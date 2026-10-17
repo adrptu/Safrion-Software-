@@ -6,10 +6,10 @@ Requisitos e fora do escopo: aceite combinado (abaixo) · fora: PR #89 (outro re
 Autor / revisor / integrador: Codex / Claude / Claude
 Base (commit) / arquivos: 2f22375d (HEAD do #89) → 3010fc9482812ae467d13d0f61f083686fdd8c86 · engine.py, g2lib.js, rmenu_unit.js, rmenu_generator_test.py, REVISAO.md
 Aceite e comando de verificação: §3 (executado)
-Estado / impedimento / próximo passo: FAVORÁVEL COM AJUSTES · A1 e A2 (S4) e o retarget sobre a ponta (conflito trivial no engine.py) antes de integrar
+Estado / impedimento / próximo passo: 3010fc9 FAVORÁVEL COM AJUSTES (A1, A2) → 4cbfa71 FAVORÁVEL, INTEGRAR por merge limpo sobre adca8ba (§7.6)
 ```
 
-Data: 17/10/2026. Dados só sintéticos (`SAFRION_DADOS=sintetico`).
+Data: 17/10/2026. Dados só sintéticos (`SAFRION_DADOS=sintetico`). As §1 a §6 valem para o HEAD `3010fc9`; o reteste do HEAD `4cbfa71` está na §7.
 
 ## 1. Veredito
 
@@ -156,3 +156,93 @@ Os outros `tabelas_*_test.py` não foram rodados. O motivo:
 - Nenhum processo de terceiros foi encerrado.
 - A sonda de navegador na base para depois de N4, como esperado, porque o ⋯ não existe lá.
 - A captura `rev93_S2526_injetado_tabela_1440.png`, fora do repositório, foi sobrescrita pela execução na base. As capturas versionadas em `claude/capturas/` têm prefixo `head_` ou `base_`.
+
+## 7. Reteste 4cbfa71
+
+```text
+ID / resultado útil / persona: EX47a reteste · a coluna de ações só existe quando há ⋯ (A1) e o teste mede cada linha (A2) · mesma persona
+Autor / revisor / integrador: Codex / Claude / Claude
+Base (commit) / arquivos: 4cbfa71516bf9699e4d552e0e597aa65068664a6 (pais 3010fc9 e 6631d58, a ponta de claude/v44-v69-mapa) · engine.py, g2lib.js, rmenu_alignment_test.js, rmenu_generator_test.py, rmenu_unit.js, codex/REVISAO.md
+Aceite e comando de verificação: pedido do coordenador, itens 1 a 6 (abaixo, executado)
+Estado / impedimento / próximo passo: FAVORÁVEL · INTEGRAR · a ponta passou de 6631d58 para adca8ba (PR #95) durante o reteste: merge de 4cbfa71 sobre adca8ba, sem conflito e verificado (§7.6)
+```
+
+### 7.1 Veredito
+
+**Favorável. Integrar.**
+- O A1 e o A2 foram corrigidos e não sobrou nenhum achado no escopo.
+- O A3 continua opcional e não foi mudado.
+- O1, O2 e O3 continuam fora do escopo, como na §2.
+- `git merge-base --is-ancestor 6631d58 4cbfa71`: verdadeiro. Quando o reteste começou, a ponta remota era `6631d58`, e o fast-forward valia.
+- Às 04:23 a ponta passou para `adca8ba` (composição do PR #95), e `adca8ba` não é ancestral de `4cbfa71`. O fast-forward deixou de existir; a integração agora é um merge limpo, verificado na §7.6.
+- Fora dos 6 arquivos do PR, `4cbfa71` é igual à ponta: `git diff --name-only 6631d58 4cbfa71`. O merge não desfez nada da composição e manteve o `class="g2th"` e o `_selArw` do TAB-09.
+
+### 7.2 O que mudou (lido no diff `6631d58..4cbfa71`)
+
+- **`g2lib.js`:** depois das linhas, `acoes=!!sp.del||linhas.some(⋯)`.
+  - Com `rmenu` sem `acoes`, sai a célula final de todas as linhas.
+  - `_acoes` e `_ncols` são publicados a partir de `acoes`.
+  - Com `rmenu`, toda linha recebe exatamente uma célula final (o ⋯ ou a estrutural). Então o `pop()` só tira a estrutural.
+  - Sem `rmenu` nem `del`, `acoes` é falso, e as células e `_ncols` ficam iguais aos da ponta (Node·A6).
+- **`engine.py`:** com `menu_linha`, o cabeçalho de ações (agora com `aria-label="Ações"`) e a célula final do total ficam em `sc-if _acoes`. As trilhas seguem `_ncols` também sem `ess`. O caminho só com `dele` não muda.
+- **Cálculo sobre as linhas à vista:** a busca, o filtro e o recolher decidem a coluna. Ela some quando nenhuma linha visível tem ⋯ e volta quando alguma tem (R2). Cabeçalho, linhas e total seguem a mesma flag.
+
+### 7.3 Itens pedidos × evidência (executado)
+
+| # | Pedido | Resultado | Evidência |
+|---|---|---|---|
+| 1 | S2526 sem coluna vazia nem cabeçalho sem nome; Plantio recupera a largura a 1440; nenhuma coluna fantasma a 390 | ok | R1: 5 trilhas = 5 cabeçalhos, todos com nome. A 1440, Plantio tem 236,7 px e vai até a borda da tabela: o mesmo valor da base `2f22375d`, contra 213,3 px + 116,5 px vazios no `3010fc9`. A 390, 3 trilhas (Plano agronômico até a borda), contra 4 com uma de 0 px no `3010fc9`. Captura: `claude/capturas/4cbfa71_S2526_1440_sem_acao.png`. |
+| 2 | Filtrar e buscar com rmenu: alinhamento e total | ok | R2, na S2526 com a ação injetada: a coluna "Ações" aparece; a busca "T2" a tira (5 trilhas); a busca "zzz" deixa só o total, sem coluna, com o aviso "Nenhuma linha corresponde"; limpar a busca a devolve. R3, na S2627: a busca "T1" e o filtro rápido "Planejado 7" mantêm a coluna. Em todas as medidas, cada célula de cada linha, total incluído, começa na borda do cabeçalho da mesma coluna (±1,5 px), e a soma dos spans é igual às trilhas. |
+| 3 | Tabela e Cartões, 1440 e 390 | ok | R1 a R4 nas duas larguras. Cartões: S2526 sem trilha de ação reservada; com a ação injetada, 1 ⋯; S2627 com 11 ⋯ (1440) e 8 (390), os mesmos da Tabela. Sem botão sem nome, sem rolagem lateral. |
+| 4 | S2627 com exclusão igual a antes | ok | R3: o ⋯ fica na última coluna e "Excluir" só aparece nos cultivos (`__safRef.cultivos`). Sonda da §3 no 4cbfa71: 61 OK e 0 falhas (confirmação "Excluir?"/Manter, teclado, Cartões, 390), mais as 2 OBS do O1. Muda só o nome acessível "Ações" no cabeçalho, que antes era vazio. |
+| 5 | Sonda Node e teste novo do Codex no HEAD | ok | Ver os resultados Node e Python logo abaixo da tabela. |
+| 6 | Regressão curta | ok | `tabelas_saf_test` 24/24 · `saf_tab_test` 14/14 · `cartoes_test` 70/70 · `ds_1510_test` 17 ok, 0 falhas |
+
+**Resultados Node e Python (item 5):**
+- `rmenu_alignment_test.js`: 561 OK e 0 falhas (A6 contra o g2lib de `6631d58`).
+  - Contraprova no g2lib de `3010fc9`, com A6 contra `2f22375d`: 551/10. Confere com o relato do Codex.
+  - Contra `6631d58` são 547/14: as 4 a mais são diferenças do TAB-09 no A6, alheias ao PR.
+  - No g2lib de `6631d58` (sem o PR): 484/53.
+- Minha sonda original (`aaa054b`) no HEAD: 547/0.
+- `rmenu_unit.js`: OK.
+- `rmenu_generator_test.py`: 8 subtestes OK, inclusive as 2 `sc-if _acoes` com menu.
+
+**Teclado (S2526 com a ação injetada, 1440):** ↓ abre e foca "Reaplicar"; Esc fecha e devolve o foco ao ⋯; Enter no item executa (a trava responde "Safra encerrada: somente consulta.") e devolve o foco.
+
+**HTML gerado, ponta `6631d58` → `4cbfa71`:** 8 páginas idênticas, 147 diferentes só pelo g2lib embutido. No SAF, as 5 grades `g_cult_*` ganham o cabeçalho de ações em `sc-if _acoes`, com o nome "Ações". Nenhum outro uso de `<gid>_acoes` nas páginas.
+
+**Contraprova da sonda nova (`rev93_reteste_navegador.py`) no `_render` do `3010fc9`:** 30 OK e 14 falhas. Reprovam R1 (coluna vazia, 1440 e 390), R2 (a busca não tira a coluna; o cabeçalho não se chama "Ações") e R3 (cabeçalho sem nome). O alinhamento passa lá também: o `3010fc9` já alinhava, e o defeito era a coluna vazia.
+
+### 7.4 Comandos (executado)
+
+- **Worktrees** (dados sintéticos): `/tmp/claude-0/rev93_4cb` em `4cbfa71` e `/tmp/claude-0/rev93_6631` em `6631d58`.
+- **Build em cada um:** `SAFRION_DADOS=sintetico python3 -W error::SyntaxWarning -B build.py && SAFRION_DADOS=sintetico python3 -B montar_render.py`. Resultado: 148 artboards e 156 páginas, exit 0 (`claude/reteste_4cbfa71/build.*.log`).
+- **Node e Python** (`claude/reteste_4cbfa71/rev93_node_python.log`):
+  - `node rmenu_unit.js`
+  - `python3 -B rmenu_generator_test.py -v`
+  - `node rmenu_alignment_test.js g2lib.js <g2lib 6631d58>`
+  - e as contraprovas acima.
+- **Navegador:**
+  - Ambiente: `env CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico`.
+  - Executor `rev93_roda_reteste.sh`, um teste por vez, espera por `until` sem teto, com o portão de no máximo 1 Chrome principal em todas as execuções (`claude/reteste_4cbfa71/_roda.log`).
+  - Sondas: `claude/rev93_reteste_navegador.py` (44 OK, 0 falhas) e `claude/sonda_rmenu_navegador.py` (61 OK, 0 falhas).
+  - Regressão: `tabelas_saf_test.py`, `saf_tab_test.py`, `cartoes_test.py` e `ds_1510_test.py`.
+- **Branch da revisão:** `claude/v44-v73-rev93` foi reposta sobre `4cbfa71` (o commit da §1 a §6 passou de `aaa054b` para `2d23c8a`, com o mesmo conteúdo, só em `docs/integracao/V73/EX47/`). Assim ela entra junto com o `4cbfa71`. Sem push.
+
+### 7.5 Especificado, não executado
+
+- Bateria completa da versão composta: só rodei a regressão curta pedida e os testes do SAF.
+- Leitor de tela real: conferi os nomes acessíveis pelo DOM.
+
+### 7.6 Composição com a ponta atual `adca8ba` (executado)
+
+- **Ponta:** `git ls-remote` (04:29) dá `claude/v44-v69-mapa` = `adca8ba` e `pull/93/head` = `4cbfa71`. `git merge-base --is-ancestor adca8ba 4cbfa71` é falso: não há fast-forward.
+- **Delta da ponta, `6631d58..adca8ba`:** só o PR #95 (`analise_solo.py`, `agro06_analitos_unit.js` e docs). Nenhum arquivo em comum com o #93. `git merge-tree adca8ba 4cbfa71` não tem conflito e dá a árvore `feaf0a0`.
+- **Composição local:** worktree `/tmp/claude-0/rev93_comp95`, merge `--no-ff` destacado `4cf9519`, com a mesma árvore `feaf0a0`. Não foi publicada.
+  - Build: 156 páginas, exit 0.
+  - `rmenu_unit.js` OK; `rmenu_generator_test.py` OK; `rmenu_alignment_test.js` 561/0.
+  - `agro06_analitos_unit.js` PASS; `solo_unit_test.py` 129/129; `solo_regressao_test.py` 2/2.
+  - Navegador, com o portão ≤1: `solo_ag02_test.py` 32/32 e `rev93_reteste_navegador.py` 44/0.
+  - Brutos: `claude/reteste_4cbfa71/composicao_adca8ba.log` e `*.comp_adca8ba.log`.
+- **Integração recomendada:** merge de `4cbfa71` em `claude/v44-v69-mapa` (`adca8ba`), cuja árvore é `feaf0a0`, a verificada. Em seguida, a branch da revisão, que só traz docs.
+  - Se a ponta mudar de novo antes do merge, refazer o `merge-tree` e esta verificação proporcional.

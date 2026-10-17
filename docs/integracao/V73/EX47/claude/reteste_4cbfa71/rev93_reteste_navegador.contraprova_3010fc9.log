@@ -1,0 +1,62 @@
+OK    1440 S2526 abre
+OK    1440 S2526 R1 alinhamento: 6 trilhas = 6 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANTIO; a última coluna vai até a borda da tabela · {"cab": [{"t": "TALHÃO OU PARCELA", "nome": "TALHÃO OU PARCELA", "w": 282.1}, {"t": "CULTURA", "nome": "CULTURA", "w": 217}, {"t": "PLANO AGRONÔMICO", "nome": "PLANO AGRONÔMICO", "w": 255.5}, {"t": "ÁREA", "nome": "ÁREA", "w": 195.5}, {"t": "PLANTIO", "nome": "PLANTIO", "w": 213.3}, {"t": "", "nome": "", "w": 116.5}], "borda": 0, "mais": [], "lado": false}
+      1440 S2526 R1 larguras: TALHÃO OU PARCELA 282.1, CULTURA 217, PLANO AGRONÔMICO 255.5, ÁREA 195.5, PLANTIO 213.3, ∅ 116.5
+OK    1440 S2526 R4 Cartões: 0 ⋯ = 0 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    1440 S2526 R4 Cartões sem trilha de ação reservada
+OK    1440 S2526 R2 com ação alinhamento: 6 trilhas = 6 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna · {"ult": {"t": "", "nome": "", "w": 142}, "mais": [{"rid": "e1", "lab": "Mais ações de T1", "its": ["Reaplicar"], "naUltima": true}]}
+OK    1440 S2526 R2 busca "T2" alinhamento: 6 trilhas = 6 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANTIO até a borda · {"cab": [{"t": "PLANTIO", "nome": "PLANTIO", "w": 217.8}, {"t": "", "nome": "", "w": 121}], "borda": 0, "tracks": 6}
+OK    1440 S2526 R2 busca "zzz" (nada) alinhamento: 6 trilhas = 6 cabeçalhos; 1 linhas (total: 1) com spans e bordas do cabeçalho; aviso "Nenhuma linha corresponde"
+FALHA 1440 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista · {"cab": [{"t": "PLANTIO", "nome": "PLANTIO", "w": 217.8}, {"t": "", "nome": "", "w": 121}], "linhas": 1, "vazio": true}
+OK    1440 S2526 R2 busca limpa alinhamento: 6 trilhas = 6 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1 · {"ult": {"t": "", "nome": "", "w": 142}, "mais": 1}
+OK    1440 S2526 R2 teclado: ↓ abre e foca "Reaplicar"; Esc fecha e devolve o foco; Enter executa (trava "Safra encerrada") e devolve o foco
+OK    1440 S2526 R4 com ação Cartões: 1 ⋯ = 1 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    1440 S2627 abre
+OK    1440 S2627 R3 alinhamento: 6 trilhas = 6 cabeçalhos; 15 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2627 R3 ⋯ (11) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome · {"ruins": [], "ult": {"t": "", "nome": "", "w": 144.3}}
+OK    1440 S2627 R3 busca "T1" alinhamento: 6 trilhas = 6 cabeçalhos; 5 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão) · {"ult": {"t": "", "nome": "", "w": 152.5}, "linhas": 5}
+OK    1440 S2627 R3 filtro rápido "Planejado 7" alinhamento: 6 trilhas = 6 cabeçalhos; 11 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2627 R4 Cartões: 11 ⋯ = 11 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2526 abre
+OK    390 S2526 R1 alinhamento: 4 trilhas = 4 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANO AGRONÔMICO; a última coluna vai até a borda da tabela · {"cab": [{"t": "TALHÃO OU PARCELA", "nome": "TALHÃO OU PARCELA", "w": 120}, {"t": "CULTURA", "nome": "CULTURA", "w": 100.5}, {"t": "PLANO AGRONÔMICO", "nome": "PLANO AGRONÔMICO", "w": 139}, {"t": "", "nome": "", "w": 0}], "borda": 0, "mais": [], "lado": false}
+      390 S2526 R1 larguras: TALHÃO OU PARCELA 120, CULTURA 100.5, PLANO AGRONÔMICO 139, ∅ 0
+OK    390 S2526 R4 Cartões: 0 ⋯ = 0 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2526 R4 Cartões sem trilha de ação reservada
+OK    390 S2526 R2 com ação alinhamento: 4 trilhas = 4 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna · {"ult": {"t": "", "nome": "", "w": 44}, "mais": [{"rid": "e1", "lab": "Mais ações de T1", "its": ["Reaplicar"], "naUltima": true}]}
+OK    390 S2526 R2 busca "T2" alinhamento: 4 trilhas = 4 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANO AGRONÔMICO até a borda · {"cab": [{"t": "PLANO AGRONÔMICO", "nome": "PLANO AGRONÔMICO", "w": 139}, {"t": "", "nome": "", "w": 0}], "borda": 0, "tracks": 4}
+OK    390 S2526 R2 busca "zzz" (nada) alinhamento: 4 trilhas = 4 cabeçalhos; 1 linhas (total: 1) com spans e bordas do cabeçalho; aviso "Nenhuma linha corresponde"
+FALHA 390 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista · {"cab": [{"t": "PLANO AGRONÔMICO", "nome": "PLANO AGRONÔMICO", "w": 139}, {"t": "", "nome": "", "w": 0}], "linhas": 1, "vazio": true}
+OK    390 S2526 R2 busca limpa alinhamento: 4 trilhas = 4 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1 · {"ult": {"t": "", "nome": "", "w": 44}, "mais": 1}
+OK    390 S2526 R4 com ação Cartões: 1 ⋯ = 1 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2627 abre
+OK    390 S2627 R3 alinhamento: 4 trilhas = 4 cabeçalhos; 9 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2627 R3 ⋯ (8) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome · {"ruins": [], "ult": {"t": "", "nome": "", "w": 44}}
+OK    390 S2627 R3 busca "T1" alinhamento: 4 trilhas = 4 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 390 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão) · {"ult": {"t": "", "nome": "", "w": 44}, "linhas": 2}
+OK    390 S2627 R3 filtro rápido "Planejado 7" alinhamento: 4 trilhas = 4 cabeçalhos; 8 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2627 R4 Cartões: 8 ⋯ = 8 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    R5 sem erro de JS
+
+30 OK, 14 falhas
+  FALHA 1440 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANTIO; a última coluna vai até a borda da tabela
+  FALHA 1440 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna
+  FALHA 1440 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANTIO até a borda
+  FALHA 1440 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista
+  FALHA 1440 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1
+  FALHA 1440 S2627 R3 ⋯ (11) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome
+  FALHA 1440 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão)
+  FALHA 390 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANO AGRONÔMICO; a última coluna vai até a borda da tabela
+  FALHA 390 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna
+  FALHA 390 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANO AGRONÔMICO até a borda
+  FALHA 390 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista
+  FALHA 390 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1
+  FALHA 390 S2627 R3 ⋯ (8) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome
+  FALHA 390 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão)
