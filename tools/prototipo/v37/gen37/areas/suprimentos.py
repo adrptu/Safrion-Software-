@@ -1052,17 +1052,18 @@ def su08():
     code=(Path(__file__).resolve().parent.parent/'sup_movimentos_ui.js').read_text()
     js(pn,cenario.js_prefixo()+'\nconst SUP_MOV_HIST='+json.dumps(historico,ensure_ascii=False)+';\n'+code)
     painel()
-    corpo=(kpis([('Em trânsito',H('k_tr'),H('k_tr_s')),('Perdas aguardando gestor',H('k_pe'),H('k_pe_s')),('Estornos lançados',H('k_es'),H('k_es_s'))])
-           + bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
+    # EX-50(a)-SUP (PR #108) + TAB-07: sem cartões de resumo; o selo do cabeçalho conta as perdas pendentes. Perda é o comando real (principal);
+    # transferência e estorno genérico ainda não têm comando canônico, então ficam como prévia
+    corpo=(bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
                    g,
-                   acao=mini('open_per','Registrar perda','Submete perda à alçada do gestor','alert')+mini('open_est','Estornar com vínculo','Cria estorno que referencia o movimento original','doc')
+                   acao=mini('open_trf','Prévia de transferência','Mostra origem, destino, lote e unidade; não registra nem altera saldo','truck')+mini('open_est','Prévia de estorno','Confere o movimento a estornar; não altera o original nem cria vínculo','doc')
                         +alink('SU-07.dc.html','Devolver','Devoluções de campo entram pela requisição','truck')))
     HEIGHTS37[fname]=1180
     shell37('SU-08','Transferências e movimentos',corpo,fname=fname,
-      subtitle='Extrato imutável e transferências entre locais, custódias e empresas; cada linha com documento e confirmação.',
-      status=(MARK,'gray'),primary_html=primb('open_trf','Transferir entre locais','truck'),
-      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32). '
-             'Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.')
+      subtitle='Extrato imutável dos movimentos de estoque; perda passa pela alçada do gestor (AL-09) antes de baixar o saldo.',
+      status=(MARK,'gray'),primary_html=primb('open_per','Registrar perda','alert'),
+      footer='Perda vira ajuste pendente e só baixa o físico do lote na aprovação AL-09; reservas são preservadas (SU-08 · FO-32). '
+             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção nunca apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================
