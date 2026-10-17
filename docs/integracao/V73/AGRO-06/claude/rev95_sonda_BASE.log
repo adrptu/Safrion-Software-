@@ -1,0 +1,15 @@
+portão: 1 principal(is) · BASE · 03:05:48
+FALHA [1440] formulário com os 15 analitos na ordem do laudo · ['Ca', 'Mg', 'K', 'H+Al', 'Al', 'Argila']
+FALHA [1440] leitor de tela: valor, unidade e os três detalhes com nome próprio por analito · [['Valor de Ca', 'Unidade de Ca', 'cmolc/dm³', None, 'decimal'], ['Valor de Mg', 'Unidade de Ca', 'cmolc/dm³', None, 'decimal'], ['Valor de K', 'Unidade de Ca', 'cmolc/dm³', None, 'decimal']]
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rev95/rev95_sonda.py", line 43, in <module>
+    J(f"(()=>{{ const i=Q('Valor de {a}'); SETV(i,{json.dumps(v)}); }})()"); time.sleep(.05)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/rev95/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'tagName')
+    at window.SETV (<anonymous>:5:36)
+    at <anonymous>:1:34
+    at <anonymous>:1:51
+exit=1

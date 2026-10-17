@@ -1,0 +1,12 @@
+== mapa_solo_texto_test.py · início 03:09:41 · chrome principais: 1
+OK    S1 barra do mapa: "Solo" entre Satélite e Pragas e doenças; tocar mostra a camada "Solo"
+OK    S2 Lagoa Grande: faixa com 5 laudos 0–20 e 77 pontos pelo oráculo; Pivô 12 "P12 V % 50 %"; os 18 pivôs sem laudo "Sem laudo"
+OK    S3 tocar o Pivô 12: painel com LAU-2071 · 0–20 cm, CTC 8,10 cmolc/dm³ e V 50 %; atalho "Abrir laudo"
+OK    T1 9 camadas: a fonte técnica fica na dica ⓘ ao lado do nome; nenhuma linha solta acima de 60 caracteres no bloco do mapa
+OK    T2 o selo "Demonstração sintética" segue à vista na legenda de toda camada da Lagoa Grande
+OK    T3 o ⓘ da camada (Satélite) abre a dica com a fonte ao passar o mouse; sem a etiqueta "clique no talhão"
+OK    S4 Santa Rita: 4 laudos 0–20 (T1, T2, T4 e C1) pelo oráculo; C1 aguardando validação e sem H+Al: V não calculável
+OK    S5 Santa Rita T3 (sem laudo): painel "Sem laudo" com "Registrar laudo"; o AG-02 abre o formulário com Santa Rita e T3 já escolhidos
+OK    T4 celular 390 px sem rolagem horizontal; sem erro de JS
+RESULTADO: 9 ok · 0 falhas
+exit=0

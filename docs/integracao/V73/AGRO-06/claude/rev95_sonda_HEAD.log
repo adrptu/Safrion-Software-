@@ -1,0 +1,38 @@
+portão: 1 principal(is) · HEAD · 03:02:45
+OK    [1440] formulário com os 15 analitos na ordem do laudo
+OK    [1440] leitor de tela: valor, unidade e os três detalhes com nome próprio por analito
+OK    [1440] teclado: Enter no summary abre os detalhes do Cu; Tab segue Método → Limite; o LD 0 digitado fica e os detalhes continuam abertos
+OK    [1440] foco visível no summary (anel)
+OK    [1440] digitação real no valor de B: foco e texto mantidos
+OK    [1440] erro do domínio (sem laboratório): painel aberto com a mensagem; Al 0, K em cmolc/dm³, LD do Cu 0 e detalhes abertos preservados; Zn vazio
+OK    [1440] domínio: 1 laudo novo, Aguardando validação, T3 · Agrolab · Mehlich-1, 14 analitos (Zn vazio omitido)
+OK    [1440] domínio: Al 0 explícito (não ausente), Cu com LD "0", vírgula → ponto (pH 5.4, Ca 3.90), unidades trocadas preservadas (K cmolc/dm³, Argila g/kg)
+OK    [1440] domínio: P e K sem método herdam o extrator (Mehlich-1); MO sem método fica vazio
+OK    [1440] depois de gravar: painel do laudo novo aberto (Aguardando validação)
+OK    [1440] repetido (mesmo talhão, profundidade, coleta e laboratório): recusa no painel aberto e nada gravado
+OK    [1440] Esc com alterações: o painel fica e avisa "Há alterações não salvas"
+INFO [1440] geometria {"n": 15, "hMin": 17, "hMax": 17, "wMin": 516, "inMin": 39, "seta": 0, "display": "list-item", "lado": true, "pag": true, "fonteSum": "12px"}
+OK    [1440] sem estouro lateral no formulário e na página
+FALHA [1440] summary "Método e limites" com alvo ≥ 24 px de altura · {'n': 15, 'hMin': 17, 'hMax': 17, 'wMin': 516, 'inMin': 39, 'seta': 0, 'display': 'list-item', 'lado': True, 'pag': True, 'fonteSum': '12px'}
+INFO [1440] paradas de Tab reais do × até Registrar laudo (detalhes fechados): 63 Registrar laudo
+OK    [1440] nenhum erro de JS
+OK    [390] formulário com os 15 analitos na ordem do laudo
+OK    [390] leitor de tela: valor, unidade e os três detalhes com nome próprio por analito
+OK    [390] teclado: Enter no summary abre os detalhes do Cu; Tab segue Método → Limite; o LD 0 digitado fica e os detalhes continuam abertos
+OK    [390] foco visível no summary (anel)
+OK    [390] digitação real no valor de B: foco e texto mantidos
+OK    [390] erro do domínio (sem laboratório): painel aberto com a mensagem; Al 0, K em cmolc/dm³, LD do Cu 0 e detalhes abertos preservados; Zn vazio
+OK    [390] domínio: 1 laudo novo, Aguardando validação, T3 · Agrolab · Mehlich-1, 14 analitos (Zn vazio omitido)
+OK    [390] domínio: Al 0 explícito (não ausente), Cu com LD "0", vírgula → ponto (pH 5.4, Ca 3.90), unidades trocadas preservadas (K cmolc/dm³, Argila g/kg)
+OK    [390] domínio: P e K sem método herdam o extrator (Mehlich-1); MO sem método fica vazio
+OK    [390] depois de gravar: painel do laudo novo aberto (Aguardando validação)
+OK    [390] repetido (mesmo talhão, profundidade, coleta e laboratório): recusa no painel aberto e nada gravado
+OK    [390] Esc com alterações: o painel fica e avisa "Há alterações não salvas"
+INFO [390] geometria {"n": 15, "hMin": 17, "hMax": 17, "wMin": 362, "inMin": 39, "seta": 0, "display": "list-item", "lado": true, "pag": true, "fonteSum": "12px"}
+OK    [390] sem estouro lateral no formulário e na página
+FALHA [390] summary "Método e limites" com alvo ≥ 44 px de altura · {'n': 15, 'hMin': 17, 'hMax': 17, 'wMin': 362, 'inMin': 39, 'seta': 0, 'display': 'list-item', 'lado': True, 'pag': True, 'fonteSum': '12px'}
+OK    [390] toque no summary do P abre os detalhes
+INFO [390] paradas de Tab reais do × até Registrar laudo (detalhes fechados): 63 Registrar laudo
+OK    [390] nenhum erro de JS
+RESULTADO: FALHA 29/31 · falhas: [1440] summary "Método e limites" com alvo ≥ 24 px de altura || [390] summary "Método e limites" com alvo ≥ 44 px de altura
+exit=1

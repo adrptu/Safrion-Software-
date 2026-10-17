@@ -1,0 +1,136 @@
+{
+ "helpers": true,
+ "cT1": [
+  "c1",
+  "Soja"
+ ],
+ "C1": {
+  "res": "LAU-2073",
+  "sit": "Aguardando validação",
+  "n": 14,
+  "nomes": "pH,P,MO,Ca,Mg,K,H+Al,Al,S,B,Cu,Fe,Mn,Argila",
+  "Al": {
+   "a": "Al",
+   "v": "0",
+   "un": "cmolc/dm³",
+   "met": "",
+   "ld": "0,1",
+   "q": ""
+  },
+  "Zn": null,
+  "Cu": {
+   "a": "Cu",
+   "v": "1.1",
+   "un": "mg/dm³",
+   "met": "",
+   "ld": "0",
+   "q": ""
+  },
+  "P": {
+   "a": "P",
+   "v": "14",
+   "un": "mg/dm³",
+   "met": "Mehlich-1",
+   "ld": "",
+   "q": ""
+  },
+  "K": {
+   "a": "K",
+   "v": "0.08",
+   "un": "cmolc/dm³",
+   "met": "Mehlich-1",
+   "ld": "",
+   "q": ""
+  },
+  "MO": {
+   "a": "MO",
+   "v": "28",
+   "un": "g/dm³",
+   "met": "",
+   "ld": "",
+   "q": ""
+  },
+  "idx": [
+   "5,38",
+   "9,20",
+   "5,38",
+   "58,48",
+   "0,00"
+  ]
+ },
+ "C1dup": "Esta amostra já está registrada como LAU-2073 (mesmo talhão, profundidade, coleta e laboratório). Nada foi gravado.",
+ "C2": {
+  "K_lt": {
+   "v": null,
+   "nc": "K abaixo do limite de detecção"
+  },
+  "K_txt": {
+   "v": 1
+  },
+  "K_ltLD": {
+   "v": 1
+  },
+  "Al_lt": {
+   "v": null,
+   "nc": "abaixo do limite de detecção"
+  },
+  "Al_txt": {
+   "v": 0.1
+  }
+ },
+ "C2_fluxo_lt": {
+  "reg": "LAU-2073",
+  "val": "LAU-2073 validado por Ana (agrônoma).",
+  "qGravado": "<",
+  "k": [],
+  "info": [
+   "LAU-2073: K abaixo do limite de detecção; nada sugerido."
+  ]
+ },
+ "C2_fluxo_texto": {
+  "reg": "LAU-2073",
+  "val": "LAU-2073 validado por Ana (agrônoma).",
+  "qGravado": "abaixo do limite",
+  "k": [
+   "dose KCl 60% 120→180 | K 1 mg/dm³ (Mehlich-1) → baixo"
+  ],
+  "info": []
+ },
+ "C3": {
+  "ext": "Mehlich-1",
+  "Kmet": "Resina",
+  "k": [
+   "150 | K 58,65 mg/dm³ (Mehlich-1) → médio"
+  ]
+ },
+ "C3ex": [
+  {
+   "a": "K",
+   "v": "160,31",
+   "un": "mg/dm³",
+   "met": "Mehlich-1",
+   "ld": "1",
+   "q": ""
+  }
+ ],
+ "C4": {
+  "pH_H2O": 5.8,
+  "Ca_mmolc": 39,
+  "pHcortes": [
+   "4.4",
+   "5.0",
+   "5.5",
+   "6.0"
+  ]
+ },
+ "C5": {
+  "soMeta": [],
+  "neg": "LAU-2073 Ca -3.1"
+ },
+ "C6": {
+  "naNaLista": false,
+  "dominioUsaNa": true
+ }
+}
+
+
