@@ -112,7 +112,7 @@ for(const v of vis){ const t=mipT(v);
     if(!cenLote(cenGet(),u.nome)){ R.semLote=(R.semLote||0)+1; continue; }   // produto sem lote no Estoque: a liberação recusa (outra trava)
     const a={kind:'controlar',prod:u.id,dose:String(dose),area:String(area),data:'2026-10-20',nota:''}; const res={vis:v.id,prod:u.nome,dose,sobe:tres(dose,area)<cenQtd(dose,area)};
     const k=mipChecks(mipGet(),mipGet().vis[v.id],a,cenGet()); if(k.tr.length){ res.trava=k.tr; R.mip.push(res); continue; }
-    const r=mipEmitir(null,v.id,a); if(r.erro){ res.erro='emitir: '+r.erro; R.mip.push(res); continue; } const c=cenGet();
+    const r=mipEmitir(null,v.id,Object.assign({ator:'Ana',chave:'TESTE-'+v.id+'-'+u.id+'-'+dose+'-'+area,dver:((mipGet().vis[v.id].dec||{}).ver||0)+1},a));   /* N-1: autor, chave e versão como a tela */ if(r.erro){ res.erro='emitir: '+r.erro; R.mip.push(res); continue; } const c=cenGet();
     const id=Object.keys(c.ordens).find(x=>c.ordens[x].osc&&c.ordens[x].osc.novo&&(c.ordens[x].osc.novo.keys||[]).indexOf('mip|'+v.id+'|'+v.prot)>=0);
     R.mip.push(fluxo(c,id,res)); } } }
 const i0=irrGet(); const ords=Object.keys(i0.ordens).filter(k=>['A liberar','Liberadas','Em execução'].indexOf(i0.ordens[k].etapa)>=0&&!i0.ordens[k].fert);

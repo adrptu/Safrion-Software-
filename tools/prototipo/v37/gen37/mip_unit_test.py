@@ -10,7 +10,8 @@ MOTOR,PRELUDIO=([JSC],'') if os.path.exists(JSC) else (['node'],'globalThis.prin
 import dados_lagoa_fonte as _F
 a22=dados_mip.TAL['PV22']['area']; ok22=a22==_F.PIVOS_HA[22]
 print(('OK   ' if ok22 else 'FALHA ')+'área do Pivô 22 no MIP = fonte única (dados_lagoa_fonte)')
-src=PRELUDIO+cenario.js_prefixo()+dados_mip.js_prefixo()+open(os.path.join(HERE,'mip_test.js'),encoding='utf-8').read()
+LS="if(typeof localStorage==='undefined'){ const __LS={}; globalThis.localStorage={getItem:k=>(k in __LS?__LS[k]:null),setItem:(k,v)=>{__LS[k]=String(v)},removeItem:k=>{delete __LS[k]}}; }\n"   # N-1: o MIP grava no cenário (estrito), como no navegador
+src=PRELUDIO+LS+cenario.perfis_js()+cenario.js_prefixo()+dados_mip.js_prefixo()+open(os.path.join(HERE,'mip_test.js'),encoding='utf-8').read()
 f=tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8'); f.write(src); f.close()
 r=subprocess.run(MOTOR+[f.name],capture_output=True,text=True,timeout=60); os.unlink(f.name)
 print(r.stdout.strip()); print(r.stderr.strip()) if r.stderr.strip() else None
