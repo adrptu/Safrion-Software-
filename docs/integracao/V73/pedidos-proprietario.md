@@ -18,7 +18,7 @@
 | 16/10 19:34 e 19:36 | Máquinas em execução andando no mapa, com 1 clique e ícones; telemetria na mesma filosofia | **Não implantado** (MAPA-FROTA: especificação integrada, F1 não começou) | — |
 | 16/10 21:29 | Seta do drill down mais amigável, como padrão em tudo | **Publicado** (v116, TAB-11) | Qualquer tabela: a seta fica à esquerda |
 | 16/10 21:42 | Editar todos os talhões de uma fazenda numa tela só; entradas mais rápidas | **Publicado** (v116, SAF-LOTE/INP) | Planejar safra › Talhões e cultivos › "Editar talhões…" |
-| 16/10 22:52 | Manutenção: vincular ativos a planos, de forma intuitiva | **Implantado e testado** (MA-VINCULO, 6 testes verdes até agora); entra na próxima publicação | — |
+| 16/10 22:52 | Manutenção: vincular ativos a planos, de forma intuitiva | **Publicado** (v117; PR #101 integrado pelo Codex em acf65e1) | Manutenção › Planos: "4 ativos sem plano · Criar plano" e "Vincular a plano" |
 | 16/10 23:38 | Mapa com UX/UI de excelência (hover, clique, detalhe) | **Em implantação** desde 17/10 09:20 (MUX-F0/F1/F2) | — |
 | 16/10 23:40 | Resolver em 1 clique | **Não implantado** (só a crítica do Claude) | — |
 | 17/10 00:03 | Excelência EX-01..48, entrada e ações (varredura e robô) | **Em parte:** os achados de entrada e ações viraram PRs do Codex, já publicados na v113 a v116; o restante está validado, mas não implantado | O.S., CA-01det, Kanban |
