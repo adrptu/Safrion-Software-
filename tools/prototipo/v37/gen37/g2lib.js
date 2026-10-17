@@ -567,7 +567,7 @@ function g2vals(self,sp,v,mask){
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+(sp.del?1:0);   // trilhas da grade = colunas visíveis
+  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+((sp.del||sp.rmenu)?1:0);   // trilhas da grade = colunas visíveis
   v[id+'_mdcols']=cols;   // modo Cartões (15/10/2026): as colunas à vista, na ordem das células da linha (g2cdVals)
   g2cabVals(self,sp,v,st,rows,cols);   // cabeçalho (⇅ e funil) e filtro da coluna: a mesma peça das tabelas próprias (TAB-08)
   const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
@@ -601,14 +601,14 @@ function g2vals(self,sp,v,mask){
     // SAF-FAZ-3: o grupo transparente (fazenda) é uma faixa de cabeçalho: a 1ª célula ocupa as colunas de dados (nome, área e contagem juntos)
     if(r.fgrp){ const d=cells.filter(x=>x.isData); if(d.length){ d[0].st+='grid-column:span '+(d.length)+';'; d[0].pw='max-width:none;'; } for(let i=cells.length-1;i>=0;i--){ if(cells[i].isData&&cells[i]!==d[0]) cells.splice(i,1); } }
     const semDel=!sp.del||r.livre||r.fora||r.nosel||!!r.ro;
-    if(sp.rmenu&&sp.del&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
-      const asking=(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
+    if(sp.rmenu&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
+      const asking=!semDel&&(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
       const its=acts.map(p=>({t:p.al||p.t, ico:g2acaoIco(p.al||p.t), cls:'', fn:fnDe(p)}));
       if(!semDel) its.push({t:'Excluir', ico:g2acaoIco('Excluir'), cls:'g2mais-destr', fn:()=>{ if(r.xdel&&v&&v[r.xdel]){ v[r.xdel](r.id); return; } g2set(self,id,{cf:r.id}); }});   // SAF-FAZ-3: r.xdel = linha guardada em outra grade
       cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,trash:false,rm:true,rmLabel:'Mais ações de '+nome,rmItems:its,st:'padding:4px 6px;white-space:nowrap;',
         delLabel:'Excluir '+nome, ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); } }); }
-    else if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+    else if((sp.rmenu&&semDel)||(sp.del&&(r.livre||r.fora||r.nosel))) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     // lvl…gk: para o modo Cartões (g2cdVals); grp é só o grupo do Agrupar por (r.grp = {k, lv}); o grp:true das linhas-pai da tela (talhão

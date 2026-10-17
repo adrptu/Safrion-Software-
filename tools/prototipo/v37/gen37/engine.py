@@ -1740,7 +1740,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
     gid=gid or wid('g'); edit=edit or {'m':'none'}
     if FIRST_TBL[0] is None: FIRST_TBL[0]=gid
-    n=len(cols)+(1 if sel else 0)+(1 if dele else 0)
+    acoes_linha=dele or menu_linha
+    n=len(cols)+(1 if sel else 0)+(1 if acoes_linha else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
     spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
@@ -1806,7 +1807,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     fpanel=filtro_coluna_html(gid)
     lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
-    hdel=f'<div role="columnheader"></div>' if dele else ''
+    hdel=f'<div role="columnheader"></div>' if acoes_linha else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
           + cab_colunas_html(gid,len(cols),headtools) + f'{hdel}</div>')
     # célula de seleção e de ação (⋯ ou lixeira, com a confirmação): as mesmas na linha da Tabela e no cartão (modo Cartões, 15/10/2026)
@@ -1827,7 +1828,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     tot=''
     if total and any(c.get('agg') for c in cols):
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
-             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
+             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if acoes_linha else '') + '</div>')
     empty='' if not vazio else f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
     ntr=H('_ncols') if ess else n   # VISOES-2 §3.6: com colunas essenciais, as trilhas seguem as colunas visíveis
     tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({ntr}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>')
