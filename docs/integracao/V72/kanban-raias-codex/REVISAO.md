@@ -2,7 +2,7 @@
 
 Autor Codex; revisor/integrador Claude. Contratos6223477051 e6224284837. Base6dfa09c190cf55ff16da841561d5739b138b7646 doPR88; entrega empilhada, depende da integração88 e da composiçãoDS87. Não integrar isoladamente nem autoaprovar.
 
-O cabeçalho nativo da raia agora recolhe/expande, com▸/▾ antes do nome (TAB-09), rótulo pelo objetivo e aria-expanded. Recolher não modifica a trilha, filtro, seleção, cartões nem dados de domínio. A memória local da tela separa perfil, fazenda, safra, dimensão, caminho e grupo; trocar visão/filtro e voltar conserva a expansão. Continua um quadro só quando não há agrupamento ou a trilha já chegou ao último nível. A mesma O.S. de dois talhões mantém os dois vínculos e a indicação da repetição.
+O cabeçalho nativo da raia agora recolhe/expande, com▸/▾ antes do nome (TAB-09), rótulo pelo objetivo e aria-expanded. Recolher não modifica a trilha, filtro, seleção, cartões nem dados de domínio. A memória local da tela separa perfil, fazenda, safra, dimensão, caminho e grupo; trocar visão/filtro e voltar conserva a expansão. Continua um quadro só quando não há agrupamento ou o recorte já chega ao último nível; não há trilha (AGR-02). A mesma O.S. de dois talhões mantém os dois vínculos e a indicação da repetição.
 
 ## Provas executadas
 
@@ -14,5 +14,5 @@ visoes2_formas_test.py foi adaptado ao pedido novo de recolher. Os antigosF2–F
 
 Delta de produto restrito ao helperosKbRaia, construção kb_raias e _kanban_raias. Nenhuma alteração deOS-LOTE/alocacao/inicio.py. A composiçãoDS87 moveu a seta antiga para antes do nome; ao integrar, conservar a nova seta dinâmica antes do nome, sem recuperar “Descer em”. SePR88 receber correção, atualizar esta pilha preservando a autoria e retestar só o afetado antes de integrar.
 
-Aplicado: listagem/detalhe existentes, contexto e próximo gesto explícitos, estado acessível e alvo44px no toque. Fora: mudanças em cálculos, agenda, composição de operações, preferências persistentes e novos menus. Cortado: navegação inesperada ao tocar o cabeçalho; a trilha existente continua pelaTabela/endereço. Nenhuma publicação ou conclusão do conjunto é declarada.
+Aplicado: listagem/detalhe existentes, contexto e próximo gesto explícitos, estado acessível e alvo44px no toque. Fora: mudanças em cálculos, agenda, composição de operações, preferências persistentes e novos menus. Cortado: navegação inesperada ao tocar o cabeçalho; não há trilha desde a AGR-02, e um endereço antigo com trilha não recorta. Nenhuma publicação ou conclusão do conjunto é declarada.
 

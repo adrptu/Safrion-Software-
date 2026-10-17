@@ -1065,12 +1065,12 @@ function osGrupoVals(self,v,recorte){
 }
 
 
-// AGR-02: recolher é estado visual local; não altera a trilha, filtros ou seleção da coleção.
+// AGR-02: recolher é estado visual local; não altera filtros, seleção nem o agrupamento da coleção (não há trilha desde a AGR-02).
 function osKbRaia(self,dim,path,nome,n,cols,nivel){
   const key=JSON.stringify([g2perfil().k,mfFaz(self),mfSaf(self),dim,path||[],nome]);
   const aberta=!(self.state.kbFechadas||{})[key];
   return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:String(aberta),seta:aberta?'▾':'▸',
-    lab:(aberta?'Recolher':'Expandir')+' raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'),
+    lab:(aberta?'Recolher':'Abrir')+' raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'),
     alterna:()=>{const fechadas=Object.assign({},self.state.kbFechadas||{});if(fechadas[key])delete fechadas[key];else fechadas[key]=true;self.setState({kbFechadas:fechadas});},
     cols,tem:n>0};
 }
@@ -1216,7 +1216,7 @@ function EXTRAVALS(self,v){
     v.ost_conta=tsel.length?(osK.length+(osK.length===1?' ordem':' ordens')+' no filtro'):'';
     v.os_tmsg=self.__osMsg||''; v.os_temmsg=!!self.__osMsg; }
   /* VISOES-2 §3.3: com Agrupar por, o Kanban ganha uma raia por grupo do nível atual (a mesma O.S. de dois talhões aparece nas duas raias,
-     como na Tabela); o cabeçalho recolhe/expande sem mudar a trilha. No último nível, um quadro só, do recorte da trilha */
+     como na Tabela); o cabeçalho recolhe/expande. Sem trilha (AGR-02): quando o recorte já chega ao último nível, um quadro só */
   v.kb=[]; v.kb_raias=[]; v.kb_temraias=false; g2visaoTenta(self,'g_os','kanban',()=>{ const kbCols=(lst)=>FASES.map(f=>{ const cs=lst.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
     return {t:f,n:String(cs.length),nst:chipSt(FCOR[f]),carga:(f==='Encerradas'?osPeriodo(cs):(sal?'saldo '+nf(sal)+' ha':'')),vazio:cs.length===0,
       cards:cs.map(o=>{ const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0;
@@ -1416,7 +1416,7 @@ def _kanban(celular_rola=False,lista="kb"):
     return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
 def _kanban_raias():
-    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o cabeçalho recolhe/expande o conteúdo, preservando a trilha da Tabela.
+    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o cabeçalho recolhe/expande o conteúdo (AGR-02: sem trilha).
     Sem agrupamento, ou no último nível, o quadro único de sempre."""
     # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
