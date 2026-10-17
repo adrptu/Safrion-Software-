@@ -1,0 +1,145 @@
+<!--
+Robô v5 do Safrion: passagens entre telas e módulos (EX-51).
+Como usar: sirva a pasta que contém v3/ (telas do protótipo) e robot3/screens.json com tools/server.py (GET e POST /save?name=), abra este arquivo pelo servidor e rode run5() no console. Cada tela gera <TELA>.v5.json; escopo.v5.json traz o teste de Fazenda e Safra entre telas.
+O robô abre até três registros por tela, conta as referências a outros registros (clicáveis ou texto), lê o próximo passo e, para cada link ou botão de passagem, clica, confere se o destino abre o registro e mostra a volta, e usa o Voltar do navegador para ver se o detalhe reabre.
+Resumo: python3 -I anexo-robo-v5-resumo.py <saida> <ocultas.json> <v3> <resumo.json>. Uma segunda passada opcional (leva-check.json) abre o endereço de cada link que leva um registro e espera 2,6 s, para evitar falso negativo.
+-->
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>robo5</title>
+<style>body{font:12px system-ui;margin:8px} iframe{border:1px solid #ccc;margin:4px;vertical-align:top;width:1280px;height:900px} #log{white-space:pre;height:140px;overflow:auto;background:#f4f4f4}</style></head>
+<body><div id="st">parado</div><div id="log"></div><div id="frames"></div>
+<script>
+'use strict';
+// Robô v5: passagens entre telas e módulos. Para cada tela: abre até 3 registros, mede as referências a outras entidades no detalhe
+// (clicáveis ou só texto), o próximo passo e, para cada link ou botão de passagem, clica, confere se o destino abre o registro,
+// se mostra a volta para a origem e se o Voltar do navegador devolve o detalhe aberto.
+const Wk = new Worker(URL.createObjectURL(new Blob(["onmessage=e=>setTimeout(()=>postMessage(e.data[0]),e.data[1])"])));
+let wid = 0; const waits = {}; Wk.onmessage = e => { const f = waits[e.data]; delete waits[e.data]; f && f(); };
+const sleep = ms => new Promise(r => { const i = ++wid; waits[i] = r; Wk.postMessage([i, ms]); });
+const log = t => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; };
+const norm = t => (t || '').replace(/\s+/g, ' ').trim();
+const vis = e => !!(e && e.getClientRects().length) && e.ownerDocument.defaultView.getComputedStyle(e).visibility !== 'hidden';
+const txt = e => norm(e.getAttribute('aria-label') || e.innerText || e.title || '').slice(0, 90);
+const ACCENT = 'rgb(30, 122, 76)';
+const ENT_SRC = '\\b(OS|PV|VIS|OM|PC|REQ|OC|CT|CG|OB|CRE|REC|INSP|RC|OF|RT|VG|LAU|TK|TR|NEC|DIA|LC|VD|MV|INV|EF|CMD|AC|COT|AGS|FAT|AM|AU|PD|DV|NC|SM|NEG|EX|DEC|CR|ES|LM|CON|RM)-\\d{2,5}[A-Z]?\\b';
+const entAll = t => (String(t || '').match(new RegExp(ENT_SRC, 'g')) || []);
+const LABENT = /talh|local|produto|insumo|m[aá]quina|conjunto|equipamento|implemento|respons|operador|fornecedor|cliente|safra|cultivo|cultura|origem|destino|pedido|compra|ordem|lote|dep[oó]sito|almox|pe[çc]a|contrato|requisi|nota|carga|ve[ií]culo|motorista|comprador|agr[oô]nomo|receit|recomend|an[aá]lise|laudo|vistoria|armaz|silo|cota[çc]|fatura|t[ií]tulo|v[ií]nculo|relacionad|fazenda|piv[oô]|setor/i;
+const INTER2 = 'a[href],button,[role=button],[role=link]';
+const MENU = new Set(['IN-04', 'CD', 'MOD-AGR', 'MOD-MAN', 'MOD-SUP', 'MOD-COM', 'MOD-CRE', 'MOD-CFG', 'MOD-OUT']);
+let BASE_LS = null, LOADN = 0;
+function restoreLS() { localStorage.clear(); for (const k in BASE_LS) localStorage.setItem(k, BASE_LS[k]); }
+async function load(fr, url) {
+  restoreLS(); try { fr.contentWindow && fr.contentWindow.sessionStorage.clear(); } catch (e) {}
+  const u = url + (url.includes('?') ? '&' : '?') + 'r=' + (++LOADN);
+  await new Promise(res => { let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    fr.onload = () => { try { if (fr.contentWindow.location.href !== 'about:blank') fin(); } catch (e) { fin(); } }; fr.src = u; setTimeout(fin, 20000); });
+  await settle(fr);
+}
+async function settle(fr) { await sleep(600); for (let i = 0; i < 30 && !(fr.contentDocument && fr.contentDocument.body && fr.contentDocument.body.innerText.length > 50); i++) await sleep(300); await sleep(250); }
+const cur = fr => { try { return fr.contentWindow.location.pathname.split('/').pop().replace('.dc.html', '') + fr.contentWindow.location.hash; } catch (e) { return '?'; } };
+const scr = u => String(u || '').split('#')[0].split('?')[0].replace('.dc.html', '');
+const dialogs = doc => [...doc.querySelectorAll('[role=dialog],dialog[open],[aria-modal=true]')].filter(vis);
+const topDlg = doc => { const d = dialogs(doc); return d[d.length - 1] || null; };
+function panelOf(doc, d) { const W = doc.defaultView.innerWidth; let el = d, r = d.getBoundingClientRect();
+  if (r.width >= W * .95) { const q = [...d.querySelectorAll(':scope > *, :scope > * > *')].filter(vis).map(x => ({ x, r: x.getBoundingClientRect(), bg: doc.defaultView.getComputedStyle(x).backgroundColor }))
+      .filter(o => o.r.width < W * .95 && o.r.width > 200 && o.bg && o.bg !== 'rgba(0, 0, 0, 0)' && o.bg !== 'transparent').sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height)[0];
+    if (q) { el = q.x; } } return el; }
+const dTitle = (doc, d) => { if (!d) return ''; const h = panelOf(doc, d).querySelector('h1,h2,h3,[role=heading]'); return h ? norm(h.innerText).slice(0, 100) : ''; };
+function rowsAll(doc) { const g = [...doc.querySelectorAll('.g2r')].filter(vis); if (g.length) return g; return [...doc.querySelectorAll('tbody tr')].filter(r => vis(r) && !r.querySelector('th')); }
+function bodyTarget(row) { const cells = [...row.children].filter(c => vis(c) && !c.querySelector(INTER2 + ',input,select') && !c.closest(INTER2) && (c.innerText || '').trim()); if (cells.length) return cells[Math.min(1, cells.length - 1)];
+  const spans = [...row.querySelectorAll('span,div,b')].filter(s => vis(s) && !s.closest(INTER2) && !s.querySelector(INTER2) && (s.innerText || '').trim().length > 1); return spans[0] || row; }
+async function expandAll(doc, d) { for (let i = 0; i < 14; i++) { const b = [...d.querySelectorAll('button[aria-expanded=false]')].filter(x => vis(x) && !x.hasAttribute('aria-haspopup') && !/^(expandir|recolher) /i.test(x.getAttribute('aria-label') || ''))[0]; if (!b) break; b.click(); await sleep(140); } }
+function refsIn(d) {   // ocorrências de IDs de outras entidades: clicável ou só texto
+  const out = {}; const w = d.ownerDocument.createTreeWalker(d, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) { const ids = entAll(n.textContent); if (!ids.length) continue; const p = n.parentElement; if (!vis(p)) continue; const c = !!p.closest(INTER2);
+    for (const id of ids) { out[id] = out[id] || { clic: 0, texto: 0 }; out[id][c ? 'clic' : 'texto']++; } }
+  return out; }
+function labelsIn(doc, d) {   // rótulo em caixa alta + valor ao lado; o valor é clicável?
+  const out = []; for (const e of d.querySelectorAll('span,div,dt,label,small')) { if (!vis(e) || e.closest('button,th,[role=columnheader],thead,a')) continue;
+    const own = norm([...e.childNodes].filter(x => x.nodeType === 3).map(x => x.textContent).join('')); if (!own || own.length > 34 || !LABENT.test(own)) continue;
+    if (doc.defaultView.getComputedStyle(e).textTransform !== 'uppercase' && doc.defaultView.getComputedStyle(e.parentElement).textTransform !== 'uppercase') continue;
+    let host = e, val = null; for (let i = 0; i < 3 && host && !val; i++) { val = host.nextElementSibling; host = host.parentElement; }
+    if (!val || !vis(val)) continue; const v = norm(val.innerText).slice(0, 90); if (!v || v === '—' || (v === v.toUpperCase() && /[A-ZÀ-Ú]{3}/.test(v))) continue;
+    out.push({ l: own, v, clic: !!(val.matches(INTER2) || val.querySelector(INTER2)) }); }
+  const seen = new Set(); return out.filter(o => { const k = o.l + '|' + o.v; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 30); }
+function nextStep(doc, d) { const P = panelOf(doc, d); let lab = null; for (const e of P.querySelectorAll('span,div')) { const own = norm([...e.childNodes].filter(x => x.nodeType === 3).map(x => x.textContent).join('')); if (/^pr[oó]ximo passo$/i.test(own)) { lab = e; break; } }
+  let v = ''; if (lab) { let host = lab, val = null; for (let i = 0; i < 3 && host && !val; i++) { val = host.nextElementSibling; host = host.parentElement; } v = val ? norm(val.innerText).slice(0, 200) : ''; }
+  const prim = [...P.querySelectorAll('button,[role=button],a')].filter(b => vis(b) && doc.defaultView.getComputedStyle(b).backgroundColor === ACCENT).map(txt).filter(Boolean);
+  return { tem: !!lab, texto: v, primarias: prim.slice(0, 4) }; }
+function passEls(doc, root, inDialog) {   // links e botões de passagem
+  const out = [];
+  for (const a of root.querySelectorAll('a[href]')) { if (!vis(a)) continue; const h = a.getAttribute('href') || ''; if (!/\.dc\.html/.test(h)) continue;
+    if (!inDialog && (a.closest('nav') || a.closest('header'))) continue; out.push({ k: 'a', t: txt(a), h }); }
+  for (const b of root.querySelectorAll('button,[role=button]')) { if (!vis(b) || b.hasAttribute('aria-haspopup') || b.hasAttribute('aria-expanded')) continue; const t = txt(b);
+    if (/^ver em (tabela|cart|kanban|calend|mapa|lista|linha do tempo|raias)/i.test(t) || b.closest('[data-g2md],[data-visoes-gid]')) continue;
+    if (/(›|→|↗)\s*$/.test(t) || /^(ver|abrir|ir para|ir a|ir à|ir ao|ver na|ver no)\b/i.test(t)) { if (!inDialog && (b.closest('nav'))) continue; out.push({ k: 'b', t, h: '' }); } }
+  const seen = new Set(); return out.filter(o => { const k = o.k + o.t + o.h; if (seen.has(k)) return false; seen.add(k); return true; }); }
+function findEl(root, sig) { const c = sig.k === 'a' ? [...root.querySelectorAll('a[href]')] : [...root.querySelectorAll('button,[role=button]')];
+  return c.find(e => vis(e) && txt(e) === sig.t && (sig.k !== 'a' || (e.getAttribute('href') || '') === sig.h)) || null; }
+async function openRow(fr, idx) { const doc = fr.contentDocument; const rows = rowsAll(doc); const r = rows[idx]; if (!r) return null; const n0 = dialogs(doc).length; bodyTarget(r).click(); await sleep(650);
+  const d = topDlg(fr.contentDocument); if (!d || dialogs(fr.contentDocument).length <= n0) return { row: r, d: null }; await expandAll(fr.contentDocument, d); return { row: r, d: topDlg(fr.contentDocument) }; }
+async function waitNav(fr, before) { for (let i = 0; i < 24; i++) { await sleep(250); const c = cur(fr); if (c !== before) { await settle(fr); return true; } } return false; }
+async function passage(fr, s, ctx, sig) {
+  const url = '/v3/' + s.n + '.dc.html'; await load(fr, url); let root = fr.contentDocument.body, oTitle = '', own = '';
+  if (ctx.row !== null) { const o = await openRow(fr, ctx.row); if (!o || !o.d) return { r: 'não reabriu' }; root = o.d; oTitle = dTitle(fr.contentDocument, o.d); own = (entAll(oTitle)[0]) || ''; }
+  const el = findEl(root, sig); if (!el) return { r: 'não achou' };
+  if (el.tagName === 'A') el.removeAttribute('target');
+  const h1o = norm((fr.contentDocument.querySelector('h1') || {}).innerText || ''); const before = cur(fr); const nd0 = dialogs(fr.contentDocument).length;
+  el.click(); const moved = await waitNav(fr, before);
+  if (!moved) { const doc = fr.contentDocument, d = topDlg(doc); const t2 = dTitle(doc, d);
+    return { r: (d && (dialogs(doc).length > nd0 || t2 !== oTitle)) ? 'abre no lugar' : 'nada', titulo: t2 }; }
+  const doc2 = fr.contentDocument, land = cur(fr), d2 = topDlg(doc2), t2 = dTitle(doc2, d2);
+  const want = entAll(land.split('#')[1] || '')[0] || entAll(sig.t)[0] || '';
+  const foc = doc2.activeElement && doc2.activeElement !== doc2.body ? norm(doc2.activeElement.innerText || '').slice(0, 80) : '';
+  const flash = [...doc2.querySelectorAll('.g2flash,[aria-selected=true],.g2r:focus,.g2r:focus-within')].filter(vis).map(e => norm(e.innerText).slice(0, 60));
+  const abriu = !!(want && d2 && t2.includes(want)), destacou = !!(want && (flash.some(f => f.includes(want)) || foc.includes(want)));
+  const HUB = /^(MOD-[A-Z]+|CD|IN-04)\.dc\.html$/;
+  const voltaEls = [...doc2.querySelectorAll('a,button,[role=button]')].filter(vis).filter(e => !e.closest('nav')).map(e => ({ t: txt(e), h: e.getAttribute('href') || '' })).filter(o => o.t && (/^(‹|←)|voltar/i.test(o.t) || (own && o.t.includes(own))));
+  const volta = voltaEls.map(o => o.t + (o.h ? ' → ' + o.h : ''));
+  const voltaOrigem = voltaEls.some(o => !HUB.test(o.h) && ((own && o.t.includes(own)) || (h1o && o.t.toLowerCase().includes(h1o.toLowerCase().slice(0, 18))) || scr(o.h) === s.n));
+  const mencionaOrigem = !!(own && doc2.body.innerText.includes(own)), dlgOrigem = !!(own && t2.includes(own));
+  const toast = [...doc2.querySelectorAll('[role=status],[aria-live]')].filter(vis).map(e => norm(e.innerText).slice(0, 120)).filter(Boolean).slice(0, 2);
+  const R = { r: scr(land) === s.n ? 'mesma tela' : 'navega', de: s.n, origemId: own, mencionaOrigem, dlgOrigem, para: land, telaDestino: scr(land), alvo: want, abriu, titulo: t2, destacou, foco: foc, volta: volta.slice(0, 4), voltaOrigem, avisos: toast,
+    escopo: [...doc2.querySelectorAll('select')].filter(vis).filter(x => /fazenda|safra/i.test(x.getAttribute('aria-label') || '')).map(x => (x.getAttribute('aria-label') || '') + '=' + x.value) };
+  // Voltar do navegador
+  const b2 = cur(fr); try { fr.contentWindow.history.back(); } catch (e) {}
+  const back = await waitNav(fr, b2); const doc3 = fr.contentDocument, d3 = topDlg(doc3);
+  R.voltar = { chegou: cur(fr), mesmaTela: scr(cur(fr)) === s.n, detalheReaberto: !!(oTitle && d3 && dTitle(doc3, d3) === oTitle), moveu: back };
+  return R; }
+async function doScreen(fr, s) {
+  const url = '/v3/' + s.n + '.dc.html'; await load(fr, url); const doc0 = fr.contentDocument;
+  const R = { screen: s.n, landed: cur(fr), h1: norm((doc0.querySelector('h1') || {}).innerText || ''), linhas: rowsAll(doc0).length, detalhes: [], passagens: [] };
+  const landEls = passEls(doc0, doc0.body, false).filter(o => o.k === 'b' || scr(o.h) !== s.n || o.h.includes('#')).slice(0, 4);
+  const n = R.linhas; const idxs = [...new Set([0, Math.floor(n / 2), n - 1].filter(i => i >= 0 && i < n))].slice(0, 3);
+  const cand = landEls.map(sig => ({ ctx: { row: null }, sig }));
+  for (const i of idxs) { await load(fr, url); const o = await openRow(fr, i); if (!o) continue; if (!o.d) { R.detalhes.push({ linha: i, abre: 'sem diálogo', url: cur(fr) }); continue; }
+    const doc = fr.contentDocument, t = dTitle(doc, o.d), own = entAll(t)[0] || ''; const refs = refsIn(o.d); delete refs[own];
+    const els = passEls(doc, o.d, true);
+    R.detalhes.push({ linha: i, titulo: t, tipo: (o.d.getBoundingClientRect().right >= doc.defaultView.innerWidth - 6 ? 'lateral' : 'central'), refs, rotulos: labelsIn(doc, o.d), passo: nextStep(doc, o.d), passagens: els.map(e => e.t + (e.h ? ' → ' + e.h : '')) });
+    for (const sig of els) if (!cand.some(c => c.sig.t === sig.t && c.sig.h === sig.h)) cand.push({ ctx: { row: i }, sig }); }
+  for (const c of cand.slice(0, 9)) { let res; try { res = await passage(fr, s, c.ctx, c.sig); } catch (e) { res = { r: 'erro', e: String(e) }; }
+    R.passagens.push(Object.assign({ origem: c.ctx.row === null ? 'tela' : 'detalhe', el: c.sig }, res)); }
+  return R; }
+async function escopo(fr) {   // Fazenda e Safra escolhidas numa tela valem na próxima?
+  const pares = [['OS', 'EST'], ['OS', 'MA'], ['EST', 'CMP'], ['COLH', 'VEN'], ['PA', 'OS'], ['SAF', 'PA'], ['PAGR', 'AG-01'], ['PSUP', 'EST']]; const out = [];
+  for (const [a, b] of pares) { await load(fr, '/v3/' + a + '.dc.html'); const doc = fr.contentDocument; const sel = [...doc.querySelectorAll('select')].filter(vis);
+    const fz = sel.find(x => /fazenda/i.test(x.getAttribute('aria-label') || '')), sf = sel.find(x => /safra/i.test(x.getAttribute('aria-label') || ''));
+    const set = (x, v) => { if (!x) return null; const o = [...x.options].find(o => o.text === v || o.value === v); if (!o) return null; x.value = o.value; x.dispatchEvent(new Event('change', { bubbles: true })); x.dispatchEvent(new Event('input', { bubbles: true })); return o.value; };
+    const vf = set(fz, 'Lagoa Grande'); await sleep(300); const vs = set([...fr.contentDocument.querySelectorAll('select')].filter(vis).find(x => /safra/i.test(x.getAttribute('aria-label') || '')), '2026/27'); await sleep(300);
+    fr.contentWindow.location.href = b + '.dc.html'; await sleep(400); await settle(fr);
+    const d2 = fr.contentDocument; const s2 = [...d2.querySelectorAll('select')].filter(vis);
+    const f2 = s2.find(x => /fazenda/i.test(x.getAttribute('aria-label') || '')), sf2 = s2.find(x => /safra/i.test(x.getAttribute('aria-label') || ''));
+    out.push({ de: a, para: b, escolheu: { fazenda: vf, safra: vs }, chegou: { fazenda: f2 ? f2.options[f2.selectedIndex].text : 'sem seletor', safra: sf2 ? sf2.options[sf2.selectedIndex].text : 'sem seletor' } }); }
+  return out; }
+window.run5 = async function (only) {
+  localStorage.setItem('safrion.perfilDemo', 'Proprietário'); BASE_LS = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); BASE_LS[k] = localStorage.getItem(k); }
+  let list = await (await fetch('/robot3/screens.json')).json(); if (only) list = list.filter(s => only.includes(s.n));
+  const q = [...list]; window.__total = list.length; window.__done = 0;
+  const frs = [0, 1, 2].map(() => { const f = document.createElement('iframe'); document.getElementById('frames').appendChild(f); return f; });
+  if (!only) { try { const E = await escopo(frs[0]); await fetch('/save?name=escopo.v5.json', { method: 'POST', body: JSON.stringify(E) }); log('escopo ok'); } catch (e) { log('escopo ERRO ' + e); } }
+  await Promise.all(frs.map(async (fr, i) => { while (q.length) { const s = q.shift(); const t0 = Date.now();
+    try { const R = await doScreen(fr, s); await fetch('/save?name=' + s.n + '.v5.json', { method: 'POST', body: JSON.stringify(R) }); log('w' + i + ' ' + s.n + ' ok ' + R.passagens.length + ' ' + ((Date.now() - t0) / 1000).toFixed(0) + 's'); }
+    catch (e) { log('w' + i + ' ' + s.n + ' ERRO ' + e); await fetch('/save?name=' + s.n + '.v5err.json', { method: 'POST', body: JSON.stringify({ screen: s.n, err: String(e && e.stack || e) }) }); }
+    window.__done++; document.getElementById('st').textContent = 'feitas ' + window.__done + ' de ' + window.__total; } }));
+  document.getElementById('st').textContent += ' · FIM'; window.__fim = true;
+};
+</script></body></html>
