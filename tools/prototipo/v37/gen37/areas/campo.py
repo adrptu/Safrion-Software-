@@ -366,40 +366,18 @@ def _ca01x_0420():
       footer='Instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado. Impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa.')
 
 # ---------------- CA-02 · Apontamentos e conferência ----------------
-FILAJS=r'''
-function EXTRAVALS(self,v){
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_fila'||!r) return;
-    r.p.real=[{k:'txt',t:Number(r.v.real).toLocaleString('pt-BR')+' ha'},{k:'br'},{k:'mut',t:'corrigido · original na trilha'}];
-    r.p.horas=[{k:'txt',t:Number(r.v.horas).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' h'}];
-    g2set(self,'g_fila',{rows}); self.setState({g2toast:'Corrigido com histórico · '+r.v.ap+': nova versão do apontamento; o valor original permanece na trilha e a etapa da ordem não muda.'}); };
-}
-'''
 def _ca02():
     fname='CA-02.dc.html'; E._reset_screen(fname)
-    def row(i,ap,det,sub,eq,real,acum,horas,cons,orig,cf,cfc,acao):
-        return dict(id=f'f{i}',v=dict(ap=ap,eq=eq,real=real,horas=horas,cons=' '.join(p['t'] for p in cons),orig=' '.join(p['t'] for p in orig),cf=cf,motivo=''),
-            s=dict(ap=f'{ap} {sub}'),
-            p=dict(ap=[Pt.link(ap,det) if det else Pt.b(ap),Pt.br(),Pt.mut(sub)],real=[Pt.txt(f'{nf(real)} ha'),Pt.br(),Pt.mut(acum)],horas=[Pt.txt(f'{nf(horas,1)} h')] if horas is not None else [Pt.mut('—')],
-                   eq=_eqp(eq),cons=cons,orig=orig,cf=[Pt.chip(cf,cfc),Pt.br()]+acao))
-    rows=[
-     row(1,'OS-0421 · v2','CA-01det.dc.html','Dia 4 · 23/09 · T1','Marcos · PJ-3030 + Trator 03',40,'150 conf. + 40 prov. · saldo 160 ha',7.2,
-         [Pt.txt('Fungicida A 20 L'),Pt.br(),Pt.mut('sem sobras')],[Pt.mut('app · sincronizado 17:40')],'A conferir','yellow',
-         [Pt.act('Conferir','Conferido o dia 4 · 40 ha confirmados (190/350) · o consumo de 20 L já baixado no apontamento não é repetido. A ordem segue Em execução — conferir um dia não conclui a ordem de 7 dias.')]),
-     row(2,'OS-0420 · v2',DET0420,'Dia 2 · 22/09 · T4','Carlos · PD-12 + Trator T1',12,'18 conf. + 12 prov. · saldo 70 ha parado',3.1,
-         [Pt.txt('Semente 58 W 624 kg'),Pt.br(),Pt.chip('horas acima do previsto · 1,8 h','yellow')],[Pt.mut('offline · sincronizado 12:10 · sem conflito'),Pt.br(),Pt.mut('turno parado pela quebra do Trator T1')],'A conferir','yellow',
-         [Pt.act('Conferir','Conferido · 12 ha confirmados (30/100) · horas acima do previsto registradas como fato. O selo Impedida permanece — conferência não muda impedimento nem etapa.')]),
-     row(3,'OS-0421 · v2','CA-01det.dc.html','Dia 3 · 22/09 · T1','Marcos · PJ-3030 + Trator 03',50,'150 conf. · saldo 160 ha',8.4,
-         [Pt.txt('Fungicida A 25 L')],[Pt.mut('app · sincronizado')],'Conferido','green',[Pt.link('Ver histórico ›','CA-01det.dc.html')]),
-     row(4,'OS-0417 · v1',None,'Final · 21/09 · P1','Paula · Distribuidor DA-08',95,'95 conf. · saldo 0 ha',None,
-         [Pt.txt('MAP 100 sc entregues · 70 consumidos'),Pt.br(),Pt.chip('10 sc com Paula a devolver','yellow')],[Pt.mut('almoxarifado · confirmado')],'Divergência de sobras','yellow',
-         [Pt.link('Ver custódia ›','CA-04.dc.html')]),
-    ]
+    from pathlib import Path
+    import cenario
+    import conferencia_diaria as CD
+    rows=[]
     g_fila=grid([dict(k='ap',l='Apontamento',w=130),dict(k='eq',l='Equipe · conjunto',w=130),dict(k='real',l='Realizado · acumulado',t='num',w=150),dict(k='horas',l='Horas',t='num',a='r',d=1,u='h'),
                  dict(k='cons',l='Consumos e sobras',w=190),dict(k='orig',l='Origem · sincronização',w=165),dict(k='cf',l='Conferência · ação',w=170)],
-        rows,edit=dict(m='form',title='Corrigir apontamento',sub='Corrija realizado e horas informando o motivo. A correção gera nova versão; o valor original permanece na trilha e a etapa da ordem não muda.',
-            fields=[dict(k='ap',l='Apontamento',ro=True),dict(k='cf',l='Conferência',ro=True),
-                    dict(k='real',l='Realizado do dia',t='num',req=True,min=0,max=200,u='ha'),dict(k='horas',l='Horas de máquina',t='num',min=0,max=24,u='h'),
-                    dict(k='motivo',l='Motivo da correção',t='area',req=True,help='Ex.: horímetro lido no fim do turno.')]),
+        rows,edit=dict(m='form',title='Revisar apontamento',sub='Conferência e divergência usam o mesmo recibo da O.S. Não alteram área, horas ou consumo. Correção de quantidade ainda indisponível.',
+            fields=[dict(k='ap',l='Apontamento',ro=True),dict(k='cf',l='Conferência',ro=True),dict(k='real',l='Realizado do dia (ha)',ro=True),dict(k='horas',l='Horas',ro=True),
+                    dict(k='decisao',l='Decisão',t='sel',opts=['Conferir dia','Registrar divergência','Vincular evidência','Arquivar caso substituído'],req=True),
+                    dict(k='motivo',l='Motivo e evidência',t='area',help='Obrigatório para divergência ou resolução de caso.')]),
         gid='g_fila',total=False)
     proj=[('23/09 06:00','Água aplicada antes da reclassificação · 6,7 mm no Pivô 1','fica no balanço hídrico; não é reapontada na fertirrigação','João (irrigante) · balanço hídrico'),
           ('liberação','Ana (agrônoma) libera a OS-0418 (v2, com ajuste opcional)','passa a Liberadas; a REQ-038 fica disponível para entrega','Ana (agrônoma)'),
@@ -416,9 +394,8 @@ def _ca02():
         search=False,gid='g_proj',total=False,headtools=False)
     reabrir=imsg('Conferir reabertura do saldo', 'Prévia · nada foi alterado. A reabertura do saldo da OS-0417 ainda não está disponível neste protótipo. Confira os apontamentos e as condições na O.S.; a conferência e a aprovação continuam necessárias.', 'calendar', 'Ver disponibilidade da reabertura do saldo')+ilink('Abrir O.S.','OS.dc.html#OS-0417','arrow','Conferir a OS-0417')
     corpo=(
-      kpis([('PROVISÓRIOS','52 ha','aguardam conferência'),('FORA DA TOLERÂNCIA','1','horas · OS-0420'),('SOBRAS A RECEBER','10 sc','OS-0417 · com Paula')])
-      + bloco('Fila de conferência diária','Confira previsto contra observado por turno; clique no apontamento para corrigir com histórico.',g_fila,
-          imsg('Devolver para esclarecimento','Apontamento do dia 2 da OS-0420 devolvido a Carlos com a pergunta registrada — o fato permanece registrado, nada é apagado.','alert','Devolver o apontamento ao executor com uma pergunta'))
+      # EX-50(a)-SUP (PR #109) + TAB-07: sem cartões de resumo fixos; o selo conta o que falta revisar. Divergência é decisão do formulário da linha
+      bloco('Fila de conferência diária','Clique no apontamento para conferir o dia ou registrar divergência com motivo; nada altera área, horas ou consumo.',g_fila)
       + bloco('Reabrir saldo para execução','Reabra o saldo quando a conferência encontrar trabalho físico adicional (conferente ou PCP com permissão).',
           '',reabrir,tone='yellow')
       + bloco('Encerramento','Encerre a ordem só com término físico e todas as condições satisfeitas.',
@@ -426,12 +403,11 @@ def _ca02():
           imsg('Encerrar OS-0417','Indisponível: 10 sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Rui recebe a devolução no almoxarifado; ou documente a destinação competente para encerrar.','check','Encerrar a ordem (exige custódia zero e conferência concluída)'))
       + bloco('Roteiro da OS-0418 após a liberação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
           ilink('Liberar OS-0418','OS.dc.html#OS-0418','check','Abrir a OS-0418 para o agrônomo liberar (pode ajustar)'),tone='yellow'))
-    EXTRAJS[0]=FILAJS
-    prim=imsg('Conferir 2 apontamentos','Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), horas acima do previsto registradas. Nenhuma ordem muda de etapa; o selo Impedida da OS-0420 permanece.',
-              'check','Conferir os apontamentos provisórios da fila',primary=True,small=False)
+    EXTRAJS[0]=cenario.js_prefixo()+CD.js_nucleo()+(Path(__file__).resolve().parent.parent/'campo_conferencia_ui.js').read_text()
+    prim='<button type="button" onClick="{{ca_proximo}}" title="Abre o próximo apontamento a revisar" style="'+BTN_ST(True)+' display: inline-flex; align-items: center; gap: 8px;">Revisar próximo apontamento</button>'
     HEIGHTS37[fname]=1560
     shell37('CA-02','Apontamentos e conferência',corpo,primary_html=prim,
-      status=('2 a conferir · 1 divergência','yellow'),
+      status=('{{ca_st}}','yellow'),
       subtitle='Conferência diária confirma provisórios sem mudar a fase da ordem; consumo recebe um único evento de efeito.',
       footer='Fato permanece registrável fora da tolerância. Conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa. '
              'Reabrir saldo: se a liberação não estiver mais vigente, o saldo reaberto recebe o selo Pausada até renovar as condições; correção só documental permanece Em conferência, sem reabrir período contábil nem reescrever fatos. '
@@ -574,5 +550,6 @@ def _ca04():
 
 def build():
     _ca01(); _ca01det(); _ca01x_0420(); _ca02(); _ca03(); _ca03det(); _ca04()
+
 
 

@@ -1,0 +1,24 @@
+A linhas: 21
+    OS-0415 · dia 1 · 11/09 Marcos 48 — Sem consumo informado web · sincronizado A ordem não admite conferência diária nesta fase.
+    OS-0415 · dia 2 · 12/09 Marcos 48 — Sem consumo informado web · sincronizado A ordem não admite conferência diária nesta fase.
+    OS-0417 · dia 1 · 19/09 Paula 32 — Sem consumo informado web · sincronizado Conferido
+    OS-0417 · dia 2 · 20/09 Paula 33 — Sem consumo informado web · sincronizado Conferido
+    OS-0417 · dia 3 · 21/09 Paula 30 — Sem consumo informado web · sincronizado Conferido
+    OS-0420 · dia 1 · 21/09 Carlos 18 — Sem consumo informado web · sincronizado Conferido
+A cabeçalho: Agrícola › Ordem de Serviço Apontamentos e conferência i 2 a conferir · 1 divergência Conferir 2 apontamentos
+A corpo topo: Provisórios 52 ha aguardam conferência Fora da tolerância 1 horas · OS-0420 Sobras a receber 10 sc OS-0417 · com Paula Fila de conferência diária Devolver para esclarecimento 21 de 21 APONTAMENTO ⇅ EQUIPE · CONJUNTO ⇅ REALIZADO · ACUMULADO ⇅ HORAS ⇅ CONSUMOS E SOBRAS ⇅ ORIGEM · SINCRONIZAÇÃO ⇅ CONFE
+B alvo: OS-0420 · dia 2
+B abrir: True
+B form: Revisar apontamento · OS-0420 · dia 2 · 22/09 | campos: ['fx_g_fila_ap=OS-0420 · dia 2 · 22/09(ro)', 'fx_g_fila_cf=Provisório(ro)', 'fx_g_fila_real=12(ro)', 'fx_g_fila_horas=(ro)', 'fx_g_fila_decisao=Conferir dia', 'fx_g_fila_motivo=']
+B após salvar: toast= Dia 2: conferido por Paula (conferência). A fase da O.S. e os efeitos do apontamento permanecem. | alerts=  | aberto= False
+B linha: OS-0420 · dia 2 · 22/09 Carlos 12 — Sem consumo informado web · sincronizado Conferido
+B estado: ["OS-0420:2=Conferido/Paula (conferência)"]
+C alvo2: OS-0421 · dia 4
+C sem motivo: alerts= Corrija os campos destacados; o que você preencheu foi mantido. | Informe o motivo e a evidência pertinente. | aberto= True
+C com motivo: toast= Dia 4: não conforme por Paula (conferência). A fase da O.S. e os efeitos do apontamento permanecem. | linha= OS-0421 · dia 4 · 23/09 Marcos 40 — Sem consumo informado web · sincronizado Não conforme
+D alvo Rui: OS-0505 · dia 2
+D Rui: alerts= Não salvo: Conferir o dia 2 da OS-0505: decisão de Paula (conferência). Nada foi alterado. Nada foi perdido; tente de novo. | toast= Não salvo: Conferir o dia 2 da OS-0505: decisão de Paula (conferência). Nada foi alterado. | aberto= True
+E primária: i | Conferir 2 apontamentos
+erros JS: 
+F 390 rolagem horizontal: False
+erros JS final: 
