@@ -19,3 +19,15 @@ for(const [name,inside,closed,exists,expected] of [
  console.log('OK '+name);ok++;
 }
 console.log(JSON.stringify({ok,fail:0,scope:'handler real; DOM simulado, nao navegador'}));
+const escStart=source.indexOf('  const soltaEsc=',start),escEnd=source.indexOf('  v.og_titulo=',escStart);
+assert.ok(escStart>start&&escEnd>escStart);
+const listeners=new Set();let mounted=true;
+const self={state:{og:{aberto:true,ids:['OS-demo']}}},v={og_show:true};
+const document={addEventListener:(n,f)=>listeners.add(f),removeEventListener:(n,f)=>listeners.delete(f),getElementById:()=>mounted?{}:null};
+const render=()=>vm.runInNewContext(source.slice(escStart,escEnd),{self,v,document,put:x=>Object.assign(self.state.og,x)});
+const fire=(key,defaultPrevented=false)=>{let prevented=false;for(const f of [...listeners])f({key,defaultPrevented,preventDefault:()=>prevented=true});return prevented;};
+render();render();assert.equal(listeners.size,1);console.log('OK documento registra apenas um listener');
+fire('Enter');fire('Escape',true);assert.equal(self.state.og.aberto,true);console.log('OK outras teclas e Escape ja tratado preservados');
+assert.equal(fire('Escape'),true);assert.equal(self.state.og.aberto,false);assert.equal(listeners.size,0);assert.deepEqual(self.state.og.ids,['OS-demo']);console.log('OK Escape sem foco fecha e remove listener, preservando rascunho');
+self.state.og.aberto=true;render();mounted=false;fire('Escape');assert.equal(listeners.size,0);console.log('OK dialogo desmontado remove listener');
+console.log(JSON.stringify({ok:8,fail:0,scope:'handlers reais; DOM simulado, nao navegador'}));

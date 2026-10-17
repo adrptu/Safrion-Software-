@@ -1044,7 +1044,16 @@ function osGrupoVals(self,v,recorte){
   v.og_temgrupos=v.og_grupos.length>0;
   const st=self.state.og||{},g=st.grupo&&(c.gruposExec||{})[st.grupo];
   v.og_show=!!st.aberto&&st.perfil===perfil;
-  v.og_fechar=()=>put({aberto:false});v.og_key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();v.og_fechar()}};
+  const soltaEsc=()=>{if(self.__ogEscape){document.removeEventListener('keydown',self.__ogEscape);self.__ogEscape=null;}};
+  v.og_fechar=()=>{soltaEsc();put({aberto:false})};v.og_key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();v.og_fechar()}};
+  // Safari pode clicar sem focar o botao: Escape tambem precisa chegar pelo documento.
+  if(typeof document!=='undefined'){
+    if(!v.og_show)soltaEsc();
+    else if(!self.__ogEscape){self.__ogEscape=e=>{
+      if(!(self.state.og||{}).aberto||!document.getElementById('og_dialog')){soltaEsc();return;}
+      if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();v.og_fechar();}
+    };document.addEventListener('keydown',self.__ogEscape);}
+  }
   v.og_titulo=g?g.id+' · versão '+g.versao:'Agrupar operações';v.og_contexto=st.contexto||'';
   v.og_erro=st.erro||'';v.og_temerro=!!st.erro;v.og_criar=!g;v.og_detalhe=!!g;
   v.og_voltar=()=>put({previa:null,confirmacao:null,instrucao:null,erro:'',chave:key()});
