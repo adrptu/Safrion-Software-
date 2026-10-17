@@ -15,7 +15,7 @@ try:
     m.ir('venc=PM-05|a06|s1'); m.clk('Gerar ordem preventiva', '#ma-painel'); g = m.toast()
     m.ir('om=OM-0235'); m.clk('Liberar', '#ma-painel'); m.clk('Liberar mesmo assim', '#ma-painel')
     m.ir('om=OM-0235', perfil='Zé'); m.clk('Iniciar serviço', '#ma-painel'); m.bloco('Tarefas'); m.responder('Feito')
-    m.bloco('Conclusão'); m.setv('#om-leitura', '890'); m.J("(()=>{const b=[...document.querySelectorAll('#ma-painel button')].find(b=>/^Previsto/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.3)
+    m.setv('#om-leitura', '890'); m.J("(()=>{const b=[...document.querySelectorAll('#ma-painel button')].find(b=>/^Previsto/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.3)
     m.clk('Concluir serviço', '#ma-painel'); c = m.toast()
     m.ok('OM-0235' in g and 'em 20/09/2027' in c and 'conta do vencimento programado' in c, 'base programada: próxima em 20/09/2027', [g[:80], c[:160]])
     # 2 · atalho Criar plano: o ativo sai de "Sem plano" e não duplica; o endereço passa a #plano=PM-11
