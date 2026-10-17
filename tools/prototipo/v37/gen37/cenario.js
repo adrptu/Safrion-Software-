@@ -25,7 +25,7 @@ function cenSave(c, estrito) { const ant = CEN_MEM; CEN_MEM = c; cenGuardaIlegiv
   catch (e) { if (estrito) { CEN_MEM = ant; throw new Error(CEN_GRAVA_ERRO); }
     try { localStorage.removeItem(CEN_KEY); } catch (e2) {} return false; } }
 function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
-function cenReset() { cenCompMarcar(); CEN_MEM = cenClone(CEN0); cenGuardaIlegivel(); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
+function cenReset() { cenCompMarcar(); CEN_MEM = cenClone(CEN0); CEN_MEM.compras={v:1,proc:{}}; cenGuardaIlegivel(); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
 function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
 // Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
 // Ordem de gravação (CONF-01 R14, revisão F1): o que já existia antes do comando fica com sq 0 (seed) e o que o comando gravou ganha sq = c.rev,
@@ -315,7 +315,7 @@ function cenRevisao(ator, autor, fato) { const q = g2pf(ator); return q && g2mes
 
 // ---------- Compras (C-3/C-4) ----------
 const CEN_COMP_ANTIGA='talhao-os-compras-v1';
-function cenCompMarcar(){localStorage.setItem(CEN_COMP_ANTIGA+':migrado','1');}
+function cenCompMarcar(){try{if(typeof localStorage==='undefined')return false;localStorage.setItem(CEN_COMP_ANTIGA+':migrado','1');return true;}catch(e){return false;}}
 function cenCompEstado(c,migrar){
   if(c.compras){ if(c.compras.v!==1||!c.compras.proc) throw Error('Compras incompatíveis. Preserve a cópia antes de gravar.'); return c.compras; }
   let old=null,raw=null,aviso='';try{if(!localStorage.getItem(CEN_COMP_ANTIGA+':migrado'))raw=localStorage.getItem(CEN_COMP_ANTIGA);}catch(e){aviso='Armazenamento bloqueado: compras antigas indisponíveis. Reabra com acesso para conferir os pedidos.';}
@@ -333,7 +333,7 @@ function cenCompGravar(id,snap,chave,ator){
     const r=cenIdem(c,chave,JSON.stringify([id,snap,ator]),'Compra '+snap.sol,()=>{s.proc[id]=cenClone(snap);return {msg:'Compra gravada.',sol:snap.sol};},{resultado:true});
     if(localStorage.getItem(CEN_KEY)!==raw)throw Error('O cenário mudou. Confira os dados antes de repetir.');return r;
   },{estrito:true});
-  if(!out.erro){try{cenCompMarcar();}catch(e){out.aviso='Compra gravada, mas a marca de migração não pôde ser gravada. Não restaure a demonstração até liberar o armazenamento.';}}return out;
+  if(!out.erro){if(!cenCompMarcar()){out.aviso='Compra gravada, mas a marca de migração não pôde ser gravada. Libere o armazenamento para preservar a restauração entre sessões.';}}return out;
 }
 function cenCompRecebimentos(c){const seen=new Set();return ((c&&c.movs)||[]).filter(m=>{const r=m.tipo==='recebimento-nf'&&m.estRec;if(!r||!r.id||seen.has(r.id))return false;seen.add(r.id);return true;}).map(m=>m.estRec);}
 function cenCompPC(r){return String(r.pedido||r.ref||r.ped||r.id||'').split(' · ')[0].trim();}
