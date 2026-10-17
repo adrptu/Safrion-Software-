@@ -114,9 +114,9 @@ function cenPreparoOrdem(c, ordem) {
   if (!Number.isFinite(haCarga)||haCarga<=0||!Number.isSafeInteger(n)||n<0||n>10000) return fail('Preparo fora da faixa · conferir tanque, vazão e área');
   const cargas=Array.from({length:n},(_,i)=>{ const ha=Math.min(haCarga, Math.max(0,area-i*haCarga));
     return {n:i+1, area:ha, vol:ha*vazao, parcial:ha<haCarga-1e-9,
-      prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*ha}))}; });
+      prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:cenQtdTrecho(x.dose,i*haCarga,ha)}))}; });
   return {ok:true,tanque,vazao,haCarga,n,area,ultima:n?cargas[n-1].area:0,cargas,
-    produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*haCarga})),
+    produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:cenQtd(x.dose,haCarga)})),
     origem:instr.origem,versao:o.versao,conjunto:alDaOrdem(c,o.id).filter(r=>r.classe==='Trator'||r.classe==='Pulverizador').map(r=>r.nome).join(' + ')};
 }
 function cenPreparoTxt(p) {
@@ -910,10 +910,18 @@ function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   if(a.f.tipo==='liquido'&&tanque!==null){
     const volume=area*a.f.volumeHa,n=Math.max(1,Math.ceil(volume/tanque-1e-9));
     if(!Number.isSafeInteger(n)||n<1||n>10000) throw new Error('Preparo fora da faixa.');
-    let ri=0,rest=rows[0].o.area;
+    let ri=0,rest=rows[0].o.area;const preparado={};
     cargas=Array.from({length:n},(_,i)=>{const vol=Math.min(tanque,Math.max(0,volume-i*tanque));let ha=vol/a.f.volumeHa;const destinos=[];
       while(ha>0&&ri<rows.length){const q=Math.min(ha,rest);destinos.push({os:rows[ri].o.id,area:q});ha-=q;rest-=q;if(rest<=0){ri++;rest=ri<rows.length?rows[ri].o.area:0;}}
-      return {n:i+1,vol,destinos,produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,q:x.dose*vol/a.f.volumeHa}))}; });
+      // Arredonda cada origem antes de converter unidades; diferenças acumuladas fecham o total da O.S.
+      const produtosCarga=a.prods.map(x=>{
+        const ds=destinos.map(d=>{const r=rows.find(r=>r.o.id===d.os),m=r.f.insumos.find(m=>m.id===x.id),ins=r.o.ins.find(ins=>ins.p===m.p);
+          const fim=Math.min(r.o.area,(preparado[d.os]||0)+d.area),q=cenDec(cenQtdTrecho(ins.dose,preparado[d.os]||0,fim-(preparado[d.os]||0)));
+          return {n:q.n,e:q.e+(['mL','g'].includes(ins.un)?3:0)};});
+        const e=Math.max(0,...ds.map(d=>d.e)),q=Number(ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n))/10**e;
+        return {id:x.id,p:x.p,un:x.un,q};});
+      destinos.forEach(d=>{preparado[d.os]=(preparado[d.os]||0)+d.area;});
+      return {n:i+1,vol,destinos,produtos:produtosCarga}; });
   } else if(a.f.tipo==='liquido') pendencias.push('Preparo não calculado · conferir capacidade útil do conjunto');
   const versoes={};ids.forEach(id=>versoes[id]=cenGrupoSnapshot(c,id));
   const previa={ids:ids.slice(),versoes,assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:a.f.receitaVersao,area,produtos,cargas,horas,inicio:new Date(inicio).toISOString(),fim:new Date(fim).toISOString(),pendencias};
