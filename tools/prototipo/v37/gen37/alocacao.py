@@ -97,7 +97,7 @@ def js():
     import dados_cad as DC
     ps = dict(CP.pessoas())
     mapa = {'MAR':'p2', 'CAR':'p3', 'PAU':'p6', 'JOA':'p5'}
-    al0.update(pessoas={r:ps[pid] for r,pid in mapa.items() if pid in ps}, ophab=CP.OPHAB,
+    al0.update(pessoas={r:ps[pid] for r,pid in mapa.items() if pid in ps and ps[pid].get('nome') == NOME[r].split(' · ')[0]}, ophab=CP.OPHAB,
                calda=CP.CALDA, ativos={a['id']:a for a in DC.ATIVOS}, preq=CP.PREQ)
     import re
     data_ref = re.search(r"const HOJE='([^']+)';", CAD.CDJS)

@@ -1,0 +1,13 @@
+# Bateria q27 · render da junção de teste 8bdc1a1 (= composição 55baa3f + DS-TAB df941bf), 156 páginas, montado em árvore limpa
+# 8bdc1a1 enviado como claude/v44-v72-q27-render para ficar recuperável
+# entradas do render iguais entre 8bdc1a1 e o HEAD do PR #87: o diff só toca ferramentas, testes e logs, não areas/, engine, *.js do site nem build/montar_render
+$ git diff --stat 8bdc1a1 b2f2ebd
+   .../V72/tabelas/ctl5_e24b_antes_q26_55baa3f.log    |  32 +++++
+   .../V72/tabelas/ctl5_e24b_espera_55baa3f.log       |  32 +++++
+   .../V72/tabelas/ds_inventario_excecao_ficha.log    |   8 ++
+   .../V72/tabelas/ds_modulos_catraca_cobertura.log   |  13 ++
+   tools/prototipo/v37/gen37/ctl5_test.py             |   2 +-
+   tools/prototipo/v37/gen37/ds_inventario.py         |   5 +
+   tools/prototipo/v37/gen37/ds_modulos.py            |  22 ++-
+   tools/prototipo/v37/gen37/ds_modulos_base.json     | 152 ++++++++++++++++++++-
+   8 files changed, 261 insertions(+), 5 deletions(-)

@@ -1,0 +1,13 @@
+# IRR-ONDA0 R3 — devolução de 6221516670
+Pai: ec650424dcd650f083d6765c96b91fffeccad0b0. Autor Codex; revisão/integração Claude.
+F1: término com área incompatível com o tempo exige motivo, conserva informação e permanece em conferência; passada sem crédito até validação pelo irrigante/gestor, com motivo/autor/instante. Nenhuma volta completa automática a 0 h. Pivô usa tempo proporcional como gatilho de conferência, não como área medida; gotejo não usa proporcionalidade de área. Pendência visível também entre passadas.
+F2: irrAgora por ordem = máximo do relógio base, trilha e início. Iniciar/pausar/retomar/avançar não escrevem s.agora. Trilha salva no futuro não causa beco sem saída. OS-0419 às20:02 não desloca OS-0423 das15:02. Desconto de pausa mantido.
+F3: irrMedicao é fonte única de estimativa/divergência/necessidade de motivo. 1291,6 sobre1253,96 exige motivo na tela e no comando. Persistência conserva precisão; formato visual pode arredondar.
+F4: atualizados irr_estado_test, irr_fluxo_test e tabelas_irr_test: leituras explícitas, confirmação antecipada, motivo, papel sintético do teste de estado, ausência recusada sem mutação, e fixture explícita de tempo decorrido para término normal. A fixture não representa um comando da UI. Jornada parcial verifica ausência de crédito antes da conferência. Regressões de navegador ainda precisam execução por Claude.
+
+S4 adjacentes: zero medido não aparece como ausência; rótulo do cabeçalho acompanha término antecipado; texto fixo sem role=status; avisos abaixo do limiar e acima da necessidade coexistem. A coluna Necessidade bruta mantém12,44mm (demanda), enquanto o detalhe explicita programação13,4mm pelo piso do equipamento. Assim o teste preserva12,44 e acrescenta a distinção13,4, em vez de legitimar a troca semântica.
+
+Provas:28/28 Node com funções reais e fixture sintética, sem navegador. Mesmo harness contra domínio+handlers ec650424:18/28,10 contraprovas (não mistura APIs novas e domínio antigo). Quatro fontes Python com AST válido; geração das cinco telas IR e inspeção de fonte HTML, não verificação visual. Runtime local de apoio já existente; não é composição remota homologada. Gitleaks: delta limpo; dois alertas na fonte completa são nomes públicos de localStorage da linha35 inalterada, conferidos sem criar allowlist.
+
+Rodar NODE=/caminho/node python3 -B tools/prototipo/v37/gen37/irr_onda0_test.py. Brutos desta entrega anexos. Claude deve repetir revisão45+F1/F2/F3, regressões atualizadas, teclado/390px e persistência/retorno. Não afirmar verde de navegador antes desses resultados. Sem alteração de aprovação agronômica ou publicação/HML.
+

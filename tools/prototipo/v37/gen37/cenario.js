@@ -830,7 +830,7 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
 
 
 // OS-LOTE-F1: agrupador operacional; a demanda e os fatos continuam nas O.S. de origem.
-function cenGrupoAtor(ator) { return cenExigeUm(ator,['pcp'].concat(g2alc('AL-02').papeis),'Agrupar operações'); }
+function cenGrupoAtor(ator) { return cenExigeAlc(ator,'AL-19','Agrupar e programar O.S.'); }
 function cenGrupoCanon(x) {
   if(Array.isArray(x)) return '['+x.map(cenGrupoCanon).join(',')+']';
   if(x&&typeof x==='object') return '{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+cenGrupoCanon(x[k])).join(',')+'}';
@@ -882,6 +882,13 @@ function cenGrupoEscopo(c,id){const o=c.ordens[id];return cenGrupoCanon({area:o.
 function cenGrupoSnapshot(c,id) {
   const o=c.ordens[id];return cenGrupoCanon({o,req:o&&o.req?c.reqs[o.req]:null,movs:(c.movs||[]).filter(m=>m.os===id)});
 }
+// ENG-011: arredondar na unidade da origem antes de converter; 5 mL não vira 0,01 L.
+function cenGrupoQuantidade(rows,produto){
+  const ds=rows.map(r=>{const m=r.f.insumos.find(x=>x.id===produto),i=r.o.ins.find(x=>x.p===m.p),d=cenDec(cenQtd(i.dose,r.o.area));
+    return {n:d.n,e:d.e+(['mL','g'].includes(i.un)?3:0)};});
+  const e=Math.max(...ds.map(d=>d.e)),n=ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n);
+  return Number(n)/10**e;
+}
 function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   cenGrupoAtor(ator);
   if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length) throw new Error('Selecione ao menos duas O.S. distintas.');
@@ -891,7 +898,7 @@ function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   const inicio=Math.max(...rows.map(x=>Date.parse(x.f.janela[0]))),fim=Math.min(...rows.map(x=>Date.parse(x.f.janela[1])));
   if(inicio>=fim) throw new Error('As janelas não têm interseção comum.');
   const area=rows.reduce((s,x)=>s+x.o.area,0); if(!Number.isFinite(area)) throw new Error('Área total fora da faixa.');
-  const produtos=a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:x.dose*area}));
+  const produtos=a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)}));
   if(produtos.some(x=>!Number.isFinite(x.q))) throw new Error('Quantidade fora da faixa.');
   const capacidades=rows.every(x=>Number.isFinite(x.f.capacidadeHaH)&&x.f.capacidadeHaH>0&&Number.isFinite(x.f.deslocamentoH)&&x.f.deslocamentoH>=0&&Number.isFinite(x.f.setupH)&&x.f.setupH>=0);
   const horas=capacidades?rows.reduce((s,x)=>s+x.o.area/x.f.capacidadeHaH+x.f.deslocamentoH+x.f.setupH,0):null;
@@ -926,12 +933,14 @@ function cenGrupoCriar(c,previa,ator,chave) {
     return {msg:id+' confirmado · origens preservadas; aprovação e liberação continuam por O.S.',grupo:id,versao:1,itens:p.ids.map(os=>({os,estado:'Vinculada',versao:c.ordens[os].versao}))};
   },{resultado:true});
 }
+// Separar exige só ausência de compromisso nas linhas vivas: versão nova ou cancelamento de uma origem não pode prender o grupo.
+function cenGrupoSeparavel(c,ids){ ids.forEach(k=>{const o=c.ordens[k];if(o&&o.etapa==='Canceladas')return;const b=o?cenGrupoCompromisso(c,o):'origem ausente';if(b)throw new Error(k+': '+b);}); }
 function cenGrupoSeparar(c,id,os,versao,esperadas,ator,chave) {
   const por=cenGrupoAtor(ator);if(!chave) throw new Error('Intenção ausente.');
   return cenIdem(c,chave,cenGrupoCanon(['separar',id,os,versao,esperadas,por]),'Separação',()=>{
     const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||!g.ids.includes(os)) throw new Error('Composição mudou: releia o grupo.');
     // Compromisso em qualquer linha impede desfazer coordenação que já serviu à execução.
-    g.ids.forEach(k=>{ if(!esperadas||cenGrupoSnapshot(c,k)!==esperadas[k]) throw new Error(k+': origem mudou; refaça a prévia de separação.'); cenGrupoFicha(c,k,id); });
+    g.ids.forEach(k=>{ if(!esperadas||cenGrupoSnapshot(c,k)!==esperadas[k]) throw new Error(k+': origem mudou; refaça a prévia de separação.'); }); cenGrupoSeparavel(c,g.ids);
     g.ids=g.ids.filter(k=>k!==os);g.versao++;g.historico.push({acao:'Destino separado',os,versao:g.versao,por,at:cenAgora()});
     return {msg:os+' separada de '+id+' · origem, aprovação e demanda preservadas.',grupo:id,versao:g.versao,itens:[{os,estado:'Separada'}]};
   },{resultado:true});
@@ -971,34 +980,6 @@ function cenGrupoRecursos(c,ids) {
     }
   });return out;
 }
-// CMD-06 por origem: prévia e confirmação separadas; nunca passar pelo ramo que cria CMD-42.
-function cenGrupoLiberar(c,id,selecionadas,versao,esperadas,ator,chave) {
-  cenExigeAlc(ator,'AL-01','Liberar selecionadas do grupo');
-  if(!chave||!Array.isArray(selecionadas)||!selecionadas.length||new Set(selecionadas).size!==selecionadas.length) throw new Error('Seleção explícita e intenção são obrigatórias.');
-  return cenIdem(c,chave,cenGrupoCanon(['liberar-grupo',id,selecionadas,versao,esperadas,(g2pf(ator)||{}).k]),'Liberação do grupo',()=>{
-  const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||selecionadas.some(k=>!g.ids.includes(k))) throw new Error('Composição mudou: releia o grupo.');
-  const itens=selecionadas.map(os=>{
-    try{
-      const r=cenIdem(c,chave+'|'+os,cenGrupoCanon(['CMD-06-grupo',id,versao,os,esperadas[os],(g2pf(ator)||{}).k]),'Liberação',()=>{
-        if(cenGrupoSnapshot(c,os)!==esperadas[os]) throw new Error('Versão ou fatos mudaram: refaça a prévia desta origem.');
-        const o=c.ordens[os];
-        if(typeof osAprovada!=='function'||!osAprovada(o,osVn(o.versao))) throw new Error('Aprovação exata pendente · revisar versão na O.S.');
-        const ficha=cenGrupoFicha(c,os,id);
-        if(!g.origens||!g.escopos||g.escopos[os]!==cenGrupoEscopo(c,os)||g.origens[os]!==o.versao||ficha.eq!==g.assinatura) throw new Error('Origem alterada após composição · revisar agrupamento.');
-        const rec=cenGrupoRecursos(c,[os]);
-        if(rec.length) throw new Error(rec.map(x=>x.motivo).join(' · '));
-        // Sem callback arbitrário: reutiliza o comando existente com todas as suas validações.
-        const k=cenClone(c),result=osc_liberar(k,os,false,(o.osc||{}).jan||'',ator);
-        Object.keys(c).forEach(key=>delete c[key]);Object.assign(c,k);
-        return {os,estado:'Liberada',cmd:'CMD-06',versao:o.versao,msg:result.msg};
-      },{resultado:true});
-      return {os,estado:r.estado||'Liberada',cmd:'CMD-06',versao:r.versao,repetido:!!r.repetido};
-    }catch(e){return {os,estado:'Não liberada',motivo:String(e.message||e)};}
-  });
-  c.gruposExec[id].historico.push({acao:'Liberação por origem',versao,por:g2pf(ator).t,at:cenAgora(),itens:cenClone(itens)});
-  return {msg:itens.filter(x=>x.estado==='Liberada').length+' liberadas · '+itens.filter(x=>x.estado!=='Liberada').length+' pendentes; consulte cada origem.',grupo:id,itens};
-  },{resultado:true});
-}
 function cenGrupoProgramacao(c,ids,proposta,previa){
   if(!proposta)return null;
   const campos=['maquina','implemento','operador'].concat(c.ordens[ids[0]].loteFicha.tipo==='liquido'?['caldeiro']:[]),recs=campos.map(k=>proposta[k]);
@@ -1007,6 +988,9 @@ function cenGrupoProgramacao(c,ids,proposta,previa){
   if(previa.horas===null)throw Error('Informe capacidade, deslocamento e setup antes de programar.');
   const comeco=Date.parse(proposta.inicio),fim=comeco+previa.horas*3600000;
   if(comeco<Date.parse(previa.inicio)||fim>Date.parse(previa.fim))throw Error('A sequência não cabe na janela comum.');
+  const fusos=ids.map(id=>c.ordens[id].loteFicha.janela.map(iso=>/Z$/.test(iso)?'+00:00':iso.slice(-6))).flat();
+  if(new Set(fusos).size!==1)throw Error('Fusos das origens divergentes: confira a janela da fazenda antes de programar.');
+  if(proposta.inicio.slice(-6)!==fusos[0])throw Error('Use o fuso da fazenda da janela técnica (UTC'+fusos[0]+'): outro fuso desloca os blocos e esconde conflitos.');
   const fuso=proposta.inicio.slice(-6),sinal=fuso[0]==='-'?-1:1,offset=sinal*(Number(fuso.slice(1,3))*60+Number(fuso.slice(4)))*60000;
   const prog={},k=cenClone(c);let cursor=comeco;
   for(const id of ids){const f=c.ordens[id].loteFicha,h=c.ordens[id].area/f.capacidadeHaH+f.deslocamentoH+f.setupH;

@@ -1,0 +1,12 @@
+OK    E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar 
+OK    E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d) 
+OK    E1d em ben.js o nome cenLiberar não aparece e a única passagem para Liberadas fica dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não citam cenLiberar 
+OK    E1e o E1d derruba os atalhos de liberação no ben.js (5 mutantes: cenLiberar colado, com outra variável e por apelido; Liberadas por atribuição e por objeto) 
+OK    E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia) 
+OK    E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10) 
+OK    E2 nenhuma ordem de manutenção em A liberar no cenário; a de beneficiamento em A liberar só com fam BEN e fora da lista da O.S. (OB-0104 Encerradas) 
+OK    E3 "Nova ordem" só emite atividade agrícola do plano 
+Traceback (most recent call last):
+  File "/private/tmp/os88fix/gen37/links_ocultos_test.py", line 67, in <module>
+    PJ=os.path.join(G,'project'); c=json.load(open(os.path.join(PJ,'canvas.json')))
+FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/os88fix/gen37/project/canvas.json'

@@ -1,0 +1,7 @@
+OK  E1 390 px · Planejar safra: etapa 2 realçada e anunciada
+FALHOU E2 390 px · liberar a OS-0430 pela lista: a ordem passa a Liberadas (painel; chips de fase A liberar −1, Liberadas +1), o que mudou é realçado e o aviso é anunciado · [['OS-0430 · Dessecação pré-plantio', 'A liberar'], {'Todas': 10, 'A liberar': 3, 'Liberadas': 2, 'Em execução': 2, 'Em conferência': 1, 'Encerradas': 2, 'Canceladas': 0}, {'Todas': 10, 'A liberar': 3, 'Liberadas': 2, 'Em execução': 2, 'Em conferência': 1, 'Encerradas': 2, 'Canceladas': 0}, 'OS-0430 liberada. REQ-041 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L. v1 
+OK  E3 390 px · toque: conciliar; toque longo no botão indisponível mostra a dica sem acionar o comando
+OK  E4 390 px · tocar fora fecha a dica
+OK  E5 390 px · sem erro de execução e a dica cabe na tela
+RESULTADO: FALHOU 4/5
+rc=1

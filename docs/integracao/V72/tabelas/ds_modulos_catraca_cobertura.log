@@ -1,0 +1,13 @@
+# executado em df941bf+mudança local de ds_modulos.py; render de f46e2d6 (148 páginas)
+$ RENDER_DIR=<pasta vazia> python3 -B ds_modulos.py --catraca
+RESULTADO: FALHOU render sem páginas
+exit=1
+$ RENDER_DIR=<render sem CA-01.dc.html> python3 -B ds_modulos.py --catraca
+RESULTADO: FALHOU faltam 1 página(s) da base: CA-01.dc.html
+exit=1
+# render completo da candidata (f46e2d6, 148 páginas), código com a cobertura; DS_MOD_JSON em pasta temporária para não tocar os brutos
+$ python3 -B ds_modulos.py --catraca
+TOTAL: 175 desvios em 80 de 148 telas · JSON: /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/dsm_full.json
+RESULTADO: catraca ok
+exit=0
+# JSON medido idêntico (cmp) ao bruto versionado docs/integracao/V72/ds-modulos.json

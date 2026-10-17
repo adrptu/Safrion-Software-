@@ -3,8 +3,8 @@
 Pedidos do proprietário em 16/10, transformados em padrão pelo método da skill `padrao-safrion` (`.claude/skills/padrao-safrion/SKILL.md`).
 
 - **Valem para todas as telas do mesmo tipo**, no protótipo e no software real.
-- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`.
-- **Contraprova:** a versão publicada antes (a156f83) reprova.
+- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; paridade dos módulos em `ds_modulos.py`.
+- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b.
 
 ## MET-01 · Método: pedido vira padrão
 
@@ -81,6 +81,89 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 **Dano evitado:**
 - duas formas de recortar a mesma coisa (filtro e trilha), uma escondendo linhas sem aparecer nos filtros;
 - texto a mais na barra.
+
+## TAB-09 · Seta de abrir sempre na 1ª coluna
+
+> "colone os icones de drill down sempre na esquerda, fica mais intuitivo em todas telas" (print: Planos agronômicos › Atividades do plano, a coluna DAP vinha antes da seta)
+
+**Referência:** Atividades do plano, modo Tabela: a seta ▸/▾ abre a 1ª coluna, antes do DAP.
+
+**Regra:**
+- A seta de abrir (TAB-04: ▸/▾ abre ali; › abre o detalhe) é a primeira coisa da linha, à esquerda de qualquer outra coluna: número, caixa de seleção, ícone ou texto.
+- Árvore e grupos: o recuo do nível continua; a seta do subnível fica no recuo, sempre antes do nome.
+- Com seleção, a seta vem antes da caixa. A linha sem seta guarda o lugar (22 px), para as caixas ficarem alinhadas. Nos cartões, a coluna da seta vem antes da seleção.
+- Seta de seção ou de item que abre ali (lotes da Qualidade, raia do Kanban da O.S., "Capacidade por mês") vem antes do nome.
+- Lista suspensa ("Agrupar por ▾", escolha de alvos) não é seta de abrir: o ▾ continua no fim.
+
+**Peça única:**
+- motor: célula `c.carT` no `engine.grid`; o `g2lib` põe a seta na 1ª célula da linha;
+- cartões: `_cartoes_html` e `_cdgtc` (seta, seleção, título);
+- Atividades do plano: a seta na célula do gatilho (`pa-tb-gat`).
+
+**Inventário na base (519ed7b):**
+- a varredura achou 7 telas ou estados fora: Ordens de campo (CA-01), Ocorrências (CA-03) e Aprovações (IN-02), com a caixa antes da seta; Qualidade (CO-06), com a seta no fim do lote; Atividades do plano em Tabela (2 estados), com o DAP antes; Planejar safra › operações, com "Capacidade por mês ▾";
+- pelo código, mais 1: a raia do Kanban da O.S. com Agrupar por, com a seta no fim.
+
+**Dano evitado:** a pessoa procura a seta num lugar diferente em cada tela, e a linha que abre fica sem o sinal no lugar de sempre.
+
+**Teste:** `tab_drill_cab_test.py` parte A (148 telas e 4 estados por endereço, a 1440 e 390 px, no estado inicial, com "Expandir tudo" e no outro modo de Tabela | Cartões). O render da 519ed7b reprova.
+
+**Oráculo mudado:** o B2 do `ds_1610_test.py` procurava a seta na célula do nome (`.g2c0`); agora procura na 1ª célula da linha, que é onde a TAB-09 a põe quando há seleção.
+
+## TAB-10 · Cabeçalho de tabela com 40 px em todas as telas
+
+> "padronize a altura das colunas cabeçalho das tabelas, em diferentes telas temos diferentes alturas."
+
+**Regra:**
+- Toda linha de cabeçalho de tabela tem 40 px: motor, tabelas próprias (Atividades do plano, Agrofit) e a ficha impressa da O.S.
+- 40 px é a altura de duas linhas de rótulo no cabeçalho do motor, a mais comum na base (39,2 px em 86 telas a 1440 px).
+- O rótulo ocupa até 2 linhas.
+- Rótulo cuja melhor quebra em 2 linhas não cabe em 104 px ganha a largura dessa quebra, medida no texto como desenhado, até 200 px.
+- Se ainda assim não couber (coluna estreita no celular), termina em reticências. O nome inteiro continua no nome acessível ("Ordenar por …").
+
+**Peça única** (`engine.TABELA_CSS`):
+- `.g2th` na célula: `cab_colunas_html`, seleção e ação;
+- `.g2thr` na linha das tabelas próprias: Agrofit, ficha da O.S. e tabela de adubação;
+- `.g2hl` no rótulo;
+- `--g2hbw` vem do `g2cabVals`.
+
+**Inventário na base (519ed7b):**
+- 1440 px: 7 alturas diferentes (de 22 a 64,4 px), com 70 telas fora de 40 px;
+- 390 px: 9 alturas diferentes, com 68 telas fora.
+
+Causas:
+- rótulo quebrando em 3 ou 4 linhas (largura máxima de 104 px);
+- motor com mínimo de 36 px, sem altura fixa;
+- tabelas próprias sem mínimo: Atividades com 26,6 px, Agrofit com 22 px, ficha com 26,5 px;
+- Cadastros com fonte de 12 px e linha de 13,5 px (CADX_CSS da frente Cadastros).
+
+No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto com as colunas. Antes ele quebrava em 2 linhas (53 px).
+
+**Dano evitado:** a tabela muda de cara de uma tela para outra, e o rótulo em 3 ou 4 linhas empurra os dados para baixo.
+
+**Teste:** `tab_drill_cab_test.py` parte B, que também conta os rótulos que terminam em reticências: nenhum a 1440 px e 30 a 390 px, em coluna estreita. O render da 519ed7b reprova.
+
+## PAR-01 · Paridade dos módulos com o Agrícola
+
+> "os demais módulos estão com design system diferente do nosso padrão de excelencia do módulo agrícola. Faça seu melhor e mantenha sempre o padrão para mim não ter que ficar cobrando toda vez."
+
+**Regra:**
+- Toda tela de todo módulo segue as regras que a tela de referência do Agrícola cumpre: cabeçalho, FIL-01, TAB-01 a TAB-10, VIS-05, VIS-06 e BOT-01.
+- O módulo não ganha estilo próprio.
+
+**Aplicado em 16/10 na peça comum:**
+- **VIS-05 em toda lista do motor:** a lista com ordenar e filtrar ganha Tabela | Cartões. Antes eram só as do quadro `MODO_LISTAS` e as com colunas essenciais ou Agrupar por (82 de 247 grades); agora são 240 de 250. A matriz sem ordenar (capacidade por mês) fica só em Tabela.
+- **VIS-06 nos cartões:**
+  - o texto de apoio apagado da célula fica só na Tabela (a regra existia, mas não pegava, porque o desenho grava a cor em rgb);
+  - as partes do valor ganham espaço entre si.
+
+**Inventário e o que falta:** `docs/integracao/V72/DS-MODULOS.md`, com tela, regra, evidência e a mudança exata, inclusive nos arquivos da frente Cadastros.
+
+**Teste e catraca:** `ds_modulos.py` mede 9 regras em 148 telas; `--catraca` reprova se a contagem de alguma regra subir em algum módulo (base em `ds_modulos_base.json`).
+
+**Dano evitado:**
+- módulo com cara diferente do Agrícola;
+- desvio corrigido que volta na tela seguinte sem ninguém ver.
 
 ## Cadastros (frente CADASTROS-PADRAO)
 

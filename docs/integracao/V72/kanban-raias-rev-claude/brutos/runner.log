@@ -1,0 +1,43 @@
+2026-10-17T01:48:45Z INICIO visoes2_formas_candidata navegadores=1
+2026-10-17T01:49:02Z FIM visoes2_formas_candidata exit=1 
+2026-10-17T01:49:02Z INICIO visoes2_formas_novo_sobre_base navegadores=1
+2026-10-17T01:49:18Z FIM visoes2_formas_novo_sobre_base exit=1 
+2026-10-17T01:49:18Z INICIO tabelas_os_candidata navegadores=1
+2026-10-17T01:50:28Z FIM tabelas_os_candidata exit=0 RESULTADO: 40/40 ok
+2026-10-17T01:50:28Z INICIO os_cenario_candidata navegadores=1
+2026-10-17T01:51:26Z FIM os_cenario_candidata exit=0 RESULTADO: 22/22 ok
+2026-10-17T02:07:32Z INICIO visoes2_formas_rev_candidata navegadores=1
+2026-10-17T02:08:08Z FIM visoes2_formas_rev_candidata exit=0 RESULTADO: 23/23
+2026-10-17T02:08:08Z INICIO sonda_raia_candidata navegadores=1
+2026-10-17T02:08:16Z FIM sonda_raia_candidata exit=1 
+2026-10-17T02:08:16Z INICIO visoes2_formas_rev_sobre_base navegadores=1
+2026-10-17T02:08:52Z FIM visoes2_formas_rev_sobre_base exit=1 RESULTADO: 17/23 · FALHAS: F2 Enter recolhe só T2, preserva endereço e mantém foco no cabeçalho; F3 recolher T2 não recorta Calendário nem cria trilha; F4 recolher T2 não recorta Carga nem cria chip de trilha; F4a volta do Kanban preserva T2 recolhida; F4b Espaço expande T2 e recupera exatamente seus cartões; F11d celular: toque recolhe primeira raia com estado acessível e sem trilha
+2026-10-17T02:08:52Z INICIO sonda_raia_base navegadores=1
+2026-10-17T02:09:01Z FIM sonda_raia_base exit=1 
+2026-10-17T02:10:32Z INICIO os_lote_candidata navegadores=1
+2026-10-17T02:10:51Z FIM os_lote_candidata exit=0 RESULTADO 32/32
+2026-10-17T02:11:34Z INICIO seta_padrao_OS_tab11_adaptada navegadores=1
+2026-10-17T02:12:44Z FIM seta_padrao_OS_tab11_adaptada exit=1 RESULTADO: 6 ok · 8 falhas · B1440 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 0); C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (35 setas; desenhos distintos: 1); D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0); B390 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 0); C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (35 setas; desenhos distintos: 1); D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0)
+2026-10-17T02:13:54Z INICIO sonda_raia_tab11_adaptada navegadores=1
+2026-10-17T02:14:27Z FIM sonda_raia_tab11_adaptada exit=0 RESULTADO: 12/12
+2026-10-17T02:14:27Z INICIO visoes2_formas_rev_tab11_adaptada navegadores=1
+2026-10-17T02:15:04Z FIM visoes2_formas_rev_tab11_adaptada exit=0 RESULTADO: 23/23
+2026-10-17T02:15:04Z INICIO ds_modulos_catraca_candidata navegadores=1
+2026-10-17T02:18:52Z FIM ds_modulos_catraca_candidata exit=0 RESULTADO: catraca ok
+2026-10-17T02:18:52Z INICIO tabelas_os_base navegadores=1
+2026-10-17T02:20:03Z FIM tabelas_os_base exit=0 RESULTADO: 40/40 ok
+2026-10-17T02:20:04Z INICIO os_cenario_base navegadores=1
+2026-10-17T02:21:02Z FIM os_cenario_base exit=0 RESULTADO: 22/22 ok
+2026-10-17T02:21:02Z INICIO os_lote_base navegadores=1
+2026-10-17T02:21:16Z FIM os_lote_base exit=0 RESULTADO 32/32
+2026-10-17T02:21:16Z INICIO visoes2_formas_antigo_base navegadores=1
+2026-10-17T02:21:27Z FIM visoes2_formas_antigo_base exit=1 
+2026-10-17T02:21:27Z LOTE FIM R1 P1 R2 P2 C4 T1 T2 T3 C5 B2 B3 B4 B1o
+2026-10-17T02:24:14Z INICIO sonda_raia_candidata navegadores=1
+2026-10-17T02:24:32Z FIM sonda_raia_candidata exit=0 RESULTADO: 12/12
+2026-10-17T02:33:04Z INICIO sonda_raia_base navegadores=1
+2026-10-17T02:33:23Z FIM sonda_raia_base exit=1 RESULTADO: 4/12
+2026-10-17T02:33:23Z LOTE FIM P1 P2
+2026-10-17T02:33:28Z INICIO seta_padrao_OS_tab11_sem_adaptacao navegadores=1
+2026-10-17T02:34:06Z FIM seta_padrao_OS_tab11_sem_adaptacao exit=1 RESULTADO: 4 ok · 10 falhas · A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1); B1440 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1); C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1); D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0); A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1); B390 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1); C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1); D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0)
+2026-10-17T02:34:06Z LOTE FIM T4

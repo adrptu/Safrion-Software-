@@ -22,3 +22,4 @@ for(const flag of ['ro','nosel','fora','livre']){
 v=render({rmenu:false});assert.equal(v.test_ncols,1);assert.equal(v.test_rows[0].cells.length,1);
 assert.equal(v.test_rows[0].cells[0].parts.some(p=>p.isAct),true);
 console.log('EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK');
+

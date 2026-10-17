@@ -7,7 +7,7 @@
                          trocar o perfil fecha o laudo e o aceite abertos; a entrega grava o perfil de quem entrega
 Sem argumento roda as três em sequência (use as partes quando o limite de tempo por comando for curto)."""
 import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)))
 from est_lib import Est
 
 
@@ -94,11 +94,11 @@ def parte2(E):
     E.ok('Sem custódia' in E.rowtxt('REQ-036'), 'REQ-036 (bloqueada, já entregue) continua visível em devoluções')
     print('primário:', E.clk('Receber devolução da REQ-031'))
     E.setv('fx_g_dev_qtd', '600'); E.salvar(); e = E.err(); E.ok('Acima da custódia' in e, 'devolução acima da custódia: erro')
-    E.setv('fx_g_dev_qtd', '500'); E.salvar(); print('toast:', E.toast())
+    E.setv('fx_g_dev_qtd', '500'); E.setv('fx_g_dev_cond', 'Apta · volta ao disponível'); E.salvar(); print('toast:', E.toast())   # EST-ONDA0 (E1): sem condição padrão
     t = E.rowtxt('REQ-031'); print('depois:', t); E.ok('Pode encerrar' in t and '1.500 kg' in t, 'custódia 500 → 0, devolvido 1.500 kg, encerramento liberado')
     t = E.rowtxt('REQ-040'); E.ok('8.000 kg' in t, 'REQ-040 aparece com 8.000 kg em custódia')
     # compras-estoque-03 · devolver 30 L da REQ-035 reabre saldo para reentrega (175 − 95 − 35 = 45 L)
-    E.row('REQ-035'); E.setv('fx_g_dev_qtd', '30'); E.salvar(); print('toast:', E.toast())
+    E.row('REQ-035'); E.setv('fx_g_dev_qtd', '30'); E.setv('fx_g_dev_cond', 'Apta · volta ao disponível'); E.salvar(); print('toast:', E.toast())   # EST-ONDA0 (E1)
     E.shot('est_e3.png')
     E.clk('Entregue por O.S.'); t = E.rowtxt('REQ-035'); print('REQ-035 depois:', t); E.ok('45 L' in t, 'após devolução de 30 L: 45 L a entregar')
     E.row('REQ-035'); h = E.aside(); E.ok('A entregar: 45 L = 175 L solicitado − 95 L consumido − 35 L em custódia' in h, 'ajuda da quantidade mostra a conta', h[:300])
@@ -199,3 +199,4 @@ if __name__ == '__main__':
             if not E.fim(): falhas += [f'parte {k}: {f}' for f in E.FAIL]
     print('RESULTADO:', 'OK' if not falhas else ('FALHAS: ' + '; '.join(falhas)))
     sys.exit(0 if not falhas else 1)
+

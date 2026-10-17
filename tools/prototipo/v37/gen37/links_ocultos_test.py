@@ -117,8 +117,9 @@ RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste;
  ('PAGR.dc.html','MB-06.dc.html'):'o painel agrícola carrega mip.js inteiro para ler a situação (mipSit); o elo do app de campo está só em '
       'mipProx, que o painel não desenha: "Conferir vistoria" leva ao AG-01 (PAINEL-02 MIP, 14/10/2026)',
  **{x:'Crédito entrou no menu (proprietário, 14/10/2026: "crie o menu de crédito"): a GE-08 abre a origem de cada compromisso (conta a pagar GE-04, '
-      'proposta do portal PT-04, venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6)'
-    for x in p('GE-08','GE-04','PT-04','VE-05')},
+      'venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6). CRE-BANCO F1 (PR #90): '
+      'o dossiê do contrato abre a visão interna GE-08#vis=dossie e a primária que levava ao portal PT-04 saiu'
+    for x in p('GE-08','GE-04','VE-05')},
  **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-02','AG-03det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
  **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}
 fora=sorted(pares-set(RESIDUAL))

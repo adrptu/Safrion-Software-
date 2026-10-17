@@ -1,0 +1,46 @@
+FAIL R1 término antes do previsto exige confirmação e não fabrica crédito :: Expected values to be strictly equal:
+
+1202 !== 372
+
+OK R1 antecipado exige área e leitura; ausência não vale zero
+OK R1 parcial explícita credita só a faixa e mantém déficit global
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+FAIL R1 pausa, retomada e avanço não ficam depois do término :: Expected values to be strictly equal:
+
+1300 !== 372
+
+OK R1 relógio já adiantado não regride com pausa/retomada
+FAIL F2 cenário salvo usa último evento sem deslocar o relógio global :: O relógio simulado está antes do último evento registrado. Avance a simulação até esse horário antes de encerrar.
+FAIL F2 início de outra ordem respeita sua janela 15:02 após OS0419 20:02 :: A passada 1 começa antes de agora (hoje 20:02).
+FAIL F1 volta completa a 0h exige motivo, sem mutar ou creditar :: Missing expected exception.
+FAIL F1 área incompatível com tempo aguarda conferência sem crédito :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Encerradas'
+- 'Em conferência'
+
+FAIL F1 parcela maior que o giro disponível exige conferência :: Missing expected exception.
+OK R2 P2 programa piso 6,7 mm e 9 h
+OK R2 PV19 respeita lâmina e duração mínimas
+OK R2 ficha incompatível rejeita sem criar ordem
+OK R2 cenário salvo não muda ao carregar/recalcular
+OK R3 Rui não aceita nem devolve; medição intacta
+OK R3 Ana sem motivo não aceita desvio maior que 3%
+OK R3 aceite com motivo e recibo; replay não duplica
+OK R3 irrigante devolve mantendo medição e crédito provisório
+OK R3 rateio pequeno conserva total sem negativo
+OK R3 tolerância exata sem motivo; ausência de perfil bloqueia
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+OK UI motivo obrigatório, preserva leitura e permite devolver
+FAIL F1 passada pendente conserva estado e crédito até conferência do conjunto :: The input did not match the regular expression /crédito pendente/. Input:
+
+'Passada 1 encerrada · OS-0419 segue Em execução · próxima passada 25/09 05:22.'
+
+FAIL F3 UI e comando usam 1253.96: 1291.6 exige motivo :: Expected values to be strictly equal:
+
+false !== true
+
+FAIL F1 UI pede motivo e conserva rascunho antes de conferência :: Cannot read properties of null (reading 'err')
+{"ok":18,"fail":10,"navegador":false}

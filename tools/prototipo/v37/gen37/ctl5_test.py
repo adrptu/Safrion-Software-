@@ -147,7 +147,7 @@ try:
     for _ in range(80):   # retorno da chegada (revisão S4-2): mensagem e destaque da linha incluída logo que o ajuste abre
         chegada = J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ajustar antes de liberar\"]'); if(!g) return null; const i=document.getElementById('aj_n0'); const d=i&&i.closest('.g2flash');"
                     "return {toast:[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | '),flash:!!d};})()")
-        if chegada: break
+        if chegada and 'Vindo da Consulta Agrofit' in chegada.get('toast', ''): break   # espera a mensagem desenhada, não só o grupo (sob carga o 1º quadro ainda traz {{os_tmsg}})
         time.sleep(.1)
     time.sleep(2.0); flash2 = J("!!(document.getElementById('aj_n0')||{closest:()=>null}).closest('.g2flash')")
     chk('E2.4b chegada à O.S. com retorno visual: "Vindo da Consulta Agrofit: Tebuconazol 200 EC incluído na OS-0501 para antracnose em mamão. Informe a dose e salve." e a linha incluída destacada (.g2flash), que some em ~1,5 s',

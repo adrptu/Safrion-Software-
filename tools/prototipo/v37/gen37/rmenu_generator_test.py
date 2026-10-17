@@ -41,8 +41,11 @@ class MenuColumn(unittest.TestCase):
                         expected = 1 + int(selection) + int(menu or delete)
                         self.assertEqual(len(p.rows[0]), expected)
                         self.assertEqual(len(p.rows[-1]), expected)
-                        self.assertIn('repeat('+str(2+int(selection)+int(menu or delete))+', auto)', s)
+                        self.assertIn('repeat('+('{{ex47_ncols}}' if menu else str(2+int(selection)+int(delete)))+', auto)', s)
+                        if menu:
+                            self.assertEqual(s.count('<sc-if value="{{ex47_acoes}}"'), 2)
                         self.assertEqual(engine.GRIDS[-1]['del'], delete)
 
 if __name__ == '__main__':
     unittest.main()
+
