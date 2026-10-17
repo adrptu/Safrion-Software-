@@ -1090,3 +1090,21 @@ function cenGrupoProgramar(c,id,versao,previa,ator,chave){
     return {grupo:id,versao:g.versao,msg:id+' programado · aprovação e liberação permanecem por origem.',itens:g.ids.map(os=>({os,estado:'Programada'}))};
   },{resultado:true});
 }
+
+
+// SU-08: perda usa o ajuste canônico; aprovação permanece em cenAprovarAjuste.
+function cenPerdaNova(c, key, qtd, motivo, ator) {
+  const l = c.lotes[key];
+  if (!l) throw new Error('Lote não encontrado.');
+  if (typeof qtd !== 'number' || !Number.isFinite(qtd) || qtd <= 0 || qtd > l.fisico)
+    throw new Error('Informe uma perda positiva até o físico do lote.');
+  const mot = String(motivo || '').trim();
+  if (!mot) throw new Error('Informe o motivo da perda.');
+  const por = cenQuem(ator, 'almoxarife', 'Registrar perda');
+  const contado = l.fisico - qtd;
+  const dc = cenAjusteDecisao(c, l, contado);
+  if (dc.erro) throw new Error(dc.erro);
+  const aj = cenAjusteNovo(c, key, l.fisico, contado, (c.movs || []).length, cenDia() + ' às ' + cenAgora());
+  aj.tipo = 'perda'; aj.motivo = mot; aj.reg = por;
+  return {id: aj.id, alerta: dc.alerta, msg: aj.id + ' aguarda aprovação do gestor. O saldo não foi alterado.'};
+}
