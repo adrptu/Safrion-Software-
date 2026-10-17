@@ -1,0 +1,10 @@
+# HEAD
+[portão: 1]
+cultura injetada: Soja
+⋯ em T1: True · texto da linha T1: T1 Soja Plano de Milho incompatível 312 ha 12/10/2025 ⋯ Reaplicar
+exit=0
+# base
+[portão: 1]
+cultura injetada: Soja
+⋯ em T1: False · texto da linha T1: T1 Soja Plano de Milho incompatível 312 ha 12/10/2025
+exit=0
