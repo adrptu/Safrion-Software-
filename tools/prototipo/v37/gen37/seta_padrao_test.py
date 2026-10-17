@@ -2,7 +2,8 @@
 """TAB-11 · Seta única de abrir e de ir (proprietário, 16/10/2026, com a captura do CD-01: "mude o estilo do drill down daquele preto para a
 setinha mais intuitiva e amigável dos debaixo, melhore ela e implemente como nosso padrão em tudo"; docs/design-system/padroes-1610.md).
 Varre todas as páginas do _render (fora Main e os redirecionamentos) e os estados que só abrem por endereço ou por um clique (painéis da
-Manutenção e da O.S., Atividades do plano, Capacidade por mês, ajuste local do Planejar safra, laudo de solo), a 1440 × 900 e a 390 × 844
+Manutenção e da O.S., Atividades do plano, Capacidade por mês, ajuste local do Planejar safra, laudo de solo, Registrar laudo, Kanban agrupado,
+barra do lote do CA-01 com uma linha escolhida), a 1440 × 900 e a 390 × 844
 (toque), no estado inicial, com "Expandir tudo" e no outro modo de Tabela | Cartões:
   A  nenhum triângulo de abrir (▸ ▾ ▹ ▿ ▶ ►; ▼ em controle de abrir) como texto em botão, link, summary ou [aria-expanded], nem no começo
      de linha; lista suspensa (aria-haspopup), ordenação do cabeçalho e menus ficam fora (o ▾ da lista suspensa continua no fim, TAB-09);
@@ -30,7 +31,7 @@ PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html'
 # estados que só abrem por endereço (painel aberto, plano aberto, visão) ou por um clique (ajuste local do Planejar safra)
 EXTRAS = ['PA.dc.html#plano=SOJA-AT', 'PA.dc.html?view=tabela#plano=SOJA-AT', 'SAF.dc.html#saf=S2627&passo=operacoes',
           'MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'OS.dc.html#OS-0420', 'OS.dc.html?view=kanban&ag=onde', 'AG-02.dc.html#LAU-2073',
-          'SAF.dc.html#saf=S2627&passo=cultivos|ajuste']
+          'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'CA-01.dc.html|sel1']
 SO = [x for x in (os.environ.get('SPT_SO') or '').split(',') if x]   # diagnóstico: só as telas cujo endereço contém um destes trechos (não vale como rodada)
 if SO: PAGS, EXTRAS = [p for p in PAGS if any(x in p for x in SO)], [p for p in EXTRAS if any(x in p for x in SO)]
 COR, TAM, TRACO = 'rgb(101, 115, 106)', 16, '1.75'
@@ -90,6 +91,9 @@ AJUSTE = r"""(async ()=>{ const vis=e=>!!e&&e.getClientRects().length>0, N=s=>(s
    (row.querySelector('.g2pw')||row).click(); await espera(500);
    const b=[...document.querySelectorAll('aside[role=dialog] button')].filter(vis).find(x=>/^(Ajustar|Ver) insumos e doses de /.test(N(x.innerText))); if(b){ b.click(); await espera(600); return 'ok'; } }
  return 'sem ação de insumos em T7, T3, T2, T4, T5, T6'; })()"""
+# seleção de uma linha (a barra do lote mostra o que só aparece com seleção, ex.: "Conferir caminho de liberação" do CA-01)
+SEL1 = r"""(async ()=>{ const vis=e=>!!e&&e.getClientRects().length>0; const b=[...document.querySelectorAll('[role=row] input[type=checkbox]')].find(vis);
+ if(!b) return 'sem caixa de seleção'; b.click(); await new Promise(r=>setTimeout(r,500)); return 'ok'; })()"""
 # E · teclado: Enter e Espaço na 1ª seta visível alternam o aria-expanded, sem abrir painel; o foco fica visível
 # o foco chega pelo teclado, como a pessoa: foco na seta, Tab e Shift+Tab de volta (o :focus-visible é o do teclado)
 TECLA_ACHA = r"""(()=>{ const vis=e=>{ const r=e.getBoundingClientRect(); return r.width>1&&r.height>1&&r.top>=0&&r.bottom<=innerHeight; };
@@ -106,9 +110,9 @@ def varre(c, J, BASE, w):
     for pg in PAGS + EXTRAS:
         url, acao = (pg.split('|') + [''])[:2]
         c.call('Page.navigate', {'url': 'about:blank'}); time.sleep(.1); c.goto(BASE + url, 1.0)
-        if acao == 'ajuste':
-            r = J(AJUSTE)
-            if r != 'ok': res['err'].append((w, pg, 'ajuste: ' + str(r)))
+        if acao in ('ajuste', 'sel1'):
+            r = J(AJUSTE if acao == 'ajuste' else SEL1)
+            if r != 'ok': res['err'].append((w, pg, acao + ': ' + str(r)))
         for est in ('inicial', 'expandir', 'modo'):
             if est != 'inicial':
                 if acao or not J(f"{ESTADOS}('{est}')"): continue

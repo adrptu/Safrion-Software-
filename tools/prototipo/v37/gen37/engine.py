@@ -1531,7 +1531,7 @@ SETA_CSS=(
     "@media (pointer:coarse){[data-g2g] :is([role=cell].g2c0,[role=cell].g2csel,[role=columnheader].g2th) :is(.g2car,.g2seta.g2drill,.g2seta-vazio){margin-left:-8px;margin-right:-6px}}"
     ".g2seta-nome{display:inline-flex;align-items:center;gap:6px}"   # botão com o nome à vista e a seta antes dele
     "@media (pointer:coarse){[aria-expanded]:has(>.g2seta),summary:has(>.g2seta){min-height:44px;box-sizing:border-box}}"   # seção, lote, "Capacidade por mês": 44 px no toque
-    "summary:has(>.g2seta){list-style:none}summary:has(>.g2seta)::-webkit-details-marker{display:none}summary:has(>.g2seta)::marker{content:''}"
+    "summary:has(>.g2seta){list-style:none;display:inline-flex;align-items:center;gap:6px}summary:has(>.g2seta)::-webkit-details-marker{display:none}summary:has(>.g2seta)::marker{content:''}"
     # VIS-02: hover verde no botão e na seta da linha que abre o detalhe (só onde há ponteiro com hover)
     "@media (hover:hover){.g2car:hover{background:#E4F3E9}.g2car:hover>.g2seta,:is(button,a,summary):hover>.g2seta,.g2ed:hover .g2seta.g2drill{color:#1E7A4C}}"
 )
