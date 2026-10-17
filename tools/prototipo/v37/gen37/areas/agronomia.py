@@ -753,8 +753,7 @@ function agPv(self,v){ const pv=self.state.pv; v.pv_open=!!pv; const fecha=()=>{
     if(r.erro){ const m=/^(VIS-\d+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
     agSetHash(r.id); self.setState(Object.assign({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)},agInclui(self,{tal:cur.tal}))); agFoco(); }; }
 function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); agIni(self); v.mf_faz=agFaz(self); agFazSalvar(self); agTopo(self,v);
-  const sp=GRIDS.find(g=>g.id==='g_vis'); sp.rows=agRows(self,v);
-  const x0={}; sp.rows.forEach(r=>{ if(r.kids) x0[r.id]=true; }); sp.x0=x0; }
+  const sp=GRIDS.find(g=>g.id==='g_vis'); sp.rows=agRows(self,v); }   // TAB-12 (17/10/2026): os grupos nascem recolhidos (sem abertura padrão)
 function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=agFaz(self);
   self.g2pick=(gid,rid)=>{ if(gid==='g_vis'&&/^VIS-/.test(rid)) agOpen(self,rid); };
   v.ag_go=(arg)=>{ const a=String(arg).split('|'); agOpen(self,a[0],a[1]); };
@@ -1582,13 +1581,13 @@ function PREVALS(self,v){
   // por uso: a coluna "Na fazenda" da linha segue a do produto (ao vivo, pelo cenário)
   const base=mu?VU.rows:V.ids.map(i=>agLeaf(P[i]));
   if(mu) base.forEach(r=>{ if(Fz[r.pi]!==undefined){ const L=agLeaf(P[r.pi]); r.v.faz=L.v.faz; r.s.faz=L.s.faz; r.p.faz=L.p.faz; } });
-  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=base; }
+  if(!gb){ sp.tree=false; sp.rows=base; }
   else { const gk=AGX.vk+'#'+gb+'#'+(mu?'u':'p')+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
       base.forEach(r=>{ const i=mu?r.pi:AGX.reg[r.id]; agGKeys(P[i],gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(r); }); });
       const ks2=Object.keys(G).sort(agGOrd(gb));
       AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(mu?(n>1?' usos':' uso'):(n>1?' produtos':' produto'))}]},
           kids:its.map(r=>Object.assign({},r,{id:r.id+'~'+j}))}; }); AGX.gk=gk; }
-    sp.tree=true; sp.x0={}; sp.rows=AGX.grows; }
+    sp.tree=true; sp.rows=AGX.grows; }
 }
 // render incremental: a grade ordena e filtra o conjunto inteiro; só as primeiras linhas viram DOM ("Mostrar mais" amplia)
 if(typeof g2flat==='function'){ const AG_FLAT0=g2flat; g2flat=function(sp,st,rows,mask,added){ const out=AG_FLAT0(sp,st,rows,mask,added);
@@ -1624,7 +1623,7 @@ function EXTRAVALS(self,v){
   const lim=sp.lim||AG_LIM, nf=sp.nflat||0; v.agf_temMais=ok&&nf>lim; v.agf_maisN=agNf(Math.min(AG_PASSO,nf-lim));
   v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':(mu?' usos':' produtos')); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
   // abrir ficha e abrir/fechar grupo só nas linhas desenhadas
-  (v[G+'_rows']||[]).forEach(rw=>{ const s=String(rw.id); if(s.indexOf('G~')===0){ const j=s.slice(2); v['agf_gx_'+j]=()=>{ const x=Object.assign({},g2st(self,G).x||sp.x0||{}); x[s]=!x[s]; g2set(self,G,{x:x}); }; }
+  (v[G+'_rows']||[]).forEach(rw=>{ const s=String(rw.id); if(s.indexOf('G~')===0){ const j=s.slice(2); v['agf_gx_'+j]=()=>{ const x=Object.assign({},g2st(self,G).x||{}); x[s]=!x[s]; g2set(self,G,{x:x}); }; }
     else { const id0=s.split('~')[0], q=id0.split('@'); v['agf_op_'+id0]=q.length===3?(()=>agOpen(self,q[0],{a:q[2],rid:s})):(()=>agOpen(self,q[0])); } });
   // menu ▾ da coluna: no máximo 300 valores (a busca do menu acha os demais)
   const fm=v[G+'_fm']; if(fm&&fm.open&&fm.vals&&fm.vals.length>300) fm.vals=fm.vals.slice(0,300);

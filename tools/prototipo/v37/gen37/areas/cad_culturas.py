@@ -82,7 +82,7 @@ def cd02():
     # revisão TABR (A1, 09/10): a Situação logo depois da identificação, à vista sem rolar
     cv=grid([dict(k='nome',l='Cultura › cultivar',w=200),dict(k='est',l='Situação',w=230),dict(k='tipo',l='Tipo de ciclo'),dict(k='unid',l='Unidade de produtividade',w=170),
              dict(k='dias',l='Ciclo',t='num',a='r',un='dias'),dict(k='sem',l='Item de semente',w=220),dict(k='uso',l='Cultivos',t='num',a='r')],
-        tree,gid='g_cv',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
+        tree,gid='g_cv',tree=True,dele=False,total=False,qf=QF_CAD,
         edit=dict(m='form',title='Cultivar',newTitle='Cadastrar cultivar',sub='Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.',
             fields=[txt('nome','Cultivar ou híbrido'),
                     sel('cult','Cultura',[n for n,*_ in DC.CULTURAS]+[OUTRA_C],**{'def':'Soja'}),
@@ -180,7 +180,7 @@ function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2gr
   // coloca o registro salvo sob o pai certo (novo ou com pai trocado) e abre o pai
   const soPai=(gid,rows,r,pid)=>{ const par=rows.find(p=>p.id===pid); const cur=rows.find(p=>(p.kids||[]).some(k=>k.id===r.id));
     if(cur!==par){ c2rm(rows,r.id); par.kids=par.kids||[]; par.kids.push(r); }
-    const x=Object.assign({},g2st(self,gid).x||GR(gid).x0||{}); x[pid]=true; g2set(self,gid,{rows:rows,x:x,fl:r.id}); };
+    const x=Object.assign({},g2st(self,gid).x||{}); x[pid]=true; g2set(self,gid,{rows:rows,x:x,fl:r.id}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return;
     if(gid==='g_cv'){ const cul=g2clone(RW(self,'g_cult')); const msg=[]; let c;
       if(r.v.cult===OUTRA_C){ const nm=String(r.v.ncult).trim(); c={id:'CU'+(cul.length+1)+'_'+String(Date.now()).slice(-4),v:{nome:nm,tipo:r.v.tipo||'Anual',unid:r.v.unid||C2.unid[0],cod:c2cod(nm)},s:{},p:{}};
@@ -226,7 +226,7 @@ def cd08():
     # 09/10): a fonte do dado (a premissa a validar é a pendência, com o verbo) logo depois do conjunto; modo, largura, velocidade e eficiência,
     # que formam o rendimento, ficam no painel (o mesmo formulário do Planejar safra), e a grade cabe sem rolar a 1440 px
     rend=grid([dict(k='nome',l='Operação › conjunto',w=300),dict(k='fonte',l='Fonte',w=200),dict(k='proc',l='Processo',w=140),dict(k='cult',l='Cultura'),
-               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2)],rtree,gid='g_rend',tree=True,dele=False,total=False,x0={r['id']:True for r in rtree},qf=QF_CAD,
+               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2)],rtree,gid='g_rend',tree=True,dele=False,total=False,qf=QF_CAD,
         tools=secbtn('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo'),
         edit=dict(m='form',title='Rendimento',newTitle='Cadastrar rendimento',
             sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.',
@@ -299,7 +299,7 @@ function EXTRAVALS(self,v){ simv(self,v); const c8grava=()=>cadLsGrava(self,{cd0
   // coloca o registro salvo sob o pai certo (novo ou com pai trocado) e abre o pai
   const soPai=(gid,rows,r,pid)=>{ const par=rows.find(p=>p.id===pid); const cur=rows.find(p=>(p.kids||[]).some(k=>k.id===r.id));
     if(cur!==par){ c2rm(rows,r.id); par.kids=par.kids||[]; par.kids.push(r); }
-    const x=Object.assign({},g2st(self,gid).x||GR(gid).x0||{}); x[pid]=true; g2set(self,gid,{rows:rows,x:x,fl:r.id}); };
+    const x=Object.assign({},g2st(self,gid).x||{}); x[pid]=true; g2set(self,gid,{rows:rows,x:x,fl:r.id}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return;
     if(gid==='g_op'){ const n=ml(r.v.atvs).length; self.setState({g2toast:'Salvo: '+r.v.nome+' · processo '+r.v.proc+' · '+n+(n===1?' atividade usual':' atividades usuais')+' nos Planos agronômicos.'}); return; }
     if(gid==='g_rend'){ const ops=g2clone(RW(self,'g_op')); let o; let pre='';

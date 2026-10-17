@@ -275,7 +275,6 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
 # =====================================================================================
 def ir02():
     fname='IR-02.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    x0={'c-'+k:True for k in DI.CAPT}
     # árvore captação › ordem, uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, A4, 09/10): etapa, pendência e próximo
     # passo logo depois da ordem; depois setor, início e fim (ordenam como data), lâmina e avisos. Tipo, bomba, vazão do setor, passadas e
     # responsável ficam no detalhe da ordem (IR-03det). A linha da captação não põe o pico do dia numa coluna de vazão das ordens (seriam duas
@@ -283,7 +282,7 @@ def ir02():
     g_ag=grid([dict(k='item',l='Captação › ordem',w=150),dict(k='etapa',l='Etapa',w=110),dict(k='pend',l='Pendência',multi=True,w=190),dict(k='prox',l='Próximo passo',w=140),
                dict(k='setor',l='Setor',w=90),dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),
                dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),dict(k='avs',l='Avisos',multi=True,w=200)],[],
-              edit=dict(m='ro',title='Programação',leafOnly=True,fields=[]),gid='g_ag',total=False,tree=True,x0=x0,search=False)
+              edit=dict(m='ro',title='Programação',leafOnly=True,fields=[]),gid='g_ag',total=False,tree=True,search=False)
     pg_corpo=(campo('Setor','pg_sel',f'<select id="pg_sel" value="{H("pg_sid")}" onChange="{H("pg_setsid")}" style="{INP}"><sc-for list="{H("pg_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','pg_err')
               + kvfor('pg_kv',2) + checks('pg_ck')
               + f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><div role="status" style="padding: 10px 12px; border-radius: 10px; background: {ACCS}; color: {ACC}; font-size: 13px; font-weight: 700;">{H("pg_temT")}</div></sc-if>')

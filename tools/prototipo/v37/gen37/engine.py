@@ -1771,7 +1771,7 @@ AG_ICONES={'oque':_ip_ag('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0
             'onde':_ip_ag('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
             '0':_ip_ag('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
 AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra='',cartoes=None):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra='',cartoes=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1791,7 +1791,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     n=len(cols)+(1 if sel else 0)+(1 if acoes_linha else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,qf=qf)   # TAB-12 (17/10/2026): sem abertura padrão (x0); toda linha com filhos nasce recolhida (g2flat)
     if any(c.get('ess') for c in cols): spec['marcas']={c['k']:dict(ess=c.get('ess'),pq=c.get('pq')) for c in cols if c.get('ess') or c.get('pq')}   # V2-3: g2marca
     if menu_linha: spec['rmenu']=True   # 15/10/2026: ações da linha no ⋯ (com ícone), Excluir por último
     if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
@@ -2161,9 +2161,8 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
         ed={'m':m,'title':'','fields':fields,'leafOnly':True}
     elif edit is False: ed={'m':'none'}
     else: ed=edit
-    x0={g['id']:True for g in groups}
     so={'k':keys[sort],'d':bool(desc)} if (sort is not None and sort<len(keys) and sort>0) else {}
-    return grid(cols,data,edit=ed,sel=sel,dele=dele,tree=bool(groups),search=search,total=bool(total) and False,so=so,add=add,gid=gid,x0=x0)
+    return grid(cols,data,edit=ed,sel=sel,dele=dele,tree=bool(groups),search=search,total=bool(total) and False,so=so,add=add,gid=gid)
 # ---------- motor final: registro de widgets antigos + grades + navegação ----------
 ENGINE_JS2=ENGINE_JS.replace("this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {} };",
                              "this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' };")

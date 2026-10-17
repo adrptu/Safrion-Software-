@@ -345,7 +345,7 @@ function tickResp(self){ if(self._tk) return; self._tk=true;
   setTimeout(tick,700); }
 // grava a edição da linha no estado do processo e devolve a grade às linhas calculadas
 function keep(self,gid,rid,patch){ const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{rows:undefined,fm:null,fl:rid}); patch.g2=all; self.setState(patch); }
-function tog(self,gid,rid){ const sp=GR(gid); const x=Object.assign({},g2st(self,gid).x||sp.x0||{}); x[rid]=!x[rid]; g2set(self,gid,{x}); }
+function tog(self,gid,rid){ const x=Object.assign({},g2st(self,gid).x||{}); x[rid]=!x[rid]; g2set(self,gid,{x}); }
 // ---------- modelo do processo (SOL-2026-07) ----------
 /* quem aprova a compra (revisão CONF 13/10, achado de base): o perfil de quem age (Ver como, o mesmo do CF-01), lido na hora; nunca "Ana" fixa.
    Nível pela alçada da Compra (dados2.ALCADA, só leitura no CF-01, CONF-D23): direção → Direção; gestor → Gerente da fazenda; sem um desses papéis,
@@ -444,7 +444,7 @@ function PREVALS(self,v){ cmPre(self);
   } else if(saf==='S2526'){
     CD.ped2526.forEach(p=>{ ent.push({id:p.id,ro:true,v:{nome:p.id,qtd:p.qtd,rec:p.qtd,quar:0,ae:0,val:p.qtd*p.preco,prev:p.prev},s:{nome:p.id+' '+p.forn+' '+p.item,sit:'Entregue'},
       p:{nome:[B(p.id),T(p.forn),BR(),MU(p.item+' · '+CD.sol2526)],qtd:[T(qt(p.qtd,p.un))],rec:[T(qt(p.qtd,p.un))],quar:[MU('—')],ae:[MU('—')],sit:[CH('Entregue · conciliado','gray')],acao:[MU('—')]}}); }); }
-  GR('g_ent').rows=ent; GR('g_ent').x0={}; (apr?apr.pcs:[]).forEach(p=>{ GR('g_ent').x0[p.id]=true; });
+  GR('g_ent').rows=ent;   // TAB-12 (17/10/2026): toda grade de etapa nasce recolhida (sem abertura padrão)
   if(!SX){ ['g_dem','g_conv','g_cmp','g_apr'].forEach(g=>{ GR(g).rows=[]; }); return; }
   // ---- etapa 2 · demanda (mesmas linhas e números do Planejar safra) ----
   const byG={}; demAgora().forEach(d=>{ (byG[d.grupo]||(byG[d.grupo]=[])).push(d); });
@@ -457,7 +457,6 @@ function PREVALS(self,v){ cmPre(self);
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
              liq:[B(nf(d.liq,dc))],falta:fa?[(d.liq>0.001?B(brd(fa)):CH(brd(fa),'red'))]:[MU('—')],sit},
           o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
-  GR('g_dem').x0=Object.fromEntries(GR('g_dem').rows.map(r=>[r.id,true]));
   // ---- etapa 3 · convites ----
   GR('g_conv').rows=m.G.map((g,gi)=>{ const cs=Object.values(m.conv).filter(c=>c.gi===gi); const its=m.items.filter(x=>x.gi===gi);
     const inv=m.env?cs.filter(c=>c.enviado):cs.filter(c=>c.conv==='Convidar'); const nr=inv.filter(c=>m.got[c.rid]).length; const ref=its.reduce((a,x)=>a+x.nec*x.preco,0);
@@ -487,7 +486,6 @@ function PREVALS(self,v){ cmPre(self);
   const fm3=g2st(self,'g_conv').fm; const FC=GR('g_conv').edit.fields;
   if(fm3&&fm3.rid&&m.conv[fm3.rid]){ const c=m.conv[fm3.rid]; const cn=c.f.canais||['E-mail']; FC[1].opts=cn.slice();
     FC[1].help=cn.length>1?('Canais autorizados no cadastro de '+c.f.nome+'.'):('Só '+cn[0]+': é o único canal autorizado no cadastro de '+c.f.nome+' (Parceiros e fornecedores).'); }
-  GR('g_conv').x0=Object.fromEntries(m.G.map((g,gi)=>['CG'+gi,true]));
   // ---- etapa 4 · comparação ----
   const spc=GR('g_cmp'); const fm4=g2st(self,'g_cmp').fm;
   if(fm4&&fm4.rid){ const it=m.items.find(x=>x.rid===fm4.rid); if(it){ const FF=spc.edit.fields; FF[0].opts=it.props.map(p=>p.label);
@@ -522,7 +520,6 @@ function PREVALS(self,v){ cmPre(self);
           k.s.venc=k.p.venc.map(x=>x.t).join(' ');
           v[k.dr]=apr?(()=>toast(self,'Compra aprovada: propostas em consulta.')):(()=>openEsc(self,it.rid,p.f)); return k; });
         return r; })}; }):[];
-  spc.x0=Object.fromEntries(m.G.map((g,gi)=>['KG'+gi,true])); const big=m.items.slice().sort((a,b)=>b.nec*b.preco-a.nec*a.preco)[0]; if(big) spc.x0[big.rid]=true;
   // ---- etapa 5 · pedidos a gerar / emitidos ----
   const pcs=apr?apr.pcs:m.pcs;
   GR('g_apr').rows=(m.env&&m.nresp)?pcs.map(p=>({id:'A_'+p.id,v:{nome:p.id,prazo:p.prazo,pag:p.pag,tot:p.valor},s:{nome:p.id+' · '+p.nome},
@@ -533,7 +530,6 @@ function PREVALS(self,v){ cmPre(self);
         o:[{t:'Necessidade na '+SX.sol.id+': '+qt(it.nec,it.un)},{t:'Proposta '+it.ch.nome+' · '+rs(it.ch.preco)+'/'+it.un+' · '+it.ch.frete+' · válida até '+it.ch.validade},
            {t:it.naoMenor?('Escolha justificada: '+it.just):('Escolha: '+(it.esc?it.esc.txt:((it.low&&it.ch.f===it.low.f)?'menor custo total':'menor custo que chega a tempo')))},   /* pedido emitido antes da DEM-08 não guardou esc */
            {t:'Chega '+brd(it.ch.chega)+(it.falta?' · falta a partir de '+brd(it.falta):' · sem falta prevista')},{t:'Ver origem da demanda no Planejar safra',h:SX.origem.h}]}))})):[];
-  GR('g_apr').x0=Object.fromEntries(pcs.map(p=>['A_'+p.id,true]));
 }
 function openEsc(self,rid,f){ const m=M(self); const it=m.items.find(x=>x.rid===rid); if(!it) return;
   const p=f?it.props.find(x=>x.f===f):null; const base={venc:it.ch?it.ch.label:'',ped:String(it.ped).replace('.',','),just:it.just||''}; const draft=Object.assign({},base); if(p) draft.venc=p.label;

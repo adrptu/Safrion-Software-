@@ -566,14 +566,14 @@ function PREVALS(self,v){
   const fmD=g2st(self,'g_dev').fm; if(fmD&&fmD.rid){ const x=IT.find(y=>y.id===fmD.rid); if(x){ const fs=GR('g_dev').edit.fields; fs[0].u=x.un; fs[0].help='Em custódia: '+eq(x.it.custodia,x.un)+' com '+x.quem+'.'; if(x.ben){ const sobra=benSobraLinhas(C,x.o).find(y=>y.rid===x.rid); fs[0].help+=' '+esobTxt(C,x.o)+'. Sobra desta linha: '+eq(sobra?sobra.qtd:0,x.un)+'. Informe a quantidade e a condição conferidas fisicamente.'; } } }
   // ---- etapa 4: saldos por lote e local ----
   const loc=self.state.est_loc||''; const LS=elotes(C).filter(l=>!loc||l.local===loc); const itens=[]; LS.forEach(l=>{ if(itens.indexOf(l.prod)<0) itens.push(l.prod); });
-  const quarTxt=[], inspTxt=[], vencTxt=[]; const x0={}; const ask=self.state.libask;
+  const quarTxt=[], inspTxt=[], vencTxt=[]; const ask=self.state.libask;
   const eexp=(pr)=>{ const g={}; CFS.filter(k=>k.prod===pr).forEach(k=>{ const kk=(k.req||'')+'|'+k.os; g[kk]=g[kk]||{rel:0,cu:cenConfCust(C,k),ids:[]}; g[kk].rel+=k.relatado; g[kk].ids.push(k.id); });
     return Object.values(g).reduce((a,x)=>({q:a.q+Math.max(0,x.rel-x.cu),ids:a.ids.concat(x.ids)}),{q:0,ids:[]}); };
   GR('g_lot').rows=itens.map(pr=>{ const ls=LS.filter(l=>l.prod===pr); const un=ls[0].un; const S=f=>ls.reduce((a,l)=>a+f(l),0);
     const cr=IT.filter(x=>x.it.prod===pr&&x.it.custodia>1e-9); const ck=cr.reduce((a,x)=>a+x.it.custodia,0);
     const fis=S(l=>l.fisico), blq=S(l=>l.quarentena), res=S(l=>l.reservado), dp=S(cenDisp); if(blq>1e-9) quarTxt.push(pr+' '+eq(blq,un));
     const bv=S(l=>evenc(l)?l.quarentena:0); if(blq-bv>1e-9) inspTxt.push(pr+' '+eq(blq-bv,un)); if(bv>1e-9) vencTxt.push(pr+' '+eq(bv,un));
-    const id='I|'+pr; x0[id]=true; const locs=[...new Set(ls.map(l=>l.local))].join(', '); const ex=eexp(pr);
+    const id='I|'+pr; const locs=[...new Set(ls.map(l=>l.local))].join(', '); const ex=eexp(pr);
     const o=[{t:'Disponível: '+eq(dp,un)+'. Soma do saldo livre dos lotes não vencidos. Em cada lote: físico − reservado − bloqueado, com mínimo de zero.'}]
       .concat(cr.map(x=>({t:'Em custódia (fora do depósito, não soma no físico): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'OS.dc.html'})))
       .concat(ex.q>1e-9?[{t:'Em conferência (exposição, fora do saldo até a decisão): '+ex.ids.join(', ')+' · '+eq(ex.q,un)+' além da custódia'}]:[]);
@@ -582,8 +582,7 @@ function PREVALS(self,v){
       p:{nome:[{k:'b',t:pr},{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],prod:[{k:'mut',t:pr}],fis:[{k:'txt',t:eq(fis,un)}],res:res>1e-9?[{k:'txt',t:eq(res,un)}]:[{k:'mut',t:'—'}],
          blq:blq>1e-9?[{k:'chip',t:eq(blq,un),c:'yellow'}]:[{k:'mut',t:'—'}],disp:[{k:'b',t:eq(dp,un)}],expo:ex.q>1e-9?[{k:'txt',t:eq(ex.q,un)}]:[{k:'mut',t:'—'}],
          cust:ck>1e-9?[{k:'txt',t:eq(ck,un)}]:[{k:'mut',t:'—'}],cos:cos?[{k:'txt',t:cos}]:[{k:'mut',t:'—'}],vali:[{k:'mut',t:''}],sitl:[{k:'mut',t:''}]},o,
-      kids:ls.map(l=>elotRow(C,l,ask,INV,GEST))}; });
-  GR('g_lot').x0=x0;
+      kids:ls.map(l=>elotRow(C,l,ask,INV,GEST))}; });   // TAB-12 (17/10/2026): o item nasce recolhido (a linha dele soma os lotes)
   // ---- etapa 5: contagens ----
   let nacontar=0,naprov=0,nvelha=0;
   const cntOpts=elotes(C).map(elotLbl);

@@ -240,8 +240,9 @@ function slGravar(self){ const D=slDados(self); if(!D) return; const {sl,lins}=D
     if(Object.keys(err).length){ const nt=[...new Set(Object.keys(err).map(k=>(lins.find(l=>l.k===k)||{}).t))].length;
       recusa(err,nt+(nt>1?' talhões precisam':' talhão precisa')+' de correção nas células destacadas. Nada foi gravado; o que você digitou foi mantido.'); return; }
     novos.forEach(c=>all.push(c));
-    const norm=normCult(all); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); norm.forEach(y=>{ if(y.grp&&x0[y.id]!==false) x0[y.id]=true; });
-    const g2all=Object.assign({},self.state.g2||{}); g2all[gid]=Object.assign({},st,{rows:norm,x:x0,fl:null});
+    // TAB-12 (17/10/2026): gravar abre só o caminho do que foi gravado, a faixa da fazenda; os talhões divididos ficam como a pessoa deixou
+    const norm=normCult(all); const st=g2st(self,gid); const xa=Object.assign({},st.x||{}); xa['fzg_'+saf]=true;
+    const g2all=Object.assign({},self.state.g2||{}); g2all[gid]=Object.assign({},st,{rows:norm,x:xa,fl:null});
     const ts=[...new Set(salvos)];
     self.__slRec[sl.ch]={n,ts};
     self.setState({g2:g2all,adj,sl:null,g2toast:sl.faz+': '+ts.length+(ts.length>1?' talhões salvos':' talhão salvo')+' ('+n+(n>1?' alterações':' alteração')+': '+ts.join(', ')+')'
@@ -250,10 +251,9 @@ function slGravar(self){ const D=slDados(self); if(!D) return; const {sl,lins}=D
   finally{ self._plan=plan0; self._metaDraft=null; self._planoAntes=null; self._ocMsg=null; } }
 
 // ---- valores da tela ----
-function slVals(self,v,saf,step,ro){ const multi=sgSubs(self,saf).length>1;
-  // "Editar talhões…" no título do bloco com uma fazenda só; com várias, cada faixa de fazenda da tabela tem o seu "Editar talhões ›"
-  // (filtrada uma fazenda, a faixa dela continua à vista: sem cópia da ação)
-  v.sl_tem=!!saf&&step===2&&!ro&&!multi; v.sl_abrir=()=>slAbrir(self);
+function slVals(self,v,saf,step,ro){
+  // "Editar talhões ›" mora na faixa de cada fazenda da tabela, que agora agrupa por fazenda sempre (17/10), também com uma fazenda só:
+  // um lugar só para a ação (filtrada uma fazenda, a faixa dela continua à vista)
   v.slfaz=(sub)=>sgNaFazenda(self,sub,()=>slAbrir(self));
   const sl=self.state.sl; v.sl_open=!!sl&&step===2; if(!v.sl_open){ v.sl_lins=[]; return; }
   const lins=self.__slLin||[]; const ctx=slCtx(self,sl.saf); const ed=lins.filter(l=>l.tipo!=='grp'&&l.tipo!=='ro'); const dados=lins.filter(l=>l.tipo!=='grp');

@@ -1457,10 +1457,11 @@ _LNKB=('font-family: inherit; font-size: 12.5px; font-weight: 700; color: #15201
 def _painel():
     lab=lambda t: f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</div>'
     # seção recolhível: título + uma linha de resumo; abre por padrão só o que faz a ordem andar na fase (panSecs). A seta é a da TAB-11
+    # TAB-12 (17/10/2026): fica fora do recolhido por padrão (seção do painel de UM registro, não tabela nem cartão); data-secao-registro marca a exceção
     # (engine.seta, 1º filho do botão): a mesma em todas as telas, gira com o aria-expanded
     def sec(k,titulo,corpo):
         return (f'<sc-if value="{H("psx_"+k+"_show")}" hint-placeholder-val="{T()}"><section aria-label="{titulo}" style="border: 1px solid {LINE}; border-radius: 12px;">'
-          f'<button type="button" onClick="{H("psx_"+k+"_tog")}" aria-expanded="{H("psx_"+k+"_ex")}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: 0; background: transparent; cursor: pointer; font-family: inherit; text-align: left; color: {INK};">'
+          f'<button type="button" data-secao-registro="1" onClick="{H("psx_"+k+"_tog")}" aria-expanded="{H("psx_"+k+"_ex")}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: 0; background: transparent; cursor: pointer; font-family: inherit; text-align: left; color: {INK};">'
           + E.seta() +
           f'<span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; flex-shrink: 0;">{titulo}</span>'
           f'<sc-if value="{H("psx_"+k+"_c")}" hint-placeholder-val="{T()}"><span style="font-size: 12.5px; color: {MUTED}; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("psx_"+k+"_sum")}</span></sc-if></button>'

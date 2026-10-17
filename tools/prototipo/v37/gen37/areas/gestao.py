@@ -424,7 +424,7 @@ def _ge05():
         cli,edit=dict(m='form',leafOnly=True,title='Título',sub='Registre a próxima cobrança autorizada. Valor e vencimento vêm do faturamento; divergência se trata pelo caso, nunca editando o pedido original. Título recebido abre em consulta.',
             fields=[F('tit','Título',ro=True),F('val','Valor',t='num',ro=True,u='R$'),F('cob','Próxima cobrança',t='date',req=True),F('canal','Canal autorizado',t='sel',opts=CANAIS,req=True),
                     F('obs','Registro da cobrança',t='area',help='O que foi combinado; fica no histórico do título.')]),
-        tree=True,x0={r['id']:True for r in cli},gid='g_rec',total=True)
+        tree=True,gid='g_rec',total=True)
     EXTRAJS[0]=JS_BASE+r'''
 function PREVALS(self,v){ if(!self._q0){ self._q0=1; try{ const m=/[?&#]caso=([A-Za-z0-9-]+)/.exec((location.search||'')+(location.hash||'')); if(m){ const q=m[1].toUpperCase(); setTimeout(()=>g2set(self,'g_rec',{q:q}),0); } }catch(e){} } }
 function EXTRAVALS(self,v){
