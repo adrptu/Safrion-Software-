@@ -451,11 +451,22 @@ LEVA_JS = r"""(() => {
   const dl = [...document.querySelectorAll('[role=dialog],dialog[open],[aria-modal=true]')].filter(vis);
   const d = dl[dl.length - 1] || null;
   let dlg = '';
-  if (d) { const h = d.querySelector('h1,h2,h3,[role=heading]'); dlg = h ? norm(h.innerText).slice(0, 100) : (norm(d.innerText).slice(0, 60) || '(diálogo sem título)'); }
+  if (d) { const h = d.querySelector('h1,h2,h3,[role=heading]'); dlg = h ? norm(h.innerText).slice(0, 100) : ''; }
   const h1 = norm((document.querySelector('h1') || {}).innerText || '');
   const selected=[...document.querySelectorAll('.g2flash,[aria-selected=true],.g2r:focus,.g2r:focus-within')].filter(vis).map(e=>norm(e.innerText));
-  return { dlg, h1, selected, url: location.pathname.split('/').pop().replace('.dc.html', '') + location.hash, corpo: document.body ? document.body.innerText : '' };
+  return { dlg, temDialogo:!!d, h1, selected, url: location.pathname.split('/').pop().replace('.dc.html', '') + location.hash, corpo: document.body ? document.body.innerText : '' };
 })()"""
+
+
+def chegada_estrita(r, alvo, para):
+    if not alvo or r.get('url') != para:
+        return False
+    textos=[r.get('dlg','') if r.get('temDialogo') else r.get('h1','')]+r.get('selected',[])
+    for texto in textos:
+        primeiro=entr_do_resumo().search(texto)
+        if primeiro and primeiro.group(0)==alvo and re.search(r'(?<![A-Za-z0-9_-])'+re.escape(alvo)+r'(?![A-Za-z0-9_/-])',texto):
+            return True
+    return False
 
 
 def fase_leva(chrome, base, trab, modo):
@@ -481,11 +492,11 @@ def fase_leva(chrome, base, trab, modo):
             else:
                 dest, _, hh = para.partition('#')
                 url = f'{base}/v3/{dest}.dc.html' + ('#' + hh if hh else '')
-            alvos.append((d['screen'], i, url, p.get('alvo') or ''))
+            alvos.append((d['screen'], i, url, p.get('alvo') or '', para))
     log(f'2ª passada ({modo}): {len(alvos)} passagens que levam um registro')
     base_corpo = {}
     out = []
-    for k, (tela, i, url, alvo) in enumerate(alvos):
+    for k, (tela, i, url, alvo, para) in enumerate(alvos):
         limpar_origem(aba, base)
         aba.goto(url, espera_corpo=False)
         aba.pump(2.6)
@@ -500,7 +511,7 @@ def fase_leva(chrome, base, trab, modo):
             aba.pump(2.6)
             base_corpo[pag] = norm_tok(aba.js(LEVA_JS)['corpo'])
         out.append({'tela': tela, 'i': i, 'endereco': url.split('/v3/', 1)[-1], 'alvo': alvo, 'dlg': r['dlg'], 'h1': r['h1'][:120],
-                    'alvoNoH1': bool(alvo and alvo in r['h1']), 'url': r['url'], 'alvoNoCorpo': False, 'tokNoCorpo': '', 'chegouEstrito': bool(alvo and re.search(r'(?<![A-Za-z0-9_-])'+re.escape(alvo)+r'(?![A-Za-z0-9_-])',' '.join([r['dlg']]+r.get('selected',[])))),
+                    'alvoNoH1': bool(alvo and alvo in r['h1']), 'url': r['url'], 'alvoNoCorpo': False, 'tokNoCorpo': '', 'chegouEstrito': chegada_estrita(r, alvo, para),
                     'diag': {'tokens': toks, 'tokSemEndereco': bool(tok and tok in base_corpo[pag]),
                              'alvoSemEndereco': bool(alvo and norm_tok(alvo) in base_corpo[pag])}})
         chrome.fechar_extras()
@@ -670,7 +681,7 @@ def main():
     ap.add_argument('--trabalho', required=True)
     ap.add_argument('--modos', default='isolado')
     ap.add_argument('--so', default='')
-    ap.add_argument('--fases', default='preparar,robo,leva,nav,escopo28,resumo')
+    ap.add_argument('--fases', default='preparar,robo,leva,nav,escopo28,criticos,resumo')
     ap.add_argument('--chrome', default=CHROME)
     ap.add_argument('--workers', type=int, default=3)
     ap.add_argument('--limite-min', type=float, default=90)
@@ -737,6 +748,12 @@ def main():
                     log(f'Chrome PID {c.p.pid} encerrado')
                 srvs.parar()
                 shutil.rmtree(os.path.join(trab, 'saida-nav'), ignore_errors=True)
+    if 'criticos' in fases:
+        for sufixo, extra in [('', []), ('-endereco', ['--por-endereco'])]:
+            destino = os.path.join(trab, 'saida-isolado', 'casos-criticos'+sufixo+'.json')
+            cmd = [sys.executable, '-I', os.path.join(os.path.dirname(__file__), 'casos_criticos.py'), '--rodar', os.path.abspath(__file__), '--trabalho', trab, '--saida', destino, '--chrome', a.chrome] + extra
+            result = subprocess.run(cmd, timeout=max(60, a.limite_min*60-(time.time()-t0)))
+            if result.returncode: raise RuntimeError('Casos críticos falharam; aceite bloqueado')
     reg['chrome'] = subprocess.run([a.chrome, '--version'], capture_output=True, text=True).stdout.strip()
     json.dump(reg, open(exec_json, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     if 'resumo' in fases:
