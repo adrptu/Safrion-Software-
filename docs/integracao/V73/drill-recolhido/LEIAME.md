@@ -4,9 +4,9 @@
 ID / resultado útil / persona: DRILL-RECOLHIDO (TAB-12, TAB-13) · toda tabela e cartão abre na visão macro (recolhido) e só mostra a seta onde há o que abrir; Planejar safra › etapa 2 agrupa por fazenda também com uma só · quem usa qualquer lista do protótipo, primeiro o gestor no Planejar safra
 Requisitos do PRD e fora do escopo: PRD cap. 74 (DS), padroes-1610 (TAB-08, TAB-11, TAB-12, TAB-13), padroes-1510 (TAB-04); fora: cabeçalho da tela, ds_modulos.py, raia do Kanban da O.S., seções do painel de UM registro, menus, listas suspensas e formulários
 Autor / revisor / integrador: Claude / Codex / Codex (regime leve, AGENTS §3.5)
-Base (commit ou hashes) / arquivos sob responsabilidade: 7d65025 · g2lib.js, engine.py, safra.js, safra_lote.js, areas/*.py listados abaixo, testes listados abaixo
+Base (commit ou hashes) / arquivos sob responsabilidade: 7d65025, com a composição ac5cd1d7 incorporada (0b48045) · g2lib.js, engine.py, safra.js, safra_lote.js, areas/*.py listados abaixo, testes listados abaixo
 Aceite e comando de verificação: drill_recolhido_test.py e saf_fazenda_recolhida_test.py verdes a 1440 e 390 e vermelhos na 7d65025; bateria pelo impacto sem vermelho novo
-Estado / impedimento / próximo passo: ver "Testes"
+Estado / impedimento / próximo passo: candidata verde (ver "Testes"); falta a revisão do Codex e o envio pelo coordenador
 ```
 
 ## Pedidos do proprietário (17/10/2026, literais)
@@ -29,6 +29,8 @@ Regras no DS: TAB-12 e TAB-13 em `docs/design-system/padroes-1610.md`; TAB-04 at
 - `g2caminho` (novo, chamado no `g2open`): abrir um registro pelo endereço ou por uma ação abre os pais recolhidos dele; o resto fica como está.
 - `engine.grid` sem o parâmetro `x0` (abertura padrão); `engine.table` também.
 - TAB-13: a seta só na linha com filhos (`caretOk`); a folha da árvore guarda o lugar dela (`SETA_VAZIO`) quando há alguma seta à vista; lista sem filhos não reserva espaço; a seta de ir (`seta_ir`, `.g2drill`) saiu da linha. Com seleção (TAB-09), só a seta de abrir vai para a 1ª célula.
+- Faixa da fazenda: com ela recolhida, "Planejar talhões livres ›" e "Editar talhões ›" ficam na faixa e passam a ter alvo de toque (`p.alvo`, `--g2-alvo`, 44 px no celular); a 390 a faixa fica mais alta. Antes o alvo tinha 15 px e o `saf_lote` H1 reprovou.
+- Cartões (`g2cdVals`): a faixa da fazenda leva o ⋯ (ações) também em Cartões, como na Tabela. Defeito anterior, achado pelo reteste do PR #93 com a faixa recolhida.
 
 ### Telas que abriam linhas por padrão (`x0`), todas recolhidas agora
 
@@ -100,3 +102,50 @@ O que cada teste verifica continua o mesmo; muda só o que a pessoa faz antes de
 | `seta_padrao_test.py` E | Tab e Shift+Tab para o anel de foco | se a seta é o último foco da página (árvore recolhida: o Tab sai do documento), Shift+Tab e Tab | harness: em IR-02 a 390 com a Lagoa Grande, a única captação recolhida é o último foco |
 | `drill_recolhido_test.py` C2 (teste novo, ajuste) | a linha do lote à vista | a 390 o painel do lote ocupa a tela (mestre-detalhe): confere a lista por baixo | harness |
 | `rev93_reteste_navegador.py` (reteste do PR #93, fora do repositório) | `abre` esperava 4 linhas na tabela da etapa 2 | cópia `rev93_reteste_navegador_tab12.py` nesta pasta abre a faixa da fazenda; o original fica como está | TAB-12; o original reprova na candidata por isso (ver Testes) |
+
+## Testes (executados em 17/10/2026)
+
+Candidata: código da `c33ce7c` (o gerador não muda desde a `a039a11`; depois só testes e documentos), render montado com `SAFRION_DADOS=sintetico`, Chrome headless a 1440 e 390 px. Base: render da `7d65025` (worktree temporária). Brutos em `regressao/<teste>_c33ce7c.log`, resumo em `regressao/_resumo_c33ce7c.txt`; base em `*_base_7d65025*.log` e `*_contraprova_*7d65025.log`. Comando de cada teste: `env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER_DIR=<gen37>/_render python3 -B <teste>.py`, um por vez, com o portão de menos de 4 Chrome.
+
+**Testes novos e contraprova**
+
+| Teste | Candidata | Base 7d65025 |
+|---|---|---|
+| `saf_fazenda_recolhida_test.py` (etapa 2: 1 e 2 fazendas, 1440 e 390) | 18 ok · 0 falhas | 2 ok · 16 falhas (contraprova: reprova) |
+| `drill_recolhido_test.py` (148 telas a 1440 e 390, amostras, busca, endereço, TAB-13) | 66 ok · 0 falhas | 22 ok · 44 falhas (contraprova: reprova) |
+
+**Bateria pelo impacto**
+
+| Teste | Candidata | Base 7d65025 | Leitura |
+|---|---|---|---|
+| ma_vinculo | 101/101 | — | verde |
+| ma_revisao, ma_correcoes_pm (oráculo da composição) | 18/18, 12/12 | — | verdes com a exceção da O.M.; com os blocos recolhidos reprovavam (`*_m0b48045.log`) |
+| ma_unica, ma_rastreio, ma_atrito | 23/23, 58/58, 13/13 | — | verdes |
+| os_lote, quantidade | 36/36, 16/16 | — | verdes |
+| textos_soltos | 267 ok · 1 falha | 267 ok · 1 falha (a mesma) | vermelho antigo: o oráculo D CA-01det espera o texto anterior ao PAINEL-FIXO-1 (d3435d04, já na base) |
+| saf_lote, tabelas_saf, saf_tab | 47/47, 24/24, 14/14 | — | verdes |
+| saf_c01, saf_fazendas, saf_multi_fazenda | 68 ok, 14/14, 23/23 | — | verdes |
+| saf_operacoes, saf_revisao, saf_totais, saf_contexto | 87 ok, 42 ok, 14 ok, 10/10 | — | verdes |
+| solo_saf, solo_os, solo_rev | 36/36, 18/18, 22/22 | — | verdes (`solo_os` e `solo_rev` em `_resumo_solo_c33ce7c.txt`) |
+| cartoes | 70/70 | — | verde |
+| tabelas_os, tabelas_cad, tabelas_est, tabelas_ben | 40/40, 206/206, 34/34, 12/12 | — | verdes |
+| tabelas_irr | 98/106 | 98/106 (as mesmas 8) | vermelho antigo TABR-CTX-02 (`tabelas_irr_base_7d65025.log`) |
+| tabelas_cad_irr_unit (sem navegador, lendo o `_render`) | 44/51 | 44/51 (as mesmas 7) | vermelho antigo: A1 procura `g_rend` no CD-02 (está no CD-08) e C15–C19 TABR-CTX |
+| pa_lista, kanban_raias, visoes2_formas | 24 ok, 9/9, 23/23 | — | verdes |
+| tab_drill_cab, ds_1510, ds_1610 | 6 ok, 17 ok, 14 ok | — | verdes |
+| paginas_scan | 5 ok (148 páginas) | — | verde |
+| seta_padrao | 14 ok · 0 falhas | — | verde |
+| `node rmenu_unit.js`, `rmenu_generator_test.py` | OK, OK | OK, OK | verdes |
+| `node rmenu_alignment_test.js g2lib.js c93_base_g2lib.js` | 557 OK · 4 falhas | 557 OK · 4 falhas (as mesmas A6) | vermelho antigo |
+| `rev93_reteste_navegador_tab12.py` (cópia adaptada) | 44 OK · 0 falhas | — | verde |
+| `rev93_reteste_navegador.py` (original, fora do repositório) | erro em `abre` (a faixa recolhida esconde as linhas) | 44 OK | esperado pela TAB-12; ver Oráculos |
+
+## Fotos (Planejar safra › etapa 2)
+
+`antes_saf2_*` no render da 7d65025 e `depois_saf2_*` no da candidata, com 1 fazenda (`1faz`) e 2 fazendas (`2faz`), a 1440 e 390 px (`fotos.py`). Depois: a faixa da fazenda aparece também com uma fazenda só, recolhida, com área e contagem; a 390 a faixa fica mais alta pelo alvo de toque dos dois links.
+
+## Não executado
+
+- `painel_fixo_2_test.py`: verificação pontual do commit 2e94a490; pede a base anterior como argumento e confere que o `x0` do `gestao.py` não mudou, o que esta frente muda de propósito.
+- Fora da lista de impacto, não rodados nesta frente: `cada_cd04`, `cada_fix04`, `ocupacao`, `saf_capacidade_simetrica`, `saf_impedimentos`, `ficha_pivo`, `ma_correcoes_om`, `ma_planos`, `galeria.py` e a bateria completa.
+- Só emulação de tela no Chrome headless; nenhum aparelho real.

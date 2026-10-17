@@ -1,0 +1,3 @@
+solo_os exit=0 200s RESULTADO: OK 18/18
+solo_rev exit=0 403s RESULTADO: OK 22/22
+FIM
