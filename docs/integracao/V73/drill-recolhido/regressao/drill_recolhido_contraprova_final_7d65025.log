@@ -1,0 +1,223 @@
+# 1440 px · 148 telas + 14 estados · 211 tabelas (16 com seta de abrir; 97 setas; 1378 linhas) · 1 listas em cartões
+  a1  (1440, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Santa Rita»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Boa Vista»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Lagoa Grande»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «T1 312,0 ha +0,1 % 2»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «T2 298,0 ha 0,0 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «T3 96,0 ha 0,0 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «T4 204,0 ha −0,2 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «P1 95,0 ha −0,3 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «P2 80,0 ha +0,3 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «T7 42,0 ha 0,0 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «C1 38,0 ha +0,8 % 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «B1 120,0 ha — 0»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV01 29,9 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV02 37,8 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV03 70,2 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV04 73,2 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV05 71,1 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV06 62,8 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV07 61,4 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV08 50,6 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV09 75,0 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV10 30,2 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV11 50,0 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV12 48,5 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV13 49,3 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV14 63,2 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV15 36,2 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV17 33,4 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV18 48,9 ha — 1»')
+  a1  (1440, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV19 75,1 ha — 1»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 8 itens de Santa Rita Santa Rita Agro R»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 1 item de Boa Vista Boa Vista Ltda Sorr»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 23 itens de Lagoa Grande Empresa a info»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Santa Rita Santa Rita Agro Rio Verde/GO»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Boa Vista Boa Vista Ltda Sorriso/MT»')
+  a2  (1440, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Lagoa Grande Empresa a informar Lagoa G»')
+  a3  (1440, 'MA.dc.html#ativo=a01', 'button.ma-blh «Situação · Bloqueado · desde 22/09 · tratada pel»')
+  a3  (1440, 'MA.dc.html#om=OM-0233', 'button.ma-blh «Tarefas · 3 de 4 respondidas»')
+  a3  (1440, 'MA.dc.html#om=OM-0233', 'button.ma-blh «Conclusão · leitura e horas na conclusão»')
+  a3  (1440, 'OS.dc.html#OS-0420', 'button «INSUMOS E DOSES»')
+  a3  (1440, 'OS.dc.html#OS-0420', 'button «APONTAMENTOS DIÁRIOS»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 01/10/2026»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Fertirrigação de nitrogênio»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 15/10/2026»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Controle de ácaro»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 01/11/2026»')
+  a3  (1440, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Fertirrigação de potássio»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-055 Mancha-anelar (PRSV) Virose 1 de 20 com »')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-053 Meleira (virose) Virose 3 de 20 com sint»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-054 Mosca-branca Praga 8,4 / 10 adultos/folh»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-051 Ácaro-rajado Praga 18 / 15 % folhas com »')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-052 Antracnose Doença 9 / 5 % frutos com les»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-060 Ácaro-rajado Praga 3 / 15 % folhas com á»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-057 Ácaro-rajado Praga 4 / 15 % folhas com á»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-059 Antracnose Doença 1 / 5 % frutos com les»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-056 Cochonilha Praga 5 / 10 % plantas com co»')
+  d1  (1440, 'AG-01.dc.html', 'seta de ir «VIS-058 Mosca-branca Praga 2,1 / 10 adultos/folh»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2050 solo C1 · 38 ha não calculável 5,6 22 m»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «Inconsistente LAU-2048 folha P1 · 95 ha — — — 17»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2061 solo T1 · 312 ha 60 % 5,5 18,5 mg/dm³ 5»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2063 solo T2 · 298 ha 40 % 4,8 7,5 mg/dm³ 13»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2055 solo Pivô 2 · 37,75 ha 72,15 % 5,6 16 m»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2056 solo Pivô 5 · 71,11 ha 72,16 % 5,5 9,5 »')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2057 solo Pivô 9 · 74,98 ha 72,57 % 5,7 21 m»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2058 solo Pivô 19 · 75,11 ha 73,46 % 5,8 12,»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2071 solo Pivô 12 · 48,47 ha 50 % difere do »')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2072 solo Pivô 12 · 48,47 ha 12,66 % 4,6 3 m»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2043 solo T4 · 204 ha composta por zona (Z2 »')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «LAU-2044 solo T4 · 204 ha composta por zona (3 z»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «AGS-004 Pivô 12 16/09/2026 não calculável sem po»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «AGS-003 P2 Z1 (baixada) 02/09/2026 45 mm»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «AGS-002 P1 28/08/2026 39 mm»')
+  d1  (1440, 'AG-02.dc.html', 'seta de ir «AGS-001 T7 20/08/2026 56 mm»')
+  d1  (1440, 'AG-03.dc.html', 'seta de ir «DIA-007 T4 · Soja VIS-011 + LAU-2043/2044 Rebole»')
+  d1  (1440, 'AG-03.dc.html', 'seta de ir «DIA-008 P2 · Milho VIS-012 abaixo do NC · 08/09 »')
+  d1  (1440, 'AG-03.dc.html', 'seta de ir «DIA-009 P1 · Feijão VIS-013 LAU-2048 (folha) não»')
+  d1  (1440, 'AG-03.dc.html', 'seta de ir «DIA-010 C1 · Café VIS-016 6 de 12 pontos Mancha-»')
+FALHA A1440.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 14) · ['CD-01.dc.html', 'CD-01det.dc.html', 'CD-02.dc.html', 'CD-06.dc.html', 'CD-07.dc.html', 'CD-08.dc.html', 'COLH.dc.html', 'GE-05.dc.html', 'IR-02.dc.html', 'OS.dc.html?view=lista&ag=onde', 'PCOM.dc.html', 'PROD.dc.html', 'SAF.dc.html#saf=S2627&passo=cultivos', 'SAF.dc.html#saf=S27SF&passo=cultivos']
+FALHA A1440.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 1) · ['CD-01.dc.html?view=cartoes']
+FALHA A1440.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 4) · ['MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'OS.dc.html#OS-0420', 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste']
+OK    A1440.4 a varredura viu tabelas em árvore, setas e cartões (rodada completa)
+FALHA D1440.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 126) · ['AG-01.dc.html', 'AG-02.dc.html', 'AG-02.dc.html#LAU-2073', 'AG-03.dc.html', 'AG-03det.dc.html', 'AG-04.dc.html', 'AG-04det.dc.html', 'AG-05.dc.html', 'AG-06.dc.html', 'AG-07.dc.html', 'BEN.dc.html', 'BO-01.dc.html', 'BO-02.dc.html', 'CA-01.dc.html', 'CA-01det.dc.html', 'CA-01x-os0420.dc.html', 'CA-02.dc.html', 'CA-03.dc.html', 'CA-03det.dc.html', 'CA-04.dc.html', 'CARGA.dc.html', 'CD-01.dc.html', 'CD-01det.dc.html', 'CD-02.dc.html', 'CD-03.dc.html', 'CD-04.dc.html', 'CD-05.dc.html', 'CD-06.dc.html', 'CD-07.dc.html', 'CD-08.dc.html', 'CF-01.dc.html', 'CF-03.dc.html', 'CF-04.dc.html', 'CF-05.dc.html', 'CMP.dc.html', 'CO-01.dc.html', 'CO-02.dc.html', 'CO-02det.dc.html', 'CO-03.dc.html', 'CO-04.dc.html', 'CO-05.dc.html', 'CO-05det.dc.html', 'CO-06.dc.html', 'CO-06det.dc.html', 'CO-07.dc.html', 'COLH.dc.html', 'EST.dc.html', 'EXPED.dc.html', 'GE-01.dc.html', 'GE-02.dc.html', 'GE-02det.dc.html', 'GE-03.dc.html', 'GE-04.dc.html', 'GE-05.dc.html', 'GE-06.dc.html', 'GE-06det.dc.html', 'GE-07.dc.html', 'GE-08.dc.html', 'IC.dc.html', 'IN-01.dc.html', 'IN-02.dc.html', 'IN-03.dc.html', 'IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-03det.dc.html', 'IR-04.dc.html', 'IV.dc.html', 'LO-01.dc.html', 'LO-02.dc.html', 'LO-02det.dc.html', 'LO-03.dc.html', 'LO-04.dc.html', 'MA.dc.html', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'ON-01.dc.html', 'ON-01det.dc.html', 'OS.dc.html', 'OS.dc.html#OS-0420', 'OS.dc.html?view=lista&ag=onde', 'PAGR.dc.html', 'PCOM.dc.html', 'PL-01.dc.html'
+OK    D1440.2 TAB-13 com "Expandir tudo" (7 telas), toda seta aberta tem o que mostrar (124 setas abertas; telas com desvio: 0)
+OK    G1440 sem erro de JavaScript e todo estado abriu
+FALHA B1440 SAF1 B1 Planejar safra › etapa 2 · 1 fazenda: recolhido na abertura (4 setas, 2 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [4, ['Recolher T1', 'Recolher P1'], ['Recolher P1'], 1002, 856]
+FALHA B1440 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s) · []
+FALHA B1440 SAF1 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher T1', 'Recolher P1'], ['Recolher P1'], ['Recolher T1', 'Recolher P1']]
+OK    B1440 SAF1 B3 "Expandir tudo" abre todas as setas do escopo (4) e "Recolher tudo" recolhe; o total não muda
+FALHA B1440 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (5 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [5, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher P1', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], 1064, 622]
+OK    B1440 SAF2 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 2 faixa(s)
+FALHA B1440 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher P1', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher P1', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej']]
+FALHA B1440 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda · [1, 1, 5, 5, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], 'Total 553 ha', 'Total 553 ha']
+FALHA B1440 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (9 setas, 9 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [9, ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], 1379, 1315]
+FALHA B1440 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4']]
+FALHA B1440 OS B3 "Expandir tudo" abre todas as setas do escopo (9) e "Recolher tudo" recolhe; o total não muda · [0, 1, 9, 9, [], '', '']
+FALHA B1440 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [3, ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Boa Vista', 'Recolher Lagoa Grande'], 954, 794]
+FALHA B1440 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande']]
+FALHA B1440 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda · [0, 1, 3, 3, [], '', '']
+OK    B1440 PA B1 Atividades do plano (Tabela): recolhido na abertura (8 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 PA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 PA B3 "Expandir tudo" abre todas as setas do escopo (8) e "Recolher tudo" recolhe; o total não muda
+FALHA B1440 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 1 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [6, ['Situação · Bloqueado · desde 22/09 · tratada pel'], [], 1091, 474]
+FALHA B1440 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Situação · Bloqueado · desde 22/09 · tratada pel'], [], ['Situação · Bloqueado · desde 22/09 · tratada pel']]
+FALHA B1440 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 28 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [28, ['Recolher KCl 60%', 'Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simples', 'Recolher Tebuconazol 200 EC', 'Recolher Ácido bórico', 'Recolher Caixa de mamão Formosa 10 kg'], ['Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simpl
+FALHA B1440 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher KCl 60%', 'Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simples', 'Recolher Tebuconazol 200 EC', 'Recolher Ácido bórico', 'Recolher Caixa de mamão Formosa 10 kg'], ['Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato sim
+FALHA B1440 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda · [0, 1, 28, 28, [], '', '']
+OK    B1440 CO06 B1 Qualidade CO-06 · lotes: recolhido na abertura (7 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 CO06 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+FALHA C1440 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido · [[], True, ['Recolher T1', 'Recolher P1']]
+FALHA C1440 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista e à vista · ['L38-115', {'n': 3, 'ab': 3, 'linha': True, 'vista': True, 'painel': True}]
+# 390 px · 148 telas + 14 estados · 195 tabelas (13 com seta de abrir; 87 setas; 1236 linhas) · 1 listas em cartões
+  a1  (390, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Santa Rita»')
+  a1  (390, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Boa Vista»')
+  a1  (390, 'CD-01.dc.html', 'g_tal seta aberta «Recolher Lagoa Grande»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «T1 312,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «T2 298,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «T3 96,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «T4 204,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «P1 95,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «P2 80,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «T7 42,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «C1 38,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «B1 120,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV01 29,9 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV02 37,8 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV03 70,2 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV04 73,2 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV05 71,1 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV06 62,8 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV07 61,4 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV08 50,6 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV09 75,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV10 30,2 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV11 50,0 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV12 48,5 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV13 49,3 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV14 63,2 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV15 36,2 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV17 33,4 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV18 48,9 ha»')
+  a1  (390, 'CD-01.dc.html', 'g_tal linha-filha à vista «PV19 75,1 ha»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 8 itens de Santa Rita Santa Rita Agro R»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 1 item de Boa Vista Boa Vista Ltda Sorr»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal seta aberta «Recolher 23 itens de Lagoa Grande Empresa a info»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Santa Rita Santa Rita Agro Rio Verde/GO»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Boa Vista Boa Vista Ltda Sorriso/MT»')
+  a2  (390, 'CD-01.dc.html?view=cartoes', 'g_tal filhos à vista «Itens de Lagoa Grande Empresa a informar Lagoa G»')
+  a3  (390, 'MA.dc.html#ativo=a01', 'button.ma-blh «Situação · Bloqueado · desde 22/09 · tratada pel»')
+  a3  (390, 'MA.dc.html#om=OM-0233', 'button.ma-blh «Tarefas · 3 de 4 respondidas»')
+  a3  (390, 'MA.dc.html#om=OM-0233', 'button.ma-blh «Conclusão · leitura e horas na conclusão»')
+  a3  (390, 'OS.dc.html#OS-0420', 'button «INSUMOS E DOSES»')
+  a3  (390, 'OS.dc.html#OS-0420', 'button «APONTAMENTOS DIÁRIOS»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 01/10/2026»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Fertirrigação de nitrogênio»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 15/10/2026»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Controle de ácaro»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher 01/11/2026»')
+  a3  (390, 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste', 'button.g2car «Recolher Fertirrigação de potássio»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-055 Mancha-anelar (PRSV) Virose 1 de 20 com »')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-053 Meleira (virose) Virose 3 de 20 com sint»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-054 Mosca-branca Praga 8,4 / 10 adultos/folh»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-051 Ácaro-rajado Praga 18 / 15 % folhas com »')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-052 Antracnose Doença 9 / 5 % frutos com les»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-060 Ácaro-rajado Praga 3 / 15 % folhas com á»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-057 Ácaro-rajado Praga 4 / 15 % folhas com á»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-059 Antracnose Doença 1 / 5 % frutos com les»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-056 Cochonilha Praga 5 / 10 % plantas com co»')
+  d1  (390, 'AG-01.dc.html', 'seta de ir «VIS-058 Mosca-branca Praga 2,1 / 10 adultos/folh»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2050 solo C1 · 38 ha não calculável»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «Inconsistente LAU-2048 folha P1 · 95 ha —»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2061 solo T1 · 312 ha 60 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2063 solo T2 · 298 ha 40 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2055 solo Pivô 2 · 37,75 ha 72,15 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2056 solo Pivô 5 · 71,11 ha 72,16 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2057 solo Pivô 9 · 74,98 ha 72,57 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2058 solo Pivô 19 · 75,11 ha 73,46 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2071 solo Pivô 12 · 48,47 ha 50 % difere do »')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2072 solo Pivô 12 · 48,47 ha 12,66 %»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2043 solo T4 · 204 ha composta por zona (Z2 »')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «LAU-2044 solo T4 · 204 ha composta por zona (3 z»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «AGS-004 Pivô 12 16/09/2026»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «AGS-003 P2 Z1 (baixada) 02/09/2026»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «AGS-002 P1 28/08/2026»')
+  d1  (390, 'AG-02.dc.html', 'seta de ir «AGS-001 T7 20/08/2026»')
+  d1  (390, 'AG-03.dc.html', 'seta de ir «DIA-007 T4 · Soja VIS-011 + LAU-2043/2044 Rebole»')
+  d1  (390, 'AG-03.dc.html', 'seta de ir «DIA-008 P2 · Milho VIS-012 abaixo do NC · 08/09 »')
+  d1  (390, 'AG-03.dc.html', 'seta de ir «DIA-009 P1 · Feijão VIS-013 LAU-2048 (folha) não»')
+  d1  (390, 'AG-03.dc.html', 'seta de ir «DIA-010 C1 · Café VIS-016 6 de 12 pontos Mancha-»')
+FALHA A390.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 9) · ['CD-01.dc.html', 'CD-01det.dc.html', 'CD-02.dc.html', 'CD-06.dc.html', 'CD-07.dc.html', 'CD-08.dc.html', 'GE-05.dc.html', 'IR-02.dc.html', 'OS.dc.html?view=lista&ag=onde']
+FALHA A390.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 1) · ['CD-01.dc.html?view=cartoes']
+FALHA A390.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 4) · ['MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'OS.dc.html#OS-0420', 'SAF.dc.html#saf=S2627&passo=cultivos|ajuste']
+OK    A390.4 a varredura viu tabelas em árvore, setas e cartões (rodada completa)
+FALHA D390.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 117) · ['AG-01.dc.html', 'AG-02.dc.html', 'AG-02.dc.html#LAU-2073', 'AG-03.dc.html', 'AG-03det.dc.html', 'AG-04.dc.html', 'AG-04det.dc.html', 'AG-05.dc.html', 'AG-06.dc.html', 'AG-07.dc.html', 'BO-01.dc.html', 'BO-02.dc.html', 'CA-01.dc.html', 'CA-01det.dc.html', 'CA-01x-os0420.dc.html', 'CA-02.dc.html', 'CA-03.dc.html', 'CA-03det.dc.html', 'CA-04.dc.html', 'CD-01.dc.html', 'CD-01det.dc.html', 'CD-02.dc.html', 'CD-03.dc.html', 'CD-04.dc.html', 'CD-05.dc.html', 'CD-06.dc.html', 'CD-07.dc.html', 'CD-08.dc.html', 'CF-01.dc.html', 'CF-03.dc.html', 'CF-04.dc.html', 'CF-05.dc.html', 'CMP.dc.html', 'CO-01.dc.html', 'CO-02.dc.html', 'CO-02det.dc.html', 'CO-03.dc.html', 'CO-04.dc.html', 'CO-05.dc.html', 'CO-05det.dc.html', 'CO-06.dc.html', 'CO-06det.dc.html', 'CO-07.dc.html', 'EST.dc.html', 'GE-01.dc.html', 'GE-02.dc.html', 'GE-02det.dc.html', 'GE-03.dc.html', 'GE-04.dc.html', 'GE-05.dc.html', 'GE-06.dc.html', 'GE-06det.dc.html', 'GE-07.dc.html', 'GE-08.dc.html', 'IN-01.dc.html', 'IN-02.dc.html', 'IN-03.dc.html', 'IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-03det.dc.html', 'IR-04.dc.html', 'LO-01.dc.html', 'LO-02.dc.html', 'LO-02det.dc.html', 'LO-03.dc.html', 'LO-04.dc.html', 'MA.dc.html', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'ON-01.dc.html', 'ON-01det.dc.html', 'OS.dc.html', 'OS.dc.html#OS-0420', 'OS.dc.html?view=lista&ag=onde', 'PAGR.dc.html', 'PL-01.dc.html', 'PL-02.dc.html', 'PL-02det.dc.html', 'PL-03.dc.html', 'PL-04.dc.html', 'PL-05.dc.html', 'PL-06.dc.html', 'P
+OK    D390.2 TAB-13 com "Expandir tudo" (7 telas), toda seta aberta tem o que mostrar (114 setas abertas; telas com desvio: 0)
+OK    G390 sem erro de JavaScript e todo estado abriu
+OK    B390 SAF1 B1 Planejar safra › etapa 2 · 1 fazenda: recolhido na abertura (4 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+FALHA B390 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s) · []
+OK    B390 SAF1 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 SAF1 B3 "Expandir tudo" abre todas as setas do escopo (4) e "Recolher tudo" recolhe; o total não muda
+FALHA B390 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (5 setas, 2 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [5, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], 838, 590]
+OK    B390 SAF2 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 2 faixa(s)
+FALHA B390 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej']]
+FALHA B390 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda · [1, 1, 5, 5, ['Recolher Santa Rita · 553 ha · 3 de 8 talhões pl', 'Recolher Boa Vista · 0 ha · 0 de 1 talhão planej'], 'Total', 'Total']
+FALHA B390 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (9 setas, 9 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [9, ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], 1060, 1022]
+FALHA B390 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4'], ['Recolher C1', 'Recolher P1', 'Recolher Sem talhão', 'Recolher T1', 'Recolher T1-A', 'Recolher T1-B', 'Recolher T2', 'Recolher T3', 'Recolher T4']]
+FALHA B390 OS B3 "Expandir tudo" abre todas as setas do escopo (9) e "Recolher tudo" recolhe; o total não muda · [0, 1, 9, 9, [], '', '']
+FALHA B390 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [3, ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Boa Vista', 'Recolher Lagoa Grande'], 724, 633]
+FALHA B390 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Boa Vista', 'Recolher Lagoa Grande'], ['Recolher Santa Rita', 'Recolher Boa Vista', 'Recolher Lagoa Grande']]
+FALHA B390 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda · [0, 1, 3, 3, [], '', '']
+OK    B390 PA B1 Atividades do plano (Tabela): recolhido na abertura (8 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 PA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 PA B3 "Expandir tudo" abre todas as setas do escopo (8) e "Recolher tudo" recolhe; o total não muda
+FALHA B390 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 1 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [6, ['Situação · Bloqueado · desde 22/09 · tratada pel'], [], 1091, 474]
+FALHA B390 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Situação · Bloqueado · desde 22/09 · tratada pel'], [], ['Situação · Bloqueado · desde 22/09 · tratada pel']]
+FALHA B390 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 28 abertas); 1 clique abre só aquele item e o conteúdo dele aparece · [28, ['Recolher KCl 60%', 'Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simples', 'Recolher Tebuconazol 200 EC', 'Recolher Ácido bórico', 'Recolher Caixa de mamão Formosa 10 kg'], ['Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simpl
+FALHA B390 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta) · [True, ['Recolher KCl 60%', 'Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato simples', 'Recolher Tebuconazol 200 EC', 'Recolher Ácido bórico', 'Recolher Caixa de mamão Formosa 10 kg'], ['Recolher MAP 11-52', 'Recolher Fungicida A', 'Recolher Glifosato 480', 'Recolher Semente de soja 58 W', 'Recolher NPK 20-05-20', 'Recolher Óleo mineral', 'Recolher 2,4-D 806', 'Recolher Acaricida D', 'Recolher Adjuvante espalhante', 'Recolher Cletodim 240', 'Recolher Fungicida TS', 'Recolher Inoculante líquido', 'Recolher Inseticida B', 'Recolher Nitrato de cálcio', 'Recolher Nitrato de potássio', 'Recolher Abamectina 18 EC', 'Recolher Acetamiprido 200 SP', 'Recolher Calcário dolomítico filler', 'Recolher Gesso agrícola', 'Recolher Muda de mamão Formosa', 'Recolher Nitrato de amônio', 'Recolher Sulfato de magnésio', 'Recolher Sulfato de potássio', 'Recolher Superfosfato sim
+FALHA B390 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda · [0, 1, 28, 28, [], '', '']
+OK    B390 CO06 B1 Qualidade CO-06 · lotes: recolhido na abertura (7 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 CO06 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+FALHA C390 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido · [[], True, []]
+FALHA C390 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista (o painel ocupa a tela) · ['L38-115', {'n': 3, 'ab': 3, 'linha': True, 'vista': False, 'painel': True}]
+RESULTADO: 22 ok · 44 falhas · A1440.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 14); A1440.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 1); A1440.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 4); D1440.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 126); B1440 SAF1 B1 Planejar safra › etapa 2 · 1 fazenda: recolhido na abertura (4 setas, 2 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s); B1440 SAF1 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (5 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda; B1440 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (9 setas, 9 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 OS B3 "Expandir tudo" abre todas as setas do escopo (9) e "Recolher tudo" recolhe; o total não muda; B1440 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda; B1440 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 1 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 28 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B1440 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B1440 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda; C1440 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido; C1440 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista e à vista; A390.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 9); A390.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 1); A390.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 4); D390.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 117); B390 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s); B390 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (5 setas, 2 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B390 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B390 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda; B390 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (9 setas, 9 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B390 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B390 OS B3 "Expandir tudo" abre todas as setas do escopo (9) e "Recolher tudo" recolhe; o total não muda; B390 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 3 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B390 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B390 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda; B390 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 1 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B390 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B390 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 28 abertas); 1 clique abre só aquele item e o conteúdo dele aparece; B390 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta); B390 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda; C390 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido; C390 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista (o painel ocupa a tela)

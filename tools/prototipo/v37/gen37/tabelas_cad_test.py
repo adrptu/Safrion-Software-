@@ -46,7 +46,8 @@ def abre(pg, w=1.4):
 def aba(nome):
     r = J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.offsetParent&&b.innerText.trim().startsWith({json.dumps(nome)})); if(!b) return false; b.click(); return true;}})()"); time.sleep(.6); return r
 def grupos(g):
-    """linhas da árvore com a marca de grupo (linha com seta)."""
+    """linhas da árvore com a marca de grupo (linha com seta); a árvore nasce recolhida (TAB-12): abre tudo antes, como a pessoa."""
+    g.abre_tudo()
     return J(f"[...([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[{g.i}].querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[!!r.querySelector('button.g2car[aria-expanded]'),[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim())])") or []
 def por_grupo(g, col):
     """valores da coluna nas folhas, um bloco por grupo (a árvore ordena dentro do nível)."""

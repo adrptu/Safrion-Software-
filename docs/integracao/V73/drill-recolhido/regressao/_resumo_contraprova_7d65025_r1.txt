@@ -1,0 +1,2 @@
+drill_recolhido exit=1 1156s RESULTADO: 22 ok · 44 falhas · A1440.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 14); A1440.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob
+FIM

@@ -1,0 +1,6 @@
+tabelas_irr exit=1 227s RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lag
+FIM
+rev93_reteste_navegador exit=0 82s 
+FIM
+textos_soltos exit=1 132s 
+FIM

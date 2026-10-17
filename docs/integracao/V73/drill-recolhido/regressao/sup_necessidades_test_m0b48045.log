@@ -1,0 +1,16 @@
+PASS origem e falta descontam reserva própria uma vez
+PASS reserva de outra ordem não cobre demanda
+PASS livre cobre apenas necessidade sem reserva
+PASS linhas repetidas não reutilizam saldo livre
+PASS OM encerrada não gera compra
+PASS item sem cadastro não vira compra fictícia
+PASS política ausente não inventa prazo
+PASS data inválida não rola silenciosamente para outro mês
+PASS ano bissexto e data civil
+PASS consulta não reserva nem modifica estado
+PASS OM inexistente é pendência explícita
+PASS linha inválida não produz necessidade parcial do mesmo item
+PASS estoque coberto não exige política de compra
+PASS falta exige política e fica junto à linha
+PASS COT113 fictícia não aparece como cotação
+15 testes aprovados

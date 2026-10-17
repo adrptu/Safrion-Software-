@@ -1,0 +1,10 @@
+  ok  MA: sem erro de JS
+  ok  AC-PCM-01 · menu: um só ícone Manutenção (destacado, sem subitens nem expandir) que abre a tela de entrada com os atalhos das 4 visões; as 4 visões no seletor da MA; nenhuma rota antiga; o início (Mapa) leva à Manutenção num toque
+  ok  AC-PCM-02 · PM, MA-01..05 e MA-04det (com #OM-, #PM-, #novo:) levam ao endereço novo; fora do canvas
+  ok  AC-PCM-02 · o destino abre o registro (painel da OM-0234, plano PM-01, Novo plano do Silo 01)
+  ok  AC-PCM-03 · nenhum project/*.dc.html (fora dos redirecionamentos) aponta para MA-01..05, MA-04det ou PM
+  ok  AC-PCM-04 · Kanban com exatamente 5 colunas (A liberar → Encerradas) e só OMs nos cartões
+  ok  AC-PCM-05/06/07 · ≤ 1 primária por visão, detalhe e painel; com painel aberto nenhuma primária fora dele; nenhum botão de comando nas linhas; sem faixa ou etapas
+  ok  AC-PCM-18/10 · sem selos fixos nem "Marcar pendentes"; as preventivas geradas nascem sem resposta
+  ok  AC-PCM-17 · nenhum cartão nas visões; o filtro de condição dos Ativos mostra os não aptos
+  ok  AC-PCM-19 · Otávio abre em Sem ordem, Zé em Ordens, Ana em Ativos; Gerar só do Otávio; condição: Zé só no ativo de que é responsável técnico (T1 sim, Bomba do Pivô 2 não); trocar o papel não muda o estado

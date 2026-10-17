@@ -24,8 +24,16 @@ class Grade:
     def labels(self):
         return [h for h, _ in self.heads()]
 
+    def abre_tudo(self):
+        """TAB-12 (17/10/2026): a árvore nasce recolhida; antes de ler as linhas a pessoa usa o "Expandir tudo" da tabela (a abertura de antes,
+        quando os grupos nasciam abertos). Sem o botão (lista sem grupos, ou tudo já aberto), nada muda."""
+        r = self.J(f"(()=>{{let n={T(self.i)}; for(let k=0;k<6&&n;k++){{ n=n.parentElement; const b=n&&[...n.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(b){{ b.click(); return true; }} }} return false; }})()")
+        if r: time.sleep(.4)
+        return r
+
     def linhas(self, so_folhas=False):
         """células (texto) de cada linha visível; so_folhas: só linhas sem seta de grupo."""
+        self.abre_tudo()
         f = "&&!r.querySelector('button.g2car[aria-expanded]')" if so_folhas else ''
         return self.J(f"[...{T(self.i)}.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]'){f}).map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()))") or []
 

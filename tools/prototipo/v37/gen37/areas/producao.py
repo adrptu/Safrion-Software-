@@ -303,7 +303,7 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
       s:{nome:pr,prod:pr,fis:U(sm('fis')),blq:U(sm('blq')),proc:U(sm('proc')),apto:U(sm('apto')),res:U(sm('res')),disp:U(sm('disp'))},
       p:{nome:[{k:'b',t:pr}],prod:[{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],loc:[{k:'mut',t:''}],fis:prTx(U(sm('fis'))),blq:prTx(U(sm('blq'))),proc:prTx(U(sm('proc'))),apto:prTx(U(sm('apto'))),res:prTx(U(sm('res'))),disp:[{k:'b',t:U(sm('disp'))}],q:[{k:'mut',t:''}]},
       kids:ls.sort((a,b)=>a.L.id.localeCompare(b.L.id)).map(x=>prLoteRow(c,x.L,x.S))}; });
-  GR('g_lot').rows=rows; const x0={}; rows.forEach(r=>{ x0[r.id]=true; }); GR('g_lot').x0=x0;
+  GR('g_lot').rows=rows;   // TAB-12 (17/10/2026): o produto nasce recolhido (a linha soma os lotes)
   self._lots=lots; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   /* cartões (celular): mesmos registros, filtro e ordem da grade */
@@ -383,7 +383,7 @@ function prBenLote(self,c,L,S,nx,PPx){ const I=benInspDe(c,L); const U=x=>prEstT
 function prRunB(self,fn,ok){ return prRun(self,fn,Object.assign({pr_form:null},ok||{})); }
 /* entrada por link: PROD.dc.html#L39-133 abre o lote; #PV-036 (link antigo) abre a venda em Comercial › Contratos e pedidos (P6) */
 function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
-  if(P.lotes[h]) setTimeout(()=>self.g2pick('g_lot',h),0); else if(P.pedidos[h]){ try{ location.replace('VEN.dc.html#'+h); }catch(e){} } }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
+  if(P.lotes[h]) setTimeout(()=>{ g2caminho(self,GR('g_lot'),h); self.g2pick('g_lot',h); },0); else if(P.pedidos[h]){ try{ location.replace('VEN.dc.html#'+h); }catch(e){} } }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
 const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ prHash(self); _EXV(self,v); };
 '''
 
@@ -578,7 +578,7 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
       p:{tal:[{k:'b',t:cu}],cult:[{k:'mut',t:xs.length+(xs.length>1?' talhões':' talhão')}],prev:[{k:'mut',t:''}],colh:[{k:'b',t:colG}],
          prtv:pd?[{k:'b',t:pdT},{k:'br'},{k:'mut',t:pdA}]:[{k:'mut',t:pdT}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
       kids:xs.map(x=>prTalRow(c,x))}}; }).sort((a,b)=>a.ord-b.ord||a.cu.localeCompare(b.cu));
-  GR('g_tal').rows=grupos.map(g=>g.row); const x0={}; grupos.forEach(g=>{ x0[g.row.id]=true; }); GR('g_tal').x0=x0;
+  GR('g_tal').rows=grupos.map(g=>g.row);   // TAB-12: a cultura nasce recolhida (a linha soma os talhões)
   /* por semana: fruta semanal por produto; grão por safra */
   const hz=self.state.pr_hz||'4'; const s0=prSem(prHoje()); const rows=[];
   const prods=[...new Set(X.filter(x=>x.k.semanal).map(x=>prUn(x.k.cultura).prod))];

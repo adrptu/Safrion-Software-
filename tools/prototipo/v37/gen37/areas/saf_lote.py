@@ -78,12 +78,6 @@ LINHA_TIT = (f'<div class="sl-l sl-tit"><span class="sl-s" aria-hidden="true"></
              f'<span class="sl-sub">{H("l.sub")}{H("l.motivoSep")}{H("l.motivo")}</span></span>{SIT}</div>')
 
 
-def link():
-    """Ação no título do bloco "Talhões e cultivos" (safra de uma fazenda): a mesma forma do "Planejar talhões livres…" ao lado."""
-    return (f'<sc-if value="{H("sl_tem")}" hint-placeholder-val="{F()}"><button type="button" id="sl-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("sl_abrir")}"'
-            f' style="min-height: 28px; white-space: nowrap;">Editar talhões…</button></sc-if>')
-
-
 def painel():
     lab = ''.join(f'<span>{x}</span>' for x in ROTS)
     ap = (f'<div class="sl-l sl-ap" role="group" aria-label="Aplicar aos marcados" data-vazio="{H("sl_apVazio")}">'

@@ -6,7 +6,7 @@
       TAB-08 Planos agronômicos › Atividades em Tabela usa a mesma peça de cabeçalho e de filtro (pa_tb).
   B · navegador a 1440 × 900, todas as telas com tabela do motor à vista:
       B1 a tabela tem moldura (borda e raio de 12 px) e o cabeçalho tem ⇅ e funil em toda coluna;
-      B2 toda linha que abre o detalhe (g2ed) mostra a seta na 1ª célula (› ou ▸/▾), sem texto (TAB-04);
+      B2 a linha que abre o detalhe (g2ed) não tem a seta de ir (TAB-13, 17/10; antes, TAB-04: seta em toda linha que abre o detalhe);
       B3 sem linha vertical no cabeçalho e nas células da 1ª coluna.
   C · navegador: Cartões (VIS-07, 17/10, revê a VIS-06) em O.S. (também agrupada por talhão), Planejar safra, Parceiros e Produtos (árvore):
       grade de cartões compactos, sem cabeçalho de colunas, título com o selo de estado, até 4 campos rotulados; Atividades em Tabela ordenam
@@ -50,8 +50,9 @@ def parte_b(c, J, BASE):
             const box=t.parentElement, cs=getComputedStyle(box), hs=[...t.querySelectorAll('[role=columnheader]')].filter(h=>h.querySelector('.g2hb'));
             const ferr=hs.some(h=>h.querySelector('button.g2hb'))?hs.filter(h=>!h.querySelector('.g2so')||!h.querySelector('.g2fb')).length:0;
             const rows=[...t.querySelectorAll('[role=row].g2ed')].filter(r=>r.getClientRects().length).slice(0,12);
-            // TAB-09 (16/10/2026): a seta fica na 1ª célula da linha (com seleção, antes da caixa), não necessariamente na do nome (.g2c0)
-            const semSeta=rows.filter(r=>{ const c0=r.querySelector('[role=cell]'); return !c0||!c0.querySelector('.g2drill,.g2car'); }).map(r=>r.getAttribute('data-rid'));
+            // TAB-13 (17/10/2026, substitui a TAB-04 de 16/10 neste ponto): a linha folha que abre o detalhe não tem seta, nem a de ir; abre pelo
+            // clique na linha. Desvio = linha com a seta de ir (.g2drill) ou com seta de abrir (.g2car) na 1ª célula que não é a 1ª coisa dela
+            const semSeta=rows.filter(r=>{ const c0=r.querySelector('[role=cell]'); return !c0||!!r.querySelector('.g2drill'); }).map(r=>r.getAttribute('data-rid'));
             const c0=t.querySelector('[role=cell].g2c0'), h0=t.querySelector('[role=columnheader].g2c0');
             const vert=[c0,h0].filter(Boolean).some(e=>{ const sh=getComputedStyle(e).boxShadow; return sh&&sh!=='none'; });
             out.push({g:t.getAttribute('data-g2g'), moldura:cs.borderTopWidth==='1px'&&cs.borderTopLeftRadius==='12px', ferr, semSeta, vert}); }); return out; })()""") or []
@@ -63,7 +64,7 @@ def parte_b(c, J, BASE):
             if t['vert']: ruins['vert'].append((pg, t['g']))
     chk(f'B1 TAB-08 toda tabela à vista tem moldura de 12 px ({n} tabelas)', n > 40 and not ruins['moldura'], ruins['moldura'][:6])
     chk('B1b TAB-08 toda coluna com ordenar tem ⇅ e funil', not ruins['cab'], ruins['cab'][:6])
-    chk('B2 TAB-04 toda linha que abre o detalhe mostra a seta na 1ª célula', not ruins['seta'], ruins['seta'][:6])
+    chk('B2 TAB-13 linha que abre o detalhe sem a seta de ir (a seta só na linha com filhos)', not ruins['seta'], ruins['seta'][:6])
     chk('B3 TAB-08 sem linha vertical na 1ª coluna', not ruins['vert'], ruins['vert'][:6])
 
 def parte_c(c, J, BASE):

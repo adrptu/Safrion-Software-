@@ -1,0 +1,15 @@
+OK  F1 1440: "Nova safra" com Santa Rita e Lagoa Grande cria uma sub-safra por fazenda, ligadas, em rascunho; abre a primeira com as duas fazendas na faixa (✓) e na tabela (um grupo cada)
+OK  F2 1440: na etapa 2 os talhões das duas fazendas ficam juntos (T7 e os pivôs); a ação num pivô abre a sub-safra da Lagoa Grande na mesma etapa (2), com o contexto dela
+OK  F3 1440: na escolha da safra as duas linhas dizem "2 fazendas"
+OK  F1 390: "Nova safra" com Santa Rita e Lagoa Grande cria uma sub-safra por fazenda, ligadas, em rascunho; abre a primeira com as duas fazendas na faixa (✓) e na tabela (um grupo cada)
+OK  F2 390: na etapa 2 os talhões das duas fazendas ficam juntos (T7 e os pivôs); a ação num pivô abre a sub-safra da Lagoa Grande na mesma etapa (2), com o contexto dela
+OK  F3 390: na escolha da safra as duas linhas dizem "2 fazendas"
+OK  F4 acrescentar Lagoa Grande à Safra 2026/27: S2627 conserva ID e estado (Em planejamento); a nova sub-safra nasce em rascunho, com a mesma mãe
+OK  F5 tirar Santa Rita da Safra 2026/27 é recusado no campo Fazendas, com o motivo (cultivos e SOL-2026-07) e onde resolver; nada muda
+OK  F6 tirar a Lagoa Grande vazia: a sub-safra sai e a Safra 2026/27 volta a uma fazenda, com o mesmo ID e estado
+OK  F7 enviar as 2 fazendas com a gravação da Santa Rita falhando: envio parcial, a Lagoa Grande (nada a cotar) conta, nada gravado como enviado da Santa Rita
+OK  F7b a nova tentativa envia só a Santa Rita (SOL-2027-02) e reaproveita a Lagoa Grande; uma solicitação só
+OK  F7c enviar de novo sem mudança na demanda não duplica nem complementa
+OK  F8 390 · teclado: foco na fazenda e Enter abre a Lagoa Grande na mesma etapa (3); a faixa cabe sem rolagem lateral
+OK  F9 sem erro de JS
+RESULTADO: 14/14

@@ -80,7 +80,7 @@ def cd06():
     # revisão TABR (A1, 09/10): a Situação logo depois do item, à vista sem rolar; o controle (lote e validade) no painel do item
     gi=grid([dict(k='item',l='Grupo › item',w=220),dict(k='est',l='Situação',w=200),dict(k='nat',l='Natureza de custo',w=170),dict(k='un',l='Unidade'),dict(k='embt',l='Embalagem',w=130),
              dict(k='preco',l='Preço de referência',t='num',a='r',w=140),dict(k='pdata',l='Data do preço',t='date')],
-        tree,gid='g_itm',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
+        tree,gid='g_itm',tree=True,dele=False,total=False,qf=QF_CAD,
         edit=dict(m='form',title='Item',newTitle='Cadastrar item',
             sub='Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.',
             fields=[txt('item','Nome do item'),
@@ -212,7 +212,7 @@ function EXTRAVALS(self,v){
     r.v.grupo=g.v.nome; r.v.ngrupo='';
     const par=rows.find(p=>p.id===g.id); const cur=rows.find(p=>(p.kids||[]).some(k=>k.id===r.id));
     if(cur!==par){ c6rm(rows,r.id); par.kids=par.kids||[]; par.kids.push(r); }
-    const x=Object.assign({},g2st(self,'g_itm').x||GR('g_itm').x0||{}); x[par.id]=true; g2set(self,'g_itm',{rows:rows,x:x,fl:r.id});
+    const x=Object.assign({},g2st(self,'g_itm').x||{}); x[par.id]=true; g2set(self,'g_itm',{rows:rows,x:x,fl:r.id});
     const e=c6emb(r.v); msg.push(r.v.un+(e?' · '+e:'')); msg.push(isnum(r.v.preco)?'R$ '+nf(r.v.preco,2)+'/'+r.v.un+' em '+br(r.v.pdata):'sem preço de referência');
     if(r.v.sit==='Inativo') msg.push('inativo: sai dos planos e das cotações'+(Number(r.v.saldo)?'; o saldo de '+nf(r.v.saldo)+' '+r.v.un+' segue no Estoque':''));
     self.setState({g2toast:'Salvo: '+r.v.item+' · '+msg.join(' · ')+'.'}); }; }
@@ -264,7 +264,7 @@ def cd07():
     # rascunho (A8: depois de publicar ela ficava vazia em todas as linhas)
     g=grid([dict(k='cod',l='Dimensão › código',w=170),dict(k='est',l='Situação',w=170),dict(k='nome',l='Nome',w=170),dict(k='ini',l='Início da vigência',t='date'),
             dict(k='fim',l='Fim da vigência',t='date'),dict(k='conta',l='Conta no ERP (Sankhya)',w=150),dict(k='rasc',l='No rascunho',w=110)],
-        tree,gid='g_dim',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
+        tree,gid='g_dim',tree=True,dele=False,total=False,qf=QF_CAD,
         tools=secbtn('c7imp','Importar do ERP','Simulação: mostra a prévia antes de trazer qualquer código'),
         edit=dict(m='form',title='Código',newTitle='Cadastrar código',leafOnly=True,
             sub='Altere o código e a tradução. A mudança entra no rascunho e vale para novos lançamentos depois de publicada; fatos já gravados mantêm as dimensões da época.',
@@ -363,7 +363,7 @@ function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.key
   const marca=(id,tipo)=>{ const m=Object.assign({},c7mud(self)); if(!m[id]) m[id]=tipo; self.setState({c7mud:m}); };
   self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_dim'||!r) return;
     const par=rows.find(p=>p.v.cod===r.v.dim&&p.kids); const cur=rows.find(p=>(p.kids||[]).some(k=>k.id===r.id));
-    if(par&&cur!==par){ c7rm(rows,r.id); par.kids.push(r); const x=Object.assign({},g2st(self,'g_dim').x||GR('g_dim').x0||{}); x[par.id]=true; g2set(self,'g_dim',{rows:rows,x:x,fl:r.id}); }
+    if(par&&cur!==par){ c7rm(rows,r.id); par.kids.push(r); const x=Object.assign({},g2st(self,'g_dim').x||{}); x[par.id]=true; g2set(self,'g_dim',{rows:rows,x:x,fl:r.id}); }
     marca(r.id,isNew?'novo':'alterado');
     self.setState({g2toast:'Salvo no rascunho v'+(c7ver(self)+1)+': '+r.v.cod+' · '+r.v.nome+(r.v.trad==='Dimensão própria'?' · traduzido na integração':(r.v.conta?' → '+r.v.conta:' · sem conta: fica fora da publicação até ser mapeado'))+'.'}); };
   const SEMNOV='Simulação: o ERP não tem mudanças novas para o rascunho.'; const IC=c7impCalc(self); const lis=a=>a.length?a:[{t:'nenhum'}];

@@ -18,7 +18,14 @@ ROWS = r"""(()=>{ const n=s=>(s||'').replace(/\s+/g,' ').trim(); const t=[...doc
   return [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2tot')).map(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const o={_id:r.getAttribute('data-rid'),_kid:r.classList.contains('g2kid')};
     cs.forEach((c,i)=>{ const h=hs[i]||('C'+i); let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); o[h]=n(x).replace(/^[▾▸] ?/,''); const ch=c.querySelector('[data-dica]:not([data-dica=""]),[title]'); if(h==='SITUAÇÃO') o._dica=ch?(ch.getAttribute('data-dica')||ch.getAttribute('title')||''):'';   /* DS-DICA (v56): a dica fica em data-dica, não em title */ });
     return o; }); })()"""
-def rows(): return c.js(ROWS) or []
+# TAB-12 (17/10/2026): a tabela de talhões agrupa por fazenda também com uma só, e a faixa da fazenda nasce recolhida; a pessoa abre a faixa
+# (a seta dela) antes de ler as linhas dos talhões. Só as faixas recolhidas; os talhões divididos ficam como estão (expande_tudo abre)
+FAIXAS = "(()=>{const b=[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].find(b=>b.offsetParent); if(!b) return false; b.click(); return true;})()"
+def abre_faixas():
+    for _ in range(4):   # uma faixa por vez (cada clique redesenha a tabela)
+        if not c.js(FAIXAS): break
+        time.sleep(.4)
+def rows(): abre_faixas(); return c.js(ROWS) or []
 def nivel0(): return [r for r in rows() if not r['_kid']]
 def faixa(): return c.js("(document.body.innerText.match(/Nesta safra[^\\n]+/)||[''])[0]") or ''
 def chips(): return c.js(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).map(b=>{N}(b.innerText))") or []

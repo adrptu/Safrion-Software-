@@ -466,7 +466,7 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const c = cenGet();
     return { id: 'grp:' + pr, ro: true, v: { per: pr, sit: def ? 'Déficit' : (sus ? 'Suspenso' : 'Livre') }, s: { per: pr, sit: '' },   /* o resumo do grupo não vira chip do filtro rápido */
       p: { per: [{ k: 'b', t: pr }], of: [{ k: 'mut', t: '' }], comp: [{ k: 'mut', t: '' }], cob: [{ k: 'mut', t: '' }], livre: [{ k: 'mut', t: '' }], sit: [{ k: 'mut', t: gt }] },
       kids: rs.map(comOfRow) }; });
-  const x0 = {}; Object.keys(por).forEach(pr => { x0['grp:' + pr] = true; }); GR('g_of').x0 = x0;
+  // TAB-12 (17/10/2026): o produto nasce recolhido (a linha dele diz os períodos em déficit e suspensos)
   const pz = comPrecos(c); self._pz = pz; GR('g_pr').rows = pz.map(comPrRow);
   const ind = comIndicadores(c); v.k_ar = comRS(ind.aRec); v.k_vn = comRS(ind.venc); v.k_en = comRS(ind.ent30);
   const tt = comTitulos(c); const prox = tt.filter(t => !comVencido(t) && t.venc)[0]; v.k_arn = prox ? 'próximo: ' + prox.cliente + ' ' + comRS(prox.valor) + ' em ' + prBr(prox.venc) : 'nada a vencer';

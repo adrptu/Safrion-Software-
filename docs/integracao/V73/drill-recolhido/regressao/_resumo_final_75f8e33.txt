@@ -1,0 +1,5 @@
+saf_fazenda_recolhida exit=0 108s RESULTADO: 18 ok · 0 falhas
+rev93_reteste_navegador_tab12 exit=0 85s 
+saf_lote exit=0 170s RESULTADO: OK 47/47
+cartoes exit=0 539s RESULTADO: 70/70
+saf_revisao exit=0 179s RESULTADO: 42 ok · 0 falhas

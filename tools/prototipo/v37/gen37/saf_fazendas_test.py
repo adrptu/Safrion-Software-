@@ -55,6 +55,10 @@ try:
             m0 == ['Santa Rita'] and [x['faz'] for x in ls] == ['Santa Rita', 'Lagoa Grande'] and ls[0]['mae'] and ls[0]['mae'] == ls[1]['mae']
             and all(x['estado'] == 'Rascunho' for x in ls) and '2 fazendas' in t1 and fx is None and ct == ['✓ Santa Rita', '✓ Lagoa Grande'] and gs == ['Santa Rita', 'Lagoa Grande'], [m0, ls, t1, fx, ct, gs])
         # F2 · na etapa 2 as fazendas ficam juntas; a ação numa linha da Lagoa Grande vale na sub-safra dela, na mesma etapa
+        # TAB-12 (17/10/2026): cada faixa de fazenda nasce recolhida; a pessoa abre as duas para ver os talhões juntos
+        for _ in range(4):   # uma faixa por vez (cada clique redesenha a tabela)
+            if not J("(()=>{const b=[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].find(b=>b.offsetParent); if(!b) return false; b.click(); return true;})()"): break
+            time.sleep(.4)
         txt = J("document.querySelector('main').innerText"); st0 = J("window.__safSelf.state.saf")
         clica("[...document.querySelectorAll('[role=table] [role=row][data-rid]')].filter(r=>r.offsetParent).map(r=>[...r.querySelectorAll('button')].find(b=>/^Vincular ciclo/.test(b.innerText.trim())&&/Pivô/.test(r.innerText))).find(Boolean)"); time.sleep(1.0)
         st = J("[window.__safSelf.state.saf,window.__safSelf.state.step]"); pn = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.innerText:'';})()") or ''
