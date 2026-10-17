@@ -78,9 +78,11 @@ try:
     # ---------- F22 / AC-PCM-23 · marco sugerido no painel Vínculo ----------
     m.ir('plano=PM-03', perfil='Otávio', limpa=True)
     e = man_js("delete m.vinc['PM-03|a04']; return {msg:''};"); m.ir('plano=PM-03')
-    m.clk('Vincular ativo'); m.setv('#vk_aid', 'a04'); time.sleep(.3); vk = J("(document.querySelector('#vk-painel')||{}).innerText||''") or ''
-    dv = J("(document.querySelector('#vk_data')||{}).value||''"); lv = J("(document.querySelector('#vk_leit')||{}).value||''")
-    m.ok(not e and 'Marco da OM-0205' in vk and dv == '2026-06-02' and lv == '3300', 'F22 · Vincular o Trator 04 ao PM-03 sugere o marco da OM-0205 (02/06 · 3.300 h), corrigível com motivo', [e, vk[:240], dv, lv])
+    # MA-VINCULO (16/10): painel único "Vincular ativos"; a base da OM encerrada vem proposta e "Corrigir" abre data e leitura (com motivo)
+    m.clk('Vincular ativos'); time.sleep(.3); vk = J("(document.querySelector('#vl-painel [data-aid=\"a04\"]')||{}).innerText||''") or ''
+    m.clk('Corrigir', '#vl-painel'); dv = J("(document.querySelector('#vl_data_a04')||{}).value||''"); lv = J("(document.querySelector('#vl_leit_a04')||{}).value||''")
+    mt = J("!!document.querySelector('#vl_mot_a04')")
+    m.ok(not e and 'Última execução registrada: OM-0205 · 02/06 · 3.300 h' in vk.replace('\n', ' ') and dv == '2026-06-02' and lv == '3300' and mt, 'F22 · Vincular o Trator 04 ao PM-03 sugere o marco da OM-0205 (02/06 · 3.300 h), corrigível com motivo', [e, vk[:240], dv, lv, mt])
     m.sem_erro('fim')
 finally:
     rc = m.fim()

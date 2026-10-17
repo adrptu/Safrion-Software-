@@ -1,0 +1,7 @@
+build2 rc=0
+rc=0 80s ma_vinculo_test :: RESULTADO: 88/88 ok
+rc=1 23s ma_vinculo_test_BASE :: RESULTADO: 1/11 ok · FALHAS: A1 · entrada do módulo: "4 ativos sem plano de manutenção · Vincular ›" leva a Ativos › Sem plano; A1 · um toque: Ativos com o filtro rápido "Sem plano" ligado (4 linhas) e a primária "Vincular a plano" no cabeçalho; A1 · coluna Plano: sugestão explícita
+rc=0 24s medida_depois :: RESULTADO: 0/0 ok
+rc=0 32s medida_base :: RESULTADO: 0/0 ok
+rc=0 51s fotos :: 
+FIM

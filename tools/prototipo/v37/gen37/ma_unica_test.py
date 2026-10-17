@@ -70,7 +70,8 @@ try:
     ruins = {}
     for a in ['vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=ativos&modo=abastecimentos', 'vis=planos', 'ativo=a01', 'plano=PM-01']:
         m.ir(a); pf = J(PRIMS_FORA) or []
-        btn_linha = J("[...document.querySelectorAll('[role=row][data-rid] button')].filter(b=>b.getClientRects().length&&!b.classList.contains('g2car')).length")
+        # MA-VINCULO (16/10): o ⋯ da linha (TAB-05, 15/10) não é comando: abre o menu, e o "Desvincular" dele abre o painel com o motivo. Só ele sai da conta
+        btn_linha = J("[...document.querySelectorAll('[role=row][data-rid] button')].filter(b=>b.getClientRects().length&&!b.classList.contains('g2car')&&!b.classList.contains('g2mais')).length")
         faixa = J("!!document.querySelector('.etp-ind,nav[aria-label=\"Telas da manutenção\"],[aria-label=\"Etapas do processo\"]')")
         if len(pf) > 1 or btn_linha or faixa: ruins[a] = (pf, btn_linha, faixa)
     for a in ['om=OM-0234', 'om=OM-0233', 'achado=INSP-104', 'venc=PM-02|a03|s1', 'ativo=a02']:
