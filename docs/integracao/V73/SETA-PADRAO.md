@@ -71,7 +71,7 @@ Contagens executadas (scripts em `/tmp/claude-0/seta_scr`, saída abaixo resumid
 | ▾ nas 148 páginas montadas | 995 (148 páginas) | 94 (54 páginas), todos de lista suspensa ou da faixa de etapas | idem |
 | Telas com triângulo de texto à vista (A do teste) | 20 a 1440 · 17 a 390 | 0 · 0 | `seta_padrao_test.py` |
 | Controles de abrir/recolher sem o componente (B) | 21 telas a 1440 · 18 a 390 | 0 · 0 | idem |
-| Setas desenhadas e medidas (C) | 0 com o componente | 1.706 a 1440 (1.340 de ir) · 1.559 a 390 | idem |
+| Setas desenhadas e medidas (C) | 0 com o componente | 1.706 a 1440 (1.340 de ir) · 1.559 a 390 na f1a4720; 1.716 · 1.569 na composição bde9f57 (com as 9 raias do Kanban) | idem |
 | Telas com alvo pequeno ou sobreposto (F) | 17 a 1440 (22 px) · 14 a 390 | 0 · 0 | idem |
 
 ## Oráculos de teste mudados
@@ -88,6 +88,9 @@ O desenho mudou; o que cada teste verifica não ficou mais fraco. Onde o glifo o
 | `ma_rastreio_test.py` F18 | literal "Mostrar checklist e peças de" no HTML | `'checklist e peças de '` e `g2seta(` no HTML | o nome vem do `g2seta` ("Abrir …"/"Recolher …") |
 | `pa_lista_test.py`, `patest.py`, `acao_unica_test.py` | nome "Mostrar insumos de …" | "Abrir insumos de …" | nome único da TAB-11 |
 | `patest.py` (plano novo) | "Mostrar as versões" ausente | "Mostrar as versões" e "Abrir as versões" ausentes | mantém a força da negação com o nome novo |
+| `tabelas_saf_test.py` (meta decimal do T2) | `/^T2\b/` no texto da linha | a mesma regra, só em linha sem `.g2car` | a linha-grupo do talhão começava pelo glifo e ficava de fora; agora ficaria dentro. A linha achada é a mesma da base (base 24/24; candidata com o teste antigo cai no mesmo ponto, reproduzido isolado) |
+| `solo_os_test.py`, `solo_rev_test.py`, `solo_saf_test.py` (INS e LINHA) | `startsWith('T2 ')` no texto da linha | idem, sem a linha-grupo (`.g2car`) | mesmo caso: o `solo_os` caía no AC-SOLO-20 ("sem ação de insumos T2"); base 18/18, candidata 18/18 |
+| `kanban_raias_unit.js` (PR #89, patch 02b do revisor) | `r.seta==='▾'` | nome "Recolher raia …"/"Abrir raia T2 …" e sem o campo `seta` | o glifo saiu do estado da raia |
 | `tabelas_lib.py`, `tabelas_cad_test.py`, `tabelas_irr_test.py`, `tabelas_est_test.py`, `tabelas_saf_test.py`, `testes_pedido.py` | `button[aria-label^="Expandir"]` (e "Recolher") | `button.g2car[aria-expanded=false]` (e `button.g2car[aria-expanded]`) | o nome mudou; o T03 do `testes_pedido` podia achar o "Recolher menu" lateral, agora acha a seta |
 
 Sem mudança de oráculo: `ds_1610_test.py` B2 (procura `.g2drill,.g2car`), `ds_1510_test.py` (S4 e C), `cartoes_test.py` M2h (`aria-expanded`), `cadastros_padrao_test.py` P5 (`.g2car` e `aria-expanded`), testes que só tiram o glifo do texto (`replace(/^[▸▾]…/)`).
@@ -118,3 +121,77 @@ Pendência aberta no código do Codex: nenhuma. Nos trechos listados (`cenario.j
 
 - Painel da O.S. a 390 px: a tabela "Insumos e doses" espreme a coluna Produto ("Semente / de / soja / 58 / W") e deixa um vão grande acima da linha. Igual na base (foto `os_painel_secoes_390_antes.jpg`).
 - A 390 px a 1ª coluna presa do CD-01 é limitada a 45 % da caixa: com o alvo de 44 px o nome perde 8 px ("Rio Verde/GO" quebra em duas linhas; na base cabia).
+
+## Composição e envio
+
+| Commit | O que é |
+|---|---|
+| `ac8590d` | TAB-11 sobre a c9ffa08 (componente, telas, teste novo, testes que achavam a seta pelo glifo) |
+| `f1a4720` | alvo de 44 px no toque sem roubar a 1ª coluna; seção com nome e seta com 44 px; contraprova |
+| `c2a20d8`, `02eb624` | documento, galeria e brutos |
+| `fb6dc9b` | merge da ponta publicada 47ccc1d (EST-ONDA0, Crédito), sem conflito; enviado a `origin/claude/v44-v73-seta` |
+| `705317d` | `tabelas_saf_test` sem a linha-grupo |
+| `f42f5c7` | merge da d995ded (PR #88, OS-LOTE), sem conflito; enviado a `origin/claude/v44-v73-seta` |
+| `6023fb3` | merge da `claude/v44-v73-seta` (f42f5c7) sobre a composição 457ef14 (PR #89 com os ajustes 01 e 03), sem conflito, branch local `claude/v44-v73-seta-comp` |
+| `bde9f57` | patch 02b na raia do Kanban e esta seção |
+| `304ce82` | INS e LINHA dos testes de solo sem a linha-grupo |
+| `e54bef1` | merge da 6631d58 (457ef14 + docs comp89), só documentação |
+
+## Testes executados
+
+Render montado da árvore limpa de cada commit (`build.py` + `montar_render.py`, dados sintéticos). Navegador: um Chrome meu por vez, só com no máximo 1 principal rodando. Logs em `docs/integracao/V73/seta/` e `docs/integracao/V73/seta/regressao/` (nome `<teste>_<candidata|base>_<commit>.log`).
+
+### Na composição final (render de bde9f57 = e54bef1 nas telas)
+
+| Teste | Comando | Candidata | Base c9ffa08 | Classificação |
+|---|---|---|---|---|
+| seta_padrao_test (TAB-11) | `seta_padrao_test.py` | 14/14 (148 telas + 10 estados; 387 controles; 1.716 setas, 1 desenho) | 3/14 (reprova A, B, C, D, F e E390) | novo; contraprova ok |
+| contraprova da raia | `SPT_SO='OS.dc.html?view=kanban' seta_padrao_test.py` no render 6023fb3 (sem o 02b) | reprova A e B nas 9 raias, 1440 e 390 | — | contraprova ok |
+| kanban_raias_test (Node) | `kanban_raias_test.py` | 9/9 | — | verde |
+| visoes2_formas_test | `visoes2_formas_test.py` | 23/23 | — | verde |
+| tab_drill_cab_test | `tab_drill_cab_test.py` (1440 e 390) | 6/6 | — | verde |
+| ds_1610_test | `ds_1610_test.py` | 14/14 | — | verde |
+| ds_1510_test | `ds_1510_test.py` | 17/17 | — | verde |
+| ds_modulos --catraca | `ds_modulos.py --catraca` | catraca ok | — | verde |
+| ds_inventario --catraca | `ds_inventario.py --catraca` | catraca ok (fb6dc9b) | — | verde |
+| tabelas_os_test | `tabelas_os_test.py` | 40/40 | — | verde |
+| os_cenario_test | `os_cenario_test.py` | 22/22 | — | verde |
+| os_lote_test | `RENDER_DIR=<render> os_lote_test.py` | 32/32 | — | verde |
+| visoes_test | `visoes_test.py` (comp) | 9/9 | — | verde |
+| cartoes_test | `cartoes_test.py` | 70/70 | — | verde |
+| pa_lista_test | `pa_lista_test.py` | 24/24 | — | verde |
+| cadastros_padrao_test | `cadastros_padrao_test.py` | 44/44 | — | verde |
+| cadastros_rev1_test | `cadastros_rev1_test.py` | 19/19 | — | verde |
+| tabelas_est_test | `tabelas_est_test.py` | 34/34 | — | verde |
+| ma_unica_test | `ma_unica_test.py` | 23/23 | — | verde |
+| ma_rastreio_test | `ma_rastreio_test.py` | 58/58 | — | verde |
+| popover_390_test | `popover_390_test.py` | 9/9 | — | verde |
+| paginas_scan_test | `paginas_scan_test.py` | 5/5 (148 páginas) | — | verde |
+| acao_unica_test | `acao_unica_test.py` (saf · familias) | 10/10 · 8/8 | — | verde |
+| acao_unica_test gemini | `acao_unica_test.py gemini` | 1/3 | 1/3, as mesmas falhas 21 e 22 | vermelho antigo |
+| acao_unica_test v3 | `acao_unica_test.py v3` | erro no item 23 (clique em nulo) | o mesmo erro | vermelho antigo (não chega à linha mudada) |
+| rend_multiconjuntos_test | `rend_multiconjuntos_test.py` | 18/18 | — | verde |
+| saf_capacidade_simetrica_test | `saf_capacidade_simetrica_test.py` | 38/38 | — | verde |
+| saf_revisao_test | `saf_revisao_test.py` | 42/42 | — | verde |
+| solo_os_test | `solo_os_test.py` | 18/18 (304ce82); com o teste antigo, 12/12 e erro no AC-SOLO-20 | 18/18 | oráculo de localização (corrigido) |
+| solo_rev_test | `solo_rev_test.py` | 22/22 (e54bef1) | — | verde |
+| solo_saf_test | `solo_saf_test.py` | 36/36 | — | verde |
+| filtros_cultura_test | `filtros_cultura_test.py` | 10/10 | — | verde |
+| patest | `patest.py` | para em "o nome da atividade abre o painel…" (erro) | o mesmo ponto e o mesmo erro | vermelho antigo |
+| tabelas_irr_test | `tabelas_irr_test.py` | 98/106 | 98/106, as mesmas 8 (TABR-CTX-02) | vermelho antigo conhecido |
+| ficha_pivo_test | `ficha_pivo_test.py` | 21/21 | — | verde |
+| testes_pedido | `testes_pedido.py` | 7/11 (T01, T02, T05, T07 falham) | 6/11 (T01, T02, T03, T05, T07) | vermelhos antigos; o T03 passa na candidata |
+| tabelas_saf_test | `tabelas_saf_test.py` | 24/24 (f42f5c7, teste corrigido) | 24/24 | oráculo de localização (corrigido) |
+| visoes_unit_test, ds_unit_test | Node | 25/25 · 31/31 (fb6dc9b) | — | verde |
+
+Reexecutados na e54bef1 (cruzam os merges: SAF carrega o `cenario.js` do #88; todas as telas carregam o `g2lib`): `saf_operacoes_test` 87/87, `saf_tab_test` 14/14, `tabelas_ben_test` 12/12, `tabelas_cad_test` 206/206. Também verdes na f1a4720: os mesmos quatro e `pa_regras_test` 18/18 (Node, sem tela mudada nos merges: prova equivalente).
+
+### 2º lote (para não repetir)
+
+`os_lote_test` (com `RENDER_DIR`), `ma_unica_test`, `popover_390_test`, `acao_unica_test` (saf, familias, gemini, v3), `paginas_scan_test`, `rend_multiconjuntos_test`, `saf_capacidade_simetrica_test`, `saf_revisao_test`, `solo_os_test`, `solo_rev_test`, `solo_saf_test`, `filtros_cultura_test`, `patest`, `ma_rastreio_test`, `tabelas_irr_test`, `ficha_pivo_test`, `testes_pedido`.
+
+### Especificado, não executado
+
+- Leitor de tela real (NVDA, VoiceOver): o nome e o `aria-expanded` foram conferidos no DOM, não com leitor.
+- Aparelho físico: o toque foi emulado (CDP, 390 × 844, ponteiro grosso).
+
