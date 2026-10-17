@@ -1,0 +1,9 @@
+CA02 AST/JS capturado; layout substituído, não é build completo.
+PASS g2open/save real confere sem repetir efeito físico
+PASS falha de gravação conserva formulário e motivo
+PASS referência da abertura recusa fato alterado mesmo após refresh
+PASS divergência e vínculo usam o caso oficial sem refazer consumo
+PASS AL12 negada não grava
+PASS divergência sem motivo fica no campo
+PASS offline é somente leitura e quantidade não tem edição
+7 testes: G2 e comandos reais; perfil/storage simulados, sem UI/browser.
