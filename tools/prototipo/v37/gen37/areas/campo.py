@@ -237,7 +237,7 @@ function EXTRAVALS(self,v){
   v.ajuste_indisponivel=!!self.state.ajuste_indisponivel;
   v.ajustar_saldo=()=>{
     const c=cenGet(), o=c.ordens&&c.ordens['OS-0421'];
-    if(o&&Number(o.saldo)>0&&['A liberar','Liberadas','Em execução'].includes(o.etapa)){
+    if(o&&Number(o.saldo)>0&&o.etapa==='A liberar'){
       window.location.href='OS.dc.html#OS-0421:ajustar'; return;
     }
     self.setState({ajuste_indisponivel:true});
@@ -276,7 +276,7 @@ def _ca01det():
         edit=dict(m='origin',title='Custódia',fields=[dict(k='item',l='Item · lote',ro=True),dict(k='ent',l='Entregue',ro=True,u='L'),dict(k='cons',l='Consumido',ro=True,u='L'),dict(k='cust',l='Em custódia',ro=True,u='L')]),
         search=False,gid='g_mat',total=False)
     ajuste=(f'<button type="button" onClick="{H("ajustar_saldo")}" style="{BTN_ST(False,True)}">Ajustar produtos e doses do saldo</button>'
-            +f'<sc-if value="{H("ajuste_indisponivel")}" hint-placeholder-val="{H("false")}"><div role="status">Prévia · nada foi alterado. A ordem não tem saldo ajustável neste cenário. '
+            +f'<sc-if value="{H("ajuste_indisponivel")}" hint-placeholder-val="{H("false")}"><div role="status">Prévia · nada foi alterado. Neste protótipo, o ajuste exige saldo positivo e estado A liberar. Ajustar uma ordem liberada ou em execução ainda não está disponível. '
              '<a href="OS.dc.html#OS-0421">Abrir O.S. ›</a></div></sc-if>')
     fichas=(f'<button type="button" onClick="{H("fichas")}" title="Consultar as fichas do caldeiro, do operador e do almoxarife" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{icon("doc",14)}Ver fichas</button>')
     FV2=(f'Prévia demonstrativa das fichas da v2 · confira a versão vigente na O.S. · saldo de 160 ha · caldeiro: Fungicida A 0,50 L/ha = 80 L · operador: T1+T2, faixas pendentes dos dias 5 a 7 · '

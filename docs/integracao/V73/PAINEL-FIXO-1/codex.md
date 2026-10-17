@@ -5,3 +5,7 @@ CA-01det não usa mais drawer genérico de ajuste nem DID que fabricava v3 liber
 
 Executado: AST; geração real isolada CA-01det; scanner paineis_estaticos do f48aa09 nessa página: base1 painel/candidata0. Não executei varredura das demais páginas para afirmar12→11 global. Oito casos da ação JS extraída passaram, cenário permanece intacto. Contraprova base com DID fixture falha por ausência da ação real (primeiro ensaio tinha DID ausente, corrigida fixture).
 Sem navegador: Claude deve testar1440/390, teclado, destino real, retorno/contexto e scanner completo. Sem alteração nos comandos da O.S., nos outros painéis ou publicação.
+
+
+## Correção A1 — 17/10/2026
+Retorno Claude 6230008555 reproduzido no contrato de destino: processo_os só expõe ajuste no estado A liberar. A navegação agora exige esse estado e saldo positivo. Liberadas/Em execução ficam na página, com aviso de que o ajuste nessas fases ainda não está disponível e link Abrir O.S.; não afirma ausência de saldo. Oito casos JS extraído passam sem mutação; o teste novo falha no HEAD d3435d0 por navegar indevidamente. AST válido. Formulário aberto, teclado e 1440/390 aguardam reteste Claude; não houve navegador Codex. Ajuste de saldo em execução permanece requisito funcional pendente, não encerrado por esta correção.
