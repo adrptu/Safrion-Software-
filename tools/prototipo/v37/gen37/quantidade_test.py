@@ -111,9 +111,25 @@ R.borda.mip={um_lote_exato:avi([nb]),dois_lotes_sem_um_que_cubra:avi([Math.round
 // 12 · rodada 4 (PRE-REV Y1–Y6): trava do ajuste do núcleo, término com 2 casas, v2 de 0 ha, MIP com total 0, rótulo "Total 0"
 const aj=(fis,d,ar)=>osc_ajFalta({lotes:{'P|L1':{prod:'P',lote:'L1',fisico:fis,reservado:0,quarentena:0}}},'P','L',d,ar);
 R.r4={aj:[aj(cenQtd(0.5,49.31),0.5,49.31),aj(cenQtd(0.5,49.31)-0.01,0.5,49.31),aj(100,0.0001,49.31),aj(100,0.4,0.01),aj(100,0.5,0.01)]};
-const idL=ords.find(k=>i0.ordens[k].etapa==='Liberadas'); const term=(cob)=>{ irrReset(); const s=irrGet(); irrIniciar(s,idL); try{ irrTerminar(s,idL,cob,null); }catch(e){ return 'ERRO '+e.message; }
+// Fixture de tempo/medição: o teste de quantidade termina no fim previsto e fornece uma leitura sintética explícita.
+// O comando de produção mantém as travas de término antecipado e hidrômetro obrigatório.
+function terminarNoFim(s,id,cob){
+  const o=irrO(s,id), p=irrPassAtual(o);
+  s.agora=Math.max(s.agora,irrFimP(o,p));
+  return irrTerminar(s,id,cob,Math.round(p.lam*irr2(cob)*10*100)/100);
+}
+const idL=ords.find(k=>i0.ordens[k].etapa==='Liberadas'); const term=(cob)=>{ irrReset(); const s=irrGet(); irrIniciar(s,idL); try{ terminarNoFim(s,idL,cob); }catch(e){ return 'ERRO '+e.message; }
   return irrO(s,idL).passadas.find(p=>p.st==='Parcial'||p.st==='Feita').cob; };
 R.r4.term=[term(20.275),term(0.004)];
+R.tempo={};
+{ irrReset(); const s=irrGet(); irrIniciar(s,idL); const before=JSON.stringify(s);
+  try{ irrTerminar(s,idL,20.28,100); R.tempo.cedo='aceitou'; }catch(e){ R.tempo.cedo=e.message; }
+  R.tempo.intacto=JSON.stringify(s)===before;
+  const o=irrO(s,idL); s.agora=Math.max(s.agora,irrFimP(o,irrPassAtual(o))); const atFim=JSON.stringify(s);
+  try{ irrTerminar(s,idL,20.28,null); R.tempo.semMedicao='aceitou'; }catch(e){ R.tempo.semMedicao=e.message; }
+  R.tempo.semBaixa=JSON.stringify(s)===atFim;
+}
+
 { cenReset(); irrReset(); const s=irrGet(); irrIniciar(s,idL); irrAvanco(s,idL,s.setores[s.ordens[idL].setor].ha); irrSave(s);
   R.r4.v2cheia=irrReclassTudo(null,idL,{prod:'Nitrato de cálcio',dose:12,mot:'teste'}).erro||'criada'; }
 { cenReset(); mipReset(); const k=mipChecks(mipGet(),vb,{kind:'localizado',prod:ub.id,dose:String(ub.dmin),area:'0,01',data:'2026-10-20'},cenGet()); R.r4.mip0=k.tr.filter(x=>/dá 0/.test(x)).length; }
@@ -134,7 +150,7 @@ R.r6={};
   R.r6.u1=[def(0),def(0.03),def(0.06)];
   cenReset(); irrReset(); let s=irrGet(); irrIniciar(s,'OS-0604'); irrAvanco(s,'OS-0604',24.47); irrSave(s);
   R.r6.u2=irrReclassTudo(null,'OS-0604',{prod:'Nitrato de cálcio',dose:12,mot:'teste'}).erro||'criada';
-  cenReset(); irrReset(); s=irrGet(); const d0=irrDef(s,'PV18'); irrIniciar(s,'OS-0604'); irrTerminar(s,'OS-0604',24.47,null); irrSave(s);
+  cenReset(); irrReset(); s=irrGet(); const d0=irrDef(s,'PV18'); irrIniciar(s,'OS-0604'); terminarNoFim(s,'OS-0604',24.47); irrSave(s);
   const k=irrReclassTudo(null,'OS-0604',{prod:'Nitrato de cálcio',dose:12.25,mot:'teste'}); s=irrGet(); const f=s.ordens['OS-0604'].fert;
   R.r6.u5=k.msg||k.erro; R.r6.guia={erro:k.erro||'',area:f&&f.area,ha:s.setores.PV18.ha,lamHa:f&&f.lamHa,lam2:s.ordens['OS-0604'].passadas[1].lam,d0};
   if(!k.erro){ const c=cenGet(); R.r6.guia.et=fim(c,'OS-0604'); cenSave(c); R.r6.guia.d1=irrDef(irrGet(),'PV18'); } }
@@ -148,7 +164,7 @@ print(JSON.stringify(R));
 def roda(src):
     f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); f.write(src); f.close()
     p = subprocess.run(MOTOR + [f.name], capture_output=True, text=True, timeout=300); os.unlink(f.name)
-    if p.returncode != 0: print(p.stderr[-1500:]); sys.exit(1)
+    if p.returncode != 0: print((p.stderr or p.stdout)[-1500:]); sys.exit(1)
     return json.loads(p.stdout.strip().splitlines()[-1])
 R = roda(PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + JS_NUCLEO + '\nconst CASOS=' + json.dumps(casos) + ';\n' + JS)
 import areas.agronomia as AG
@@ -228,15 +244,24 @@ chk('14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pi
     and 'Informe a dose' in r6['u3']['dose'] and 'Informe a área' in r6['u3']['area'] and 'Informe a dose' in r6['u3']['inf'] and 'LANÇOU' not in json.dumps(r6['u3'])
     and 'inválida' in r6['u3']['aj']
     and "irrN(pa.cob,1)" not in IRP and "irrN(cob,1)" not in IRP and "' nos ' + irrN(x.ha, 2, 0)" in IRJ and '12,25 kg/ha' in r6['u5'], r6)
+EXC_LINHAS = {
+    ('areas/custo_dominio.py', "const prHa=(o.ins||[]).reduce((s,x)=>{ const p=cusPreco(D,x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);"): 'custo por hectare: dose × preço; extraído do Mapa',
+    ('cenario.js', "if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');"): 'validação de finitude do preparo, sem baixa de custódia',
+    ('cenario.js', 'prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*ha}))}; });'): 'prévia de produto por carga do tanque',
+    ('cenario.js', 'produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*haCarga})),'): 'prévia de produto por tanque cheio',
+    ('cenario.js', 'return {n:i+1,vol,destinos,produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,q:x.dose*vol/a.f.volumeHa}))}; });'): 'prévia de carga agrupada; volume dividido pela vazão por hectare',
+}
+chk('15 guardas de término: cedo e sem hidrômetro recusam sem alterar o estado',
+    'Antes do fim previsto' in F['tempo']['cedo'] and F['tempo']['intacto'] and 'volume medido' in F['tempo']['semMedicao'] and F['tempo']['semBaixa'], F['tempo'])
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)
     if re.search(r'(_test|test|_unit|verif_)', os.path.basename(fn)): continue
     for i, ln in enumerate(open(fn, encoding='utf-8'), 1):
         for mm in PROD.finditer(ln):
-            if (rel, mm.group(0)) not in EXC: crus.append((rel, i, mm.group(0)))
+            if (rel, mm.group(0)) not in EXC and (rel, ln.strip()) not in EXC_LINHAS: crus.append((rel, i, mm.group(0)))
 tots = re.findall(r'tot\s*:\s*(?:Math\.round|Number\(|[^,}]*toFixed)', ''.join(open(os.path.join(HERE, n), encoding='utf-8').read() for n in ('mip.js', 'irrigacao_estado.js', 'cenario.js')) + JS_NUCLEO)
-chk(f'10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: {len(EXC)}) e nenhum tot: arredondado por conta própria',
+chk(f'10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: {len(EXC)} expressões e {len(EXC_LINHAS)} linhas exatas) e nenhum tot: arredondado por conta própria',
     not crus and not tots, [crus[:6], tots])
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)
