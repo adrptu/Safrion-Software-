@@ -53,6 +53,17 @@ def setv(sel,val):
 def shot(nome): c.shot(os.path.join(PROBE,f'acao_{nome}.png'))
 def rolagem():   # posição de leitura: a soma das rolagens da casca, do conteúdo e das caixas de tabela da tela
     return J("(()=>{const col=document.querySelector('.ml-tog+div'); const m=document.querySelector('main[data-scroll]'); return Math.round((col?col.scrollTop:0)+(m?m.scrollTop:0)+[...document.querySelectorAll('main .g2rola,main .rola')].reduce((a,x)=>a+x.scrollTop,0));})()")
+def abre_drill(tudo=False):
+    """17/10/2026 (TAB-12, drill recolhido por padrão): a tabela da etapa 2 nasce com a fazenda recolhida; o item que lê os talhões ou os cultivos
+    abre antes, como a pessoa: a seta de cada faixa de fazenda recolhida ou, com tudo=True, "Expandir tudo"; espera não restar seta recolhida"""
+    n=J("(()=>{const bs=[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)); bs.forEach(b=>b.click()); return bs.length;})()") if tudo else 0
+    sel="main [role=table] button.g2car[aria-expanded=false]" if tudo else "main [role=row][data-rid^=fzg_] button.g2car[aria-expanded=false]"
+    for _ in range(40):
+        b=f"[...document.querySelectorAll({json.dumps(sel)})].find(b=>b.getClientRects().length)"
+        if not J(f"!!{b}"): break
+        if tudo: time.sleep(.1)
+        else: n+=1; J(f"{b}.click()"); time.sleep(.3)
+    time.sleep(.3); return n
 try:
     c=Chrome()
     if MODO=='saf':   # SAF-TAB: o 5 lê Situação, Área livre e Livre a partir de, fora do padrão das colunas
@@ -83,10 +94,13 @@ try:
         abre('SAF'); estados['1 sem safra']=est()
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3); estados['2 falta plano']=est(); shot('saf_etapa2_falta_plano')
         # 2b · a área de ações não toma o lugar da lista: a tabela da etapa estica até a área, e a área fica no pé do conteúdo (1440×900)
+        # 17/10/2026 (TAB-12, drill recolhido por padrão): a tabela nasce com a fazenda recolhida (só a faixa, ~133 px) e a medida da lista cheia
+        # vale com os talhões à vista; como a pessoa, "Expandir tudo" abre a fazenda e os talhões divididos, e mede-se o mesmo critério (≥ 300 px)
+        nxt=abre_drill(tudo=True)
         lay=J(r"""(()=>{const m=document.querySelector('main[data-scroll]'); const r=[...m.querySelectorAll('.g2rola')].find(x=>x.getClientRects().length); const a=document.querySelector('[data-acoes]'); const ra=a.getBoundingClientRect(), rm=m.getBoundingClientRect();
           return {tabela:Math.round(r.getBoundingClientRect().height), linhas:r.querySelectorAll('[role=row]').length, area:Math.round(ra.height), folga:Math.round(rm.bottom-ra.bottom), mainRola:m.scrollHeight>m.clientHeight+1};})()""")
         chk('2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla',
-            lay['tabela']>=300 and lay['area']<=140 and 0<=lay['folga']<=40 and not lay['mainRola'], lay)
+            lay['tabela']>=300 and lay['area']<=140 and 0<=lay['folga']<=40 and not lay['mainRola'], dict(lay,expandir=nxt))
         for i in (3,4): etapa(i); estados[f'{i}']=est()
         shot('saf_etapa4_revisao')
         def uma(s): return len(s['prims'])<=1 and s['avancos']<=1 and all(s['prims'].count(x)==1 for x in s['prims'])
@@ -99,7 +113,13 @@ try:
         # 3 · etapa 2 nova (todos os talhões): sem "Adicionar cultivo"; "Planejar ›" na linha do talhão abre o painel sem trocar de etapa e
         #     preserva o rascunho (Esc → Continuar editando)
         abre('SAF',hash='#saf=S27SF&passo=cultivos'); time.sleep(.4); nadd=J("document.querySelectorAll('[data-acao=adicionar]').length")
-        b=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T3\\s/.test(x.querySelector('.g2c0').innerText.trim()+' ')); const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); if(!b) return null; const h=b.closest('section')&&b.closest('section').querySelector('h3'); b.click(); return [b.innerText.trim(), h?h.innerText.trim():''];})()"); time.sleep(.5)
+        # 17/10/2026 (TAB-12, drill recolhido por padrão): a fazenda nasce recolhida e a linha do T3 não está à vista; como a pessoa, abre-se pela
+        # seta a faixa da fazenda (recolhida, na ordem da lista) até o T3 aparecer; o resto do item não muda
+        T3="[...document.querySelectorAll('[role=row]')].find(x=>x.querySelector('.g2c0')&&/^[▾▸]?\\s?T3\\s/.test(x.querySelector('.g2c0').innerText.trim()+' '))"
+        for _ in range(6):
+            if J(f"!!{T3}"): break
+            J("(()=>{const b=[...document.querySelectorAll('[role=row][data-rid^=\"fzg_\"] button.g2car[aria-expanded=false]')].find(b=>b.getClientRects().length); if(b) b.click();})()"); time.sleep(.4)
+        b=J("(()=>{const r="+T3+"; const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); if(!b) return null; const h=b.closest('section')&&b.closest('section').querySelector('h3'); b.click(); return [b.innerText.trim(), h?h.innerText.trim():''];})()"); time.sleep(.5)
         campo=J("(()=>{const d=document.querySelector('aside[role=dialog]'); const i=d&&[...d.querySelectorAll('input')].find(x=>/_var$/.test(x.id)); return i?i.id:null;})()")
         setv('#'+campo,'Teste ação única') if campo else None; time.sleep(.2); J(f"document.getElementById({json.dumps(campo)}).focus()")
         c.tecla('Escape','Escape',27); time.sleep(.3); aviso='Há alterações não salvas' in (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '')
@@ -111,8 +131,9 @@ try:
         abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
         # oráculo direto (revisão Codex 6181957223): as linhas dos cultivos (plano de cada um) antes do avanço e depois do retorno à etapa 2
         LIN="JSON.stringify([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row][data-rid]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())))"
-        e4=est(); l4a=json.loads(J(LIN) or '[]'); sp4a=[x for x in l4a if 'Aplicar plano' in x]   # cultivo sem plano: a linha oferece "Aplicar plano"
-        acao('avancar'); e4b=est(); etapa(2); time.sleep(.4); l4b=json.loads(J(LIN) or '[]'); sp4b=[x for x in l4b if 'Aplicar plano' in x]; e4c=est()
+        # 17/10/2026 (TAB-12): as linhas dos cultivos só estão à vista com a fazenda aberta; "Expandir tudo" antes de cada leitura (abre_drill)
+        e4=est(); abre_drill(tudo=True); l4a=json.loads(J(LIN) or '[]'); sp4a=[x for x in l4a if 'Aplicar plano' in x]   # cultivo sem plano: a linha oferece "Aplicar plano"
+        acao('avancar'); e4b=est(); etapa(2); time.sleep(.4); abre_drill(tudo=True); l4b=json.loads(J(LIN) or '[]'); sp4b=[x for x in l4b if 'Aplicar plano' in x]; e4c=est()
         chk('4 SAF · falta de plano: sem descrição visível na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (as linhas dos cultivos iguais antes e depois e ainda "Aplicar plano em 4 cultivos" na volta)',
             not any(a.startswith('nota:') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
             and e4b['etapa']==3 and l4a==l4b and len(l4a)>=8 and 'resolver:Aplicar plano em 4 cultivos' in e4c['area'], [e4['area'],e4b['etapa'],len(l4a),l4a==l4b,e4c['area']])
@@ -120,6 +141,7 @@ try:
         abre('SAF'); clk('Criar safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)
         clk('Salvar','aside[role=dialog]'); time.sleep(.6); e5=est(); shot('saf_vazio')
+        abre_drill()   # 17/10/2026 (TAB-12): os talhões só estão à vista com a faixa da fazenda aberta; os talhões ficam no estado em que nascem
         tal=J(r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return {}; const o={}; [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2kid')).forEach(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=r.querySelector('.g2c0'); if(!c0) return; const nm=c0.innerText.replace(/^[▾▸] ?/,'').trim().split(/\s+/)[0]; const sr=r.querySelectorAll('.g2sr'); let txt=cs.map(c=>{ let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); return x.replace(/\s+/g,' ').trim(); }); o[nm]={c0:c0.innerText.replace(/\s+/g,' ').trim(),cs:txt}; }); return o; })()""")
         t1=tal.get('T1',{}).get('cs',[]); t7=tal.get('T7',{}).get('c0',''); c1=tal.get('C1',{}).get('c0','')
         chk('5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027',

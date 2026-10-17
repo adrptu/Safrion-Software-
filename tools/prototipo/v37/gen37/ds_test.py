@@ -213,7 +213,12 @@ try:
         fora()
         abre('CD-01.dc.html')
         kid = "[...document.querySelectorAll('[role=table] [role=row].g2ed.g2kid')].find(r=>/T1/.test(r.innerText))"
-        hover(kid); bg = J(f"getComputedStyle({kid}).backgroundColor")
+        # 17/10/2026 (TAB-12, drill recolhido por padrão): a árvore nasce recolhida e a linha-filha T1 não está à vista; como a pessoa, abre-se
+        # pela seta a fazenda (linha-pai recolhida, na ordem da lista) até o T1 aparecer, e mede-se o mesmo hover da linha-filha
+        for _ in range(8):
+            if J(f"!!{kid}"): break
+            J("(()=>{ const b=[...document.querySelectorAll('[role=table] [role=row].g2ed:not(.g2kid) button.g2car[aria-expanded=false]')].find(b=>b.getClientRects().length); if(b) b.click(); })()"); time.sleep(.4)
+        hover(kid); bg = J(f"(()=>{{ const e={kid}; return e?getComputedStyle(e).backgroundColor:'sem a linha T1 à vista'; }})()")
         chk('B5 linha da grade dos Cadastros (T1): hover verde #F2F8F4, não o cinza #F4F6F3', bg == 'rgb(242, 248, 244)', bg)
         # 16/10/2026 (padrão comum dos cadastros): a faixa e o hover próprios da linha de grupo (.cadx-arv, #E8F3EC) saíram com o CADX_CSS; a
         # linha de grupo que abre detalhe tem o hover verde do motor (.g2ed, #F2F8F4), igual às árvores das outras telas

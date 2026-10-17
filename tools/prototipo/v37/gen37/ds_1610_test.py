@@ -72,9 +72,19 @@ def parte_c(c, J, BASE):
     # antigo pedia um cartão por linha, colunas alinhadas e rótulos uma vez no alto. Agora: grade de cartões compactos (vários por fileira a
     # 1440 px), inclusive agrupada; sem cabeçalho de colunas; título com o selo de estado; até 4 campos, cada um com o rótulo.
     # Contraprova: o render anterior (cartão em linha com cabeçalho de colunas) reprova C1.
+    # 17/10/2026 (TAB-12, drill recolhido por padrão): com Agrupar por, os grupos dos cartões nascem recolhidos e a grade não tem cartão à vista;
+    # como a pessoa, "Expandir tudo" (e, se faltar, a seta de cada grupo recolhido) abre os grupos, e mede-se o mesmo cartão (C1 agrupado e C3)
+    def expande(gid):
+        return J("""(async (gid)=>{ const vis=e=>!!e&&e.getClientRects().length>0, esp=ms=>new Promise(r=>setTimeout(r,ms));
+            const fech=()=>[...document.querySelectorAll('[data-g2cd="'+gid+'"] .g2cd-gcab button.g2car[aria-expanded=false]')].filter(vis);
+            const xt=[...document.querySelectorAll('button.g2xtog')].filter(b=>vis(b)&&/Expandir/.test(b.innerText)); xt.forEach(b=>b.click());
+            for(let i=0;i<30&&fech().length;i++) await esp(100);
+            for(let i=0;i<40&&fech().length;i++){ fech()[0].click(); await esp(120); }
+            await esp(300); return {xtog:xt.length, fechados:fech().length}; })(%s)""" % json.dumps(gid))
     for pg, gid, selo in [('OS.dc.html?view=cartoes', 'g_os', True), ('OS.dc.html?view=cartoes&ag=onde', 'g_os', True), ('SAF.dc.html?view=cartoes', 'g_saf', False),
                           ('CD-05.dc.html?view=cartoes', 'g_forn', False), ('CD-06.dc.html?view=cartoes', 'g_itm', False)]:
         c.goto(BASE + pg, 1.6)
+        if 'ag=' in pg: expande(gid)
         m = J(f"""(()=>{{ const box=document.querySelector('[data-g2cd="{gid}"]'); if(!box) return null; const vis=e=>!!e&&e.getClientRects().length>0;
             const ks=[...box.querySelectorAll('.g2cd')].filter(vis), hd=[...box.querySelectorAll('.g2cd-hd')].filter(vis).length;
             const fil={{}}; ks.forEach(k=>{{ const t=Math.round(k.getBoundingClientRect().top); fil[t]=(fil[t]||0)+1; }});
@@ -110,8 +120,8 @@ def parte_c(c, J, BASE):
     MED = """(()=>{ const vis=e=>!!e&&e.getClientRects().length>0; const ks=[...document.querySelectorAll('[data-g2cd="g_os"] .g2cd')].filter(vis);
         const sem=ks.filter(k=>!vis(k.querySelector('.g2cd-nk'))), esq=sem.map(k=>Math.round(k.querySelector('.g2cd-tit').getBoundingClientRect().left-k.getBoundingClientRect().left));
         return {n:ks.length, esqMax:Math.max(0,...esq), selo:ks.filter(k=>vis(k.querySelector(':scope > .g2cd-lin .g2cd-selo'))).length}; })()"""
-    c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); m14 = J(MED) or {}
-    c.aparelho(390, 844, 2, True); c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); m39 = J(MED) or {}
+    c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); expande('g_os'); m14 = J(MED) or {}
+    c.aparelho(390, 844, 2, True); c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); expande('g_os'); m39 = J(MED) or {}
     c.aparelho(1440, 900, 1)
     chk('C3 VIS-07 O.S. agrupada por talhão: cartão sem itens dentro sem a coluna vazia da seta (1440 e 390) e com o selo da Fase também a 390 px',
         m14.get('n', 0) > 0 and m14['esqMax'] <= 24 and m39.get('n', 0) > 0 and m39['esqMax'] <= 24 and m39['selo'] == m39['n'], [m14, m39])
