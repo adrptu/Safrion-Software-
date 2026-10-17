@@ -26,7 +26,7 @@ observacoes (dados locais coerentes com dados.py / dados2.py / comercial.py / su
   (FAT-2088 e FAT-2096), o 2º com "Crédito solicitado · RC-12 · 300 kg" (R$ 885); PV-026/VG-117 9,4 t × R$ 3,00/kg com recusa de 0,4 t
   (RC-15, R$ 1.200); PV-030 8.000 sc × R$ 128 recebidos. Crédito emitido recebe o nº CR-031 (local). GE-05 aceita ?caso=RC-12 para abrir
   filtrado pelo caso (VE-06 deve passar esse parâmetro no link "Emitir solicitação de crédito").
-- Novo caso de ação recebe AC-104 em diante; proposta de parâmetro PP-014.
+- Novo caso de ação recebe AC-104 em diante; proposta de parâmetro permanece prévia sem envio.
 """
 import json, os
 from engine import (grid,Pt,kpis,chip,tag,icon,esc,msgbtn,drawer_button,stepper,BTN_ST,EXTRA,EXTRAJS,_MINI,
@@ -239,18 +239,9 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ver'||!r) r
                              ('= REAL','R$ 5.808','264 L · dif. total +R$ 1.808',RED,'#FDECEE')])
       +'</div>'
       + nota(f'Orçamento flexível para os 120 ha·op ao padrão original = <b style="color:{INK};">R$ 4.800</b>; desvio contra essa base = <b style="color:{INK};">R$ 1.008</b>.'))
-    prop=idrawer('Propor novo parâmetro de consumo',dict(title='Proposta de parâmetro',sub='mostra a diferença e vale só para novas versões',
-            fields=[('Plano','Fungicida · Feijão'),('Consumo (L/ha)','2,2 (antes 2,0)'),('Vigência','a partir da próxima aplicação'),('Justificativa','calda ajustada por pressão de mancha-angular')],
-            confirm='Enviar para revisão agronômica',done='Proposta enviada · revisão agronômica decide'),'leaf','Propor consumo de 2,2 L/ha para as próximas versões (revisão agronômica decide)')
-    DID=E.DRAWN['Propor novo parâmetro de consumo']
-    estado=(f'<sc-if value="{H("pp_on")}" hint-placeholder-val="{H("false")}"><div role="status" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
-            f'{chip("Em revisão agronômica","yellow")}<span>PP-014 · consumo 2,2 L/ha (antes 2,0) · vigência a partir da próxima aplicação · base V1 inalterada</span></div></sc-if>'
-            f'<sc-if value="{H("pp_off")}" hint-placeholder-val="{H("true")}">'
-            + nota('Nenhuma proposta em revisão para esta operação.') + '</sc-if>')
-    EXTRAJS[0]=JS_BASE+'''
-const DID='''+json.dumps(DID)+''';
-function EXTRAVALS(self,v){ const on=!!((self.state.added||{})[DID]); v.pp_on=on; v.pp_off=!on;
-  const add=v[DID+'_add']; v[DID+'_add']=()=>{ add(); self.setState({g2toast:'Proposta PP-014 enviada · 2,2 L/ha · vigência a partir da próxima aplicação · base V1 inalterada · revisão agronômica decide.'}); }; }'''
+    prop=imsg('Conferir proposta de parâmetro', 'Prévia · nada foi alterado. O envio de um novo parâmetro para revisão agronômica ainda não está disponível neste protótipo. Consulte os documentos de origem; nenhum consumo, versão ou aprovação foi alterado.', 'leaf', 'Ver disponibilidade da proposta de parâmetro')
+    estado=nota('Prévia de análise · não há envio de proposta para revisão agronômica nesta tela.')
+    EXTRAJS[0]=JS_BASE
     corpo=(
       continuity('Orçamento · versões da safra 26/27',f'Comparação V1 × V2 × real — fungicida no feijão P1 ({OS_ORC})','entender causa e decidir parâmetro','Criar ação do desvio')
       + bloco('Orçado V1 × previsão V2 × real','Compare quantidade, consumo e preço de cada grandeza; clique numa linha para ver a origem do número.',g_cmp)
@@ -313,9 +304,7 @@ function EXTRAVALS(self,v){ const dz=!!self.state.dz;
     self.setState({dz:true,g2toast:'Conciliado · medição do tanque em 22/09 confere com os abastecimentos apontados (dif. 0,7%, dentro da tolerância de 1%) · lançamento vira definitivo.'}); }; }'''
     fech=(stepper([('Coleta e apontamentos','done'),('Conciliações','now'),('Rateios versionados','now'),('Revisão e fechamento','todo'),('Exportação ERP','todo')],'')
           + f'<div role="status" style="font-size: 13.5px; font-weight: 700; color: {INK};">{H("fech_hint")}</div>')
-    reab=idrawer('Solicitar reabertura de 08/2026',dict(title='Reabertura de período fechado',sub='exige motivo e aprovação; correção entra como estorno + relançamento — o histórico permanece',
-            fields=[('Competência','08/2026'),('Motivo','NF de calcário classificada no centro errado'),('Efeito','estorno + relançamento com nova dimensão'),('Aprovador','Controladoria')],
-            confirm='Solicitar reabertura',done='Reabertura pedida · aguardando aprovação'),'clock','Pedir reabertura de competência fechada (exige aprovação)')
+    reab=imsg('Conferir reabertura de 08/2026', 'Prévia · nada foi alterado. A solicitação de reabertura de competência ainda não está disponível neste protótipo. O período permanece fechado; motivo e aprovação da Controladoria continuam necessários antes de estorno e relançamento.', 'clock', 'Ver disponibilidade da reabertura de competência')
     corpo=(kpis([('COMPETÊNCIA','09/2026','fecha 05/10'),('LANÇAMENTOS','1.412','98% com doc.'),
                  ('PROVISÓRIOS',rs(prov),f'{sum(1 for x in L if x[9]!="green")} lançamentos'),('CONCILIAÇÃO ERP','OK até 21/09','14 na fila')])
         + bloco('Composição de custos · setembro/2026','Confira cada lançamento até o documento de origem; clique num lançamento provisório para corrigir dimensões ou rateio.',g_lan,
@@ -642,10 +631,7 @@ def _ge08():
                     F('custo','Valor do arrendamento',t='num',req=False,min=0,u='sc/ha/ano',cond=dict(k='tipo',eq='Contrato de arrendamento')),
                     F('val','Validade ou fim',t='date',req=False),
                     F('pend','Pendência',t='txt',req=False,help='O que falta no documento (ex.: contrato sem registro em cartório).')]))
-    doc=idrawer('Anexar documento condicionante',dict(title='Documento exigido pelo credor',sub='condição da aprovação',
-            fields=[('Solicitação',c['id']),('Documento','Certidão de matrícula atualizada'),('Validade','90 dias'),('Arquivo','matricula_1874.pdf')],
-            confirm='Enviar ao credor',done='Em conferência pelo credor'),'doc','Anexar a certidão exigida pelo Banco Terra')
-    DDID=E.DRAWN['Anexar documento condicionante']
+    doc=imsg('Conferir envio ao credor', 'Prévia · nada foi alterado. Anexar arquivo e enviá-lo ao credor ainda não está disponível neste protótipo. O cadastro de documentos abaixo permite registrar os dados; isso não envia arquivo, não confirma aceite do credor e não libera parcela.', 'doc', 'Ver disponibilidade do envio do documento')
     # CRE-BANCO F1: avaliações declaradas da ficha comum; não são dossiês nem autorização.
     dc=dict(k='oper',eq='Atualizar declaração')
     g_ficha=grid([C('nome','Bem'),C('situacao','Situação'),C('valor','Valor declarado',a='r',t='num'),
@@ -663,10 +649,9 @@ def _ge08():
     assert EXTRA[i_fm].count('>Salvar</button>')==1
     EXTRA[i_fm]=EXTRA[i_fm].replace('>Salvar</button>','>'+H('cre_ficha_salvar_rotulo')+'</button>')
     EXTRAJS[0]=JS_BASE+CRED_JS+'''
-const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''', HOJE_DOC='2026-09-23', HOJE_FICHA='2026-10-16';
-// documentos para crédito: pendente sem número ou com pendência; vencido depois da validade; a certidão do CRE-0102 enviada fica em conferência
-function docSit(self,V){ const sent=!!((self.state.added||{})[DDID]);
-  if(V.id==='dc_cert_SR'&&sent) return ['Em conferência pelo credor','yellow'];
+const LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''', HOJE_DOC='2026-09-23', HOJE_FICHA='2026-10-16';
+// Cadastro documental: situação deriva dos dados; não há envio nem aceite do credor nesta prévia.
+function docSit(self,V){
   if(!String(V.num||'').trim()) return ['Pendente','yellow']; if(V.pend) return ['Pendente','yellow'];
   if(V.val&&V.val<HOJE_DOC) return ['Vencido','red']; return [V.tipo==='Contrato de arrendamento'?'Vigente':'Registrado','green']; }
 function PREVALS(self,v){
@@ -683,7 +668,7 @@ function PREVALS(self,v){
     r.p.tipo=[{k:'b',t:V.tipo}]; r.s.tipo=V.tipo; r.p.est=[{k:'chip',t:S[0],c:S[1]}].concat(V.pend?[{k:'mut',t:V.pend}]:[]); r.s.est=S[0];
     const det=[V.num||'',V.mf?String(V.mf).replace('.',',')+' módulos fiscais':'',V.custo?String(V.custo).replace('.',',')+' sc/ha/ano':''].filter(Boolean).join(' · ');
     r.p.num=[det?{k:'txt',t:det}:{k:'mut',t:'a informar'}]; r.s.num=det; r.p.exig=[V.exig?{k:'txt',t:V.exig}:{k:'mut',t:'—'}]; r.s.exig=V.exig||''; }); }
-function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
+function EXTRAVALS(self,v){
   const hv=(String(location.hash).match(/vis=([a-z]+)/)||[])[1]||'', VIS=['contratos','liberacoes','dossie','documentos','ficha'], vis=VIS.indexOf(hv)>=0?hv:'';
   VIS.forEach(k=>{ v['cv_'+k]=!vis||vis===k; });
   v.cv_ficha=vis==='ficha'; v.cv_ficha_nao=!v.cv_ficha; // entrada pela área de Documentos; não altera o conjunto legado sem recorte
@@ -702,10 +687,8 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     catch(e){self._fichaErr=e.message;}return d;};
   self.g2newDraft=(gid,d)=>gid==='g_ficha'?{_fichaRev:0}:{};
   if(!self.__creHash){ self.__creHash=true; addEventListener('hashchange',()=>self.setState({}),false); }
-  v.cre_hint=sent?('liberado '+LIB+' de '+VAL+' · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela libera quando o Banco Terra aceitar o documento')
-                 :('liberado '+LIB+' de '+VAL+' · próximas parcelas só liberam com a certidão do imóvel atualizada — anexe o documento para destravar');
-  v.lib2=()=>self.setState({g2toast:sent?('Bloqueado · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela aguarda a conferência do credor; liberado até agora '+LIB+' de '+VAL+'.')
-                                         :('Bloqueado · condição documental pendente — liberado até agora: '+LIB+' de '+VAL+'; a 1ª parcela já é título real em Contas a pagar. Anexe a certidão para liberar.')});
+  v.cre_hint='liberado '+LIB+' de '+VAL+' · condição documental pendente; envio e aceite do credor ainda não disponíveis nesta prévia';
+  v.lib2=()=>self.setState({g2toast:'Prévia · nada foi alterado. Condição documental pendente; envio e aceite do credor ainda não disponíveis. Nenhuma parcela liberada.'});
   // gravação no ponto transacional do motor (revisão do Codex 6221423767, S2): o documento só vale como salvo se o navegador gravou; falhou
   // (ou é mudança de tipo/fazenda de documento automático), o motor desfaz o comando e reabre o formulário com o rascunho e o motivo
   self.g2persist=(gid)=>{
@@ -731,7 +714,6 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
   // seletor "Fazenda ou parceiro" (opções dinâmicas do motor): as fazendas ativas do cadastro atual, inclusive as criadas no CD-01, pelo nome de hoje
   self.g2opts=(gid,k,d)=>{ if(gid!=='g_doc'||k!=='tit') return null; const ns=(self._credFz||[]).filter(f=>f.sit!=='Inativa'&&f.nome).map(f=>f.nome);
     if(d&&d.tit&&ns.indexOf(d.tit)<0) ns.push(d.tit); return [{v:'',t:'Escolha…'}].concat(ns.map(n=>({v:n,t:n}))); };
-  const add=v[DDID+'_add']; v[DDID+'_add']=()=>{ add(); self.setState({g2toast:'Certidão enviada ao Banco Terra · em conferência pelo credor · nenhuma parcela liberada por isso.'}); };
   v.autorizar=()=>{ if(self.state.aut){ self.setState({g2toast:'Bloco já autorizado · consentimento registrado uma vez.'}); return; }
     gsetRow(self,'g_dos','d3',r=>{ r.p.st=[{k:'chip',t:'Autorizado pela Direção',c:'green'}]; r.s.st='Autorizado'; });
     self.setState({aut:true,g2toast:'Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do '+'''+json.dumps(c['id'])+r'''+'.'}); };
@@ -774,3 +756,4 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
 
 def build():
     _ge01(); _ge02(); _ge03(); _ge04(); _ge05(); _ge06(); _ge07(); _ge08()
+

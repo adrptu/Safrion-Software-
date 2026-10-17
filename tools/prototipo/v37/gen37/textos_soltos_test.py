@@ -150,7 +150,7 @@ FICAM = [
     ('CA-04', 'Balanço da REQ-031: 100 sc entregues − 70 consumidos − 20 recebidos = 10 sc com Paula'),
     ('CO-05', 'segue Bloqueado pela inspeção INSP-88'), ('CO-06', 'Demonstração · pós-colheita, laudos e destinos sintéticos'),
     ('CO-07', 'Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc'),
-    ('SU-01', 'KCl 60%: falta firme 140 − 50 − 40 = 50 t'), ('SU-02', 'Propostas e exceções aguardando: Diesel S10 v5'),
+    ('SU-01', 'KCl 60%: falta firme 140 − 50 − 40 = 50 t'), ('SU-02', '1 proposta aguardando gestor'),
     ('PL-03', 'elegível só após confirmação do PCP'), ('PL-03', 'Última atualização 07:42'), ('PL-06', 'Proposta · não divide a área vigente'),
     ('VE-01', 'Atualizado hoje 06:30'), ('VE-02', 'Câmbio da simulação: R$ 5,32/US$ (PTAX D-1)'), ('VE-06', 'o lote L26-118'),
     ('LO-02det', 'Frete: retirada pelo cliente'), ('LO-04', 'Mesma base: 9,6 t · 512 km · refrigerado'),

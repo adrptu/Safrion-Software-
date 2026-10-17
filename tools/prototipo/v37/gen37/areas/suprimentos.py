@@ -28,6 +28,7 @@ observacoes (dados locais coerentes com dados2/dados; declarados):
 - OS-0420 segue 30/70 ha de dados.OS (o card 60/40 do PRD fica para reconciliação).
 """
 import json, os, datetime as _dt
+from pathlib import Path
 from engine import (grid, esc, icon, chip, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, GRAYS, SH, DISP,
                     BTN_ST, EXTRA, EXTRAJS, _MINI, _MINIP)
 import engine as E
@@ -219,6 +220,11 @@ def _origens():
                        dict(t=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha = {nf(dose*c['area'],1 if p['un']=='L' else 0)} {p['un']}"),
                        dict(t='Abrir em Planejar safra',h='SAF.dc.html')]))
     return out
+def _sup_man_js():
+    import dados_manutencao as DM
+    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sup_necessidades.js'), encoding='utf-8') as f:
+        return DM.js_prefixo() + f.read()
+
 def su01():
     fname='SU-01.dc.html'; E._reset_screen(fname)
     dem=D2.demanda('S2627'); org=_origens()
@@ -266,11 +272,7 @@ def su01():
         dict(item=[b('Diesel S10'),mut('Combustível · frota do plantio')],dem=[txt(f"{nf(DIESEL['demanda'])} L")],disp=[txt(f"{nf(DIESEL['tanque']-DIESEL['res'])} L"),mut(f"res. {nf(DIESEL['res'])}")],
              firm=[txt(f"{nf(DIESEL['q'])} L"),mut(DIESEL['ped'])],falta=[ch(f'{nf(dfalta)} L','red')],acao=[lk('Ver contrato','SU-05.dc.html')]),
         o=[dict(t='Programação do plantio (PCP): 35.400 L entre 25/09 e 05/10'),dict(t=f'Falta firme = 35.400 − 9.400 − 15.000 = {nf(dfalta)} L'),dict(t='Contrato Ipiranga CT-2026-03',h='SU-05.dc.html')],lead=2+SEG))
-    rows.append(R('Rolamento 6310',dict(item='Rolamento 6310',data='2026-10-02',dem=4,disp=0,firm=0,cond=0,falta=3,un='un'),
-        dict(item=[b('Rolamento 6310'),mut('Peças · colhedora, preventiva')],dem=[txt('4 un')],disp=[txt('0 un'),mut('res. 1')],firm=[mut('—')],
-             falta=[ch('3 un','red')],acao=[lk('Cotar','SU-04.dc.html')]),
-        o=[dict(t='Plano de manutenção da colhedora (PCM) · OM-0234 · troca em 02/10'),dict(t='Falta firme = 4 − 0 − 0 = 3 un'),dict(t='Cotação COT-113',h='SU-04.dc.html')],lead=7))
-    nfalta+=2; natr+=sum(1 for r in rows[-2:] if _faixa((_dt.date.fromisoformat(r['v']['data'])-_dt.timedelta(days=r['lead'])).isoformat())=='atrasada')
+    nfalta+=1; natr+=int(_faixa((_dt.date.fromisoformat(rows[-1]['v']['data'])-_dt.timedelta(days=rows[-1]['lead'])).isoformat())=='atrasada')
     g=grid([dict(k='item',l='Item · origem',w=210),dict(k='falta',l='Falta firme',t='num',a='r'),dict(k='pedir',l='Pedir até · necessária',t='date'),
             dict(k='dem',l='Demanda',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='firm',l='Receb. firmes',t='num',a='r',w=170),
             dict(k='acao',l='Próxima ação')],
@@ -280,12 +282,12 @@ def su01():
     valor=sum(o['valor'] for o in dem.values())
     pn={'rep':dict(title='Reprogramar proposta de reposição',sub='Muda a data necessária e recalcula o “pedir até”. Nenhuma cotação nova é enviada.',ok='Reprogramar',
         fields=[fs('item','Item','sel',opts=faltas,req=True,**{'def':faltas[0]}),fs('data','Nova data necessária','date',req=True),fs('motivo','Motivo','txt',req=True,help='Ex.: janela de plantio deslocada pela chuva.')])}
-    js(pn,r'''
+    js(pn,_sup_man_js()+r'''
 CHECK.rep=(self,d)=>(d.data<HOJE?{data:'A data não pode ser anterior a hoje (23/09).'}:null);
 RUN.rep=(self,d)=>{ let lead=0; setRows(self,'g_nec',rows=>{ const r=rows.find(x=>x.v.item===d.item); if(r){ r.v.data=d.data; lead=r.lead; } });
   return d.item+' reprogramado para '+dm(d.data)+' · pedir até '+dm(addd(d.data,-lead))+' · nenhuma cotação nova enviada'; };
-function PREVALS(self,v){ RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
-  if(!r.lead) return; const pa=addd(V.data,-r.lead); V.pedir=pa;
+function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
+  if(!r.lead) return; const pa=supPedirAte(V.data,{prazo:r.lead,seguranca:0}); V.pedir=pa;
   r.p.pedir=((V.falta>0.001)?[faixa(pa)]:[M('—')]).concat([BRK,M('necessária '+dm(V.data))]); r.s.pedir=(V.falta>0.001)?pa:''; }); }
 function EXTRAVALS(self,v){ pnVals(self,v); }''')
     painel()
@@ -324,32 +326,41 @@ def su02():
     pn={'exc':dict(title='Submeter exceção versionada',sub='A exceção vale só no período informado e passa pela alçada do gestor.',ok='Submeter exceção',
         fields=[fs('grp','Item/grupo','sel',opts=[p[1] for p in POL],req=True,**{'def':'Peças de manutenção'}),fs('alt','Alteração','txt',req=True,**{'def':'mínimo 2 → 4 un durante a colheita'}),
                 fs('ini','Início','date',req=True,**{'def':'2026-10-01'}),fs('fim','Fim','date',req=True,**{'def':'2026-12-20'}),fs('just','Justificativa','area',req=True)])}
-    js(pn,r'''
-CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
-RUN.exc=(self,d)=>{ setRows(self,'g_pol',rows=>{ const r=rows.find(x=>x.v.grp===d.grp); if(r) r.v.estado='Exceção submetida · aguarda gestor'; });
-  return 'Exceção de '+d.grp+' submetida ('+dm(d.ini)+' a '+dm(d.fim)+') · aguarda o gestor · a política vigente não muda até a aprovação'; };
-function PREVALS(self,v){ RW(self,'g_pol').forEach(r=>{ const V=r.v;
+    for key,title,ok in [('aprovar','Revisar proposta de política','Aprovar proposta'),('publicar','Publicar versão aprovada','Publicar versão')]:
+        pn[key]=dict(title=title,sub='Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo.',ok=ok,
+                     fields=[fs('id','Política','txt',ro=True,req=True,cond=dict(k='_meta',eq='mostrar')),fs('rev','Revisão da proposta','num',ro=True,req=True,cond=dict(k='_meta',eq='mostrar'))])
+    pn['simular']=dict(title='Simular antecedência',sub='Calcula prazo mais segurança; não presume consumo nem risco de ruptura.',ok='Simular',
+                       fields=[fs('id','Política','sel',opts=[r['v']['grp'] for r in rows],req=True,**{'def':rows[0]['v']['grp']})])
+    seedrows=[dict(id=r['id'],v=r['v']) for r in rows]
+    root=os.path.dirname(os.path.dirname(__file__))
+    service=Path(root,'sup_politicas.js').read_text(encoding='utf-8')
+    adapter=Path(root,'sup_politicas_ui.js').read_text(encoding='utf-8')
+    js(pn,service+'\nconst SUP_POL_SEED=supPolSeed('+json.dumps(seedrows,ensure_ascii=False)+');\n'+adapter+r'''
+// selo do cabeçalho pelo estado das políticas (composição do integrador, PR #107)
+function supPolSelo(v,ps){ if(!ps) return hstatus(v,'Políticas ilegíveis · confira os dados','red'); const qs=Object.values(ps.politicas).map(p=>p.proposta).filter(Boolean), ap=qs.filter(q=>q.estado==='Aprovada').length, ag=qs.length-ap;
+  if(!qs.length) return hstatus(v,'Políticas vigentes · nenhuma proposta pendente','green');
+  hstatus(v,[ag?ag+(ag===1?' proposta aguardando gestor':' propostas aguardando gestor'):'',ap?ap+(ap===1?' aprovada a publicar':' aprovadas a publicar'):''].filter(Boolean).join(' · '),'yellow'); }
+function PREVALS(self,v){ const ps=supPolRefresh(self); supPolSelo(v,ps); if(!ps)return; RW(self,'g_pol').forEach(r=>{ const V=r.v;
   r.p.grp=[B(V.grp),M(V.dep)]; r.s.grp=V.grp+' '+V.dep;
   r.p.abc=[T(V.abc+' ·'),chipc(V.crit,V.crit==='Alta'?'red':(V.crit==='Média'?'yellow':'gray'))]; r.s.abc=V.abc+' '+V.crit;
   r.p.seg=[T(nf(V.seg)+' d · '+nf(V.prazo)+' d')]; r.s.seg=String(V.seg);
-  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v);
-  self.g2after=(gid,rows,r)=>{ if(gid==='g_pol'&&r){ const m=String(r.v.estado).match(/v(\d+)/); const nv='v'+(m?Number(m[1])+1:2);
-    r.v.estado='Proposta '+nv+' · aguarda gestor'; self.setState({g2toast:'Proposta '+nv+' de '+r.v.grp+' salva · aguarda aprovação do gestor; a versão vigente segue valendo'}); } }; }''',
-    simsd=dict(sim='Simulação do Diesel S10: mínimo de 40 % cobre 9 dias do pico do plantio sem ruptura · a política vigente não foi alterada',
-               pub='Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita.'))
+  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); supPolActions(self,ps); }
+
+CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
+RUN.exc=(self,d)=>{const s=supPolCurrent(),n=supPolClone(s);const id=Object.keys(n.politicas).find(k=>n.politicas[k].vigente.grp===d.grp);if(!id)throw Error('Política não encontrada.');const p=n.politicas[id];p.excecoes=(p.excecoes||[]).concat([{alteracao:d.alt,inicio:d.ini,fim:d.fim,just:d.just,estado:'Submetida'}]);n.rev++;supPolCommit(n,s.rev);return 'Exceção registrada para análise; não altera a política vigente.';};
+function EXTRAVALS(self,v){pnVals(self,v);supPolBind(self,v);}''')
     painel()
     corpo=(bloco('Políticas por item e depósito','Confira segurança, prazo e limites de cada política; clique na linha para propor uma nova versão.',
                  g,
-                 acao=mini('sim_sim','Simular cobertura','Simula o efeito de uma política sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend'))
-           + bloco('Publicação de vigência','Publique só a versão aprovada; a simulação e as propostas não alteram a política vigente.',
-                   nota('Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).'),acao=mini('sim_pub','Publicar vigência','Publica a versão aprovada','check')))
+                 acao=mini('sim_sim','Simular antecedência','Prazo mais segurança de uma política, sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend')))
+    # EX-50(a)-SUP (PR #107): revisar, aprovar e publicar ficam na própria linha; sem bloco de publicação com nota fixa
     HEIGHTS37[fname]=900
     shell37('SU-02','Políticas de estoque',corpo,fname=fname,
       subtitle='Política por item e local com segurança, prazo, lote, múltiplo, validade e justificativa; exceções versionadas.',
-      status=('1 proposta aguardando gestor','yellow'),primary_html=primb('open_exc','Submeter exceção'),
+      status=(MARK,'gray'),primary_html=primb('open_exc','Submeter exceção'),
       footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65). '
              'Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.')
+    dyn_status(fname)
 
 # ================= SU-03 · Saldos e lotes de materiais =================
 LOTES_X=[  # além de dados2.LOTES: sobras da REQ-031, lote zerado com custódia da OS-0420, consignado, diesel e café (produção)
@@ -550,9 +561,6 @@ def su04():
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),
             ro=True,o=[dict(t=f"{c['nome']}: mercadoria R$ {nf(c['merc'])} + frete R$ {nf(c['frete'])} = R$ {nf(c['tot'])} · {c['prazo']} d · {c['cond']}") for c in cot]
                      +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')]))
-    rows.append(R('COT-113',dict(cot='COT-113 · Rolamento 6310 2RS',itens=1,forn=3,resp=0,melhor=0,estado='rascunho',tipo='Rascunho',esp='Rolamento 6310 2RS · colhedora',qtd=3,ent='2026-10-02',local='Almox. oficina',dest='; '.join(FORN_PECAS)),
-        dict(cot=[b('COT-113 · Rolamento 6310 2RS'),mut('Necessidades · falta firme 3 un')],itens=[txt('1 item'),mut('3 un')],forn=[txt('3 sugeridos')],resp=[mut('—')],melhor=[mut('—')]),
-        o=[dict(t='Origem: falta firme do rolamento 6310 (PCM · OM-0234)',h='SU-01.dc.html')]))
     rows.append(R('COT-110',dict(cot='COT-110 · Kit filtros + óleo 15W40',itens=1,forn=3,resp=1,melhor=0,estado='aguardando',tipo='Enviada em 21/09 · consulta'),
         dict(cot=[b('COT-110 · Kit filtros + óleo 15W40'),mut('Manutenção · OM-0234')],itens=[txt('1 item'),mut('1 kit')],forn=[txt('3 convidados')],resp=[ch('1/3','yellow')],melhor=[mut('—')],
              estado=[ch('Até 24/09','yellow')]),ro=True,o=[dict(t='Respostas até 24/09; depois disso compara com as recebidas')]))
@@ -575,22 +583,18 @@ const BEST=%s, ALC=%s;
 function PREVALS(self,v){ const sel=self.state.selp;
   RW(self,'g_cmp').forEach((r,i)=>{ r.p.tot=[i===0?B('R$ '+nf(r.v.tot)):T('R$ '+nf(r.v.tot))];
     r.p.sit=(sel===r.id)?[chipc('Selecionada','green')]:(i===0?[chipc('Melhor equalizado','green')]:[M('+R$ '+nf(r.v.tot-RW(self,'g_cmp')[0].v.tot))]); });
-  const c=RF(self,'g_cot','COT-113'); if(c){ const env=!!self.state.env113; c.ro=env; c.v.tipo=env?'Enviada em 23/09 · consulta':'Rascunho'; c.p.estado=env?[chipc('Enviada · respostas até 26/09','green')]:[chipc('Rascunho','gray')];
-    c.p.forn=[T((String(c.v.dest||'').split(';').filter(x=>x.trim()).length)+(env?' convidados':' sugeridos'))]; c.p.itens=[T('1 item'),M(nf(c.v.qtd)+' un')]; } }
+  }
 function EXTRAVALS(self,v){
-  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); };
-  v.env113=()=>{ if(self.state.env113) return toast(self,'COT-113 já foi enviada · nada reenviado'); const c=RF(self,'g_cot','COT-113'); const n=String(c.v.dest||'').split(';').filter(x=>x.trim()).length;
-    if(!n) return toast(self,'Escolha ao menos um destinatário: clique na linha da COT-113'); self.setState({env113:true,g2toast:'COT-113 enviada a '+n+' convidados · respostas até 26/09 (simulado · nenhuma mensagem real enviada)'}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
-    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
-                 ,
-                 acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
+  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
+    # EX-50(a)-SUP (PR #106): sem rascunho fictício; falta de manutenção é conferida em Necessidades (SU-01), não enviada daqui
+    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação.',g)
            + bloco(f'Comparação equalizada · SOL-2026-07 · Fertilizantes','Compare mercadoria, frete, prazo e condição no mesmo critério e selecione a proposta.',gc
                    + nota('Itens: '+', '.join(n+' '+nf(o['qtd'])+' '+o['un'] for n,o in fert.items())+f". Alçada pelo valor: {_alcada(best['tot'])} (até R$ 300 mil)."),
                    acao=alink('SU-05.dc.html','Aprovar contratação','Abre contratos e pedidos','doc')))
     HEIGHTS37[fname]=1190
     shell37('SU-04','Solicitações e cotações',corpo,fname=fname,
       subtitle='Cotações nascem da necessidade (SOL-2026-07 e faltas de manutenção); a comparação equaliza propostas e a seleção registra justificativa.',
-      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar · 1 rascunho','yellow'),
+      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar','yellow'),
       primary_html=primb('sel_prop',f"Selecionar {best['nome']}",'check'),
       footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17). '
              'O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.')
@@ -1013,6 +1017,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
 # ================= SU-08 · Transferências e movimentos =================
 def su08():
     fname='SU-08.dc.html'; E._reset_screen(fname)
+    import cenario
     M=[('tr452','23/09 10:12','TR-0452','Transferência','Galpão Boa Vista → Almox. defensivos','Glifosato 480 · G26-15',200,'L','própria','reforço da dessecação','transito'),
        ('dv031','23/09 09:41','Devolução REQ-031','Devolução recebida','Custódia OS-0417 → Galpão 2','MAP 11-52 · M26-05',20,'sc','própria','sobras de campo · quarentena','conf'),
        ('mv8821','22/09 16:20','MV-8821','Saída p/ custódia de ordem','Almox. defensivos → OS-0421','Fungicida A · F26-02',160,'L','própria','REQ-035','conf'),
@@ -1033,68 +1038,30 @@ def su08():
          'nf5520':[dict(t='Transferência entre empresas com NF 5520 · muda o proprietário do saldo')],
          'pe012':[dict(t='R$ 195 (50 kg × R$ 3,90/kg) · alçada do gestor de suprimentos (até R$ 50 mil)')],
          'nf4501':[dict(t='Entrada do PC-088 · 50.000 kg aptos + 10.000 kg em quarentena'),dict(t='Ver o recebimento',h='SU-06.dc.html')]}
-    rows=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    historico=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    rows=[]
     g=grid([dict(k='doc',l='Documento · data',w=170),dict(k='mov',l='Movimento · motivo',w=200),dict(k='od',l='Origem → destino',w=200),dict(k='it',l='Item · lote',w=190),
             dict(k='q',l='Quantidade',t='num',a='r'),dict(k='est',l='Estado',w=200)],rows,gid='g_mov',total=False,
         edit=dict(m='ro',title='Movimento',fields=[fs('doc','Documento',ro=True),fs('mov','Movimento',ro=True),fs('od','Origem → destino',ro=True),fs('it','Item · lote',ro=True),fs('mot','Motivo',ro=True)]))
-    LOCS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Tanque Sede','Galpão Boa Vista']
-    ESTORNAVEIS=['MV-8788 · KCl 60% 4.800 kg → OS-0420','MV-8821 · Fungicida A 160 L → OS-0421','NF 5520 · Diesel S10 2.000 L → Boa Vista Ltda']
-    pn={'trf':dict(title='Transferir entre locais',sub='A transferência fica em trânsito até a confirmação no destino.',ok='Iniciar transferência',
-          fields=[fs('it','Item · lote','sel',opts=['KCl 60% · K26-11','MAP 11-52 · M26-07','Glifosato 480 · G26-14','Semente de soja 58 W · S58-0801'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=1,u='kg ou L'),fs('o','Origem','sel',opts=LOCS,req=True,**{'def':'Galpão 2'}),fs('d','Destino','sel',opts=LOCS,req=True,**{'def':'Galpão 1'}),
-                  fs('mot','Motivo','txt',req=True,help='Ex.: abastecer a frente de plantio.')]),
-        'per':dict(title='Registrar perda em alçada',sub='A perda entra no extrato só depois da aprovação na alçada; o saldo não muda antes disso.',ok='Submeter perda',
-          fields=[fs('it','Item · lote','sel',opts=['MAP 11-52 · M26-07','KCl 60% · K26-11','Glifosato 480 · G26-14'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=0.1,u='kg ou L'),fs('causa','Causa','txt',req=True),fs('ev','Evidência','txt',req=True,help='Ex.: foto, laudo, boletim.'),
-                  fs('apr','Aprovador','sel',opts=['Ana (gestora)','Gerente da fazenda'],req=True,**{'def':'Ana (gestora)'})]),
-        'est':dict(title='Estornar com vínculo',sub='O estorno cria um movimento novo que referencia o original; nada é apagado.',ok='Estornar com vínculo',
-          fields=[fs('orig','Movimento original','sel',opts=ESTORNAVEIS,req=True,**{'def':ESTORNAVEIS[0]}),fs('mot','Motivo','txt',req=True,help='Ex.: quantidade digitada errada.')])}
-    code=r'''
-const ST={transito:['Em trânsito','yellow'],conf:['Confirmado','green'],estorno:['Estorno lançado','gray'],estornado:['Estornado · ver ES-0071','gray'],gestor:['Aguarda gestor','yellow'],aprov:['Aprovada · lançada','green']};
-function qq(n,un){ return nf(n,(n%1)?1:0)+' '+un; }
-function un(it){ return /Glifosato|Fungicida|Diesel/.test(it)?'L':'kg'; }
-CHECK.trf=(self,d)=>(d.o===d.d?{d:'O destino precisa ser diferente da origem.'}:null);
-CHECK.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const r=RW(self,'g_mov').find(x=>x.v.doc===doc); return (r&&r.v.st==='estornado')?{orig:doc+' já foi estornado · nada estornado de novo.'}:null; };
-function add(self,row){ setRows(self,'g_mov',rows=>{ rows.unshift(row); }); }
-function nx(self,k,base){ const n=(self.state[k]||base)+1; self.setState({[k]:n}); return n; }
-RUN.trf=(self,d)=>{ const n=nx(self,'ntr',452); const id='TR-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Transferência',od:d.o+' → '+d.d,it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.mot,st:'transito'},s:{},p:{},o:[{t:'Em trânsito; o saldo só muda de local ao confirmar no destino'}]});
-  return id+' iniciada: '+qq(q,un(d.it))+' de '+d.it+' em trânsito '+d.o+' → '+d.d+' · confirme no destino'; };
-RUN.per=(self,d)=>{ const n=nx(self,'npe',12); const id='PE-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Perda em alçada',od:d.it.split(' · ')[0]+' → perda',it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.causa,st:'gestor'},s:{},p:{},o:[{t:'Evidência: '+d.ev},{t:'Aprovador: '+d.apr}]});
-  return id+' submetida a '+d.apr+' · o saldo só baixa depois da aprovação'; };
-RUN.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const n=nx(self,'nes',71); const id='ES-00'+n; let src=null;
-  setRows(self,'g_mov',rows=>{ src=rows.find(x=>x.v.doc===doc); src.v.st='estornado'; src.v.est_ref=id;
-    const p=src.v.od.split(' → '); rows.unshift({id:id,v:{dh:'23/09 agora',doc:id,mov:'Estorno · vínculo '+doc,od:p[1]+' → '+p[0],it:src.v.it,q:src.v.q,un:src.v.un,prop:src.v.prop,mot:d.mot,st:'estorno'},s:{},p:{},o:[{t:'Estorna o '+doc+'; o original segue no extrato'}]}); });
-  return id+' lançado com vínculo ao '+doc+' · o original fica no extrato como estornado'; };
-function PREVALS(self,v){ RW(self,'g_mov').forEach(r=>{ const V=r.v;
-  r.p.doc=[B(V.doc),BRK,M(V.dh)]; r.s.doc=V.doc+' '+V.dh; r.p.q=[T(qq(V.q,V.un))];
-  r.p.mov=[T(V.mov),BRK,M(V.mot)]; r.s.mov=V.mov+' '+V.mot; r.p.od=[T(V.od)].concat(V.prop!=='própria'?[BRK,M(V.prop)]:[]);
-  const s=ST[V.st]||[V.st,'gray']; const t=V.st==='estornado'?'Estornado · ver '+(V.est_ref||'ES-0071'):s[0];
-  r.p.est=[chipc(t,s[1])].concat(V.st==='transito'?[BRK,{k:'act',t:'Confirmar recebimento',fn:'conf:'+r.id}]:(V.st==='gestor'?[BRK,{k:'act',t:'Aprovar perda',fn:'apr:'+r.id}]:[])); r.s.est=t; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_mov');
-  const tr=rs.filter(x=>x.v.st==='transito'), pe=rs.filter(x=>x.v.st==='gestor'), es=rs.filter(x=>x.v.st==='estorno');
-  v.k_tr=String(tr.length); v.k_tr_s=tr.map(x=>x.v.doc).join(' · ')||'nada em trânsito'; v.k_pe=String(pe.length); v.k_pe_s=pe.map(x=>x.v.doc).join(' · ')||'nenhuma aguardando';
-  v.k_es=String(es.length); v.k_es_s=es.map(x=>x.v.doc).join(' · ');
-  const parts=[]; if(tr.length) parts.push(tr.length+' em trânsito'); if(pe.length) parts.push(pe.length+(pe.length>1?' perdas':' perda')+' em alçada');
-  hstatus(v,parts.join(' · ')||'Sem pendência no extrato',parts.length?'yellow':'green');
-  v.conf=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='transito') return toast(self,(r?r.v.doc:id)+' já confirmada no destino · nada muda');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='conf'; }); toast(self,r.v.doc+' confirmada no destino: '+qq(r.v.q,r.v.un)+' de '+r.v.it+' saem do trânsito e entram em '+r.v.od.split(' → ')[1]); };
-  v.apr=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='gestor') return toast(self,(r?r.v.doc:id)+' já aprovada · nada lançado de novo');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='aprov'; }); toast(self,r.v.doc+' aprovada por Ana (gestora) · '+qq(r.v.q,r.v.un)+' baixados de '+r.v.it+' com vínculo à perda'); }; }'''
-    js(pn,code)
+    pn={'trf':dict(title='Prévia de transferência',sub='Não registra movimento nem altera saldo.',ok='Conferir prévia',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('d','Destino','txt',req=True),fs('mot','Motivo','txt',req=True)]),
+        'per':dict(title='Submeter perda',sub='Cria ajuste pendente (AL-09); aprove aqui em Revisar perda. O saldo só muda após aprovação.',ok='Submeter perda',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('causa','Motivo','txt',req=True),fs('ev','Evidência','txt',req=True)]),
+        'est':dict(title='Prévia de estorno',sub='Estorno genérico sem comando: não altera original nem cria vínculo. Entregas: confira a devolução no Estoque ou na O.S.',ok='Conferir prévia',fields=[fs('orig','Movimento original','sel',opts=[],req=True),fs('mot','Motivo','txt',req=True)]),
+        'aprovar':dict(title='Revisar perda',sub='A aprovação revalida o ajuste e altera o físico do lote; reservas são preservadas.',ok='Aprovar perda',fields=[fs('id','Ajuste',ro=True)])}
+    code=(Path(__file__).resolve().parent.parent/'sup_movimentos_ui.js').read_text()
+    js(pn,cenario.js_prefixo()+'\nconst SUP_MOV_HIST='+json.dumps(historico,ensure_ascii=False)+';\n'+code)
     painel()
-    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    # EX-50(a)-SUP (PR #108) + TAB-07: sem cartões de resumo; o selo do cabeçalho conta as perdas pendentes. Perda é o comando real (principal);
+    # transferência e estorno genérico ainda não têm comando canônico, então ficam como prévia
     corpo=(bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
                    g,
-                   acao=mini('open_per','Registrar perda','Submete perda à alçada do gestor','alert')+mini('open_est','Estornar com vínculo','Cria estorno que referencia o movimento original','doc')
+                   acao=mini('open_trf','Prévia de transferência','Mostra origem, destino, lote e unidade; não registra nem altera saldo','truck')+mini('open_est','Prévia de estorno','Confere o movimento a estornar; não altera o original nem cria vínculo','doc')
                         +alink('SU-07.dc.html','Devolver','Devoluções de campo entram pela requisição','truck')))
     HEIGHTS37[fname]=1180
     shell37('SU-08','Transferências e movimentos',corpo,fname=fname,
-      subtitle='Extrato imutável e transferências entre locais, custódias e empresas; cada linha com documento e confirmação.',
-      status=(MARK,'gray'),primary_html=primb('open_trf','Transferir entre locais','truck'),
-      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32). '
-             'Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.')
+      subtitle='Extrato imutável dos movimentos de estoque; perda passa pela alçada do gestor (AL-09) antes de baixar o saldo.',
+      status=(MARK,'gray'),primary_html=primb('open_per','Registrar perda','alert'),
+      footer='Perda vira ajuste pendente e só baixa o físico do lote na aprovação AL-09; reservas são preservadas (SU-08 · FO-32). '
+             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção não apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================
@@ -1177,3 +1144,6 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
       footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
              'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)
+
+
+

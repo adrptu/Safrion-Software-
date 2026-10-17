@@ -1,0 +1,9 @@
+PASS g2save real salva proposta e preserva vigente
+PASS falha real g2persist restaura formulário e rascunho
+PASS painel de aprovação não publica
+PASS falha na publicação mantém painel e estado
+PASS publicação após recuperação gera um recibo
+PASS simular usa opção inicial válida
+PASS exemplos têm proposta e exceção explícitas
+PASS revisão identifica nome sem renderizar metadados
+PASS versão capturada na abertura rejeita alteração concorrente
