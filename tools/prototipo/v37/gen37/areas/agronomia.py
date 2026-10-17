@@ -645,7 +645,7 @@ function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); c
   v.dc_prods=L.slice().sort((a0,b0)=>(a0.sit==='Cancelado'?1:0)-(b0.sit==='Cancelado'?1:0)).map(u=>{ const sel=u.id===d.prod; const k=mipChecks(s,vv,{kind:d.kind,prod:u.id,dose:sel?d.dose:u.dmin,area:d.area,data:d.data},c);
     const TAGS=[[/^Carência/,'Carência × colheita'],[/^Nº máximo/,'Máx. aplicações'],[/^Dose × área dá 0/,'Área pequena · total 0'],[/^Dose/,'Dose fora da bula'],[/^Registro cancelado/,'Cancelado'],[/^Rotação/,'Rotação'],[/^Estoque/,'Sem estoque'],[/^Colheita/,'Colheita suspensa'],[/reavaliação/,'Reavaliação'],[/não conferido/,'Não conferido']];
     const tag=(x)=>{ const m=TAGS.find(q=>q[0].test(x)); return m?m[1]:''; };
-    const tt=k.tr.map(tag).filter(Boolean), ta=k.al.map(tag).filter(Boolean); const cc=tt.length?[tt[0],'red']:(ta.length?[ta.slice(0,2).join(' · '),'yellow']:['Conferido','green']); const cs=agCh(cc[1]);
+    const tt=k.tr.map(tag).filter(Boolean), ta=k.al.map(tag).filter(Boolean); const cc=(sel&&!(num(d.dose)>0))?['Informe a dose','gray']:(tt.length?[tt[0],'red']:(ta.length?[ta.slice(0,2).join(' · '),'yellow']:['Conferido','green'])); const cs=agCh(cc[1]);
     return {nome:u.nome,on:sel,pick:()=>up({prod:u.id,dose:self.state.dec.prod===u.id?self.state.dec.dose:''}),h:'AG-07.dc.html#'+u.id,cht:cc[0],chst:cs.st,chdot:cs.dot,
       sub:u.g+' · '+u.dose+(u.calda?' (calda 1.000 L/ha)':'')+' · carência '+u.cart+(u.mx?' · máx. '+u.mx+' por ciclo':'')+(u.sit!=='Vigente'?' · '+u.sit:''),
       st:'display:flex;align-items:center;gap:10px;padding:8px 10px;border-top:1px solid #E4E9E5;'+(sel?'background:#F4FAF6;box-shadow:inset 3px 0 0 #1E7A4C;':'')}; });
@@ -1816,3 +1816,4 @@ def _agf_pos(fname):
     # trilhas da grade = colunas à vista (g2lib, VISOES-2 §3.6): por produto ou por uso, com ou sem as colunas do painel "Colunas"
     assert s.count('grid-template-columns: var(--g2cols, repeat('+H(AGF_ID+'_ncols')+', auto));')==1, 'trilhas da grade não seguem as colunas à vista em '+fname
     open(p,'w',encoding='utf-8').write(s)
+

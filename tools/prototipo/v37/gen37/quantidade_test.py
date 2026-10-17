@@ -71,10 +71,13 @@ function fluxo(c,id,res){ const o=c.ordens[id]; res.area=o.area; res.tot=o.ins[0
 const R={mip:[],fert:[],area:[]};
 const s0=mipGet(); const maior=a=>a.tr.filter(x=>/Área maior/.test(x));
 // formulário "Decidir controle" (agDecIni real do AG-01), em toda vistoria da Lagoa: o que ele preenche passa nas checagens de área
+// AGRO-02: o formulário abre sem produto nem dose (vazio); para a checagem de área chegar ao fim, o teste escolhe explicitamente
+// o 1º registrado não cancelado e digita a dose mínima da bula, como o RT faria
 if(typeof agDecIni==='function') for(const v of Object.values(s0.vis).filter(v=>/^PV/.test(v.tal))){ const t=mipT(v); let st=null;
   agDecIni({state:{},setState:x=>{ st=x; }},v.id); const d=st.dec;
-  const ck=(ar)=>mipChecks(mipGet(),v,{kind:d.kind,prod:d.prod,dose:d.dose,area:ar,data:d.data},cenGet());
-  R.area.push({vis:v.id,kind:d.kind,form:d.area,trava:maior(ck(d.area)),antes:d.kind==='controlar'&&maior(ck(mipN(t.area,1))).length>0}); }
+  const u=(d.kind==='controlar'||d.kind==='localizado')?mipElig(v).find(x=>x.sit!=='Cancelado'):null;
+  const ck=(ar)=>mipChecks(mipGet(),v,{kind:d.kind,prod:u?u.id:'',dose:u?String(u.dmin):'',area:ar,data:d.data},cenGet());
+  R.area.push({vis:v.id,kind:d.kind,form:d.area,vazio:d.prod===''&&d.dose==='',trava:maior(ck(d.area)),antes:d.kind==='controlar'&&maior(ck(mipN(t.area,1))).length>0}); }
 // emissão pelo MIP: área do talhão e a maior área em que 3 casas ficariam ABAIXO da regra única (o caso que recusava o apontamento)
 const tres=(dose,ar)=>Math.round(dose*ar*1000)/1000;
 const sobe=(dose,max)=>{ for(let k=0;k<400;k++){ const ar=Math.round(max*100-k)/100; if(ar<=0) break; if(tres(dose,ar)<cenQtd(dose,ar)) return ar; } return null; };
@@ -188,8 +191,8 @@ chk(f'8 fertirrigação → O.S. ({len(fa)} v2 de {len(fe)} tentativas, 1 a 50 k
     [x for x in fa if not ok(x)][:4] or [x for x in pc if not okp(x)][:4] or [x['msg'][-90:] for x in fa][:2])
 ar = F['area']
 na = sum(1 for x in ar if x['antes'])
-chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área que o formulário preenche nunca passa do talhão '
-    f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and not any(x['trava'] for x in ar), [x for x in ar if x['trava']])
+chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): abre sem produto nem dose e a área que o formulário preenche nunca passa do talhão '
+    f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and all(x['vazio'] for x in ar) and not any(x['trava'] for x in ar), [x for x in ar if x['trava'] or not x['vazio']])
 # 10 · varredura de todo o gen37 (JS e JS embutido nos .py, sem testes): produto dose × área fora da regra única. Exceções nomeadas, que não
 #      são quantidade de custódia: custo (dose × preço), carga do tanque e demanda do planejamento (CAL-01, exata por desenho).
 import glob
@@ -237,3 +240,4 @@ chk(f'10 varredura de todo o gen37: nenhum dose × área fora da regra única (e
     not crus and not tots, [crus[:6], tots])
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)
+
