@@ -9,6 +9,11 @@ with tempfile.TemporaryDirectory() as d:
  cases=[base,dict(base,alvo='',titulo='Outro'),dict(base,abriu=True,para='OS#OS-0502',titulo='OS-0502')]
  (out/'EST.v5.json').write_text(json.dumps({'screen':'EST','detalhes':[],'passagens':cases}))
  (out/'leva-check.json').write_text(json.dumps([{'tela':'EST','i':0,'dlg':'OS-0503','alvoNoCorpo':True,'tokNoCorpo':'OS 0502','alvoNoH1':True,'url':'OS#OS-0503'}]))
+ (out/'OS.v5err.json').write_text('{"erro":"timeout"}')
+ (p/'escopo-28.json').write_text('[{"resultado":"herda"},{"resultado":"inconclusivo"}]')
  subprocess.run([sys.executable,'-I',str(pathlib.Path(__file__).parent/'resumo.py'),str(out),str(p/'ocultas.json'),str(v3),str(p/'resumo.json')],check=True,capture_output=True)
  r=json.loads((p/'resumo.json').read_text())['robo'];assert r['navRegistro']==2 and r['chegou']==1 and r['inconclusivas']==1,r
+ assert r['erros']==1 and r['escopo']['herda']==1,r
+ result=json.loads((p/'resumo.json').read_text());assert result['aceite']['estado']=='BLOQUEADO'
+ assert result['passagens'][1]['chegou'] is None and result['passagens'][1]['tipo']=='registro inconclusivo'
  print('PASS resumo: alvo errado e texto corporal da 2ª passada recusados; inconclusiva separada; controle positivo passa')

@@ -30,21 +30,21 @@ function expectedTarget(el, sig) {
     const ids=entAll(raw); if(ids.length===1) return {id:ids[0],source:'data-ref'};
     return {id:'',source:'data-ref inválido'};
   }
-  let h=sig.h||''; try { h=decodeURIComponent(h); } catch(e) {}
-  const hi=[...new Set(entAll(h.split('#')[1]||''))], ti=[...new Set(entAll(sig.t))];
+  let h=((sig.h||'').split('#')[1]||'').split('&')[0]; try { h=decodeURIComponent(h); } catch(e) {}
+  const hi=[...new Set(entAll(h))], ti=[...new Set(entAll(sig.t))];
   if(hi.length===1 && ti.length===1 && hi[0]!==ti[0]) return {id:'',source:'origem ambígua'};
   const ids=hi.length?hi:ti;
   return ids.length===1?{id:ids[0],source:hi.length?'href':'texto'}:{id:'',source:'origem sem alvo único'};
 }
 function exactId(text,id) {
-  if(!id) return false;
+  if(!id || entAll(String(text||''))[0]!==id) return false;
   const escaped=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return new RegExp('(^|[^A-Za-z0-9_-])'+escaped+'(?![A-Za-z0-9_-])').test(String(text||''));
+  return new RegExp('(^|[^A-Za-z0-9_-])'+escaped+'(?![A-Za-z0-9_/-])').test(String(text||''));
 }
 function arrival(doc, expected) {
-  const d=topDlg(doc), title=dTitle(doc,d);
+  const d=topDlg(doc), title=d ? dTitle(doc,d) : ((doc.querySelector('h1')||{}).innerText||'');
   const selected=[...doc.querySelectorAll('.g2flash,[aria-selected=true],.g2r:focus,.g2r:focus-within')].filter(vis);
-  return {abriu:!!(expected.id && d && exactId(title,expected.id)),
+  return {abriu:!!(expected.id && exactId(title,expected.id)),
     destacou:!!(expected.id && selected.some(e=>exactId(e.innerText,expected.id))), titulo:title};
 }
 const LABENT = /talh|local|produto|insumo|m[aá]quina|conjunto|equipamento|implemento|respons|operador|fornecedor|cliente|safra|cultivo|cultura|origem|destino|pedido|compra|ordem|lote|dep[oó]sito|almox|pe[çc]a|contrato|requisi|nota|carga|ve[ií]culo|motorista|comprador|agr[oô]nomo|receit|recomend|an[aá]lise|laudo|vistoria|armaz|silo|cota[çc]|fatura|t[ií]tulo|v[ií]nculo|relacionad|fazenda|piv[oô]|setor/i;
@@ -112,9 +112,9 @@ async function passage(fr, s, ctx, sig) {
   const h1o = norm((fr.contentDocument.querySelector('h1') || {}).innerText || ''); const before = cur(fr); const nd0 = dialogs(fr.contentDocument).length;
   el.click(); let moved = await waitNav(fr, before);
   let stack=null;
-  if(!moved) {
+  if(scr(cur(fr))===scr(before)) {
     const doc=fr.contentDocument, top=topDlg(doc);
-    if(top && top.hasAttribute('data-g2pilha')) {
+    if(top && (top.hasAttribute('data-g2pilha') || top.querySelector('[data-g2pilha]'))) {
       const evidence=arrival(doc,expected);
       stack={alvo:expected.id,abriu:evidence.abriu,titulo:evidence.titulo};
       const go=[...top.querySelectorAll('a[href]')].find(e=>vis(e)&&/^Abrir na tela de /i.test(norm(e.textContent)));
@@ -131,7 +131,7 @@ async function passage(fr, s, ctx, sig) {
   const HUB = /^(MOD-[A-Z]+|CD|IN-04)\.dc\.html$/;
   const voltaEls = [...doc2.querySelectorAll('a,button,[role=button]')].filter(vis).filter(e => !e.closest('nav')).map(e => ({ t: txt(e), h: e.getAttribute('href') || '' })).filter(o => o.t && (/^(‹|←)|voltar/i.test(o.t) || (own && o.t.includes(own))));
   const volta = voltaEls.map(o => o.t + (o.h ? ' → ' + o.h : ''));
-  const voltaOrigem = voltaEls.some(o => !HUB.test(o.h) && ((own && o.t.includes(own)) || (h1o && o.t.toLowerCase().includes(h1o.toLowerCase().slice(0, 18))) || scr(o.h) === s.n));
+  const voltaOrigem = voltaEls.some(o => !HUB.test(o.h) && ((own && exactId(o.t,own)) || (h1o && norm(o.t).toLowerCase()===h1o.toLowerCase()) || scr(o.h) === s.n));
   const mencionaOrigem = !!(own && doc2.body.innerText.includes(own)), dlgOrigem = !!(own && t2.includes(own));
   const toast = [...doc2.querySelectorAll('[role=status],[aria-live]')].filter(vis).map(e => norm(e.innerText).slice(0, 120)).filter(Boolean).slice(0, 2);
   const R = { metodo:'v5.1', esperado:expected, inconclusivo:!want, empilhado:stack, r: scr(land) === s.n ? 'mesma tela' : 'navega', de: s.n, origemId: own, mencionaOrigem, dlgOrigem, para: land, telaDestino: scr(land), alvo: want, abriu, titulo: t2, destacou, foco: foc, volta: volta.slice(0, 4), voltaOrigem, avisos: toast,
