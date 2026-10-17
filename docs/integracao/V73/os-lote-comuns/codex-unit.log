@@ -1,0 +1,98 @@
+OK A3 duas origens:50L e2500L; cargas2000/500 e destinos10+10/5
+OK A3 três origens:30ha60L3000L6.75h
+OK A4 compor não altera ordem,estoque,demanda ou aprovação
+OK A8 replay devolve mesmo ID e itens sem duplicar
+OK A8 mesma chave outro conteúdo recusada
+OK A8 versão mudou antes da confirmação:sem grupo
+OK A8 origem já agrupada recusa nova intenção
+OK A5 separar preserva origens e incrementa só grupo
+OK A5 compromisso de outra origem impede separar
+OK A5 versão/fato alterado entre prévia e separação recusa
+OK cenIdem chamadas antigas preservadas
+OK cenIdem resultado completo sobrevive callback que troca estado
+OK A7 perfil duplo libera aprovadas, nunca aprova implicitamente
+OK A7 snapshot desatualizado recusa só origem alterada
+OK A7 reabrir prévia não libera receita alterada após composição
+OK N7 conflito entre destinos recusa no reuso do alChoques
+OK N8 blocos adjacentes não conflitam
+OK manutenção bloqueada recusa recurso
+OK A6 realizado é projeção dos fatos e não escreve
+OK N1 equivalência exata2L=2000mL
+OK N2 base100L não é ha
+OK N3 kg não é L
+OK N4 doses que arredondam igual continuam incompatíveis
+OK N5 interseção global ausente
+OK N6 janela curta explicita pendência, não programação confirmada
+OK incompatível organizacao
+OK incompatível fazenda
+OK incompatível safra
+OK incompatível cultura
+OK incompatível receita
+OK incompatível receitaVersao
+OK incompatível regulagem
+OK incompatível volumeHa
+OK ausência não herdada receita
+OK ausência não herdada formulacao
+OK ausência não herdada concentracao
+OK dose inválida 0
+OK dose inválida -1
+OK dose inválida NaN
+OK dose inválida Infinity
+OK parcela repetida
+OK liberada não elegível
+OK perfil operador não compõe
+OK capacidade ausente é desconhecida, não zero
+OK A8 quota reverte grupo/recibo/memória e permite retry
+OK Y4 saldo 1.4210854715202004e-14 cargas 0
+OK Y4 saldo 0 cargas 0
+OK Y4 saldo 5e-10 cargas 0
+OK Y4 saldo 1e-9 cargas 1
+OK Y4 saldo 2e-9 cargas 1
+OK Y4 área inválida -1
+OK Y4 área inválida NaN
+OK Y4 área inválida Infinity
+OK N7 estado final substitui próprios blocos e programa 6.75h sem falso conflito
+OK programação revalida conflito externo surgido depois da prévia
+OK programação não cabe na janela: não cria ordem nem grupo
+OK potência real CD03 78cv <100cv recusa T04+PJ
+OK habilidade real CD04 Carlos plantadeira não autoriza pulverização
+OK classe diferente de equipamento recusa composição proposta
+OK sem pessoa mapeada não presume habilitação por função
+OK NR31 vencida na data programada recusa mesmo válida na referência CD04
+OK fonte alocavel recusa admissão futura e contrato encerrado
+OK programação explícita continua na troca, detecta outros compromissos e cancela sem sobras
+OK destinos de área muito pequena não desaparecem das cargas
+OK Seed real: três compatíveis e uma dose distinta, nenhuma aprovação/reserva criada
+OK Jornada real da seed: compor, programar depois, aprovar duas, liberar parcialmente e apontar por origem
+OK escopo técnico alterado sem nova versão não é legitimado por nova prévia
+OK recibo parcial durável não refaz linha recusada após mudança de aprovação
+OK grupo não conta consumo sem sinal, descartado ou duplicado retido como fato
+OK Fluxo aprova uma origem no grupo sem liberar nem reservar, com replay
+OK Fluxo aprovação recusa versão/fatos alterados sem efeito
+OK Fluxo aprovação revalida alçada e composição
+OK Separação soma reservas por produto/lote e conserva origens, sem alterar estoque
+OK Separação não apresenta origem ainda não liberada como reserva
+OK Separação reduz após entrega real, não mistura lote e não repete origem
+OK Fluxo UI aprova três origens uma a uma no grupo, sem liberar
+OK UI começa sem seleção e mantém contexto ao fechar/reabrir
+OK UI prévia mostra só selecionadas, confirma uma vez e não libera
+OK UI quota conserva prévia, seleção e intenção; retry só confirma depois de gravar
+OK UI versão alterada recusa confirmação sem perder rascunho
+OK UI troca de perfil não expõe rascunho anterior nem o confirma
+OK D2 soma quantidades arredondadas por origem, sem recalcular pela área total
+OK D2 conversão mL/L preserva arredondamento na unidade original
+OK D1 origem revisada pode sair sem redatar versão ou liberar
+OK D1 origem cancelada sai e permite reprogramar remanescentes
+OK A3 mesmo instante em outro fuso não esconde conflito
+OK A3 janelas da mesma fazenda com fusos divergentes não programam
+OK R1 demonstração não desloca numeração da próxima O.S.
+OK UI A2 após concluir, botão inicia outra composição vazia
+OK UI A3 herda fuso, A4 mostra janela local, S4c descreve programação
+OK UI S4d grupo com compromisso não oferece separar nem programar
+OK UI S4e clique repetido após recibo não cria erro contraditório
+OK Caldas confirmadas persistem após aprovação e liberação sem dupla contagem
+OK Preparo não reapresenta plano obsoleto após dose nova ou separação
+OK Comuns: três origens sem loteFicha agrupam e liberam por comandos reais
+OK Comuns: vazão de outra versão e dose divergente impedem composição
+OK UI comuns: aprovar individualmente, conferir todas aprovadas, liberar e conservar caldas
+{"ok":97,"fail":0,"scope":"domínio, persistência e CMD06 real com dados sintéticos; não navegador"}

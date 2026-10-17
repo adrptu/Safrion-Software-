@@ -441,6 +441,21 @@ function osc_liberar(c,id,agua,jan,ator){ const o=osc_o(c,id);
   return r; }
 // OS-LOTE-F1 (movida do cenario.js): mora ao lado do osc_liberar que ela reutiliza; links_ocultos E1 (só a O.S. e o Mapa chamam osc_liberar)
 // CMD-06 por origem: prévia e confirmação separadas; nunca passar pelo ramo que cria CMD-42.
+function cenGrupoAprovar(c,id,os,versao,esperada,ator,chave) {
+  const por=cenExigeAlc(ator,'AL-02','Aprovar a versão da '+os+' (CMD-42)');
+  if(!chave) throw new Error('Intenção ausente: reveja a origem.');
+  return cenIdem(c,chave,cenGrupoCanon(['CMD-42-grupo',id,os,versao,esperada,por]),'Aprovação individual',()=>{
+    const g=(c.gruposExec||{})[id];
+    if(!g||g.versao!==versao||!g.ids.includes(os)) throw new Error('Composição mudou: releia o grupo.');
+    if(cenGrupoSnapshot(c,os)!==esperada) throw new Error('Versão ou fatos mudaram: reveja esta origem.');
+    const o=c.ordens[os],f=cenGrupoFicha(c,os,id);
+    if(!g.escopos||g.escopos[os]!==cenGrupoEscopo(c,os)||g.origens[os]!==o.versao||f.eq!==g.assinatura) throw new Error('Origem alterada após composição: reveja o agrupamento.');
+    const k=cenClone(c),r=osc_aprovar(k,os,ator);
+    k.gruposExec[id].historico.push({acao:'Aprovação individual '+os,versao,por,at:cenAgora()});
+    Object.keys(c).forEach(key=>delete c[key]);Object.assign(c,k);
+    return {grupo:id,msg:r.msg,itens:[{os,estado:'Aprovada · aguarda liberação',cmd:'CMD-42',versao:o.versao}]};
+  },{resultado:true});
+}
 function cenGrupoLiberar(c,id,selecionadas,versao,esperadas,ator,chave) {
   cenExigeAlc(ator,'AL-01','Liberar selecionadas do grupo');
   if(!chave||!Array.isArray(selecionadas)||!selecionadas.length||new Set(selecionadas).size!==selecionadas.length) throw new Error('Seleção explícita e intenção são obrigatórias.');
@@ -1014,19 +1029,24 @@ function osGrupoVals(self,v,recorte){
   v.og_voltar=()=>put({previa:null,confirmacao:null,erro:'',chave:key()});
   v.og_revisao=!!(st.previa||st.confirmacao);v.og_selecao=!v.og_revisao&&!st.modoPrograma;v.og_semcheckbox=!v.og_selecao;
   const selecionar=id=>{const ids=(self.state.og.ids||[]).slice(),i=ids.indexOf(id);if(i<0)ids.push(id);else ids.splice(i,1);put({ids,previa:null,confirmacao:null,erro:'',resultado:null,chave:key()})};
-  const ids=st.ids||[],lista=st.previa?st.previa.ids:(st.confirmacao&&st.confirmacao.tipo==='liberar'?st.confirmacao.ids:(g?g.ids:(st.candidatos||[])));
+  const ids=st.ids||[],lista=st.previa?st.previa.ids:(st.confirmacao&&st.confirmacao.tipo==='aprovar'?[st.confirmacao.os]:st.confirmacao&&st.confirmacao.tipo==='liberar'?st.confirmacao.ids:(g?g.ids:(st.candidatos||[])));
   const fatos=g?cenGrupoRealizado(c,g.id):[];
   let separavel=!!g&&permitido;try{if(g)cenGrupoSeparavel(c,g.ids)}catch(e){separavel=false}
   let libera=true;try{cenExigeAlc(pf,'AL-01','Liberar selecionadas')}catch(e){libera=false}
-  v.og_pode_programar=separavel;
-  v.og_acao_permitida=(!g||st.modoPrograma||(st.confirmacao&&st.confirmacao.tipo==='separar'))?permitido:libera;
-  v.og_acao_visivel=v.og_acao_permitida&&!(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma);
+  v.og_pode_programar=separavel&&g.ids.every(id=>(c.ordens[id]||{}).loteFicha);
+  let aprova=true;try{cenExigeAlc(pf,'AL-02','Aprovar origem')}catch(e){aprova=false}
+  const revisaAprovacao=st.confirmacao&&st.confirmacao.tipo==='aprovar';
+  v.og_acao_permitida=revisaAprovacao?aprova:(!g||st.modoPrograma||(st.confirmacao&&st.confirmacao.tipo==='separar'))?permitido:libera;
+  const aprovadas=g?g.ids.filter(id=>{const o=c.ordens[id];return o&&o.etapa==='A liberar'&&osAprovada(o,osVn(o.versao))&&!cenGrupoRecursos(c,[id]).length}):[];
+  v.og_acao_visivel=v.og_acao_permitida&&!(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length);
   v.og_motivo_acao=v.og_acao_permitida?'':(!g||st.modoPrograma?'Agrupar e programar: '+g2alcQuem('AL-19'):'Liberar: '+g2alcQuem('AL-01')); 
   v.og_linhas=lista.map(id=>{const o=c.ordens[id],po=ords(self).find(x=>x.id===id);let motivo='';
     if(!o)motivo='Origem não encontrada · reabra o recorte';
     else if(g){if(o.etapa!=='A liberar')motivo=o.etapa;else if(!osAprovada(o,osVn(o.versao)))motivo='Aprovação '+o.versao+' pendente';else motivo=cenGrupoRecursos(c,[id]).map(x=>x.motivo).join(' · ')}
     else try{const f=cenGrupoFicha(c,id);const outra=ids.find(k=>k!==id);if(outra&&f.eq!==cenGrupoFicha(c,outra).eq)motivo='Receita ou parâmetros incompatíveis com a seleção'}catch(e){motivo=e.message}
-    return {id,podeSeparar:separavel,t:id+' · '+(po?po.talhao:(o&&o.talhao)||'origem ausente'),area:o?nf(o.area)+' ha':'—',estado:motivo||'Compatível · '+(o&&o.versao),marcado:ids.includes(id),desabilitado:!ids.includes(id)&&!!motivo,
+    return {id,podeSeparar:separavel,podeAprovar:!!g&&aprova&&!v.og_revisao&&o&&o.etapa==='A liberar'&&!osAprovada(o,osVn(o.versao)),receita:o?o.versao+' · '+((o.loteFicha||{}).receita||((((o.osc||{}).novo||{}).atv||{}).nome)||'Instrução da origem')+' · '+(o.ins||[]).map(i=>i.p+': '+nf(i.dose)+' '+i.un+'/ha').join(' · '):'',
+      aprovar:()=>put({confirmacao:{tipo:'aprovar',os:id,versao:g.versao,esperada:cenGrupoSnapshot(c,id)},erro:'',chave:key()}),
+      t:id+' · '+(po?po.talhao:(o&&o.talhao)||'origem ausente'),area:o?nf(o.area)+' ha':'—',estado:motivo||'Compatível · '+(o&&o.versao),marcado:ids.includes(id),desabilitado:!ids.includes(id)&&!!motivo,
       mudar:()=>selecionar(id),abrir:()=>{put({aberto:false});self.setState({pan:id,pa:null})},
       feito:o?(()=>{const f=fatos.find(x=>x.os===id),s={};if(f)f.consumo.forEach(a=>Object.keys(a.cons||{}).forEach(p=>s[p]=(s[p]||0)+a.cons[p]));return nf(o.realizado||0)+' ha realizados · '+nf(o.saldo)+' ha de saldo'+Object.keys(s).map(p=>' · consumido '+p+': '+nf(s[p])+' '+((o.ins||[]).find(x=>x.p===p)||{}).un).join('')+(f&&f.pendentes?' · '+f.pendentes+' registros aguardam sinal ou conferência':'')})():'',
       separar:()=>{try{cenGrupoAtor(pf);cenGrupoSeparavel(c,g.ids);put({confirmacao:{tipo:'separar',os:id,versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}catch(e){put({erro:e.message})}}};
@@ -1039,27 +1059,33 @@ function osGrupoVals(self,v,recorte){
   v.og_inicio=st.inicio||'';v.og_inicio_mudar=e=>put({inicio:e.target.value,previa:null,erro:'',chave:key()});
   v.og_fuso=st.fuso||fz0;v.og_fuso_mudar=e=>put({fuso:e.target.value,previa:null,erro:'',chave:key()});
   v.og_campos=[['maquina','Máquina','Máquina'],['implemento','Implemento','Implemento'],['operador','Operador','Pessoa','operador'],['caldeiro','Caldeiro','Pessoa','caldeiro']].filter(([k])=>k!=='caldeiro'||!((c.ordens[(g?g.ids:ids)[0]]||{}).loteFicha)||c.ordens[(g?g.ids:ids)[0]].loteFicha.tipo==='liquido').map(([k,l,t,cl])=>({k,l,val:st[k]||'',mudar:e=>put({[k]:e.target.value,previa:null,erro:'',chave:key()}),opcoes:[{v:'',t:'Escolha…'}].concat(Object.keys(AL0.nome).filter(r=>AL0.tipo[r]===t&&(!cl||AL0.classe[r]===cl)).map(r=>({v:r,t:AL0.nome[r]})))}));
-  v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao;
+  v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao&&(g?g.ids:ids).every(id=>(c.ordens[id]||{}).loteFicha);
   v.og_previa=()=>{try{if(!g||st.modoPrograma){const p=cenGrupoPrevia(c,g?g.ids:ids,pf,g?g.id:undefined,st.programar?{maquina:st.maquina,implemento:st.implemento,operador:st.operador,caldeiro:st.caldeiro,inicio:(st.inicio||'')+(st.fuso||fz0)}:null);put({previa:p,versaoGrupo:g?g.versao:null,erro:'',chave:key()})}
-    else{if(!ids.length)throw Error('Selecione as origens que deseja liberar.');cenExigeAlc(pf,'AL-01','Liberar selecionadas');put({confirmacao:{tipo:'liberar',ids:ids.slice(),versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}}catch(e){put({erro:e.message})}};
+    else{const escolhidas=ids.length?ids:aprovadas;if(!escolhidas.length)throw Error('Aprove cada O.S. e confira os impedimentos antes de liberar.');cenExigeAlc(pf,'AL-01','Liberar selecionadas');put({confirmacao:{tipo:'liberar',ids:escolhidas.slice(),versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}}catch(e){put({erro:e.message})}};
   const p=st.previa,q=st.confirmacao;
-  v.og_resumo=p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
+  v.og_resumo=revisaAprovacao?'Aprovar somente '+st.confirmacao.os+' na versão e dose exibidas. As demais origens permanecem como estão. Aprovar não libera nem reserva insumos.':p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
     q?(q.tipo==='separar'?'Separar '+q.os+' do grupo. IDs, versões e demanda das origens permanecem.':'Liberar '+q.ids.join(', ')+'. Cada origem terá seu resultado; nenhuma aprovação será criada.'):'Escolha explicitamente as origens deste recorte.';
-  v.og_janela=p?'Janela comum: '+hl(p.inicio,fz0)+' a '+hl(p.fim,fz0):'';
+  v.og_janela=p&&p.inicio?'Janela comum: '+hl(p.inicio,fz0)+' a '+hl(p.fim,fz0):'';
   v.og_produtos=p?p.produtos.map(x=>({t:x.p+' · '+nf(x.q)+' '+x.un+' ('+nf(x.dose)+' '+x.un+'/ha)'})):[];
-  v.og_cargas=p?(p.cargas||[]).map(x=>({t:'Carga '+x.n+' · '+nf(x.vol)+' L · '+x.destinos.map(d=>d.os+': '+nf(d.area)+' ha').join(' / ')})):[];
+  const preparo=g?cenGrupoCaldas(c,g.id):{cargas:[],talhoes:[],motivo:''};
+  v.og_cargas=(p?(p.cargas||[]):preparo.cargas).map(x=>({t:'Carga '+x.n+' · '+nf(x.vol)+' L · '+x.destinos.map(d=>d.os+': '+nf(d.area)+' ha').join(' / ')+' · '+x.produtos.map(i=>i.p+': '+nf(i.q)+' '+i.un).join(' · ')}));
+  v.og_sequencia=preparo.talhoes.map(x=>({t:x.ordem+'. '+x.talhao+' · '+x.os+' · '+nf(x.area)+' ha · '+x.quantidade+' carga(s): '+x.cargas.join(', ')+' · '+nf(x.volume)+' L destinados ao talhão'}));
+  v.og_preparo_motivo=preparo.motivo;
   v.og_pendencias=p?p.pendencias.map(t=>({t})):[];
   const programacao=p?p.programacao:g?Object.fromEntries(g.ids.map(id=>[id,(c.ordens[id]||{}).prog])):null;
   v.og_recursos=programacao?Object.keys(programacao).flatMap(id=>{const x=programacao[id];return x?(x.blocos||[]).map(b=>({t:id+' · '+AL0.nome[b.r]+' · '+alDm(b.dia)+' '+alHh(b.ini)+'–'+alHh(b.fim)+' (UTC'+x.fuso+')'})):[]}):[];
-  v.og_consequencia=p?(st.modoPrograma?'Confirmar atualiza apenas a programação operacional. Aprovação e liberação continuam separadas.':'Confirmar vincula as origens. Não aprova, libera ou reserva insumos. '+(p.programacao?'A programação dos recursos será registrada.':'Programação ainda pendente: escolher recursos e início no grupo.')) : '';
-  v.og_botao=v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar selecionadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?'Conferir liberação':'Conferir agrupamento';
-  v.og_acao=()=>{if(!v.og_acao_permitida)return;if(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma)return;if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
+  v.og_consequencia=p?(st.modoPrograma?'Confirmar atualiza apenas a programação operacional. Aprovação e liberação continuam separadas.':'Confirmar vincula as origens. Não aprova, libera ou reserva insumos. '+(p.programacao?'A programação dos recursos será registrada.':p.comum?'Recursos da alocação de cada O.S. preservados.':'Programação ainda pendente: escolher recursos e início no grupo.')) : '';
+  v.og_botao=revisaAprovacao?'Aprovar '+q.os+' · '+c.ordens[q.os].versao:v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar as '+q.ids.length+' aprovadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?(!ids.length&&aprovadas.length?'Conferir liberação das '+aprovadas.length+' aprovadas':'Conferir liberação'):'Conferir agrupamento';
+  v.og_acao=()=>{if(!v.og_acao_permitida)return;if(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length)return;if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
     const atual=self.state.og||{};if(atual!==st)return;
-    const r=cenMudar(null,k=>p?(g?cenGrupoProgramar(k,g.id,st.versaoGrupo,p,pf,st.chave):cenGrupoCriar(k,p,pf,st.chave)):q.tipo==='separar'?cenGrupoSeparar(k,g.id,q.os,q.versao,q.versoes,pf,st.chave):cenGrupoLiberar(k,g.id,q.ids,q.versao,q.versoes,pf,st.chave),{estrito:true});
+    const r=cenMudar(null,k=>p?(g?cenGrupoProgramar(k,g.id,st.versaoGrupo,p,pf,st.chave):cenGrupoCriar(k,p,pf,st.chave)):q.tipo==='aprovar'?cenGrupoAprovar(k,g.id,q.os,q.versao,q.esperada,pf,st.chave):q.tipo==='separar'?cenGrupoSeparar(k,g.id,q.os,q.versao,q.versoes,pf,st.chave):cenGrupoLiberar(k,g.id,q.ids,q.versao,q.versoes,pf,st.chave),{estrito:true});
     if(r.erro){put({erro:r.erro});return}
     put({grupo:r.grupo,modoPrograma:false,previa:null,confirmacao:null,resultado:r,ids:[],erro:'',chave:key()});self.setState({cenrev:cenGet().rev});
   };
   v.og_temresultado=!!st.resultado;v.og_resultado=st.resultado?st.resultado.msg:'';
+  const separacao=g?cenGrupoSeparacao(c,g.id):{linhas:[],pendencias:[]};
+  v.og_separacao=separacao.linhas.map(x=>({t:x.produto+' · lote '+x.lote+' · '+nf(x.q)+' '+x.un+' a separar · '+x.origens.map(a=>a.os+' / '+a.req+': '+nf(a.q)+' '+x.un).join(' · ')}));
+  v.og_sep_pendencias=separacao.pendencias.map(x=>({t:x.os+' · '+x.motivo}));
   v.og_recibos=st.resultado?(st.resultado.itens||[]).map(x=>({t:x.os+' · '+x.estado+(x.motivo?' · '+x.motivo:'')})):[];
   v.og_hist=g?g.historico.map(x=>({t:x.acao+' · v'+x.versao+' · '+x.por+' · '+x.at})):[];
 }
@@ -1910,9 +1936,9 @@ def _grupo():
         f'<sc-if value="{H("og_selecao")}" hint-placeholder-val="{T()}"><label style="display:flex;align-items:center;gap:10px;min-height:44px">'
         f'<input type="checkbox" checked="{H("o.marcado")}" disabled="{H("o.desabilitado")}" onChange="{H("o.mudar")}" aria-label="{H("o.t")}" style="width:20px;height:20px;flex-shrink:0"/><span>{H("o.t")} · {H("o.area")}</span></label></sc-if>'
         f'<sc-if value="{H("og_semcheckbox")}" hint-placeholder-val="{F()}"><b>{H("o.t")} · {H("o.area")}</b></sc-if>'
-        f'<span>{H("o.estado")}</span><sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><span>{H("o.feito")}</span></sc-if>'
-        f'<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" onClick="{H("o.abrir")}" style="{_MINI};min-height:44px">Abrir origem</button>'
-        f'<sc-if value="{H("o.podeSeparar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.separar")}" style="{_MINI};min-height:44px">Separar destino</button></sc-if></div></div>')
+        f'<span>{H("o.estado")}</span><span>{H("o.receita")}</span><sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><span>{H("o.feito")}</span></sc-if>'
+        f'<sc-if value="{H("o.podeAprovar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.aprovar")}" style="{_MINI};min-height:44px">Revisar aprovação de {H("o.id")}</button></sc-if>'
+        + E.mais(H("o.id"),[("Abrir origem",H("o.abrir")),f'<sc-if value="{H("o.podeSeparar")}" hint-placeholder-val="{F()}"><button type="button" role="menuitem" onClick="{H("o.separar")}">Separar destino</button></sc-if>'],linha=True)+'</div>')
     def textos(nome):
         return f'<sc-for list="{H(nome)}" as="r" hint-placeholder-count="0"><p style="margin:4px 0;overflow-wrap:anywhere">{H("r.t")}</p></sc-for>'
     programar=(f'<sc-if value="{H("og_edprograma")}" hint-placeholder-val="{F()}"><label style="display:flex;align-items:center;gap:8px;min-height:44px"><input type="checkbox" checked="{H("og_programar")}" onChange="{H("og_programar_mudar")}"/>Programar recursos nesta composição</label>'
@@ -1921,18 +1947,19 @@ def _grupo():
         f'<label>Fuso da fazenda<select value="{H("og_fuso")}" onChange="{H("og_fuso_mudar")}" style="display:block;min-height:44px"><option value="">Escolha…</option><option value="-03:00">UTC−3</option><option value="-04:00">UTC−4</option><option value="-05:00">UTC−5</option></select></label>'
         f'<sc-for list="{H("og_campos")}" as="f" hint-placeholder-count="4"><label>{H("f.l")}<select value="{H("f.val")}" onChange="{H("f.mudar")}" style="display:block;min-height:44px;width:100%"><sc-for list="{H("f.opcoes")}" as="r" hint-placeholder-count="2"><option value="{H("r.v")}">{H("r.t")}</option></sc-for></select></label></sc-for>'
         '<p>A sequência usa a capacidade, o deslocamento e o setup de cada origem. Sem programação, a composição fica pendente.</p></div></sc-if></sc-if>')
-    return (f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end">'
+    return (f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box">'
         f'<button type="button" aria-label="Fechar agrupamento" onClick="{H("og_fechar")}" style="position:absolute;inset:0;border:0;background:rgba(21,32,26,.32)"></button>'
-        f'<aside role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:560px;max-width:100%;height:100dvh;background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
+        f'<aside role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:960px;max-width:100%;height:min(900px,calc(100dvh - 24px));border-radius:16px;border:1px solid {LINE};box-shadow:0 24px 64px rgba(21,32,26,.2);background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
         f'<header style="padding:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid {LINE}"><h2 style="font-size:18px;flex:1;margin:0">{H("og_titulo")}</h2>'
         f'<button type="button" aria-label="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
         f'<div style="flex:1;overflow-y:auto;min-height:0;padding:16px;font-size:13px;line-height:1.5;overflow-wrap:anywhere">'
         f'<p>{H("og_contexto")} · recorte da abertura</p><p>{H("og_n")}</p>'
         f'<sc-if value="{H("og_temresultado")}" hint-placeholder-val="{F()}"><div role="status"><b>{H("og_resultado")}</b>{textos("og_recibos")}</div></sc-if>'
         f'<sc-if value="{H("og_temerro")}" hint-placeholder-val="{F()}"><p role="alert">{H("og_erro")}</p></sc-if>'
-        f'<sc-if value="{H("og_pode_programar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_programar_grupo")}" style="{_MINI};min-height:44px">Programar grupo</button></sc-if>{programar}<p>{H("og_resumo")}</p><p>{H("og_janela")}</p>{textos("og_produtos")}{textos("og_cargas")}{textos("og_pendencias")}{textos("og_recursos")}'
+        f'<sc-if value="{H("og_pode_programar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_programar_grupo")}" style="{_MINI};min-height:44px">Programar grupo</button></sc-if>{programar}<p>{H("og_resumo")}</p><p>{H("og_janela")}</p>{textos("og_produtos")}{textos("og_cargas")}{textos("og_sequencia")}<p>{H("og_preparo_motivo")}</p>{textos("og_pendencias")}{textos("og_recursos")}'
         f'<p>{H("og_consequencia")}</p><sc-for list="{H("og_linhas")}" as="o" hint-placeholder-count="2">{linha}</sc-for>'
         f'<sc-if value="{H("og_vazia")}" hint-placeholder-val="{F()}"><p>Nenhuma origem neste recorte. Feche e confira os filtros da lista.</p></sc-if>'
+        f'<sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><h3>Separação de insumos</h3><p>Reservas por produto e lote. A entrega continua vinculada a cada requisição no Estoque.</p>{textos("og_separacao")}{textos("og_sep_pendencias")}</sc-if>'
         f'{textos("og_hist")}</div><footer style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid {LINE}">'
         f'<sc-if value="{H("og_revisao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_voltar")}" style="{_MINI};min-height:44px">Rever seleção</button></sc-if>'
         f'<span>{H("og_motivo_acao")}</span><sc-if value="{H("og_acao_visivel")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("og_acao")}" style="{_MINIP};min-height:44px;flex:1">{H("og_botao")}</button></sc-if></footer></aside></div></sc-if>')
