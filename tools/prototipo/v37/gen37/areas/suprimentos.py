@@ -1020,16 +1020,37 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
 def su08():
     fname='SU-08.dc.html'; E._reset_screen(fname)
     import cenario
+    M=[('tr452','23/09 10:12','TR-0452','Transferência','Galpão Boa Vista → Almox. defensivos','Glifosato 480 · G26-15',200,'L','própria','reforço da dessecação','transito'),
+       ('dv031','23/09 09:41','Devolução REQ-031','Devolução recebida','Custódia OS-0417 → Galpão 2','MAP 11-52 · M26-05',20,'sc','própria','sobras de campo · quarentena','conf'),
+       ('mv8821','22/09 16:20','MV-8821','Saída p/ custódia de ordem','Almox. defensivos → OS-0421','Fungicida A · F26-02',160,'L','própria','REQ-035','conf'),
+       ('mv8791','22/09 14:05','MV-8791','Saída p/ custódia de ordem','Câmara fria → OS-0420','Semente de soja 58 W · S58-0801',1560,'kg','própria','REQ-036 · lote correto','conf'),
+       ('es071','22/09 14:02','ES-0071','Estorno · vínculo MV-8790','OS-0420 → Câmara fria','Semente de soja 58 W · S58-0726',1560,'kg','própria','lote digitado errado','estorno'),
+       ('mv8790','22/09 11:37','MV-8790','Saída p/ custódia de ordem','Câmara fria → OS-0420','Semente de soja 58 W · S58-0726',1560,'kg','própria','REQ-036','estornado'),
+       ('mv8788','21/09 17:10','MV-8788','Saída p/ custódia de ordem','Galpão 2 → OS-0420','KCl 60% · K26-07',R37['entregue'],'kg','própria','REQ-037','conf'),
+       ('nf5520','21/09 15:04','NF 5520','Entre empresas','Faz. Santa Rita → Boa Vista Ltda','Diesel S10 · tanque',2000,'L','muda de proprietário','apoio de frota','conf'),
+       ('pe012','21/09 09:12','PE-012','Perda em alçada','Galpão 2 → perda','MAP 11-52 · M26-07',50,'kg','própria','quebra de embalagem','gestor'),
+       ('nf4501','19/09 16:40','NF 4501','Entrada por compra','Fertisul → Galpão 2','KCl 60% · K26-11',60000,'kg','própria','PC-088 · 10 t em quarentena','conf')]
+    ORG={'tr452':[dict(t='Saiu do Galpão Boa Vista em 23/09 10:12 · em trânsito; o saldo só muda de local ao confirmar no destino')],
+         'dv031':[dict(t='Recebida por Rui · embalagem aberta → quarentena'),dict(t='Abrir a requisição',h='SU-07det.dc.html')],
+         'mv8821':[dict(t='Entrega da REQ-035 à custódia de Marcos'),dict(t='Ver a requisição',h='SU-07.dc.html')],
+         'mv8791':[dict(t='Lançamento correto depois do estorno ES-0071')],
+         'es071':[dict(t='Estorna o MV-8790 (lote S58-0726 digitado errado); o original segue no extrato')],
+         'mv8790':[dict(t='Estornado pelo ES-0071 · a operação original não foi apagada')],
+         'mv8788':[dict(t='Entrega da REQ-037 à custódia de Carlos'),dict(t='Ver a requisição',h='SU-07.dc.html')],
+         'nf5520':[dict(t='Transferência entre empresas com NF 5520 · muda o proprietário do saldo')],
+         'pe012':[dict(t='R$ 195 (50 kg × R$ 3,90/kg) · alçada do gestor de suprimentos (até R$ 50 mil)')],
+         'nf4501':[dict(t='Entrada do PC-088 · 50.000 kg aptos + 10.000 kg em quarentena'),dict(t='Ver o recebimento',h='SU-06.dc.html')]}
+    historico=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
     rows=[]
     g=grid([dict(k='doc',l='Documento · data',w=170),dict(k='mov',l='Movimento · motivo',w=200),dict(k='od',l='Origem → destino',w=200),dict(k='it',l='Item · lote',w=190),
             dict(k='q',l='Quantidade',t='num',a='r'),dict(k='est',l='Estado',w=200)],rows,gid='g_mov',total=False,
         edit=dict(m='ro',title='Movimento',fields=[fs('doc','Documento',ro=True),fs('mov','Movimento',ro=True),fs('od','Origem → destino',ro=True),fs('it','Item · lote',ro=True),fs('mot','Motivo',ro=True)]))
     pn={'trf':dict(title='Prévia de transferência',sub='Não registra movimento nem altera saldo.',ok='Conferir prévia',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('d','Destino','txt',req=True),fs('mot','Motivo','txt',req=True)]),
-        'per':dict(title='Submeter perda',sub='Cria ajuste pendente no Estoque. O saldo só muda após aprovação AL-09.',ok='Submeter perda',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('causa','Motivo','txt',req=True),fs('ev','Evidência','txt',req=True)]),
+        'per':dict(title='Submeter perda',sub='Cria ajuste pendente (AL-09); aprove aqui em Revisar perda. O saldo só muda após aprovação.',ok='Submeter perda',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('causa','Motivo','txt',req=True),fs('ev','Evidência','txt',req=True)]),
         'est':dict(title='Prévia de estorno',sub='Estorno genérico sem comando: não altera original nem cria vínculo. Entregas: confira a devolução no Estoque ou na O.S.',ok='Conferir prévia',fields=[fs('orig','Movimento original','sel',opts=[],req=True),fs('mot','Motivo','txt',req=True)]),
         'aprovar':dict(title='Revisar perda',sub='A aprovação revalida o ajuste e altera o físico do lote; reservas são preservadas.',ok='Aprovar perda',fields=[fs('id','Ajuste',ro=True)])}
     code=(Path(__file__).resolve().parent.parent/'sup_movimentos_ui.js').read_text()
-    js(pn,cenario.js_prefixo()+code)
+    js(pn,cenario.js_prefixo()+'\nconst SUP_MOV_HIST='+json.dumps(historico,ensure_ascii=False)+';\n'+code)
     painel()
     corpo=(kpis([('Em trânsito',H('k_tr'),H('k_tr_s')),('Perdas aguardando gestor',H('k_pe'),H('k_pe_s')),('Estornos lançados',H('k_es'),H('k_es_s'))])
            + bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',

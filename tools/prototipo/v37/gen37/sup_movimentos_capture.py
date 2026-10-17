@@ -4,7 +4,7 @@ from types import SimpleNamespace
 p=Path(__file__).parent;s=(p/'areas/suprimentos.py').read_text();tree=ast.parse(s)
 node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='su08')
 sujs=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='SUJS' for t in n.targets))
-globs=dict(Path=Path,json=json,__file__=str(p/'areas/suprimentos.py'),os=__import__('os'),E=SimpleNamespace(_reset_screen=lambda x:None),DEPOS=['Galpão 1'],METODOS=['Necessidade datada'],HEIGHTS37={},R=lambda id,v,**kw:dict(id=id,v=v,p={},s={},**kw),fs=lambda k,l,t='txt',**kw:dict(k=k,l=l,t=t,**kw),nf=str)
+globs=dict(Path=Path,json=json,__file__=str(p/'areas/suprimentos.py'),os=__import__('os'),E=SimpleNamespace(_reset_screen=lambda x:None),DEPOS=['Galpão 1'],METODOS=['Necessidade datada'],R37={'entregue':4800},HEIGHTS37={},R=lambda id,v,p0=None,**kw:dict(id=id,v=v,p={},s={},**kw),fs=lambda k,l,t='txt',**kw:dict(k=k,l=l,t=t,**kw),nf=str)
 globs.update(H=lambda s:'{{'+s+'}}',MARK='estado',dyn_status=lambda x:None)
 import sys
 sys.modules['cenario']=SimpleNamespace(js_prefixo=lambda:(p/'cenario.js').read_text())
