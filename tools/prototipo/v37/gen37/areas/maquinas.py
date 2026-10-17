@@ -926,6 +926,7 @@ function vlLista(c,st){ const p=c.planos[st.d.pid]; const rows=[], seen={};
   st.pre.forEach(aid=>add(c.ativos[aid],true));
   const cs=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&!manVincVale(c.vinc[p.id+'|'+a.id])).map(a=>({a,cp:manVincCompat(c,p,a)}));
   cs.filter(x=>!x.cp.erro).sort((x,y)=>MAN_NIV[x.cp.nivel]-MAN_NIV[y.cp.nivel]).forEach(x=>add(x.a,false));
+  cs.filter(x=>x.cp.erro&&manAtvAtivo(x.a)&&manCabe(c,p,x.a)).forEach(x=>add(x.a,false));   /* do "Aplica a" mas recusado: aparece com o motivo */
   const q=g2norm(st.q||'').trim(); if(!q) return rows;
   cs.filter(x=>x.cp.erro).forEach(x=>add(x.a,false));   /* na busca, o que não serve aparece com o motivo */
   return rows.filter(r=>r.pre||g2norm(r.a.nome+' '+r.a.modelo+' '+r.a.local+' '+r.a.classe).indexOf(q)>=0); }
@@ -1059,7 +1060,7 @@ def _visoes():
             dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
     g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
             dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
-    semp=IF('at_semp_tem',f'<button type="button" aria-pressed="{H("at_semp_on")}" title="{H("at_semp_lab")}" onClick="{H("at_semp_go")}" style="{H("at_semp_st")}">Sem plano <span style="opacity: .75;">{H("at_semp_n")}</span></button>')
+    semp=IF('at_semp_tem',f'<button type="button" data-filtro-tela="pendencia" aria-pressed="{H("at_semp_on")}" title="{H("at_semp_lab")}" onClick="{H("at_semp_go")}" style="{H("at_semp_st")}">Sem plano <span style="opacity: .75;">{H("at_semp_n")}</span></button>')
     g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='plano',l='Plano',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
             dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
            qf=dict(k='cond',l='condição'),busca_extra=semp)
@@ -1210,7 +1211,8 @@ PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
         '.vl-ck:has(input:disabled){cursor:default;opacity:.85}.vl-d{display:flex;flex-direction:column;gap:6px;min-width:0}.vl-in{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center}'
         '.vl-g{display:inline-flex;gap:6px;align-items:center;flex-wrap:nowrap;max-width:100%}.vl-g input[type=date]{min-width:0;flex:0 1 150px}'
         '.vl-prev{display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:#F4F7F5}'
-        '@media (max-width:640px){.vl-l{grid-template-columns:minmax(0,1fr)}.vl-ck{min-height:44px}.vl-in input,.vl-at{min-height:44px}.ma-atpl a{display:inline-flex;align-items:center;min-height:44px}}'
+        '@media (max-width:640px){.vl-l{grid-template-columns:minmax(0,1fr)}.vl-ck{min-height:44px}.vl-in input,.vl-at{min-height:44px}.ma-atpl a{display:inline-flex;align-items:center;min-height:44px}'
+        '.ma-rod>span[id$="-why"]{flex:1 1 100%!important}#dv_mot{min-height:44px}}'   # no celular o motivo da primária desligada fica numa linha e os dois botões juntos
         '.pm-sv-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:10px 14px 14px 50px;border-top:1px solid #E4E9E5}'
         '@media (max-width:640px){.pm-sv-linha{grid-template-columns:30px minmax(0,1fr) 34px}.pm-sv-linha>:nth-child(3),.pm-sv-linha>:nth-child(4),.pm-sv-linha>:nth-child(5){display:none}.pm-sv-det{grid-template-columns:1fr;padding-left:14px}}'
         '.pm-nome{border:0;background:transparent;padding:0;font-family:inherit;font-size:13.5px;font-weight:800;color:#15201A;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:#C9D3CC;text-underline-offset:3px}'

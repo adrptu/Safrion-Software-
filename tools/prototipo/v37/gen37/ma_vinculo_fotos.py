@@ -27,7 +27,8 @@ def rodada(w, h, suf):
         m.ir('ativo=a12'); shot('F8_ativo')
         m.ir('plano=PM-07'); m.clk('Editar plano'); m.setv('#np_tipo', 'modelo'); m.setv('#np_modelo', 'motobomba 125 cv'); shot('F9_aplica_a')
         if w > 500:
-            m.ir('', pagina='CD-03.dc.html'); m.t.openrow(0, 'Trator 02'); shot('F10_cd03')
+            m.ir('', pagina='CD-03.dc.html'); m.t.openrow(0, 'Trator 02')
+            J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog] a')].find(a=>/^Plano: /.test(a.innerText.trim())); if(a) a.scrollIntoView({block:'center'});})()"); shot('F10_cd03')
         print(suf, 'erros de JS:', m.errs() or 'nenhum')
     finally:
         try: m.c.close()

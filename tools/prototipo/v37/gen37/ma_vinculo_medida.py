@@ -27,7 +27,7 @@ def js_clk(expr):
     CONT['cliques'] += 1; time.sleep(.8)
 RES = {}
 try:
-    m.ir('vis=ativos', perfil='Otávio', limpa=True); novo = bool(J("typeof vlAbrir==='function'")); RES['versao'] = 'depois' if novo else 'base'
+    m.ir('vis=ativos', perfil='Otávio', limpa=True); novo = bool(J("!!(window.__man&&window.__man.manVincular)")); RES['versao'] = 'depois' if novo else 'base'
     # M1
     m.ir('', perfil='Otávio', limpa=True, pagina='MOD-MAN.dc.html'); zera()
     if novo:

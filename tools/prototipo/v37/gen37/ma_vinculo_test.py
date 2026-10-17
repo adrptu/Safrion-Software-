@@ -38,9 +38,20 @@ def clica_chip(m):
 def link_linha(m, rid, txt=None):
     return m.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==={json.dumps(rid)}&&r.getClientRects().length); if(!r) return null;"
                f" const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao |^Criar plano/.test(a.innerText.trim())); return a?a.innerText.trim():null;}})()")
+def espera(m, cond, t=8):
+    fim = time.time() + t
+    while time.time() < fim:
+        try:
+            if m.J(cond): return True
+        except Exception: pass
+        time.sleep(.15)
+    return False
 def abre_link(m, rid):
+    espera(m, f"[...document.querySelectorAll('[role=row][data-rid]')].some(r=>r.getAttribute('data-rid')==={json.dumps(rid)}&&r.getClientRects().length&&[...r.querySelectorAll('a')].some(a=>/^Vincular ao /.test(a.innerText.trim())))")
     r = m.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==={json.dumps(rid)}&&r.getClientRects().length); if(!r) return false;"
-            f" const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao /.test(a.innerText.trim())); if(!a) return false; a.focus(); a.click(); return true;}})()"); time.sleep(.8); return r
+            f" const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao /.test(a.innerText.trim())); if(!a) return false; a.focus(); a.click(); return true;}})()")
+    if r: espera(m, f"!!document.querySelector('{PAN} [data-aid]')")
+    time.sleep(.3); return r
 def pan(m): return J_texto(m, PAN)
 def aberto(m): return bool(m.J(f"!!document.querySelector('{PAN}')"))
 def prim(m):   # primária do painel (rodapé): texto, desligada, motivo
@@ -74,8 +85,9 @@ def parte_A():
         m.ir('', perfil='Otávio', limpa=True, pagina='MOD-MAN.dc.html'); av = J("(()=>{const a=document.querySelector('a.mod-aviso'); return a?{t:a.innerText.replace(/\\s+/g,' ').trim(),h:a.getAttribute('href')}:null;})()")
         ok(av and '4 ativos sem plano de manutenção' in av['t'] and av['h'] == 'MA.dc.html#vis=ativos&pend=semplano', 'A1 · entrada do módulo: "4 ativos sem plano de manutenção · Vincular ›" leva a Ativos › Sem plano', av)
         foto(m, 'A1_entrada_1440.png')
-        J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6)
-        rows = m.linhas(0); ch = chip(m); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled}:null;})()")
+        if av: J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6)
+        else: m.ir('vis=ativos&pend=semplano')
+        espera(m, "document.querySelectorAll('[role=row][data-rid]').length>0"); rows = m.linhas(0); ch = chip(m); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled}:null;})()")
         ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and ch and ch['on'] == 'true' and 'pend=semplano' in (m.hash() or '') and hp and not hp['dis'],
            'A1 · um toque: Ativos com o filtro rápido "Sem plano" ligado (4 linhas) e a primária "Vincular a plano" no cabeçalho', [rows, ch, m.hash(), hp])
         foto(m, 'A1_ativos_sem_plano_1440.png')
@@ -87,8 +99,20 @@ def parte_A():
         hd = J("[...document.querySelectorAll('main [role=columnheader]')].filter(e=>e.getClientRects().length).map(e=>e.innerText.trim().toUpperCase())") or []
         ok(len(hd) > 1 and hd[1].startswith('PLANO'), 'A1 · "Plano" é a 2ª coluna, logo depois do ativo', hd[:4])
         m.sem_erro('A1')
+        # A1b · a primária do lote: os 4 sem plano no painel, um plano por vez, quem não serve fica de fora com o motivo
+        clica_chip(m); m.clk('Vincular a plano', 'header'); ops = J(f"[...document.querySelectorAll('{PAN} [role=radio]')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
+        ms = {a: marcado(m, a) for a in ('a07', 'a09', 'a10', 'a12')}; l9 = linha_vl(m, 'a09')
+        ok(len(ops) == 2 and ops[0].startswith('PM-07') and ops[1].startswith('PM-08') and ms['a12'] == {'on': True, 'dis': False} and ms['a09'] == {'on': False, 'dis': True}
+           and 'Não serve: PM-07 é de Irrigação e Máquina TSI é de Beneficiamento' in l9 and 'Um plano por vez' in pan(m),
+           'A1b · "Vincular a plano" com os 4 sem plano: opções PM-07 e PM-08; no PM-07 só o Gotejo T7 entra, os outros com o motivo', [ops, ms, l9[:160]])
+        J(f"[...document.querySelectorAll('{PAN} [role=radio]')][1].click()"); time.sleep(.5); ms2 = {a: marcado(m, a) for a in ('a09', 'a12')}
+        ok(ms2 == {'a09': {'on': True, 'dis': False}, 'a12': {'on': False, 'dis': True}} and plano_ativo(m).startswith('PM-08'), 'A1b · trocar para o PM-08 marca a Máquina TSI e tira o Gotejo T7', ms2)
+        J("(()=>{const b=document.querySelector('#vl-painel button[aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.4); m.clk('Descartar alterações', PAN); time.sleep(.3)
+        J("(()=>{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==='a07'); const a=r&&[...r.querySelectorAll('a')].find(a=>/^Criar plano/.test(a.innerText.trim())); if(a) a.click();})()"); time.sleep(.8)
+        np = J("(()=>{const n=document.querySelector('#np_nome'); return n?n.value:null;})()"); J("(()=>{const b=document.querySelector('#np-painel button[aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.3)
+        ok(np == 'Distribuidor 3 t · preventiva' and sorted(m.linhas(0)) == ['a07', 'a09', 'a10', 'a12'], 'A1b · "Criar plano ›" abre o Novo plano já com o Distribuidor; a lista filtrada continua', [np, m.linhas(0)])
         # A2 · um ativo pela sugestão: abrir (1) · contar de agora (2) · Vincular ao PM-07 (3)
-        clica_chip(m); abre_link(m, 'a12')
+        abre_link(m, 'a12')
         p0 = pan(m); pr = prim(m); mk = marcado(m, 'a12'); lv = linha_vl(m, 'a12')
         ok(aberto(m) and plano_ativo(m).startswith('PM-07') and mk == {'on': True, 'dis': False} and 'Modelo diferente: cabeçal + injetora de fertilizante' in lv,
            'A2 · o link abre o painel com o PM-07 já escolhido, Gotejo T7 marcado e o aviso de modelo diferente (permitido)', [plano_ativo(m), mk, lv[:200]])
@@ -212,7 +236,9 @@ def parte_B():
         m.ir('', perfil='Otávio', limpa=True, pagina='MOD-MAN.dc.html'); av = J("(()=>{const a=document.querySelector('a.mod-aviso'); if(!a) return null; const r=a.getBoundingClientRect(); return {h:r.height,w:r.right};})()")
         ok(av and av['h'] >= 44 and av['w'] <= 390 and larg(m) <= 0, 'B1 · entrada do módulo: aviso com 44 px de alvo, sem rolagem lateral', [av, larg(m)])
         foto(m, 'B1_entrada_390.png')
-        J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6); rows = m.linhas(0)
+        if av: J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6)
+        else: m.ir('vis=ativos&pend=semplano')
+        espera(m, "document.querySelectorAll('[role=row][data-rid]').length>0"); rows = m.linhas(0)
         cartao = J("(()=>{const r=[...document.querySelectorAll('[data-rid=\"a12\"]')].find(e=>e.getClientRects().length); if(!r) return null; const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao/.test(a.innerText.trim())); const b=a&&a.getBoundingClientRect(); return b&&b.width>0?{h:b.height,r:b.right,t:a.innerText.trim()}:null;})()")
         ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and larg(m) <= 0 and cartao and cartao['h'] >= 44, 'B1 · Ativos › Sem plano no celular: 4 ativos, "Vincular ao PM-07 ›" à vista na linha (44 px), sem rolagem lateral da página', [rows, cartao, larg(m)])
         foto(m, 'B1_ativos_390.png')
@@ -238,6 +264,8 @@ def fecha(m):
 
 if __name__ == '__main__':
     os.chdir(HERE); ps = [a for a in sys.argv[1:] if a in ('U', 'A', 'B')] or ['U', 'A', 'B']
-    for p in ps: globals()['parte_' + p]()
+    for p in ps:
+        try: globals()['parte_' + p]()
+        except Exception as e: ok(False, f'{p} · interrompida por exceção (o resto da parte não rodou)', repr(e)[:300])
     print(f'RESULTADO: {N[0] - len(FAIL)}/{N[0]} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
     sys.exit(1 if FAIL else 0)
