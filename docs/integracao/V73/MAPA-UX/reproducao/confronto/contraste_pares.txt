@@ -1,0 +1,83 @@
+A. Texto do rótulo sobre o preenchimento (WCAG 1.4.3: 4,5:1)
+token          hex      | escuro opaco branco opaco | SR 0,88 hex escuro SR branco SR
+impede         #89291A  |   1.91 FALHA   8.77 ok    |     #944031  2.42 FALHA  6.91 ok 
+urgente        #CD6F1D  |   4.70 ok      3.57 FALHA |     #D07E34  5.36 ok   3.13 FALHA
+atencao        #EAC453  |   9.99 ok      1.68 FALHA |     #E9C963 10.37 ok   1.62 FALHA
+em-dia         #4CA96B  |   5.74 ok      2.92 FALHA |     #5EB178  6.41 ok   2.61 FALHA
+em-curso       #275A86  |   2.31 FALHA   7.26 ok    |     #3E6B90  2.96 FALHA  5.66 ok 
+programado     #A0C4E3  |   9.17 ok      1.83 FALHA |     #A8C9E2  9.67 ok   1.73 FALHA
+concluido      #73827A  |   4.15 FALHA   4.04 FALHA |     #808E86  4.89 ok   3.43 FALHA
+neutro         #C9CFCB  |  10.59 ok      1.58 FALHA |     #CCD2CD 10.90 ok   1.54 FALHA
+nao-se-aplica  #E4E9DF  |  13.58 ok      1.23 FALHA |     #E4E9DF 13.58 ok   1.23 FALHA
+   tokens em que NENHUM dos dois textos passa 4,5:1 no uso da Santa Rita: nenhum
+
+B. Correção verificável: placa branca sólida a 90 % atrás do rótulo (texto #15201A)
+   impede         placa #F4ECEA  texto escuro 14.39 ok
+   urgente        placa #FAF2EB  texto escuro 15.13 ok
+   atencao        placa #FDFAEF  texto escuro 16.03 ok
+   em-dia         placa #EFF7F2  texto escuro 15.36 ok
+   em-curso       placa #ECF0F4  texto escuro 14.63 ok
+   programado     placa #F6FAFC  texto escuro 15.96 ok
+   concluido      placa #F2F4F3  texto escuro 15.17 ok
+   neutro         placa #FAFAFA  texto escuro 16.05 ok
+   nao-se-aplica  placa #FCFDFC  texto escuro 16.43 ok
+   pior caso com a placa: 14.39:1
+   Nota: o número do talhão já tem halo sólido (stroke 6 un, paint-order stroke, inicio.py:1426); o sub e o rótulo da camada
+   usam text-shadow difuso (inicio.py:1403-1406), que não dá superfície mensurável: por isso a placa.
+
+C. Não-texto (WCAG 1.4.11: 3:1) contra o preenchimento da Santa Rita (0,88 sobre o fundo)
+token          |  seleção #15201A |  foco #1E7A4C | contorno branco
+impede         |     2.42 FALHA  |   1.30 FALHA |    6.91 ok   
+urgente        |     5.36 ok     |   1.70 FALHA |    3.13 ok   
+atencao        |    10.37 ok     |   3.30 ok    |    1.62 FALHA
+em-dia         |     6.41 ok     |   2.04 FALHA |    2.61 FALHA
+em-curso       |     2.96 FALHA  |   1.06 FALHA |    5.66 ok   
+programado     |     9.67 ok     |   3.07 ok    |    1.73 FALHA
+concluido      |     4.89 ok     |   1.55 FALHA |    3.43 ok   
+neutro         |    10.90 ok     |   3.47 ok    |    1.54 FALHA
+nao-se-aplica  |    13.58 ok     |   4.32 ok    |    1.23 FALHA
+   foco #1E7A4C × fundo 4.33; seleção × fundo 13.61; foco × seleção 3.15
+   Leitura: um anel só de #1E7A4C não chega a 3:1 sobre os preenchimentos escuros; o anel do foco precisa de duas
+   cores (ex.: #1E7A4C por dentro e branco por fora) ou de espessura/forma distinta da seleção.
+
+D. Lagoa Grande: texto branco com sombra (inicio.py:565) sobre preenchimento a 0,55 por cima da imagem RGB
+   imagem lagoa_rgb_20260925.png 1080x820, 55350 pixels amostrados (passo 4); envelope de luminância: P5=#32602F, P50=#86875B, P95=#968E62
+token          | branco P5  escuro P5  | branco P50 escuro P50 | branco P95 escuro P95
+impede         |  9.04 ok     1.85 FALHA |  6.29 ok     2.66 FALHA |  5.90 ok     2.84 FALHA
+urgente        |  5.20 ok     3.22 FALHA |  3.74 FALHA  4.48 FALHA |  3.54 FALHA  4.74 ok   
+atencao        |  3.08 FALHA  5.44 ok    |  2.34 FALHA  7.16 ok    |  2.24 FALHA  7.50 ok   
+em-dia         |  4.32 FALHA  3.87 FALHA |  3.30 FALHA  5.08 ok    |  3.15 FALHA  5.32 ok   
+em-curso       |  7.40 ok     2.26 FALHA |  5.47 ok     3.06 FALHA |  5.19 ok     3.23 FALHA
+programado     |  3.23 FALHA  5.19 ok    |  2.47 FALHA  6.77 ok    |  2.36 FALHA  7.09 ok   
+concluido      |  5.26 ok     3.18 FALHA |  3.91 FALHA  4.29 FALHA |  3.71 FALHA  4.52 ok   
+neutro         |  2.93 FALHA  5.71 ok    |  2.25 FALHA  7.44 ok    |  2.16 FALHA  7.77 ok   
+nao-se-aplica  |  2.47 FALHA  6.77 ok    |  1.93 FALHA  8.70 ok    |  1.85 FALHA  9.07 ok   
+   Leitura: com 0,55 sobre a imagem, nenhuma cor de texto passa em todos os tokens; o rótulo da Lagoa Grande precisa
+   da mesma placa sólida (B) ou de halo sólido medido, não de sombra difusa.
+
+E. Candidatos para "concluído" (matiz 150, saturação 0,06, como busca_paleta.py)
+   #515C57 L=0.34 | opaco escuro 2.41 branco 6.96 | SR escuro  3.12 branco  5.37 → branco | ΔE00 mín: normal 20.1 deutan 19.0 protan 17.3 tritan 13.5
+   #56615C L=0.36 | opaco escuro 2.60 branco 6.44 | SR escuro  3.31 branco  5.06 → branco | ΔE00 mín: normal 20.2 deutan 19.3 protan 18.4 tritan 13.7
+   #5B6761 L=0.38 | opaco escuro 2.84 branco 5.90 | SR escuro  3.59 branco  4.67 → branco | ΔE00 mín: normal 21.2 deutan 19.4 protan 19.5 tritan 13.8
+   #606C66 L=0.40 | opaco escuro 3.06 branco 5.48 | SR escuro  3.81 branco  4.40 → —      | ΔE00 mín: normal 21.7 deutan 20.1 protan 20.9 tritan 14.4
+   #65726B L=0.42 | opaco escuro 3.33 branco 5.03 | SR escuro  4.07 branco  4.12 → —      | ΔE00 mín: normal 22.9 deutan 19.1 protan 21.9 tritan 15.2
+   #697770 L=0.44 | opaco escuro 3.57 branco 4.69 | SR escuro  4.35 branco  3.85 → —      | ΔE00 mín: normal 23.0 deutan 17.6 protan 21.1 tritan 15.7
+   #6E7C75 L=0.46 | opaco escuro 3.83 branco 4.37 | SR escuro  4.59 branco  3.65 → escuro | ΔE00 mín: normal 21.9 deutan 16.2 protan 19.8 tritan 17.3
+   #73827A L=0.48 | opaco escuro 4.15 branco 4.04 | SR escuro  4.89 branco  3.43 → escuro | ΔE00 mín: normal 20.5 deutan 14.5 protan 18.1 tritan 18.2
+   #788780 L=0.50 | opaco escuro 4.45 branco 3.77 | SR escuro  5.22 branco  3.21 → escuro | ΔE00 mín: normal 20.1 deutan 14.1 protan 17.6 tritan 17.5
+   #7D8C85 L=0.52 | opaco escuro 4.76 branco 3.52 | SR escuro  5.49 branco  3.05 → escuro | ΔE00 mín: normal 19.6 deutan 13.5 protan 16.9 tritan 16.9
+   #83918A L=0.54 | opaco escuro 5.09 branco 3.29 | SR escuro  5.86 branco  2.86 → escuro | ΔE00 mín: normal 19.4 deutan 13.0 protan 16.3 tritan 17.1
+   #88968F L=0.56 | opaco escuro 5.43 branco 3.09 | SR escuro  6.16 branco  2.72 → escuro | ΔE00 mín: normal 19.3 deutan 12.8 protan 16.0 tritan 16.9
+   #8D9A94 L=0.58 | opaco escuro 5.73 branco 2.92 | SR escuro  6.47 branco  2.59 → escuro | ΔE00 mín: normal 19.3 deutan 13.4 protan 16.2 tritan 16.5
+   #939F99 L=0.60 | opaco escuro 6.11 branco 2.74 | SR escuro  6.82 branco  2.46 → escuro | ΔE00 mín: normal 18.4 deutan 13.6 protan 16.2 tritan 15.6
+   #98A49E L=0.62 | opaco escuro 6.49 branco 2.58 | SR escuro  7.15 branco  2.34 → escuro | ΔE00 mín: normal 17.6 deutan 13.9 protan 16.3 tritan 14.7
+   #9EA9A3 L=0.64 | opaco escuro 6.91 branco 2.43 | SR escuro  7.57 branco  2.21 → escuro | ΔE00 mín: normal 17.0 deutan 14.1 protan 16.5 tritan 14.2
+   Leitura: o candidato serve se o texto passa 4,5:1 opaco e no uso (coluna →) e o ΔE00 mínimo fica ≥ 10 nas quatro visões.
+   PNG: 820 linhas, todas com filtro 0; bytes descomprimidos = 820 × (1 + 1080 × 3).
+
+F. Anel em duas cores (WCAG 1.4.11): passa se pelo menos uma das duas cores tem 3:1 contra o preenchimento real (SR 0,88)
+   seleção #15201A + branco             tokens sem 3:1 em nenhuma das cores: nenhum
+   foco #1E7A4C + branco                tokens sem 3:1 em nenhuma das cores: ['em-dia']
+   foco #15201A + branco (tracejado)    tokens sem 3:1 em nenhuma das cores: nenhum
+   Leitura: o par escuro + branco cobre os 9 tokens; o verde do DS + branco falha no "em dia". Foco e seleção ficam
+   distintos pela forma (seleção contínua; foco tracejado e afastado), não pela cor.

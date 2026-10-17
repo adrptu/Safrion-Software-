@@ -1,0 +1,11 @@
+grupo            n menor lado  <44  <48 mín.  <48 máx.
+abas             9         44    0         1         9
+ferramentas      3         31    3         3         3
+zoom             2         36    2         2         2
+fechar           1         30    1         1         1
+segmentados      2         25    2         2         2
+atalho           1         44    0         1         1
+acoes_painel    11       29.6   11        11        11
+
+TOTAL 29 controles medidos a 390 px (toque): abaixo de 44 = 19; abaixo de 48 = de 21 a 29
+Fora desta conta: o próprio talhão como alvo (não medido no M5).

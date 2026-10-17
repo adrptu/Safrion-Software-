@@ -1,0 +1,81 @@
+
+## 0. Bases: anexos de pedidos-1610 contra o SHA256SUMS (529adf7) e arquivos do mapa entre b989864 e 47ccc1d
+igual  entrada-acoes-revisao-anexo-achados.md
+igual  entrada-acoes-revisao-pedido.md
+igual  entrada-acoes-revisao-robo-resumo.py
+igual  entrada-acoes-revisao-robo-varredura.html
+igual  excelencia-pedido-ex01-48.md
+igual  mapa-ux-anexo-analise.md
+igual  mapa-ux-pedido.md
+igual  raiox-alvo-pedido.md
+igual  raiox-pragas-no-tempo-v3.html
+igual  resolve-1-clique-anexo-insumos.md
+igual  resolve-1-clique-pedido.md
+arquivos do mapa alterados entre b989864 e 47ccc1d: 0
+
+## 1. PRD (c827408673580d18195dcf247388dac036d26bc1): lista alternativa, painel, tabela abaixo, câmera, alvo, geometria sintética
+405:**Conteúdo:** Mapa e lista equivalentes; camadas canônicas do capítulo 67.2, com os nomes de DEC-2609-12: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produt
+2475:| RF-WRK-004 | P0 / E1 | Exibir mapa e lista equivalente com data e origem da camada. | Usuário sem mapa ou GPS acessa os mesmos registros pela lista; camada antiga mostra atualização e não parece ao vivo. | IN-
+5091:9. **Mapa e fluxo:** camadas, histórico, legenda, atualização e lista equivalente; não confundir vigor com produtividade ou cor com decisão agronômica. Geometria sintética no modo demo é identificada.
+9516:**Atualização v3.9 (decisões do proprietário de 25 e 26/09/2026):** prevalecem 71.6 e 72. Não há tabela nem lista abaixo do mapa: lista e Kanban de ordens ficam em Ordem de Serviço. Onde este capítulo fala e
+9532:No celular, mapa ocupa a largura da tela e altura adaptável; tabela transforma-se em lista de cartões abaixo. Preservar acesso às mesmas funcionalidades por barra compacta ou botão Camadas que abre seletor, conf
+9538:Clicar em talhão destaca a linha correspondente e mostra resumo curto sem deslocar a página involuntariamente. **Ver detalhes abaixo** leva à linha/painel expandido; clicar em linha oferece **Localizar no mapa**,
+9547:- **MAPUX-04:** seleção mapa–tabela funciona nos dois sentidos sem salto inesperado de rolagem; usuário consegue retornar ao talhão selecionado.
+9549:- **MAPUX-06:** teclado, leitor de tela, contraste (medições de 74.7 e 74.9) e zoom de interface permitem operar ações e consultar dados equivalentes ao mapa.
+12475:| DEC-2609-06 | Barras do mapa | Barra vertical: as nove funcionalidades (Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos; nomes em DEC-260
+14112:| DS-15 | Alvo de 44 × 44 px em toda ação do app e em controle usado no campo; no desktop, 24 × 24 px no mínimo, salvo a exceção de espaçamento de WCAG 2.5.8, que precisa ser medida. | Medição automática
+14444:| Zoom | `role="group" aria-label="Zoom"` com Aproximar e Afastar: 36 × 36 px no desktop e 44 × 44 px em tela de toque; `cor.superficie`, `raio.10`, `elevacao.2`; transição `movimento.curto`, sem transição co
+14447:| Ausentes no protótipo | Ampliar mapa, Ajustar à fazenda, Voltar à seleção e Ver dados (67.2) entram com o desenho das ferramentas |
+14454:| Estados | Muda com a funcionalidade e com o filtro. Recolhível, com o estado lembrado por usuário (67.2) |
+14462:| Contêiner | O mapa é um grupo com nome acessível, e cada talhão é um botão; há alternativa em lista (MAPUX-06) |
+14463:| Painel do talhão | Abre à direita só com seleção (DEC-2609-06), dentro do cartão do mapa, com `layout.painel.talhao` e borda esquerda `cor.borda.divisor`. Título `tipo.titulo-painel`, subtítulo e fechar; 
+
+## 2. Design system (c827408673580d18195dcf247388dac036d26bc1): BOT-03, BOT-08, SEL-01, VIS-04
+12:| BOT-03 | **Verbos fixos.** <ul><li>**Criar:** registro novo e independente (safra, ordem, plano, talhão).</li><li>**Incluir:** item dentro de outro registro (atividade no plano, insumo na atividade).</li><li>**Prog
+17:| BOT-08 | **Navegação não é primária.** Botão que só troca de tela vira link ou "Voltar". A exceção é o avanço de etapa do processo (BOT-02) | Verde só para decisão |
+24:| SEL-01 | **Seleção abre detalhe.** Lista com busca e filtro. Ao tocar uma linha, o detalhe abre ao lado no computador e em tela cheia no celular, e os itens filhos aparecem já listados e selecionáveis. Exemplos:
+30:| VIS-04 | **Dica (tooltip) só como complemento.** O motivo de uma ação bloqueada (causa, quem resolve e próximo passo) continua **visível em texto** junto ao controle ou no "Próximo passo", sem depender de pont
+
+## 3. Pedido e EX-43 (529adf7, pedidos-1610)
+9:REFERÊNCIAS PARA TIRAR BOAS IDEIAS (não são requisito)
+16:  - o painel sem seleção mostra a visão da fazenda (o Raio-X ou o ranking da camada), e cada item leva ao talhão;
+63:- Teclado: Tab entra no mapa; setas andam entre talhões vizinhos; Enter seleciona; Esc fecha; "/" busca.
+67:- Alvos de toque de 48 px ou mais, texto legível ao sol, "você está aqui" quando o GPS estiver ligado.
+123:- Em qualquer camada, passar o mouse (ou focar com Tab) num talhão mostra o cartão em menos de 100 ms, sem corte, com valor, estado em texto e data do dado.
+136:- Zoom ou recentralização automática sem pedido.
+275:2. **Hover e foco com cartão rápido (D3).** Mostrar nome, área, cultura, estado da camada e valor, após cerca de 300 ms e também no foco, reutilizando 
+285:12. **Seleção previsível (D16, D20, D30).** Clique no fundo e Esc desmarcam; toggle igual em todas as camadas (pixel só em modo "Inspecionar"); enquadra
+287:14. **Ferramentas e retorno (D19, D22, D29).** "Medir" real (distância e área desenhadas) ou renomeada para "Área e perímetro", com o resultado no paine
+590:EX-43 Raio-X do alvo: o que faz cada praga ou doença subir e descer, medido nos dados da própria fazenda (camada "Pragas e doenças" do IN-04, ao lado do 
+591:  - Objetivo: por alvo, mostrar o que faz subir e o que faz descer, ordenado pelo tamanho do efeito, com limiar, janela, intervalo, número de casos e níve
+600:  - Tela: cabeçalho com base de dados e evidência; listas "Faz subir" e "Faz descer" com barra de efeito e intervalo; sub-detalhe com curva de resposta, j
+
+## 4. Skill de satélite (47ccc1d): dois níveis e ação por estado
+18:| **Fazenda** (listagem) | Todos os talhões/pivôs sobre imagem real (true color ou basemap de satélite). Cada polígono preenchido com o raster do índice
+19:| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução nativa (10 m Sentinel-2, cm no drone), **sem suavização** (`image-rendering: pixe
+56:| Normal | área fraca < 5 % e sem queda | Ver histórico |
+57:| Atenção | área fraca 5–15 % ou queda 10–15 % | Ver manchas |
+58:| Crítico | área fraca > 15 % ou queda > 15 % ou mancha nova > 1 ha | Criar vistoria |
+
+## 5. NAV: X-CAD-9 (47ccc1d)
+161:| X-CAD-9 | não aplicar | O mapa da Santa Rita é SVG esquemático; unificar apagaria função | registro para o software real | — | — | P3 | Registrado |
+
+## 6. Fonte do protótipo (47ccc1d): ícone Colheita, aria-pressed, forced-colors, verbo da vistoria
+22: 'Colheita':'M12 22V9M12 9c-3 0-5-2-5
+1629:          'Lavoura': 'leaf', 'Colheita': 'Colheita', 'C
+ICN (inicio.py:911) tem Colheita? 0
+ICS (inicio.py:1445) tem Colheita? 0
+talhão do SVG (inicio.py:1411) com aria-pressed? 0
+forced-colors em engine.py: 1
+forced-colors em areas/inicio.py: 0
+"Programar vistoria" em areas/inicio.py: 9
+"Criar vistoria" em areas/inicio.py: 0
+g2dica: 1192:    d.a
+1227:    cle
+
+## 7. Render publicado (05947ad): AG-06, Ver dados, arquivos de apoio, MapLibre
+<title>Eficácia e histórico</title>
+IN-04: "Ver dados abaixo"=0  "Localizar no mapa"=0  <table=0
+IN-04 busca lagoa_s2.json por caminho relativo: 1
+IN-04 carrega MapLibre do CDN: 1
+lagoa_s2.json no render: 2586169 B

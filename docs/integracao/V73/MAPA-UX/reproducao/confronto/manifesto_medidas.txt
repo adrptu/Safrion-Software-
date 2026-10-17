@@ -1,0 +1,40 @@
+# Manifesto das medidas M0–M20 (avaliação do Claude, 6c03d7e)
+troca do espelho: 00:16:19.984000 UTC (espelho_troca.txt)
+A: espelho antigo: versão publicada 1792184197-5a81, fonte b9898643662715a3f7b17bf7797d44e81e5e4a3d (fonte_publicado.txt: 0 de 1028 linhas sem par)
+B: espelho novo: render da composição 05947ad0152c31c106569219d4fdd09b8c7849a1 (publicação registrada em 47ccc1d5739235b6ebb4f1fcad3e91bb324c7da1; fonte_publicado_05947ad.txt: 0 de 875 linhas sem par)
+Os 9 arquivos do mapa são iguais nas duas fontes (git diff b989864 05947ad vazio; espelho_troca.txt), então a medida vale
+para as duas; o manifesto corrige o rótulo de versão, não o resultado.
+
+arquivo bruto          medida início ≤        fim ≤           espelho
+repro_mapa.json        M0     00:15:01.340    00:15:16.440    A (certo: termina antes da troca)
+repro_mapa.json        M1     00:15:16.440    00:15:34.340    A (certo: termina antes da troca)
+repro_mapa.json        M2     00:15:34.340    00:15:50.740    A (certo: termina antes da troca)
+repro_mapa.json        M3     00:15:50.740    00:16:25.440    indeterminado (cruza a troca); arquivos do mapa iguais em A e B
+repro_mapa.json        M4     00:16:25.440    00:17:44.340    B (provável: margem de 5.5 s menos as folgas entre medidas)
+repro_mapa.json        M5     00:17:44.340    00:18:14.440    B (provável: margem de 84.4 s menos as folgas entre medidas)
+repro_mapa.json        M6     00:18:14.440    00:19:12.940    B (provável: margem de 114.5 s menos as folgas entre medidas)
+repro_mapa.json        M7     00:19:12.940    00:19:51.840    B (provável: margem de 173.0 s menos as folgas entre medidas)
+repro_mapa.json        M8     00:19:51.840    00:20:21.640    B (provável: margem de 211.9 s menos as folgas entre medidas)
+repro_mapa.json        M9     00:20:21.640    00:20:39.540    B (provável: margem de 241.7 s menos as folgas entre medidas)
+repro_mapa.json        M10    00:20:39.540    00:21:12.740    B (provável: margem de 259.6 s menos as folgas entre medidas)
+repro_mapa.json        M11    00:21:12.740    00:21:34.540    B (provável: margem de 292.8 s menos as folgas entre medidas)
+repro_mapa.json        M12    00:21:34.540    00:21:56.340    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M13    00:21:56.340    00:22:11.840    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M14    00:22:11.840    00:22:59.340    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M15    00:22:59.340    00:23:22.840    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M16    00:23:22.840    00:23:37.940    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M17    00:23:37.940    00:23:54.640    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa.json        M18    00:23:54.640    00:24:09.740    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_b.json      M3b    00:25:23.644    00:25:40.944    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_b.json      M9b    00:25:40.944    00:26:01.744    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_b.json      M10b   00:26:01.744    00:26:19.344    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_b.json      M18b   00:26:19.344    00:26:36.344    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_c.json      M10c   00:26:56.563    00:27:15.463    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_d.json      M18c   00:27:42.703    00:28:02.503    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_e.json      M7b    00:28:22.272    00:29:44.272    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_f.json      M19    00:31:14.604    00:32:10.704    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_g.json      M19b   00:32:39.420    00:33:01.320    B (certo: margem > 5 min, muito maior que as folgas)
+repro_mapa_h.json      M20    00:33:26.451    00:34:02.151    B (certo: margem > 5 min, muito maior que as folgas)
+
+O PNG m18c_T7_satelite_1440.png foi gravado às 00:28:01.974 UTC, junto do M18c: espelho B.
+Horas de gravação lidas do sistema de arquivos da worktree em que as medidas rodaram (antes do commit 6c03d7e).

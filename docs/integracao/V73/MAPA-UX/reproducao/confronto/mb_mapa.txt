@@ -1,0 +1,17 @@
+MB-01.dc.html            svg= 12 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-02.dc.html            svg=  8 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-02det.dc.html         svg=  5 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-03.dc.html            svg=  5 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-03x-recibo.dc.html    svg=  2 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-04.dc.html            svg=  7 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-05.dc.html            svg=  4 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-05det.dc.html         svg=  3 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=0 #talhao=0
+MB-06.dc.html            svg=  3 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=0 #talhao=0
+MB-07.dc.html            svg=  4 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-08.dc.html            svg=  7 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=0 #talhao=0
+MB-08x-recibo.dc.html    svg=  2 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=0 #talhao=0
+MB-09.dc.html            svg=  8 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-09det.dc.html         svg=  5 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+MB-10.dc.html            svg=  4 svg>=200un=0 maplibre=0 polygon=0 link_IN-04#car=2 #talhao=0
+
+TOTAL telas MB=15 · com mapa=0 · com código de link para o IN-04 (aviso de carência)=11
