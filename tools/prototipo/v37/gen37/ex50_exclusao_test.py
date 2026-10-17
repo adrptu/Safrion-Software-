@@ -106,6 +106,9 @@ def check(render, decisions, proofs):
     if len(names) != len(sources):
         raise ValueError('Nomes HTML duplicados no render: destino ambíguo')
     parsed = {p: Page(s) for p, s in sources.items()}
+    # A limpeza independe do item: executar uma vez por página.
+    reference_lines = {p: unquote(unescape(re.sub(r'<!--.*?-->', '', s, flags=re.S))).splitlines()
+                       for p, s in sources.items()}
     results = []
     for row in decisions:
         item = dict(row, errors=[], incoming=[], status='BLOQUEADO')
@@ -122,12 +125,11 @@ def check(render, decisions, proofs):
         if target not in names:
             item['errors'].append('Página de origem ausente: não é prova anterior à exclusão')
         pattern = re.compile(r'(?<![A-Za-z0-9_-])' + re.escape(target) + r'(?![A-Za-z0-9_.-])')
-        for path, src in sources.items():
+        for path, lines in reference_lines.items():
             if Path(path).name == target:
                 continue
             # Decodificar entidades/URL evita ignorar href codificado.
-            clean = re.sub(r'<!--.*?-->', '', src, flags=re.S)
-            for number, line in enumerate(unquote(unescape(clean)).splitlines(), 1):
+            for number, line in enumerate(lines, 1):
                 if pattern.search(line):
                     item['incoming'].append({'page': path, 'line': number})
         if item['incoming']:
