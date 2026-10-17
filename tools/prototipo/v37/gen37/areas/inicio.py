@@ -1623,10 +1623,11 @@ function muxCartaoHtml(i){ const E=muxEsc;
     +'<div class="mux-c-d">'+E([i.data,i.comp].filter(Boolean).join(' · '))+'</div>'
     +(i.manejo?'<div class="mux-c-m">'+E(i.manejo)+'</div>':'')+(i.fora?'<div class="mux-c-d">Fora do filtro de cultura</div>':'')
     +'<div class="mux-c-h">Clique para detalhar</div>'; }
-function muxCartaoMostra(id,modo,ev){ const i=MUX.info[id]; if(!i) return; const d=muxCartaoEl(); clearTimeout(MUX.sai); const t0=ev&&typeof ev.timeStamp==='number'?ev.timeStamp:null;
+// medida (MUX-F2, §8 item 3): ms = do evento ao quadro seguinte (inclui a pintura do mapa, que pesa com a máquina carregada); js = o trabalho do cartão
+function muxCartaoMostra(id,modo,ev){ const tj=performance.now(); const i=MUX.info[id]; if(!i) return; const d=muxCartaoEl(); clearTimeout(MUX.sai); const t0=ev&&typeof ev.timeStamp==='number'?ev.timeStamp:null;
   const html=muxCartaoHtml(i); if(d.__h!==html){ d.innerHTML=html; d.__h=html; } d.hidden=false; d.dataset.modo=modo; d.dataset.talhao=id;
   MUX.hov=id; MUX.modo=modo; MUX.cartaoOn=true; muxCartaoPos(); muxRealce([id],modo==='foco'?'foco':'hover');
-  if(t0!==null) requestAnimationFrame(()=>{ MUX.med.push({id,modo,ms:Math.round((performance.now()-t0)*10)/10}); if(MUX.med.length>400) MUX.med.shift(); }); }
+  if(t0!==null){ const js=Math.round((performance.now()-tj)*10)/10; requestAnimationFrame(()=>{ MUX.med.push({id,modo,ms:Math.round((performance.now()-t0)*10)/10,js}); if(MUX.med.length>400) MUX.med.shift(); }); } }
 function muxSobra(c,w,h,R){ const x=Math.max(0,Math.min(c.x+w,R.right)-Math.max(c.x,R.left)), y=Math.max(0,Math.min(c.y+h,R.bottom)-Math.max(c.y,R.top)); return x*y; }
 function muxCartaoPos(){ const d=document.getElementById('mux-cartao'); if(!d||d.hidden) return; const R=muxCaixa(MUX.hov); if(!R){ muxCartaoFecha(); return; }
   const W=innerWidth, H=innerHeight, g=10, mg=8; d.style.maxWidth=Math.min(300,W-2*mg)+'px'; d.style.left='0px'; d.style.top='0px'; const w=d.offsetWidth, h=d.offsetHeight;
@@ -1963,7 +1964,7 @@ def _mapcard(h,full=False):
          f'<sc-if value="{H("lg_err")}" hint-placeholder-val="{F()}"><div role="alert" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; max-width: min(360px, calc(100% - 24px)); box-sizing: border-box; padding: 10px 14px; border-radius: 10px; background: #fff; color: {RED}; font-size: 13px; font-weight: 700;">{H("lg_errt")}'
          f'<button type="button" onClick="{H("lg_tenta")}" style="{_MINI}">Tentar de novo</button></div></sc-if></sc-if>')
       + ('' if full else _mux_lista()) + f'{tools}{zoom}{_tm_barra()}' + ('' if full else _mux_barra()) +
-      f'<sc-if value="{H("aviso_bv")}" hint-placeholder-val="{F()}"><span role="note" class="mux-aviso" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">Todas: o mapa mostra a Santa Rita · Lagoa Grande e Boa Vista (sem geometria) na Lista</span></sc-if>'
+      f'<sc-if value="{H("aviso_bv")}" hint-placeholder-val="{F()}"><span role="note" class="mux-aviso" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">Santa Rita no mapa · Lagoa Grande na Lista · Boa Vista sem geometria</span></sc-if>'
       # MUX-F2: legenda que trabalha (cada classe é um botão com contagem e área: realça no hover e no foco, filtra no clique) e as instruções do teclado
       f'<div class="mux-legenda" style="position: absolute; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 5px 9px; border-radius: 10px; background: rgba(255,255,255,.94); box-shadow: 0 1px 4px rgba(21,32,26,.14); font-size: 11.5px; color: {MUTED}; z-index: 3; pointer-events: none;">'
       f'<sc-for list="{H("leg")}" as="x" hint-placeholder-count="5"><sc-if value="{H("x.btn")}" hint-placeholder-val="{T()}"><button type="button" data-mux-leg="{H("x.key")}" aria-pressed="{H("x.on")}" aria-label="{H("x.rot")}" onClick="{H("x.go")}" style="{H("x.bst")}"><span style="{H("x.dot")}"></span>{H("x.t")}<b class="mux-qt" style="font-weight: 700; color: {INK};">{H("x.qt")}</b></button></sc-if>'

@@ -60,8 +60,9 @@ try:
     lk=links('T1')
     bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button')].map(b=>b.innerText.trim())") or []
     # Fase 1 (01/10): o painel mostra as ordens do talhão e o próximo passo da escolhida; o primário é Liberar no próprio mapa e o ajuste abre a O.S.
+    # MUX-F0 (17/10/2026, D8): "Nova O.S. neste talhão" leva o talhão (#tal=Fazenda|Talhão), não mais OS.dc.html puro. Oráculo obsoleto no destino; a asserção fica mais estrita
     chk('4 T1 (Ordens de serviço): OS-0430 A liberar · primário "Liberar para execução" · "Ajustar antes de liberar" → O.S. da OS-0430 · rodapé "Nova O.S. neste talhão" · sem revisão · nenhum destino repetido',
-        'Liberar para execução' in bt and ['Ajustar antes de liberar','OS.dc.html#OS-0430:ajustar'] in lk and lk[-1:]==[['Nova O.S. neste talhão','OS.dc.html']]
+        'Liberar para execução' in bt and ['Ajustar antes de liberar','OS.dc.html#OS-0430:ajustar'] in lk and lk[-1:]==[['Nova O.S. neste talhão','OS.dc.html#tal=Santa%20Rita%7CT1']]
         and 'Aguardando agrônomo' not in t1 and 'Revisar' not in t1 and unico(lk), [bt,lk])
     tap('T1'); tap('P1'); p1=pan('P1'); lk=links('P1'); pr=prim('P1')
     # a OS-0418 (mais urgente) vem escolhida, impedida pelo Estoque (Ureia 45 % sem lote); a OS-0417 (sobras) mostra o atalho ao Estoque quando é escolhida

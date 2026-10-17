@@ -62,8 +62,11 @@ try:
     for _ in range(3):
         for t in ('T1', 'T2', 'P1', 'P2', 'T4', 'T3', 'T7', 'C1'):
             c.mouse(5, 890); time.sleep(.2); bb = caixa(J, t); c.mouse(bb['x'], bb['y']); time.sleep(.12)   # cada hover abre um cartão novo
-    md = sorted(x['ms'] for x in (J("(window.__MUX&&window.__MUX.med)||[]") or []))
-    p95 = md[min(len(md) - 1, int(round(.95 * (len(md) - 1))))] if md else None; MED['tempo_ms'] = {'n': len(md), 'p50': md[len(md) // 2] if md else None, 'p95': p95}
+    raw = J("(window.__MUX&&window.__MUX.med)||[]") or []
+    pc = lambda v, q: v[min(len(v) - 1, int(round(q * (len(v) - 1))))] if v else None
+    md = sorted(x['ms'] for x in raw); mj = sorted(x.get('js', 0) for x in raw)
+    MED['tempo_ms'] = {'n': len(md), 'p50': pc(md, .5), 'p95': pc(md, .95), 'js_p50': pc(mj, .5), 'js_p95': pc(mj, .95)}   # js: o trabalho do cartão, sem a pintura
+    p95 = MED['tempo_ms']['p95']
     chk('C2b tempos do evento ao quadro medidos (indicativo, SwiftShader): amostra com 24 hovers entre vizinhos', len(md) >= 20, MED['tempo_ms'])
     # C3 foco de teclado = mesmo cartão
     c.mouse(5, 890); time.sleep(.4); bb = caixa(J, 'T4'); c.mouse(bb['x'], bb['y']); espera(J, "(document.getElementById('mux-cartao')||{}).dataset&&document.getElementById('mux-cartao').dataset.talhao==='T4'", 2); kh = cartao(J)
