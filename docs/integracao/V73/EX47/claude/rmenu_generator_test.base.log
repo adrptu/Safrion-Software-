@@ -1,0 +1,22 @@
+FF
+======================================================================
+FAIL: test_header_total_and_tracks (__main__.MenuColumn.test_header_total_and_tracks) (menu=True, delete=False, selection=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev93/tools/prototipo/v37/gen37/rmenu_generator_test.py", line 42, in test_header_total_and_tracks
+    self.assertEqual(len(p.rows[0]), expected)
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_header_total_and_tracks (__main__.MenuColumn.test_header_total_and_tracks) (menu=True, delete=False, selection=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev93/tools/prototipo/v37/gen37/rmenu_generator_test.py", line 42, in test_header_total_and_tracks
+    self.assertEqual(len(p.rows[0]), expected)
+AssertionError: 2 != 3
+
+----------------------------------------------------------------------
+Ran 1 test in 0.017s
+
+FAILED (failures=2)
+exit=0

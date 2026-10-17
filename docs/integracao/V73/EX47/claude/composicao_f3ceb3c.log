@@ -1,0 +1,10 @@
+# composição: f3ceb3c + 3010fc9 (conflito do engine.py resolvido: hdel da ponta com class g2th, condição acoes_linha)
+EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK
+rmenu_unit exit=0
+Ran 1 test in 0.051s
+
+OK
+rmenu_generator exit=0
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 547 OK, 0 falhas
+sonda exit=0

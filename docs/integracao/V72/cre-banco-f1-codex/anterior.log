@@ -1,0 +1,31 @@
+FALHA ausência inicial não é valor zero: c.credFichaLer is not a function
+FALHA R$850.000,00 mantém unidade e centavos após recarga: c.credFichaSalvar is not a function
+FALHA centavos e valor grande voltam exatos após salvar e reabrir: c.credFichaSalvar is not a function
+FALHA zero explícito é declaração, vazio fica pendente: c.credFichaSalvar is not a function
+FALHA confirmação Carlos preserva declaração original Ana 10/03: c.credFichaSalvar is not a function
+FALHA atualização mantém declaração e confirmações anteriores: c.credFichaSalvar is not a function
+FALHA repetir confirmação no mesmo dia não duplica recibo: c.credFichaSalvar is not a function
+FALHA dado pendente não aceita confirmação: c.credFichaSalvar is not a function
+FALHA valor sem origem ou responsável é recusado: The input did not match the regular expression /fonte/i. Input:
+
+'TypeError: c.credFichaSalvar is not a function'
+
+FALHA decimal ambíguo, negativo, não finito e centavo excedente são recusados: The input did not match the regular expression /valor/i. Input:
+
+'TypeError: c.credFichaSalvar is not a function'
+
+FALHA datas impossíveis ou futuras são recusadas: The input did not match the regular expression /data/i. Input:
+
+'TypeError: c.credFichaSalvar is not a function'
+
+FALHA conflito de revisão preserva edição mais nova: c.credFichaSalvar is not a function
+FALHA salvar outro item preserva alterações concorrentes: c.credFichaSalvar is not a function
+FALHA quota não confirma nem altera versão anterior: c.credFichaSalvar is not a function
+FALHA armazenamento corrompido não é substituído por vazio: CRED_FICHA_KEY is not defined
+FALHA perfil inexistente ou sem papel não grava: The input did not match the regular expression /perfil/i. Input:
+
+'TypeError: c.credFichaSalvar is not a function'
+
+FALHA schema desconhecido não é apagado: CRED_FICHA_KEY is not defined
+FALHA IDs duplicados falham fechados sem apagar dados: c.credFichaSalvar is not a function
+RESULTADO 0/18

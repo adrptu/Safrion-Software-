@@ -95,6 +95,12 @@ def _hub(fname, titulo, itens, blocos=None, topo='', js=''):
 
 def itens_do(nome):
     """cartões de um módulo, na ordem do menu: uma tela por cartão; a visão com nome próprio no CURTO37 (MA.dc.html#vis=…) tem o seu."""
+    if nome == 'Crédito':
+        # CRE F2: documentos continuam acessíveis pela ficha do grupo.
+        return [('GE-08.dc.html#vis=ficha', 'Ficha do grupo', 'prancheta'),
+                ('GE-08.dc.html#vis=dossie', 'Dossiês', 'pasta'),
+                ('GE-08.dc.html#vis=contratos', 'Pedidos e contratos', 'doc'),
+                ('GE-08.dc.html#vis=liberacoes', 'Liberações e garantias', 'cash')]
     its, vistos = [], set()
     for _, ic, items in [m for m in MENU2 if m[0] == nome]:
         for l, h in items:

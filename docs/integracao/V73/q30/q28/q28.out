@@ -1,0 +1,10 @@
+render: 156 páginas
+rc=0 2s node est_onda0_unit.js :: RESULTADO 24/24
+sem -B
+sem -B
+sem -B
+rc=0 42s est_cenario_test.py :: RESULTADO: 15/15 ok
+rc=0 92s esttest.py :: RESULTADO: OK
+rc=0 17s est_sem_validade_nav.py :: RESULTADO: 8/8 ok
+rc=0 74s map_decisoes_test.py :: 18 ok · 0 falhas []
+rc=124 1500s ben_fluxo_test.py :: OK  S390 sobra sem erro de JS

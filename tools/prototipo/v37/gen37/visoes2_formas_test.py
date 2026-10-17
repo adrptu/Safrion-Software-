@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""VISOES-2 §3.3–3.4 e §8 ponto 3 · toda forma lê o mesmo recorte, no navegador: Kanban com raias por grupo (o nome desce), trilha e filtros
+"""VISOES-2 §3.3–3.4 e §8 ponto 3 · toda forma lê o mesmo recorte, no navegador: Kanban com raias por grupo (o cabeçalho recolhe/expande), trilha e filtros
 em chips removíveis acima do conteúdo em Kanban, Calendário e Carga; filtro de Talhão limita os grupos com a O.S. de dois talhões (OS-0421,
 T1 e T2; Codex 6168779649 achado 2); o recorte do Painel suspende a trilha sem apagá-la. Dados sintéticos; render em RENDER_DIR ou _render."""
 import sys, os, time, json
@@ -29,16 +29,28 @@ try:
     abre('?view=kanban&ag=onde'); rs = raias(); dist = sorted(set(i for _, xs in rs for i in xs))
     chk('F1 Kanban com Agrupar por Talhão: uma raia por talhão; OS-0421 nas raias T1 e T2; as O.S. distintas das raias = as da Tabela',
         len(rs) >= 3 and 'OS-0421' in dict(rs).get('T1', []) and 'OS-0421' in dict(rs).get('T2', []) and dist == todas, [rs, todas])
-    J("[...document.querySelectorAll('.os-raia-cab')].find(b=>b.querySelector('b').innerText.trim()==='T2').click()"); time.sleep(.7)
-    f = faixa()
-    chk('F2 o nome da raia desce: trilha no endereço, um quadro só com as O.S. de T2 e a faixa "Talhão: … › T2 ×" acima do quadro',
-        'trilha=' in J("location.search") and not raias() and quadro() == sorted(dict(rs)['T2']) and 'Talhão:' in f and '› T2' in f and 'Limpar filtros' in f, [J("location.search"), quadro(), f])
+    q0 = J("location.search")
+    J("(()=>{const b=[...document.querySelectorAll('.os-raia-cab')].find(b=>b.querySelector('b').innerText.trim()==='T2');b.focus()})()")
+    c.tecla('Enter','Enter',13,text='\r'); time.sleep(.7)   # rev. Claude: Enter com o texto '\r', como a tecla real (sem ele o botão nativo não é acionado)
+    dobrada = "(()=>{const b=[...document.querySelectorAll('.os-raia-cab')].find(b=>b.querySelector('b').innerText.trim()==='T2');return !!b&&b.getAttribute('aria-expanded')==='false'&&![...b.parentElement.querySelectorAll('[role=list]')].some(x=>x.offsetParent)})()"
+    chk('F2 Enter recolhe só T2, preserva endereço e mantém foco no cabeçalho',
+        J(dobrada) and J("location.search")==q0 and len(raias())==len(rs) and J("document.activeElement.classList.contains('os-raia-cab')"), [J("location.search"),raias()])
     visao('calendario'); cal = sorted(set(J("[...document.querySelectorAll('[role=button][aria-label^=Abrir],button[aria-label^=Abrir]')].filter(x=>x.offsetParent).map(x=>x.getAttribute('aria-label').split(' · ')[0].replace('Abrir ',''))") or []))
-    chk('F3 Calendário lê o mesmo recorte da trilha (só O.S. de T2) e mostra a mesma faixa', set(cal) <= set(dict(rs)['T2']) and '› T2' in faixa(), [cal, faixa()])
+    chk('F3 recolher T2 não recorta Calendário nem cria trilha', set(cal)<=set(todas) and bool(cal) and 'trilha=' not in J("location.search") and '› T2' not in faixa(), [cal,faixa()])
     visao('carga')
-    chk('F4 Carga mostra a mesma faixa do recorte', '› T2' in faixa() and 'Limpar filtros' in faixa(), faixa())
-    visao('kanban'); tira('Tirar a trilha')
-    chk('F5 o × do chip tira a trilha: as raias voltam e o endereço fica sem trilha', len(raias()) == len(rs) and 'trilha=' not in J("location.search"), [J("location.search"), len(raias())])
+    chk('F4 recolher T2 não recorta Carga nem cria chip de trilha', 'trilha=' not in J("location.search") and '› T2' not in faixa(),faixa())
+    visao('kanban'); chk('F4a volta do Kanban preserva T2 recolhida',J(dobrada))
+    J("[...document.querySelectorAll('.os-raia-cab')].find(b=>b.querySelector('b').innerText.trim()==='T2').focus()")
+    c.tecla(' ','Space',32,text=' '); time.sleep(.7)
+    chk('F4b Espaço expande T2 e recupera exatamente seus cartões',sorted(dict(raias())['T2'])==sorted(dict(rs)['T2']) and J("document.activeElement.getAttribute('aria-expanded')==='true'"),raias())
+    # AGR-02 (padroes-1610): não há trilha; endereço antigo com trilha não recorta nada (o recorte é dos filtros). Rev. Claude: os F4c–F5
+    # do PR exigiam o recorte pela trilha, que a AGR-02 desligou antes da base do PR (g2agNoTrilha devolve null; g2agRows usa at=[]).
+    abre('?view=kanban&ag=onde&trilha=Santa%20Rita/T2'); f=faixa()
+    chk('F4c endereço antigo com trilha não recorta o Kanban (AGR-02): as mesmas raias e sem chip de trilha',[k for k,_ in raias()]==[k for k,_ in rs] and '› T2' not in f,[raias(),f])
+    visao('calendario');chk('F4d Calendário sem chip de trilha','› T2' not in faixa(),faixa())
+    visao('carga');chk('F4e Carga sem chip de trilha','› T2' not in faixa(),faixa())
+    visao('kanban')
+    chk('F5 de volta ao Kanban: todas as raias e nenhum botão "Tirar a trilha"',len(raias())==len(rs) and not J("[...document.querySelectorAll('[data-os-recorte] button')].some(b=>b.offsetParent&&/^Tirar a trilha/.test(b.getAttribute('aria-label')||''))"),[len(raias()),faixa()])
     # filtro de Talhão = T1 na coluna (Tabela) e Agrupar por Talhão: só o grupo T1, OS-0421 não reaparece em T2 (achado 2, com dado real)
     visao('lista')
     J("(()=>{const h=[...document.querySelectorAll('[data-g2g=g_os] [role=columnheader]')].find(x=>/^talhão/i.test(x.innerText.trim())); h.querySelector('.g2fb').click();})()"); time.sleep(.45)
@@ -50,23 +62,24 @@ try:
     chk('F7 Kanban com o mesmo filtro: só a raia T1, e a faixa traz o chip "Talhão: T1 ×"', [x for x, _ in rk] == ['T1'] and 'Talhão: T1' in faixa(), [rk, faixa()])
     tira('Remover filtro Talhão')
     chk('F8 o × do chip do filtro remove só esse filtro: as raias voltam e a faixa some', len(raias()) == len(rs) and faixa() == '', [len(raias()), faixa()])
-    # recorte do Painel com trilha guardada: a trilha fica suspensa (não esconde O.S. do recorte) e volta ao sair
-    J("[...document.querySelectorAll('.os-raia-cab')].find(b=>b.querySelector('b').innerText.trim()==='C1').click()"); time.sleep(.6)
-    q_tr = J("location.search")
-    c.goto(B + q_tr.replace('view=kanban', 'view=lista') + '#painel=OS-0418,OS-0420', 1.6)
-    chk('F9 #painel=OS-0418,OS-0420 com a trilha C1 guardada: o recorte mostra as duas O.S., sem raia nem faixa de trilha', ids_tab() == ['OS-0418', 'OS-0420'] and '› C1' not in faixa(), [ids_tab(), faixa()])
+    # recorte do Painel com Agrupar por: o recorte mostra só as O.S. dele, sem raia; "Ver todas as O.S." volta às raias (AGR-02: sem trilha)
+    c.goto(B + '?view=lista&ag=onde#painel=OS-0418,OS-0420', 1.6)
+    chk('F9 #painel=OS-0418,OS-0420 com Agrupar por Talhão: o recorte mostra as duas O.S., sem raia nem chip de trilha', ids_tab() == ['OS-0418', 'OS-0420'] and '›' not in faixa(), [ids_tab(), faixa()])
     J("(()=>{const b=[...document.querySelectorAll('button')].find(x=>/Ver todas as O\\.S\\./.test(x.innerText)); if(b) b.click();})()"); time.sleep(.7)
     visao('kanban')
-    chk('F10 "Ver todas as O.S." devolve a trilha guardada (C1)', '› C1' in faixa() and not raias(), [faixa(), raias()])
+    chk('F10 "Ver todas as O.S." volta às raias do agrupamento, sem trilha', len(raias()) == len(rs) and '›' not in faixa(), [faixa(), len(raias())])
     c.aparelho(390, 844, 2, True); abre('?view=kanban&ag=onde')
     chk('F11 celular: raias sem rolagem lateral da página', len(raias()) >= 3 and J("document.documentElement.scrollWidth<=innerWidth"), J("[document.documentElement.scrollWidth,innerWidth]"))
     # Codex 6170116165: F11 mede só a página; V2-RAIAS-MOBILE-01 mede a coluna da raia e o que há dentro, V2-RAIAS-TOQUE-01 os alvos de toque
     med = J("[...document.querySelectorAll('.os-raia .os-kbcol')].filter(x=>x.offsetParent).map(c=>[c.clientWidth,c.scrollWidth])") or []
     chk('F11b celular: coluna da raia com 148 px e nada encoberto (o quadro rola dentro, a página não)', med and min(w for w, _ in med) >= 140 and all(sw <= w + 1 for w, sw in med) and J("document.documentElement.scrollWidth<=innerWidth"), med[:6])
     cab = J("[...document.querySelectorAll('.os-raia-cab')].filter(x=>x.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height))") or []
-    J("[...document.querySelectorAll('.os-raia-cab')].find(x=>x.offsetParent).click()"); time.sleep(.8)
+    t0 = J("(()=>{const b=[...document.querySelectorAll('.os-raia-cab')].find(x=>x.offsetParent); b.scrollIntoView({block:'center'}); const r=b.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];})()")
+    c.toque(*t0); time.sleep(.5)   # rev. Claude: toque real (Input.dispatchTouchEvent), não .click()
+    chk('F11d celular: toque recolhe primeira raia com estado acessível e sem trilha',J("[...document.querySelectorAll('.os-raia-cab')].find(x=>x.offsetParent).getAttribute('aria-expanded')==='false'") and 'trilha=' not in J("location.search"))
+    abre('?view=kanban&ag=onde')
     alv = J("[...document.querySelectorAll('[data-os-recorte] button')].filter(x=>x.offsetParent).map(b=>{const r=b.getBoundingClientRect(); return [b.getAttribute('aria-label')||b.innerText.trim(), Math.round(r.width), Math.round(r.height)];})") or []
-    chk('F11c toque: nome da raia, × da trilha e "Limpar filtros" com 44 px', cab and min(cab) >= 44 and any(a[0].startswith('Tirar a trilha') for a in alv) and all(a[1] >= 44 and a[2] >= 44 for a in alv), [cab, alv])
+    chk('F11c toque: cabeçalho da raia com 44 px e os botões da faixa de recorte, se houver, com 44 px (sem chip de trilha: AGR-02)', cab and min(cab) >= 44 and all(a[1] >= 44 and a[2] >= 44 for a in alv), [cab, alv])
     # Codex V68-CAL-DIA-01: na agenda do celular cada dia mostra as ordens que correm nele (as de vários dias com "dia N de M") e abre
     # a ordem dali; a contagem do dia = as linhas do dia; no computador vale a faixa única, cada O.S. uma vez; o conjunto da semana é o mesmo
     J("localStorage.clear();sessionStorage.clear()"); abre('?view=calendario')
@@ -90,3 +103,4 @@ finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {ok_n}/{ok_n + len(falhas)}' + (' · FALHAS: ' + '; '.join(falhas) if falhas else ''))
 sys.exit(1 if falhas else 0)
+

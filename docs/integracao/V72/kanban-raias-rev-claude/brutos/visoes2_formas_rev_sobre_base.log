@@ -1,0 +1,24 @@
+OK  F1 Kanban com Agrupar por Talhão: uma raia por talhão; OS-0421 nas raias T1 e T2; as O.S. distintas das raias = as da Tabela
+FALHA F2 Enter recolhe só T2, preserva endereço e mantém foco no cabeçalho · ['?view=kanban&ag=onde&trilha=Santa%20Rita/T2', [['C1', ['OS-0425']], ['P1', ['OS-0418', 'OS-0417']], ['Sem talhão', ['OB-0104']], ['T1', ['OS-0421']], ['T1-A', ['OS-0430']], ['T1-B', ['OS-0424']], ['T2', ['OS-0431', 'OS-0421']], ['T3', ['OS-0415']], ['T4', ['OS-0420']]]]
+FALHA F3 recolher T2 não recorta Calendário nem cria trilha · [['OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0424', 'OS-0430', 'OS-0431'], '']
+FALHA F4 recolher T2 não recorta Carga nem cria chip de trilha · 
+FALHA F4a volta do Kanban preserva T2 recolhida · 
+FALHA F4b Espaço expande T2 e recupera exatamente seus cartões · [['C1', ['OS-0425']], ['P1', ['OS-0418', 'OS-0417']], ['Sem talhão', ['OB-0104']], ['T1', ['OS-0421']], ['T1-A', ['OS-0430']], ['T1-B', ['OS-0424']], ['T2', ['OS-0431', 'OS-0421']], ['T3', ['OS-0415']], ['T4', ['OS-0420']]]
+OK  F4c endereço antigo com trilha não recorta o Kanban (AGR-02): as mesmas raias e sem chip de trilha
+OK  F4d Calendário sem chip de trilha
+OK  F4e Carga sem chip de trilha
+OK  F5 de volta ao Kanban: todas as raias e nenhum botão "Tirar a trilha"
+OK  F6 Tabela por Talhão com filtro Talhão = T1: só o grupo T1 (OS-0421 não leva o grupo T2 junto)
+OK  F7 Kanban com o mesmo filtro: só a raia T1, e a faixa traz o chip "Talhão: T1 ×"
+OK  F8 o × do chip do filtro remove só esse filtro: as raias voltam e a faixa some
+OK  F9 #painel=OS-0418,OS-0420 com Agrupar por Talhão: o recorte mostra as duas O.S., sem raia nem chip de trilha
+OK  F10 "Ver todas as O.S." volta às raias do agrupamento, sem trilha
+OK  F11 celular: raias sem rolagem lateral da página
+OK  F11b celular: coluna da raia com 148 px e nada encoberto (o quadro rola dentro, a página não)
+FALHA F11d celular: toque recolhe primeira raia com estado acessível e sem trilha · 
+OK  F11c toque: cabeçalho da raia com 44 px e os botões da faixa de recorte, se houver, com 44 px (sem chip de trilha: AGR-02)
+OK  F13 celular: cada dia lista as suas ordens (contagem = linhas; as de vários dias com "dia N de M"), sem a faixa do topo; há dia só com ordens de vários dias
+OK  F13b celular: no dia só com ordens de vários dias, o toque abre a ordem certa
+OK  F14 computador: faixa única das ordens de vários dias, cada O.S. uma vez, sem as linhas do celular; o conjunto da semana = o do celular
+OK  F12 sem erro de JS
+RESULTADO: 17/23 · FALHAS: F2 Enter recolhe só T2, preserva endereço e mantém foco no cabeçalho; F3 recolher T2 não recorta Calendário nem cria trilha; F4 recolher T2 não recorta Carga nem cria chip de trilha; F4a volta do Kanban preserva T2 recolhida; F4b Espaço expande T2 e recupera exatamente seus cartões; F11d celular: toque recolhe primeira raia com estado acessível e sem trilha
