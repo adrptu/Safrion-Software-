@@ -1,0 +1,44 @@
+A sem RM: cabeçalho: Fazenda Santa Rita Safra 2026/27 Logística › Expedições e cargas › Nenhuma carga programada Conferir carga i Nenhuma carga programada Abrir Expedição
+A corpo: Conferência por pedido e lote 0 de 0 PRODUTO ⇅ LOTE ⇅ PEDIDO ⇅ PREVISTO (KG) ⇅ SAÍDA ⇅ ESTADO ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros Pesagem 0 de 0 ROMANEIO ⇅ BRUTO (KG) ⇅ TARA (KG) ⇅ LÍQUIDO ⇅ ORIGEM ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros Lacre e documentos 0 de 
+A erros: 
+B linha PV-030: ok
+B 60kg: ok registrar: ok
+B toast saca: PV-030: saca de 60 kg registrada por Ana (gestora) (Contrato CT-201): 4.000 sc = 240.000 kg; falta 125 sc.
+B reservar: ok
+B toast reserva: RS-0002: 125 sc do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 34.420 sc · PV-030 coberto.
+B ir programar: ok
+B veic: ok placa: QZA1B23
+B programar: ok
+B toast: RM-0002 programada por Ana (gestora): PV-030 (Coop Grão Sul) · L10-031 37.000 kg = 616,67 sc · Bitrem graneleiro 37 t QZA1B23 · cliente retira · 26/09. Próximo passo: confirmar a saída com a pesagem.
+B RMs: []
+C Caio cabeçalho: Fazenda Santa Rita Safra 2026/27 Logística › Expedições e cargas › RM-0002 · PV-030 · Coop Grão Sul Conferir carga i Programada Confirmar saída
+C linhas ps: [['Soja em grão L10-031 PV-030 Previsto: 37000 kg Ainda não saiu Programada'], ['RM-0002 — — Bruto − tara Informar pesos do ticket'], ['Lacre e autorização de saída Prévia · sem registro ou autorização neste detalhe Conferir no processo responsável'], []]
+C RM linha: RM-0002 — 
+C abrir: True
+C form: Confirmar saída · RM-0002 | ['fx_g_ps_bruto=', 'fx_g_ps_tara=']
+C Caio salvar: alerts= Não salvo: Confirmar saída da RM-0002: decisão de Ana (gestora) ou Rui (expedição). Nada foi alterado. Nada foi perdido; tente de novo. | aberto= True
+K selo: Programada | rgb(255, 243, 214)
+K foco botão: True
+K Enter abre: True Confirmar saída · RM-0002 | foco no diálogo: False
+K Esc fecha: False
+D campos: ['fx_g_ps_bruto', 'fx_g_ps_tara']
+D tara>bruto: alerts= Corrija os campos destacados; o que você preencheu foi mantido. | A tara deve ser menor que o bruto.
+D lotes previstos: 
+D Rui salvar: toast= RM-0002: saída de 37.000 kg (52.000 − 15.000) = 616,67 sc para o PV-030 (Coop Grão Sul). Entregue na retirada · R$ 78.933,33 a receber até 26/09. L10-031 disponível 34.420 sc. | alerts=  | aberto= False
+D RMs: []
+D cabeçalho: Fazenda Santa Rita Safra 2026/27 Logística › Expedições e cargas › RM-0002 · PV-030 · Coop Grão Sul Conferir carga i Entregue Abrir Expedição
+D hash após salvar: #rm=RM-0002
+D recarregar (F5): #rm=RM-0002 | 7 Logística › Expedições e cargas › RM-0002 · PV-030 · Coop Grão Sul Conferir carga i Entregue Abrir Expedição | 1 movimento(s)
+D movimentos: ['MP-1020 · expedição L10-031 · -37000 kg Rui (expedição) · 2026-09-26 16:51']
+E recarregar cabeçalho: /27 Logística › Expedições e cargas › Nenhuma carga programada Conferir carga i Nenhuma carga programada Abrir Expedição
+E tabelas: [[], [], [], []]
+E reabrir após saída: False 
+F recarregar sem hash:  anta Rita Safra 2026/27 Logística › Expedições e cargas › Nenhuma carga programada Conferir carga i Nenhuma carga programada Abrir Expedição
+F hash cabeçalho: fra 2026/27 Logística › Expedições e cargas › RM-0002 · PV-030 · Coop Grão Sul Conferir carga i Entregue Abrir Expedição
+F tabelas: [['Soja em grão L10-031 PV-030 Previsto: 37000 kg 37000 kg Entregue'], ['RM-0002 52000 15000 37000 kg Saída por Rui (expedição)'], ['Lacre e autorização de saída Prévia · sem registro ou autorização neste detalhe Conferir no processo responsável'], ['MP-1020 · expedição L10-031 · -37000 kg Rui (expedição) · 2026-09-26 16:51']]
+F abrir RM saída: True Confirmar saída · RM-0002 Confirmar saída · RM-0002 | × | Saída já confirmada por Rui (expedição) em 2026-09-26 16:51; nada a salvar. Correção é estorno no Estoque, com vínculo. | Peso bruto (kg) | Tara (kg) | Fechar
+F sub consulta: Confirmar saída · RM-0002 | × | Saída já confirmada por Rui (expedição) em 2026-09-26 16:51; nada a salvar. Correção é estorno no Estoque, com vínculo. | Peso bruto (kg) | Tara (kg) | Fechar
+F botão: ['Abrir Expedição'] link exp: ['EXPED.dc.html#RM-0002']
+F movs RM-0002 no estado: ['MP-1001', 'MP-1002', 'MP-1003', 'MP-1004', 'MP-1005', 'MP-1006', 'MP-1007', 'MP-1008', 'MP-1009', 'MP-1010', 'MP-1011', 'MP-1012', 'MP-1013', 'MP-1014', 'MP-1015', 'MP-1016', 'MP-1017', 'MP-1018', 'MP-1019', 'MP-1020']
+G 390 overflow: 0 botões fora: []
+erros JS: 

@@ -59,6 +59,11 @@ def ibtn(label,hole,ic,title,primary=False):
             f'{icon(ic,14)}{esc(label)}</button>')
 def ilink(label,href,ic,title):
     return (f'<a href="{href}" title="{esc(title)}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">{icon(ic,14)}{esc(label)}</a>')
+def _selo_dinamico(fname,hole):
+    """selo do cabeçalho com cor ligada ao estado ({{hole}}, {{hole_st}}, {{hole_dot}}), como na Colheita."""
+    p=f'{E.P}/{fname}'; s=open(p).read(); old=chip(H(hole),'green')
+    assert old in s, 'selo dinâmico não encontrado'
+    open(p,'w').write(s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>',1))
 def bloco(titulo,desc,corpo,acao='',state='green'):
     acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
@@ -376,75 +381,30 @@ function EXTRAVALS(self,v){ const s=self.state;
     # LO-02det · Conferir carga T2 (saída física única)
     # =====================================================================
     fname='LO-02det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000; PARENT37[fname]='LO-02.dc.html'
-    g_cf=grid([C('item','Item',w=170),C('lote','Lote'),C('ped','Pedido (parcela)',a='r'),C('sep','Separado',a='r'),C('car','Carregado',a='r'),C('saldo','Saldo da parcela',w=260),C('conf','Conferência')],[
-      R('i1',item=[Pt.b(VD['produto'])],lote=VD['lote'],ped=VD['carga_t'],sep=VD['carga_t'],car=VD['carga_t'],saldo='0 t · 2ª de 3 cargas (37,00 t na 3ª)',conf=[Pt.chip('Conferido','green')],
-        o=[(f'Pedido {VD["id"]}: 111 t em 3 cargas de 37,00 t',None),(f'Carregado = líquido do ticket {TICKET["id"]} ({TICKET["liquido"]})',None),('Leitura de código na separação · Rui (expedição)',None)]),
-      ],edit=dict(m='origin',title='Conferência',fields=[]),search=False,gid='g_cf',total=False)
-    g_ps=grid([C('tk','Ticket'),C('tara','Tara',a='r'),C('bruto','Bruto',a='r'),C('liq','Líquido',a='r'),C('base','Umidade · base'),C('orig','Origem da medição',w=240)],[
-      R('p1',ro=True,tk=[Pt.b(TICKET['id']),Pt.txt(' · balança 1')],tara=TICKET['tara'],bruto=TICKET['bruto'],liq=[Pt.b(TICKET['liquido'])],base=TICKET['base'],orig='balança integrada · hoje 09:22'),
-      ],edit=dict(m='ro',title='Ticket de pesagem',fields=[dict(k='tara',l='Tara',t='txt'),dict(k='bruto',l='Bruto',t='txt'),dict(k='base',l='Umidade · base',t='txt'),dict(k='orig',l='Origem da medição',t='txt')]),
-      search=False,gid='g_ps',total=False)
-    g_ck=grid([C('item','Verificação',w=300),C('estado','Estado',w=250),C('resp','Responsável',w=200)],[
-      R('prod',ro=True,item='Produto, lote e destino conferem com o pedido',estado=[Pt.chip('Conferido · leitura de código','green')],resp='Rui (expedição)'),
-      R('veic',ro=True,item='Veículo compatível · graneleiro com lona',estado=[Pt.chip('Conferido','green')],resp='Portaria'),
-      R('lacre',v=dict(num='',apl='Rui (expedição)',confp='',evid=''),item=[Pt.b('Lacre aplicado')],estado=[Pt.chip('Pendente · registre antes da saída','yellow')],resp='Rui (expedição)'),
-      R('nf',ro=True,item=f'Documento fiscal · {NF_T2}',estado=[Pt.chip('Autorizada','green')],resp='Sandra (fiscal)'),
-      R('fin',ro=True,item='Prontidão financeira/comercial',estado=[Pt.chip('Liberada · condição do pedido','green')],resp='Comercial'),
-      ],edit=dict(m='form',title='Registrar lacre',sub='Número e foto ficam na evidência da expedição; quem confere não pode ser quem aplicou.',
-        fields=[dict(k='num',l='Nº do lacre',t='txt',req=True,help='Ex.: LC-778120'),dict(k='apl',l='Aplicado por',t='txt',ro=True),
-                dict(k='confp',l='Conferido por',t='sel',req=True,opts=['Portaria (Jair)','Sandra (fiscal)']),
-                dict(k='evid',l='Evidência',t='sel',req=True,opts=['Foto do lacre anexada'])]),
-      search=False,gid='g_ck',total=False)
-    g_sa=grid([C('ev','Evento',w=220),C('estado','Estado',w=280),C('quem','Quem · quando',w=220)],[
-      R('aut',ro=True,ev='Autorização de saída',estado=[Pt.chip('Aguarda o lacre','gray')],quem='Sandra (fiscal)'),
-      R('sai',ro=True,ev='Saída física confirmada',estado=[Pt.chip('Bloqueada · falta lacre e autorização','yellow')],quem='Portaria'),
-      R('est',ro=True,ev=f'Baixa de estoque · {VD["lote"]}',estado=[Pt.chip('Na saída · uma única vez','gray')],quem='automática'),
-      R('vg',ro=True,ev='Viagem VG-118',estado=[Pt.chip('Aguardando saída','yellow')],quem='cumprida na retirada'),
-      ],edit=dict(m='ro',title='Evento da saída',fields=[dict(k='ev',l='Evento',t='txt'),dict(k='quem',l='Quem · quando',t='txt')]),search=False,gid='g_sa',total=False)
-    ETAPAS=['A preparar','Em separação','Conferência','Pronta p/ carregar','Carregada','Saída confirmada']
-    stp=''.join(f'<span style="{H("stg"+str(i)+"_st")}">{esc(t)}</span>'+(f'<span aria-hidden="true" style="color: {MUTED};">→</span>' if i<len(ETAPAS)-1 else '') for i,t in enumerate(ETAPAS))
-    stepper=f'<div aria-label="Etapa da expedição" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px;">{stp}</div>'
-    EXTRAJS[0]=JS_BASE+'''
-function EXTRAVALS(self,v){ const s=self.state; const lac=s.lacre, aut=s.aut, sai=s.saida;
-  const cur=sai?5:4;
-  for(let i=0;i<6;i++){ v['stg'+i+'_st']='padding:4px 10px;border-radius:999px;font-weight:'+(i===cur?'800':'600')+';'+(i<cur?'background:#E4F3E9;color:#1E7A4C;':(i===cur?'background:#1E7A4C;color:#fff;':'background:#EEF1EE;color:#5B6660;')); }
-  v.c_aqui=sai?'Saída confirmada '+sai:(aut?'Autorizada · pronta para sair':(lac?'Lacre registrado':'Carregada · lacre pendente'));
-  v.c_falta=sai?'—':(aut?'confirmar saída':(lac?'autorização de saída':'lacre · autorização de saída'));
-  v.c_prox=sai?'Acompanhar viagem VG-118':(aut?'Confirmar saída':(lac?'Pedir autorização de saída':'Registrar lacre'));
-  v.st_t=sai?'Saída confirmada · doca 1 livre':(aut?'Autorizada · aguarda saída':(lac?'Lacre registrado · aguarda autorização':'Carregada · lacre pendente'));
-  v.prim_t=sai?'Saída confirmada':(aut?'Confirmar saída':(lac?'Pedir autorização de saída':'Registrar lacre'));
-  v.prim_tip=sai?'A saída já foi confirmada; repetir não duplica a baixa':v.prim_t;
-  v.prim_st=PST(!sai);
-  v.prim_fn=()=>{ const st=self.state;
-    if(st.saida){ toast(self,'Saída já confirmada às '+st.saida+' · mesmo recibo MV-3318 · repetir não duplica a baixa de estoque.'); return; }
-    if(!st.lacre){ g2open(self,GR('g_ck'),'lacre',null); return; }
-    if(!st.aut){ setRow(self,'g_sa','aut',r=>{ r.p.estado=[{k:'chip',t:'Concedida',c:'green'}]; r.v.quem='Sandra (fiscal) · 09:55'; delete r.s.quem; });
-      setRow(self,'g_sa','sai',r=>{ r.p.estado=[{k:'chip',t:'Liberada para confirmar',c:'yellow'}]; });
-      self.setState({aut:'09:55'}); toast(self,'Autorização de saída concedida por Sandra (fiscal) às 09:55 (simulado · nenhuma mensagem real enviada).'); return; }
-    setRow(self,'g_sa','sai',r=>{ r.p.estado=[{k:'chip',t:'Confirmada · recibo MV-3318',c:'green'}]; r.v.quem='Portaria · 09:58'; delete r.s.quem; });
-    setRow(self,'g_sa','est',r=>{ r.p.estado=[{k:'chip',t:'Baixados 37,00 t do MZ-26-03',c:'green'}]; r.v.quem='automática · 09:58'; delete r.s.quem; });
-    setRow(self,'g_sa','vg',r=>{ r.p.estado=[{k:'chip',t:'Cumprida na retirada',c:'green'}]; });
-    self.setState({saida:'09:58'}); toast(self,'Saída do T2 confirmada às 09:58 · estoque MZ-26-03 baixado 37,00 t uma única vez · VG-118 cumprida na retirada · doca 1 liberada para o T3.'); };
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_ck'||!r||r.id!=='lacre') return;
-    r.ro=true; r.p.estado=[{k:'chip',t:'Aplicado · '+r.v.num,c:'green'}]; r.s.estado='Aplicado'; r.p.resp=[{k:'txt',t:'Rui · conferido por '+r.v.confp}]; r.s.resp='Rui';
-    setRow(self,'g_sa','aut',x=>{ x.p.estado=[{k:'chip',t:'A pedir',c:'yellow'}]; });
-    self.setState({lacre:r.v.num,g2toast:'Lacre '+r.v.num+' registrado · checklist 5/5 · falta a autorização de saída.'}); };
-}
-'''
+    g_cf=grid([C('item','Produto'),C('lote','Lote'),C('ped','Pedido'),C('saldo','Previsto (kg)'),C('car','Saída'),C('conf','Estado')],[],edit=dict(m='ro',fields=[]),gid='g_cf',total=False)
+    g_ps=grid([C('tk','Romaneio'),C('bruto','Bruto (kg)'),C('tara','Tara (kg)'),C('liq','Líquido'),C('orig','Origem')],[],
+      edit=dict(m='form',title='Confirmar saída',sub='Informe os pesos do ticket em kg. Salvar confirma a saída e baixa o estoque uma única vez, após validar permissão, reserva e crédito.',fields=[dict(k='bruto',l='Peso bruto (kg)',t='txt',req=True),dict(k='tara',l='Tara (kg)',t='txt',req=True)]),gid='g_ps',total=False)
+    g_ck=grid([C('item','Verificação'),C('estado','Estado'),C('resp','Próximo passo')],[],edit=dict(m='ro',fields=[]),gid='g_ck',total=False)
+    g_sa=grid([C('ev','Movimento'),C('estado','Lote · quantidade'),C('quem','Quem · quando')],[],edit=dict(m='ro',fields=[]),gid='g_sa',total=False)
+    import cenario, dados_comercial
+    from areas.processo_os import JS_NUCLEO
+    from pathlib import Path
+    EXTRAJS[0]=cenario.js_prefixo()+JS_NUCLEO+dados_comercial.js_regras()+'\n'+(Path(__file__).resolve().parent.parent/'logistica_saida_ui.js').read_text(encoding='utf-8')
+    # Composição (EX-50, PR #110): tudo vem da RM oficial; sem etapas, continuidade ou viagem fictícias.
     corpo=(
-      continuity('Fila de expedição · T2 chamado 08:35',H('c_aqui'),H('c_falta'),H('c_prox'))
-      + stepper
-      + bloco('Conferência por pedido e lote','Confira pedido, separado e carregado por lote.',g_cf)
-      + bloco('Pesagem e base comercial','Confira tara, bruto e líquido na base comercial; tara não é vendida como produto.',g_ps,state='gray')
-      + bloco('Checklist e documentos','Registre o lacre pela linha; a saída exige todos os itens verdes.',
-              g_ck+nota('Frete: retirada pelo cliente — custo e transportador do cliente.'),state='yellow')
-      + bloco('Saída','Confirme a saída uma única vez; o estoque baixa nesse evento.',g_sa,
-              ilink('Acompanhar viagem','LO-03.dc.html','map','Abrir a viagem VG-118 em Acompanhe viagens'))
+      bloco('Conferência por pedido e lote','Previsto da RM por lote; a coluna Saída mostra o que baixou do estoque.',g_cf)
+      + bloco('Pesagem','Clique na RM para informar bruto e tara em kg; salvar confirma a saída e baixa o estoque uma única vez.',g_ps,state='gray')
+      + bloco('Lacre e documentos','Prévia: lacre e autorização são registrados no processo responsável; nada aqui libera a saída.',g_ck,state='gray')
+      + bloco('Movimentos da saída','Movimentos oficiais de estoque desta RM; correção é estorno com vínculo, nunca apagar.',g_sa,
+              ilink('Abrir Expedição',H('lo_expedicao'),'truck','Abrir esta carga em Expedição'))
     )
-    shell37('LO-02','Conferir carga · T2 · VD-2101',corpo,fname='LO-02det.dc.html',crumbs_extra=['T2 · VD-2101 · 2ª de 3'],
-      subtitle='Retirada pelo cliente: conferência, pesagem, documentos e saída física única no ponto contratado.',
-      status=(H('st_t'),'yellow'),primary_html=PRIM,steps=faixa(2),
-      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui. Retirada pelo cliente: o rateio da instalação não se aplica à carga.')
+    lo_prim=(f'<button type="button" onClick="{H("lo_revisar")}" title="Confirma a saída da carga programada ou abre a Expedição" '
+             f'style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 8px;">{H("lo_proximo")}</button>')
+    shell37('LO-02','Conferir carga',corpo,fname='LO-02det.dc.html',crumbs_extra=[H('lo_contexto')],
+      subtitle='Confere a carga programada pela RM, registra a pesagem e confirma a saída física com baixa única do estoque.',
+      status=(H('lo_estado'),'green'),primary_html=lo_prim,steps=faixa(2),
+      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui.')
+    _selo_dinamico(fname,'lo_estado')
 
     # =====================================================================
     # LO-03 · Acompanhe viagens
@@ -582,3 +542,4 @@ function EXTRAVALS(self,v){ const s=self.state;
       subtitle='Cotação, contrato, vínculo com viagens e conferência do serviço; desempenho medido contra a janela original.',
       status=('1 cotação a decidir · até 10:30','yellow'),primary_html=PRIM,steps=faixa(4),
       footer='Contratar é ação autorizada; cotação ou sugestão de rota não despacha transportador (48.3). Documento fiscal, conta a pagar e medição não triplicam o custo.')
+
