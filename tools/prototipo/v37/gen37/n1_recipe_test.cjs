@@ -22,4 +22,18 @@ for(const cmd of ['approve','release'])for(const mutation of ['same','dose','are
  else {assert.throws(()=>vm.runInContext(expr,b),/Receituário/);assert.equal(o.osc.ev.length,0);assert.equal(effects,0);}
  n++;
 }
-console.log(n+' PASS receipt guards; legal checks/permission/reservation stubbed.');
+// As portas do grupo devem conservar a recusa, sem recibo de item liberado.
+const groupSource=src.slice(src.indexOf('function cenGrupoAprovar('),src.indexOf('// efeito da liberação, sem o registro'));
+const cenLines=fs.readFileSync(__dirname+'/cenario.js','utf8').split('\n');
+const idem=cenLines.slice(305,310).join('\n');
+for(const cmd of ['approve','release']) {
+ const o={id:'OS-0440',etapa:'A liberar',versao:'v1',area:2,ins:[{p:'Produto',un:'L',dose:3,tot:6}],osc:{ev:cmd==='release'?[{cmd:'CMD-42',v:'v1'}]:[],novo:{keys:['mip|V1|P1']}}};
+ const c={ordens:{[o.id]:o},mip:{rec:{R:{id:'R',os:o.id,sit:'Receituário emitido',nome:'Produto',un:'L',dose:1,area:2}}},gruposExec:{G:{versao:1,ids:[o.id],escopos:{[o.id]:'scope'},origens:{[o.id]:'v1'},assinatura:'eq',historico:[]}}};
+ let effects=0;
+ const b={c,cenClone:x=>JSON.parse(JSON.stringify(x)),cenNum:String,cenQtd:(a,b)=>a*b,cenAgora:()=> '12:00',cenExigeAlc:()=> 'Ator',g2papel:()=>true,g2alc:()=>({papeis:['agronomo']}),OS_LIB:()=>['gestor'],g2alcQuem:()=> 'Ator',g2pf:()=>({k:'agro',t:'Ator'}),osc_o:(c,id)=>c.ordens[id],osUsoErro:()=>'',osUsoAtencao:()=>'',osc_libEfeito:()=>{effects++;return {msg:'OK'}},cenGrupoCanon:JSON.stringify,cenGrupoSnapshot:()=> 'snapshot',cenGrupoFicha:()=>({eq:'eq'}),cenGrupoEscopo:()=> 'scope',cenGrupoRecursos:()=>[]};
+ vm.createContext(b);vm.runInContext(actual+'\n'+idem+'\n'+groupSource,b);
+ if(cmd==='approve')assert.throws(()=>vm.runInContext("cenGrupoAprovar(c,'G','OS-0440',1,'snapshot','ator','test')",b),/Receituário/);
+ else {const r=vm.runInContext("cenGrupoLiberar(c,'G',['OS-0440'],1,{'OS-0440':'snapshot'},'ator','test')",b);assert.equal(r.itens[0].estado,'Não liberada');assert.match(r.itens[0].motivo,/Receituário/);}
+ assert.equal(effects,0);assert.equal(c.ordens[o.id].etapa,'A liberar');assert(!c.ordens[o.id].osc.ev.some(e=>e.cmd==='CMD-06'));assert(!(c.recibos||{})['test|OS-0440']);n++;
+}
+console.log(n+' PASS receipt guards including real group commands; legal checks/permission/reservation/group metadata stubbed.');
