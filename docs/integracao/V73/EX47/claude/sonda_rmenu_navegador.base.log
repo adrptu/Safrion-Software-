@@ -1,0 +1,37 @@
+[portão: 1 após 410s]
+OK    1440 S2627 abre
+OK    1440 S2627 (menu+del) N1 alinhamento: 16 linhas, 6 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2627 (menu+del) N1 o ⋯ (11) cai na última coluna
+OK    1440 S2627 (menu+del) N2 Excluir só onde é permitido (dele=True)
+OK    1440 S2627 (menu+del) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2627 (menu+del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+      1440 S2627: ⋯ em [('grp_T1', ['Dividir']), ('c1', ['Excluir']), ('c2', ['Excluir']), ('grp_T2', ['Dividir']), ('c5', ['Dividir', 'Aplicar plano', 'Excluir']), ('c4', ['Dividir', 'Aplicar plano', 'Excluir']), ('grp_P1', ['Dividir']), ('c6', ['Aplicar plano', 'Excluir']), ('grp_P2', ['Dividir']), ('c8', ['Dividir', 'Excluir']), ('c9', ['Dividir', 'Excluir'])]
+OK    1440 S2627 N5 Excluir no ⋯ pergunta "Excluir?" na linha c1
+OK    1440 S2627 N5 alinhamento com a pergunta aberta
+OK    1440 S2627 N5 Manter volta ao ⋯ e a linha continua
+OK    1440 S2627 N6 Cartões: 11 ⋯ no cartão = 11 da Tabela
+OK    1440 S2627 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 5)
+OK    1440 S2526 abre
+OK    1440 S2526 (menu sem del) N1 alinhamento: 7 linhas, 5 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2526 (menu sem del) N1 o ⋯ (0) cai na última coluna
+OK    1440 S2526 (menu sem del) N2 Excluir só onde é permitido (dele=False)
+OK    1440 S2526 (menu sem del) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2526 (menu sem del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+OK    1440 S2526 sem ação na linha nos dados sintéticos: nenhum ⋯ e nenhum "Excluir"
+OK    1440 S2526 N6 Cartões: 0 ⋯ no cartão = 0 da Tabela
+OK    1440 S2526 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 0)
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N1 alinhamento: 7 linhas, 5 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N1 o ⋯ (0) cai na última coluna
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N2 Excluir só onde é permitido (dele=False)
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+FALHA 1440 S2526 N4 ⋯ de T1 só com "Reaplicar" (sem Excluir), rótulo "Mais ações de T1" · []
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev93/docs/integracao/V73/EX47/claude/sonda_rmenu_navegador.py", line 138, in <module>
+    J("document.querySelector('%s').focus()" % sel)
+  File "/tmp/claude-0/rev93/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'focus')
+    at <anonymous>:1:88
+exit=1

@@ -1,0 +1,55 @@
+diff --git a/tools/prototipo/v37/gen37/areas/processo_os.py b/tools/prototipo/v37/gen37/areas/processo_os.py
+index 953c6a6..cc0b712 100644
+--- a/tools/prototipo/v37/gen37/areas/processo_os.py
++++ b/tools/prototipo/v37/gen37/areas/processo_os.py
+@@ -1069,8 +1069,8 @@ function osGrupoVals(self,v,recorte){
+ function osKbRaia(self,dim,path,nome,n,cols,nivel){
+   const key=JSON.stringify([g2perfil().k,mfFaz(self),mfSaf(self),dim,path||[],nome]);
+   const aberta=!(self.state.kbFechadas||{})[key];
+-  return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:String(aberta),seta:aberta?'▾':'▸',
+-    lab:(aberta?'Recolher':'Abrir')+' raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'),
++  const sx=g2seta(aberta,'raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'));   // TAB-11: estado e nome "Abrir …"/"Recolher …" únicos
++  return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:sx.exp,lab:sx.lab,
+     alterna:()=>{const fechadas=Object.assign({},self.state.kbFechadas||{});if(fechadas[key])delete fechadas[key];else fechadas[key]=true;self.setState({kbFechadas:fechadas});},
+     cols,tem:n>0};
+ }
+@@ -1420,8 +1420,9 @@ def _kanban_raias():
+     Sem agrupamento, ou no último nível, o quadro único de sempre."""
+     # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
+     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
+-          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" aria-expanded="{H("r.expandida")}" onClick="{H("r.alterna")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
+-          f'<span aria-hidden="true">{H("r.seta")}</span><b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'   # TAB-09: seta antes do nome (DS87); AGR-02: ▸/▾ pelo estado da raia
++          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" aria-expanded="{H("r.expandida")}" onClick="{H("r.alterna")}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
++          + E.seta() +   # TAB-09/TAB-11: a seta única antes do nome, 1º filho do botão: gira com o aria-expanded (AGR-02: recolhe a raia)
++          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'
+           + f'<sc-if value="{H("r.aberta")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</sc-if></section>')
+     # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
+     # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
+diff --git a/tools/prototipo/v37/gen37/kanban_raias_unit.js b/tools/prototipo/v37/gen37/kanban_raias_unit.js
+index c317336..113751d 100644
+--- a/tools/prototipo/v37/gen37/kanban_raias_unit.js
++++ b/tools/prototipo/v37/gen37/kanban_raias_unit.js
+@@ -4,8 +4,8 @@ function test(nome,f){try{cenReset();mem={};f();ok++;console.log('OK '+nome)}cat
+ const nova=()=>({state:{g2:{},mf_faz:'Santa Rita',mf_saf:'Todas'},setState(d){Object.assign(this.state,d)}});
+ const ler=s=>{const v={};PREVALS(s,v);EXTRAVALS(s,v);return v};
+ const ids=r=>r.cols.flatMap(c=>c.cards.map(k=>k.id));
+-test('abre todas as raias e expõe estado expandido',()=>{const s=nova(),v=ler(s);assert.ok(v.kb_raias.length>2);assert.ok(v.kb_raias.every(r=>r.aberta&&r.expandida==='true'&&r.seta==='▾'));});
+-test('recolher T2 mantém filtros, trilha, cenário e cartões das outras raias',()=>{const s=nova();let v=ler(s);const r=v.kb_raias.find(r=>r.k==='T2'),antes=JSON.stringify({g2:s.state.g2,c:cenGet()}),outras=v.kb_raias.filter(r=>r.k!=='T2').map(r=>[r.k,ids(r)]);r.alterna();v=ler(s);assert.equal(v.kb_raias.find(r=>r.k==='T2').aberta,false);assert.equal(v.kb_raias.find(r=>r.k==='T2').expandida,'false');assert.deepEqual(v.kb_raias.filter(r=>r.k!=='T2').map(r=>[r.k,ids(r)]),outras);assert.equal(JSON.stringify({g2:s.state.g2,c:cenGet()}),antes);});
++test('abre todas as raias e expõe estado expandido',()=>{const s=nova(),v=ler(s);assert.ok(v.kb_raias.length>2);assert.ok(v.kb_raias.every(r=>r.aberta&&r.expandida==='true'&&/^Recolher raia /.test(r.lab)&&!('seta' in r)));});
++test('recolher T2 mantém filtros, trilha, cenário e cartões das outras raias',()=>{const s=nova();let v=ler(s);const r=v.kb_raias.find(r=>r.k==='T2'),antes=JSON.stringify({g2:s.state.g2,c:cenGet()}),outras=v.kb_raias.filter(r=>r.k!=='T2').map(r=>[r.k,ids(r)]);r.alterna();v=ler(s);assert.equal(v.kb_raias.find(r=>r.k==='T2').aberta,false);assert.equal(v.kb_raias.find(r=>r.k==='T2').expandida,'false');assert.match(v.kb_raias.find(r=>r.k==='T2').lab,/^Abrir raia T2 /);assert.deepEqual(v.kb_raias.filter(r=>r.k!=='T2').map(r=>[r.k,ids(r)]),outras);assert.equal(JSON.stringify({g2:s.state.g2,c:cenGet()}),antes);});
+ test('dois cliques no mesmo callback alternam o estado atual, sem fechamento obsoleto',()=>{const s=nova();let v=ler(s);const r=v.kb_raias[0],antes=ids(r);r.alterna();r.alterna();v=ler(s);assert.ok(v.kb_raias[0].aberta);assert.deepEqual(ids(v.kb_raias[0]),antes);});
+ test('mudar visão e voltar conserva raia e seleção',()=>{const s=nova();let v=ler(s);v.kb_raias[0].alterna();s.state.pan='OS-0421';s.state.g2.g_os.visao='calendario';ler(s);s.state.g2.g_os.visao='carga';ler(s);s.state.g2.g_os.visao='kanban';v=ler(s);assert.equal(v.kb_raias[0].aberta,false);assert.equal(s.state.pan,'OS-0421');});
+ test('filtro esconde raia; limpar filtro recupera sua expansão anterior',()=>{const s=nova();let v=ler(s);v.kb_raias.find(r=>r.k==='T2').alterna();s.state.g2.g_os.q='OS-0418';ler(s);s.state.g2.g_os.q='';v=ler(s);assert.equal(v.kb_raias.find(r=>r.k==='T2').aberta,false);});
+diff --git a/tools/prototipo/v37/gen37/seta_padrao_test.py b/tools/prototipo/v37/gen37/seta_padrao_test.py
+index b3aa5f8..fe26b65 100644
+--- a/tools/prototipo/v37/gen37/seta_padrao_test.py
++++ b/tools/prototipo/v37/gen37/seta_padrao_test.py
+@@ -29,7 +29,7 @@ FORA = set(REDIRECIONA) | {'Main.dc.html'}
+ PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)
+ # estados que só abrem por endereço (painel aberto, plano aberto, visão) ou por um clique (ajuste local do Planejar safra)
+ EXTRAS = ['PA.dc.html#plano=SOJA-AT', 'PA.dc.html?view=tabela#plano=SOJA-AT', 'SAF.dc.html#saf=S2627&passo=operacoes',
+-          'MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'OS.dc.html#OS-0420', 'AG-02.dc.html#LAU-2073',
++          'MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'OS.dc.html#OS-0420', 'OS.dc.html?view=kanban&ag=onde', 'AG-02.dc.html#LAU-2073',
+           'SAF.dc.html#saf=S2627&passo=cultivos|ajuste']
+ SO = [x for x in (os.environ.get('SPT_SO') or '').split(',') if x]   # diagnóstico: só as telas cujo endereço contém um destes trechos (não vale como rodada)
+ if SO: PAGS, EXTRAS = [p for p in PAGS if any(x in p for x in SO)], [p for p in EXTRAS if any(x in p for x in SO)]

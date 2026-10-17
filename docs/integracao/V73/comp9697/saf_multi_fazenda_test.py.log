@@ -1,0 +1,24 @@
+OK  A1 faixa "Trabalhando em" da etapa 2: a fazenda da safra em chip ✓ e "+ Fazenda" (sem o rótulo de texto "Fazenda Santa Rita")
+OK  A1b "+ Fazenda" abre a lista do DS (popover, não <select>) com as fazendas da organização, área e nº de talhões; Santa Rita marcada
+OK  A2 marcar Boa Vista inclui a fazenda na safra pelo mesmo comando do SAF-FAZ-2: S27SF conserva ID e estado, a nova nasce em rascunho, ligadas; sem abrir "Editar safra"
+OK  A3 desmarcar Santa Rita (3 cultivos) é recusado com o motivo no próprio lugar; nada muda (linhas, chips e a marca)
+OK  A4 Esc fecha a lista e devolve o foco ao "+ Fazenda"
+OK  B1 a tabela mostra os talhões das duas fazendas juntos, um grupo por fazenda (aberto, mesmo com grupos já abertos antes) com área e "x de y talhões planejados"
+OK  B2 filtro rápido por fazenda logo depois da busca (Todas · Santa Rita · Boa Vista): Boa Vista mostra só o grupo dela; Todas volta às duas
+OK  B3 o filtro rápido da Situação atravessa o grupo da fazenda: conta e filtra os talhões das duas (Livre: T1 e B1)
+OK  B4 "Planejar ›" no B1 (outra fazenda) abre o painel na sub-safra da Boa Vista, com o contexto herdado; a tabela continua a mesma (2 grupos)
+OK  C1 "Planejar talhões livres…" abre o painel com os livres das duas fazendas (marcados), por fazenda, e o contexto herdado (safra, fazendas, cultura e plano mais usados; meta vazia)
+OK  C2 recusa sem gravar: meta vazia pede a meta; plantio 01/02/2027 antes de o T1 liberar trava o T1 no próprio item; nada é gravado
+OK  C3 "Planejar 3 talhões" de 2 fazendas grava 3 cultivos, um por talhão, cada um na sub-safra da sua fazenda, uma vez só (duplo clique não duplica)
+OK  C4 reabrir não repete: T1, T3 e B1 saem da lista de livres; os grupos contam os planejados
+OK  A5 com o cultivo do B1, tirar a Boa Vista também é recusado no lugar
+OK  A6 incluir e tirar a Lagoa Grande vazia: entra em rascunho e sai sem deixar sub-safra; as outras não mudam
+OK  D1 "Não plantar nesta safra" no ⋯ do T4 livre: fica "Sem plantio" (chip cinza na linha, sem Planejar ›), conta no grupo e na faixa; talhão com cultivo (T2) não oferece
+OK  D2 Sem plantio não é pendência: sem cor de alerta, fora da lista de livres, a etapa avança (Dimensionar operações ›) e a nota não cita o T4; nada entra em cultivo nem na demanda
+OK  D3 "Voltar a planejar" desfaz: o T4 volta com Planejar › e sai das marcas
+OK  E1 etapas 3 e 4 seguem por fazenda (Santa Rita · Boa Vista) e "Enviar as 2 fazendas para cotação" gera uma solicitação por fazenda, com itens
+OK  B5 safra de uma fazenda (S2627): sem o nível de grupo e sem o filtro de fazenda; chip ✓ Santa Rita na faixa
+OK  A7 na etapa 1 com a safra escolhida, a faixa continua com os chips e "+ Fazenda"
+OK  F1 390: a lista de fazendas e o painel cabem na tela; o cabeçalho do grupo cabe na parte visível da tabela; sem rolagem lateral
+OK  G sem erro de JS
+RESULTADO: 23/23

@@ -1,0 +1,9 @@
+FALHA K0 raias abertas no início, aria-expanded=true, rótulo "Recolher raia …" · {"exp": null, "lab": "Descer em T2 (talhão): 2 ordens", "txt": "› T2 2 ordens", "cards": 2, "foco": false, "mesmo": false, "fv": false, "q": "?view=kanban&ag=onde", "abertas": ["C1=null", "P1=null", "Sem talhão=null", "T1=null", "T1-A=null", "T1-B=null", "T2=null", "T3=null", "T4=null"]}
+FALHA K1 Tab a partir de T1 chega em T2 com foco visível · {"exp": null, "lab": "Descer em T2 (talhão): 2 ordens", "txt": "› T2 2 ordens", "cards": 2, "foco": false, "mesmo": true, "fv": false, "q": "?view=kanban&ag=onde", "abertas": ["C1=null", "P1=null", "Sem talhão=null", "T1=null", "T1-A=null", "T1-B=null", "T2=null", "T3=null", "T4=null"]}
+FALHA K2 Enter recolhe T2: aria-expanded=false, sem cartões, foco no MESMO botão, endereço igual, outras raias abertas · {"exp": null, "lab": "Descer em T2 (talhão): 2 ordens", "txt": "› T2 2 ordens", "cards": 2, "foco": false, "mesmo": true, "fv": false, "q": "?view=kanban&ag=onde", "abertas": ["C1=null", "P1=null", "Sem talhão=null", "T1=null", "T1-A=null", "T1-B=null", "T2=null", "T3=null", "T4=null"]}
+FALHA K3 Espaço expande T2: aria-expanded=true, cartões de volta, foco no mesmo botão · {"exp": null, "lab": "Descer em T2 (talhão): 2 ordens", "txt": "› T2 2 ordens", "cards": 2, "foco": false, "mesmo": true, "fv": false, "q": "?view=kanban&ag=onde", "abertas": ["C1=null", "P1=null", "Sem talhão=null", "T1=null", "T1-A=null", "T1-B=null", "T2=null", "T3=null", "T4=null"]}
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr89/sonda_raia.py", line 40, in <module>
+    chk('K4 (diagnóstico) Enter sem texto, como no F2 do teste do PR, também recolhe', e4['exp'] == 'false', e4)
+                                                                                       ~~^^^^^^^
+TypeError: 'NoneType' object is not subscriptable

@@ -1,0 +1,13 @@
+delta HTML 6631d58 (ponta) → 4cbfa71 · páginas: 156 156 mesmo conjunto: True
+idênticas: 8 · só o g2lib embutido: 147 · outra diferença: ['SAF.dc.html']
+ g_cult_S2627 ponta    trilhas={{g_cult_S2627_ncols}} · hdel=vazio
+ g_cult_S2627 4cbfa71  trilhas={{g_cult_S2627_ncols}} · hdel=sc-if _acoes, aria-label Ações
+ g_cult_S27SF ponta    trilhas={{g_cult_S27SF_ncols}} · hdel=vazio
+ g_cult_S27SF 4cbfa71  trilhas={{g_cult_S27SF_ncols}} · hdel=sc-if _acoes, aria-label Ações
+ g_cult_S2526 ponta    trilhas={{g_cult_S2526_ncols}} · hdel=ausente
+ g_cult_S2526 4cbfa71  trilhas={{g_cult_S2526_ncols}} · hdel=sc-if _acoes, aria-label Ações
+ g_cult_LG2627 ponta    trilhas={{g_cult_LG2627_ncols}} · hdel=vazio
+ g_cult_LG2627 4cbfa71  trilhas={{g_cult_LG2627_ncols}} · hdel=sc-if _acoes, aria-label Ações
+ g_cult_NOVA ponta    trilhas={{g_cult_NOVA_ncols}} · hdel=vazio
+ g_cult_NOVA 4cbfa71  trilhas={{g_cult_NOVA_ncols}} · hdel=sc-if _acoes, aria-label Ações
+verificado: nenhum outro uso de <gid>_acoes além dos buracos do motor

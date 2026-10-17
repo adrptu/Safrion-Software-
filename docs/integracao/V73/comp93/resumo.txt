@@ -1,0 +1,12 @@
+FIM rmenu_unit rc=0 :: EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK
+FIM rmenu_generator_test rc=0 :: OK
+FIM rmenu_alignment_test rc=0 :: sonda EX47: 561 OK, 0 falhas
+FIM agro02_selecao_unit rc=0 :: 7 passed; 0 failed
+FIM mip_unit_test rc=0 :: RESULTADO 34/34
+FIM rev93_reteste_navegador.py rc=0 80s :: 44 OK, 0 falhas
+FIM tabelas_saf_test.py rc=0 69s :: RESULTADO: 24/24 ok
+FIM saf_tab_test.py rc=0 35s :: RESULTADO: 14/14
+FIM cartoes_test.py rc=0 531s :: RESULTADO: 70/70
+FIM ds_1510_test.py rc=0 234s :: RESULTADO: 17 ok · 0 falhas
+FIM mip_fluxo_test.py rc=0 57s :: RESULTADO 15/15
+TUDO

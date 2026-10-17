@@ -1,0 +1,22 @@
+OK  F1 Kanban com Agrupar por Talhão: uma raia por talhão; OS-0421 nas raias T1 e T2; as O.S. distintas das raias = as da Tabela
+FALHA F2 Enter recolhe só T2, preserva endereço e mantém foco no cabeçalho · ['?view=kanban&ag=onde', [['C1', ['OS-0425']], ['P1', ['OS-0418', 'OS-0417']], ['Sem talhão', ['OB-0104']], ['T1', ['OS-0421']], ['T1-A', ['OS-0430']], ['T1-B', ['OS-0424']], ['T2', ['OS-0431', 'OS-0421']], ['T3', ['OS-0415']], ['T4', ['OS-0420']]]]
+OK  F3 recolher T2 não recorta Calendário nem cria trilha
+OK  F4 recolher T2 não recorta Carga nem cria chip de trilha
+FALHA F4a volta do Kanban preserva T2 recolhida · 
+FALHA F4b Espaço expande T2 e recupera exatamente seus cartões · [['C1', ['OS-0425']], ['P1', ['OS-0418', 'OS-0417']], ['Sem talhão', ['OB-0104']], ['T1', ['OS-0421']], ['T1-A', ['OS-0430']], ['T1-B', ['OS-0424']], ['T2', ['OS-0431', 'OS-0421']], ['T3', ['OS-0415']], ['T4', ['OS-0420']]]
+FALHA F4c trilha explícita mantém o recorte de T2 · [['OB-0104', 'OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0431'], '']
+FALHA F4d Calendário conserva trilha explícita · 
+FALHA F4e Carga conserva trilha explícita · 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr89/tools/prototipo/v37/gen37/visoes2_formas_test.py", line 51, in <module>
+    visao('kanban');tira('Tirar a trilha')
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr89/tools/prototipo/v37/gen37/visoes2_formas_test.py", line 23, in tira
+    def tira(rx): J("(()=>{const b=[...document.querySelectorAll('[data-os-recorte] button')].filter(x=>x.offsetParent).find(x=>new RegExp(%s).test(x.getAttribute('aria-label')||'')); b.click();})()" % json.dumps(rx)); time.sleep(.6)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr89/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of undefined (reading 'click')
+    at <anonymous>:1:180
+    at <anonymous>:1:190
