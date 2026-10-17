@@ -1,0 +1,28 @@
+== A · ADV-01: tratado d1 = 10 → d10 = 5; controles C1 e C2 com d1 = 10 e d12 = Cd (t_disp = t_evento); NC 10; sem ε
+  Cd = 10, D = 10: sem comparação válida: controle sem leitura depois até D
+  Cd = 10, D = 12: E = 0.5000000000 (fator do controle 1)
+  Cd = 30, D = 10: sem comparação válida: controle sem leitura depois até D
+  Cd = 30, D = 12: E = 0.8333333333 (fator do controle 3)
+  Invariância: em D = 10 as duas variantes dão a mesma saída (a leitura d12 ainda não existe para o corte).
+  Em D = 12 a saída muda com Cd, como deve: 0,5 com Cd = 10 e 0,8333333333 com Cd = 30.
+  Contraprova (R-C1, executado no confronto): o rxHT do v3 já em D = 10 dá 0,4762 e 0,8197, porque lê o controle de d12.
+
+== B · ORA-05: nível latente sem ruído de medida; NC 10; aplicação em d2
+  B1 crescimento ×1,15/dia desde 3 em d2: x(d10) = 9.1771, x(d11) = 10.5536; leituras d9 = 7.9801, d16 = 21.2271
+     S1 = (d9, d16]; {"primeiroDiaAcimaDepoisDaAplicacao":11,"queda":2,"retornoAposQueda":11,"cruzamentosParaCimaAposQueda":[11]}
+     retorno após queda dentro do intervalo de S1: true; algum cruzamento para cima no intervalo: true
+  B2 excursão: x = {"1":12,"2":3,"3":6,"4":9,"5":11,"6":11,"7":8,"8":7,"9":7,"10":8,"11":9,"12":9.5,"13":10.5,"14":12,"15":13,"16":14}; leituras d9 = 7, d16 = 14
+     S1 = (d9, d16]; {"primeiroDiaAcimaDepoisDaAplicacao":5,"queda":2,"retornoAposQueda":5,"cruzamentosParaCimaAposQueda":[5,13]}
+     retorno após queda dentro do intervalo de S1: false; algum cruzamento para cima no intervalo: true
+  B3 sem queda: x = {"1":30,"2":14,"3":13,"4":13,"5":14,"6":15,"7":16,"8":17,"9":18}; {"primeiroDiaAcimaDepoisDaAplicacao":3,"queda":null,"retornoAposQueda":null,"cruzamentosParaCimaAposQueda":[]}
+     "primeiro dia acima depois da aplicação" existe (d3), mas não há queda nem retorno: S2 "retorno não demonstrado" é o estado certo.
+  Sem ruído de medida, a invariante é "algum cruzamento para cima em (t_(k−1), t_k]" (B1 e B2 verdadeiros).
+  "Retorno após queda dentro do intervalo" não é invariante (B2 falso): é medida de cobertura, como qualquer contenção com leitura ruidosa.
+
+== C · K10 fora do domínio positivo: ln(1 − E) × [ln T_depois − ln T_antes] − [ln C_depois − ln C_antes]
+  T 10 → 0, C 10 → 10: E = 1; ln(1 − E) = -Infinity; contraste de logs = -Infinity
+  T 0 → 2, C 10 → 10: E = -Infinity; ln(1 − E) = Infinity; contraste de logs = Infinity
+  T 10 → 5, C 0 → 10: E = 1; ln(1 − E) = -Infinity; contraste de logs = -Infinity
+  T 10 → 5, C 10 → 0: E = -Infinity; ln(1 − E) = Infinity; contraste de logs = Infinity
+  Com algum zero, um lado ou os dois saem infinitos ou NaN: a identidade de K10 só foi demonstrada para valores positivos.
+  Ela é álgebra de um par antes/depois: não prova identificação causal, tendência paralela, nem equivalência a qualquer estimador DiD.

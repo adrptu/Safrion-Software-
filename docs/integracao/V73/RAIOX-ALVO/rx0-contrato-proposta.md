@@ -1,6 +1,7 @@
 # RX-0 · contrato de dados e gabarito do Raio-X do alvo (proposta mínima do Claude)
 
 Versão 1 · 17/10/2026 · autor Claude · revisor e registro: Codex.
+**Versão 1.1 · Δ 17/10**, depois do retorno do Codex (comentários 6227947437 e 6227991541 do PR #47): os seis ajustes pedidos e mais quatro pontos estão na §12. O texto da versão 1 fica preservado; onde ele mudou, há um ponteiro "→ Δ 17/10-n". **Dependência:** o RX-0 só vira executável depois do EX-42 e de contrato, base e arquivos delimitados (Δ 17/10-9).
 - **Estado: especificado.** Nada deste contrato foi implementado ou testado. As únicas execuções citadas estão em `reproducao/gemini/` (rótulos K e V) e no confronto (R-Cn).
 - Escrito para o Codex registrar sem reinterpretar: cada regra tem ID, cada teste tem entrada mínima e saída esperada, e cada número sem fonte está marcado como pendente.
 - O RX-0 cobre só dados e gabarito: nenhum modelo, risco, nível de evidência ou tela.
@@ -15,6 +16,8 @@ Base (commit ou hashes) / arquivos sob responsabilidade: v3 529adf7; confronto 4
 Aceite e comando de verificação: §9; comando a fixar quando houver autoria
 Estado / impedimento / próximo passo: proposta · depende do registro do Codex e do EX-42 F1a (contrato comum de observações), que o RX-0 estende sem reimplementar (CX:34)
 ```
+
+→ Δ 17/10-9: dependência do EX-42 e de contrato, base e arquivos delimitados antes de virar executável.
 
 ## 1. Termos
 
@@ -41,12 +44,12 @@ São fatos, não janelas (CL:209). As janelas são calculadas a partir dos fatos
 | U6 | Episódio de aplicação (camada 3) | (aplicação_id, alvo, leitura_antes, leitura_depois, D, versões) | candidatos a controle, cada um com o motivo de inclusão ou exclusão e a razão C_depois ÷ C_antes |
 | U7 | Origem de previsão (camada 4) | (talhão, alvo, t0, h, versões) | membros e motivos definidos só com fatos de t_disp ≤ t0 |
 
-**Regra:** toda unidade derivada carrega a lista de (id, versão) das fontes usadas, ou seja, a proveniência (X-25, X-31). Mudar qualquer versão gera chave nova; o recálculo é idempotente (CL:209).
+**Regra:** toda unidade derivada carrega a lista de (id, versão) das fontes usadas, ou seja, a proveniência (X-25, X-31). Mudar qualquer versão gera chave nova; o recálculo é idempotente (CL:209). → Δ 17/10-4: chaves com organização, fazenda, cultivo e safra; U4 com revisão da emissão.
 
 ## 3. Tempo de disponibilidade (RX0-T)
 
 **Regras.**
-- **T1 · Corte em D** ("só entra o que estava disponível em D"). Um fato entra num cálculo com corte D só se t_evento ≤ D **e** t_disp ≤ D. Entre as versões do mesmo fato, vale a de maior t_disp ≤ D.
+- **T1 · Corte em D** ("só entra o que estava disponível em D"). Um fato entra num cálculo com corte D só se t_evento ≤ D **e** t_disp ≤ D. Entre as versões do mesmo fato, vale a de maior t_disp ≤ D. → Δ 17/10-1: a existência do fato também depende de t_disp.
   - Única exceção ao t_evento: a previsão (U4). Ela entra com t_emissão ≤ D e t_disp ≤ D, sempre rotulada "previsão emitida em …".
 - **T2 · Origem t0 (camada 4).**
   - Variáveis e pertença à população só com t_disp ≤ t0 e t_evento ≤ t0, mais previsões emitidas e recebidas até t0.
@@ -58,7 +61,7 @@ São fatos, não janelas (CL:209). As janelas são calculadas a partir dos fatos
 - **T5 · Revisão retroativa.** Uma correção com t_disp > D não muda o resultado de D. Recalcular D em qualquer data devolve o mesmo resultado (ADV-07).
 - **T6 · Parâmetros e tabelas versionadas.**
   - Usa-se a versão publicada até D (ou até t0).
-  - Exceção: o NC que classifica uma leitura é o da versão válida no t_evento da leitura (EX-42:30).
+  - Exceção: o NC que classifica uma leitura é o da versão válida no t_evento da leitura (EX-42:30). → Δ 17/10-1: só entre as versões publicadas até o corte.
 
 **Quando cada variável fica conhecida.** Valores de atraso no gerador: GER-09.
 
@@ -113,12 +116,12 @@ São fatos, não janelas (CL:209). As janelas são calculadas a partir dos fatos
   - semente;
   - hash do conjunto de entrada.
 - **V2.** Protocolo demonstrativo só no gerador e sempre rotulado (EX-42:38). O RX-0 não adota parâmetro agronômico (PRD:512).
-- **V3.** NC para classificar uma leitura: versão válida no t_evento (T6).
+- **V3.** NC para classificar uma leitura: versão válida no t_evento (T6). → Δ 17/10-1.
 - **V4.** Mudou a unidade entre as duas leituras do par → par "incompatível" (ADV-19).
 
 ## 6. Estimandos das camadas que vêm depois (RX0-EST)
 
-Cada estimando segue os atributos do ICH E9(R1): pergunta, população, variável, eventos intercorrentes com estratégia, sumário e o que o oráculo exporta. O RX-0 só os fixa, para que o gabarito exporte a verdade de cada um. Nenhum estimador é escolhido aqui.
+Cada estimando segue os atributos do ICH E9(R1) (→ Δ 17/10-10): pergunta, população, variável, eventos intercorrentes com estratégia, sumário e o que o oráculo exporta. O RX-0 só os fixa, para que o gabarito exporte a verdade de cada um. Nenhum estimador é escolhido aqui.
 
 ### EST-1 · Associação (camada 1; Q1; X-02, X-13, X-15)
 
@@ -159,9 +162,9 @@ Cada estimando segue os atributos do ICH E9(R1): pergunta, população, variáve
 | Atributo | Definição |
 |---|---|
 | Pergunta | Depois da aplicação, o que as leituras seguintes mostraram em relação ao NC? Só descrição, sem estimador (EX-42:42) |
-| População | P-EPI(D), sem exigir controle |
-| Estados (exclusivos, em ordem) | S6 NC incompatível → indisponível. S4 sem leitura depois. S2 1ª leitura depois ≥ NC: "retorno não demonstrado". S5 nova aplicação contra o alvo antes de qualquer leitura ≥ NC: "encerrado por nova aplicação em t" (o seguimento termina ali; nada é creditado à 1ª). S1 leitura < NC seguida de leitura ≥ NC: "retorno entre t_(k−1) e t_k", com a largura do intervalo, mesmo com lacuna. S3 abaixo do NC até a última leitura elegível: censura nessa leitura, não em D |
-| Oráculo | 1º dia latente com x ≥ NC depois da aplicação (ORA-05), para conferir que o intervalo de S1 o contém |
+| População | P-EPI(D), sem exigir controle → Δ 17/10-2: P-SEG(D) |
+| Estados (exclusivos, em ordem) | S6 NC incompatível → indisponível. S4 sem leitura depois. S2 1ª leitura depois ≥ NC: "retorno não demonstrado". S5 nova aplicação contra o alvo antes de qualquer leitura ≥ NC: "encerrado por nova aplicação em t" (o seguimento termina ali; nada é creditado à 1ª). S1 leitura < NC seguida de leitura ≥ NC: "retorno entre t_(k−1) e t_k", com a largura do intervalo, mesmo com lacuna. S3 abaixo do NC até a última leitura elegível: censura nessa leitura, não em D → Δ 17/10-2: janela W e nova ordem |
+| Oráculo | 1º dia latente com x ≥ NC depois da aplicação (ORA-05), para conferir que o intervalo de S1 o contém → Δ 17/10-5 |
 
 ### EST-3c · Sequência do grupo (Q5)
 
@@ -175,12 +178,12 @@ Cada estimando segue os atributos do ICH E9(R1): pergunta, população, variáve
 
 | Atributo | Definição |
 |---|---|
-| Pergunta (proposta; divergência D4) | Na origem t0, entre os talhões elegíveis, qual a probabilidade de o alvo **precisar de ação** até t0 + h? "Precisar de ação" = alguma leitura completa em (t0, t0 + h] ≥ NC **ou** aplicação contra o alvo com motivo "gatilho MIP" em (t0, t0 + h]. h = 7; 14 só com contrato próprio (X-27) |
+| Pergunta (proposta; divergência D4) | Na origem t0, entre os talhões elegíveis, qual a probabilidade de o alvo **precisar de ação** até t0 + h? "Precisar de ação" = alguma leitura completa em (t0, t0 + h] ≥ NC **ou** aplicação contra o alvo com motivo "gatilho MIP" em (t0, t0 + h]. h = 7; 14 só com contrato próprio (X-27) → Δ 17/10-7 |
 | População P-ORI(t0) | Talhões cuja última leitura completa até t0 está abaixo do NC, com idade dentro da validade (7 dias MIP; EX-42:30, DEC-0910-13 b), sem efeito residual de aplicação contra o alvo em t0. Tudo decidido só com fatos até t0 (T2) |
 | Intercorrentes | Aplicação com outro motivo (calendário, campanha, outro alvo): a unidade fica e o desfecho é observado como está (política de tratamento), com marca e sensibilidade. Motivo desconhecido: contado à parte. Nenhuma unidade sai da população em silêncio (N3) |
 | Perda | Sem leitura em (t0, t0 + h] e sem aplicação: "sem desfecho", no denominador do relatório como perda |
 | Variáveis | Só da coluna "Camada 4" da §3 |
-| Exportado pelo RX-0 | Os três desfechos (composto, só leituras, marca do intercorrente com o motivo), para que o RX-4 escolha sem mudar o RX-0 |
+| Exportado pelo RX-0 | Os três desfechos (composto, só leituras, marca do intercorrente com o motivo), para que o RX-4 escolha sem mudar o RX-0 → Δ 17/10-7 |
 | Oráculo | Nenhum de probabilidade. O gerador exporta o desfecho realizado e se o latente cruzou o NC em (t0, t0 + h], para medir quanto a vistoria semanal esconde |
 | Sumário (RX-4) | Brier e log-loss contra persistência 0/1 e nível + estádio, por horizonte, em origens posteriores ao treino; portão da Q4, pendente |
 
@@ -224,7 +227,7 @@ Cada estimando segue os atributos do ICH E9(R1): pergunta, população, variáve
 | ORA-02 | Contrafactual por mecanismo m: os mesmos fluxos (GER-02), m desligado e as decisões congeladas (mesmas aplicações, nos mesmos dias) |
 | ORA-03 | Por par (EST-1, EST-2): τ = r_lat − r_lat^(−m). Por população: média nos expostos, sinal, magnitude (log por semana e %) e n |
 | ORA-04 | Por episódio (EST-3a): E_true = 1 − x(t_depois) ÷ x^(−aplicação)(t_depois); razão leitura ÷ latente da leitura antes |
-| ORA-05 | Por episódio (EST-3b): 1º dia latente com x ≥ NC depois da aplicação |
+| ORA-05 | Por episódio (EST-3b): 1º dia latente com x ≥ NC depois da aplicação → Δ 17/10-5 |
 | ORA-06 | Por aplicação (EST-3c): fator plantado |
 | ORA-07 | Mundo nulo por mecanismo: m desligado **sem** congelar as decisões. O oráculo de m é 0 por construção |
 | ORA-08 | Manifesto: commit do gerador, hash da configuração, sementes, lista de "fortes" (P4) e de ruído (P5), data de congelamento |
@@ -244,6 +247,7 @@ Todos os testes:
   - episódio "sem comparação válida: controle sem leitura depois até D";
   - trocar só as leituras d12 dos controles para 30 deixa a saída de D = 10 idêntica;
   - com D = 12 e tolerância de pareamento da versão ≥ 2 dias, E = 0,5.
+- → Δ 17/10-3: ramos explícitos e executados.
 
 **ADV-02 · Clima realizado e previsão publicada depois da origem** (X-06; N1)
 - Entrada: t0 = fim do dia 30, h = 7. Clima realizado dos dias 31 a 37 presente na base. Previsão P1 emitida e recebida em d30 18:00 para os dias 31 a 37, com Tmáx 30 °C. Previsão P2 emitida em d31 06:00. Variante: Tmáx realizado de d35 + 70 °C.
@@ -271,7 +275,7 @@ Todos os testes:
   - relatório: 3 = 2 com desfecho (1 com intercorrente) + 1 perda;
   - nenhuma exclusão silenciosa.
 
-**ADV-05 · Seguimento: reaplicação, 1ª acima, lacuna, censura, sobreposição** (N4; X-10; EX-42:38, :42)
+**ADV-05 · Seguimento: reaplicação, 1ª acima, lacuna, censura, sobreposição** (N4; X-10; EX-42:38, :42) → Δ 17/10-2: estados pela P-SEG e caso (g)
 - Base de todos os casos: leitura antes em d1 = 12 e aplicação a1 em d2.
 - Casos:
   - **(a)** d9 = 3, nova aplicação em d12, d16 = 11 → S5 "encerrado por nova aplicação em d12". Nunca "retorno entre d9 e d16".
@@ -294,6 +298,7 @@ Todos os testes:
   - com D = 11: M presente;
   - com D = 25: L = 14;
   - recalcular D = 10 em qualquer data dá a mesma saída.
+- → Δ 17/10-1: este "Esperado" foi substituído (M sem sinal conhecido não aparece em D = 10); ADV-07b novo.
 
 **ADV-08 · Exposição depois da 2ª leitura do par** (PED:213; T3)
 - Entrada: par (d7, d14 às 09:00). Chuva de 30 mm em d15. Irrigação em d14 às 18:00.
@@ -384,7 +389,7 @@ Todos os testes:
   - 5 episódios "sem comparação válida: sem controle elegível", sem fallback;
   - identidade 5 = 0 incluídos + 5 excluídos ("sem controle").
 
-**ADV-19 · Protocolo e unidade mudados** (CX:44; T6; V4)
+**ADV-19 · Protocolo e unidade mudados** (CX:44; T6; V4) → Δ 17/10-1: cada versão publicada no início da vigência
 - Entrada:
   - NC 15 na versão 1 (até d39) e 10 na versão 2 (desde d40); leituras d35 = 12 e d42 = 12;
   - na versão 3 (desde d50), a unidade muda de "% de folhas" para "ácaros por folha"; leituras d49 e d56.
@@ -414,6 +419,7 @@ Todos os testes:
   - (b) τ = ln(1,05) = 0,04879 por semana (5 %);
   - mesma semente e versão → saída idêntica;
   - outra semente → outro clima.
+- → Δ 17/10-5: caso (c) novo, do ORA-05.
 
 ## 9. Aceite do RX-0 (especificado)
 
@@ -422,6 +428,8 @@ Todos os testes:
 3. O gabarito tem ≥ 20 sementes independentes (GER-01) e o manifesto congelado (ORA-08), com a lista de "fortes" e de ruído.
 4. P2 vale para toda data D da linha do tempo, nas três unidades derivadas.
 5. Nenhum estimador, nível de evidência, risco ou texto de tela é entregue no RX-0.
+
+→ Δ 17/10-8: o aceite inclui ADV-07b, ADV-21(c) e ADV-22.
 
 ## 10. Pendências (nenhuma bloqueia o registro)
 
@@ -459,3 +467,162 @@ Todos os testes:
 | Q4 | EST-4 |
 | Q5 | EST-3c |
 | Q6 | A2, A3, A7; GER-07 |
+
+## 12. Δ 17/10 · ajustes depois do retorno do Codex (6227947437 e 6227991541)
+
+**Decisões do Codex** (lidas, sem reinterpretar):
+- D1, D2 e D3 aceitas;
+- D4 fica como alternativa exportada;
+- V1–V3, N5 e K1–K11 reproduzidos por ele;
+- nenhuma aprovação integral do RX-0; a PR 88 segue prioridade.
+
+Os ajustes abaixo substituem os trechos apontados por "→ Δ 17/10-n". A verificação aritmética está em `reproducao/gemini/delta_1710.txt` (executado).
+
+### Δ 17/10-1 · Existência conhecida e versão retroativa (completa T1 e T6; substitui o "Esperado" do ADV-07)
+
+- **T1a.** A existência de um fato também tem t_disp. Para o corte D, um fato sem nenhuma versão com t_disp ≤ D **não existe**: não aparece como linha, nem como "não sincronizada", nem com outro motivo.
+- **T1b.** O motivo "não sincronizada" só aparece em D se, até D, havia um sinal conhecido da própria leitura, como um aviso de pendência enviado pelo aparelho com t_disp ≤ D.
+  - Sem sinal, mas com expectativa conhecida até D (vistoria programada ou cadência da versão do protocolo): "ausente: sem registro conhecido".
+  - Sem sinal nem expectativa: nada.
+- **T1c.** Conhecer o fato depois de D não muda nem revela nada em D. A saída de D é idêntica com e sem o fato que só chega depois.
+- **T6a.** Para classificar uma leitura (NC, unidade, parâmetros), vale a versão **vigente no t_evento da leitura entre as publicadas até o corte** (t_disp da versão ≤ D).
+  - Versão publicada depois do corte, mesmo com vigência retroativa, não muda o resultado de D; vale para os cortes posteriores à publicação.
+  - No ADV-19, cada versão é publicada no início da sua vigência.
+
+**ADV-07 (substituto) · Revisão retroativa e sincronização tardia**
+- Entrada:
+  - leitura L em d5 = 4, com t_disp d5, corrigida para 14 com t_disp d20;
+  - leitura M em d8, com t_disp d11, sem nenhum sinal antes de d11;
+  - vistoria do talhão programada para d8, com t_disp d1.
+- Esperado:
+  - D = 10: L = 4; M não aparece; a vistoria programada de d8 aparece como "ausente: sem registro conhecido", nunca "não sincronizada" nem zero;
+  - a saída de D = 10 é idêntica nos mundos com M e sem M;
+  - D = 11: M presente; D = 25: L = 14;
+  - recalcular D = 10 em qualquer data dá a mesma saída.
+- Variante com sinal: aviso de pendência de M recebido em d9 → em D = 10, "não sincronizada" (e só nesse caso).
+
+**ADV-07b (novo) · Versão retroativa do NC**
+- Entrada: NC v1 = 15, vigente e publicada desde d0; v2 = 10, vigente desde d5 e publicada em d20. Leitura d6 = 12.
+- Esperado:
+  - consulta com D = 10 → "abaixo do NC (15, v1)";
+  - consulta com D = 25 → "acima do NC (10, v2)";
+  - recalcular D = 10 depois de d20 → continua v1.
+- Contraprova: um classificador que use a "versão vigente no t_evento" sem filtrar a publicação dá "acima (10, v2)" em D = 10 e reprova.
+
+### Δ 17/10-2 · População própria do seguimento (substitui "População" e "Estados" do EST-3b)
+
+- **P-SEG(D):** aplicações contra o alvo realizadas e confirmadas (U2), com T1.
+  - Não exige leitura depois, controle nem ausência de outra aplicação: essas condições definem estados, não a entrada.
+  - A leitura antes é exportada se existir, mas não é exigida.
+  - A P-EPI (EST-3a) continua como estava. Os relatórios mostram as duas populações (P1).
+- **Janela de seguimento:** W = (t_aplicação, t_fim]. t_fim é o instante da próxima aplicação contra o alvo no mesmo talhão, se houver até D; senão, D.
+  - Só leituras completas em W, com T1.
+  - Leitura do dia da nova aplicação sem hora ou ordem confiável fica fora de W (A6).
+- **Estados** (exclusivos, avaliados nesta ordem):
+  1. S6: NC incompatível → indisponível.
+  2. Nenhuma leitura em W: S5a "encerrado por nova aplicação em t, sem leitura depois", se W terminou por nova aplicação; senão S4 "sem leitura depois".
+  3. 1ª leitura de W ≥ NC: S2 "retorno não demonstrado".
+  4. Leitura < NC seguida de leitura ≥ NC em W: S1 "retorno entre t_(k−1) e t_k", com a largura (o primeiro par desse tipo).
+  5. Todas as leituras de W < NC: S5b "abaixo do NC até t_k; encerrado por nova aplicação em t", se W terminou por nova aplicação; senão S3 "abaixo do NC até t_k" (censura em t_k).
+- **ADV-05 com a P-SEG:**
+  - (a) S5b "abaixo do NC até d9; encerrado por nova aplicação em d12";
+  - (b) S2;
+  - (c) S1 (d9, d23], largura 14;
+  - (d) S3 em d16;
+  - (e) S4;
+  - (f) no EST-3a, "interferência"; no EST-3b, a1 fica S5a "encerrado por nova aplicação em d4, sem leitura depois", e a aplicação de d4 tem seguimento próprio;
+  - **(g) novo:** aplicação em d2, nova aplicação em d5, nenhuma leitura até D = 20 → S5a em d5, nunca S4.
+
+### Δ 17/10-3 · ADV-01 com os ramos explícitos (substitui o "Esperado" do ADV-01; executado, `delta_1710.txt` bloco A)
+
+| Corte | Controles com d12 = 10 | Controles com d12 = 30 |
+|---|---|---|
+| D = 10 | sem comparação válida: controle sem leitura depois até D | igual à coluna ao lado, byte a byte |
+| D = 12 (tolerância da versão ≥ 2 dias) | E = 0,5000000000 | E = 0,8333333333 |
+
+- A invariância vale só antes da disponibilidade (D = 10). Em D = 12 a saída muda com a leitura, como deve.
+- Contraprova: o `rxHT` do v3 já em D = 10 dá 0,4762 e 0,8197 (R-C1).
+
+### Δ 17/10-4 · Chaves com a identidade de origem (substitui a coluna "Chave" da §2)
+
+| ID | Chave |
+|---|---|
+| U1 | (org, fazenda, cultivo, safra, talhão, alvo, leitura_id, versão) |
+| U2 | (org, fazenda, cultivo, safra, talhão, evento_id, versão) |
+| U3 | (org, fazenda, fonte, estação ou talhão/cultivo, período, variável, versão). Em fonte regional compartilhada, também o id do local no provedor |
+| U4 | (org, fazenda, fonte, emissão_id, revisão da emissão, t_emissão, t_alvo, variável, local), com t_disp por revisão. Duas revisões da mesma emissão são versões distintas, e T1 escolhe a de maior t_disp ≤ D (ou ≤ t0) |
+| U5 | (org, fazenda, cultivo, safra, talhão, alvo, leitura_1, leitura_2, D, versão de parâmetros, versão do contrato) |
+| U6 | (org, fazenda, cultivo, safra, aplicação_id, alvo, leitura_antes, leitura_depois, D, versões) |
+| U7 | (org, fazenda, cultivo, safra, talhão, alvo, t0, h, versões) |
+
+- Os campos de identidade são copiados da origem (contrato comum do EX-42 F1a), nunca recalculados nem inferidos do nome. IDs locais só são únicos dentro de (org, fazenda).
+- Par, episódio, controle e origem nunca cruzam fazenda, cultivo ou safra.
+
+**ADV-22 (novo) · Colisão de IDs**
+- Entrada: fazendas F1 e F2, da mesma org e de orgs diferentes, cada uma com talhão "P3" e leitura_id "L1" no mesmo dia.
+- Esperado:
+  - unidades distintas;
+  - nenhum par, episódio ou controle mistura F1 e F2;
+  - as contagens por fazenda são iguais às de cada fazenda processada sozinha.
+
+### Δ 17/10-5 · ORA-05 e cobertura (substitui a linha ORA-05 e o "Oráculo" do EST-3b)
+
+- **Exportado por aplicação:**
+  - t_queda: 1º dia com latente < NC depois da aplicação;
+  - t_retorno: 1º dia ≥ NC depois de t_queda;
+  - todos os cruzamentos para cima depois de t_queda;
+  - t_primeiro_acima: 1º dia ≥ NC depois da aplicação, que existe mesmo sem queda.
+- **Fixture sem ruído de medida** (leitura = latente). Invariantes determinísticas para S1:
+  - há ao menos um cruzamento para cima em (t_(k−1), t_k];
+  - t_retorno ≤ t_k.
+  - "t_retorno dentro do intervalo" **não** é invariante. Executado (`delta_1710.txt` bloco B2): o retorno em d5 fica fora de (d9, d16], e o cruzamento de d13 fica dentro.
+- **Com ruído de medida** nada é determinístico. São medidas de cobertura, com n e população:
+  - fração de S1 com t_retorno no intervalo;
+  - fração de S1 com algum cruzamento no intervalo;
+  - fração de S2 em que o latente nunca caiu abaixo do NC (bloco B3).
+  - Sem limiar de aprovação no RX-0; limiar, se houver, é do contrato do RX-1.
+
+**ADV-21 caso (c) (novo)**
+- Entrada: as fixtures B1, B2 e B3 de `delta_1710.txt`.
+- Esperado: as saídas registradas lá, campo a campo (queda, retorno, cruzamentos, intervalo de S1 e as duas verificações).
+
+### Δ 17/10-6 · Alcance da equivalência HT × contraste de logs (EST-3a; revisão R7)
+
+- A identidade ln(1 − E) = [ln T_depois − ln T_antes] − [ln C_depois − ln C_antes] foi demonstrada só para valores positivos (K10). Com algum zero, os dois lados saem infinitos (`delta_1710.txt` bloco C).
+- É álgebra de um par antes/depois. Não prova identificação causal, nem tendência paralela, nem equivalência a qualquer estimador DiD (vários períodos, regressão, escala de nível, adoção escalonada).
+- O teste de pré-tendência do U5 só pode reprovar.
+
+### Δ 17/10-7 · D4 só como alternativa exportada (substitui "Pergunta" e "Exportado pelo RX-0" do EST-4)
+
+- O RX-0 exporta separadamente:
+  - **cruzamento observado:** alguma leitura completa em (t0, t0 + h] ≥ NC;
+  - **ação registrada:** aplicação contra o alvo em (t0, t0 + h], com o motivo;
+  - a perda.
+- O composto "precisou de ação" é só alternativa derivada. Não é estimando primário nem verdade agronômica (6227947437). A escolha é do contrato do RX-4.
+- População, perda e intercorrentes do EST-4 não mudam.
+
+### Δ 17/10-8 · Aceite
+
+Os itens 1 e 2 da §9 valem para ADV-01 a ADV-22, com o ADV-07b e o caso (c) do ADV-21. O caso (c) separa a invariante sem ruído de medida da medida de cobertura.
+
+### Δ 17/10-9 · Dependência
+
+O RX-0 depende do EX-42 (F1a, F1d e F1b integradas). Ele só vira executável depois que o Codex registrar contrato, base e arquivos delimitados, com autoria definida e dentro do teto de frentes (AGENTS §3.6). Esta proposta não abre implantação e não passa à frente da PR 88 (6227947437).
+
+### Δ 17/10-10 · ICH E9(R1)
+
+Referência oficial localizada pelo Codex: *ICH E9(R1) Addendum on estimands and sensitivity analysis in clinical trials to the guideline on statistical principles for clinical trials*, Step 4, 2019, https://database.ich.org/sites/default/files/E9-R1_Step4_Guideline_2019_1203.pdf. É framework metodológico, não norma agro.
+
+### Rastreabilidade do Δ
+
+| Pedido do Codex (6227947437) | Onde |
+|---|---|
+| 1. ADV07/T6 | Δ 17/10-1; ADV-07 substituto; ADV-07b |
+| 2. EST3b | Δ 17/10-2; ADV-05(g) |
+| 3. ADV01 | Δ 17/10-3; `delta_1710.txt` A |
+| 4. U3/U5/U6/U7 e U4 | Δ 17/10-4; ADV-22 |
+| 5. ORA05 | Δ 17/10-5; ADV-21(c); `delta_1710.txt` B |
+| 6. HT × logs | Δ 17/10-6; `delta_1710.txt` C |
+| D4 | Δ 17/10-7 |
+| ICH E9(R1) | Δ 17/10-10 |
+| Dependência | Δ 17/10-9 |
