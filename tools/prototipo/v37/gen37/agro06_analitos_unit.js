@@ -10,7 +10,7 @@ for(const name of ['pH','P','MO','Ca','Mg','K','H+Al','Al','S','B','Cu','Fe','Mn
 }
 const rows=api.SO_AN.map(a=>api.soRlAnalito(a));
 assert.deepEqual(plain(api.soRlEnviarAnalitos(rows,'Mehlich-1')),[]);
-const zero=api.soRlAnalito('Al',{v:0,un:'cmolc/dm³',met:'lab',ld:'0',q:'não detectado'});
+const zero=api.soRlAnalito('Al',{v:0,un:'cmolc/dm³',met:'lab',ld:0,q:'não detectado'});
 assert.deepEqual(plain(api.soRlEnviarAnalitos([zero],'Resina')),[{a:'Al',v:'0',un:'cmolc/dm³',met:'lab',ld:'0',q:'não detectado'}]);
 const p=api.soRlAnalito('P',{v:3.1,un:'mg/dm³',met:'Outro método',ld:'1',q:'< LD'});
 assert.equal(p.v,'3,1');assert.equal(api.soRlEnviarAnalitos([p],'Resina')[0].met,'Outro método');

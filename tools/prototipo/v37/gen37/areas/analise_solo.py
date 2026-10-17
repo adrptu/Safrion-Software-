@@ -103,8 +103,8 @@ JS=r'''
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 const SO_UN={'pH':['CaCl₂','H₂O'],'P':['mg/dm³'],'MO':['g/dm³'],'Ca':['cmolc/dm³','mmolc/dm³','mg/dm³'],'Mg':['cmolc/dm³','mmolc/dm³','mg/dm³'],'K':['mg/dm³','cmolc/dm³','mmolc/dm³'],'H+Al':['cmolc/dm³','mmolc/dm³'],'Al':['cmolc/dm³','mmolc/dm³'],'S':['mg/dm³'],'B':['mg/dm³'],'Cu':['mg/dm³'],'Fe':['mg/dm³'],'Mn':['mg/dm³'],'Zn':['mg/dm³'],'Argila':['%','g/kg']};
 const SO_AN=['pH','P','MO','Ca','Mg','K','H+Al','Al','S','B','Cu','Fe','Mn','Zn','Argila'];
-function soRlAnalito(a,q){ return {a,v:q&&q.v!==undefined&&q.v!==null?String(q.v).replace('.',','):'',un:q&&q.un||SO_UN[a][0],met:q&&q.met||'',ld:q&&q.ld||'',q:q&&q.q||''}; }
-function soRlEnviarAnalitos(an,ext){ return an.filter(x=>String(x.v).trim()!=='').map(x=>({a:x.a,v:x.v,un:x.un,met:x.met||((x.a==='P'||x.a==='K')?ext:''),ld:x.ld||'',q:x.q||''})); }
+function soRlAnalito(a,q){ return {a,v:q&&q.v!==undefined&&q.v!==null?String(q.v).replace('.',','):'',un:q&&q.un||SO_UN[a][0],met:q&&q.met||'',ld:q&&q.ld!==undefined&&q.ld!==null?String(q.ld):'',q:q&&q.q||''}; }
+function soRlEnviarAnalitos(an,ext){ return an.filter(x=>String(x.v).trim()!=='').map(x=>({a:x.a,v:x.v,un:x.un,met:x.met||((x.a==='P'||x.a==='K')?ext:''),ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||''})); }
 function soFazOk(self,f){ const x=self.state.mf_faz||'Todas'; return x==='Todas'||f===x; }
 function soFz(self){ const x=self.state.mf_faz||'Todas'; return x==='Todas'?'Santa Rita':x; }
 function soAtor(){ return g2perfil().k; }
@@ -204,7 +204,7 @@ function soRlVals(self,v){ const rl=self.state.rl; v.rl_open=!!rl; if(!rl) retur
   v.rl_atalhos=[['Hoje',hoje],['Ontem',soloMaisDias(hoje,-1)],['Há 5 dias',soloMaisDias(hoje,-5)]].map(a=>({t:a[0],st:pill(rl.coleta===a[1]),on:String(rl.coleta===a[1]),go:()=>upd({coleta:a[1]})}));
   v.rl_lab=rl.lab; v.rl_labs=[{v:'',t:'Escolha o laboratório'}].concat(SOLO0.labs.map(x=>({v:x,t:x}))); v.rl_setlab=(e)=>upd({lab:e.target.value});
   v.rl_arq=rl.arq; v.rl_setarq=(e)=>upd({arq:e.target.value});
-  v.rl_ans=rl.an.map((x,i)=>({a:x.a,v:x.v,id:'rl_v'+i,lab:'Valor de '+x.a,ulab:'Unidade de '+x.a,un:x.un,met:x.met||'',ld:x.ld||'',q:x.q||'',mlab:'Método de '+x.a,llab:'Limite de detecção de '+x.a,qlab:'Qualificador de '+x.a,uns:Array.from(new Set(SO_UN[x.a].concat(x.un||[]))).map(u=>({v:u,t:u})),st:inSt+'max-width:130px;text-align:right;',ust:inSt+'max-width:150px;',
+  v.rl_ans=rl.an.map((x,i)=>({a:x.a,v:x.v,id:'rl_v'+i,lab:'Valor de '+x.a,ulab:'Unidade de '+x.a,un:x.un,met:x.met||'',ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||'',mlab:'Método de '+x.a,llab:'Limite de detecção de '+x.a,qlab:'Qualificador de '+x.a,uns:Array.from(new Set(SO_UN[x.a].concat(x.un||[]))).map(u=>({v:u,t:u})),st:inSt+'max-width:130px;text-align:right;',ust:inSt+'max-width:150px;',
     set:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{v:e.target.value}); upd({an}); },
     setu:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{un:e.target.value}); upd({an}); },
     setm:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{met:e.target.value}); upd({an}); },
