@@ -1,0 +1,20 @@
+{
+ "versao_publicada": "1792184197-5a81",
+ "site": "site70",
+ "medidas": {
+  "M19b Lagoa Grande: clique no pivô logo após abrir × após trocar de camada (diagnóstico do M19)": {
+   "ponto": [
+    999.0590320705383,
+    340.233535784992
+   ],
+   "elemento_no_ponto": "CANVAS.maplibregl-canvas",
+   "features_no_ponto": [
+    "PV05"
+   ],
+   "painel_1o_clique": true,
+   "painel_2o_clique": true,
+   "painel_apos_trocar_camada": true
+  }
+ },
+ "erros": {}
+}

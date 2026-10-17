@@ -1,0 +1,946 @@
+{
+ "versao_publicada": "1792184197-5a81",
+ "site": "site70",
+ "medidas": {
+  "M0 carga do mapa padrão (Lagoa Grande, MapLibre do CDN)": {
+   "pronto": true,
+   "segundos_ate_pronto": 3.4,
+   "maplibre": "5.9.0",
+   "erro": "",
+   "erros_js": [],
+   "canvas_aria": {
+    "label": "Map",
+    "role": "region",
+    "tabindex": "0"
+   },
+   "container_aria": {
+    "label": "Mapa da Fazenda Lagoa Grande · Demonstração sintética",
+    "role": null
+   },
+   "marcador_exemplo": {
+    "role": "img",
+    "label": "P5: OS-0507 impedida · bomba",
+    "tabindex": null
+   }
+  },
+  "M1 ordem de Tab na Lagoa Grande (1440)": {
+   "tabs": 140,
+   "primeiro_na_area_do_mapa": 28,
+   "focos_na_area_do_mapa": [
+    [
+     "BUTTON",
+     "Afastar"
+    ],
+    [
+     "BUTTON",
+     "Aproximar"
+    ],
+    [
+     "BUTTON",
+     "Desenhar"
+    ],
+    [
+     "BUTTON",
+     "Importar"
+    ],
+    [
+     "BUTTON",
+     "Medir"
+    ],
+    [
+     "BUTTON",
+     "Selecionar área"
+    ],
+    [
+     "CANVAS",
+     "Map"
+    ]
+   ],
+   "primeiro_no_desenho": 28,
+   "algum_pivo_focado": false,
+   "canvas_focado": true,
+   "sequencia_resumo": [
+    [
+     "A",
+     "",
+     "Mapa"
+    ],
+    [
+     "A",
+     "",
+     "Cadastros"
+    ],
+    [
+     "A",
+     "",
+     "Agrícola"
+    ],
+    [
+     "A",
+     "",
+     "Manutenção"
+    ],
+    [
+     "A",
+     "",
+     "Suprimentos"
+    ],
+    [
+     "A",
+     "",
+     "Comercial"
+    ],
+    [
+     "A",
+     "",
+     "Crédito"
+    ],
+    [
+     "A",
+     "",
+     "Configurações"
+    ],
+    [
+     "A",
+     "",
+     "Outros acessos"
+    ],
+    [
+     "SELECT",
+     "",
+     "Trocar perfil de demonstração"
+    ],
+    [
+     "SELECT",
+     "",
+     "Filtrar por fazenda"
+    ],
+    [
+     "SELECT",
+     "",
+     "Filtrar por safra"
+    ],
+    [
+     "SELECT",
+     "",
+     "Filtrar por cultura"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Integrado"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Satélite"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Solo"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Pragas e doenças"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Ordens de serviço"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Irrigação"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Estádio"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Colheita e produtividade"
+    ],
+    [
+     "BUTTON",
+     "tab",
+     "Custos"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Fonte e regra da camada"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Todas as condições"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Só pendências"
+    ],
+    [
+     "DIV",
+     "group",
+     "Indicadores de Integrado"
+    ],
+    [
+     "A",
+     "",
+     "Abrir ordens ›"
+    ],
+    [
+     "CANVAS",
+     "region",
+     "Map"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Selecionar área"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Medir"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Desenhar"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Importar"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Aproximar"
+    ],
+    [
+     "BUTTON",
+     "",
+     "Afastar"
+    ],
+    [
+     "BODY",
+     null,
+     null
+    ],
+    [
+     "A",
+     "",
+     "Mapa"
+    ],
+    [
+     "A",
+     "",
+     "Cadastros"
+    ],
+    [
+     "A",
+     "",
+     "Agrícola"
+    ],
+    [
+     "A",
+     "",
+     "Manutenção"
+    ],
+    [
+     "A",
+     "",
+     "Suprimentos"
+    ]
+   ]
+  },
+  "M2 Santa Rita: Tab até os talhões e árvore de acessibilidade (1440)": {
+   "tabs_ate_1o_talhao": 28,
+   "tabs_ate_ultimo_talhao": 76,
+   "talhoes_focados": 16,
+   "nome_acessivel_exemplo": [
+    "T1: OS-0430 a liberar",
+    "T2: OS-0431 impedida · Trator T1",
+    "P1: OS-0418 a liberar"
+   ],
+   "ax_botoes_de_talhao_expostos": [
+    "T1: OS-0430 a liberar",
+    "T2: OS-0431 impedida · Trator T1",
+    "P1: OS-0418 a liberar",
+    "P2: irrigação · conferir medição",
+    "T4: OS-0420 impedida",
+    "T3: OS-0415 encerrada",
+    "T7: irrigação em conflito · mancha 1,2 ha · satélite",
+    "C1: OS-0425 · entrega sem saldo"
+   ],
+   "ax_svg_como_imagem": [
+    "Mapa da fazenda Santa Rita"
+   ],
+   "tamanho_foco_talhao": [
+    [
+     275,
+     263
+    ],
+    [
+     248,
+     258
+    ]
+   ]
+  },
+  "M3 hover e foco: dica no talhão (1440)": {
+   "SR_hover_dica_visivel": false,
+   "SR_hover_filtro_poligono": "none",
+   "SR_hover_cursor": "pointer",
+   "SR_foco_programatico_dica": false,
+   "SR_satelite_sob_ponteiro": "circle P2: NDVI 0,76",
+   "SR_satelite_pixels_por_cima": {
+    "opacidade": "1",
+    "depois_do_poligono": true
+   },
+   "SR_satelite_dica_no_pixel": false,
+   "LG_hover_cursor_canvas": "pointer",
+   "LG_hover_dica_visivel": false,
+   "LG_popup": false
+  },
+  "M4 cliques até o detalhe do talhão mais crítico de cada camada (1440, mouse)": {
+   "Santa Rita · Integrado": {
+    "talhao": "T2",
+    "rotulo": "OS-0431 impedida · Trator T1",
+    "cliques_ate_detalhe": 2,
+    "painel": "T2 · 298 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Santa Rita · Satélite": {
+    "talhao": "T7",
+    "rotulo": "NDVI 0,66",
+    "cliques_ate_detalhe": 2,
+    "painel": "T7 · 42 ha",
+    "primaria_verde": [
+     "Programar vistoria"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Solo": {
+    "talhao": "T2",
+    "rotulo": "V % 40 %",
+    "cliques_ate_detalhe": 2,
+    "painel": "T2 · 298 ha",
+    "primaria_verde": [
+     "Abrir laudo"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Pragas e doenças": {
+    "talhao": "P1",
+    "rotulo": "Mosca-branca · acima do NC · +2",
+    "cliques_ate_detalhe": 2,
+    "painel": "P1 · 95 ha",
+    "primaria_verde": [
+     "Decidir controle"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Ordens de serviço": {
+    "talhao": "T4",
+    "rotulo": "OS-0420 · em execução",
+    "cliques_ate_detalhe": 2,
+    "painel": "T4 · 204 ha",
+    "primaria_verde": [
+     "Acompanhar OM-0233"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Irrigação": {
+    "talhao": "P1",
+    "rotulo": "falta insumo · OS-0418",
+    "cliques_ate_detalhe": 2,
+    "painel": "P1 · 95 ha",
+    "primaria_verde": [
+     "Programar só água"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Estádio": {
+    "talhao": "C1",
+    "rotulo": "Café · 7 anos e 8 meses",
+    "cliques_ate_detalhe": 2,
+    "painel": "C1 · 38 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Santa Rita · Colheita e produtividade": {
+    "talhao": "T7",
+    "rotulo": "sem previsão",
+    "cliques_ate_detalhe": 2,
+    "painel": "T7 · 42 ha",
+    "primaria_verde": [
+     "Coletar contagem"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Santa Rita · Custos": {
+    "talhao": "T1",
+    "rotulo": "R$ 2.462/ha",
+    "cliques_ate_detalhe": 2,
+    "painel": "T1 · 312 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Lagoa Grande · Integrado": {
+    "talhao": "PV05",
+    "rotulo": "OS-0507 impedida · bomba",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 5 · 71 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Lagoa Grande · Satélite": {
+    "talhao": "PV01",
+    "rotulo": "NDVI 0,56",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 1 · 30 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Lagoa Grande · Solo": {
+    "talhao": "PV12",
+    "rotulo": "V % 50 %",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 12 · 48 ha",
+    "primaria_verde": [
+     "Abrir laudo"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Lagoa Grande · Pragas e doenças": {
+    "talhao": "PV09",
+    "rotulo": "Meleira (virose) · foco",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 9 · 75 ha",
+    "primaria_verde": [
+     "Confirmar foco"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Lagoa Grande · Ordens de serviço": {
+    "talhao": "PV23",
+    "rotulo": "OS-0508 · em conferência",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 23 · 64 ha",
+    "primaria_verde": [
+     "Conferir e encerrar"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Lagoa Grande · Irrigação": {
+    "talhao": "PV05",
+    "rotulo": "bomba parada · OS-0507",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 5 · 71 ha",
+    "primaria_verde": [
+     "Abrir OS-0507"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Lagoa Grande · Estádio": {
+    "talhao": "PV02",
+    "rotulo": "Mamão · 1 ano",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 2 · 38 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   },
+   "Lagoa Grande · Colheita e produtividade": {
+    "talhao": "PV02",
+    "rotulo": "sem previsão",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 2 · 38 ha",
+    "primaria_verde": [
+     "Coletar contagem"
+    ],
+    "cliques_ate_decidir": 3
+   },
+   "Lagoa Grande · Custos": {
+    "talhao": "PV01",
+    "rotulo": "R$ 7.110/ha",
+    "cliques_ate_detalhe": 2,
+    "painel": "Pivô 1 · 30 ha",
+    "primaria_verde": [],
+    "cliques_ate_decidir": null
+   }
+  },
+  "M5 alvos de toque e de clique (1440 fino; 390 toque)": {
+   "1440px": {
+    "pointer_coarse": false,
+    "limite_px": 24,
+    "resumo": {
+     "abas": {
+      "n": 9,
+      "menor": 32,
+      "abaixo_do_limite": 0
+     },
+     "ferramentas": {
+      "n": 3,
+      "menor": 31,
+      "abaixo_do_limite": 0
+     },
+     "zoom": {
+      "n": 2,
+      "menor": 36,
+      "abaixo_do_limite": 0
+     },
+     "fechar": {
+      "n": 1,
+      "menor": 30,
+      "abaixo_do_limite": 0
+     },
+     "segmentados": {
+      "n": 2,
+      "menor": 25,
+      "abaixo_do_limite": 0
+     },
+     "atalho": {
+      "n": 1,
+      "menor": 29,
+      "abaixo_do_limite": 0
+     },
+     "selects": {
+      "n": 0,
+      "menor": null,
+      "abaixo_do_limite": 0
+     },
+     "acoes_painel": {
+      "n": 11,
+      "menor": 29.6,
+      "abaixo_do_limite": 0
+     }
+    },
+    "ferramentas": [
+     {
+      "n": "Selecionar área",
+      "w": 133.4,
+      "h": 31
+     },
+     {
+      "n": "Medir",
+      "w": 76,
+      "h": 31
+     },
+     {
+      "n": "Tela cheia",
+      "w": 101.1,
+      "h": 31
+     }
+    ],
+    "zoom": [
+     {
+      "n": "Aproximar",
+      "w": 36,
+      "h": 36
+     },
+     {
+      "n": "Afastar",
+      "w": 36,
+      "h": 36
+     }
+    ],
+    "fechar": [
+     {
+      "n": "Fechar painel",
+      "w": 30,
+      "h": 30
+     }
+    ]
+   },
+   "390px": {
+    "pointer_coarse": true,
+    "limite_px": 44,
+    "resumo": {
+     "abas": {
+      "n": 9,
+      "menor": 44,
+      "abaixo_do_limite": 0
+     },
+     "ferramentas": {
+      "n": 3,
+      "menor": 31,
+      "abaixo_do_limite": 3
+     },
+     "zoom": {
+      "n": 2,
+      "menor": 36,
+      "abaixo_do_limite": 2
+     },
+     "fechar": {
+      "n": 1,
+      "menor": 30,
+      "abaixo_do_limite": 1
+     },
+     "segmentados": {
+      "n": 2,
+      "menor": 25,
+      "abaixo_do_limite": 2
+     },
+     "atalho": {
+      "n": 1,
+      "menor": 44,
+      "abaixo_do_limite": 0
+     },
+     "selects": {
+      "n": 0,
+      "menor": null,
+      "abaixo_do_limite": 0
+     },
+     "acoes_painel": {
+      "n": 11,
+      "menor": 29.6,
+      "abaixo_do_limite": 11
+     }
+    },
+    "ferramentas": [
+     {
+      "n": "Selecionar área",
+      "w": 133.4,
+      "h": 31
+     },
+     {
+      "n": "Medir",
+      "w": 76,
+      "h": 31
+     },
+     {
+      "n": "Tela cheia",
+      "w": 101.1,
+      "h": 31
+     }
+    ],
+    "zoom": [
+     {
+      "n": "Aproximar",
+      "w": 36,
+      "h": 36
+     },
+     {
+      "n": "Afastar",
+      "w": 36,
+      "h": 36
+     }
+    ],
+    "fechar": [
+     {
+      "n": "Fechar painel",
+      "w": 30,
+      "h": 30
+     }
+    ]
+   }
+  },
+  "M6 legenda sobre o mapa: talhões cobertos e cliques bloqueados": {
+   "SR 1440px": {
+    "legenda_h": 31,
+    "area_mapa_h": 605,
+    "pct_altura": 5,
+    "pointer_events": "auto",
+    "talhoes_sob_legenda": [
+     {
+      "t": "T4",
+      "pct": 11
+     },
+     {
+      "t": "T3",
+      "pct": 9
+     },
+     {
+      "t": "T7",
+      "pct": 10
+     },
+     {
+      "t": "C1",
+      "pct": 9
+     }
+    ],
+    "clique_no_centro_da_legenda_cai_em": "legenda"
+   },
+   "LG 1440px": {
+    "legenda_h": 31,
+    "area_mapa_h": 605,
+    "pct_altura": 5,
+    "pointer_events": "auto",
+    "centros_de_pivo_sob_legenda": 0
+   },
+   "SR 390px": {
+    "legenda_h": 69,
+    "area_mapa_h": 523,
+    "pct_altura": 13,
+    "pointer_events": "auto",
+    "talhoes_sob_legenda": [],
+    "clique_no_centro_da_legenda_cai_em": null
+   },
+   "LG 390px": {
+    "legenda_h": 88,
+    "area_mapa_h": 523,
+    "pct_altura": 17,
+    "pointer_events": "auto",
+    "centros_de_pivo_sob_legenda": 0
+   }
+  },
+  "M7 rótulos do SVG da Santa Rita: tamanho efetivo e corte (D12)": {
+   "1440px": {
+    "escala_e_tamanhos": {
+     "escala": 0.976,
+     "id_px": 39,
+     "rotulo_px": 14.6,
+     "sub_px": 12.7
+    },
+    "rotulos_cortados": {
+     "Integrado": [],
+     "Colheita e produtividade › Carência e destino": [],
+     "Ordens de serviço": [],
+     "Irrigação › Balanço hídrico": []
+    }
+   },
+   "390px": {
+    "escala_e_tamanhos": {
+     "escala": 0.292,
+     "id_px": 11.7,
+     "rotulo_px": 4.4,
+     "sub_px": 3.8
+    },
+    "rotulos_cortados": {
+     "Integrado": [],
+     "Colheita e produtividade › Carência e destino": [],
+     "Ordens de serviço": [],
+     "Irrigação › Balanço hídrico": []
+    }
+   }
+  },
+  "M8 rótulos da Lagoa Grande: sobreposição (D28)": {
+   "1440px": {
+    "zoom": 12.95,
+    "rotulos": 23,
+    "pares_sobrepostos": 0,
+    "exemplos": [],
+    "fonte_px": "15px / 11px"
+   },
+   "390px": {
+    "zoom": 12.01,
+    "rotulos": 23,
+    "pares_sobrepostos": 11,
+    "exemplos": [
+     "P1 sem pendência × P2 sem pendência",
+     "P3 sem pendência × P4 OS-0506 · 36/73 ha",
+     "P4 OS-0506 · 36/73 ha × P5 OS-0507 impedida · bom",
+     "P5 OS-0507 impedida · bom × P6 OS-0504 ácaro · libera"
+    ],
+    "fonte_px": "15px / 11px"
+   }
+  },
+  "M9 arrasto de um dedo sobre o mapa no celular (D29)": {
+   "antes": {
+    "rolador": "MAIN",
+    "rolador_top": 0,
+    "scroll": 0,
+    "main": 0,
+    "rola_pagina": false,
+    "rola_main": true,
+    "centro": [
+     -47.157520500000004,
+     -34.62351505252148
+    ],
+    "x": 229,
+    "y": 742.6328125,
+    "h": 523.265625,
+    "touch_action": "auto"
+   },
+   "depois": {
+    "rolador_top": 0,
+    "scroll": 0,
+    "main": 0,
+    "centro": [
+     -47.157520500000004,
+     -34.62351505252148
+    ]
+   },
+   "mapa_moveu": false,
+   "pagina_rolou": false
+  },
+  "M10 seleção: Esc, clique no fundo, endereço e foco (D16, D17, D20)": {
+   "painel_abriu": true,
+   "foco_apos_clique": {
+    "t": "polygon",
+    "role": "button",
+    "nome": "T4: OS-0420 impedida",
+    "mapa": true,
+    "real": false,
+    "svg": true,
+    "canvas": false,
+    "talhao": true,
+    "w": 251,
+    "h": 249
+   },
+   "hash_antes_depois": [
+    "",
+    ""
+   ],
+   "painel_apos_Esc": true,
+   "painel_apos_clique_no_fundo": true,
+   "ponto_de_fundo": [
+    106,
+    291
+   ],
+   "390_painel": null,
+   "390_painel_visivel_sem_rolar": false,
+   "390_foco_apos_toque": {
+    "t": "BODY"
+   }
+  },
+  "M11 #talhao= com o contexto salvo em outra fazenda (D18)": {
+   "fazenda_no_topo": "Santa Rita",
+   "painel": null,
+   "mapa_real_presente": false
+  },
+  "M12 Medir: resultado e anúncio (D19)": {
+   "aviso": "Medição · T1: 312 ha · perímetro ≈ 7,1 km (geometria do cadastro).",
+   "regiao_viva": "Medição · T1: 312 ha · perímetro ≈ 7,1 km (geometria do cadastro).",
+   "aviso_apos_5s": "",
+   "painel": false
+  },
+  "M13 abas das camadas: setas e aria-controls (D21)": {
+   "antes": "Integrado",
+   "depois_da_seta": "Integrado",
+   "seta_move_foco": false,
+   "aria_controls": 0,
+   "tabpanel": 0,
+   "orientacao": null
+  },
+  "M14 tela cheia e fazenda \"Todas\" (D5, D6)": {
+   "LG_botao_tela_cheia": false,
+   "SR_botao_tela_cheia": true,
+   "tela_cheia_dialog": {
+    "aria_modal": null,
+    "foco_dentro": false
+   },
+   "tela_cheia_apos_Esc": true,
+   "Todas": {
+    "svg_santa_rita": true,
+    "mapa_real": false,
+    "aviso": "Boa Vista sem geometria"
+   }
+  },
+  "M15 destinos e atalhos por camada (D7, D8, D24, D25)": {
+   "Integrado": {
+    "t": "Abrir ordens ›",
+    "href": "OS.dc.html"
+   },
+   "Satélite": {
+    "t": "Ver histórico ›",
+    "href": "AG-06.dc.html"
+   },
+   "Solo": null,
+   "Pragas e doenças": {
+    "t": "Abrir Pragas e doenças ›",
+    "href": "AG-01.dc.html"
+   },
+   "Ordens de serviço": {
+    "t": "Abrir ordens ›",
+    "href": "OS.dc.html"
+   },
+   "Irrigação": {
+    "t": "Abrir irrigação ›",
+    "href": "IR-01.dc.html#faz=Santa%20Rita"
+   },
+   "Estádio": {
+    "t": "Abrir safra ›",
+    "href": "SAF.dc.html"
+   },
+   "Colheita e produtividade": null,
+   "Custos": {
+    "t": "Abrir safra ›",
+    "href": "SAF.dc.html"
+   },
+   "painel O.S. · Nova O.S. neste talhão": "OS.dc.html",
+   "painel Satélite · link de histórico": {
+    "t": "Ver histórico do talhão ›",
+    "href": "AG-06.dc.html"
+   },
+   "painel Colheita · ícone nos botões": [
+    {
+     "t": "×",
+     "svg": false
+    },
+    {
+     "t": "Abrir na Previsão e colheita ›",
+     "svg": false
+    },
+    {
+     "t": "Coletar contagem",
+     "svg": false
+    }
+   ]
+  },
+  "M16 Lagoa Grande: opacidade do preenchimento × legenda e nuvem (D13)": {
+   "opacidades_no_mapa": [
+    0,
+    0.55
+   ],
+   "amostra_legenda_opacidade": "1",
+   "hachura_no_mapa_LG": false
+  },
+  "M17 Satélite: contraste padrão, legenda e classe do pixel no painel (D9)": {
+   "contraste_padrao": [
+    "NDVI",
+    "21/09",
+    "Talhão"
+   ],
+   "legenda_sem_talhao": [
+    "Falha",
+    "Fraco",
+    "Atenção",
+    "Médio",
+    "Bom",
+    "Vigor alto",
+    "sem cultura",
+    "nuvem",
+    "Demonstrativo"
+   ],
+   "pixel_vermelho_P1": [
+    992.0967712402344,
+    357.8709716796875
+   ],
+   "painel_pixel": "Pixel selecionado · NDVI 0,82 Vigor alto −15,5448 · −54,2959 · 10 m · cena 21/09 (demonstrativo)",
+   "chip_do_talhao": "Feijão BRS Estilo · DAP 80 · R5 · Santa Rita",
+   "legenda_com_talhao": [
+    "Falha < 0,826",
+    "Fraco 0,826–0,830",
+    "Atenção 0,830–0,837",
+    "Médio 0,837–0,844",
+    "Bom 0,844–0,858",
+    "Vigor alto ≥ 0,858",
+    "sem cultura",
+    "nuvem",
+    "limites de P1",
+    "Demonstrativo"
+   ],
+   "pixels_vermelhos_por_talhao": {
+    "P1": 15,
+    "P2": 16,
+    "T7": 17,
+    "C1": 0
+   }
+  },
+  "M18 mancha do T7 sobre o rótulo (D11)": {
+   "chip": false,
+   "t7": true
+  }
+ },
+ "erros": {}
+}

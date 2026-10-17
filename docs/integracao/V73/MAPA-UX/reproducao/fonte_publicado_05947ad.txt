@@ -1,0 +1,4 @@
+faixa automática 7216-8090; deslocamento publicado − inicio.py no início da faixa: 6698
+linhas de JS do mapa no publicado (7216-8090) sem par literal na fonte: 0 de 875
+espelho atual = render da composição 05947ad (int90)
+sha256 do IN-04 do espelho atual: cc68e3e0b061defbeb8a2e39fd59aab89eaff5d86ca10dec2f7e598a454cdd00

@@ -1,0 +1,83 @@
+
+## Operacional antes (inicio.py:430): contraste (razão WCAG) contra fundo #E3EADB, contra branco do contorno, do texto #15201A sobre a cor e do branco sobre a cor
+| classe | hex | × fundo | × contorno branco | texto escuro sobre | texto branco sobre |
+|---|---|---:|---:|---:|---:|
+| ok | #7FAE68 | 2.09 | 2.57 | 6.51 | 2.57 |
+| good | #5F8F55 | 3.08 | 3.79 | 4.43 | 3.79 |
+| lime | #A9C06A | 1.63 | 2.01 | 8.33 | 2.01 |
+| yellow | #D4B25A | 1.65 | 2.04 | 8.23 | 2.04 |
+| orange | #D98A4E | 2.22 | 2.73 | 6.14 | 2.73 |
+| red | #C8553D | 3.54 | 4.35 | 3.85 | 4.35 |
+| gray | #C9CFCB | 1.29 | 1.58 | 10.59 | 1.58 |
+| blue | #6E9FC6 | 2.29 | 2.82 | 5.93 | 2.82 |
+| navy | #44739A | 4.10 | 5.04 | 3.32 | 5.04 |
+| none | #E4E9DF | 1.00 | 1.23 | 13.58 | 1.23 |
+| purple | #9B8BC4 | 2.48 | 3.05 | 5.49 | 3.05 |
+
+## Operacional antes, pares de estado usados juntos numa legenda: menor distância CIEDE2000 entre classes, por visão (abaixo de 10 = difícil de separar em área pequena)
+- normal: mínimo 6.5 (gray × none); pares < 10: 2 → gray × none 6.5; ok × lime 9.0
+- deutan: mínimo 1.0 (blue × purple); pares < 10: 6 → blue × purple 1.0; lime × yellow 3.6; orange × yellow 6.3; gray × none 6.6; red × good 6.8; ok × lime 7.6
+- protan: mínimo 2.5 (lime × yellow); pares < 10: 6 → lime × yellow 2.5; blue × purple 4.4; yellow × ok 5.9; ok × lime 6.3; gray × none 6.4; orange × yellow 9.6
+- tritan: mínimo 6.0 (gray × none); pares < 10: 2 → gray × none 6.0; blue × ok 9.5
+
+Simulação deuteranopia dos estados antes: {'ok': '#ACA06C', 'good': '#8B8158', 'yellow': '#CCBA5D', 'orange': '#B4A44E', 'red': '#90823A'}
+
+## Rampa de vigor (inicio.py:345; PRD 74.7.2): contraste (razão WCAG) contra fundo #E3EADB, contra branco do contorno, do texto #15201A sobre a cor e do branco sobre a cor
+| classe | hex | × fundo | × contorno branco | texto escuro sobre | texto branco sobre |
+|---|---|---:|---:|---:|---:|
+| v1 falha | #E4002B | 3.94 | 4.85 | 3.46 | 4.85 |
+| v2 fraco | #FF6A00 | 2.33 | 2.87 | 5.83 | 2.87 |
+| v3 atenção | #FFD500 | 1.15 | 1.42 | 11.78 | 1.42 |
+| v4 médio | #B5E61D | 1.19 | 1.47 | 11.41 | 1.47 |
+| v5 bom | #3FBF2A | 1.96 | 2.41 | 6.94 | 2.41 |
+| v6 vigor alto | #0B7A1E | 4.47 | 5.50 | 3.05 | 5.50 |
+
+## Rampa de vigor, classes vizinhas e extremos: menor distância CIEDE2000 entre classes, por visão (abaixo de 12 = difícil de separar em área pequena)
+- normal: mínimo 16.6 (v4 médio × v5 bom); pares < 12: 0
+- deutan: mínimo 2.8 (v3 atenção × v4 médio); pares < 12: 4 → v3 atenção × v4 médio 2.8; v2 fraco × v5 bom 4.3; v1 falha × v5 bom 11.5; v1 falha × v6 vigor alto 11.8
+- protan: mínimo 1.4 (v3 atenção × v4 médio); pares < 12: 4 → v3 atenção × v4 médio 1.4; v2 fraco × v6 vigor alto 9.0; v3 atenção × v5 bom 9.8; v4 médio × v5 bom 11.2
+- tritan: mínimo 11.7 (v1 falha × v2 fraco); pares < 12: 1 → v1 falha × v2 fraco 11.7
+
+## Proposta por significado (não aprovada): contraste (razão WCAG) contra fundo #E3EADB, contra branco do contorno, do texto #15201A sobre a cor e do branco sobre a cor
+| classe | hex | × fundo | × contorno branco | texto escuro sobre | texto branco sobre |
+|---|---|---:|---:|---:|---:|
+| estado.critico | #89291A | 7.12 | 8.77 | 1.91 | 8.77 |
+| estado.alerta | #CD6F1D | 2.90 | 3.57 | 4.70 | 3.57 |
+| estado.atencao | #EAC453 | 1.36 | 1.68 | 9.99 | 1.68 |
+| estado.ok | #4CA96B | 2.37 | 2.92 | 5.74 | 2.92 |
+| estado.em-curso | #275A86 | 5.90 | 7.26 | 2.31 | 7.26 |
+| estado.programado | #A0C4E3 | 1.48 | 1.83 | 9.17 | 1.83 |
+| estado.concluido | #73827A | 3.28 | 4.04 | 4.15 | 4.04 |
+
+## Proposta por significado: menor distância CIEDE2000 entre classes, por visão (abaixo de 15 = difícil de separar em área pequena)
+- normal: mínimo 20.5 (estado.ok × estado.concluido); pares < 15: 0
+- deutan: mínimo 13.6 (estado.alerta × estado.ok); pares < 15: 2 → estado.alerta × estado.ok 13.6; estado.ok × estado.concluido 14.5
+- protan: mínimo 14.9 (estado.atencao × estado.ok); pares < 15: 2 → estado.atencao × estado.ok 14.9; estado.alerta × estado.ok 14.9
+- tritan: mínimo 15.1 (estado.ok × estado.programado); pares < 15: 0
+
+## Estádio, categórica proposta: contraste (razão WCAG) contra fundo #E3EADB, contra branco do contorno, do texto #15201A sobre a cor e do branco sobre a cor
+| classe | hex | × fundo | × contorno branco | texto escuro sobre | texto branco sobre |
+|---|---|---:|---:|---:|---:|
+| fase.vegetativo | #438F82 | 3.11 | 3.83 | 4.38 | 3.83 |
+| fase.reprodutivo | #9C86CF | 2.54 | 3.12 | 5.37 | 3.12 |
+| fase.producao-continua | #2A4E75 | 6.98 | 8.59 | 1.95 | 8.59 |
+| fase.enchimento-maturacao | #8C6638 | 4.19 | 5.16 | 3.25 | 5.16 |
+| fase.pre-plantio | #C9CFCB | 1.29 | 1.58 | 10.59 | 1.58 |
+
+## Estádio, categórica proposta: menor distância CIEDE2000 entre classes, por visão (abaixo de 15 = difícil de separar em área pequena)
+- normal: mínimo 28.3 (fase.vegetativo × fase.pre-plantio); pares < 15: 0
+- deutan: mínimo 18.5 (fase.vegetativo × fase.reprodutivo); pares < 15: 0
+- protan: mínimo 20.0 (fase.vegetativo × fase.enchimento-maturacao); pares < 15: 0
+- tritan: mínimo 19.0 (fase.reprodutivo × fase.pre-plantio); pares < 15: 0
+
+## Neutros e ausência de leitura: contraste (razão WCAG) contra fundo #E3EADB, contra branco do contorno, do texto #15201A sobre a cor e do branco sobre a cor
+| classe | hex | × fundo | × contorno branco | texto escuro sobre | texto branco sobre |
+|---|---|---:|---:|---:|---:|
+| nao-se-aplica (liso) | #E4E9DF | 1.00 | 1.23 | 13.58 | 1.23 |
+| contorno tracejado nao-se-aplica | #6B776F | 3.80 | 4.67 | 3.58 | 4.67 |
+| sem-leitura base | #C9CFCB | 1.29 | 1.58 | 10.59 | 1.58 |
+| sem-leitura listra | #6B6B6B | 4.33 | 5.33 | 3.14 | 5.33 |
+
+Não se aplica × fundo: 1.00 · cinza × não se aplica: 1.28 · contorno tracejado proposto × fundo: 3.80 · listra proposta × base: 3.37 · listra atual × base: 1.69
+Contorno de seleção #15201A × fundo: 13.61 · foco tracejado #15201A (igual à seleção, só muda o traço)
+Borda branca da amostra × legenda (Lc, inicio.py:854) para none: 1.01

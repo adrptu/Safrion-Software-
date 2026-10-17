@@ -1,0 +1,20 @@
+{
+ "versao_publicada": "1792184197-5a81",
+ "site": "site70",
+ "medidas": {
+  "M18c recorte da tela no T7 (Satélite 21/09, 1440 px) para conferir a mancha e o rótulo": {
+   "arquivo": "m18c_T7_satelite_1440.png",
+   "caixa": [
+    850,
+    602,
+    185,
+    258
+   ],
+   "chip_altura_fo_un": 22,
+   "chip_div_altura_px": 37,
+   "fo_altura_px": 21,
+   "overflow_fo": "hidden"
+  }
+ },
+ "erros": {}
+}

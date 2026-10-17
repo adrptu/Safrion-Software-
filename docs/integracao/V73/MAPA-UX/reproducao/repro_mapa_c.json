@@ -1,0 +1,36 @@
+{
+ "versao_publicada": "1792184197-5a81",
+ "site": "site70",
+ "medidas": {
+  "M10c toque a 390 px: eventos recebidos pelo talhão e por uma aba (diagnóstico do M10b)": {
+   "eventos_no_toque": [
+    "T1:pointerdown",
+    "T1:touchstart",
+    "T1:pointerup",
+    "T1:touchend"
+   ],
+   "painel_apos_toque": null,
+   "painel_apos_clique": {
+    "titulo": "T1 · 312 ha",
+    "top": 825,
+    "bottom": 2116,
+    "alturaJanela": 844,
+    "verdes": []
+   },
+   "eventos_total": [
+    "T1:pointerdown",
+    "T1:touchstart",
+    "T1:pointerup",
+    "T1:touchend",
+    "T1:pointerdown",
+    "T1:pointerup",
+    "T1:click"
+   ],
+   "main": {
+    "scrollTop": 0,
+    "clientHeight": 738
+   }
+  }
+ },
+ "erros": {}
+}

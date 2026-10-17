@@ -1,0 +1,14 @@
+| cor (token do protótipo) | nº de significados | significados (inicio.py:linha) |
+|---|---:|---|
+| gray | 13 | COLHCOR Prevista (1370); SOLOCOR vencida (1270); a liberar · encerradas (808); encerrada (805); não iniciada (807); pré-plantio (866); sem aplicação apontada (1216); sem cultura (865); sem laudo ou não calculável (1326); sem plano na safra (870); sem previsto (871); sequeiro ou preparo (868); vistoria atrasada ou sem vistoria no período (867) |
+| yellow | 13 | 5–10 mm (868); COLHCOR Sem previsão (1370); SOLOCOR validar (1270); atenção ou a liberar (861); até +10 % (871); até 3 dias (805); dados insuficientes · conferir (1216); em conferência (808); pedido a receber (870); pendente: janela, conferência ou liberação (869); pendência com dono (806); perto do NC ou coleta pendente (867); produção contínua (866) |
+| ok | 12 | COLHCOR Em colheita (1370); SOLOCOR dia (1270); abaixo do NC (867); déficit < 5 mm (868); em dia (861); em execução (808); estoque cobre (870); no prazo (805); no previsto (871); sem impedimento (806); sem necessidade hoje (869); vegetativo ou emergência (866) |
+| none | 10 | SOLOCOR sem (1270); colhido ou fora do filtro (866); sem colheita (1381); sem cultura (867); sem execução (871); sem lavoura em colheita (1216); sem necessidade no período (870); sem ordem (805); sem ordem aberta (806); sem pendência (861) |
+| red | 7 | acima de +10 % (871); acima do NC (867); atrasada (805); carência em curso · colheita impedida (1216); falta comprar (870); impedida ou conflito (806); ≥ 15 mm (868) |
+| blue | 6 | COLHCOR Programada (1370); com previsto (871); em controle (867); irrigando (869); liberadas (808); prazo cumprido · destino a avaliar por lote (1216) |
+| orange | 5 | 10–15 mm (868); SOLOCOR corrigir (1270); foco (867); granação ou maturação (866); vence hoje (805) |
+| lime | 2 | em andamento (807); programada (867) |
+| cloud | 3 | nuvem (865); sem necessidade · ≈ estimado (869); ≈ estimado por ET (sonda sem dado ou suspeita) (868) |
+| good | 1 | área toda feita (807) |
+| purple | 1 | reprodutivo (866) |
+| navy | 1 | COLHCOR Colhida (1370) |

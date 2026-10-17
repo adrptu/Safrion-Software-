@@ -1,0 +1,2 @@
+[ 35.7s] M20 o mapa muda de lugar quando o painel abre? (salto de layout, 1440): {"Santa Rita": {"talhao": "T4", "antes": [438, 732], "depois": [263, 723], "deslocamento_px": 175, "largura_do_mapa": [1306, 921], "sob_o_ponteiro_depois": "T3"}, "Lagoa Grande": {"talhao": "PV05", "antes": [999, 340], "depois": [807, 340], "deslocamento_px": 192, "largura_do_mapa": [1306, 921], "sob_o_ponteiro_depois": "PV06"}}
+FIM 1 medidas, 0 erros -> repro_mapa_h.json

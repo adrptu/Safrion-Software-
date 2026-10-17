@@ -1,0 +1,13 @@
+menor ΔE00 entre estados nas 4 visões: 13.6
+{'critico': '#89291A', 'alerta': '#CD6F1D', 'atencao': '#EAC453', 'ok': '#4CA96B', 'em-curso': '#275A86', 'programado': '#A0C4E3', 'concluido': '#73827A'}
+normal mínimo 20.5 (ok × concluido)
+deutan mínimo 13.6 (alerta × ok)
+protan mínimo 14.9 (atencao × ok)
+tritan mínimo 15.1 (ok × programado)
+critico #89291A × fundo 7.12 · branco sobre 8.77 · escuro sobre 1.91
+alerta #CD6F1D × fundo 2.90 · branco sobre 3.57 · escuro sobre 4.70
+atencao #EAC453 × fundo 1.36 · branco sobre 1.68 · escuro sobre 9.99
+ok #4CA96B × fundo 2.37 · branco sobre 2.92 · escuro sobre 5.74
+em-curso #275A86 × fundo 5.90 · branco sobre 7.26 · escuro sobre 2.31
+programado #A0C4E3 × fundo 1.48 · branco sobre 1.83 · escuro sobre 9.17
+concluido #73827A × fundo 3.28 · branco sobre 4.04 · escuro sobre 4.15

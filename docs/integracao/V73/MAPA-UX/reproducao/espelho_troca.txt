@@ -1,0 +1,26 @@
+# Troca do espelho site70 durante a passada de navegador (executado em 2026-10-17T00:39Z)
+ctime do IN-04 no espelho: 2026-10-17 00:16:19.984216713 +0000
+linhas do IN-04 antes da troca (medido antes, nesta sessão): 8538; depois: 8541
+o espelho atual é byte a byte o render da composição 05947ad (b989864 + PRs #81, #90 e #91; publicação registrada em 47ccc1d)
+
+## arquivos do mapa entre b989864 e 05947ad (git diff --stat; vazio = iguais)
+(fim do diff)
+
+## todos os arquivos do gerador que mudaram entre b989864 e 05947ad
+tools/prototipo/v37/gen37/areas/gestao.py
+tools/prototipo/v37/gen37/areas/modulos.py
+tools/prototipo/v37/gen37/areas/processo_estoque.py
+tools/prototipo/v37/gen37/ben_fluxo_test.py
+tools/prototipo/v37/gen37/credito_docs.js
+tools/prototipo/v37/gen37/credito_ficha_build.py
+tools/prototipo/v37/gen37/credito_ficha_motor_unit.js
+tools/prototipo/v37/gen37/credito_ficha_unit.js
+tools/prototipo/v37/gen37/credito_menu_test.py
+tools/prototipo/v37/gen37/demanda_estado_nav_test.py
+tools/prototipo/v37/gen37/est_cenario_test.py
+tools/prototipo/v37/gen37/est_onda0_test.py
+tools/prototipo/v37/gen37/est_onda0_unit.js
+tools/prototipo/v37/gen37/est_sem_validade_nav.py
+tools/prototipo/v37/gen37/esttest.py
+tools/prototipo/v37/gen37/links_ocultos_test.py
+tools/prototipo/v37/gen37/map_decisoes_test.py

@@ -1,0 +1,86 @@
+{
+ "versao_publicada": "1792184197-5a81",
+ "site": "site70",
+ "medidas": {
+  "M3b hover em ponteiro fino: media query e realce do polígono": {
+   "hover_hover": false,
+   "ponto": [
+    592.209716796875,
+    301.4677429199219
+   ],
+   "filtro_no_hover": "none · :hover=true",
+   "dica_visivel": false
+  },
+  "M9b arrasto de um dedo com eventos de toque, com controle fora do mapa (D29)": {
+   "antes": {
+    "main": 0,
+    "centro": [
+     -47.157520500000004,
+     -34.62351505252148
+    ],
+    "topo_mapa": 481,
+    "base_mapa": 1004,
+    "janela": 844
+   },
+   "depois_no_mapa": {
+    "main": 0,
+    "centro": [
+     -47.157520499995485,
+     -34.62403982491725
+    ],
+    "topo_mapa": 481,
+    "base_mapa": 1004,
+    "janela": 844
+   },
+   "mapa_moveu": true,
+   "pagina_rolou_no_mapa": false,
+   "controle_fora_do_mapa_rolou": true,
+   "controle": {
+    "main": 165,
+    "centro": [
+     -47.157520499995485,
+     -34.62403982491725
+    ],
+    "topo_mapa": 316,
+    "base_mapa": 839,
+    "janela": 844
+   }
+  },
+  "M10b toque num talhão a 390 px: painel e foco (D20)": {
+   "ponto": [
+    97.76000213623047,
+    485.53680419921875
+   ],
+   "painel": null,
+   "painel_visivel_sem_rolar": false,
+   "foco": {
+    "t": "BODY"
+   },
+   "main": {
+    "scrollTop": 179,
+    "scrollHeight": 917,
+    "clientHeight": 738
+   }
+  },
+  "M18b mancha do T7 sobre o rótulo, por textContent (D11)": {
+   "chip": "mancha 1,2 ha",
+   "opacidade_chip": "1",
+   "rotulo_T7": "NDVI 0,66",
+   "caixa_chip": [
+    941,
+    783,
+    88,
+    37
+   ],
+   "caixa_rotulo": [
+    857,
+    762,
+    170,
+    18
+   ],
+   "sobreposicao_px2": 0,
+   "pct_do_chip": 0
+  }
+ },
+ "erros": {}
+}
