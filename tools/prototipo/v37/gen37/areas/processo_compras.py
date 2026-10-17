@@ -254,7 +254,7 @@ function fnome(id){ const f=CD.forn.find(x=>x.id===id); return f?f.nome:id; }
 function toast(self,t){ self.setState({g2toast:t}); }
 function pt(a,b){ return String(a).localeCompare(String(b),'pt-BR'); }
 // ---------- solicitação da safra aberta: a SOL-2026-07 inicial ou o registro gravado pelo Planejar safra (talhao-os-compras-v1) ----------
-const SOL_KEY='talhao-os-compras-v1';
+const SOL_KEY=CEN_COMP_ANTIGA;
 function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.sols)||{}; }catch(e){ return {}; } }
 // safras da compra: as do cadastro e as que só existem numa solicitação gravada pelo Planejar safra (safra nova)
 function safras(){ const ls=solLer(); return CD.safras.concat(Object.values(ls).filter(r=>r&&r.safra&&!CD.safras.some(s=>s.id===r.safra)).map(r=>({id:r.safra,nome:r.nome||r.safra,periodo:'',estado:'',faz:r.faz||''}))); }
@@ -275,9 +275,9 @@ function sx(self){ SX=solDe(self.state.saf||null); return SX; }
 // cenário vivo, cenDemEntradas) e a mesma regra (demSolAcima, cal01.js). Só avisa: quem atualiza a SOL é o Planejar safra. ACIMA: {insumo: {dif, liq}}
 let ACIMA={};
 // plano: o da versão da SOL (ent, gravado pelo Planejar safra com os ajustes da tela) ou, na SOL da semente, o da semente (dem_fixas)
-function vivaDe(saf){ if(!SX||SX.safra!==saf) return null; const X=SX.ent||((CD.viva||{}).x||{})[saf]; if(!X) return null;
+function vivaDe(saf){ vivaDe.aviso=""; if(!SX||SX.safra!==saf) return null; const X=SX.ent||((CD.viva||{}).x||{})[saf]; if(!X) return null;
   let raw=''; try{ raw=localStorage.getItem(CEN_KEY)||''; }catch(e){} const k=raw+'|'+saf+'|'+SX.key; if(vivaDe._k===k) return vivaDe._v;
-  const E=cenDemEntradas(cenGet(),X,CD.viva.b); const m=demFazenda(E); const qual={};
+  const E=cenDemEntradas(cenGet(),X,CD.viva.b); const m=demFazenda(E); const qual={};vivaDe.aviso=(E.recebNaoApuravel||[]).map(r=>r.item+': '+r.motivo).join(' ');
   // falta condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): a mesma conta do Planejar safra;
   // a Compra mostra a decisão (laudo no Estoque) e não compra a parcela — nenhuma trava, nenhuma proposta automática
   Object.values(m).forEach(d=>{ if((d.cond||0)>0.001) qual[d.nome]={q:d.cond,un:d.un,falta:d.condFalta||'',txt:demCondTxt(d)}; });   /* motivo, responsável, prazo e decisão (cal01.js) */
@@ -312,7 +312,7 @@ function calDe(d){ return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),d
 // O andamento também fica no registro compartilhado (talhao-os-compras-v1 · proc[safra]), ligado à versão da solicitação: recarregar ou ir
 // à origem e voltar não perde a compra, e o Planejar safra mostra o estado.
 const PROC=['env','nresp','conv','esc','aprov','pcx','dec5']; const PROC_REG=['env','nresp','conv','esc','aprov','pcx'];
-function procLer(id){const r=cenCompLer(id);procLer.erro=r.erro||'';const x=solDe(id);if(!x)return null;const p=r.proc;
+function procLer(id){const r=cenCompLer(id);procLer.erro=r.erro||r.aviso||'';const x=solDe(id);if(!x)return null;const p=r.proc;
   return (p&&p.key===x.key&&p.sol===x.sol.id)?p:null; }
 function procGravar(self,m){ const st=self.state,id=st.saf;const leitura=cenCompLer(id);if(leitura.erro){if(st.g2toast!==leitura.erro)self.setState({g2toast:leitura.erro});return leitura;}if(!id||!SX||SX.safra!==id)return;
   const snap={sol:SX.sol.id,key:SX.key,comp:SX.comp||0};PROC_REG.forEach(k=>{snap[k]=st[k]===undefined?null:st[k];});snap.estado=estadoCompra(self,m,id).t;
@@ -320,13 +320,13 @@ function procGravar(self,m){ const st=self.state,id=st.saf;const leitura=cenComp
   const pend=self._procWrite||(self._procWrite={});const keys=self._procKeys||(self._procKeys={});const k=id+'\n'+js; if(!keys[k])keys[k]='CMP-'+id+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);pend[id]={js,chave:keys[k]};
   const r=cenCompGravar(id,snap,pend[id].chave,cmpPerfil().nome);
   if(r.erro){const msg='Compra não gravada: '+r.erro+' O rascunho foi mantido; repita após corrigir.';if(st.g2toast!==msg)self.setState({g2toast:msg});return r;}
-  memo[id]=js;return r; }
+  memo[id]=js;if(r.aviso&&st.g2toast!==r.aviso)self.setState({g2toast:r.aviso});return r; }
 // Confirmações só aparecem depois do recibo; o formulário original fica intacto na falha.
 function procAplicar(self,patch){
   const tmp=Object.create(self);tmp.state=Object.assign({},self.state,patch);let aviso={};tmp.setState=p=>{aviso=p;};
   tmp._procJs=self._procJs||(self._procJs={});tmp._procWrite=self._procWrite||(self._procWrite={});tmp._procKeys=self._procKeys||(self._procKeys={});
   const r=procGravar(tmp,M(tmp));if(r&&r.erro){self.setState(aviso);return false;}
-  self.setState(patch);return true;
+  self.setState(r&&r.aviso?Object.assign({},patch,{g2toast:(patch.g2toast||'')+' · '+r.aviso}):patch);return true;
 }
 function trocaSafra(self,id,extra){ const st=self.state; const patch={saf:id,conf5:false};
   if(st.saf!==id){ const bag=Object.assign({},st.porSaf||{}); if(st.saf){ const cur={}; PROC.forEach(k=>{ cur[k]=st[k]; }); bag[st.saf]=cur; }
@@ -437,7 +437,7 @@ function PREVALS(self,v){ cmPre(self);
       const falt=p.itens.map(it=>faltaDe(st,it.nome,null)).filter(Boolean).sort()[0]||null; const av=avFalta(x,p.prev,falt);
       const r={id:p.id,v:{nome:p.id,val:p.valor,prev,obs:x.obs||''},s:{nome:p.id+' '+p.nome},p:{nome:[B(p.id),T(p.nome),BR(),MU(SX.sol.id+' · '+(one?p.itens[0].nome:p.itens.length+' insumos'))]}};
       const entrega=it=>{const e=cenCompSaldo(cenGet(),{id:p.id,linha:it.i,item:it.nome,un:it.un,qtd:it.ped});return {
-        v:{qtd:it.ped,rec:e.rec,quar:e.quar,ae:e.ae,val:it.tot},p:{qtd:[T(qt(it.ped,it.un))],rec:[T(qt(e.rec,it.un))],quar:[e.quar===null?MU('Saldo sem atribuição por linha'):T(qt(e.quar,it.un)),MU('Na conferência: '+qt(e.quarEntrada,it.un))],ae:[B(qt(e.ae,it.un))]}};};
+        v:{qtd:it.ped,rec:e.rec,quar:e.quar,ae:e.ae,val:it.tot},p:{qtd:[T(qt(it.ped,it.un))],rec:[T(qt(e.rec,it.un))],quar:[{k:'ico',c:'gray',curto:e.quar===null?'Não apurável':qt(e.quar,it.un),t:'Na conferência: '+qt(e.quarEntrada,it.un)+(e.quar===null?' · Lote compartilhado ou sem atribuição segura à linha; nenhum rateio aplicado.':'') }],ae:[B(qt(e.ae,it.un))]}};};
       if(one){const z=entrega(p.itens[0]);Object.assign(r.v,z.v);Object.assign(r.p,z.p);}
       else r.kids=p.itens.map(it=>{const z=entrega(it);return {id:p.id+'_'+it.i,ro:true,dr:'entp_'+p.id,v:Object.assign({nome:it.nome},z.v),s:{nome:it.nome},p:Object.assign(z.p,{prev:[T('')],sit:[T('')],acao:[T('')]})};});
       r.p.sit=[x.conf?CH('Confirmado pelo fornecedor','green'):CH('Aguarda confirmação','blue')].concat(av); r.s.sit=(x.conf?'Confirmado':'Emitido')+(av.length?' '+av[0].t:'');
@@ -739,7 +739,7 @@ function EXTRAVALS(self,v){ hooks(self);
     if(step===6) A={volta:ir(5),prim:{t:'Conferir recebimentos ›',h:'EST.dc.html',a:'abrir'}};
   }
   g2acoes(v,'aa',A);
-  procGravar(self,m);
+  const persistencia=procGravar(self,m);if(!(persistencia&&(persistencia.erro||persistencia.aviso))&&vivaDe.aviso&&self.state.g2toast!==vivaDe.aviso)self.setState({g2toast:vivaDe.aviso});
   cmVals(self,v);   // V69: seletor do tipo de compra e Materiais, peças e serviços
 }
 const NOMES_=['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'];

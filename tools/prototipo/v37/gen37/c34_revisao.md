@@ -13,6 +13,12 @@ O andamento da compra lê/migra a chave antiga para `cenario.compras` sem apagar
 
 ## Provas executadas
 
-`node c34_test.cjs`: 14 cenários com as funções reais de cenario.js, procGravar e adaptadores EST; armazenamento em memória com falha de quota injetada. Casos: recibo/repetição/conflito, migração e preservação, corrupção, PC-X 100 kg A + 50 L B recebendo 20 kg A → 80 kg A e 50 L B, deduplicação, linha/unidade diferentes, quarentena após inspeção e atribuição desconhecida, pedidos aprovados, legado sem unidade e memo após durabilidade, emissão real que só confirma depois do recibo e repetição após render intermediário. AST dos dois Python e sintaxe JS extraída + cenario.js passaram.
+`node c34_test.cjs`: 17 cenários com as funções reais de cenario.js, procGravar e adaptadores EST; armazenamento em memória com falha de quota injetada. Casos: recibo/repetição/conflito, migração e preservação, corrupção, PC-X 100 kg A + 50 L B recebendo 20 kg A → 80 kg A e 50 L B, deduplicação, linha/unidade diferentes, quarentena após inspeção e atribuição desconhecida, pedidos aprovados, legado sem unidade e memo após durabilidade, emissão real que só confirma depois do recibo e repetição após render intermediário. AST dos três Python e sintaxe JS extraída + cenario.js passaram.
 
 Contraprovas da base já entregues em 6241912132 (memo antes da escrita impede retry) e 6241983319 (recebimento de A reduz B). Testes novos não alteram fontes do revisor nem testes anteriores.
+
+## Retorno P1–P6 (6242615315)
+
+P1: est_dem de dados2.py usa a mesma identidade PC/item/unidade/linha e deduplicação de cenEstDem. P2: RECEB_DT conserva unidade/linha dos pedidos; previsão ambígua fica fora da oferta, registrada em recebNaoApuravel e sinalizada em Compras. P3: marcador de migração após recibo e antes de reset impede ressurreição do legado; falha no marcador antes de reset interrompe o reset. P4: armazenamento bloqueado gera aviso distinto de cópia corrompida, inclusive no EST. P5: SOL_KEY referencia CEN_COMP_ANTIGA. P6: histórico da quarentena está no tooltip de uma única linha.
+
+c34_paridade_test.py passou em 6 comparações das funções reais JS/Python: duas fazendas da previsão canônica, parcial deduplicado, multi-item, legado ambíguo e lotes de unidades diferentes. Extração AST evita importar o build inteiro. Ordens vazias e lotes explicitamente tratados como não vencidos delimitam o teste à previsão/recebimento; não valida vencimento, build completo nem navegador. Os 17 testes JS incluem reset antes/depois da migração e armazenamento bloqueado. Revisão cruzada e execução de navegador seguem pendentes.

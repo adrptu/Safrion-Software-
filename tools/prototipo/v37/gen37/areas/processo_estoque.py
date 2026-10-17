@@ -495,7 +495,7 @@ function PREVALS(self,v){
   const vazio=(v.mf_faz==='Boa Vista'); v.est_vazio=vazio; v.est_tem=!vazio; v.est_versr=()=>self.setState({mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'});
   const IT=eitens(C); const INV=einvs(C);
   // ---- etapa 1: recebimentos ----
-  const RC=erecs(C), PD=epeds(C); let npend=0;
+  const RC=erecs(C), PD=epeds(C); let npend=0;if(cenCompLinhas.aviso&&self.state.g2toast!==cenCompLinhas.aviso)self.setState({g2toast:cenCompLinhas.aviso});
   GR('g_rec').edit.fields.find(f=>f.k==='ped').opts=PD.map(p=>p.label);
   GR('g_rec').rows=RC.map(x=>{ const ok=!!x.ok; if(!ok) npend++; const p=epedBase(x.ped); const quar=ok?(Number(x.quar)||0):0;
     const l=C.lotes[x.item+'|'+x.lote]; const vl=x.val&&x.val!=='—'?x.val:'';
