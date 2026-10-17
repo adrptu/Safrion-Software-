@@ -1,0 +1,23 @@
+PASS 10 plantas/m a 0,5m = 200000 plantas/ha
+PASS espaçamento 1m, 5 plantas/m = 50000/ha
+PASS vazio: sem escala
+PASS vazio: sem estatística
+PASS vazio: cor sem dado
+PASS vazio: sem classe
+PASS vazio: máscara desconhecida
+PASS nodata: sem escala
+PASS nodata: sem estatística
+PASS nodata: cor sem dado
+PASS nodata: sem classe
+PASS nodata: máscara desconhecida
+PASS único: sem escala
+PASS único: sem estatística
+PASS único: cor sem dado
+PASS único: sem classe
+PASS único: máscara desconhecida
+PASS uniforme tem escala finita não degenerada
+PASS mínimo operacional configurado respeitado
+PASS amostra válida mantém média
+PASS máscara é Uint8Array, ignora nodata
+PASS escala inválida não classifica
+22/22

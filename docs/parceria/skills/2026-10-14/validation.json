@@ -1,0 +1,133 @@
+{
+  "skills": [
+    {
+      "skill": "agro-gestao-conhecimento",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "benchmark-top5",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-backend",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-ciclo-completo",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-frontend-mobile",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-infra",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-revisao",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-testes",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "growth-receita-implantacao",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "indicadores-satelite",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "master-detail-ux",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "minimalismo-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "negocios-ecossistema",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "safrion-equipe",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "tabelas-interativas",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "ux-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-custos",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-desempenho-incidentes",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-infra-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "revisao-terceira-opiniao",
+      "valid": true,
+      "result": "Skill is valid!"
+    }
+  ],
+  "missingLinks": [],
+  "adapterTests": {
+    "run": 17,
+    "failures": 0,
+    "errors": 0
+  },
+  "manifestSha256": "7e3eeabd652c8b5b9ef8803078448941cb189c0960db3be9f18fda6122b0ff49",
+  "r18": {
+    "staticCI": {
+      "before": "0/8 exit1",
+      "after": "8/8 exit0"
+    },
+    "pipelineExecuted": false,
+    "unchangedSkillsAndAdapter": "R17 proofs preserved; no SKILL.md or adapter delta"
+  },
+  "r19": {
+    "staticCI": {
+      "before": "8/9 exit1",
+      "after": "9/9 exit0"
+    },
+    "pipelineExecuted": false,
+    "scope": "Dockerfile base digests; independent existing test extended"
+  },
+  "r20": {
+    "baseline": "0/6 exit1; publishing step absent",
+    "candidate": "10/10 exit0: 5 graph assertions + 5 shell scenarios with fake Docker",
+    "existingStaticCI": "9/9 exit0",
+    "pipelineExecuted": false
+  }
+}

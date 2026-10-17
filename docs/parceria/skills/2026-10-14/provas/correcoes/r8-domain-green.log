@@ -1,0 +1,69 @@
+PASS 10 plantas/m a 0,5m = 200000 plantas/ha
+PASS espaçamento 1m, 5 plantas/m = 50000/ha
+PASS vazio: sem escala
+PASS vazio: sem estatística
+PASS vazio: cor sem dado
+PASS vazio: sem classe
+PASS vazio: máscara desconhecida
+PASS nodata: sem escala
+PASS nodata: sem estatística
+PASS nodata: cor sem dado
+PASS nodata: sem classe
+PASS nodata: máscara desconhecida
+PASS único: sem escala
+PASS único: sem estatística
+PASS único: cor sem dado
+PASS único: sem classe
+PASS único: máscara desconhecida
+PASS uniforme tem escala finita não degenerada
+PASS mínimo operacional configurado respeitado
+PASS amostra válida mantém média
+PASS máscara é Uint8Array, ignora nodata
+PASS escala inválida não classifica
+PASS classe absoluta 0.299 → 1
+PASS classe absoluta 0.3 → 2
+PASS classe absoluta 0.449 → 2
+PASS classe absoluta 0.45 → 3
+PASS classe absoluta 0.46 → 3
+PASS classe absoluta 0.6 → 4
+PASS classe absoluta 0.72 → 5
+PASS classe absoluta 0.82 → 6
+PASS classe absoluta 1 → 6
+PASS relativa usa cortes da escala, não limites absolutos
+PASS diasDesdeCena indisponível não é Normal
+PASS diasDesdeCena indisponível não é Normal
+PASS diasDesdeCena indisponível não é Normal
+PASS nuvemPct indisponível não é Normal
+PASS nuvemPct indisponível não é Normal
+PASS nuvemPct indisponível não é Normal
+PASS areaFracaPct indisponível não é Normal
+PASS areaFracaPct indisponível não é Normal
+PASS areaFracaPct indisponível não é Normal
+PASS quedaPct indisponível não é Normal
+PASS quedaPct indisponível não é Normal
+PASS quedaPct indisponível não é Normal
+PASS maiorManchaNovaHa indisponível não é Normal
+PASS maiorManchaNovaHa indisponível não é Normal
+PASS maiorManchaNovaHa indisponível não é Normal
+PASS válido mantém Normal
+PASS sem imagem precede outros estados
+PASS nuvem precede estatística ausente
+PASS crítico preservado
+PASS atenção preservada
+PASS 1000kg,2%impureza,20→14%umidade = 911,6279kg
+PASS impureza zero e mesma umidade preservam massa
+PASS cor absoluta corresponde à classe -1
+PASS cor absoluta corresponde à classe 0.29
+PASS cor absoluta corresponde à classe 0.3
+PASS cor absoluta corresponde à classe 0.449
+PASS cor absoluta corresponde à classe 0.45
+PASS cor absoluta corresponde à classe 0.6
+PASS cor absoluta corresponde à classe 0.7
+PASS cor absoluta corresponde à classe 0.72
+PASS cor absoluta corresponde à classe 0.82
+PASS cor absoluta corresponde à classe 1
+PASS classe NDVI fora do intervalo é sem dado
+PASS cor NDVI fora do intervalo é sem dado
+PASS minAmostra NaN não contorna mínimo
+PASS rampa relativa intermediária executável
+68/68

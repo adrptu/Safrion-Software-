@@ -1,0 +1,39 @@
+[
+  {
+    "name": "YAML válido",
+    "ok": true
+  },
+  {
+    "name": "Actions em SHA completo",
+    "ok": true
+  },
+  {
+    "name": "Workflow não concede escrita",
+    "ok": true
+  },
+  {
+    "name": "Cada job só lê contents",
+    "ok": true
+  },
+  {
+    "name": "Seis imagens em digest",
+    "ok": true
+  },
+  {
+    "name": "Scanner não recebe socket Docker",
+    "ok": true
+  },
+  {
+    "name": "Checkout não persiste token",
+    "ok": true
+  },
+  {
+    "name": "Cobertura só no resumo",
+    "ok": true
+  },
+  {
+    "name": "Todas as bases externas do Dockerfile em digest",
+    "ok": false
+  }
+]
+8/9

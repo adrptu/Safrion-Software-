@@ -12,18 +12,27 @@ const DOMINIO = [
 ];
 
 export default defineConfig(
-  { ignores: ['**/dist/**', 'coverage/**', '.semgrep/**', '**/.next/**', '**/next-env.d.ts'] },
+  {
+    ignores: ['**/dist/**', 'coverage/**', '.semgrep/**', '**/.next/**', '**/next-env.d.ts'],
+  },
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {
     languageOptions: {
-      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     rules: {
       '@typescript-eslint/ban-ts-comment': [
         'error',
-        { 'ts-expect-error': 'allow-with-description', 'ts-ignore': true, 'ts-nocheck': true },
+        {
+          'ts-expect-error': 'allow-with-description',
+          'ts-ignore': true,
+          'ts-nocheck': true,
+        },
       ],
     },
   },
@@ -46,7 +55,10 @@ export default defineConfig(
       ],
       'no-restricted-syntax': [
         'error',
-        { selector: 'ImportExpression', message: 'ENG-012: import dinâmico não é permitido no domínio.' },
+        {
+          selector: 'ImportExpression',
+          message: 'ENG-012: import dinâmico não é permitido no domínio.',
+        },
         {
           selector: "CallExpression[callee.name='require']",
           message: 'ENG-012: require não é permitido no domínio.',
@@ -80,6 +92,33 @@ export default defineConfig(
   {
     files: ['**/*.js', '**/*.mjs'],
     extends: [tseslint.configs.disableTypeChecked],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly', URL: 'readonly' } },
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly', URL: 'readonly' },
+    },
+  },
+  {
+    // Templates independentes de aplicação: mantêm lint sintático, sem inventar um projeto TS.
+    files: ['docs/parceria/skills/2026-10-14/shared/**/*.{js,ts}'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    // Assets executados no navegador, não no Node do produto.
+    files: [
+      'docs/parceria/skills/2026-10-14/shared/tabelas-interativas/assets/tabela.js',
+      'docs/parceria/skills/2026-10-14/shared/ux-essencial/assets/m3-kit.js',
+    ],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        FormData: 'readonly',
+        innerWidth: 'readonly',
+        innerHeight: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        requestAnimationFrame: 'readonly',
+      },
+    },
   },
 );

@@ -1,0 +1,115 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Regressão dos assets</title><pre id="result"></pre><div id="table"></div><form id="form"><input name="nome" value="A"></form>
+<script src="../../shared/tabelas-interativas/assets/tabela.js"></script><script src="../../shared/ux-essencial/assets/m3-kit.js"></script><script>
+(async()=>{
+const results=[];const tick=async()=>{for(let i=0;i<8;i++)await Promise.resolve()};
+function check(name,ok){results.push({name,ok:!!ok})}
+let t=Tabela.create('#table',{rows:[{preco:10,margem:0.2},{preco:20,margem:0.4}],columns:[{key:'preco',type:'currency'},{key:'margem',type:'percent'}]});
+check('Preço e taxa não agregam por tipo',!document.querySelector('tfoot').textContent.trim());t.destroy();
+t=Tabela.create('#table',{rows:[{grupo:'A',qtd:10},{grupo:'A',qtd:20}],columns:[{key:'grupo'},{key:'qtd',agg:'sum'}],groupBy:['grupo']});
+check('Soma explícita permanece disponível',document.querySelector('tfoot').textContent.includes('30'));t.destroy();
+async function sequence(values){
+ const form=document.querySelector('#form').cloneNode(true);document.body.appendChild(form);const input=form.elements.nome;input.value='A';
+ const calls=[],pending=[];let stored='A';const api=Kit.autosave(form,data=>new Promise(resolve=>{calls.push(data.nome);pending.push(()=>{stored=data.nome;resolve()})}),{message:''});
+ const promises=[];for(const value of values){input.value=value;promises.push(api.flush());await tick()}
+ const concurrent=calls.length;const unload=new Event('beforeunload',{cancelable:true});window.dispatchEvent(unload);const blocked=unload.defaultPrevented;
+ for(let i=0;i<12;i++){while(pending.length)pending.pop()();await tick()}
+ await Promise.all(promises);api.destroy?.({discard:true});form.remove();return {calls,stored,concurrent,blocked};
+}
+let r=await sequence(['B','C']);check('Gravações são serializadas',r.concurrent===1);check('Saída com gravação pendente pede confirmação',r.blocked);check('Versão recente vence conclusão tardia',r.stored==='C'&&r.calls.join()==='B,C');
+r=await sequence(['B','A']);check('Reversão ao valor inicial é persistida após envio pendente',r.stored==='A'&&r.calls.join()==='B,A');
+r=await sequence(['B','B']);check('Conteúdo igual não duplica gravação confirmada',r.calls.join()==='B');
+const form=document.querySelector('#form');form.elements.nome.value='A';let attempts=0,stored='A';const api=Kit.autosave(form,async data=>{attempts++;if(attempts===1)throw Error('falha sintética');stored=data.nome},{message:''});form.elements.nome.value='B';await api.flush();await api.flush();check('Falha permite reenviar o mesmo conteúdo',attempts===2&&stored==='B');
+const clean=new Event('beforeunload',{cancelable:true});window.dispatchEvent(clean);check('Recibo concluído libera saída',!clean.defaultPrevented);
+form.elements.nome.value='C';const dirty=new Event('beforeunload',{cancelable:true});window.dispatchEvent(dirty);check('Edição anterior ao debounce pede confirmação',dirty.defaultPrevented);
+const multi=document.createElement('form');multi.innerHTML='<input name="nome" value="simples"><input type="checkbox" name="fazenda" value="A" checked><input type="checkbox" name="fazenda" value="B" checked><select name="talhao" multiple><option value="T1" selected>T1</option><option value="T2" selected>T2</option></select>';
+document.body.appendChild(multi);const snapshots=[];const ma=Kit.autosave(multi,async data=>snapshots.push(data),{message:''});
+multi.elements.nome.value='novo';await ma.flush();check('Checkboxes com mesmo nome preservam todos os valores',JSON.stringify(snapshots[0]?.fazenda)==='["A","B"]');check('Select múltiplo preserva todos os valores',JSON.stringify(snapshots[0]?.talhao)==='["T1","T2"]');check('Campo simples preserva contrato string',snapshots[0]?.nome==='novo');
+multi.querySelector('input[value=A]').checked=false;await ma.flush();check('Alteração anterior ao último valor também é gravada',snapshots.length===2&&JSON.stringify(snapshots[1].fazenda)==='["B"]');ma.destroy?.();multi.remove();
+api.destroy?.({discard:true});
+const mounted=document.createElement('form');mounted.innerHTML='<input name="nome" value="A">';document.body.appendChild(mounted);
+let saves=0;const life=Kit.autosave(mounted,async()=>{saves++},{delay:20,message:''});mounted.elements.nome.value='B';mounted.dispatchEvent(new Event('input'));life.destroy?.({discard:true});mounted.remove();
+const gone=new Event('beforeunload',{cancelable:true});window.dispatchEvent(gone);check('Desmontar formulário remove guarda de saída',!gone.defaultPrevented);
+await new Promise(r=>setTimeout(r,40));check('Destruir cancela debounce pendente',saves===0);
+mounted.dispatchEvent(new Event('input'));mounted.dispatchEvent(new Event('submit',{cancelable:true}));await life.flush();await new Promise(r=>setTimeout(r,40));check('Formulário destruído não inicia novos envios',saves===0);
+const queued=document.createElement('form');queued.innerHTML='<input name="nome" value="A">';document.body.appendChild(queued);let releases;const versions=[];
+const qa=Kit.autosave(queued,data=>new Promise(resolve=>{versions.push(data.nome);releases=resolve}),{message:''});queued.elements.nome.value='B';const first=qa.flush();await tick();queued.elements.nome.value='C';const second=qa.flush();qa.destroy?.({discard:true});releases();await tick();if(versions.length>1)releases();await Promise.all([first,second]);check('Destruir descarta envio ainda na fila',versions.join()==='B');queued.remove();
+
+const ff=document.createElement('form');ff.innerHTML='<input name="x" value="A"><input type="checkbox" name="f" value="A" checked><select name="s" multiple><option selected>T10</option></select>';document.body.appendChild(ff);
+let payload;const fa=Kit.autosave(ff,async d=>{payload=d;throw Error('falha')},{message:'',timeoutMs:20});ff.elements.x.value='B';
+const failed=await fa.flush();check('Falha de flush retorna ok false',failed?.ok===false);check('Falha mantém dirty observável',fa.dirty===true);
+const refused=await fa.destroy();check('Destroy recusa rascunho sem decisão',refused?.ok===false&&fa.dirty===true);
+check('Select múltiplo com um valor continua array',JSON.stringify(payload?.s)==='["T10"]');
+ff.elements.f.checked=false;ff.elements.s.options[0].selected=false;await fa.flush();check('Desmarcar último checkbox envia array vazio',JSON.stringify(payload?.f)==='[]');check('Select múltiplo vazio envia chave vazia',JSON.stringify(payload?.s)==='[]');
+await fa.destroy({discard:true});await new Promise(r=>setTimeout(r,280));check('Destroy fecha snackbar da própria instância',![...document.querySelectorAll('.snackbar')].at(-1));ff.remove();
+const tf=document.createElement('form');tf.innerHTML='<input name="x" value="A">';document.body.appendChild(tf);let finish,signal;const sent=[];
+const ta=Kit.autosave(tf,(d,o)=>{sent.push(d.x);signal=o?.signal;return new Promise(resolve=>{finish=resolve})},{message:'',timeoutMs:20});tf.elements.x.value='B';const tb=ta.flush();await tick();tf.elements.x.value='C';const tc=ta.flush();
+const timeoutResult=await Promise.race([tb,new Promise(r=>setTimeout(()=>r(null),80))]);check('Envio travado retorna timeout observável',timeoutResult?.ok===false&&timeoutResult?.reason==='timeout');
+check('Timeout sinaliza abort ao transporte',signal?.aborted===true);check('Incerteza mantém pending e dirty',ta.pending===true&&ta.dirty===true);
+const queuedResult=await Promise.race([tc,new Promise(r=>setTimeout(()=>r(null),80))]);check('Fila não trava nem envia sobre escrita incerta',queuedResult?.ok===false&&sent.join()==='B');
+finish();await tick();const retry=ta.flush();await tick();finish();await retry;check('Após resolução do transporte versão recente pode salvar',sent.join()==='B,C'&&ta.dirty===false);await ta.destroy({discard:true});tf.remove();
+
+
+const af=document.createElement('form');af.innerHTML='<input name="x" value="A">';document.body.appendChild(af);let remote='A',commitB;const acalls=[];
+const aa=Kit.autosave(af,(d,{signal})=>{acalls.push(d.x);if(d.x==='C'){remote='C';return Promise.resolve()};commitB=()=>{remote='B'};return new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Error('aborted')),{once:true}))},{message:'',timeoutMs:20});af.elements.x.value='B';await aa.flush();af.elements.x.value='C';const blocked=await aa.flush();
+check('Abort local não libera escrita enquanto servidor pode concluir B',blocked?.ok===false&&acalls.join()==='B'&&aa.pending===true);
+const unknown=await aa.reconcile?.(async()=>({settled:false,data:{x:remote}}));check('Readback ainda pendente mantém bloqueio',unknown?.ok===false&&aa.pending===true);
+commitB();const settled=await aa.reconcile?.(async()=>({settled:true,data:{x:remote}}));check('Readback terminal preserva rascunho C e libera tentativa explícita',settled?.ok===true&&af.elements.x.value==='C'&&aa.dirty===true);
+await aa.flush();check('Após readback B confirmado, C prevalece sem ultrapassagem',acalls.join()==='B,C'&&remote==='C'&&aa.dirty===false);await aa.destroy({discard:true});af.remove();
+
+const staleForm=document.createElement('form');staleForm.innerHTML='<input name="x" value="A">';document.body.appendChild(staleForm);let late;
+const stale=Kit.autosave(staleForm,d=>d.x==='B'?new Promise(resolve=>{late=resolve}):Promise.resolve(),{message:'',timeoutMs:20});staleForm.elements.x.value='B';await stale.flush();
+const rejected=await stale.reconcile(async()=>{throw Error('sem rede')});check('Falha de readback mantém escrita incerta',rejected.ok===false&&stale.pending);
+await stale.reconcile(async()=>({settled:true,data:{x:'B'}}));staleForm.elements.x.value='C';await stale.flush();late();await tick();check('Recibo antigo após reconciliação não substitui confirmação C',stale.dirty===false&&stale.pending===false);await stale.destroy();staleForm.remove();
+const uf=document.createElement('form');uf.innerHTML='<input name="x" value="A">';document.body.appendChild(uf);let ucount=0;
+const ua=Kit.autosave(uf,()=>{ucount++;return new Promise(()=>{})},{message:'',timeoutMs:20});uf.elements.x.value='B';await ua.flush();
+Kit.snackbar('Outro retorno',{timeout:10});await new Promise(r=>setTimeout(r,280));uf.elements.x.value='C';const ur=await ua.flush();
+check('Nova tentativa incerta renova aviso mesmo após outro snackbar',ur.ok===false&&ur.reason==='pending'&&ucount===1&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('sem confirmação'));await ua.destroy({discard:true});uf.remove();
+for(const [msg,edit,label] of [['Confirmado',false,'sucesso'],['',false,'sem mensagem'],['Confirmado',true,'rascunho mais recente']]) {
+ const f=document.createElement('form');f.innerHTML='<input name="x" value="A">';document.body.appendChild(f);let resolveLate;
+ const a=Kit.autosave(f,()=>new Promise(resolve=>{resolveLate=resolve}),{message:msg,delay:1000,timeoutMs:20});f.elements.x.value='B';await a.flush();
+ if(edit)f.elements.x.value='C';resolveLate();await new Promise(r=>setTimeout(r,280));
+ const feedback=[...document.querySelectorAll('.snackbar')].map(e=>e.textContent).join(' ');
+ check('Recibo tardio atualiza aviso: '+label,a.pending===edit&&a.dirty===edit&&!feedback.includes('sem confirmação')&&((msg&&!edit)?feedback.includes(msg):!feedback.includes('Confirmado')));
+ await a.destroy({discard:edit});f.remove();await new Promise(r=>setTimeout(r,280));
+}
+const f1=document.createElement('form'),f2=document.createElement('form');for(const f of [f1,f2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let finish1;
+const a1=Kit.autosave(f1,()=>new Promise(r=>{finish1=r}),{timeoutMs:20});const a2=Kit.autosave(f2,()=>new Promise(()=>{}),{timeoutMs:20});f1.elements.x.value='B';await a1.flush();f2.elements.x.value='B';await a2.flush();const warning2=[...document.querySelectorAll('.snackbar')].at(-1);finish1();await tick();
+check('Recibo de um formulário não substitui aviso incerto de outro',a2.pending&&warning2.isConnected&&[...document.querySelectorAll('.snackbar')].at(-1)===warning2&&warning2.textContent.includes('sem confirmação'));await a1.destroy();await a2.destroy({discard:true});f1.remove();f2.remove();
+const rf=document.createElement('form');rf.innerHTML='<input name="x" value="A">';document.body.appendChild(rf);let rdone;const rsent=[];
+const ra=Kit.autosave(rf,d=>{rsent.push(d.x);return d.x==='B'?new Promise(r=>{rdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});rf.elements.x.value='B';await ra.flush();rf.elements.x.value='C';await ra.flush();rdone();await new Promise(r=>setTimeout(r,80));
+check('Recibo tardio retoma autosave do rascunho recente sem nova tecla',rsent.join()==='B,C'&&!ra.dirty&&!ra.pending&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('Salvo'));await ra.destroy();rf.remove();
+const zf1=document.createElement('form'),zf2=document.createElement('form');for(const f of [zf1,zf2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let zdone;const zsent=[];
+const za1=Kit.autosave(zf1,d=>{zsent.push(d.x);return d.x==='B'?new Promise(r=>{zdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});const za2=Kit.autosave(zf2,()=>new Promise(()=>{}),{timeoutMs:20});zf1.elements.x.value='B';await za1.flush();zf1.elements.x.value='C';await za1.flush();zf2.elements.x.value='B';await za2.flush();const zwarn=[...document.querySelectorAll('.snackbar')].at(-1);zdone();await new Promise(r=>setTimeout(r,80));
+check('Reenvio retomado não substitui aviso incerto do outro formulário',zsent.join()==='B,C'&&!za1.dirty&&!za1.pending&&za2.pending&&zwarn.isConnected&&[...document.querySelectorAll('.snackbar')].at(-1)===zwarn&&zwarn.textContent.includes('sem confirmação'));await za1.destroy();await za2.destroy({discard:true});zf1.remove();zf2.remove();
+
+for (const mode of ['fechado','expirado']) {
+ await new Promise(r=>setTimeout(r,280));
+ const f=document.createElement('form');f.innerHTML='<input name="x" value="A">';document.body.appendChild(f);let resolveSave;
+ const a=Kit.autosave(f,()=>new Promise(r=>{resolveSave=r}),{timeoutMs:20,message:'Recibo confirmado'});f.elements.x.value='B';
+ const nativeTimeout=window.setTimeout;
+ if(mode==='expirado')window.setTimeout=(fn,ms,...args)=>nativeTimeout(fn,ms===60000?10:ms,...args);
+ try { await a.flush(); } finally {window.setTimeout=nativeTimeout;}
+ if(mode==='fechado')[...document.querySelectorAll('.snackbar')].at(-1).querySelector('[aria-label="Fechar"]').click();
+ await new Promise(r=>setTimeout(r,280));resolveSave();await tick();
+ check('Recibo tardio informa sucesso após aviso '+mode,!a.pending&&!a.dirty&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('Recibo confirmado'));
+ await a.destroy();f.remove();
+}
+let oldCalls=0,newCalls=0;
+const oldCommands=Kit.commands([{title:'Tela antiga',keys:'alt+j',run:()=>oldCalls++}]);oldCommands.destroy?.();
+const newCommands=Kit.commands([{title:'Tela atual',keys:'alt+j',run:()=>newCalls++}]);
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'j',altKey:true,bubbles:true}));
+check('Remontagem executa somente callback atual',oldCalls===0&&newCalls===1);
+newCommands.open();check('Remontagem não duplica comandos na paleta',document.querySelectorAll('#kit-cmds [role=option]').length===1&&document.querySelector('#kit-cmds').textContent.includes('Tela atual'));
+newCommands.destroy?.();check('Desmontagem remove comando da paleta já aberta',document.querySelectorAll('#kit-cmds [role=option]').length===0);
+let sameCalls=0;const sharedCommand={title:'Mesmo comando',keys:'alt+l',run:()=>sameCalls++};
+const same1=Kit.commands([sharedCommand]),same2=Kit.commands([sharedCommand]);same1.destroy?.();same1.destroy?.();
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+// Paleta aberta bloqueia atalhos; fechar antes de verificar a inscrição restante.
+document.querySelector('.palette input').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+check('Destroy idempotente preserva inscrição independente do mesmo objeto',sameCalls===1);
+same2.destroy?.();document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+check('Destroy final remove o atalho registrado',sameCalls===1);
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
+})().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
+</script></html>

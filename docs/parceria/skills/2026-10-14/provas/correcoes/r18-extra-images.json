@@ -1,0 +1,14 @@
+[
+  {
+    "registry": "registry-1.docker.io",
+    "repo": "zricethezav/gitleaks",
+    "tag": "latest",
+    "digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
+  },
+  {
+    "registry": "ghcr.io",
+    "repo": "google/osv-scanner",
+    "tag": "v2.7.0",
+    "digest": "sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0"
+  }
+]

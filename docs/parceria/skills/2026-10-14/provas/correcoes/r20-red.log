@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Uma construção Docker, no job de segurança",
+    "pass": false
+  },
+  {
+    "name": "Arquivo do scan só é publicado após sucesso",
+    "pass": false
+  },
+  {
+    "name": "Identidades vêm do job de segurança",
+    "pass": false
+  },
+  {
+    "name": "Staging recupera o mesmo artefato",
+    "pass": false
+  },
+  {
+    "name": "Staging e produção usam exatamente o digest publicado",
+    "pass": false
+  },
+  {
+    "name": "Etapa publicadora executável existe",
+    "pass": false
+  }
+]
+0/6

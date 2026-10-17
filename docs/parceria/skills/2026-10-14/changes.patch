@@ -1,0 +1,1977 @@
+--- before/gemini/gcp-custos/SKILL.md
++++ candidate/gemini/gcp-custos/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Custos verificáveis
++
++## Custo da decisão e limites de execução
++
++Use a autorização vigente por ambiente, preservando sua referência e exclusões; não duplique valores de orçamento mutáveis nesta skill. Consulta adicional ao modelo precisa resolver decisão material, não repetir parecer por rotina. Inclua tokens, execução e custos indiretos pertinentes e diferencie limite do adaptador, cota técnica, alerta e cobrança possível. Prontidão comercial e política de mídia ficam nas fontes de negócio; custo técnico baixo não libera campanha.
++
+ 
+ Diferencie fatura observada, consumo medido, estimativa e hipótese. Use serviço/SKU, região, unidade, quantidade, período, preço e data. Sem preço atual fornecido ou verificável, mostre a fórmula e as variáveis faltantes; não invente uma cotação.
+ 
+--- before/gemini/gcp-desempenho-incidentes/SKILL.md
++++ candidate/gemini/gcp-desempenho-incidentes/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Desempenho e incidentes
++
++## Retomada sem repetição cega
++
++Identifique executor local/remoto e distinga timeout de transporte, cota/permissão, falha de ferramenta, relato e prova. Antes de reenviar mutação incerta, peça readback do estado/recibo. Duas falhas pela mesma causa exigem outra hipótese/abordagem ou bloqueio com gatilho. Preserve rascunhos, dados e brutos; verificação encerrada só reabre por novo indício. Reteste a jornada e o delta afetados, reutilizando provas válidas.
++
+ 
+ Comece pelo impacto no usuário, início/duração, ambiente/versão e mudanças recentes. Separe fato observado, hipótese e causa comprovada. Correlacione latência p95/p99, erros e volume com traces, consultas lentas, pool de conexões e saturação disponíveis; média isolada não representa a experiência.
+ 
+--- before/gemini/gcp-infra-essencial/SKILL.md
++++ candidate/gemini/gcp-infra-essencial/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Infraestrutura essencial
++
++## Reutilizar a base comprovada
++
++Confira executor, ambiente e versão antes de sugerir nova infraestrutura. Independência do Mac requer prova remota de aplicação/banco; agendamento local não a fornece. Reutilize autorizações e verificações equivalentes já válidas. Não reabra inspeção encerrada sem incidente ou delta novo e não altere controles para destravar ferramenta. Uma falha de transporte não é defeito da aplicação; duas falhas pela mesma causa exigem nova abordagem ou impedimento explícito.
++
+ 
+ Parta do PRD, ADR e implementação fornecidos; não substitua a stack por preferência. Identifique ambiente, fluxo crítico, dependências, carga prevista ou medida e requisitos de recuperação. Na falta de dados, declare a hipótese e a evidência que muda a decisão; não bloqueie a análise inteira por ausência de previsão exata.
+ 
+--- before/gemini/revisao-terceira-opiniao/SKILL.md
++++ candidate/gemini/revisao-terceira-opiniao/SKILL.md
+@@ -5,12 +5,19 @@
+ 
+ # Terceira opinião útil
+ 
++## Contribuição material na equipe atual
++
++Codex e Claude implementam e revisam reciprocamente com autoria delimitada; o revisor integra o trabalho do outro. Gemini contribui com crítica independente de fluxo, acessibilidade, domínio e contraexemplos, além de infraestrutura. Grok não participa. Use somente o pacote mínimo inspecionado enviado pelo adaptador oficial Pro/HIGH; não pressuponha ter lido arquivos referenciados ou realizado ações por API.
++
++Em UX, teste a lógica de origem/contexto, estado, ação, consequência e recuperação; uma primária por contexto ativo e preservação de filtros/rascunho/foco. Contraexemplos úteis: ausência não é zero, percentual não é estado, provisório não duplica confirmado, recorte temporário não apaga preferências, desfazer não apaga edição posterior. Separe análise textual de teste executado e peça somente a prova faltante que muda o parecer. Publicação parcial não dispara auditoria integral; consulte o gatilho vigente em `safrion-equipe` quando fornecido.
++
++
+ Analise a pergunta e a evidência fornecida sobre produto, UX, código, dados, domínio agrícola ou gestão do projeto. Sua especialidade adicional em Google Cloud não transforma assuntos de outras áreas em problemas de infraestrutura. Não se acione para repetir toda revisão de rotina.
+ 
+ Trabalhe com resultado esperado/persona, restrições do PRD, versão do artefato, alternativas e evidência disponível. Falta de um dado só bloqueia a conclusão que depende dele; diga o que pode concluir e qual menor verificação falta. Avalie o conteúdo, não quem propôs a alternativa. Quando existir teste ou fonte que resolva a divergência, indique-o em vez de propor votação entre modelos.
+ 
+ Entregue recomendação, evidência a favor/contra, risco, incerteza e teste de aceite no detalhe necessário à decisão. Separe defeito reproduzível, hipótese e preferência. Cálculos relevantes precisam de conferência determinística. Não invente análise de arquivo, execução, navegação ou fatos ausentes. Fontes atuais para legislação, agronomia, segurança e preços devem ser fornecidas ou verificadas por quem tem a ferramenta adequada. Consenso das três IAs não substitui validação agronômica exigida nem a realidade do campo.
+ 
+-O autor continua responsável pelo artefato e o revisor pelo parecer; oferecer ajuda não autoriza edição concorrente. Codex organiza a integração e o registro da decisão no protocolo existente. Um resultado pode ser aceitar, adaptar, rejeitar com motivo ou investigar; concordar não é obrigatório. Não declarar decisão do proprietário, aceite de produção ou conclusão de tarefa em nome de outra pessoa/agente.
++O autor continua responsável pelo artefato e o revisor pelo parecer; oferecer ajuda não autoriza edição concorrente. O revisor integra o PR do outro; o registro da decisão segue o protocolo existente. Um resultado pode ser aceitar, adaptar, rejeitar com motivo ou investigar; concordar não é obrigatório. Não declarar decisão do proprietário, aceite de produção ou conclusão de tarefa em nome de outra pessoa/agente.
+ 
+ Peça revisão adicional somente quando uma mudança, evidência nova ou risco não resolvido justificar. Preserve contexto, simplicidade, trabalho já concluído e autorizações existentes; não crie novas cerimônias para parecer rigoroso.
+--- before/gemini-consult.py
++++ candidate/gemini-consult.py
+@@ -28,11 +28,14 @@
+                       for name in ("dev-infra", "dev-testes", "dev-revisao",
+                                    "negocios-ecossistema", "growth-receita-implantacao",
+                                    "ux-essencial", "master-detail-ux",
+-                                   "minimalismo-essencial", "tabelas-interativas")})
++                                   "minimalismo-essencial", "tabelas-interativas",
++                                   "agro-gestao-conhecimento", "benchmark-top5", "dev-backend",
++                                   "dev-ciclo-completo", "dev-frontend-mobile",
++                                   "indicadores-satelite", "safrion-equipe")})
+ SKILL_REFERENCES = {"master-detail-ux": ("references/anatomia.md", "references/checklist.md")}
+ SYSTEM = ("Você colabora com o Safrion como terceira opinião por tarefa, com especialidade em Google Cloud, custos, desempenho e incidentes. "
+-          "Codex coordena produto/UX/QA; Claude é autor da arquitetura/implementação. "
+-          "Uma fatia por vez e um autor por artefato. Produção depende do aceite do proprietário. "
++          "Codex dirige produto/UX/QA; Codex e Claude implementam partes delimitadas e revisam reciprocamente. O revisor integra o PR do outro. "
++          "Uma autoria ativa por agente, com contratos/arquivos separados. Você também critica fluxo, acessibilidade e contraexemplos materiais, sem consultas por rotina. Produção depende do aceite do proprietário. "
+           "Você só conhece o contexto enviado; não tem ferramentas nem acesso direto ao ambiente. "
+           "Distinga fatos fornecidos, hipóteses e evidência faltante. Proponha a menor solução "
+           "que atende ao requisito; não acrescente serviços sem necessidade demonstrada. "
+--- before/shared/agro-gestao-conhecimento/SKILL.md
++++ candidate/shared/agro-gestao-conhecimento/SKILL.md
+@@ -5,12 +5,21 @@
+ 
+ # Conhecimento aplicado: agro + gestão
+ 
++## Estados e cálculos com significado operacional
++
++Regra validada fica no domínio canônico, com unidade, período, origem e denominador explícitos. Planejado e realizado precisam do mesmo recorte para comparação. Área de aplicações acumuladas difere de hectares físicos únicos; custo/ha não se soma. Ausência de preço, apontamento ou cobertura torna o resultado parcial/desconhecido, não zero. Dados provisórios e confirmados não entram duas vezes.
++
++Estado é contrato: 100% da área não encerra O.S. automaticamente; plano publicado não significa adotado na safra; cadastro de produto não comprova execução. Preserve vínculos entre planejamento, compra, reserva, retirada, aplicação, devolução e custo conforme a fatia e o PRD. Revalide transições, concorrência e cancelamento no domínio.
++
++Em MIP, cobertura da amostragem, presença, incidência/intensidade e critério técnico são grandezas distintas. Percentual NC não é percentual de área; critério de presença não ganha percentual inventado. Parcial/offline não vira completo; cancelamento da O.S. de controle deve respeitar a decisão pendente e a rastreabilidade da origem/RT. Não transforme um exemplo de implementação em regra agronômica universal.
++
++
+ **Norte:** apoiar decisões com cálculos rastreáveis, unidades corretas e linguagem do produtor. Referências deste skill são ponto de partida, não prescrição nem validação vigente. Conferir fonte, cultura/estádio, região, premissas e responsabilidade técnica antes de incorporar recomendações materiais.
+ 
+ ## Como aplicar
+ 1. **Mapear cada módulo às disciplinas** (tabela abaixo) e ler os arquivos correspondentes antes de modelar dados ou telas.
+ 2. **Modelar com as entidades e unidades do setor** (safra, talhão, lote, categoria animal, sc, @, ha, L/ha) — nunca genéricos.
+-3. **Embutir fórmulas e validações** dos arquivos como regras do domínio, com teste unitário para cada (`dev-testes`): cálculo errado de calagem, umidade ou custo é bug grave.
++3. **Validar fórmulas e premissas** dos arquivos contra o contrato do projeto e fontes pertinentes antes de incorporá-las ao domínio. Testar unidades, limites e precisão (`dev-testes`); exemplos não são prescrições agronômicas.
+ 4. **Selecionar indicadores que resolvem a tarefa da fatia**, com origem, período, unidade e base de comparação válida; não inventar benchmark nem adicionar painel sem decisão concreta.
+ 5. **Fontes oficiais como referência** (Embrapa, CONAB, MAPA, CEPEA/Esalq, IMEA, B3, CFM/NRC, Receita Federal, CPC). Valores legais/fiscais e alíquotas mudam: marcar `verificar vigência` e parametrizar no sistema (nunca hardcode).
+ 6. **Benchmark do setor** (`benchmark-top5`): referências típicas — Aegro, Climate FieldView, John Deere Operations Center, Solinftec, Siagri/Totvs Agro, Datacoper/Agrimanager, Prodap, JetBov, Conta Azul, Omie. UX segue `ux-essencial` e a organização das telas segue `master-detail-ux`.
+@@ -32,14 +41,14 @@
+ - **Produção com umidade e impurezas**: armazenar bruto, umidade, impurezas e peso líquido corrigido ao padrão.
+ - **Rastreabilidade por processo**: manter data, responsável, origem e destino e vínculos necessários. Aplicação de insumo, movimentação animal e colheita têm campos e exigências diferentes; verificar normas atuais pertinentes antes de torná-los obrigatórios.
+ - **Categorias animais** por espécie/sexo/idade/fase; movimentações (nascimento, compra, transferência, venda, morte, mudança de categoria) fecham o inventário mensal.
+-- **Estoque de insumos** por depósito, lote e validade; baixa automática pela aplicação; saldo nunca negativo (alerta antes).
+-- **Custos rateados** com critério declarado (ha, horas-máquina, cabeça, litro) e auditável; toda operação gera custo (insumo + máquina + mão de obra).
+-- **Indicadores sempre com contexto**: valor, meta, benchmark regional/histórico, tendência e drill-down até a operação (`tabelas-interativas`).
++- **Estoque de insumos** por depósito, lote e validade; movimentos conforme comando e estado validado, distinguindo reserva, custódia, consumo e devolução. Impedir saldo inválido de forma atômica; alerta visual sozinho não garante integridade.
++- **Custos rateados** com critério declarado (ha, horas-máquina, cabeça, litro) e auditável; insumo, máquina e mão de obra entram conforme o contrato; componentes desconhecidos mantêm o custo explicitamente parcial.
++- **Indicadores sempre com contexto**: valor, unidade, origem e recorte; meta, benchmark e tendência somente quando existirem dados confiáveis, com drill-down até a operação (`tabelas-interativas`).
+ - **Parâmetros técnicos editáveis** (tabelas de Kc, exigências nutricionais, PRNT, alíquotas, preços de referência) versionados, com valor padrão de fonte oficial.
+ - **Offline-first** no campo, GPS, fotos, leitura de código de barras/QR (`dev-frontend-mobile`).
+ 
+ ## Checklist por módulo
+-- [ ] Entidades, unidades e vocabulário do setor (glossário no `docs/benchmark.md`)
++- [ ] Entidades, unidades e vocabulário do setor (glossário na fonte adotada pelo projeto; `docs/benchmark.md` é apenas um caminho de exemplo)
+ - [ ] Fórmulas dos arquivos implementadas como funções puras com testes (inclusive limites e arredondamento)
+ - [ ] Validações de domínio ativas (carência, dose máxima, estoque, umidade, idade/categoria, prazos fiscais)
+ - [ ] Indicadores da fatia com origem, período e base de comparação válida
+--- before/shared/agro-gestao-conhecimento/assets/agronomia.md
++++ candidate/shared/agro-gestao-conhecimento/assets/agronomia.md
+@@ -6,7 +6,8 @@
+ ## Planejamento de safra
+ - **ZARC** (Zoneamento Agrícola de Risco Climático, MAPA): janela de plantio por cultura/município/solo/ciclo — condição para crédito e Proagro. Alertar plantio fora da janela.
+ - **Rotação/sucessão**: histórico do talhão (cultura, cultivar, defensivos usados — rotação de mecanismos de ação IRAC/FRAC/HRAC).
+-- **População de plantas**: plantas/ha = (1 000 000 / espaçamento m) × plantas/m linear; sementes/ha = população / (germinação × vigor/emergência); kg sementes = sementes/ha × PMS (g) / 1000 / 1000.
++- **População de plantas**: plantas/ha = (10 000 m²/ha / espaçamento entre linhas em m) × plantas/m linear; sementes/ha = população / (germinação × vigor/emergência); kg sementes/ha = sementes/ha × PMS (g) / 1000 / 1000.
++  Exemplo dimensional: 10 plantas/m e 0,50 m entre linhas → 200 000 plantas/ha. Germinação e emergência são frações (0–1), com denominador positivo; ausência ou zero não permite calcular sementes/ha.
+ - **Graus-dia** (GD) = (Tmáx + Tmín)/2 − Tb (Tb soja 10 °C, milho 10 °C); previsão de estágios e colheita por acúmulo térmico.
+ - **Balanço hídrico climatológico** (Thornthwaite-Mather) para risco; **ETc = Kc × ETo** (ETo Penman-Monteith FAO-56; Kc por estágio, tabela FAO/Embrapa parametrizável).
+ 
+@@ -19,7 +20,7 @@
+ 
+ ## Manejo fitossanitário
+ - **MIP/MID**: monitoramento com amostragem (pano-de-batida, armadilhas), **nível de ação / nível de dano econômico** por praga (ex. soja: percevejo 2/pano em R; lagartas 20/pano ou 30 % desfolha vegetativo, 15 % reprodutivo) — alerta quando atinge.
+-- **Receituário agronômico obrigatório** (Lei 7.802/89): produto registrado no MAPA (AGROFIT) para cultura × alvo, dose dentro do rótulo, **intervalo de segurança (carência)**, intervalo de reentrada, classe toxicológica, EPI, tríplice lavagem/devolução de embalagens (inpEV). Validar: cultura autorizada, dose máxima, nº máximo de aplicações, carência antes da colheita, mistura em tanque.
++- **Receita agronômica na comercialização ao usuário**, emitida por profissional legalmente habilitado, ressalvadas exceções regulamentadas: [Lei 14.785/2023, art. 39 e texto consolidado](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14785.htm), consultado em 14/10/2026. A Lei 7.802/1989 foi revogada pelo art. 65; não a usar como fundamento vigente. Antes de modelar conformidade, conferir regulamentação aplicável, regras estaduais e registro/rótulo/bula atuais, inclusive enquadramento específico de bioinsumos. Controles operacionais a validar: produto registrado no MAPA (AGROFIT) para cultura × alvo, dose dentro do rótulo, **intervalo de segurança (carência)**, intervalo de reentrada, classe toxicológica, EPI, tríplice lavagem/devolução de embalagens (inpEV). Validar: cultura autorizada, dose máxima, nº máximo de aplicações, carência antes da colheita, mistura em tanque.
+ - **Condições de aplicação**: temperatura < 30 °C, UR > 55 %, vento 3–10 km/h (Δ-T ideal 2–8); registrar e alertar deriva.
+ - **Rotação de mecanismos de ação** (IRAC/FRAC/HRAC) por talhão/safra — alerta de repetição.
+ - **Vazio sanitário e calendário de semeadura** (soja: por estado) — validar datas.
+@@ -32,7 +33,7 @@
+ - Fertirrigação: dose por injeção, condutividade elétrica, compatibilidade.
+ 
+ ## Colheita e produção
+-- **Peso corrigido** = Peso bruto × (100 − U_colheita)/(100 − U_padrão) − impurezas; padrões: soja 14 %, milho 14 %, trigo 13 %, arroz 13 %, feijão 14 %, café 11–12 % (beneficiado); desconto de impurezas acima de 1 %; **tabela de descontos** parametrizável (armazém/cooperativa).
++- **Peso corrigido (balanço físico, não desconto comercial)**: declarar peso bruto em kg, impureza `I_pct` como percentual em massa sobre esse bruto, e umidades em base úmida do grão limpo. `P_limpo_kg = P_bruto_kg × (1 − I_pct/100)`; depois `P_corrigido_kg = P_limpo_kg × (100 − U_atual_pct)/(100 − U_padrao_pct)`. Não subtrair um percentual de um peso. Se a entrada já for peso limpo, não remover impurezas outra vez. Exemplo: 1 000 kg, 2% de impurezas, 20% de umidade atual e 14% de referência → 980 kg limpos e 911,6279 kg corrigidos. Peso ≥ 0, impurezas entre 0 e 100%, umidades entre 0 e <100%; dados ausentes/inválidos impedem cálculo. A referência de umidade deve ser a contratada por produto; tabelas de descontos/tolerâncias e perdas de secagem são regras comerciais separadas, parametrizadas e versionadas, não um desconto universal de 1%. Base da correção por umidade: [Embrapa — Padronização da umidade dos grãos na experimentação agrícola](https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/158702/1/RESUMO.1.pdf), consultada em14/10/2026; a remoção percentual acima explicita a hipótese dimensional do exemplo.
+ - **Produtividade** = peso líquido / área colhida: sc/ha (60 kg; café 60 kg beneficiado; arroz 50 kg), kg/ha, t/ha, @/ha (algodão em caroço). Comparar com histórico do talhão, média regional (CONAB/IMEA) e potencial.
+ - **Perdas na colheita**: medição por área conhecida (copo/quadro) → kg/ha; meta soja ≤ 1 sc/ha.
+ - **Ponto de colheita**: umidade, maturação fisiológica (R8 soja, R6 milho), dessecação.
+--- before/shared/agro-gestao-conhecimento/assets/zootecnia.md
++++ candidate/shared/agro-gestao-conhecimento/assets/zootecnia.md
+@@ -44,7 +44,7 @@
+ 
+ ## Sanidade e conformidade
+ - **Calendário sanitário** por espécie/região (aftosa conforme status, brucelose B19 fêmeas 3–8 m, clostridioses, raiva, IBR/BVD, leptospirose; aves: Marek, Gumboro, Newcastle; suínos: circovírus, micoplasma) parametrizável; alerta de dose de reforço.
+-- **GTA** (Guia de Trânsito Animal) para toda movimentação; **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
++- **GTA** (Guia de Trânsito Animal) nos trânsitos de animais em que seja exigida pela norma aplicável à espécie, origem/destino e jurisdição. Nascimento, morte e mudança de categoria não exigem GTA apenas por serem eventos de inventário; transferência de piquete exige avaliar se há trânsito sujeito à norma. Validar a exigência com o serviço veterinário oficial antes de bloquear a operação ([MAPA, consultado em 14/10/2026](https://www.gov.br/pt-br/servicos/habilitar-se-para-emissao-da-guia-de-transito-animal)); **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
+ - Mortalidade com causa, necropsia, destinação (compostagem); biosseguridade (fluxo, quarentena); **bem-estar** (indicadores: escore de locomoção, lesões, densidade, sombra/água).
+ 
+ ## Indicadores (síntese)
+--- before/shared/benchmark-top5/SKILL.md
++++ candidate/shared/benchmark-top5/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Benchmark de cinco referências — aprender antes de construir
++
++## Pesquisa dirigida pela decisão
++
++Comece pela pergunta que a mudança precisa resolver e pelos achados já registrados. Nova evidência pode atualizar uma prática sem refazer cinco pesquisas completas. Diferencie comportamento observado, afirmação comercial e inferência; ausência de acesso permanece limitação. Fonte de concorrente inspira, mas não substitui PRD, decisões NAV/DS, regras de domínio e validação de campo.
++
++Compare esforço total, erro, recuperação e clareza por persona e contexto/safra. Menos cliques, mais recursos ou consenso de IAs não comprovam benefício. Registre adoção/adaptação/descarte na fonte existente e mantenha requisitos pendentes; não transforme lista de funções em novos menus ou amplie o produto pela pesquisa.
++
+ 
+ **Norte:** estudar referências relevantes, com evidência de fluxos, regras e práticas, e adaptar o que serve à tarefa. Buscar menos esforço e mais clareza (`ux-essencial`), sem presumir liderança, escala de uso ou superioridade sem dados.
+ 
+@@ -29,7 +36,7 @@
+ 5. **Gestão e métricas** — dashboards padrão, KPIs, relatórios que o gestor usa, alertas.
+ 6. **Etapas de onboarding/configuração** — o que pedem no primeiro uso, importação de dados, templates.
+ 7. **Integrações e ecossistema** — o que conectam por padrão (pagamentos, fiscal, WhatsApp, e-mail, ERP, marketplaces).
+-8. **Diferencial** — o que só ele faz bem e por que é líder.
++8. **Diferencial** — prática diferenciada e evidência do benefício, sem presumir liderança.
+ 9. **Reclamações recorrentes** — fricção, burocracia, lentidão, complexidade (nossa chance de fazer melhor).
+ 10. **Padrões de UX específicos do setor** — convenções que o usuário do setor já espera (nomenclatura, atalhos, layouts) e que não devemos quebrar sem motivo.
+ 
+@@ -49,10 +56,10 @@
+ 
+ ## Filtros ao incorporar (nossa filosofia vence)
+ - **Essencialismo**: avaliar utilidade, frequência por oportunidade e criticidade por persona/safra; não excluir tarefas raras essenciais por porcentagem arbitrária.
+-- **Fricção zero**: se o player exige 5 telas, encontrar a versão de 1 tela com padrões inteligentes. Cada campo do concorrente passa pela pergunta "o sistema pode inferir isso?".
++- **Fricção zero**: se o player exige várias telas, reduzir etapas sem perder decisões, aprovações e contexto. Cada campo do concorrente passa pela pergunta "o sistema pode inferir isso?".
+ - **Lógica e regras**: verificar fórmulas, unidades, legislação e premissas com fontes técnicas e requisitos locais; uma regra de concorrente não é evidência de correção para nossa operação.
+ - **Convenções do setor** (termos, ordem das etapas, documentos obrigatórios, regras fiscais/legais BR): respeitar.
+-- **Estética**: nossa (Material 3, `ux-essencial`), não a deles.
++- **Estética**: do design system vigente (`ux-essencial`), sem copiar a identidade deles.
+ - **Nunca copiar** textos, ícones, layouts ou marca; inspiração de funcionalidade e lógica é legítima, cópia de expressão não é.
+ 
+ ## Checklist (antes de iniciar a Fase 1 de dev-ciclo-completo)
+--- before/shared/dev-backend/SKILL.md
++++ candidate/shared/dev-backend/SKILL.md
+@@ -5,11 +5,22 @@
+ 
+ # Backend — meta: correto, seguro, rápido e pronto para escalar
+ 
++A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
++
++## Contrato de estado, cálculo e recuperação
++
++Concentre regras e agregações em funções de domínio compartilhadas; a UI formata os resultados sem recalcular contadores por caminhos divergentes. Defina universo autorizado, período, unidade, precisão, denominador e tratamento de ausência. Nulo/desconhecido não vira zero; subtotal parcial não representa total conhecido; razões usam numerador/denominador compatíveis, não soma de taxas ou média sem ponderação definida.
++
++Comandos revalidam permissão, escopo, estado e versão no momento da execução. Contexto de navegação não concede acesso nem autoriza ação. Propostas da IA têm prévia e aprovação específica conforme política, comando de domínio e recibo; consenso entre modelos não substitui essas verificações.
++
++Desfazer aplica inversão delimitada ou compensação validada; não restaura um snapshot global que apague alterações posteriores. Timeout de escrita requer consulta do estado/recibo antes de reenviar. Distinguir rascunho, envio pendente, aceito, aplicado e cancelado evita afirmar sucesso antes do efeito autoritativo.
++
++
+ ## Arquitetura
+ - **Monólito modular por domínio**: `src/modules/<dominio>/{routes,service,repository,schema,events}`; módulo só fala com outro via interface pública (service) ou evento — nunca acessa a tabela alheia. Estrutura em [assets/estrutura-modular.md](assets/estrutura-modular.md).
+ - **Camadas**: rota (HTTP, validação, auth) → serviço (regra de negócio, transação) → repositório (SQL/ORM). Domínio não importa framework nem infra. Sem "hexagonal completo" onde não há necessidade; sem lógica de negócio em controller.
+ - Estado durável e autoritativo não depende de memória do processo. Cache em memória pode ser descartável e limitado; Redis/objetos/filas entram por necessidade, não por padrão.
+-- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação.
++- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação. No Safrion, conforme o contrato vigente de comandos (AGENTS §4), todo comando grava efeito, recibo e outbox na mesma transação; essa exigência não é opcional.
+ - **Multi-tenant**: `tenant_id` em toda tabela de negócio, filtro obrigatório no repositório (ou RLS no Postgres), teste que prova isolamento.
+ 
+ ## API
+--- before/shared/dev-ciclo-completo/SKILL.md
++++ candidate/shared/dev-ciclo-completo/SKILL.md
+@@ -5,11 +5,18 @@
+ 
+ # Ciclo completo de desenvolvimento
+ 
++## Entrega identificada e continuidade
++
++Antes de editar, delimite resultado, IDs vigentes, base, arquivos/trechos, autor, revisor e aceite na tarefa existente. Em colaboração, mantenha uma autoria ativa por agente e contratos separados; encaminhe entregas prontas imediatamente e avance no próximo trabalho autorizado e independente. Não confunda ausência de ACK com ociosidade nem crie outra fila para retomar.
++
++Registre estados distintos: implementado, revisado, integrado, publicado e homologado. Uma camada sintética, CI verde ou publicação parcial não conclui o produto. Preserve o trabalho válido e os requisitos pendentes. A revisão de PRD confronta decisões aprovadas e comportamento validado, sem legitimar defeitos já implementados; reutilize referências do design system. Os gatilhos específicos do Safrion ficam em `safrion-equipe`.
++
++
+ **Norte:** entregar uma fatia útil, verificável e operável por vez, com controles proporcionais ao risco. O primeiro commit prepara o necessário para a próxima entrega; não antecipa todo o produto.
+ 
+ PRD, arquitetura e instruções do projeto prevalecem sobre os exemplos deste guia. Assets são pontos de partida: conferir versões, permissões e adequação antes de incorporá-los. Um protótipo deve permanecer identificado como protótipo.
+ 
+-**"Pronto" = Definition of Done ([assets/definition-of-done.md](assets/definition-of-done.md)) cumprida e verificada rodando.** Nunca dizer "funciona" sem ter executado lint, tipos e testes e visto a saída.
++**"Pronto" = Definition of Done ([assets/definition-of-done.md](assets/definition-of-done.md)) cumprida e verificada rodando.** Nunca dizer "funciona" sem evidência pertinente: comportamento executável pede execução; alteração documental pede leitura e validação documental. Execute os checks aplicáveis e exigidos pelo projeto.
+ 
+ ---
+ 
+@@ -29,7 +36,7 @@
+ - Registrar decisões em ADRs curtos ([assets/ADR-template.md](assets/ADR-template.md)) em `docs/adr/`.
+ - **Monólito modular primeiro** (módulos por domínio, fronteiras claras); microsserviços só com motivo concreto (times separados, escala desigual).
+ - **Tecnologia "chata" e comprovada**; novidade só quando resolve um problema real.
+-- Stack padrão quando o usuário não tem preferência:
++- Exemplos para projeto sem stack definida; decisão vigente prevalece, sem instalar a tabela inteira:
+ 
+ | Camada | Padrão |
+ |---|---|
+@@ -37,7 +44,7 @@
+ | Web | Next.js (App Router) ou Vite + React; Tailwind + tokens M3 (`ux-essencial`) |
+ | API | Fastify/NestJS (TS) ou FastAPI (Py); OpenAPI gerado do código |
+ | Mobile | Expo (React Native) ou Flutter; nativo só por exigência de plataforma |
+-| Dados | PostgreSQL; Prisma/Drizzle (TS) ou SQLAlchemy (Py); Redis para cache/filas |
++| Dados | PostgreSQL; Prisma/Drizzle (TS) ou SQLAlchemy (Py); Redis somente se houver necessidade de cache/filas |
+ | Testes | Vitest + Testing Library + Playwright; pytest; Maestro/Detox (mobile) |
+ | Infra | Docker; GitHub Actions; PaaS (Vercel/Fly.io/Cloud Run) → Kubernetes só quando necessário |
+ | Observabilidade | Sentry + OpenTelemetry + logs estruturados |
+@@ -48,7 +55,7 @@
+ No produto novo, preparar a fundação necessária à primeira fatia. Em projeto existente, verificar antes de acrescentar:
+ 1. `git init`, `.gitignore`, `.editorconfig`, `README.md` (como rodar em 3 comandos).
+ 2. Gerenciador de pacotes com lockfile e versões fixadas; `.nvmrc`/`.python-version`.
+-3. **Lint + formatação + tipos estritos** (`dev-revisao`, assets prontos) — zero warnings tolerados.
++3. **Lint + formatação + tipos estritos** (`dev-revisao`, assets prontos) — conforme a política do projeto, sem ocultar avisos para liberar a entrega.
+ 4. **Testes** configurados com um teste real passando (`dev-testes`).
+ 5. **Pre-commit** (lint-staged) e **CI** rodando lint → tipos → testes → build em todo PR (`dev-infra/assets/ci.yml`).
+ 6. `.env.example` + validação das variáveis no boot; nunca segredo no repositório.
+@@ -65,18 +72,18 @@
+ - **Feature flags** para o que não pode ir ao ar de uma vez; nada de branch de meses.
+ - **Sem redundância**: antes de escrever, procurar se já existe (função, componente, util, pacote). Regra dos 3: na terceira repetição, extrair. Sem copiar/colar blocos.
+ - **Sem código morto**: sem arquivos/funções/flags não usados, sem `TODO` sem issue, sem código comentado.
+-- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; nada de `catch {}` vazio, `any`, `// eslint-disable`, `@ts-ignore`, `as unknown as`.
+-- **Aritmética e tempo corretos**: dinheiro e taxas com precisão definida (inteiro/decimal); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
++- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; não use `catch {}` vazio nem supressão de tipos/lint para esconder defeito. Exceções estreitas só quando a política do projeto permitir, com justificativa e revisão; siga `dev-revisao`.
++- **Aritmética e tempo corretos**: dinheiro e taxas com aritmética decimal e escala explícita conforme o contrato do projeto (no Safrion, ENG-013); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
+ - Atualizar docs/ADR/README no mesmo PR que muda o comportamento.
+ 
+ ## Fase 4 — Revisão (`dev-revisao`)
+-Self-review → automação (lint, tipos, testes, cobertura, segurança, duplicação) → revisão com checklist → squash merge. Nada entra com pipeline vermelho ou com "arrumo depois".
++Autorrevisão → checks aplicáveis → revisão independente → integração segundo a política do projeto. O revisor integra o PR do outro quando esse for o contrato; ninguém aprova ou integra o próprio PR no Safrion. Check exigido falho ou indisponível permanece pendente.
+ 
+ ## Fase 5 — Entrega (`dev-infra`)
+ Deploy automatizado; migrações versionadas com recuperação testada e compatibilidade; homologação isolada com o mesmo artefato candidato. Produção segue os gates do projeto, incluindo aceite humano quando exigido. No Safrion, o proprietário aprova explicitamente a versão após homologação.
+ 
+ ## Fase 6 — Operação
+-SLOs definidos (disponibilidade, p95 de latência, taxa de erro) com alertas que acordam alguém só quando o usuário sente; dashboards; backups testados com restauração; post-mortem sem culpa para todo incidente, gerando teste + correção; dependências atualizadas semanalmente (Renovate/Dependabot).
++SLOs definidos (disponibilidade, p95 de latência, taxa de erro) com alertas que acordam alguém só quando o usuário sente; dashboards; backups testados com restauração; análise sem culpa e ações proporcionais ao incidente; manutenção de dependências conforme política do projeto.
+ 
+ ---
+ 
+@@ -84,6 +91,6 @@
+ 1. Dimensionar a fundação ao escopo: uma tela em sistema existente reutiliza a base; um protótipo explícito não implica provisionar produção.
+ 2. Ao mexer em projeto existente: respeitar as convenções dele; se faltar lint/testes/CI, propor e adicionar de forma incremental (não reescrever tudo).
+ 3. Antes de declarar concluído: executar os checks aplicáveis à mudança e informar resultado, versão e limitações. Comando configurado não equivale a executado; não inventar comandos ausentes.
+-4. Toda funcionalidade nova vem com testes no mesmo commit; todo bug vem com teste de regressão.
++4. Proteja os comportamentos alterados com verificações proporcionais. Para defeito, reproduza o cenário e acrescente regressão quando viável; não crie testes que só espelhem texto ou implementação.
+ 5. Preferir remover código a adicionar. Cada abstração precisa justificar-se com uso real (≥ 2 chamadores).
+ 6. Se algo do padrão não se aplicar (script descartável, protótipo explícito), dizer isso e o que foi omitido.
+--- before/shared/dev-ciclo-completo/assets/ADR-template.md
++++ candidate/shared/dev-ciclo-completo/assets/ADR-template.md
+@@ -6,7 +6,7 @@
+ Qual problema ou força motivou a decisão (1 parágrafo). Restrições relevantes: escala, prazo, equipe, custo, stack existente.
+ 
+ ## Decisão
+-O que foi decidido, em uma frase afirmativa. ("Usaremos PostgreSQL com Prisma como camada de persistência.")
++O que foi decidido, em uma frase afirmativa. ("Usaremos a opção A para atender aos critérios descritos, preservando os contratos vigentes.")
+ 
+ ## Alternativas consideradas
+ - **Opção A** — por que não.
+--- before/shared/dev-ciclo-completo/assets/definition-of-done.md
++++ candidate/shared/dev-ciclo-completo/assets/definition-of-done.md
+@@ -5,7 +5,7 @@
+ ## Código
+ - [ ] Faz exatamente o que a tarefa pede — nem mais (sem funcionalidade "de brinde"), nem menos
+ - [ ] Tipagem estrita sem `any`, `@ts-ignore`, `eslint-disable`, `# type: ignore` sem justificativa em comentário
+-- [ ] Zero warnings de lint/formatação/tipos (`lint`, `typecheck`, `format --check` passam)
++- [ ] Checks aplicáveis de lint/formatação/tipos passam conforme política do projeto
+ - [ ] Sem código morto, duplicado, comentado ou `TODO` sem issue vinculada
+ - [ ] Erros tratados em toda fronteira (rede, banco, disco, entrada do usuário) com timeout e mensagem acionável
+ - [ ] Sem segredo, credencial ou dado pessoal no código, log ou teste
+@@ -22,11 +22,11 @@
+ ## Revisão
+ - [ ] PR focado e revisável, com problema, resultado, evidências e capturas pertinentes
+ - [ ] Self-review feito (ler o diff inteiro como se fosse de outra pessoa)
+-- [ ] Pipeline verde: lint, tipos, testes, build, cobertura, segurança (deps + segredos), duplicação
++- [ ] Checks exigidos e pertinentes aprovados na candidata identificada
+ - [ ] Revisado por pessoa ou agente com o checklist de `dev-revisao`; comentários resolvidos
+ 
+ ## Produto e UX
+-- [ ] Segue `ux-essencial` (uma ação primária, fricção zero, estados vazio/carregando/erro, acessível, claro/escuro)
++- [ ] Segue `ux-essencial` (uma primária por contexto ativo, estados e recuperação, acessibilidade e temas adotados)
+ - [ ] Passou pelo procedimento de corte de `minimalismo-essencial`; lista de cortes entregue; nada supérfluo na tela
+ - [ ] Tabelas seguem `tabelas-interativas`
+ - [ ] Textos em pt-BR revisados; formatação de número/data/moeda correta
+@@ -38,3 +38,6 @@
+ - [ ] Feature flag/rollback definidos para mudança arriscada
+ - [ ] Documentação atualizada no mesmo PR (artefatos afetados, como README, ADR, OpenAPI e AGENTS.md; CLAUDE.md referencia a mesma fonte)
+ - [ ] Quando houver entrega executável: homologação verificada, desempenho contra metas e aceite humano exigido antes de produção
++
++- [ ] Fonte/diff, base e versão recuperáveis; relato e prova distintos; revisão cruzada e integração pelo revisor quando exigidas
++- [ ] Estado da entrega identifica protótipo, implementação real, teste, publicação e HML sem confundir conclusão parcial com funcional
+--- before/shared/dev-frontend-mobile/SKILL.md
++++ candidate/shared/dev-frontend-mobile/SKILL.md
+@@ -5,7 +5,21 @@
+ 
+ # Frontend e mobile — meta: rápido, robusto, sem bug de tela
+ 
++A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
++
++## Contexto, fontes e recuperação
++
++Derive indicadores e listas do mesmo contrato de domínio; não esconda mocks atrás de indicadores reais nem interprete números já formatados. Preserve ausência e parcialidade no texto. Em tabelas legadas, declare agregação explicitamente; use `agg: null` para grandeza sem resumo validado ou a função de domínio adequada para razões/ponderações. Percentual completo não altera sozinho o estado de negócio.
++
++Ao abrir um recorte por painel/mapa, carregue exatamente o conjunto autorizado, sem um filtro antigo invisível restringir o destino. Separe recorte temporário dos filtros pessoais persistidos; valide fazenda/safra/perfil e validade do contexto. Voltar restaura filtros, posição, rascunho e foco; contexto inválido oferece recuperação clara. Não reutilize recibo/contexto consumido nem vaze dados ao trocar usuário.
++
++Tabela, raias e calendário são projeções coerentes das mesmas entidades e estados. Explique contagem de eventos com vários dias para não confundir cartões visíveis com registros únicos. Desfazer aplica inversão delimitada e preserva alterações posteriores fora desse escopo; conflito de versão bloqueia a inversão e oferece recuperação, sem exigir event sourcing/CRDT. A ação expira conforme versão/publicação/descarte e permanece acessível mesmo quando a lista fica vazia. Teste as transições alteradas com teclado e viewport móvel, incluindo foco após erro e controles que se sobrepõem.
++
++
+ UX/UI é `ux-essencial`; organização das telas (listagem → detalhe → sub-detalhe, rotas `/entidade`, `/entidade/:id`) é `master-detail-ux`; tabelas é `tabelas-interativas`. Aqui é a engenharia por trás.
++
++Toda ação relevante, inclusive salvar e cancelar, tem retorno inequívoco no contexto: processamento, salvo/pendente ou erro e próximo passo. Cancelar informa se preservou rascunho ou descartou alterações; navegar para fora não significa salvar. Reutilize a camada de feedback do design system, sem toast duplicado nem confirmação modal em toda ação; confirmação adicional depende de risco real. Nunca mostrar sucesso antes do recibo.
++
+ 
+ ## Estrutura e código
+ - **Organização por feature**, não por tipo: `src/features/pedidos/{components,hooks,api,schemas,index.ts}`; `src/shared/{ui,lib,hooks}` só para o que é realmente genérico. Feature exporta só pelo `index.ts`; sem import cruzado entre features (usar `shared` ou compor na página).
+@@ -25,8 +39,8 @@
+ 
+ ## Formulários e dados
+ - Reutilizar a biblioteca do projeto; schema, validação útil, teclado e autocomplete corretos. Autosave preserva rascunho; comandos de negócio exigem envio explícito. Atualização otimista só onde reversível, com pendência visível e sem afirmar aceite antes do recibo.
+-- Datas: `Intl`/`date-fns` com fuso explícito; números/moeda com `Intl.NumberFormat('pt-BR')`. Nunca `toFixed` para dinheiro.
+-- Listas > 200 itens virtualizadas (TanStack Virtual / FlashList / `ListView.builder`).
++- Datas: `Intl`/`date-fns` com fuso explícito; números/moeda com `Intl.NumberFormat('pt-BR')`. Não usar formatação como cálculo ou armazenamento monetário; precisão e arredondamento pertencem ao contrato de domínio.
++- Virtualizar listas quando a medição justificar, preservando teclado, leitores de tela, busca e altura/posição de retorno.
+ 
+ ## Rotas, erros e carregamento
+ - Rotas com **lazy loading** por página; **error boundary** por rota e por widget crítico com ação de tentar de novo; `Suspense` com skeleton no formato do conteúdo.
+@@ -68,4 +82,4 @@
+ - [ ] Lighthouse/Web Vitals ou fps dentro do orçamento; bundle não cresceu
+ - [ ] Acessibilidade com axe passando; teclado/leitor de tela
+ - [ ] Testes: unit + componente (Testing Library) + E2E se fluxo crítico
+-- [ ] Claro/escuro, responsivo (compacto/médio/expandido), pt-BR
++- [ ] Temas e dispositivos adotados, responsivo, pt-BR
+--- before/shared/dev-infra/SKILL.md
++++ candidate/shared/dev-infra/SKILL.md
+@@ -4,6 +4,15 @@
+ ---
+ 
+ # Infra e operação — disponibilidade e recuperação verificáveis
++
++## Execução comprovada e autorização vigente
++
++Identifique executor e dependências reais: comando disparado no Mac continua local até prova de execução remota. Agenda/heartbeat retoma uma sessão disponível; não garante continuidade com aplicativo/computador indisponível. Aplicação e banco independentes precisam de execução e recuperação verificadas, não apenas plano, container construído ou CI verde.
++
++Reaproveite autorização concreta de desenvolvimento/QA/HML, orçamento e ferramentas. Alerta de orçamento não limita cobrança. Produção, efeitos em dados reais e mudanças de proteção seguem os limites vigentes; não desative controles para resolver falha. Distinguir transporte, autenticação, permissão, cota, custo e defeito evita repetição cega. Antes de reenviar mutação incerta, confira recibo/estado.
++
++Não reabra incidente ou verificação encerrada sem novo indício. Escolha checks equivalentes ao delta; publicação incremental não exige reconstruir a infraestrutura. Preserve artefato, dados e logs úteis; duas falhas pela mesma causa pedem abordagem diferente ou bloqueio com gatilho explícito.
++
+ 
+ Escolha a menor infraestrutura que cumpra requisitos, carga e orçamento. Exemplos de provedores, versões e assets não são contratação nem receita pronta; verificar suporte e configuração antes de usar. Haver monitoramento não significa haver plantão: nomear o responsável e testar o acionamento.
+ 
+@@ -32,7 +41,7 @@
+ - Imagens escaneadas (Trivy) no CI; SBOM gerado; assinadas (cosign) quando houver exigência.
+ 
+ ## CI/CD — [assets/ci.yml](assets/ci.yml)
+-Pipeline de todo PR (< 10 min, com cache):
++Exemplo de pipeline a selecionar pelo escopo e pelos gates do projeto, com duração medida e cache seguro:
+ `install → lint + format → typecheck → testes unit (cobertura) → build → testes integração (serviços via Docker) → E2E (sharded) → segurança (gitleaks, osv-scanner, Trivy, Semgrep) → deploy preview`
+ 
+ Trunk (`main`): checks aplicáveis → homologação → smoke tests e validação humana exigida pelo projeto → promoção do mesmo artefato à produção → verificação pós-deploy. No Safrion, produção exige o aceite explícito do proprietário sobre a versão. Recuperação automática só por procedimento previamente autorizado e testado, compatível com migrações e dados.
+@@ -70,7 +79,7 @@
+ - Custo monitorado com alerta de orçamento; recursos ociosos removidos; rightsizing mensal.
+ 
+ ## Checklist de lançamento
+-- [ ] Pipeline completo verde; imagem promovida de staging; migração compatível; rollback testado
++- [ ] Checks exigidos e pertinentes verdes; imagem promovida de staging; migração compatível; rollback testado
+ - [ ] TLS, domínio, rate limiting e cabeçalhos; CDN/WAF conforme arquitetura e risco
+ - [ ] Segredos no cofre; acesso mínimo; banco em rede privada
+ - [ ] `/health` e `/ready`; monitoramento externo; rastreador de erros e telemetria adotados pelo projeto recebendo dados
+--- before/shared/dev-infra/assets/Dockerfile
++++ candidate/shared/dev-infra/assets/Dockerfile
+@@ -1,8 +1,9 @@
+ # Dockerfile — Node/TypeScript multi-stage, produção mínima e não-root.
+ # Python: troque por python:3.12-slim + uv; Go: build estático + distroless/static.
+ 
++# Digest do índice oficial conferido em 14/10/2026; atualizar por PR revisado.
+ # ---- dependências ----
+-FROM node:22-alpine AS deps
++FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS deps
+ WORKDIR /app
+ COPY package.json package-lock.json ./
+ RUN npm ci --ignore-scripts
+@@ -13,7 +14,7 @@
+ RUN npm run build && npm prune --omit=dev
+ 
+ # ---- produção ----
+-FROM node:22-alpine AS runner
++FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS runner
+ ENV NODE_ENV=production \
+     PORT=3000
+ WORKDIR /app
+--- before/shared/dev-infra/assets/ci.yml
++++ candidate/shared/dev-infra/assets/ci.yml
+@@ -1,3 +1,7 @@
++# Template opt-in, não é o workflow ativo do Safrion. Validar a execução no projeto antes de adotar.
++# npm ci requer lockfile e ferramentas declaradas (knip, jscpd, playwright, @lhci/cli).
++# SHAs/digests públicos conferidos em 2026-10-14; atualizar por PR revisado, nunca por tag mutável.
++# Regras OWASP e bases de vulnerabilidades são dados atualizados pelos scanners; binários são fixos.
+ # .github/workflows/ci.yml — pipeline padrão (Node/TypeScript; adapte os comandos para Python/Go)
+ name: CI
+ 
+@@ -10,10 +14,7 @@
+   group: ci-${{ github.ref }}
+   cancel-in-progress: true
+ 
+-permissions:
+-  contents: read
+-  pull-requests: write
+-  security-events: write
++permissions: {}  # cada job declara só o acesso que usa; nenhum token de escrita nos PRs
+ 
+ env:
+   NODE_VERSION: 22
+@@ -21,68 +22,79 @@
+ jobs:
+   quality:
+     name: Lint · tipos · unit
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 10
+-    steps:
+-      - uses: actions/checkout@v4
+-        with: { fetch-depth: 0 }
+-      - uses: actions/setup-node@v4
+-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
++    permissions:
++      contents: read
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    steps:
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { fetch-depth: 0, persist-credentials: false }
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
++        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+       - run: npm ci
+       - run: npm run format:check
+       - run: npm run lint -- --max-warnings=0
+       - run: npm run typecheck
+       - run: npm run test:unit -- --coverage
+-      - name: Cobertura no PR
++      - name: Cobertura no resumo da execução
+         if: github.event_name == 'pull_request'
+-        uses: davelosert/vitest-coverage-report-action@v2
+-      - run: npx knip            # código/dependências mortas
+-      - run: npx jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
+-      - uses: actions/upload-artifact@v4
++        uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2 · conferido 2026-10-14
++        with: { comment-on: none, file-coverage-mode: all }
++      - run: npx --no-install knip            # código/dependências mortas
++      - run: npx --no-install jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
++      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+         if: always()
+         with: { name: reports-unit, path: reports/, retention-days: 7 }
+ 
+   build:
+     name: Build
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 10
+-    steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
+-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
++    permissions:
++      contents: read
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    steps:
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { persist-credentials: false }
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
++        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+       - run: npm ci
+       - run: npm run build
+-      - uses: actions/upload-artifact@v4
++      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+         with: { name: build, path: dist/, retention-days: 1 }
+ 
+   integration:
+     name: Integração (banco real)
++    permissions:
++      contents: read
+     runs-on: ubuntu-latest
+     timeout-minutes: 15
+     needs: quality
+     services:
+       postgres:
+-        image: postgres:16-alpine
++        image: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea # 16-alpine
+         env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app_test }
+         ports: ['5432:5432']
+         options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+       redis:
+-        image: redis:7-alpine
++        image: redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499 # 7-alpine
+         ports: ['6379:6379']
+         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+     env:
+       DATABASE_URL: postgres://app:app@localhost:5432/app_test
+       REDIS_URL: redis://localhost:6379
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
+-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { persist-credentials: false }
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
++        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+       - run: npm ci
+       - run: npm run db:migrate
+       - run: npm run test:integration
+ 
+   e2e:
+     name: E2E (shard ${{ matrix.shard }}/4)
++    permissions:
++      contents: read
+     runs-on: ubuntu-latest
+     timeout-minutes: 20
+     needs: build
+@@ -90,69 +102,158 @@
+       fail-fast: false
+       matrix: { shard: [1, 2, 3, 4] }
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
+-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+-      - run: npm ci
+-      - uses: actions/download-artifact@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { persist-credentials: false }
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
++        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
++      - run: npm ci
++      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
+         with: { name: build, path: dist/ }
+-      - run: npx playwright install --with-deps chromium
+-      - run: npx playwright test --shard=${{ matrix.shard }}/4
+-      - uses: actions/upload-artifact@v4
++      - run: npx --no-install playwright install --with-deps chromium
++      - run: npx --no-install playwright test --shard=${{ matrix.shard }}/4
++      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+         if: failure()
+-        with: { name: playwright-${{ matrix.shard }}, path: test-results/, retention-days: 7 }
++        with: { name: "playwright-${{ matrix.shard }}", path: test-results/, retention-days: 7 }
+ 
+   security:
++    outputs:
++      image-id: ${{ steps.scan.outputs.image-id }}
++      archive-sha: ${{ steps.scan.outputs.archive-sha }}
+     name: Segurança
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 10
+-    steps:
+-      - uses: actions/checkout@v4
+-        with: { fetch-depth: 0 }
++    permissions:
++      contents: read
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    steps:
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { fetch-depth: 0, persist-credentials: false }
++      # Scanners sem token, sem socket Docker e com fonte montada somente para leitura.
+       - name: Segredos vazados
+-        uses: gitleaks/gitleaks-action@v2
++        run: >-
++          docker run --rm -v "$PWD:/repo:ro"
++          zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
++          git /repo --redact --exit-code 1
+       - name: Vulnerabilidades em dependências
+-        uses: google/osv-scanner-action/osv-scanner-action@v1
+-        with: { scan-args: --lockfile=package-lock.json }
++        run: >-
++          docker run --rm -v "$PWD:/src:ro" -w /src
++          ghcr.io/google/osv-scanner@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
++          scan source --lockfile=/src/package-lock.json
+       - name: Análise estática (OWASP)
+-        uses: semgrep/semgrep-action@v1
+-        with: { config: p/owasp-top-ten }
+-      - name: Imagem
+-        run: docker build -t app:ci . && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL app:ci
++        run: >-
++          docker run --rm -v "$PWD:/src:ro" -w /src
++          semgrep/semgrep@sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3
++          semgrep scan --config p/owasp-top-ten --error --metrics=off /src
++      - name: Construir e verificar a imagem uma vez
++        id: scan
++        run: |
++          set -euo pipefail
++          docker build -t app:ci .
++          docker save app:ci -o "$RUNNER_TEMP/app-ci.tar"
++          docker run --rm -v "$RUNNER_TEMP/app-ci.tar:/scan/app.tar:ro" \
++            aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
++            image --input /scan/app.tar --exit-code 1 --severity HIGH,CRITICAL
++          printf 'image-id=%s\n' "$(docker image inspect app:ci --format '{{.Id}}')" >> "$GITHUB_OUTPUT"
++          printf 'archive-sha=%s\n' "$(sha256sum "$RUNNER_TEMP/app-ci.tar" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
++      - name: Guardar exatamente o arquivo aprovado pelo scanner
++        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
++        with:
++          name: scanned-image
++          path: ${{ runner.temp }}/app-ci.tar
++          retention-days: 7
++          if-no-files-found: error
+ 
+   lighthouse:
+     name: Web Vitals
++    permissions:
++      contents: read
+     runs-on: ubuntu-latest
+     timeout-minutes: 10
+     needs: build
+     if: github.event_name == 'pull_request'
+     steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-node@v4
+-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+-      - run: npm ci
+-      - uses: actions/download-artifact@v4
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
++        with: { persist-credentials: false }
++      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
++        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
++      - run: npm ci
++      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
+         with: { name: build, path: dist/ }
+-      - run: npx @lhci/cli autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
+-
++      - run: npx --no-install lhci autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
++
++  # Antes de adotar: configurar autenticação de curta duração do registry/provedor,
++  # IMAGE_REPOSITORY canônico (sem tag) e ci/deploy.sh + ci/smoke.sh.
++  # Os adaptadores recebem ambiente e referência repo@sha256; não constroem imagens.
++  # Ausência de configuração/recibo falha o job; este template não anuncia deploy por echo.
+   deploy-staging:
+-    name: Deploy staging
++    name: Deploy staging da imagem verificada
++    permissions:
++      contents: read
+     runs-on: ubuntu-latest
+     needs: [quality, build, integration, e2e, security]
+-    if: github.ref == 'refs/heads/main'
++    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+     environment: staging
+-    steps:
+-      - uses: actions/checkout@v4
+-      - run: echo "docker build + push com tag ${{ github.sha }}; migrar; deploy (fly deploy / gcloud run deploy / kubectl set image)"
+-      - run: echo "smoke: curl -f https://staging.exemplo.com/health"
++    outputs:
++      image-ref: ${{ steps.publish.outputs.image-ref }}
++    steps:
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with: { persist-credentials: false }
++      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
++        with: { name: scanned-image, path: '${{ runner.temp }}/scanned' }
++      - name: Publicar o arquivo verificado e fixar a referência por digest
++        id: publish
++        env:
++          IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
++          EXPECTED_ARCHIVE_SHA: ${{ needs.security.outputs.archive-sha }}
++          EXPECTED_IMAGE_ID: ${{ needs.security.outputs.image-id }}
++        run: |
++          set -euo pipefail
++          [[ "$IMAGE_REPOSITORY" =~ ^[a-z0-9.-]+(:[0-9]+)?/[a-z0-9._/-]+$ ]]
++          [[ "$EXPECTED_ARCHIVE_SHA" =~ ^[a-f0-9]{64}$ ]]
++          [[ "$EXPECTED_IMAGE_ID" =~ ^sha256:[a-f0-9]{64}$ ]]
++          cd "$RUNNER_TEMP/scanned"
++          printf '%s  app-ci.tar\n' "$EXPECTED_ARCHIVE_SHA" | sha256sum -c -
++          docker load --input app-ci.tar
++          test "$(docker image inspect app:ci --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
++          target="$IMAGE_REPOSITORY:ci-$GITHUB_SHA"
++          docker tag "$EXPECTED_IMAGE_ID" "$target"
++          docker push "$target"
++          image_ref=''
++          while IFS= read -r ref; do
++            if [[ "$ref" == "$IMAGE_REPOSITORY"@sha256:* ]]; then image_ref="$ref"; fi
++          done < <(docker image inspect "$target" --format '{{range .RepoDigests}}{{println .}}{{end}}')
++          test -n "$image_ref"
++          digest="${image_ref#"$IMAGE_REPOSITORY"@}"
++          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
++          docker pull "$image_ref"
++          test "$(docker image inspect "$image_ref" --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
++          printf 'image-ref=%s\n' "$image_ref" >> "$GITHUB_OUTPUT"
++      - name: Implantar e testar staging com a referência publicada
++        env:
++          IMAGE_REF: ${{ steps.publish.outputs.image-ref }}
++        run: |
++          set -euo pipefail
++          test -x ci/deploy.sh && test -x ci/smoke.sh
++          ci/deploy.sh staging "$IMAGE_REF"
++          ci/smoke.sh staging "$IMAGE_REF"
+ 
+   deploy-prod:
+-    name: Deploy produção
++    name: Promover a imagem validada em staging
++    permissions:
++      contents: read
+     runs-on: ubuntu-latest
+     needs: deploy-staging
+-    if: github.ref == 'refs/heads/main'
+-    environment: production   # aprovação manual configurada no GitHub → Settings → Environments
+-    steps:
+-      - uses: actions/checkout@v4
+-      - run: echo "promover a MESMA imagem ${{ github.sha }} para produção; migrar; deploy canário/rolling"
+-      - run: echo "verificar: health, taxa de erro e p95 por 10 min; rollback automático se degradar"
++    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
++    environment: production   # configurar aprovação explícita da candidata antes de adotar
++    steps:
++      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
++        with: { persist-credentials: false }
++      - name: Implantar e testar produção com o mesmo digest
++        env:
++          IMAGE_REF: ${{ needs.deploy-staging.outputs.image-ref }}
++        run: |
++          set -euo pipefail
++          test -n "$IMAGE_REF"
++          [[ "$IMAGE_REF" =~ @sha256:[a-f0-9]{64}$ ]]
++          test -x ci/deploy.sh && test -x ci/smoke.sh
++          ci/deploy.sh production "$IMAGE_REF"
++          ci/smoke.sh production "$IMAGE_REF"
+--- before/shared/dev-revisao/SKILL.md
++++ candidate/shared/dev-revisao/SKILL.md
+@@ -5,13 +5,20 @@
+ 
+ # Revisão de código — correção, clareza e evidência
+ 
++## Vincular parecer à candidata
++
++Confira base, autoria, arquivos, dependências e versão exata antes da revisão; leia fontes recuperáveis, diff e saídas brutas pertinentes. Hash sem fonte não permite revisar; relato do autor, teste proposto e resultado verificado são evidências diferentes. Em PRs empilhados, declare a ordem de integração e revise novamente apenas o delta material após rebase/retarget.
++
++Reproduza o comportamento afetado e os contraexemplos relevantes. Consolide um retorno por candidata, com versão, cenário, impacto, localização, severidade do projeto, prioridade separada e aceite observável. Não transforme preferência em bloqueio. Ao chegar correção, confira o novo delta e reteste o afetado, preservando provas equivalentes válidas. Ninguém aprova ou integra o próprio PR quando a revisão cruzada for exigida.
++
++
+ Aplicar ao diff e seus riscos. Reutilizar ferramentas do projeto; os assets são exemplos a validar, não uma lista de dependências obrigatórias. Não abrir uma refatoração ampla para satisfazer preferências estilísticas.
+ 
+ ## Fluxo
+-1. **Self-review** — antes de abrir o PR, ler o diff inteiro como revisor hostil, com o checklist abaixo. Rodar `lint`, `typecheck`, `test`, `build` localmente.
++1. **Self-review** — antes de abrir o PR, ler o diff inteiro como revisor hostil, com o checklist abaixo. Rodar os checks existentes aplicáveis à mudança e os exigidos pelo projeto.
+ 2. **PR focado** — um assunto revisável; tamanho é sinal de complexidade, não limite que obriga a fragmentar uma mudança coerente. Template: [assets/PULL_REQUEST_TEMPLATE.md](assets/PULL_REQUEST_TEMPLATE.md).
+-3. **Automação bloqueante** no CI (nada é mesclado com falha): formatação, lint, tipos, testes + cobertura, duplicação, código morto, dependências vulneráveis, segredos, build.
+-4. **Revisão humana/agente** com [assets/checklist-revisao.md](assets/checklist-revisao.md). Comentários com severidade: **bloqueia** / **sugestão** / **nit**. Elogiar o que está bom.
++3. **Automação bloqueante**: cumprir os checks exigidos e pertinentes. Formatação, tipos, testes, build e verificações de segurança são opções segundo o risco; não instalar ferramentas ou ampliar infraestrutura por rotina.
++4. **Revisão humana/agente** com [assets/checklist-revisao.md](assets/checklist-revisao.md). Usar a escala de severidade do projeto e distinguir defeito, sugestão e preferência; prioridade de trabalho é outro eixo.
+ 5. Merge conforme a política e autorização do projeto; não publicar, mesclar ou apagar branch só por seguir este checklist.
+ 
+ Ao revisar como agente: ler o código de verdade (não só o diff), executar os testes, procurar o que **falta** (erro não tratado, caso limite, permissão), e reportar cada achado com arquivo:linha, cenário concreto de falha e correção sugerida. Não aprovar com pipeline vermelho.
+@@ -40,7 +47,7 @@
+ | Swift | swift-format | SwiftLint | compilador | — |
+ | Todos | EditorConfig | Semgrep (regras OWASP), CodeQL (GitHub) | — | Renovate/Dependabot semanal, commitlint |
+ 
+-Prontos: [assets/eslint.config.js](assets/eslint.config.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
++Modelos para adaptar ao projeto (o arquivo `eslint.config.exemplo.js` só vira configuração quando copiado e renomeado explicitamente): [assets/eslint.config.exemplo.js](assets/eslint.config.exemplo.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
+ 
+ Cumprir a política de warnings do projeto; configurar regras relevantes de forma consistente. Exceções precisam de motivo concreto e revisão, sem desativar checks para ocultar defeitos. Uma mudança global justificada de configuração não é automaticamente proibida.
+ 
+@@ -51,5 +58,5 @@
+ 4. **Testes**: existem, testam comportamento, cobrem erro/limite, são determinísticos?
+ 5. **Legibilidade**: entendo em uma leitura? Nomes? Tamanho? Duplicação? Código morto?
+ 6. **Desempenho**: N+1, índices, paginação, memória, bundle.
+-7. **Compatibilidade**: migração reversível, API retrocompatível, feature flag, dados existentes.
++7. **Compatibilidade**: migração compatível e recuperação testada sem perda indevida, API retrocompatível, feature flag, dados existentes.
+ 8. **Produto**: segue `ux-essencial` / `tabelas-interativas`; textos pt-BR.
+--- before/shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md
++++ candidate/shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md
+@@ -5,15 +5,15 @@
+ <!-- Passos reprodutíveis. Comandos. Dados de exemplo. -->
+ 
+ ## Evidências
+-<!-- Capturas/vídeo para UI (claro e escuro, mobile e desktop). Saída resumida dos testes. -->
++<!-- Versão/base, fontes/diff e resultados executados. UI: capturas nos contextos, temas e dispositivos pertinentes. Distinguir limitações e testes não executados. -->
+ 
+ ## Riscos e reversão
+ <!-- Migração? Feature flag? Como desfazer em produção? Impacto em dados existentes? -->
+ 
+ ## Checklist
+-- [ ] Self-review feito; diff só contém o assunto do PR (< 400 linhas)
++- [ ] Self-review feito; diff só contém o assunto do PR 
+ - [ ] Testes novos cobrem comportamento, limites e erros; bug tem regressão
+-- [ ] `lint` · `typecheck` · `test` · `build` verdes localmente
++- [ ] Checks aplicáveis e exigidos aprovados; resultados vinculados à candidata
+ - [ ] Sem `any`/`ignore`/`skip`/código morto/duplicação
+-- [ ] Migração reversível; `.env.example` e docs atualizados
++- [ ] Migração compatível e recuperação verificada; `.env.example` e docs atualizados
+ - [ ] UX conforme `ux-essencial`; tabelas conforme `tabelas-interativas`
+--- before/shared/dev-revisao/assets/checklist-revisao.md
++++ candidate/shared/dev-revisao/assets/checklist-revisao.md
+@@ -1,6 +1,6 @@
+ # Checklist de revisão de código
+ 
+-Marque severidade em cada comentário: **[bloqueia]** · **[sugestão]** · **[nit]**.
++Use severidade e prioridade separadas conforme o projeto; diferencie defeito, risco e preferência. Cada achado identifica candidata, cenário, impacto e aceite.
+ 
+ ## 1. Correção
+ - [ ] Implementa exatamente o pedido; comportamento anterior preservado onde não deveria mudar
+@@ -24,14 +24,14 @@
+ - [ ] Upload: tipo/tamanho validados; arquivos fora do webroot; nomes sanitizados
+ 
+ ## 4. Testes
+-- [ ] Existem para todo comportamento novo/alterado; nomes descrevem comportamento
++- [ ] Protegem os comportamentos alterados segundo o risco; nomes descrevem comportamento
+ - [ ] Testam limites e erros, não só o caminho feliz
+ - [ ] Determinísticos (sem tempo real, rede, ordem); banco real em integração
+-- [ ] Nenhum `skip`/`only`; cobertura não caiu
++- [ ] Nenhum `only` acidental; skips e cobertura avaliados contra os gates, sem aprovação falsa
+ 
+ ## 5. Legibilidade e estrutura
+ - [ ] Entendo cada função em uma leitura; nomes revelam intenção
+-- [ ] Funções curtas, um propósito, ≤ 3 parâmetros, sem flag booleana
++- [ ] Funções coesas e legíveis, sem extrações por quota de linhas/parâmetros
+ - [ ] Sem duplicação de conhecimento (existe util/componente que já faz isso?)
+ - [ ] Sem código morto, comentado, `TODO` solto, `console.log`
+ - [ ] Sem números/strings mágicos; sem `any`/`ignore`
+@@ -43,11 +43,11 @@
+ - [ ] Frontend: sem re-render desnecessário, bundle não cresceu sem motivo, imagens dimensionadas
+ 
+ ## 7. Compatibilidade e operação
+-- [ ] Migração expand/contract, reversível, testada com dados
++- [ ] Migração compatível, testada com dados e recuperação sem perda indevida
+ - [ ] API retrocompatível ou versionada; clientes antigos continuam funcionando
+ - [ ] Variáveis de ambiente novas documentadas e validadas; feature flag onde há risco
+ - [ ] Logs/métricas cobrem o novo caminho; documentação atualizada
+ 
+ ## 8. Produto
+-- [ ] Segue `ux-essencial` (ação primária única, fricção zero, estados, acessibilidade, claro/escuro)
++- [ ] Segue `ux-essencial` (primária por contexto ativo, estados, recuperação, acessibilidade e temas adotados)
+ - [ ] Tabelas conforme `tabelas-interativas`; textos pt-BR, formatos locais
+--- before/shared/dev-testes/SKILL.md
++++ candidate/shared/dev-testes/SKILL.md
+@@ -4,6 +4,15 @@
+ ---
+ 
+ # Testes automatizados — reduzir falhas com evidência
++
++## Prova proporcional e reutilizável
++
++Vincule cada resultado à candidata, comando, ambiente, dados/perfil isolados e saída recuperável. Classifique falha do produto, fixture/precondição, ferramenta, transporte e resultado inconclusivo antes de alterar código. Proposta, relato, ajuda, zero testes e suíte interrompida não equivalem a execução aprovada.
++
++Selecione contraexemplos pelo delta: ausência versus zero, parcial versus completo, estado versus percentual, repetição/concorrência, filtro antigo ao entrar por outro contexto, retorno com rascunho/foco, e desfazer após uma edição posterior. Teclado e celular são pertinentes ao trecho de UI alterado. Reuse provas equivalentes e válidas; mudança invalida o que afeta, sem disparar auditoria integral por publicação parcial. Leia os brutos e explique divergências; não resolva por votação de modelos.
++
++Duas falhas pela mesma causa exigem mudar a abordagem ou registrar impedimento e gatilho, preservando rascunhos e evidências. Retry diagnóstico fica explícito e nunca transforma falha em sucesso silencioso.
++
+ 
+ Teste comportamentos e riscos, não contagens. Nenhuma suíte garante ausência absoluta de bugs. Ajustes de texto/instruções ou visuais reversíveis sem mudança de comportamento podem ser verificados por leitura/inspeção; não criar testes que só repetem a implementação.
+ 
+@@ -16,17 +25,17 @@
+ ## Pirâmide (referência, não quota)
+ | Nível | O que cobre | Velocidade | Quanto |
+ |---|---|---|---|
+-| **Unitário** | regras de negócio, cálculos, validações, reducers, utils, componentes isolados | ms | 70 % |
+-| **Integração** | módulo + banco real (Testcontainers/Docker), handlers HTTP, filas, repositórios, componentes com dados | ~100 ms–1 s | 20 % |
++| **Unitário** | regras de negócio, cálculos, validações, reducers, utils, componentes isolados | ms | conforme o risco |
++| **Integração** | módulo + banco real (Testcontainers/Docker), handlers HTTP, filas, repositórios, componentes com dados | ~100 ms–1 s | conforme fronteiras alteradas |
+ | **Contrato** | forma das APIs entre front/back e serviços (OpenAPI/Pact); schema do banco vs. ORM | rápido | por API |
+-| **E2E** | 5–15 fluxos críticos completos no navegador/dispositivo (login, cadastro, compra, fluxo principal) | s | 10 % |
++| **E2E** | fluxos críticos afetados, completos no navegador/dispositivo (login, cadastro, compra, fluxo principal) | s | conforme jornadas alteradas |
+ | **Propriedade** | invariantes com dados gerados (fast-check / Hypothesis) para parsers, cálculos, serialização | — | onde há lógica densa |
+ | **Mutação** | Stryker / mutmut no núcleo de domínio: prova que os testes detectam mudanças | lento, CI noturno | domínio |
+ | **Carga** | k6 nos endpoints críticos antes de lançar e antes de picos | — | pré-lançamento |
+ 
+ Mocks só na fronteira do sistema (APIs de terceiros, relógio, aleatoriedade, e-mail). **Banco de dados é real** nos testes de integração (Docker), nunca mockado.
+ 
+-## O que obrigatoriamente testar
++## Riscos a selecionar conforme a mudança
+ - Caminho feliz, **limites** (0, 1, máximo, vazio, nulo, unicode, negativo), **erros** (entrada inválida, rede falha, timeout, concorrência).
+ - Dinheiro, arredondamento, datas/timezones/horário de verão, ordenação com acentos.
+ - **Permissões**: cada endpoint com usuário sem permissão → 403; sem login → 401; outro tenant → 404.
+@@ -36,7 +45,7 @@
+ ## Como escrever testes bons
+ - **Nome descreve comportamento**: `deve rejeitar pedido com quantidade zero` / `test_rejects_zero_quantity`. Um comportamento por teste.
+ - Estrutura **Arrange–Act–Assert**, sem lógica (if/loop) dentro do teste.
+-- **Determinístico**: relógio falso, seed fixa, sem `sleep`, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
++- **Determinístico**: relógio controlado, seed fixa e espera por condição observável; espera fixa somente quando o tempo real for objeto do teste, com motivo e limite explícitos, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
+ - Dados via **factories/builders** (`buildPedido({ total: 0 })`), não fixtures gigantes.
+ - Asserções específicas (`toEqual({...})`, não `toBeTruthy`); mensagens de erro verificadas por conteúdo.
+ - Testar comportamento observável, não implementação (não asserta chamadas internas nem estado privado).
+@@ -66,7 +75,7 @@
+ ## Checklist do PR
+ - [ ] Comportamentos e riscos alterados têm testes no nível adequado; fronteiras críticas têm integração e jornadas críticas têm E2E
+ - [ ] Bug corrigido tem teste que falhava antes
+-- [ ] Nenhum `skip`/`only`/`xit`; nenhum teste com `sleep` ou dependência de ordem
++- [ ] Nenhum `skip`/`only`/`xit`; nenhuma dependência de ordem ou espera fixa sem justificativa de tempo real e limite
+ - [ ] Limites, erros e permissões cobertos
+ - [ ] Gates de cobertura pertinentes atendidos; duração medida; nenhum agregado mascara falha ou ausência de testes
+ - [ ] Testes legíveis: alguém entende o comportamento só lendo os nomes
+--- before/shared/growth-receita-implantacao/SKILL.md
++++ candidate/shared/growth-receita-implantacao/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Crescer com clientes bem atendidos
++
++## Prontidão e limites comerciais
++
++Antes de ativar um experimento externo, confira a oferta operável, versão validada, capacidade de implantação/suporte e autorização vigente de canal, público e gasto. CI verde, protótipo publicado ou avanço técnico não demonstram prontidão vendável. Não use acesso institucional para mensagens pessoais nem trate acesso à conta como autorização de campanha.
++
++No Safrion, recupere a política comercial aprovada e os adiamentos pelo [checkpoint da issue #1](https://github.com/adrptu/Safrion-Software-/issues/1), [decisões versionadas](https://github.com/adrptu/Safrion-Software-/blob/main/docs/DECISIONS.md) e recibos ali indicados. `outputs/estrategia-growth.md` é uma fonte adicional somente no executor onde existir; não pertence a este pacote. Sem fonte recuperável que comprove teto e gatilho vigentes, mantenha gasto e ativação bloqueados e solicite o recibo no canal existente, sem inventar números. Na política vigente: SITE/marketing e painel de contas preservam rascunhos e não avançam por automatismo. Mídia permanece sem execução antecipada; regras monetárias e gatilho de concordância ficam na fonte aprovada, sem duplicar valores aqui. Atualizar skills não reativa agente retirado, campanha ou automação comercial.
++
+ 
+ Parta do segmento, tarefa e versão realmente entregue. Reaproveite estratégia, CRM e eventos existentes. PLG, parceiros, conteúdo e mídia são mecanismos a testar; nenhuma ferramenta, número de agentes ou volume de peças prova produtividade.
+ 
+--- before/shared/indicadores-satelite/SKILL.md
++++ candidate/shared/indicadores-satelite/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Indicadores de satélite: cores vivas, falhas visíveis
++
++## Integração ao mapa e prova de suporte
++
++Reutilize mapa, navegação, tokens e contrato de índices do projeto. No Safrion, C4 é a fonte do escopo e dos aceites de NDVI, NDRE, EVI, SAVI e NDMI; não acrescente menu separado por seguir um exemplo desta skill. Cada índice exige bandas, fórmula, resolução efetiva, qualidade e fonte verificáveis; suporte a NDVI não comprova suporte aos demais.
++
++Mantenha cena/data, resolução, máscara, área válida e escala absoluta/relativa visíveis no contexto necessário. Sem dado/nuvem não é zero nem área de baixo vigor. Não transforme contraste relativo em diagnóstico ou recomendação automática. Raster sintético demonstra interação e deve ser identificado; não comprova integração com provedor nem observação real. Revalide somente índices/caminhos afetados por uma mudança.
++
+ 
+ **Norte:** tornar a variabilidade legível, com cores vivas e pixels dentro do talhão. Índice baixo ou cor vermelha indica valor/variação a investigar, não comprova praga, morte ou perda. Escala relativa mostra contraste interno, não gravidade: uma lavoura saudável também pode conter pixels vermelhos nesse modo.
+ 
+@@ -16,22 +23,22 @@
+ | Nível | O que mostra | Como |
+ |---|---|---|
+ | **Fazenda** (listagem) | Todos os talhões/pivôs sobre imagem real (true color ou basemap de satélite). Cada polígono preenchido com o raster do índice em cores vivas, opacidade 85 %. **Número/nome do talhão grande no centro** (fonte bold, halo branco ou escuro), legível em qualquer zoom. Manchas fracas aparecem como "ilhas" vermelho/laranja dentro do verde. | Escala **absoluta** (mesma cor = mesmo valor em toda a fazenda) para comparar talhões. Fora dos polígonos, sem overlay. |
+-| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução nativa (10 m Sentinel-2, cm no drone), **sem suavização** (`image-rendering: pixelated`, nunca interpolação bilinear/blur). Legenda com as classes e os valores reais. Falhas e zonas fracas delimitadas. | Escala **relativa ao talhão** por padrão (estica percentil 2–98 do próprio talhão), que é o que revela variabilidade dentro de uma lavoura uniforme — ex. 0,84 a 0,93 vira vermelho→verde completo. |
++| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução efetiva das bandas e do processamento, explicitada por fonte/índice, **sem suavização** (`image-rendering: pixelated`, nunca interpolação bilinear/blur). Legenda com as classes e os valores reais. Falhas e zonas fracas delimitadas. | Escala **relativa ao talhão** por padrão (estica percentil 2–98 do próprio talhão), que é o que revela variabilidade dentro de uma lavoura uniforme — ex. 0,84 a 0,93 vira vermelho→verde completo. |
+ 
+ Alternador único e sempre visível: **Contraste: Talhão | Fazenda | Absoluto**. Trocar escala recolore no cliente, sem nova requisição.
+ 
+ ## 2. Paleta viva (única em todo o sistema)
+ 
+-6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
++O design system e o contrato do projeto prevalecem; a rampa abaixo é uma referência para projetos sem decisão vigente. 6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
+ 
+ | Classe | Significado | Cor | NDVI absoluto (padrão, editável por cultura/estádio) |
+ |---|---|---|---|
+ | 1 | Índice muito baixo — investigar | `#E4002B` vermelho | < 0,30 |
+-| 2 | Fraco | `#FF6A00` laranja | 0,30–0,45 |
+-| 3 | Atenção | `#FFD500` amarelo | 0,45–0,60 |
+-| 4 | Médio | `#B5E61D` verde-limão | 0,60–0,72 |
+-| 5 | Bom | `#3FBF2A` verde vivo | 0,72–0,82 |
+-| 6 | Vigor alto | `#0B7A1E` verde escuro | > 0,82 |
++| 2 | Fraco | `#FF6A00` laranja | 0,30 ≤ índice < 0,45 |
++| 3 | Atenção | `#FFD500` amarelo | 0,45 ≤ índice < 0,60 |
++| 4 | Médio | `#B5E61D` verde-limão | 0,60 ≤ índice < 0,72 |
++| 5 | Bom | `#3FBF2A` verde vivo | 0,72 ≤ índice < 0,82 |
++| 6 | Vigor alto | `#0B7A1E` verde escuro | ≥ 0,82 |
+ 
+ - **Nuvem, sombra, neve, sem dado**: cinza `#9E9E9E` hachurado, nunca cor de índice; % de nuvem do talhão sempre exibido. Cena com > 20 % de nuvem no talhão não entra na série sem aviso.
+ - **Legenda sempre com os valores reais** de cada faixa (no modo relativo os limites mudam por talhão e a legenda acompanha).
+@@ -40,18 +47,21 @@
+ 
+ ## 3. Falhas e partes fracas (detecção automática)
+ 
++A classe absoluta usa os limites configurados da paleta; a classe relativa usa os cortes da escala vigente. A cor contínua deve ser calculada pela mesma função para pixel e legenda, sem inferir classe pela posição visual na rampa.
++
+ O mapa não é só imagem: o sistema **encontra e lista as manchas**.
+ 
+ 1. **Estatística por talhão e data**: média, mediana, desvio, P2/P10/P90/P98, % de área por classe, % nuvem. Excluir borda de 1 pixel do polígono (efeito de borda) da estatística.
+ 2. **Pixel de baixo índice relativo**: definir explicitamente o algoritmo. No exemplo conservador, valor < min(média − 1,5 DP, P10), equivalente a atender ambos os cortes, não ao OU. Excluir nodata, tratar dispersão nula e amostra insuficiente. Classe 1 absoluta é indício para investigar, não falha comprovada.
+ 3. **Mancha**: pixels candidatos contíguos (8-vizinhos) acima da área mínima definida. Três pixels inteiros de 10 × 10 m = 300 m² = **0,03 ha**; em 20 m são 0,12 ha. Calcular pela resolução/transformação real e recorte, sem fixar área pelo nome do sensor. Cada mancha tem geometria, área válida, classe, valor, ponto de vistoria dentro do polígono e evolução em cenas comparáveis.
+-4. **Queda temporal**: talhão ou mancha com índice médio caindo > 15 % vs. cena anterior válida (mesma fase da cultura) → alerta.
++4. **Queda temporal**: aplicar os níveis da tabela de estados abaixo (atenção de 10–15 %, crítico acima de 15 %) somente como exemplo configurável e validado por cultura/estádio; comparar cenas válidas e comparáveis. Definir denominador e tratar índice anterior zero/negativo ou ausente antes de usar percentual; não gerar diagnóstico agronômico pela queda isolada.
+ 5. **Padrões espaciais** geram hipóteses de vistoria, não causa nem recomendação de aplicação automática. Forma, cor ou consenso de modelos não substituem dados de campo e validação técnica.
+ 6. **Estado do talhão** derivado, visível na listagem e no mapa:
+ 
+ | Estado | Regra | Ação primária |
+ |---|---|---|
+ | Sem imagem | nenhuma cena válida ≤ 15 dias | Buscar imagens |
++| Sem dado | cena sem estatísticas confiáveis, amostra insuficiente ou valores indisponíveis | Ver qualidade da cena |
+ | Nuvem | última cena com > 20 % nuvem no talhão | Aguardar próxima cena |
+ | Normal | área fraca < 5 % e sem queda | Ver histórico |
+ | Atenção | área fraca 5–15 % ou queda 10–15 % | Ver manchas |
+@@ -59,7 +69,7 @@
+ 
+ ## 4. Telas (master-detail)
+ 
+-- **Menu → Satélite (listagem)**: mapa da fazenda (§1) + tabela de talhões com colunas: talhão, cultura/estádio, data da cena, índice médio, variação vs. anterior (seta e %), % área fraca, nº de manchas, % nuvem, estado, próximo passo. Filtro/ordenação no cabeçalho, agrupar por fazenda/cultura/estado, clique na linha ou no polígono abre o detalhe (`tabelas-interativas`). Seletor de data e de índice no topo, um só.
++- **Menu → mapa/listagem vigente do projeto**: mapa da fazenda (§1) + tabela de talhões com colunas: talhão, cultura/estádio, data da cena, índice médio, variação vs. anterior (seta e %), % área fraca, nº de manchas, % nuvem, estado, próximo passo. Filtro/ordenação no cabeçalho, agrupar por fazenda/cultura/estado, clique na linha ou no polígono abre o detalhe (`tabelas-interativas`). Seletor de data e de índice no topo, um só.
+ - **Detalhe do talhão**: raster grande (§1) com legenda e alternador de contraste; ao lado: estado + ação primária; **lista de manchas** (área, classe, evolução, botão "Ir para" que centraliza o mapa e "Criar vistoria" que gera ocorrência com GPS); histograma das classes (% de área); série temporal do índice médio com faixa P10–P90, lacunas de nuvem explícitas, marcos de plantio/aplicações; comparar duas datas lado a lado (slider ou split).
+ - **Sub-detalhe: mancha**: recorte do raster centrado na mancha, área e evolução por data, tipo provável, fotos/laudo da vistoria, status (detectada → vistoriada → causa identificada → resolvida/ignorada). Uma ação primária por status.
+ - Toque/hover em qualquer pixel mostra valor do índice, classe e coordenada. Exportar: PNG do mapa com legenda, GeoTIFF/Shapefile das manchas para o monitor.
+@@ -70,7 +80,7 @@
+ - **Dados**: `cena` (sensor, data, nuvem %, versão do processamento), `indice_talhao_cena` (estatísticas, % por classe, referência do COG), `mancha` (geometria, área, classe, valor, centroide, status, vínculo à vistoria).
+ - **Frontend**: mapa (MapLibre/Leaflet) + camada raster colorizada **no cliente** por função pura `corDoIndice(valor, escala)` — permite trocar contraste sem nova requisição; rótulos dos talhões em camada própria sempre acima do raster; renderização sem suavização.
+ - **Testes** (`dev-testes`): classificação por faixa (limites inclusivos), stretch por percentil, detecção de manchas em raster sintético (mancha de 3 px conta, 2 px não; borda excluída), regra de estado, cores/hex iguais em mapa e legenda.
+-- **Performance**: raster do talhão ≤ 1 MB (COG com overview, ou PNG paletizado), fazenda inteira via tiles; primeira pintura < 1 s em 4G.
++- **Performance**: usar COG/overviews, tiles ou formato adequado ao recorte; medir transferência, primeira pintura e interação no dispositivo/rede-alvo contra as metas do projeto. Não reduzir qualidade analítica para atingir um número arbitrário.
+ 
+ ## 6. Checklist de entrega
+ - [ ] Mapa da fazenda com número grande em cada talhão e manchas vermelhas/laranjas visíveis de longe.
+@@ -79,6 +89,6 @@
+ - [ ] Paleta de 6 cores exatas (§2) reutilizada em mapa, tabela, badge e gráfico.
+ - [ ] Nuvem em cinza hachurado, nunca com cor de índice; % nuvem visível.
+ - [ ] Manchas detectadas, listadas com área/ha, centroide e ação "Criar vistoria".
+-- [ ] Estado do talhão (5 estados) com uma ação primária cada, na listagem e no detalhe.
++- [ ] Estados do talhão conforme §3, incluindo Sem dado, com uma ação primária cada, na listagem e no detalhe.
+ - [ ] Série temporal com lacunas explícitas e comparação de duas datas.
+ - [ ] Testes unitários das funções de cor, stretch, manchas e estado.
+--- before/shared/indicadores-satelite/assets/referencia-implementacao.md
++++ candidate/shared/indicadores-satelite/assets/referencia-implementacao.md
+@@ -1,6 +1,8 @@
+ # Referência de implementação: cor, contraste, manchas, estado
+ 
+ Exemplos de funções puras, não implementação validada para produção. Conferir nodata, amostra, escala, resolução e limiares contra o SKILL.md e dados conhecidos antes de adaptar. Cores relativas não são diagnóstico; área depende da transformação real do raster. Resoluções do sensor: [Copernicus S2 Mission](https://sentiwiki.copernicus.eu/web/s2-mission).
++
++Normalizar nodata (incluindo sentinelas como −9999), nuvem e sombra para `NaN` antes destas funções. Este exemplo usa NDVI em [−1, 1]; outros índices exigem seus próprios intervalos e classes. A máscara de qualidade da fonte é obrigatória: um valor finito sob nuvem não pode ser detectado só pelo número.
+ 
+ ## Paleta e classes (fonte única)
+ 
+@@ -19,34 +21,44 @@
+ ## Escala: absoluta × relativa
+ 
+ ```ts
+-export type Escala = { min: number; max: number };            // valores que viram 0 % e 100 % da rampa
++export type Escala = { modo: 'absoluta' | 'relativa'; min: number; max: number };            // valores que viram 0 % e 100 % da rampa
+ 
+-export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
++export const escalaAbsoluta: Escala = { modo: 'absoluta', min: 0.30, max: 0.82 }; // limites da classe 1 e 6
+ 
+ /** Estica o contraste ao próprio talhão (ou à fazenda): percentil 2–98 dos pixels válidos. */
+-export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98]): Escala {
++export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98], minAmostra = 2): Escala | null {
+   const v = Array.from(valores).filter(Number.isFinite).sort((a, b) => a - b);
++  if (!Number.isFinite(minAmostra) || v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
+   const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
+   const min = q(p[0]), max = q(p[1]);
+-  return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
++  return max - min < 0.02 ? { modo: 'relativa', min: min - 0.01, max: max + 0.01 } : { modo: 'relativa', min, max }; // talhão uniforme não vira ruído
+ }
+ ```
+ 
+-## Colorização no cliente (rampa contínua, sem suavização espacial)
++`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
++
++## Colorização no cliente (classes absolutas; rampa relativa sem suavização espacial)
+ 
+ ```ts
++function misturaHex(a: string, b: string, t: number): string {
++  const canal = (hex: string, i: number) => parseInt(hex.slice(i, i + 2), 16);
++  return '#' + [1, 3, 5].map(i => Math.round(canal(a, i) * (1 - t) + canal(b, i) * t).toString(16).padStart(2, '0')).join('');
++}
+ const STOPS = CLASSES_VIGOR.map(c => c.cor);   // 6 paradas igualmente espaçadas em t ∈ [0,1]
+ 
+-export function corDoIndice(valor: number, escala: Escala): string {
+-  if (!Number.isFinite(valor)) return COR_SEM_DADO;
++export function corDoIndice(valor: number, escala: Escala | null): string {
++  if (!Number.isFinite(valor) || valor < -1 || valor > 1 || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return COR_SEM_DADO;
++  if (escala.modo === 'absoluta') return classeDoIndice(valor, escala)?.cor || COR_SEM_DADO;
+   const t = Math.min(1, Math.max(0, (valor - escala.min) / (escala.max - escala.min)));
+   const pos = t * (STOPS.length - 1), i = Math.floor(pos), f = pos - i;
+   return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
+ }
+ 
+-/** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
+-export function classeDoIndice(valor: number, escala: Escala) {
+-  if (!Number.isFinite(valor)) return null;
++/** Classe para legenda, tabela e histograma. Absoluto usa os limites configurados; relativo usa seis cortes iguais. A cor absoluta é exatamente a cor da classe; a rampa relativa não define diagnóstico. */
++export function classeDoIndice(valor: number, escala: Escala | null) {
++  if (!Number.isFinite(valor) || valor < -1 || valor > 1 || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
++  // Intervalos absolutos com limite superior exclusivo; a última classe inclui o limite final.
++  if (escala.modo === 'absoluta') return CLASSES_VIGOR.find(c => valor < c.max) || CLASSES_VIGOR[CLASSES_VIGOR.length - 1];
+   const t = (valor - escala.min) / (escala.max - escala.min);
+   return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
+ }
+@@ -56,8 +68,9 @@
+ ## Estatística e manchas
+ 
+ ```ts
+-export function estatisticas(v: Float32Array) {
++export function estatisticas(v: Float32Array, minAmostra = 2) {
+   const s = Array.from(v).filter(Number.isFinite).sort((a, b) => a - b);
++  if (!Number.isFinite(minAmostra) || s.length < Math.max(2, minAmostra)) return null;
+   const q = (t: number) => s[Math.floor(t * (s.length - 1))];
+   const media = s.reduce((a, b) => a + b, 0) / s.length;
+   const dp = Math.sqrt(s.reduce((a, b) => a + (b - media) ** 2, 0) / s.length);
+@@ -66,8 +79,9 @@
+ 
+ /** Exemplo conservador: abaixo de ambos os cortes (min), não OU; candidatos a vistoria, sem diagnóstico causal. Validar limiares, nodata e amostra. */
+ export function mascaraFraco(v: Float32Array, st: ReturnType<typeof estatisticas>) {
++  if (!st) return null; // não interpretar falta de estatística como ausência de manchas
+   const corte = Math.min(st.media - 1.5 * st.dp, st.p10);
+-  return v.map(x => (Number.isFinite(x) && x < corte ? 1 : 0)) as unknown as Uint8Array;
++  return Uint8Array.from(v, x => (Number.isFinite(x) && x < corte ? 1 : 0));
+ }
+ 
+ /** Componentes conexos (8 vizinhos) com área mínima; retorna manchas com área, média e centroide em índice de pixel. */
+@@ -98,10 +112,14 @@
+ 
+ ## Estado do talhão
+ 
++Derivados ausentes entram como NaN no exemplo numérico abaixo (não converter null para zero). Estatística insuficiente mantém “Sem dado”; não significa “Normal”.
++
+ ```ts
+ export function estadoTalhao(a: { diasDesdeCena: number | null; nuvemPct: number; areaFracaPct: number; quedaPct: number; maiorManchaNovaHa: number }) {
+   if (a.diasDesdeCena === null || a.diasDesdeCena > 15) return { estado: 'Sem imagem', acao: 'Buscar imagens' };
++  if (!Number.isFinite(a.diasDesdeCena) || a.diasDesdeCena < 0 || !Number.isFinite(a.nuvemPct) || a.nuvemPct < 0 || a.nuvemPct > 100) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
+   if (a.nuvemPct > 20) return { estado: 'Nuvem', acao: 'Aguardar próxima cena' };
++  if (![a.areaFracaPct, a.quedaPct, a.maiorManchaNovaHa].every(Number.isFinite) || a.areaFracaPct < 0 || a.areaFracaPct > 100 || a.maiorManchaNovaHa < 0) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
+   if (a.areaFracaPct > 15 || a.quedaPct > 15 || a.maiorManchaNovaHa > 1) return { estado: 'Crítico', acao: 'Criar vistoria' };
+   if (a.areaFracaPct >= 5 || a.quedaPct >= 10) return { estado: 'Atenção', acao: 'Ver manchas' };
+   return { estado: 'Normal', acao: 'Ver histórico' };
+@@ -109,8 +127,8 @@
+ ```
+ 
+ ## Casos de teste mínimos
+-- `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
++- `corDoIndice(0.30, absoluta)` → `#FF6A00` (classe Fraco); `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
+ - `escalaRelativa` de um talhão com valores 0,84–0,93 devolve min≈0,84 e max≈0,93 (o mapa usa a rampa inteira).
+ - Raster sintético 10×10 com bloco de 3 px fracos → 1 mancha; bloco de 2 px → 0 manchas; dois blocos separados → 2 manchas.
+-- `estadoTalhao` cobre os 5 estados e a precedência (Sem imagem > Nuvem > Crítico > Atenção > Normal).
++- `estadoTalhao` cobre também estatística ausente/NaN e amostra insuficiente, sem cair em Normal; Sem imagem e Nuvem preservam a precedência quando seus dados são válidos.
+ - Mesma cor na legenda e no pixel para um valor dado (snapshot).
+--- before/shared/master-detail-ux/SKILL.md
++++ candidate/shared/master-detail-ux/SKILL.md
+@@ -5,14 +5,21 @@
+ 
+ # Master-detail: localizar, entender e agir
+ 
++## Origem, destino e contexto ativo
++
++Cada tela esclarece origem/contexto, estado atual, ação possível, consequência/destino e recuperação. Modal ou subdetalhe ativo concentra a primária; a tela de fundo não compete. Preserve rascunho, filtros, foco e posição ao abrir/fechar ou voltar. Drill-down temporário pode substituir o recorte visível sem sobrescrever preferências persistidas.
++
++Classificar funções da pessoa não cria novos menus. Reutilize a navegação acordada; corte submenus, telas intermediárias e ações equivalentes. Painéis, mapas e alternâncias de visualização não exigem entidades ou níveis artificiais. Preserve visão global necessária e acesso ao detalhe; estado de negócio não é inferido apenas de cor, percentual ou existência de dados.
++
++
+ **Menu → Listagem → Detalhe → Sub-detalhe.** Toda entidade de gestão tem listagem e detalhe. A estrutura organiza o trabalho; não exige adicionar componentes sem função.
+ 
+ ## Princípios
+ 
+ 1. **Estado visível:** mostrar a situação com vocabulário consistente e texto, sem depender só de cor. Barra de etapas e percentual apenas quando representam progresso real e ajudam a decidir.
+ 2. **Próximo passo com verbo:** indicar a ação adequada ao estado e à permissão. Deixar claro onde está no processo, o que falta e como avançar. Se estiver impedida, mostrar a causa e quem pode resolver, sem oferecer execução inválida. Avançar conserva o contexto e não dispara sozinho a operação da etapa seguinte.
+-3. **Uma ação primária por tela:** posição consistente e acessível. Secundárias junto do conteúdo a que pertencem; destrutivas separadas. Manter a primária alcançável em tela longa; repetir em rodapé apenas se a distância justificar, sem cobrir dados, campo ativo, teclado virtual ou controles. Conferir toque, teclado e posição após erros.
+-4. **Contexto preservado:** título, vínculo ao pai e retorno claro; voltar conserva filtros, posição e estado útil. Detalhe pode ser página ou painel acessível, com referência estável.
++3. **Uma ação primária por contexto ativo:** posição consistente e acessível. Secundárias junto do conteúdo a que pertencem; destrutivas separadas. Manter a primária alcançável em tela longa; repetir em rodapé apenas se a distância justificar, sem cobrir dados, campo ativo, teclado virtual ou controles. Conferir toque, teclado e posição após erros.
++4. **Contexto preservado:** título, vínculo ao pai e retorno claro; voltar conserva filtros, posição e estado útil. Detalhe pode ser página, painel ou expansão acessível com referência estável; no celular, não exige empilhar rotas quando o detalhe pode permanecer no contexto.
+ 5. **Vocabulário e cores consistentes:** usar os mesmos nomes e tokens do design system para o mesmo significado; classificação não se confunde com estado.
+ 
+ ## Por nível
+--- before/shared/master-detail-ux/references/checklist.md
++++ candidate/shared/master-detail-ux/references/checklist.md
+@@ -4,7 +4,7 @@
+ - [ ] Cada entidade de gestão tem listagem e detalhe acessíveis.
+ - [ ] Estado visível e vocabulário/cores consistentes, sem depender só de cor.
+ - [ ] Próximo passo nomeado com verbo; impedimento e permissão respeitados.
+-- [ ] Uma ação primária por tela; secundárias e destrutivas não competem.
++- [ ] Uma ação primária por contexto ativo; secundárias e destrutivas não competem.
+ - [ ] Retorno e vínculo ao pai claros; contexto preservado ao navegar.
+ - [ ] Seções e sub-detalhes pertencem à entidade; cada componente tem função real.
+ - [ ] Etapas, percentuais e indicadores só aparecem quando têm significado verificável.
+--- before/shared/minimalismo-essencial/SKILL.md
++++ candidate/shared/minimalismo-essencial/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Só o que ajuda a tarefa
++
++## Simplificação que preserva o trabalho
++
++Cadastros devem reutilizar contexto confiável, seleção rápida e autocomplete acessível dentro das permissões. Campos da mesma tarefa ficam juntos, com validação local e confirmação clara. Não repartir preenchimento entre cards, submenus ou wizards sem etapa real. Resumo, card, tooltip e rodapé só permanecem quando ajudam uma decisão ou recuperação que ainda não está atendida.
++
++No código e nos documentos, referencie contratos e design system vigentes em vez de copiá-los. Remova instruções obsoletas que contradizem a regra nova; não acumule adendos incompatíveis. Encerrar uma correção não exige nova infraestrutura, pesquisa completa ou auditoria integral sem motivo material.
++
+ 
+ Cada elemento deve ajudar o usuário a agir, entender, decidir ou recuperar-se de erro, ou ser necessário ao funcionamento e aos controles do processo. Menos elementos não prova melhor usabilidade: medir conclusão, tempo, erro e esforço.
+ 
+@@ -19,7 +26,7 @@
+ 
+ ## Direção visual
+ 
+-- Uma ação primária; secundárias úteis junto de seu contexto, sem competição.
++- Uma ação primária por contexto ativo; secundárias úteis junto de seu contexto, sem competição.
+ - Título curto e linguagem do usuário; ajuda curta quando evita erro ou dúvida real. Não impor zero explicações a pessoas que precisam de orientação.
+ - Campos necessários ao processo, com rótulo visível e unidade acessível. Não esconder campo obrigatório só para cumprir uma quota.
+ - Colunas para localizar, comparar e decidir; dados complementares no detalhe. Indicadores apenas quando sustentam uma decisão.
+@@ -28,7 +35,7 @@
+ 
+ ## Metas de concisão e exceções
+ 
+-Uma ação primária é regra. Como metas iniciais, buscar até duas secundárias visíveis, título de até quatro palavras, criação com até cinco campos, listagem com até seis colunas e painel com até quatro indicadores. São sinais para revisar, não limites que autorizam esconder informação necessária ou quebrar uma tarefa em etapas. Exceder quando o processo, a persona, a acessibilidade ou o design system justificar; explicar brevemente na revisão existente.
++Uma ação primária por contexto ativo é regra. Quantidade de campos, colunas, indicadores e secundárias depende da decisão e da tarefa; não imponha quotas que escondam dados ou fabriquem etapas. Corte redundância antes de deslocar informação necessária para outro lugar. Preserve unidades, aprovações, visão global, origem e recuperação.
+ 
+ Microcopy: verbo + objeto nos botões; erro = o que houve + como corrigir, preferindo até duas frases; vazio = uma frase e uma ação; unidade junto do campo. Evitar exclamações, emojis, jargão e palavras de cortesia repetidas nos controles. Não abreviar a ponto de perder sentido.
+ 
+@@ -48,6 +55,6 @@
+ 
+ ## Procedimento final
+ 
+-Inventarie o que importa ao fluxo, classifique e execute os cortes com justificativa. Tente cortar mais um elemento; mantenha-o se passar no teste de essencialidade. Só reintroduza ruído removido com evidência de necessidade. Verifique que a tarefa continua completa, acessível e segura; reverifique o comportamento afetado. Entregue três listas curtas: **aplicado**, **deixado de fora**, **cortado**, com motivo.
++Inventarie o que importa ao fluxo, classifique e execute os cortes com justificativa. Reveja somente elementos cuja utilidade esteja em dúvida; não faça cortes por ritual. Só reintroduza ruído removido com evidência de necessidade. Verifique que a tarefa continua completa, acessível e segura; reverifique o comportamento afetado. Entregue três listas curtas: **aplicado**, **deixado de fora**, **cortado**, com motivo.
+ 
+ Não cortar por estética: aprovações exigidas, isolamento/permissões, unidades, incerteza relevante, distinção entre rascunho/pendente/aceito, contexto de ambiente, avisos necessários ou caminhos de recuperação.
+--- before/shared/negocios-ecossistema/SKILL.md
++++ candidate/shared/negocios-ecossistema/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Negócios que remuneram valor
++
++## Oferta validada e receita distinta de volume
++
++Separe completude técnica, funcional, homologação e prontidão comercial. Fatia de estoque concluída não significa fase comercial inteira concluída. Oferta e promessa ao cliente dependem do inventário de requisitos e provas, sem prazo garantido ou ganho fabricado por consenso de modelos.
++
++Política futura de investimento não autoriza antecipar gasto. Use a fonte aprovada para base, período, percentuais, limites e condições de ativação; não substitua receita por GMV, crédito ou saldo de terceiros. Preserve adiamentos e rascunhos comerciais enquanto o produto é validado. Revalidar uma hipótese financeira não altera por si só contrato, campanha ou acesso de conta.
++
+ 
+ No Safrion, adote a missão do proprietário: **Juntos pelo sucesso total do agro brasileiro.** Transforme-a em benefícios verificáveis para produtor, equipe de campo, consultoria, fornecedor, comprador, financiador e plataforma. Não prometa satisfação universal, domínio de mercado ou lucro garantido.
+ 
+--- before/shared/safrion-equipe/SKILL.md
++++ candidate/shared/safrion-equipe/SKILL.md
+@@ -1,59 +1,50 @@
+ ---
+ name: safrion-equipe
+-description: Coordene entregas do Safrion (Do Talhão à O.S.) entre Codex e Claude Code, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
++description: Coordene entregas do Safrion (Do Talhão à O.S.) com implementação e revisão cruzada de Codex e Claude e crítica delimitada do Gemini real, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
+ metadata:
+-  version: "1.0.0"
++  version: "2.0.1"
+ ---
+ 
+ # Equipe Safrion (Do Talhão à O.S.)
+ 
+-Use os skills existentes para executar a tarefa; este skill organiza a passagem entre os dois agentes. Não muda permissões nem substitui o PRD.
++Codex dirige produto/UX/QA; Codex e Claude implementam partes delimitadas e revisam reciprocamente. O revisor integra o PR do outro; ninguém aprova ou integra o próprio PR. Gemini real participa de decisões, deltas materiais e contraexemplos, inclusive fluxo, acessibilidade e domínio. Não simule modelos. Grok saiu da equipe; preserve seu histórico sem acioná-lo.
+ 
+-## Começar pelo estado real
++## Retomar pelo registro vigente
+ 
+-Localize a raiz do projeto pelo contexto e leia apenas o necessário: `AGENTS.md`, `docs/STATUS.md`, requisitos citados de `docs/PRD.md` e a rodada atual em `docs/parceria/rodadas/`. `CLAUDE.md` pode apontar para `AGENTS.md`; mantenha uma fonte de regras. Se o repositório não estiver identificado, confirme-o antes de editar; não crie outro.
++Leia `AGENTS.md`, [docs/STATUS.md](https://github.com/adrptu/Safrion-Software-/blob/main/docs/STATUS.md), o cabeçalho do checkpoint da [issue #1](https://github.com/adrptu/Safrion-Software-/issues/1) e os deltas dos PRs depois do último recibo de cada IA. Siga o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md) e recupere fontes/diffs/provas pelos commits e recibos indicados nesses registros. Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui.
+ 
+-Identifique a fatia ativa, base (commit ou hashes), mudanças em curso e responsável pelos arquivos. Reaproveite a solução existente. Não implemente nos mesmos arquivos do outro agente sem combinar a integração.
++No executor local do proprietário, `outputs/revisao-f0a.md` e `work/fontes-claude/` são canais adicionais quando existem e estão acessíveis; não fazem parte deste pacote nem são pré-requisitos de uma sessão limpa. Na nuvem ou sem esses diretórios, use os registros versionados, checkpoint e PRs acima. Se a prova necessária existir apenas no Mac, solicite ao autor sua fonte recuperável no canal existente e mantenha o aceite dependente bloqueado; não reconstrua nem presuma a evidência. Preserve o trabalho independente possível.
+ 
+-## Carregar somente o que a tarefa exige
++Priorize risco crítico, correção ou revisão devolvida pronta, dependência imediata e próximo item apto. Confira pedidos enviados, recebidos, em execução e devolvidos: ACK não é entrega, ausência de ACK não prova ociosidade. Só Codex edita o checkpoint; releia antes de editar, preserve histórico e não crie outra fila ou automação.
+ 
+-Leia os skills abaixo pelo catálogo do ambiente. No uso local, confira os diretórios de skills do Codex ou do Claude; não pressuponha que a instalação local está disponível em sessões na nuvem. Se faltar uma dependência necessária, declare a ausência e preserve o trabalho possível.
++## Autoria e passagem imediata
+ 
+-| Trabalho da fatia | Skills pertinentes |
+-|---|---|
+-| Construir ou evoluir produto | `dev-ciclo-completo`; `agro-gestao-conhecimento` para regras agro |
+-| Definir módulo ou comparar práticas | `benchmark-top5`; reutilizar pesquisa atual pertinente |
+-| Criar ou revisar interface | `ux-essencial`, `master-detail-ux`, `minimalismo-essencial`; `tabelas-interativas` quando houver tabela |
+-| Implementar interface ou app | `dev-frontend-mobile` |
+-| API, dados ou integrações | `dev-backend` |
+-| Testar ou revisar código | `dev-testes`, `dev-revisao` |
+-| Ambientes, entrega ou incidentes | `dev-infra` |
+-| Indicadores de satélite ou drone | `indicadores-satelite` |
++Registre na mesma tarefa: IDs, resultado/persona, base/arquivos/trechos, autor, revisor/integrador e aceite. Uma autoria ativa por agente; paralelismo somente com contratos e arquivos/trechos separados. Preserve trabalho e rascunhos da sessão existente do Claude. Enquanto o outro revisa, avance na implementação delimitada já combinada, sem invadir sua autoria.
+ 
+-Não carregue todos por rotina nem instale dependências ou ferramentas só porque aparecem como exemplos. Decisões, contratos e regras de negócio ficam nos documentos do projeto, não neste skill.
++Passe entrega pronta ao próximo responsável imediatamente durante trabalho ativo. A agenda retoma a sessão; não é intervalo obrigatório entre agentes nem garantia de execução remota. Antes de encerrar por dependência externa, confira correção própria, entrega do outro e implementação apta. Se não houver, deixe pedido concreto de próxima divisão e gatilho exato de retomada. Não invente conclusão nem prazo garantido.
+ 
+-## Entregar e revisar sem retrabalho
++Envio incerto exige readback antes de reenviar. Duas falhas pela mesma causa pedem abordagem diferente ou bloqueio documentado. Respeite interface bloqueada, cotas, permissões e controles; não contorne nem faça consultas pagas repetitivas. Falha de transporte, bloqueio de ferramenta e falta de retorno são estados diferentes.
+ 
+-Registre na rodada existente, de forma curta: **resultado/persona e IDs do PRD; autor/revisor/integrador; base/arquivos; aceite/teste; estado/próximo passo**. Uma fatia útil por vez. Paralelismo só quando necessário e autorizado, com arquivos e saídas delimitados.
++## Revisar a mesma candidata
+ 
+-- O autor faz a menor mudança coerente, verifica o comportamento e entrega caminho/diff, versão, comandos, resultados e limites.
+-- O outro agente procura contraexemplos na versão entregue. Distingue defeito demonstrado, risco a investigar e preferência; cada achado tem cenário, impacto e aceite observável.
+-- O integrador confere a base antes de aplicar. Depois da integração, execute a regressão afetada; não repita toda a bateria sem uma mudança ou dúvida que justifique.
+-- Revisão do Claude significa revisão pelo Claude real, e vice-versa. Confirme envio e retorno por evidência. Sem acesso, deixe pedido preparado e revisão pendente; não simule concordância.
+-- Encerre quando o aceite do escopo e a revisão estiverem resolvidos. Melhorias opcionais vão para a fila, sem abrir ciclos infinitos de polimento.
++Confira base, autor e arquivos; leia fontes recuperáveis/diff e saídas pertinentes; reproduza o comportamento alterado. Hash sem fontes, teste proposto e relato do autor não comprovam execução independente. Use perfis, dados e portas isolados e preserve provas válidas. Consolide um retorno por candidata: cenário, versão, evidência, impacto, severidade S1–S4 conforme PRD 22.1, prioridade separada e aceite observável.
+ 
+-## Verificação que não produz aprovação falsa
++Solicite ao Claude real crítica das entregas substantivas do Codex e revise as do Claude. Gemini real Pro/HIGH usa o adaptador oficial Vertex verificado, com pacote mínimo inspecionado, sem segredos/dados reais; cada consulta resolve decisão ou contraexemplo material. Referências não enviadas permanecem indisponíveis; não consulte por ritual. Divergência se resolve por fonte/reprodução, não votação. Após correção, reteste o afetado; integre o PR do outro quando checks e pareceres pertinentes estiverem resolvidos.
+ 
+-Uma saída zero com ajuda, nenhum teste executado, asserção mascarada ou resumo contraditório não comprova sucesso. Separe falha do produto, teste obsoleto, precondição ausente, artefato antigo, problema da ferramenta e bloqueio externo antes de corrigir.
++## Produto, publicação e transição
+ 
+-Em jornadas com estado, registre a ordem e as precondições; ordem alfabética não é uma sequência funcional. Não reutilize perfil de navegador, porta ou dados de teste que outro agente esteja alterando sem coordenação. Preserve evidências válidas ao retomar; dois fracassos pela mesma causa exigem outra hipótese ou uma tarefa menor.
++Conclua todo o conjunto vigente do protótipo, usando IDs/estados atuais. Publique incrementos operáveis no protótipo existente após os aceites pertinentes, com versão, URL e mudança concreta. Publicação parcial, ACK, camada sintética e tarefa técnica encerrada não concluem o conjunto nem disparam auditoria integral.
+ 
+-## Feedback e homologação desde cedo
++Somente com todas as melhorias concluídas e candidata completa/operável identificada por versão, URL, fontes, diff e provas, realize auditoria integral de Codex, Claude e Gemini reais na mesma candidata, com inventário comum e análise dos brutos. Ferramenta indisponível permanece bloqueada. Corrija divergências reproduzidas e reteste só o afetado.
+ 
+-Transforme a explicação do agricultor em tarefa curta: **o que tentou, o que aconteceu, o esperado e a evidência disponível**. Registre o que foi efetivamente visto/ouvido; não invente conteúdo inacessível de áudio ou vídeo. Aproveite o relato original e peça complemento só quando mudar a correção. Preserve o requisito de print e comentário do fluxo de feedback do produto.
++Depois da conclusão e validação, transfira à aplicação Next existente por fatias tela → domínio → banco, comprovando fidelidade e HML. Registre no mesmo ID: protótipo → implementado no real → testado → HML. Preserve trabalhos reais anteriores; não inicie nova evolução paralela do protótipo. F1 técnico não equivale à Fase 1 comercial; o escopo é o do PRD/registro vigente.
+ 
+-Priorize acesso à primeira fatia funcional verificada. Diferencie protótipo, homologação e produção pelo que realmente está disponível. Para teste humano, entregue versão, acesso testado, dados de demonstração e roteiro curto baseado nos aceites; indique limitações materiais. Use os critérios de liberação e o aceite explícito do proprietário definidos no projeto. Não confunda aprovação do plano com aprovação de produção.
++O confronto do PRD após as implantações só começa quando todas as implantações vigentes estiverem concluídas com evidências. Corrija divergências, lacunas, ambiguidades e redundâncias necessárias sem ampliar escopo, perder IDs/histórico/pendências ou legitimar defeito por estar implementado. Referencie o design system. Se não houver mudança, registre conferência e mantenha versão; se houver, combine autoria e solicite revisão real, com integração pelo revisor. Gemini participa quando o domínio/fluxo mudar materialmente.
+ 
+-## Melhorar com evidência
++## Autorizações e fontes
+ 
+-Corrija o método quando uma falha real revelar lacuna; prefira corrigir a ferramenta ou o teste responsável a acrescentar regras genéricas. Revise alterações deste skill com o outro agente. Meça pelos registros existentes esforço do agricultor, defeitos escapados e retrabalho; número de skills, agentes ou testes não mede sucesso.
++Reutilize autorizações concretas de desenvolvimento/QA/HML, sem pedir novamente. Orçamento/alerta não limita cobrança; produção exige aceite explícito de Adrianus sobre a candidata e pareceres pertinentes. Não altere proteções nem realize efeitos reais de produção sem autorização. Executor local continua local até prova remota; aplicativo/computador indisponível impede retomada.
++
++Marketing/SITE, contas e mídia seguem adiamentos e gatilhos comerciais registrados; preserve rascunhos. Nenhum CI verde libera campanhas. Não copie valores mutáveis de orçamento, IDs de PRs atuais ou estado do backlog para esta skill.
++
++Carregue só skills pertinentes: `dev-ciclo-completo`, `dev-revisao`, `dev-testes`; por camada `dev-frontend-mobile`, `dev-backend`, `dev-infra`; por UX `master-detail-ux`, `ux-essencial`, `minimalismo-essencial`, `tabelas-interativas`; por domínio `agro-gestao-conhecimento`, `indicadores-satelite`; `benchmark-top5` reutiliza pesquisa vigente; negócio/growth somente no escopo autorizado. Instalação local não comprova disponibilidade em sessão na nuvem; confira leitura/recibo, não apenas catálogo.
+--- before/shared/safrion-equipe/agents/openai.yaml
++++ candidate/shared/safrion-equipe/agents/openai.yaml
+@@ -1,4 +1,4 @@
+ interface:
+   display_name: "Equipe Safrion"
+   short_description: "Cooperação, revisão e homologação do Safrion"
+-  default_prompt: "Use $safrion-equipe para conduzir a próxima entrega do Safrion com revisão entre Codex e Claude e evidências de validação."
++  default_prompt: "Use $safrion-equipe para conduzir a próxima entrega do Safrion com implementação e revisão cruzada de Codex e Claude, crítica pertinente do Gemini real e evidências de validação."
+--- before/shared/tabelas-interativas/SKILL.md
++++ candidate/shared/tabelas-interativas/SKILL.md
+@@ -5,7 +5,16 @@
+ 
+ # Tabelas interativas
+ 
+-Toda tabela de dados entregue tem **quatro recursos obrigatórios**. Não são opcionais e não dependem do usuário pedir.
++## Universo, agregação e continuidade
++
++Filtro, grupo, total, contador e drill-down precisam se referir ao mesmo universo autorizado. Declare se o valor representa página, recorte ou total global. Mantenha valores tipados separados da apresentação; ausentes permanecem distintos de zero e sua posição na ordenação deve ser explícita e consistente nos dois sentidos.
++
++Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset usa `agg: null` por padrão. Ative agregação somente com regra validada do domínio.
++
++Ao detalhar e voltar, preserve busca, filtros, ordem, grupos abertos, página/posição e foco. Recorte recebido de painel/mapa tem contexto explícito e recuperação, sem ser silenciosamente limitado por busca antiga ou sobrescrever preferências persistidas. Alternâncias tabela/raias/calendário conservam entidade, permissão e semântica de contagem.
++
++
++Listagens interativas de gestão seguem os **quatro recursos** abaixo. Adapte a semântica e os controles ao formato e ao conjunto; uma tabela curta de comparação em texto não exige construir uma aplicação.
+ 
+ ## 1. Ordenação no cabeçalho
+ - Clicar no título da coluna ordena: crescente → decrescente → sem ordenação.
+@@ -50,7 +59,7 @@
+ ### HTML, artifact, relatório web (padrão)
+ O componente [assets/tabela.js](assets/tabela.js) e [assets/exemplo.html](assets/exemplo.html) são referências a inspecionar e testar; não presumir conformidade, segurança ou agregação correta. Prefira o componente existente do projeto quando ele atende ao contrato. Para grandes bases, filtro/ordenação/agrupamento devem operar no conjunto autorizado no servidor, sem fingir totais globais sobre uma página local.
+ 
+-1. Leia `assets/tabela.js` e **cole o conteúdo inteiro em um `<script>` inline** (artifacts bloqueiam scripts de hosts não permitidos; em projetos com build, copie o arquivo para o repositório).
++1. Somente se o asset for a solução escolhida, inspecione `assets/tabela.js` e integre conforme build/CSP do projeto; não copie o componente inteiro para substituir um componente existente adequado.
+ 2. Crie a tabela:
+ 
+ ```html
+@@ -63,8 +72,8 @@
+       { key: 'pedido', label: 'Pedido', type: 'text' },
+       { key: 'data', label: 'Data', type: 'date' },          // 'AAAA-MM-DD', dd/mm/aaaa ou Date
+       { key: 'regiao', label: 'Região' },
+-      { key: 'valor', label: 'Valor', type: 'currency' },   // agg padrão: sum
+-      { key: 'margem', label: 'Margem', type: 'percent' },  // 0.23 → 23,0%; agg padrão: avg
++      { key: 'valor', label: 'Valor total', type: 'currency', agg: 'sum' }, // valores aditivos do exemplo
++      { key: 'margem', label: 'Margem', type: 'percent', agg: null }, // resumo exige razão de totais do domínio
+       { key: 'obs', label: 'Observação', hidden: true },     // só no painel de detalhe
+     ],
+     groupBy: ['regiao'],        // agrupamento inicial opcional; datas: 'data:ano' | 'data:mes' | 'data:dia'
+@@ -78,7 +87,7 @@
+ 
+ Opções de coluna: `key`, `label`, `type` (`text` | `integer` | `number` | `currency` | `percent` | `date`), `agg` (`sum` | `avg` | `min` | `max` | `count` | função `(rows)=>valor` | `null`), `decimals`, `currency` (padrão `BRL`), `format(v,row)`, `render(v,row)` (retorna HTML — escape você mesmo), `value(row)` (coluna calculada), `width`, `hidden`.
+ 
+-Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sobrescrevendo qualquer média automática do exemplo.
++Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sem inferir soma ou média pelo formato da coluna.
+ 
+ API retornada: `setRows(rows)`, `groupBy([...])`, `filter(key, texto)`, `sort(key, 1|-1|0)`, `drillTo([{spec, key, label}])`, `clearFilters()`, `getRows()`, `getState()`, `destroy()`.
+ 
+@@ -108,7 +117,7 @@
+ - Se o usuário usa Excel desktop, sugerir também uma Tabela Dinâmica sobre a Tabela.
+ 
+ ### Terminal / chat em Markdown
+-Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link.
++Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link, somente com dados sintéticos ou explicitamente autorizados para esse destino. Se o projeto proibir dados reais em artefatos, mantenha-os no ambiente autorizado; autorização genérica de desenvolvimento não libera exportação.
+ 
+ ---
+ 
+@@ -121,4 +130,6 @@
+ - [ ] Drill-down: expandir grupo, "Detalhar" com trilha e Voltar, painel de detalhe da linha com "Filtrar por este"
+ - [ ] Contador "X de Y linhas", filtros ativos destacados, estado vazio com "Limpar filtros"
+ - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
+-- [ ] Funciona com teclado e nos temas claro e escuro
++- [ ] Funciona com teclado e nos temas adotados pelo projeto
++
++O asset `Tabela.create` aceita `rowKey` (nome de campo ou função; padrão `id`) para preservar o detalhe em `setRows` com objetos novos. Use uma identidade estável e única. Sem chave, somente o mesmo objeto pode manter seleção; registro removido ou chave duplicada fecha o detalhe, sem escolher outro registro. Atualização conserva grupos expandidos e contexto ainda válido.
+--- before/shared/tabelas-interativas/assets/exemplo.html
++++ candidate/shared/tabelas-interativas/assets/exemplo.html
+@@ -41,7 +41,7 @@
+       { key: 'categoria', label: 'Categoria' },
+       { key: 'quantidade', label: 'Qtd.', type: 'integer', agg: 'sum' },
+       { key: 'valor', label: 'Valor', type: 'currency', agg: 'sum' },
+-      { key: 'margem', label: 'Margem', type: 'percent', agg: 'avg' },
++      { key: 'margem', label: 'Margem', type: 'percent', agg: null },
+     ],
+     groupBy: ['regiao', 'uf'],
+     sort: ['-valor'],
+--- before/shared/tabelas-interativas/assets/tabela.js
++++ candidate/shared/tabelas-interativas/assets/tabela.js
+@@ -121,14 +121,20 @@
+     else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+     return Number(s);
+   }
++  function calendarDate(y, m, day) {
++    const d = new Date(0);
++    d.setFullYear(y, m - 1, day);
++    d.setHours(0, 0, 0, 0);
++    return d.getFullYear() === y && d.getMonth() === m - 1 && d.getDate() === day ? d : null;
++  }
+   function toDate(v) {
+     if (v instanceof Date) return isNaN(v) ? null : v;
+     if (typeof v === 'number') return new Date(v);
+     const s = String(v);
+     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+-    if (m) return new Date(+m[1], m[2] - 1, +m[3]);
++    if (m) return calendarDate(+m[1], +m[2], +m[3]);
+     const b = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+-    if (b) return new Date(+b[3], b[2] - 1, +b[1]);
++    if (b) return calendarDate(+b[3], +b[2], +b[1]);
+     const d = new Date(s);
+     return isNaN(d) ? null : d;
+   }
+@@ -158,7 +164,7 @@
+     injectCss();
+     const root = typeof target === 'string' ? document.querySelector(target) : target;
+     if (!root) throw new Error('Tabela: container não encontrado');
+-    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, detail: null }, options);
++    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, rowKey: 'id', detail: null }, options);
+ 
+     let data = [], rowIdx = new Map(), cols = [], colMap = {};
+     let current = [], tree = null, groupIndex = new Map(), pendingExpand = opts.expandLevels > 0;
+@@ -169,17 +175,25 @@
+     function setData(rows) {
+       data = rows || [];
+       rowIdx = new Map(data.map((r, i) => [r, i]));
+-      const src = opts.columns || [...new Set(data.slice(0, 50).flatMap((r) => Object.keys(r)))];
++      // Uma resposta vazia transitória preserva o esquema e o contexto da tabela.
++      const src = opts.columns || (data.length ? [...new Set(data.slice(0, 50).flatMap((r) => Object.keys(r)))] : cols);
+       cols = src.map((c) => {
+         c = typeof c === 'string' ? { key: c } : Object.assign({}, c);
+         c.label = c.label || prettify(c.key);
+         c.type = c.type || inferType(c.key, data.slice(0, 200).map((r) => r[c.key]));
+-        if (c.agg === undefined) c.agg = c.type === 'percent' ? 'avg' : isNum(c.type) ? 'sum' : null;
++        if (c.agg === undefined) c.agg = null; // Agregação exige regra explícita do domínio.
+         return c;
+       });
+       colMap = {};
+       cols.forEach((c) => (colMap[c.key] = c));
+       specCache.clear();
++      st.groupBy = st.groupBy.filter((id) => gspec(id));
++      if (st.focus.some((f) => !gspec(f.spec))) st.trail = [];
++      st.focus = st.focus.filter((f) => gspec(f.spec));
++      st.sort = st.sort.filter((s) => colMap[s.key]);
++      for (const state of [st.filters, st.values]) {
++        for (const key of Object.keys(state)) if (!colMap[key]) Reflect.deleteProperty(state, key);
++      }
+     }
+     const vis = () => cols.filter((c) => !c.hidden);
+     const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
+@@ -255,11 +269,13 @@
+         let m = t.match(/^(.+?)\.\.(.+)$/);
+         if (m) {
+           const a = typed.parse(m[1]), b = typed.parse(m[2]);
++          if (c.type === 'date' && (isNaN(a) || isNaN(b))) return () => false;
+           if (!isNaN(a) && !isNaN(b)) return (r) => { const v = typed.get(r); return v != null && v >= a && v <= b; };
+         }
+         m = t.match(/^(>=|<=|!=|<>|>|<|=)\s*(.+)$/);
+         if (m) {
+           const x = typed.parse(m[2]), op = m[1];
++          if (c.type === 'date' && isNaN(x)) return () => false;
+           if (!isNaN(x)) return (r) => {
+             const v = typed.get(r);
+             if (v == null) return op === '!=' || op === '<>';
+@@ -427,7 +443,7 @@
+         groupIndex.set(g.id, g);
+         const open = st.open.has(g.id);
+         h += `<tr class="dt-grp${open ? ' dt-open' : ''}" tabindex="0" data-g="${esc(g.id)}" aria-expanded="${open}">` +
+-          `<td colspan="${span}" style="padding-left:${8 + g.depth * 20}px"><div class="dt-gl"><span class="dt-caret">▶</span><span class="dt-gk">${esc(g.spec.label)}:</span><span>${esc(g.label)}</span><span class="dt-badge" title="linhas">${fmtInt(g.rows.length)}</span><button class="dt-drill" data-drill title="Abrir somente este grupo (duplo clique)">Detalhar ›</button></div></td>` +
++          `<td colspan="${span}" style="padding-left:${8 + g.depth * 20}px"><div class="dt-gl"><span class="dt-caret">▶</span><span class="dt-gk">${esc(g.spec.label)}:</span><span>${esc(g.label)}</span><span class="dt-badge" title="linhas">${fmtInt(g.rows.length)}</span><button class="dt-drill" data-drill title="Abrir somente este grupo (duplo clique)">Detalhar ›</button></div>${firstAgg === 0 ? `<div class="dt-n">${esc(fmtAgg(V[0], g.aggs[V[0].key]))}</div>` : ''}</td>` +
+           V.slice(span).map((c) => `<td${isNum(c.type) ? ' class="dt-n"' : ''}>${c.agg ? esc(fmtAgg(c, g.aggs[c.key])) : ''}</td>`).join('') + '</tr>';
+         if (open) h += g.children ? renderGroups(g.children, V) : renderLeaves(g.rows, g.depth + 1, g.id, V);
+       }
+@@ -542,12 +558,13 @@
+       }
+       const universe = [...counts.values()].sort((a, b) => (a.sort == null ? 1 : b.sort == null ? -1 : cmp(a.sort, b.sort)));
+       const valsEl = pop.querySelector('.dt-vals'), search = pop.querySelector('[data-vs]');
+-      let shown = [];
++      let shown = [], matched = [];
+       function drawVals() {
+         const q = norm(search.value.trim()), set = st.values[key];
+         const match = q ? universe.filter((u) => norm(u.label).includes(q)) : universe;
++        matched = match;
+         shown = match.slice(0, 500);
+-        const all = shown.length > 0 && shown.every((u) => !set || set.has(u.key));
++        const all = matched.length > 0 && matched.every((u) => !set || set.has(u.key));
+         valsEl.innerHTML = `<label><input type="checkbox" data-all ${all ? 'checked' : ''}><span class="dt-v"><b>(Selecionar ${q ? 'resultados' : 'tudo'})</b></span></label>` +
+           shown.map((u, i) => `<label><input type="checkbox" data-vi="${i}" ${!set || set.has(u.key) ? 'checked' : ''}><span class="dt-v">${esc(u.label)}</span><span class="dt-c">${fmtInt(u.n)}</span></label>`).join('') +
+           (match.length > shown.length ? `<div class="dt-note">+${fmtInt(match.length - shown.length)} valores — refine a busca</div>` : '') +
+@@ -557,9 +574,9 @@
+       search.addEventListener('input', drawVals);
+       valsEl.addEventListener('change', (e) => {
+         let set = st.values[key] || new Set(universe.map((u) => u.key));
+-        if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
+-        else { const u = shown[+e.target.dataset.vi]; e.target.checked ? set.add(u.key) : set.delete(u.key); }
+-        if (universe.every((u) => set.has(u.key))) delete st.values[key]; else st.values[key] = set;
++        if (e.target.hasAttribute('data-all')) matched.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
++        else { const u = shown[+e.target.dataset.vi]; if (e.target.checked) set.add(u.key); else set.delete(u.key); }
++        if (universe.every((u) => set.has(u.key))) Reflect.deleteProperty(st.values, key); else st.values[key] = set;
+         st.limits = {};
+         renderBody(); drawVals();
+       });
+@@ -568,7 +585,7 @@
+         if (!b) return;
+         if (b.dataset.s !== undefined) { closeMenu(); toggleSort(key, e.shiftKey, +b.dataset.s); }
+         else if (b.dataset.gp) { closeMenu(); addGroup(b.dataset.gp); }
+-        else if (b.hasAttribute('data-clr')) { delete st.filters[key]; delete st.values[key]; closeMenu(); renderBody(); }
++        else if (b.hasAttribute('data-clr')) { Reflect.deleteProperty(st.filters, key); Reflect.deleteProperty(st.values, key); closeMenu(); renderBody(); }
+       });
+ 
+       const rect = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+@@ -667,7 +684,8 @@
+       e.dataTransfer.effectAllowed = 'move';
+       e.dataTransfer.setData('text/plain', 'chip');
+     });
+-    document.addEventListener('dragend', () => { drag = null; zone.classList.remove('dt-over'); });
++    const onDragEnd = () => { drag = null; zone.classList.remove('dt-over'); };
++    document.addEventListener('dragend', onDragEnd);
+     zone.addEventListener('dragover', (e) => { if (drag) { e.preventDefault(); zone.classList.add('dt-over'); } });
+     zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dt-over'); });
+     zone.addEventListener('drop', (e) => {
+@@ -684,13 +702,14 @@
+       if (b) { st.groupBy.splice(+b.dataset.ungroup, 1); st.limits = {}; renderBody(); }
+     });
+     addSel.addEventListener('change', () => { if (addSel.value) addGroup(addSel.value); });
+-    root.addEventListener('click', (e) => {
++    const onRootClick = (e) => {
+       const a = e.target.closest('[data-act]');
+       if (!a) return;
+       if (a.dataset.act === 'clear') clearFilters();
+       else if (a.dataset.act === 'expand') { walk(tree, (g) => st.open.add(g.id)); renderBody(); }
+       else if (a.dataset.act === 'collapse') { st.open.clear(); st.limits = {}; renderBody(); }
+-    });
++    };
++    root.addEventListener('click', onRootClick);
+     crumbs.addEventListener('click', (e) => { const b = e.target.closest('[data-crumb]'); if (b) goCrumb(+b.dataset.crumb); });
+ 
+     tbody.addEventListener('click', (e) => {
+@@ -711,7 +730,7 @@
+     function toggleGroup(id, force) {
+       const open = force ?? !st.open.has(id);
+       if (open === st.open.has(id)) return;
+-      open ? st.open.add(id) : st.open.delete(id);
++      if (open) st.open.add(id); else st.open.delete(id);
+       renderBody();
+       refocus({ g: id });
+     }
+@@ -744,7 +763,27 @@
+     renderBody();
+ 
+     return {
+-      setRows(rows) { closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
++      setRows(rows) {
++        const selected = st.sel == null ? null : data[st.sel];
++        const identity = (row) => typeof opts.rowKey === 'function' ? opts.rowKey(row) : row?.[opts.rowKey];
++        const key = selected && identity(selected);
++        const active = document.activeElement;
++        const panelFocus = panel?.contains(active);
++        const focusAttr = panelFocus && ['data-close', 'data-nav', 'data-fk', 'id', 'name'].find((attr) => active.hasAttribute(attr));
++        const focusValue = focusAttr && active.getAttribute(focusAttr);
++        const scroll = panel?.querySelector('.dt-pb').scrollTop;
++        closeMenu(); setData(rows);
++        const matches = selected ? data.map((row, i) => ({ row, i })).filter(({ row }) => key == null ? row === selected : identity(row) === key) : [];
++        if (matches.length === 1) st.sel = matches[0].i;
++        else closePanel();
++        if (!opts.columns) renderHead();
++        renderBody();
++        if (panel && panelFocus) {
++          const next = focusAttr && [...panel.querySelectorAll('[' + focusAttr + ']')].find((el) => el.getAttribute(focusAttr) === focusValue && !el.disabled);
++          (next || panel.querySelector('[data-close]')).focus();
++          panel.querySelector('.dt-pb').scrollTop = scroll;
++        }
++      },
+       groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
+       filter(key, text) { st.filters[key] = text || ''; renderBody(); },
+       sort(key, dir) { toggleSort(key, false, dir); },
+@@ -752,7 +791,7 @@
+       clearFilters,
+       getRows: () => current.slice(),
+       getState: () => ({ sort: st.sort.slice(), filters: Object.assign({}, st.filters), groupBy: st.groupBy.slice(), focus: st.focus.slice() }),
+-      destroy() { closeMenu(); closePanel(); document.removeEventListener('keydown', onDocKey); root.innerHTML = ''; root.classList.remove('dt'); },
++      destroy() { closeMenu(); closePanel(); document.removeEventListener('keydown', onDocKey); document.removeEventListener('dragend', onDragEnd); root.removeEventListener('click', onRootClick); root.innerHTML = ''; root.classList.remove('dt'); },
+     };
+   }
+ 
+--- before/shared/ux-essencial/SKILL.md
++++ candidate/shared/ux-essencial/SKILL.md
+@@ -5,11 +5,23 @@
+ 
+ # UX Essencial — o sistema como braço direito
+ 
++## Fluxo contínuo com consequência clara
++
++Na entrada de cada contexto, torne reconhecíveis origem, estado, o que fazer, destino/consequência e recuperação, usando a informação mínima necessária. Nomeie comandos pelo objetivo da pessoa; detalhes internos de implementação não pertencem ao fluxo. Preserve valores, filtros e foco quando o contexto mudar; avançar não executa automaticamente a operação seguinte.
++
++Use o design system vigente também para densidade, tipografia, cores de estado e alvos de toque. No Safrion, consulte as decisões NAV/DS na fonte do projeto; não duplique suas regras no PRD ou crie menus pela classificação das funções do usuário. Ajuda aparece onde previne erro, sem repetir título e estado em vários cards.
++
++Recuperação precisa ser verdadeira: desfazer não apaga edições posteriores; vazio mantém a ação de recuperar quando aplicável; falha conserva rascunho e indica o próximo passo. Verifique teclado, foco, celular e teclado virtual no fluxo alterado; redução de cliques não comprova ganho sem tarefa concluída e erros observados.
++
++
+ **Norte:** o usuário chega, faz o que veio fazer no menor tempo possível, sem pensar, sem medo de errar, e sai com a sensação de que o sistema trabalhou por ele.
+ 
+ Teste de cada tela: **"Qual é a única coisa que a pessoa veio fazer aqui? Ela consegue fazer isso agora, com o mínimo de passos?"** Se não, redesenhe antes de codar.
+ 
+ ---
++
++Toda ação relevante, inclusive salvar e cancelar, tem retorno inequívoco no contexto: processamento, salvo/pendente ou erro e próximo passo. Cancelar informa se preservou rascunho ou descartou alterações; navegar para fora não significa salvar. Reutilize a camada de feedback do design system, sem toast duplicado nem confirmação modal em toda ação; confirmação adicional depende de risco real. Nunca mostrar sucesso antes do recibo.
++
+ 
+ ## 1. Processo — pensar antes de desenhar
+ 1. **Tarefa principal** de cada tela em uma frase ("Registrar pedido de um cliente conhecido").
+@@ -20,9 +32,9 @@
+ 
+ ## 2. Leis da fricção zero
+ **Menos passos**
+-- **Uma ação primária por tela**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Nunca duas primárias.
++- **Uma ação primária por contexto ativo**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Ao abrir modal/subdetalhe, a primária do contexto ativo não compete com a tela de fundo.
+ - A tarefa mais frequente fica **na primeira tela, sem navegar**. Nada de "home" decorativa: a home é o trabalho (lista, caixa de entrada, próximo passo).
+-- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Data atual e usuário logado não são necessariamente data da operação e executor.
++- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Nunca reaproveitar o último valor para lote, dose, quantidade ou autorização. Data atual e usuário logado não são necessariamente data da operação e executor.
+ - **Autocompletar com fonte**: cadastro autorizado → entidade/unidade/preço vigente; quantidade × preço → total calculado. Não inferir nome/identidade pelo e-mail. Seleções mostram dados suficientes para distinguir homônimos.
+ - **Criação rápida inline**: campo "Adicionar…" + Enter. Detalhes opcionais depois, na própria linha.
+ - **Edição inline** (clicar no valor e editar). Modal só para fluxo realmente separado.
+@@ -48,8 +60,8 @@
+ - Busca contextual acessível; busca global e paleta Ctrl/⌘+K quando reduzem esforço real. Atalhos complementam controles visíveis.
+ - **Atalhos de teclado** para as ações frequentes (N = novo, / = buscar, E = editar, Esc = fechar), exibidos nos tooltips e na paleta.
+ - **URL reflete o estado** (filtros, aba, item aberto): dá para compartilhar, recarregar e voltar sem perder nada.
+-- Navegação: **3 a 5 destinos principais**, profundidade máxima de 3 níveis, caminho sempre visível.
+-- **Organização das telas** segue a skill **`master-detail-ux`** (Menu → Listagem → Detalhe → Sub-detalhe; estado visível, próximo passo nomeado, uma ação primária por tela).
++- Navegação: destinos e níveis nascem das entidades e tarefas segundo `master-detail-ux`; preserve caminho visível, sem quotas que criem agrupamentos artificiais.
++- **Organização das telas** segue a skill **`master-detail-ux`** (Menu → Listagem → Detalhe → Sub-detalhe; estado visível, próximo passo nomeado, uma ação primária por contexto ativo).
+ - **Tabelas** seguem a skill **`tabelas-interativas`** (filtro e ordenação no cabeçalho, agrupamento, drill-down).
+ 
+ **Notificações e mensagens**
+@@ -87,7 +99,7 @@
+ 
+ Exemplos: **[assets/m3.css](assets/m3.css)**, **[assets/m3-kit.js](assets/m3-kit.js)** e **[assets/exemplo.html](assets/exemplo.html)**. Inspecione acessibilidade, segurança e compatibilidade antes de reutilizar; não são componentes certificados nem substituem o design system vigente. Respeite a política de recursos externos do ambiente.
+ 
+-- **Cor por papéis** (`primary`, `on-primary`, `secondary-container`, `surface-container-*`, `on-surface-variant`, `outline`, `error`) — nunca hex solto no componente. Paleta padrão GM3 azul; para a marca, gerar o esquema no Material Theme Builder e trocar só os tokens. **Uma cor de destaque**; o resto são superfícies neutras. Claro e escuro sempre.
++- **Cor por papéis** (`primary`, `on-primary`, `secondary-container`, `surface-container-*`, `on-surface-variant`, `outline`, `error`) — nunca hex solto no componente. Paleta padrão GM3 azul; para a marca, gerar o esquema no Material Theme Builder e trocar só os tokens. **Uma cor de destaque**; o resto são superfícies neutras. Verificar os temas adotados pelo projeto; não criar outro tema por rotina.
+ - **Tipografia**: escala M3 (Display, Headline, Title, Body, Label); Roboto Flex/Roboto; **sentence case** em títulos e botões ("Criar pedido", não "CRIAR PEDIDO" nem "Criar Pedido"). Máx. 2–3 tamanhos por tela.
+ - **Espaço**: grade de 4/8 px; respiro generoso separa grupos melhor que linhas e caixas.
+ - **Forma**: 4 (campos) · 8 (chips) · 12 (cards) · 16 (FAB) · 28 (diálogos) · pílula (botões).
+@@ -98,7 +110,7 @@
+ - **Layout adaptativo (classes de janela M3)**: compacto < 600 px → barra de navegação inferior; médio 600–839 → navigation rail; expandido ≥ 840 → rail/drawer + painéis lista-detalhe lado a lado. Densidade maior em desktop para dados.
+ 
+ ## 5. Minimalismo e essencialismo
+-A lei de corte completa (5 testes de essencialidade, orçamentos por tela, lista de proibidos, procedimento de corte e lista de cortes na entrega) está na skill **`minimalismo-essencial`** — aplicar sempre, ao fechar toda tela.
++A lei de corte completa (5 testes de essencialidade, concisão por tarefa, exclusões justificadas, procedimento de corte e lista de cortes na entrega) está na skill **`minimalismo-essencial`** — aplicar sempre, ao fechar toda tela.
+ - Para cada elemento: **"se eu remover, alguém sente falta?"** Se não, remove.
+ - Nada decorativo: sem ilustrações de enfeite, gradientes, sombras gratuitas, textos de boas-vindas, ícones sem função.
+ - **Hierarquia clara**: o olho cai primeiro na informação/ação principal; secundário em `on-surface-variant`.
+@@ -110,7 +122,7 @@
+ 
+ ## 7. Plataformas
+ Na ausência de design system do projeto, usar as referências abaixo, respeitando a stack e as convenções já adotadas.
+-- **Web (HTML/React/Vue/Next)**: `m3.css` + `m3-kit.js` ou tokens M3 mapeados no Tailwind/CSS do projeto. Evite `@material/web` (em modo de manutenção). MUI só se já existir no projeto, ajustando tema para M3.
++- **Web (HTML/React/Vue/Next)**: `m3.css` + `m3-kit.js` ou tokens M3 mapeados no Tailwind/CSS do projeto. Verifique manutenção, licença e adequação atuais antes de adotar uma biblioteca. MUI só se já existir no projeto, ajustando tema para M3.
+ - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
+ - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
+ 
+@@ -131,3 +143,11 @@
+ - [ ] Acessível (contraste, teclado, foco não encoberto, alvos conforme design system/plataforma)
+ - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
+ - [ ] Tabelas conforme `tabelas-interativas`
++
++O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
++
++O snapshot preserva nomes repetidos. Checkbox (inclusive único) e select múltiplo usam sempre arrays, inclusive `[]` ao desmarcar tudo; controles desabilitados não são enviados. Outros nomes repetidos usam escalar com um valor e array com vários; o domínio deve aceitar essa cardinalidade. Uploads exigem contrato próprio de persistência/comparação, ausente deste kit.
++
++`flush()` retorna `{ok:true}` somente após confirmação (ou conteúdo já confirmado); falha retorna `{ok:false, reason}`. Confira esse resultado antes de navegar. `dirty` e `pending` expõem edição sem recibo e atividade/incerteza. `save(data, {signal})` deve rejeitar falhas ou retornar `{ok:false}` e usar transporte com prazo finito, cancelamento e versão/idempotência no domínio. O kit dá prazo `timeoutMs` (15 s por padrão) e AbortSignal: timeout é resultado incerto, não prova que o servidor cancelou. A fila devolve falha observável em vez de ficar pendurada; não envia a próxima versão até recibo remoto de sucesso ou reconciliação que prove término no servidor. Rejeição local após abort mantém a incerteza, mesmo que a promise termine. `reconcile(readback)` só libera com `{settled:true, data}`: o adaptador deve consultar o resultado terminal da operação e a versão vigente no servidor, devolvendo o snapshot completo confirmado. Um GET de valor momentâneo, sem comprovar que a escrita anterior não pode concluir depois, NÃO autoriza settled:true. A reconciliação mantém o formulário/rascunho e não envia automaticamente; nova tentativa explícita usa versão/idempotência do domínio. Readback sem confirmação ou rejeitado mantém o bloqueio. Se o transporte ignorar cancelamento e nunca terminar, preserve o rascunho e reconcilie no domínio antes de remontar; não faça retry cego nem suponha cancelamento remoto.
++
++`destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
+--- before/shared/ux-essencial/assets/m3-kit.js
++++ candidate/shared/ux-essencial/assets/m3-kit.js
+@@ -2,8 +2,8 @@
+  * m3-kit.js — ajudantes de fricção zero (usa as classes de m3.css).
+  *   Kit.snackbar('Mensagem', { action: 'Desfazer', onAction, timeout })
+  *   Kit.undoable({ message, run, undo })            → executa já, oferece Desfazer (sem diálogo de confirmação)
+- *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
+- *   Kit.autosave(form, save, { delay })              → salva sozinho, sem botão "Salvar"
++ *   Kit.commands([{ title, icon, keys, keywords, run }])  → open/destroy; paleta Ctrl/⌘+K + atalhos de teclado
++ *   Kit.autosave(form, save, { delay, timeoutMs })   → flush: {ok, reason}; dirty/pending; reconcile: recibo remoto terminal
+  */
+ (function (global) {
+   'use strict';
+@@ -27,13 +27,14 @@
+     requestAnimationFrame(() => el.classList.add('show'));
+     const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); if (live === el) live = null; };
+     const [a, x] = action ? el.querySelectorAll('button') : [null, el.querySelector('button')];
+-    if (a) a.addEventListener('click', () => { close(); onAction && onAction(); });
++    if (a) a.addEventListener('click', () => { close(); if (onAction) onAction(); });
+     x.addEventListener('click', close);
+     let remaining = timeout, started = Date.now();
+     const arm = () => { started = Date.now(); timer = setTimeout(close, remaining); };
+     el.addEventListener('mouseenter', () => { clearTimeout(timer); remaining -= Date.now() - started; });
+     el.addEventListener('mouseleave', arm);
+     arm();
++    close.isCurrent = () => live === el;
+     return close;
+   }
+ 
+@@ -54,11 +55,25 @@
+   const label = (keys) => parseKeys(keys).map((p) => (p === 'mod' ? (isMac ? '⌘' : 'Ctrl') : p === 'shift' ? '⇧' : p === 'alt' ? (isMac ? '⌥' : 'Alt') : p.toUpperCase())).join(isMac ? '' : '+');
+ 
+   function commands(list) {
+-    registry.push(...list);
+-    return { open: openPalette };
+-  }
+-
+-  let scrim = null;
++    const entries = list.map(command => ({ ...command }));
++    registry.push(...entries);
++    let disposed = false;
++    refreshPalette?.();
++    return {
++      open: () => { if (!disposed) openPalette(); },
++      destroy: () => {
++        if (disposed) return;
++        disposed = true;
++        for (const entry of entries) {
++          const index = registry.indexOf(entry);
++          if (index !== -1) registry.splice(index, 1);
++        }
++        refreshPalette?.();
++      }
++    };
++  }
++
++  let scrim = null, refreshPalette = null;
+   function openPalette() {
+     if (scrim) return;
+     const back = document.activeElement;
+@@ -77,8 +92,8 @@
+         : '<div class="empty">Nenhum comando encontrado</div>';
+       ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+     };
+-    const close = () => { scrim.remove(); scrim = null; back && back.focus && back.focus(); };
+-    const exec = (c) => { close(); c && c.run(); };
++    const close = () => { scrim.remove(); scrim = null; refreshPalette = null; if (back && back.focus) back.focus(); };
++    const exec = (c) => { close(); if (c) c.run(); };
+     input.addEventListener('input', () => { sel = 0; draw(); });
+     input.addEventListener('keydown', (e) => {
+       if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); draw(); }
+@@ -88,12 +103,13 @@
+     });
+     ul.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) exec(shown[+li.dataset.i]); });
+     scrim.addEventListener('mousedown', (e) => { if (e.target === scrim) close(); });
++    refreshPalette = draw;
+     draw();
+     input.focus();
+   }
+ 
+   document.addEventListener('keydown', (e) => {
+-    if (matches(e, 'mod+k')) { e.preventDefault(); scrim ? scrim.querySelector('input').focus() : openPalette(); return; }
++    if (matches(e, 'mod+k')) { e.preventDefault(); if (scrim) scrim.querySelector('input').focus(); else openPalette(); return; }
+     if (scrim) return;
+     for (const c of registry) {
+       if (!c.keys) continue;
+@@ -104,19 +120,105 @@
+   });
+ 
+   // ---------- autosave ----------
+-  function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
+-    let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
+-    const flush = async () => {
+-      const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
+-      if (json === last) return;
+-      last = json;
+-      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
+-      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
+-    };
+-    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
+-    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
+-    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
+-    return { flush };
++  function autosave(form, save, { delay = 600, message = 'Salvo', timeoutMs = 15000 } = {}) {
++    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError('timeoutMs deve ser positivo');
++    const snapshot = () => {
++      const data = new FormData(form), multi = new Set();
++      for (const field of form.elements) {
++        if (field.name && !field.matches(':disabled') && (field.type === 'checkbox' || field.multiple)) multi.add(field.name);
++      }
++      return Object.fromEntries([...new Set([...data.keys(), ...multi])].map(key => {
++        const values = data.getAll(key);
++        return [key, multi.has(key) || values.length !== 1 ? values : values[0]];
++      }));
++    };
++    let t = null, last = JSON.stringify(snapshot());
++    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null, writeSerial = 0;
++    const dirty = () => JSON.stringify(snapshot()) !== last;
++    const notice = (text, options = {}) => { if (!destroyed) closeNotice = snackbar(text, options); };
++    const flush = () => {
++      clearTimeout(t); t = null;
++      if (destroyed) return Promise.resolve({ ok: false, reason: 'destroyed' });
++      const data = snapshot(), json = JSON.stringify(data);
++      pending++;
++      queue = queue.then(async () => {
++        if (destroyed) return { ok: false, reason: 'destroyed' };
++        if (uncertain) {
++          notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
++          return { ok: false, reason: 'pending' };
++        }
++        if (json === last) return { ok: true };
++        const serial = ++writeSerial;
++        const controller = new window.AbortController();
++        let timer, timedOut = false;
++        const operation = Promise.resolve().then(() => save(data, { signal: controller.signal })).then(
++          receipt => {
++            if (receipt?.ok === false) throw new Error('Gravação recusada');
++            if (serial === writeSerial && !destroyed) {
++              last = json;
++              if (timedOut) {
++                uncertain = false;
++                const ownsNotice = closeNotice?.isCurrent();
++                closeNotice?.();
++                if (dirty()) { clearTimeout(t); t = setTimeout(flush, delay); }
++                else if ((ownsNotice || !live) && message) notice(message, { timeout: 2000 });
++              }
++            }
++            return receipt;
++          },
++          error => { throw error; },
++        );
++        try {
++          await Promise.race([operation, new Promise((_, reject) => {
++            timer = setTimeout(() => {
++              timedOut = true; uncertain = true; controller.abort();
++              reject(new Error('timeout'));
++            }, timeoutMs);
++          })]);
++          if (message && !dirty() && (!live || closeNotice?.isCurrent())) notice(message, { timeout: 2000 });
++          return { ok: true };
++        } catch {
++          if (timedOut) notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
++          else notice('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
++          return { ok: false, reason: timedOut ? 'timeout' : 'save' };
++        } finally { clearTimeout(timer); }
++      }).finally(() => { pending--; });
++      return queue;
++    };
++    // Somente o domínio pode comprovar término remoto; rejeição local/abort não basta.
++    const reconcile = async (readback) => {
++      if (destroyed) return { ok: false, reason: 'destroyed' };
++      if (!uncertain) return { ok: true };
++      const serial = writeSerial;
++      try {
++        const receipt = await readback();
++        if (destroyed || serial !== writeSerial || receipt?.settled !== true || !receipt.data || typeof receipt.data !== 'object' || Array.isArray(receipt.data)) return { ok: false, reason: 'pending' };
++        last = JSON.stringify(receipt.data);
++        writeSerial++;
++        uncertain = false;
++        closeNotice?.();
++        return { ok: true };
++      } catch { return { ok: false, reason: 'readback' }; }
++    };
++    const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
++    const onSubmit = (event) => { event.preventDefault(); flush(); };
++    const onBeforeUnload = (event) => {
++      if (pending || uncertain || dirty()) { event.preventDefault(); event.returnValue = ''; }
++    };
++    form.addEventListener('input', onInput);
++    form.addEventListener('submit', onSubmit);
++    window.addEventListener('beforeunload', onBeforeUnload);
++    const destroy = ({ discard = false } = {}) => {
++      if (!discard && (pending || uncertain || dirty())) return Promise.resolve({ ok: false, reason: 'pending' });
++      destroyed = true;
++      clearTimeout(t); t = null;
++      form.removeEventListener('input', onInput);
++      form.removeEventListener('submit', onSubmit);
++      window.removeEventListener('beforeunload', onBeforeUnload);
++      closeNotice?.();
++      return Promise.resolve({ ok: true });
++    };
++    return { flush, destroy, reconcile, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
+   }
+ 
+   global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };
+--- before/test_gemini_consult.py
++++ candidate/test_gemini_consult.py
+@@ -20,6 +20,17 @@
+         session = patch.dict(os.environ, {"CLOUD_SHELL": "true"})
+         session.start()
+         self.addCleanup(session.stop)
++        # O pacote versionado tem raízes próprias; nunca validar cópias instaladas
++        # no lugar dos arquivos em revisão. Na instalação, conservar o catálogo real.
++        package = Path(__file__).resolve().parent
++        shared, specific = package / "shared", package / "gemini"
++        if shared.is_dir() or specific.is_dir():
++            catalog = {name: (shared if path.is_relative_to(consult.SHARED_SKILLS_DIR)
++                              else specific) / name / "SKILL.md"
++                       for name, path in consult.SKILL_CATALOG.items()}
++            self.enterContext(patch.object(consult, "SHARED_SKILLS_DIR", shared))
++            self.enterContext(patch.object(consult, "SKILLS_DIR", specific))
++            self.enterContext(patch.dict(consult.SKILL_CATALOG, catalog, clear=True))
+ 
+     def invoke(self, arguments, auth=None, response=None):
+         stdin = io.TextIOWrapper(io.BytesIO(b"Revisar apenas esta fixture sintetica."), encoding="utf-8")
+@@ -65,6 +76,28 @@
+         auth.assert_not_called()
+         http.assert_not_called()
+         return err
++
++    def test_all_twenty_owned_skills_are_available_without_loading_them_together(self):
++        shared = {"agro-gestao-conhecimento", "benchmark-top5", "dev-backend",
++                  "dev-ciclo-completo", "dev-frontend-mobile", "dev-infra",
++                  "dev-revisao", "dev-testes", "growth-receita-implantacao",
++                  "indicadores-satelite", "master-detail-ux", "minimalismo-essencial",
++                  "negocios-ecossistema", "safrion-equipe", "tabelas-interativas", "ux-essencial"}
++        specific = {"gcp-infra-essencial", "gcp-custos", "gcp-desempenho-incidentes", "revisao-terceira-opiniao"}
++        self.assertEqual(set(consult.SKILL_CATALOG), shared | specific)
++        for name in sorted(shared | specific):
++            with self.subTest(skill=name):
++                code, out, err, auth, http = self.invoke(["--dry-run", "--skill", name])
++                self.assertEqual((code, err), (0, ""))
++                receipt = json.loads(out)
++                self.assertEqual({item["name"] for item in receipt["skills"]}, {name})
++                for item in receipt["skills"]:
++                    source = (consult.SKILL_CATALOG[name].parent / item["file"]).resolve()
++                    self.assertEqual(item["resolvedPath"], str(source))
++                    self.assertEqual(item["sha256"], hashlib.sha256(source.read_bytes()).hexdigest())
++                self.assertEqual(receipt["payload"]["generationConfig"]["thinkingConfig"]["thinkingLevel"], "HIGH")
++                auth.assert_not_called()
++                http.assert_not_called()
+ 
+     def test_remote_preserves_session_identity_and_runtime(self):
+         session = {"CLOUD_SHELL": "true", "PATH": "/google/bin", "CLOUDSDK_CONFIG": "/session/config", "CLOUDSDK_PYTHON": "/session/python"}

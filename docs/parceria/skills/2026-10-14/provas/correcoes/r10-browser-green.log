@@ -1,0 +1,150 @@
+[
+  {
+    "name": "Preço e taxa não agregam por tipo",
+    "ok": true
+  },
+  {
+    "name": "Soma explícita permanece disponível",
+    "ok": true
+  },
+  {
+    "name": "Gravações são serializadas",
+    "ok": true
+  },
+  {
+    "name": "Saída com gravação pendente pede confirmação",
+    "ok": true
+  },
+  {
+    "name": "Versão recente vence conclusão tardia",
+    "ok": true
+  },
+  {
+    "name": "Reversão ao valor inicial é persistida após envio pendente",
+    "ok": true
+  },
+  {
+    "name": "Conteúdo igual não duplica gravação confirmada",
+    "ok": true
+  },
+  {
+    "name": "Falha permite reenviar o mesmo conteúdo",
+    "ok": true
+  },
+  {
+    "name": "Recibo concluído libera saída",
+    "ok": true
+  },
+  {
+    "name": "Edição anterior ao debounce pede confirmação",
+    "ok": true
+  },
+  {
+    "name": "Checkboxes com mesmo nome preservam todos os valores",
+    "ok": true
+  },
+  {
+    "name": "Select múltiplo preserva todos os valores",
+    "ok": true
+  },
+  {
+    "name": "Campo simples preserva contrato string",
+    "ok": true
+  },
+  {
+    "name": "Alteração anterior ao último valor também é gravada",
+    "ok": true
+  },
+  {
+    "name": "Desmontar formulário remove guarda de saída",
+    "ok": true
+  },
+  {
+    "name": "Destruir cancela debounce pendente",
+    "ok": true
+  },
+  {
+    "name": "Formulário destruído não inicia novos envios",
+    "ok": true
+  },
+  {
+    "name": "Destruir descarta envio ainda na fila",
+    "ok": true
+  },
+  {
+    "name": "Falha de flush retorna ok false",
+    "ok": true
+  },
+  {
+    "name": "Falha mantém dirty observável",
+    "ok": true
+  },
+  {
+    "name": "Destroy recusa rascunho sem decisão",
+    "ok": true
+  },
+  {
+    "name": "Select múltiplo com um valor continua array",
+    "ok": true
+  },
+  {
+    "name": "Desmarcar último checkbox envia array vazio",
+    "ok": true
+  },
+  {
+    "name": "Select múltiplo vazio envia chave vazia",
+    "ok": true
+  },
+  {
+    "name": "Destroy fecha snackbar da própria instância",
+    "ok": true
+  },
+  {
+    "name": "Envio travado retorna timeout observável",
+    "ok": true
+  },
+  {
+    "name": "Timeout sinaliza abort ao transporte",
+    "ok": true
+  },
+  {
+    "name": "Incerteza mantém pending e dirty",
+    "ok": true
+  },
+  {
+    "name": "Fila não trava nem envia sobre escrita incerta",
+    "ok": true
+  },
+  {
+    "name": "Após resolução do transporte versão recente pode salvar",
+    "ok": true
+  },
+  {
+    "name": "Abort local não libera escrita enquanto servidor pode concluir B",
+    "ok": true
+  },
+  {
+    "name": "Readback ainda pendente mantém bloqueio",
+    "ok": true
+  },
+  {
+    "name": "Readback terminal preserva rascunho C e libera tentativa explícita",
+    "ok": true
+  },
+  {
+    "name": "Após readback B confirmado, C prevalece sem ultrapassagem",
+    "ok": true
+  },
+  {
+    "name": "Falha de readback mantém escrita incerta",
+    "ok": true
+  },
+  {
+    "name": "Recibo antigo após reconciliação não substitui confirmação C",
+    "ok": true
+  },
+  {
+    "name": "Nova tentativa incerta renova aviso mesmo após outro snackbar",
+    "ok": true
+  }
+]

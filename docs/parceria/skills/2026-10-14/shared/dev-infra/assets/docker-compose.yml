@@ -1,0 +1,38 @@
+# docker-compose.yml — ambiente de desenvolvimento completo em 1 comando: docker compose up
+services:
+  app:
+    build:
+      context: .
+      target: deps          # em dev roda com hot reload sobre o código montado
+    command: npm run dev
+    ports: ['3000:3000']
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app
+      REDIS_URL: redis://redis:6379
+      SMTP_URL: smtp://mailpit:1025
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app }
+    ports: ['5432:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck: { test: ['CMD-SHELL', 'pg_isready -U app'], interval: 5s, timeout: 5s, retries: 10 }
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    healthcheck: { test: ['CMD', 'redis-cli', 'ping'], interval: 5s, timeout: 5s, retries: 10 }
+
+  mailpit:                  # captura e-mails em dev: http://localhost:8025
+    image: axllent/mailpit
+    ports: ['8025:8025', '1025:1025']
+
+volumes:
+  pgdata:
