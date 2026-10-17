@@ -36,10 +36,15 @@ function slData(t,ctx){ const s=String(t==null?'':t).trim(); if(!s) return ''; l
     for(let yy=y0; yy<=y1; yy++){ if(ok(yy)&&iso(yy)>=ini&&(!fim||iso(yy)<=fim)) return iso(yy); }
     y=y0; }
   if(y<1900||y>2200||!ok(y)) return null; return iso(y); }
-// cultura e plano pelo texto (sem acento, sem diferença de maiúscula; o plano também pelo código ou pelo nome sem a versão)
+// cultura e plano pelo texto (sem acento, sem diferença de maiúscula)
 function slCultura(t,ctx){ const k=slSemAc(t); return (ctx.culturas||[]).find(c=>slSemAc(c)===k)||null; }
-function slPlano(t,ctx){ const k=slSemAc(t); if(!k||/^(sem plano|—|-|nenhum)$/.test(k)) return {id:''};
-  const ps=ctx.planos||[]; return ps.find(p=>slSemAc(p.id)===k)||ps.find(p=>slSemAc(p.nome)===k)||ps.find(p=>slSemAc(p.nome+' v'+p.versao)===k)||ps.find(p=>k.indexOf(slSemAc(p.nome))===0)||null; }
+// plano pelo texto, só com correspondência exata (revisão do Codex 6229216931, PR #47: o prefixo e o nome repetido aplicavam outra receita):
+// 1) o código do plano; 2) nome + versão ("Soja alta tecnologia v6"; o rótulo da lista, com "· N atividades", também vale); 3) o nome sem a
+// versão, só se for único entre os planos da cultura da linha (sem cultura, no catálogo inteiro). Nada por prefixo, e a ordem do catálogo
+// não decide nada. Devolve {id:''} (sem plano), o plano, {ambiguo:[planos]} ou null (não encontrado)
+function slPlano(t,ctx,cult){ const k=slSemAc(t).replace(/\s*·\s*\d+\s+atividades?$/,''); if(!k||/^(sem plano|—|-|nenhum)$/.test(k)) return {id:''};
+  const ps=ctx.planos||[]; const um=(l)=>{ if(!l.length) return null; const dc=cult?l.filter(p=>p.cultura===cult):[]; const m=dc.length?dc:l; return m.length===1?m[0]:{ambiguo:m}; };
+  return um(ps.filter(p=>slSemAc(p.id)===k))||um(ps.filter(p=>slSemAc(p.nome+' v'+p.versao)===k))||um(ps.filter(p=>slSemAc(p.nome)===k)); }
 function slCultDoPlano(id,ctx){ const p=(ctx.planos||[]).find(x=>x.id===id); return p?p.cultura:null; }
 // pode receber o valor? {ok, v} ou {ok:false, motivo}. A linha traz o que trava (trava[col]: motivo da O.S., do ciclo ou da área calculada) e a
 // cultura do rascunho (o plano tem de ser dela). Mesmas mensagens do Dividir e do painel do cultivo, curtas para o resumo da colagem
@@ -53,8 +58,11 @@ function slPode(lin,col,txt,ctx,cultAtual){ if(!lin||lin.tipo==='grp') return {o
   if(col==='plantio'){ const d=slData(s,ctx); return d===null?{ok:false,motivo:'data inválida (use dd/mm/aaaa)'}:{ok:true,v:d}; }
   if(col==='cult'){ const c=slCultura(s,ctx); return c?{ok:true,v:c}:{ok:false,motivo:'cultura "'+s+'" não está no cadastro'}; }
   if(col==='var') return {ok:true,v:s};
-  if(col==='plano'){ const p=slPlano(s,ctx); if(!p) return {ok:false,motivo:'plano "'+s+'" não encontrado'}; if(!p.id) return {ok:true,v:''};
-    const cu=cultAtual===undefined?lin.cult:cultAtual; if(p.cultura!==cu) return {ok:false,motivo:'plano de '+p.cultura+' não serve para '+(cu||'linha sem cultura')}; return {ok:true,v:p.id}; }
+  if(col==='plano'){ const cu=cultAtual===undefined?lin.cult:cultAtual; const p=slPlano(s,ctx,cu);
+    if(!p) return {ok:false,motivo:'plano "'+s+'" não encontrado (use o código ou o nome com a versão)'};
+    if(p.ambiguo) return {ok:false,motivo:'plano "'+s+'" ambíguo: '+[...p.ambiguo].map(x=>x.nome+' v'+x.versao).sort().join(', ')+'; informe com a versão'};
+    if(!p.id) return {ok:true,v:''};
+    if(p.cultura!==cu) return {ok:false,motivo:'plano de '+p.cultura+' não serve para '+(cu||'linha sem cultura')}; return {ok:true,v:p.id}; }
   return {ok:false,motivo:'coluna sem edição'}; }
 // trocar a cultura do rascunho: o plano e a variedade da cultura anterior saem; vazios, recebem a sugestão do contexto (ctx.sugere: a
 // variedade e o plano mais usados nesta safra para a cultura; nunca área, meta, dose ou lote) e, na linha nova, o primeiro plantio possível
@@ -162,6 +170,9 @@ function slAbrir(self){ const saf=self.state.saf; if(!slTem(self,saf)){ self.set
 function slDados(self){ const sl=self.state.sl; if(!sl) return null; const lins=(self.__slLin||[]); return {sl,lins,dados:lins.filter(l=>l.tipo!=='grp')}; }
 function slSet(self,k,col,val){ const sl=self.state.sl; if(!sl) return; const lin=(self.__slLin||[]).find(l=>l.k===k); if(!lin||lin.tipo==='ro'||(lin.trava||{})[col]) return;
   const ctx=slCtx(self,sl.saf);
+  // plano escolhido na célula: a mesma conferência da colagem e do "Aplicar aos marcados" (código exato e da cultura da linha)
+  if(col==='plano'&&String(val||'')!==''){ const r=slPode(lin,'plano',val,ctx,(sl.vals[k]||{}).cult); if(!r.ok){ const er=Object.assign({},sl.err); er[k]=Object.assign({},er[k]||{},{plano:r.motivo});
+    self.setState({sl:Object.assign({},sl,{err:er,warn:false})}); return; } val=r.v; }
   // linha livre: "Não planejar agora" na cultura limpa a linha inteira (volta ao que era: nada a gravar)
   const vals=(lin.tipo==='novo'&&col==='cult'&&!String(val||'').trim())?Object.assign({},sl.vals,{[k]:Object.assign({},sl.base[k])}):slPor(sl.vals,lin,col,val,ctx); const er=Object.assign({},sl.err); if(er[k]){ const e=Object.assign({},er[k]); delete e[col]; if(col==='cult') delete e.plano; if(Object.keys(e).length) er[k]=e; else delete er[k]; }
   self.setState({sl:Object.assign({},sl,{vals,err:er,warn:false,info:'',gerr:Object.keys(er).length?sl.gerr:''})}); }

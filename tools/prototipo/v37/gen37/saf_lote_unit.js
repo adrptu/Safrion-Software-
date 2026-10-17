@@ -86,6 +86,28 @@ ok('linha livre que recebe a cultura ganha o plantio sugerido (primeiro possíve
 const a2 = slAplicarSel(dados, V0, { c5: true }, { plano: 'Milho safrinha' }, CTX);
 ok('plano de outra cultura sem trocar a cultura: recusado', a2.n === 0 && /plano de Milho não serve para Soja/.test(a2.recusas[0].motivo), a2.recusas);
 
+console.log('— slPlano exato (revisão do Codex 6229216931, PR #47): sem prefixo, nome repetido é ambíguo, a ordem do catálogo não decide');
+{
+  const P1 = { id: 'P1', nome: 'Soja', versao: 1, cultura: 'Soja' }, P2 = { id: 'P2', nome: 'Soja precoce', versao: 1, cultura: 'Soja' }, P3 = { id: 'P3', nome: 'Soja', versao: 2, cultura: 'Soja' };
+  const M1 = { id: 'M1', nome: 'Milho safrinha', versao: 4, cultura: 'Milho' };
+  const perms = (a) => a.length <= 1 ? [a] : a.flatMap((x, i) => perms(a.slice(0, i).concat(a.slice(i + 1))).map(r => [x].concat(r)));
+  const L = { k: 'c5', tipo: 'tal', rot: 'T3', T: 96, cult: 'Soja', trava: {} };
+  const casos = [['Soja precoce v9', null], ['Soja v99', null], ['Soja', 'ambíguo'], ['P2', 'P2'], ['Soja precoce v1', 'P2'], ['soja PRECOCE', 'P2'], ['Soja v2', 'P3'], ['soja v1', 'P1'],
+    ['Soja v2 · 8 atividades', 'P3'], ['Milho safrinha', 'outra'], ['sem plano', '']];
+  const res = perms([P1, P2, P3, M1]).map(ps => { const cx = Object.assign({}, CTX, { planos: ps });
+    return casos.map(([t]) => { const r = slPode(L, 'plano', t, cx, 'Soja'); return r.ok ? r.v : (/ambíguo/.test(r.motivo) ? 'ambíguo' : (/não serve/.test(r.motivo) ? 'outra' : null)); }); });
+  const r0 = res[0];
+  ok('"Soja precoce v9" e "Soja v99" recusados (não encontrados; nada por prefixo)', r0[0] === null && r0[1] === null, r0);
+  ok('"Soja" com Soja v1 e Soja v2 no catálogo: recusado como ambíguo, com as versões no motivo', r0[2] === 'ambíguo' && /ambíguo: Soja v1, Soja v2; informe com a versão/.test(slPode(L, 'plano', 'Soja', Object.assign({}, CTX, { planos: [P1, P2, P3] }), 'Soja').motivo),
+    slPode(L, 'plano', 'Soja', Object.assign({}, CTX, { planos: [P1, P2, P3] }), 'Soja').motivo);
+  ok('código exato (P2) e nome com versão exatos (Soja precoce v1, Soja v2, soja v1) aceitos', r0[3] === 'P2' && r0[4] === 'P2' && r0[6] === 'P3' && r0[7] === 'P1', r0);
+  ok('nome único sem versão (Soja precoce) aceito; o rótulo da lista ("Soja v2 · 8 atividades") também', r0[5] === 'P2' && r0[8] === 'P3', r0);
+  ok('plano de outra cultura continua recusado pela cultura; "sem plano" limpa', r0[9] === 'outra' && r0[10] === '', r0);
+  ok('as 24 ordens do catálogo dão a mesma resolução', res.length === 24 && res.every(r => JSON.stringify(r) === JSON.stringify(r0)), res.filter(r => JSON.stringify(r) !== JSON.stringify(r0)).slice(0, 2));
+  const cx = Object.assign({}, CTX, { planos: [P1, P2, P3] }); const V = { c5: { area: '96', cult: 'Soja', var: '62 X', plantio: '2026-10-22', meta: '62', plano: 'P1' } };
+  const col = slColarBloco([L], V, 0, 'plano', [['Soja']], cx); const apl = slAplicarSel([L], V, { c5: true }, { plano: 'Soja v99' }, cx);
+  ok('colar e "Aplicar aos marcados" recusam com o motivo e o rascunho fica (P1)', col.n === 0 && /ambíguo/.test(col.recusas[0].motivo) && col.vals.c5.plano === 'P1' && apl.n === 0 && /não encontrado/.test(apl.recusas[0].motivo) && apl.vals.c5.plano === 'P1', [col.recusas, apl.recusas]);
+}
 console.log('— slContar: células alteradas (contador do Salvar)');
 ok('sem mudança → 0', slContar(dados, V0, V0) === 0);
 ok('mudança de espaço nas pontas não conta', slContar(dados, Object.assign({}, V0, { c5: Object.assign({}, V0.c5, { var: ' 62 X ' }) }), V0) === 0);
