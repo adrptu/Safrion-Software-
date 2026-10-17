@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Preço e taxa não agregam por tipo",
+    "ok": true
+  },
+  {
+    "name": "Soma explícita permanece disponível",
+    "ok": true
+  },
+  {
+    "name": "Gravações são serializadas",
+    "ok": true
+  },
+  {
+    "name": "Saída com gravação pendente pede confirmação",
+    "ok": true
+  },
+  {
+    "name": "Versão recente vence conclusão tardia",
+    "ok": true
+  },
+  {
+    "name": "Reversão ao valor inicial é persistida após envio pendente",
+    "ok": true
+  },
+  {
+    "name": "Conteúdo igual não duplica gravação confirmada",
+    "ok": true
+  },
+  {
+    "name": "Falha permite reenviar o mesmo conteúdo",
+    "ok": true
+  },
+  {
+    "name": "Recibo concluído libera saída",
+    "ok": true
+  },
+  {
+    "name": "Edição anterior ao debounce pede confirmação",
+    "ok": true
+  },
+  {
+    "name": "Checkboxes com mesmo nome preservam todos os valores",
+    "ok": true
+  },
+  {
+    "name": "Select múltiplo preserva todos os valores",
+    "ok": true
+  },
+  {
+    "name": "Campo simples preserva contrato string",
+    "ok": true
+  },
+  {
+    "name": "Alteração anterior ao último valor também é gravada",
+    "ok": true
+  }
+]

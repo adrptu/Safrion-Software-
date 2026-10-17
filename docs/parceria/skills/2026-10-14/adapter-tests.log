@@ -1,0 +1,22 @@
+test_all_twenty_owned_skills_are_available_without_loading_them_together (tests.ConsultaPortatil.test_all_twenty_owned_skills_are_available_without_loading_them_together) ... ok
+test_auth_timeout_stops_before_http (tests.ConsultaPortatil.test_auth_timeout_stops_before_http) ... ok
+test_dry_run_works_without_gcloud_or_network (tests.ConsultaPortatil.test_dry_run_works_without_gcloud_or_network) ... ok
+test_existing_local_profile_is_preserved (tests.ConsultaPortatil.test_existing_local_profile_is_preserved) ... ok
+test_external_reference_symlink_stops_before_authentication_and_http (tests.ConsultaPortatil.test_external_reference_symlink_stops_before_authentication_and_http) ... ok
+test_external_skill_symlink_is_rejected_without_reading_its_target (tests.ConsultaPortatil.test_external_skill_symlink_is_rejected_without_reading_its_target) ... ok
+test_failed_auth_stops_before_http_without_leaking_error (tests.ConsultaPortatil.test_failed_auth_stops_before_http_without_leaking_error) ... ok
+test_four_large_skills_do_not_bypass_the_combined_budget (tests.ConsultaPortatil.test_four_large_skills_do_not_bypass_the_combined_budget) ... ok
+test_invalid_utf8_reference_stops_before_authentication_and_http (tests.ConsultaPortatil.test_invalid_utf8_reference_stops_before_authentication_and_http) ... ok
+test_missing_cloud_shell_marker_stops_before_auth (tests.ConsultaPortatil.test_missing_cloud_shell_marker_stops_before_auth) ... ok
+test_missing_remote_gcloud_does_not_fall_back_to_mac (tests.ConsultaPortatil.test_missing_remote_gcloud_does_not_fall_back_to_mac) ... ok
+test_missing_required_reference_stops_before_authentication_and_http (tests.ConsultaPortatil.test_missing_required_reference_stops_before_authentication_and_http) ... ok
+test_receipt_binds_exact_payload_and_keeps_token_out_of_logs (tests.ConsultaPortatil.test_receipt_binds_exact_payload_and_keeps_token_out_of_logs) ... ok
+test_remote_does_not_introduce_a_local_profile (tests.ConsultaPortatil.test_remote_does_not_introduce_a_local_profile) ... ok
+test_remote_preserves_session_identity_and_runtime (tests.ConsultaPortatil.test_remote_preserves_session_identity_and_runtime) ... ok
+test_selected_order_is_stable_deduplicated_and_hashes_bind_each_supplied_file (tests.ConsultaPortatil.test_selected_order_is_stable_deduplicated_and_hashes_bind_each_supplied_file) ... ok
+test_utf8_final_text_budget_accepts_exact_limit_and_rejects_one_more_byte (tests.ConsultaPortatil.test_utf8_final_text_budget_accepts_exact_limit_and_rejects_one_more_byte) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.041s
+
+OK

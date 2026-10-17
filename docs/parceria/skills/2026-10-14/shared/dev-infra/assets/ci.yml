@@ -1,0 +1,259 @@
+# Template opt-in, não é o workflow ativo do Safrion. Validar a execução no projeto antes de adotar.
+# npm ci requer lockfile e ferramentas declaradas (knip, jscpd, playwright, @lhci/cli).
+# SHAs/digests públicos conferidos em 2026-10-14; atualizar por PR revisado, nunca por tag mutável.
+# Regras OWASP e bases de vulnerabilidades são dados atualizados pelos scanners; binários são fixos.
+# .github/workflows/ci.yml — pipeline padrão (Node/TypeScript; adapte os comandos para Python/Go)
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}  # cada job declara só o acesso que usa; nenhum token de escrita nos PRs
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  quality:
+    name: Lint · tipos · unit
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint -- --max-warnings=0
+      - run: npm run typecheck
+      - run: npm run test:unit -- --coverage
+      - name: Cobertura no resumo da execução
+        if: github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2 · conferido 2026-10-14
+        with: { comment-on: none, file-coverage-mode: all }
+      - run: npx --no-install knip            # código/dependências mortas
+      - run: npx --no-install jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+        if: always()
+        with: { name: reports-unit, path: reports/, retention-days: 7 }
+
+  build:
+    name: Build
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+        with: { name: build, path: dist/, retention-days: 1 }
+
+  integration:
+    name: Integração (banco real)
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: quality
+    services:
+      postgres:
+        image: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea # 16-alpine
+        env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app_test }
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499 # 7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app_test
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run test:integration
+
+  e2e:
+    name: E2E (shard ${{ matrix.shard }}/4)
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix: { shard: [1, 2, 3, 4] }
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
+        with: { name: build, path: dist/ }
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npx --no-install playwright test --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
+        if: failure()
+        with: { name: "playwright-${{ matrix.shard }}", path: test-results/, retention-days: 7 }
+
+  security:
+    outputs:
+      image-id: ${{ steps.scan.outputs.image-id }}
+      archive-sha: ${{ steps.scan.outputs.archive-sha }}
+    name: Segurança
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { fetch-depth: 0, persist-credentials: false }
+      # Scanners sem token, sem socket Docker e com fonte montada somente para leitura.
+      - name: Segredos vazados
+        run: >-
+          docker run --rm -v "$PWD:/repo:ro"
+          zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --redact --exit-code 1
+      - name: Vulnerabilidades em dependências
+        run: >-
+          docker run --rm -v "$PWD:/src:ro" -w /src
+          ghcr.io/google/osv-scanner@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+          scan source --lockfile=/src/package-lock.json
+      - name: Análise estática (OWASP)
+        run: >-
+          docker run --rm -v "$PWD:/src:ro" -w /src
+          semgrep/semgrep@sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3
+          semgrep scan --config p/owasp-top-ten --error --metrics=off /src
+      - name: Construir e verificar a imagem uma vez
+        id: scan
+        run: |
+          set -euo pipefail
+          docker build -t app:ci .
+          docker save app:ci -o "$RUNNER_TEMP/app-ci.tar"
+          docker run --rm -v "$RUNNER_TEMP/app-ci.tar:/scan/app.tar:ro" \
+            aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
+            image --input /scan/app.tar --exit-code 1 --severity HIGH,CRITICAL
+          printf 'image-id=%s\n' "$(docker image inspect app:ci --format '{{.Id}}')" >> "$GITHUB_OUTPUT"
+          printf 'archive-sha=%s\n' "$(sha256sum "$RUNNER_TEMP/app-ci.tar" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - name: Guardar exatamente o arquivo aprovado pelo scanner
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: scanned-image
+          path: ${{ runner.temp }}/app-ci.tar
+          retention-days: 7
+          if-no-files-found: error
+
+  lighthouse:
+    name: Web Vitals
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
+        with: { name: build, path: dist/ }
+      - run: npx --no-install lhci autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
+
+  # Antes de adotar: configurar autenticação de curta duração do registry/provedor,
+  # IMAGE_REPOSITORY canônico (sem tag) e ci/deploy.sh + ci/smoke.sh.
+  # Os adaptadores recebem ambiente e referência repo@sha256; não constroem imagens.
+  # Ausência de configuração/recibo falha o job; este template não anuncia deploy por echo.
+  deploy-staging:
+    name: Deploy staging da imagem verificada
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    needs: [quality, build, integration, e2e, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: staging
+    outputs:
+      image-ref: ${{ steps.publish.outputs.image-ref }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: { persist-credentials: false }
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: { name: scanned-image, path: '${{ runner.temp }}/scanned' }
+      - name: Publicar o arquivo verificado e fixar a referência por digest
+        id: publish
+        env:
+          IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
+          EXPECTED_ARCHIVE_SHA: ${{ needs.security.outputs.archive-sha }}
+          EXPECTED_IMAGE_ID: ${{ needs.security.outputs.image-id }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_REPOSITORY" =~ ^[a-z0-9.-]+(:[0-9]+)?/[a-z0-9._/-]+$ ]]
+          [[ "$EXPECTED_ARCHIVE_SHA" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$EXPECTED_IMAGE_ID" =~ ^sha256:[a-f0-9]{64}$ ]]
+          cd "$RUNNER_TEMP/scanned"
+          printf '%s  app-ci.tar\n' "$EXPECTED_ARCHIVE_SHA" | sha256sum -c -
+          docker load --input app-ci.tar
+          test "$(docker image inspect app:ci --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
+          target="$IMAGE_REPOSITORY:ci-$GITHUB_SHA"
+          docker tag "$EXPECTED_IMAGE_ID" "$target"
+          docker push "$target"
+          image_ref=''
+          while IFS= read -r ref; do
+            if [[ "$ref" == "$IMAGE_REPOSITORY"@sha256:* ]]; then image_ref="$ref"; fi
+          done < <(docker image inspect "$target" --format '{{range .RepoDigests}}{{println .}}{{end}}')
+          test -n "$image_ref"
+          digest="${image_ref#"$IMAGE_REPOSITORY"@}"
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          docker pull "$image_ref"
+          test "$(docker image inspect "$image_ref" --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
+          printf 'image-ref=%s\n' "$image_ref" >> "$GITHUB_OUTPUT"
+      - name: Implantar e testar staging com a referência publicada
+        env:
+          IMAGE_REF: ${{ steps.publish.outputs.image-ref }}
+        run: |
+          set -euo pipefail
+          test -x ci/deploy.sh && test -x ci/smoke.sh
+          ci/deploy.sh staging "$IMAGE_REF"
+          ci/smoke.sh staging "$IMAGE_REF"
+
+  deploy-prod:
+    name: Promover a imagem validada em staging
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production   # configurar aprovação explícita da candidata antes de adotar
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: { persist-credentials: false }
+      - name: Implantar e testar produção com o mesmo digest
+        env:
+          IMAGE_REF: ${{ needs.deploy-staging.outputs.image-ref }}
+        run: |
+          set -euo pipefail
+          test -n "$IMAGE_REF"
+          [[ "$IMAGE_REF" =~ @sha256:[a-f0-9]{64}$ ]]
+          test -x ci/deploy.sh && test -x ci/smoke.sh
+          ci/deploy.sh production "$IMAGE_REF"
+          ci/smoke.sh production "$IMAGE_REF"

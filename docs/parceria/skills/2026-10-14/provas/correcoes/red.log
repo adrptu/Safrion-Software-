@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Preço e taxa não agregam por tipo",
+    "ok": false
+  },
+  {
+    "name": "Soma explícita permanece disponível",
+    "ok": true
+  },
+  {
+    "name": "Gravações são serializadas",
+    "ok": false
+  },
+  {
+    "name": "Versão recente vence conclusão tardia",
+    "ok": false
+  },
+  {
+    "name": "Reversão ao valor inicial é persistida após envio pendente",
+    "ok": false
+  },
+  {
+    "name": "Conteúdo igual não duplica gravação confirmada",
+    "ok": true
+  },
+  {
+    "name": "Falha permite reenviar o mesmo conteúdo",
+    "ok": true
+  }
+]
+Traceback (most recent call last):
+  File "[workspace]/run-browser.py", line 12, in <module>
+    print(json.dumps(results,ensure_ascii=False,indent=2));assert results and all(x['ok'] for x in results)
+AssertionError

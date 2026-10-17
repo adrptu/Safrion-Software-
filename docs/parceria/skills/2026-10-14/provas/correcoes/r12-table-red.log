@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Vazio transitório preserva agrupamento",
+    "ok": true
+  },
+  {
+    "name": "Retorno dos dados preserva agrupamento",
+    "ok": true
+  },
+  {
+    "name": "Mudança real de esquema remove estado inválido",
+    "ok": true
+  },
+  {
+    "name": "Destruir remove ouvintes persistentes",
+    "ok": true
+  },
+  {
+    "name": "Destruir com menu aberto remove ouvintes globais",
+    "ok": true
+  },
+  {
+    "name": "Desmarcar tudo inclui valores além dos 500 visíveis",
+    "ok": true
+  },
+  {
+    "name": "Selecionar tudo restaura universo completo",
+    "ok": true
+  },
+  {
+    "name": "Desmarcar resultados inclui todos os 600 correspondentes",
+    "ok": true
+  },
+  {
+    "name": "Selecionar resultados restaura todos os correspondentes",
+    "ok": true
+  },
+  {
+    "name": "Refresh preserva grupo expandido e seleção por identidade",
+    "ok": false,
+    "error": "Error: expectativa não satisfeita"
+  },
+  {
+    "name": "Refresh preserva foco no detalhe",
+    "ok": false,
+    "error": "Error: expectativa não satisfeita"
+  },
+  {
+    "name": "Registro removido fecha detalhe sem selecionar outro",
+    "ok": true
+  },
+  {
+    "name": "Chave configurável aceita zero",
+    "ok": false,
+    "error": "Error: expectativa não satisfeita"
+  },
+  {
+    "name": "Identidade ambígua não seleciona registro arbitrário",
+    "ok": true
+  }
+]
+Traceback (most recent call last):
+  File "/private/tmp/skills-r3-20261014/run-table.py", line 12, in <module>
+    print(json.dumps(results,ensure_ascii=False,indent=2));assert results and all(x['ok'] for x in results)
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

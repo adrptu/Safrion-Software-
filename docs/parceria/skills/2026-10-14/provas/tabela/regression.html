@@ -1,0 +1,40 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Regressão da tabela</title><pre id="result"></pre><div id="table"></div><script>
+window.listeners=[];const add=EventTarget.prototype.addEventListener,rm=EventTarget.prototype.removeEventListener;
+EventTarget.prototype.addEventListener=function(type,fn,options){listeners.push({target:this,type,fn,options,active:true});return add.call(this,type,fn,options)};
+EventTarget.prototype.removeEventListener=function(type,fn,options){for(const x of listeners)if(x.target===this&&x.type===type&&x.fn===fn)x.active=false;return rm.call(this,type,fn,options)};
+</script><script src="../../shared/tabelas-interativas/assets/tabela.js"></script><script>
+const results=[];let t;function check(name,fn){try{if(!fn())throw Error('expectativa não satisfeita');results.push({name,ok:true})}catch(e){results.push({name,ok:false,error:String(e)})}}
+const persistent=()=>listeners.filter(x=>x.active&&(x.target===document||x.target===window||x.target.id==='table')).length;
+t=Tabela.create('#table',{rows:[{fazenda:'A',area:1},{fazenda:'B',area:2}],groupBy:['fazenda']});
+check('Vazio transitório preserva agrupamento',()=>{t.setRows([]);return t.getRows().length===0&&t.getState().groupBy[0]==='fazenda'});
+check('Retorno dos dados preserva agrupamento',()=>{t.setRows([{fazenda:'C',area:3}]);return t.getRows().length===1&&t.getState().groupBy[0]==='fazenda'});
+t.destroy();t=Tabela.create('#table',{rows:[{fazenda:'A',area:1}],groupBy:['fazenda']});
+check('Mudança real de esquema remove estado inválido',()=>{t.drillTo([{spec:'fazenda',key:'A'}]);t.sort('area',1);t.filter('fazenda','A');t.setRows([{novo:'X'}]);const s=t.getState();return !s.groupBy.length&&!s.sort.length&&!s.focus.length&&!Object.keys(s.filters).length});
+t.destroy();check('Destruir remove ouvintes persistentes',()=>persistent()===0);
+t=Tabela.create('#table',{rows:[{fazenda:'A'}]});document.querySelector('.dt-mbtn').click();t.destroy();check('Destruir com menu aberto remove ouvintes globais',()=>persistent()===0);
+t=Tabela.create('#table',{rows:Array.from({length:601},(_,i)=>({nome:i<600?'Grupo '+String(i).padStart(3,'0'):'Outro'}))});document.querySelector('.dt-mbtn').click();
+const toggleAll=()=>document.querySelector('[data-all]').click();
+toggleAll();check('Desmarcar tudo inclui valores além dos 500 visíveis',()=>t.getRows().length===0);
+toggleAll();check('Selecionar tudo restaura universo completo',()=>t.getRows().length===601);
+const search=document.querySelector('[data-vs]');search.value='Grupo';search.dispatchEvent(new Event('input'));toggleAll();check('Desmarcar resultados inclui todos os 600 correspondentes',()=>t.getRows().length===1&&t.getRows()[0].nome==='Outro');toggleAll();check('Selecionar resultados restaura todos os correspondentes',()=>t.getRows().length===601);t.destroy();
+t=Tabela.create('#table',{rows:[{id:'a',nome:'Ana',fazenda:'A'},{id:'b',nome:'Bia',fazenda:'B'}],columns:['nome','fazenda'],groupBy:['fazenda'],rowTitle:r=>r.nome});document.querySelector('.dt-grp').click();document.querySelector('.dt-leaf').click();
+t.setRows([{id:'b',nome:'Bia',fazenda:'B'},{id:'a',nome:'Ana atualizada',fazenda:'A'}]);
+check('Refresh preserva grupo expandido e seleção por identidade',()=>document.querySelector('.dt-open')&&document.querySelector('.dt-sel')?.textContent.includes('Ana atualizada')&&document.querySelector('.dt-panel h3')?.textContent==='Ana atualizada');
+check('Refresh preserva foco no detalhe',()=>document.activeElement.matches('.dt-panel [data-close]'));
+t.setRows([{id:'b',nome:'Bia',fazenda:'B'}]);check('Registro removido fecha detalhe sem selecionar outro',()=>!document.querySelector('.dt-panel')&&!document.querySelector('.dt-sel'));t.destroy();
+t=Tabela.create('#table',{rows:[{codigo:0,nome:'Zero'}],rowKey:'codigo',rowTitle:r=>r.nome});document.querySelector('.dt-leaf').click();t.setRows([{codigo:0,nome:'Novo zero'}]);check('Chave configurável aceita zero',()=>document.querySelector('.dt-panel h3')?.textContent==='Novo zero');t.setRows([{codigo:0,nome:'Duplicado A'},{codigo:0,nome:'Duplicado B'}]);check('Identidade ambígua não seleciona registro arbitrário',()=>!document.querySelector('.dt-panel'));t.destroy();
+
+t=Tabela.create('#table',{rows:[{farm:'A',area:10,cost:7},{farm:'A',area:20,cost:11}],columns:[{key:'area',label:'Área',type:'number',agg:'sum'},{key:'cost',label:'Custo',type:'number',agg:'sum'},{key:'farm',hidden:true}],groupBy:['farm']});
+check('Grupo apresenta soma da primeira coluna visível',()=>document.querySelector('.dt-grp td .dt-n')?.textContent==='30');
+check('Grupo mantém alinhamento e segundo agregado',()=>document.querySelector('.dt-grp').cells.length===2&&document.querySelector('.dt-grp').cells[1].textContent==='18');
+const numericGroup=document.querySelector('.dt-grp');numericGroup.focus();numericGroup.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+check('Agrupamento numérico preserva expansão por teclado e total',()=>document.querySelectorAll('.dt-leaf').length===2&&document.querySelector('.dt-grp td .dt-n')?.textContent==='30');t.destroy();
+t=Tabela.create('#table',{rows:[{farm:'A',amount:10},{farm:'A',amount:20}],columns:[{key:'amount',type:'number',agg:'avg'},{key:'farm',hidden:true}],groupBy:['farm']});
+check('Grupo de coluna única apresenta agregação configurada',()=>document.querySelector('.dt-grp').cells.length===1&&document.querySelector('.dt-grp td .dt-n')?.textContent==='15'&&document.querySelector('tfoot td').textContent==='15');t.destroy();
+
+t=Tabela.create('#table',{rows:[{date:'2025-03-03'},{date:'2024-02-29'},{date:'2025-05-01'},{date:'2025-01-01'}],columns:[{key:'date',type:'date'}]});
+for(const invalid of ['=31/02/2025','=2025-02-31','=29/02/2025','=31/04/2025','=2025-13-01','!=31/02/2025','01/02/2025..31/02/2025'])check('Filtro rejeita data impossível '+invalid,()=>{t.filter('date',invalid);return t.getRows().length===0});
+check('Ano bissexto válido em formato brasileiro',()=>{t.filter('date','=29/02/2024');return t.getRows().length===1&&t.getRows()[0].date==='2024-02-29'});
+check('Intervalo de datas ISO válidas conserva limites',()=>{t.filter('date','2025-01-01..2025-03-03');return t.getRows().length===2});t.destroy();
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
+</script></html>

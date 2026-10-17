@@ -1,0 +1,182 @@
+[
+  {
+    "file": "gemini/gcp-custos/SKILL.md",
+    "before": "c524c3aa80a7dd3aca3b2c74fa7d10214a3bca70f75ae3133143402e44cbe98c",
+    "after": "6c7dc2c80aa12cb2d17eba455ac525ce783408f055f6dc153d610f019aede0e1"
+  },
+  {
+    "file": "gemini/gcp-desempenho-incidentes/SKILL.md",
+    "before": "8f5116b72e4efc2787a0d877c53beecca094b7525dbb02f6a84cf0a37c953a0e",
+    "after": "52e5bf5a61ce9a0da698302008a17325bb4445922e5ab574f211b6eefe4898c8"
+  },
+  {
+    "file": "gemini/gcp-infra-essencial/SKILL.md",
+    "before": "633e61e82a1be5b1c1da266d0671b2349e8c158987ce0efb1d26b3a3396194f1",
+    "after": "9733964e9af650b47896ca7c4b518290147ba09efdfbbdc206bb2cb3fe3aeb48"
+  },
+  {
+    "file": "gemini/revisao-terceira-opiniao/SKILL.md",
+    "before": "995272ed1c13b94c7bb70599c40d835861ee99ee497b8a8279a71bd501695297",
+    "after": "39617949b32ecf703d0de9c387abcf53cbf43cc8bee4da13b03bd62170416d00"
+  },
+  {
+    "file": "gemini-consult.py",
+    "before": "c52e760c6141547c3048f4f34e2d089ad7937603b116e22e4ae08f17988cdb8e",
+    "after": "3da14c38a810d346dfe2c1fa79f821f9022640459bce770c393bda9107fcd42c"
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/SKILL.md",
+    "before": "70eea322cc5c72674f89d73d3a9a9c679409d8c53824ffb368228a6d354290b6",
+    "after": "228165df3835602ce7f9342ece476feea583a90d8c89904d515c7bcdc2b4a6ef"
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
+    "before": "aac9afab74d62d3a3eaf15da4da2085a8cb6ca5d0ce611ba0af4f94f1a1284de",
+    "after": "8371104cf5df7e2706d679f49b15b61bd42667b7537244ee716201f5bac6186f"
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/zootecnia.md",
+    "before": "26d24d696737559690e78ee968dd9a82cb1629629d5d11696325d4313b336346",
+    "after": "b8488a1fc54ddebef2db39ed06f8572330c8bf1270ec97e623ac0e7df38f77b2"
+  },
+  {
+    "file": "shared/benchmark-top5/SKILL.md",
+    "before": "9d260a256095606bad69f1a164d24f34414eb76a7b3074a66707d70c18316c69",
+    "after": "f140283350ab8f767414ec5c2f94524d8001f882760906083746c5033ae7d8b4"
+  },
+  {
+    "file": "shared/dev-backend/SKILL.md",
+    "before": "63e02d40954bcff20a5ad7cb70dd5652550c9f4838138d7f21fc765f5ad81104",
+    "after": "8d92a48e92fd89c6b6005a62e02caf8ae3e5faeda4a9effe19c735150964972a"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/SKILL.md",
+    "before": "5e3cb17ecbb6e9cff8d7d178ad58e24a31d5793e1c0bacab93fd8f7a0dfa83bf",
+    "after": "7ff9d82cc2673017083fb3eb72971cdba7429cf25079e25f6ef04389d04e387c"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/ADR-template.md",
+    "before": "f1096e77e626a218ef30b9275aa2b7693ae20afa95c63a0d0233b92ccabff3cd",
+    "after": "c8f6e67f9bcf083ce367420c92a84780ff6e7af63c5b6d86adcfd4433ccb1e76"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/definition-of-done.md",
+    "before": "14cd26a2474eee56dedb269db51569fbb621babe791bbaeecb47f5559146cfc1",
+    "after": "06dcd1bd4d1449e54a237cfc0a47c4a6b3a7c79e963efe5b2ac4b74fa7328d8b"
+  },
+  {
+    "file": "shared/dev-frontend-mobile/SKILL.md",
+    "before": "eb83b188ad071601d5ff438a45e31f59c9df95da4fbd930f4a665e7e8d42425e",
+    "after": "58418c0419693cc9b0b3e05221ee031cd72442ff18fd38e068bce36364736742"
+  },
+  {
+    "file": "shared/dev-infra/SKILL.md",
+    "before": "10f255cdba0a55ea315cea3cee00a83fa835dfb14c4ed839e9fa5c8ffadf5d41",
+    "after": "b44d72f67853921b729d217443e0e2223bec6f943ed21d0038ec2e365b01ac3d"
+  },
+  {
+    "file": "shared/dev-infra/assets/Dockerfile",
+    "before": "eb35106936e385356c79d74799677cc872d631dc4750d1e8b852eacbe18cf033",
+    "after": "c8ba67bd9f44de13a1ccc20a9e2299e7936ba2e6515c8411fe8d99d51793965c"
+  },
+  {
+    "file": "shared/dev-infra/assets/ci.yml",
+    "before": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
+    "after": "234f136701c10a48b68710029c605cc370b58db6d3089b9e57adfc4a45881dba"
+  },
+  {
+    "file": "shared/dev-revisao/SKILL.md",
+    "before": "7ad2ac80af3d907d8dbaf3e7e2539cc63656dfcc0b6545dfb9bae11efcc34a57",
+    "after": "91d16f4063e2c9279afcd314e576ce287822b6cee378016d4262cc09adcaa6a3"
+  },
+  {
+    "file": "shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+    "before": "29329fe89f07c25c316b565e36cb5f1b3753bbf88ca0db6e5b11d81023024f33",
+    "after": "450870ce2c3b2be5412038523d3584c6f455d5edcb6f2f2673607fa86271f482"
+  },
+  {
+    "file": "shared/dev-revisao/assets/checklist-revisao.md",
+    "before": "53343a400482f94931fb235bff60fd3a37ac157aa855c8e6d94432b3e4ee0a61",
+    "after": "f1776100561d20516cd0f1dad409b4d1b9d88e11814b6f17e395f7b43c6c6182"
+  },
+  {
+    "file": "shared/dev-testes/SKILL.md",
+    "before": "7a93f851546be1380b3fda8e76c19e7ac04f2c63a4ab802770e0ac880a68cea6",
+    "after": "8d069e074e78f3a50c05cd25d822b2ab1a6c20a25bde5aedd107efd162f02dea"
+  },
+  {
+    "file": "shared/growth-receita-implantacao/SKILL.md",
+    "before": "2ce9a4db1cd6b2efd10bf9ed16194a0080b6d7dcc8800eb5800790c62dabfa29",
+    "after": "c8b9ef7b20ff93bcec91977206d3f089af2f3e5f1c09c42db56c8912dd8d6c63"
+  },
+  {
+    "file": "shared/indicadores-satelite/SKILL.md",
+    "before": "4a4a4dd7f2ba13edd494262ffae05310e4cee89674b0889b035467d1550603f6",
+    "after": "96f47fc685dc9d45fc29918d62c1cf0dabf02e68823be49de50649dfe149c65f"
+  },
+  {
+    "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
+    "before": "3a765737dc09288725ae42629acb781dd55168ab5ba591e38d4564de27f31579",
+    "after": "15e8f2b6e446e9f6e57679f1f65329e573e75c12ddbbb20d7fa5f603db21fad8"
+  },
+  {
+    "file": "shared/master-detail-ux/SKILL.md",
+    "before": "296cbd094e1aa7461a0f3dc95e583e47d6fc737e7e78104f4de9ab1941aa8b52",
+    "after": "d55339ccf43287736920584955ef638a866745dad4fc13797ca3d0b2ff2e2813"
+  },
+  {
+    "file": "shared/master-detail-ux/references/checklist.md",
+    "before": "4b28d6a0ca7d0e47f088f35045456a4bba00dc1ef2aa76d103f66bb1000e6c9a",
+    "after": "9785e5542c5b38883068d2478b409b3ebc48ae1d63b6932e8cb222b412c4ecf7"
+  },
+  {
+    "file": "shared/minimalismo-essencial/SKILL.md",
+    "before": "e8edcc15958eb51607a5ddb0ccb6b979060865dc6141da1adc66781a87e69757",
+    "after": "ea3ae62aa85873cf8c22e16f6668b6611bfe5d5ed0b4683143092951c1eec6e9"
+  },
+  {
+    "file": "shared/negocios-ecossistema/SKILL.md",
+    "before": "a43788e323db1c16f501a0c84bf20b2facf807ee8008d2628796efab7a2f1a58",
+    "after": "cdac1ccbd57ee51829f9226d937eab550d64ad57dc3ef2f6e0d8b4657514c264"
+  },
+  {
+    "file": "shared/safrion-equipe/SKILL.md",
+    "before": "4dcd62d7041096d3e4687ef16703f03ceb30495e2bef8dbd009726058a12d404",
+    "after": "a7cb8152c42fda5fe822689c172bbafb6d9584848d6d29315b01f7017e4263b0"
+  },
+  {
+    "file": "shared/safrion-equipe/agents/openai.yaml",
+    "before": "36047610c4a002130d6a510f62694a3cdaaf2629b1104415d42626d20fedf147",
+    "after": "dfde0e9cc73c23512416e5267cdfebf381866df2970e13b4b1a6af0db8339d9d"
+  },
+  {
+    "file": "shared/tabelas-interativas/SKILL.md",
+    "before": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7",
+    "after": "4f39b87bd07012be82194a321176daffb7ffacc2b84752c470d6a43b709dd392"
+  },
+  {
+    "file": "shared/tabelas-interativas/assets/exemplo.html",
+    "before": "3279a44536c648f02bb3198d3ca09e3f31f19fbd3f605cd564ca57d88b20a154",
+    "after": "5875855fd34c4fa72591dd085d52980a02d552538f74832edd85e7aaf3aa9f93"
+  },
+  {
+    "file": "shared/tabelas-interativas/assets/tabela.js",
+    "before": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
+    "after": "e4a34048a2414875109c4f170c0f247d52f644acd6a77337bb85c2c07b79818d"
+  },
+  {
+    "file": "shared/ux-essencial/SKILL.md",
+    "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
+    "after": "4fc4fd3ca1d7cf1ff71d7887144f7f5dabf80627e2e38c5ea561a5c79db8e678"
+  },
+  {
+    "file": "shared/ux-essencial/assets/m3-kit.js",
+    "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
+    "after": "9a8020de4750f28e7c85fe473972aeb0243d58397c0ef3cedff0578fb346e45d"
+  },
+  {
+    "file": "test_gemini_consult.py",
+    "before": "2bb0541a674468f8d1bd5df94eeac4332a6370f532989ee40c20afa8ea9da474",
+    "after": "981e487e96c7d32484e73f3d123ad2220be075ebf3cc22a0afa8e3b88fc67991"
+  }
+]

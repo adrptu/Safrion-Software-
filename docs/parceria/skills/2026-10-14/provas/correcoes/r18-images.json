@@ -1,0 +1,26 @@
+[
+  {
+    "repo": "library/postgres",
+    "tag": "16-alpine",
+    "digest": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea",
+    "mediaType": "application/vnd.oci.image.index.v1+json"
+  },
+  {
+    "repo": "library/redis",
+    "tag": "7-alpine",
+    "digest": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499",
+    "mediaType": "application/vnd.oci.image.index.v1+json"
+  },
+  {
+    "repo": "aquasec/trivy",
+    "tag": "latest",
+    "digest": "sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222",
+    "mediaType": "application/vnd.oci.image.index.v1+json"
+  },
+  {
+    "repo": "semgrep/semgrep",
+    "tag": "latest",
+    "digest": "sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3",
+    "mediaType": "application/vnd.oci.image.index.v1+json"
+  }
+]

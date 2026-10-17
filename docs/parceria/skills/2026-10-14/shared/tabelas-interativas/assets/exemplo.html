@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exemplo — tabela interativa</title>
+<style>
+  body{margin:0;padding:24px;background:#f6f7f9;font:14px system-ui,sans-serif}
+  @media (prefers-color-scheme:dark){body{background:#010409;color:#e6edf3}}
+  h1{font-size:18px;margin:0 0 12px}
+</style>
+</head>
+<body>
+<h1>Vendas</h1>
+<div id="vendas"></div>
+<script src="tabela.js"></script>
+<script>
+  // Dados sintéticos só para demonstração
+  const regioes = { Sul: ['RS', 'SC', 'PR'], Sudeste: ['SP', 'RJ', 'MG'], Nordeste: ['BA', 'PE', 'CE'] };
+  const produtos = [['Adubo NPK', 'Insumos'], ['Semente Soja', 'Sementes'], ['Semente Milho', 'Sementes'], ['Herbicida', 'Defensivos'], ['Fungicida', 'Defensivos']];
+  const vendedores = ['Ana Lima', 'Bruno Costa', 'Carla Souza', 'Diego Rocha', 'Elisa Prado'];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pick = (a) => a[Math.floor(rnd() * a.length)];
+  const rows = Array.from({ length: 3000 }, (_, i) => {
+    const regiao = pick(Object.keys(regioes)), [produto, categoria] = pick(produtos);
+    const qtd = 1 + Math.floor(rnd() * 80), preco = 50 + Math.round(rnd() * 900);
+    const d = new Date(2024, 0, 1 + Math.floor(rnd() * 700));
+    return { pedido: 10000 + i, data: d.toISOString().slice(0, 10), regiao, uf: pick(regioes[regiao]), vendedor: pick(vendedores),
+      produto, categoria, quantidade: qtd, valor: qtd * preco, margem: 0.08 + rnd() * 0.3 };
+  });
+
+  Tabela.create('#vendas', {
+    rows,
+    columns: [
+      { key: 'pedido', label: 'Pedido', type: 'text' },
+      { key: 'data', label: 'Data', type: 'date' },
+      { key: 'regiao', label: 'Região' },
+      { key: 'uf', label: 'UF' },
+      { key: 'vendedor', label: 'Vendedor' },
+      { key: 'produto', label: 'Produto' },
+      { key: 'categoria', label: 'Categoria' },
+      { key: 'quantidade', label: 'Qtd.', type: 'integer', agg: 'sum' },
+      { key: 'valor', label: 'Valor', type: 'currency', agg: 'sum' },
+      { key: 'margem', label: 'Margem', type: 'percent', agg: null },
+    ],
+    groupBy: ['regiao', 'uf'],
+    sort: ['-valor'],
+    rowTitle: (r) => `Pedido ${r.pedido}`,
+  });
+</script>
+</body>
+</html>

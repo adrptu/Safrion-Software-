@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Vazio transitório preserva agrupamento",
+    "ok": true
+  },
+  {
+    "name": "Retorno dos dados preserva agrupamento",
+    "ok": true
+  },
+  {
+    "name": "Mudança real de esquema remove estado inválido",
+    "ok": true
+  },
+  {
+    "name": "Destruir remove ouvintes persistentes",
+    "ok": true
+  },
+  {
+    "name": "Destruir com menu aberto remove ouvintes globais",
+    "ok": true
+  },
+  {
+    "name": "Desmarcar tudo inclui valores além dos 500 visíveis",
+    "ok": true
+  },
+  {
+    "name": "Selecionar tudo restaura universo completo",
+    "ok": true
+  },
+  {
+    "name": "Desmarcar resultados inclui todos os 600 correspondentes",
+    "ok": true
+  },
+  {
+    "name": "Selecionar resultados restaura todos os correspondentes",
+    "ok": true
+  }
+]
