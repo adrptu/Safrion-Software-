@@ -1,0 +1,13 @@
+FALHA abre todas as raias e expõe estado expandido: The expression evaluated to a falsy value:
+
+  assert.ok(v.kb_raias.every(r=>r.aberta&&r.expandida==='true'&&r.seta==='▾'))
+
+FALHA recolher T2 mantém filtros, trilha, cenário e cartões das outras raias: r.alterna is not a function
+FALHA dois cliques no mesmo callback alternam o estado atual, sem fechamento obsoleto: r.alterna is not a function
+FALHA mudar visão e voltar conserva raia e seleção: v.kb_raias[0].alterna is not a function
+FALHA filtro esconde raia; limpar filtro recupera sua expansão anterior: v.kb_raias.find(...).alterna is not a function
+FALHA mesmo grupo em outra fazenda não herda recolhimento: v.kb_raias.find(...).alterna is not a function
+FALHA troca de perfil não herda recolhimento e volta restaura o próprio estado: v.kb_raias[0].alterna is not a function
+FALHA sem agrupamento volta ao quadro único sem descartar estado das raias: v.kb_raias[0].alterna is not a function
+FALHA OS de dois talhões continua rastreável nas duas raias: t1.alterna is not a function
+RESULTADO 0/9

@@ -1,0 +1,265 @@
+— A1 · padrão: sem c.conf o efetivo é exatamente G2_PERFIS; estado de outra versão volta ao padrão
+OK    A1 sem c.conf: g2perfis() = G2_PERFIS (10 perfis: + Otávio, João e Dora da v56, PCM e Comercial; mesma ordem e mesmos papéis)
+OK    A1b CD-04 (R1): 15 pessoas (v57: + Otávio p14 e Dora p15), Caio (p11, PCP, Agronomia) entra, Igor e Marta (BEN-1) também; 14 com acesso, Beto sem; só Ana com CREA válido
+OK    A1c perfil desativado ou desconhecido guardado no navegador cai no 1º efetivo (Ana)
+OK    A1d com c.conf (Rui ganha conferência): o efetivo muda na hora, sem recarregar
+OK    A1e c.conf de outra versão (outro build ou outro G2_PERFIS): volta ao padrão
+OK    A1f a versão do CONF0 inclui o resumo do bloco <perfis> (outra frente que mude G2_PERFIS invalida o salvo)
+
+— A2 · conceder conferência a Rui vale para o CMD-09 na hora; retirar recusa; idempotência pela chave (R12)
+OK    A2a NEGATIVO antes: Rui decide a duplicidade → recusado, decisão de Paula (conferência)
+OK    A2b mesma chave e mesmo conteúdo 2×: 1 evento, mesmo recibo
+OK    A2c mesma chave com outro conteúdo: conflito, nada gravado
+OK    A2d com o papel, Rui decide e o registro grava "Rui (conferência)"
+OK    A2e retirado o papel, Rui é recusado sem gravar
+OK    A2f sem chave ou sem perfil: recusa
+
+— A3 · travas com dano nomeado (R3, R4, R5): recusam com o motivo e c.rev igual
+OK    A3a R4 agrônomo sem CREA (Caio): recusado com o motivo (lei)
+OK    A3b R3 Ana concede direção a si mesma: recusado (RF-GOV-002)
+OK    A3c R5 Ana retira o próprio gestor (última gestora): recusado (organização trancada)
+OK    A3d R5 desativar a última gestora: recusado
+OK    A3e quem não é gestor não muda papel (AL-13): Rui recusado, decisão de Ana (gestora)
+OK    A3f nada gravado: c.rev igual e trilha com 18 registros (v57: + acesso de Otávio e Dora)
+
+— A17 · Restaurar demonstração volta acessos, alçadas, conexões e trilha ao seed
+OK    A17 cenReset: g2perfis() = G2_PERFIS, Paula volta, trilha 18 (antes 20)
+
+— A10 (seed) · trilha lida dos registros: 14 no início
+OK    A10a 18 registros: jun 2 · jul 12 · ago 3 · set 1 (v57: Otávio e Dora recebem acesso em 01/07)
+OK    A10b autores pelo 1º nome: Ana 15, Plataforma 1, Provedor 2 (3 autores)
+OK    A10c nenhuma linha sem autor, data ou objeto
+OK    A10d fatura paga pelo provedor aparece "Provedor (simulado)"; contrato v1 por "Ana · Gestora"
+
+— A4 · cada alçada é lida pelo comando real: perfil com os papéis passa, sem eles recusa sem gravar (níveis base e acima)
+OK    A4 AL-18 é fixa (contrato da F2, 6147460986): trocar o papel para agrônomo é recusado sem gravar; segue gestor
+OK    A4 AL-01 NEGATIVO sem o papel (Caio): recusado "decisão de …", nada gravado
+OK    A4 AL-01 com o papel (Ana): passa
+OK    A4 AL-02 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-02 com o papel (Ana): passa
+OK    A4 AL-04 NEGATIVO sem o papel (Caio): recusado "decisão de …", nada gravado
+OK    A4 AL-04 com o papel (Ana): passa
+OK    A4 AL-05 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-05 com o papel (Ana): passa
+OK    A4 AL-09 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-09 com o papel (Ana): passa
+OK    A4 AL-10 NEGATIVO sem o papel (Caio): recusado "decisão de …", nada gravado
+OK    A4 AL-10 com o papel (Rui): passa
+OK    A4 AL-11 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-11 com o papel (Ana): passa
+OK    A4 AL-12 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-12 com o papel (Paula): passa
+OK    A4 AL-13 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-13 com o papel (Ana): passa
+OK    A4 AL-14 NEGATIVO sem o papel (Caio): recusado "decisão de …", nada gravado
+OK    A4 AL-14 com o papel (Ana): passa
+OK    A4 AL-15 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-15 com o papel (Ana): passa
+OK    A4 AL-17 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-17 com o papel (Ana): passa
+OK    A4 AL-18 NEGATIVO sem o papel (Rui): recusado "decisão de …", nada gravado
+OK    A4 AL-18 com o papel (Ana): passa
+OK    A4 AL-10 acima NEGATIVO: Rui (almoxarife) não aceita o excedente; decisão de Ana (gestora)
+OK    A4 AL-10 acima: Ana (gestora) aceita
+OK    A4 AL-05 acima (71 ha = 20,3 %) sem direção: recusa com a mensagem de hoje
+FALHA A4 nenhum comando confere papel literal (cenExige com papel fixo): tudo por cenExigeAlc · ["cenExigeUm(ator,['pcp'",null,null]
+OK    A4 telas da O.S. e do Estoque não testam papel literal (g2papel/g2quem com papel fixo)
+OK    A4 nenhuma pessoa fixa como "quem decide" (OS_AGRO, CEN_CONF_AP, CEN_CONC_RESP, LIM_DISP viraram funções da alçada)
+OK    A4 AL-16 mostra os níveis de dados2.ALCADA (R$ 50.000 · R$ 300.000 · Direção), sem edição
+
+— A5 · AL-01 → PCP (CONF-D10): Ana aprova (só CMD-42), Caio libera (só CMD-06); 5 fases; Salvar ajuste não aprova (R13)
+OK    A5a com AL-01 = PCP: Ana vê "Aprovar v1"; Caio vê a aprovação pendente (sem botão)
+OK    A5b NEGATIVO Caio antes da aprovação: recusado, nada gravado
+OK    A5c Ana aprova: só CMD-42 por Ana (agrônoma), A liberar com o selo "Aprovada v1 · aguarda liberação"
+OK    A5d NEGATIVO aprovar de novo: recusado
+OK    A5e Caio libera: só CMD-06 por Caio (PCP); Liberadas; REQ reservada
+OK    A5f trilha +3: AL-01 v1 → v2, CMD-42 por Ana (agrônoma), CMD-06 por Caio (PCP)
+OK    A5g Kanban segue com 5 fases (FASES da tela da O.S.)
+OK    A5h "Salvar ajuste" (sem aprovar) não grava CMD-42 (N5)
+OK    A5i "Salvar e aprovar v3": grava a v3 e o CMD-42 da v3 no mesmo comando
+OK    A5j com AL-01 = gestor (padrão), Ana segue numa confirmação: CMD-42 e CMD-06
+
+— A6 · AL-05: limite pela regra decimal única; ampliar o próprio poder espera o 2º aprovador (R10); uma pendência por alçada (R8)
+OK    A6a limite de 20 %: 70 / 20 / 15,02 / 14,64 / 14,22 ha (cenQtd, decimal)
+OK    A6b 20 → 25 % por Ana (quem dispensa): fica pendente, vale a v1 (70 ha na OS-0421)
+OK    A6c enquanto pendente, 71 ha segue recusado (20 %)
+OK    A6d NEGATIVO outra proposta para a AL-05 antes de confirmar: recusada (R8)
+OK    A6e NEGATIVO Ana não confirma a própria
+OK    A6f Ana concede gestor a Caio
+OK    A6g Caio (gestor) confirma: vigente v2 = 25 %, 87,5 ha na OS-0421
+OK    A6h com 25 %, dispensar 80 ha passa
+OK    A6i 20 → 15 % por Ana vale na hora (reduz): 52,5 ha
+OK    A6j com 15 %, 53 ha recusa com o limite vigente na mensagem
+OK    A6k limite fora de 1-100 % recusado
+
+— A7 · R9: alçada só aponta para papel que alguém ativo tem; AL-01 → PCP vale na hora (reduz o poder da gestora)
+OK    A7a NEGATIVO AL-09 → direção (ninguém tem): recusado, nada gravado
+OK    A7b NEGATIVO AL-10 excedente → direção: recusado
+OK    A7c NEGATIVO AL-02 é fixa (lei)
+OK    A7d AL-01 → PCP por Ana: vale na hora (v2), CMD-06 passa a ser do PCP
+OK    A7e AL-01 PCP → gestor por Ana amplia o poder dela: aguarda 2º aprovador (CONF-D10, como reverter)
+OK    A7f quem propôs desiste: segue PCP
+
+— A8 · desativar Paula: some do Ver como; AL-12 sem titular; textos dizem onde conceder; registros antigos intactos
+OK    A8a Paula desativada: fora do Ver como e de g2quem; aviso de AL-12 sem titular
+OK    A8b quem decide a duplicidade: "conferência sem titular: conceda em Configurações" (não "Paula (conferência)")
+OK    A8c registro antigo intacto: o dia 6 segue decidido por "Paula (conferência)"
+OK    A8d na O.S., o dono da duplicidade diz que a conferência está sem titular
+OK    A8e Conceder conferência a Rui: AL-12 volta a ter titular
+OK    A8f reativar Paula: volta com os papéis
+
+— A19 · o app de campo respeita o acesso desativado (R2, CONF-D24)
+OK    A19a Marcos desativado: iniciar, ocorrência, confirmar recebimento e fechar turno recusam com o motivo do acesso
+OK    A19b o que já estava na fila do aparelho envia
+OK    A19c reativado, volta a registrar
+
+— A10 (parte 1) · dispensa e decisão de duplicidade na trilha, uma linha por ato
+OK    A10e duas dispensas na mesma O.S. = 2 linhas CMD-47 (antes a 2ª sobrescrevia dispPor)
+OK    A10f "vale este" = 1 linha CMD-09 e nenhuma CMD-50 (o caso CC fechado pela decisão leva via CMD-09)
+OK    A10g pedir recontagem grava quem recusou o ajuste (Rui) e entra na trilha
+
+— A10 (roteiro da §6) · cada item parte do seed e acrescenta exatamente o "trilha +n" dele, cada ato uma vez com autor, data e objeto
+OK    A10h AL-05 20 → 15 % por Ana: +1
+OK    A10i AL-05 20 → 25 % (proposta), gestor a Caio (concessão), Caio confirma: +3
+OK    A10j recusas (agrônomo sem CREA, autoconcessão, último gestor): +0
+OK    A10k desativar Paula e conceder conferência a Rui: +2
+OK    A10l convidar Beto: +1 e CF-05 contaria 15 com acesso
+OK    A10m desativar Marcos (só app): +1
+OK    A10n Ana libera a OS-0430 (3 reservas fora da fila), Rui entrega Glifosato 480: fila do ERP 1; sincronizar envia 1; de novo 0; trilha +5 (CMD-42, CMD-06, entrega, 2 sincronizações)
+OK    A10o a entrega aparece com autor Rui (almoxarife) e o destinatário no efeito (autor = o campo até " → ")
+OK    A10p filtrar pela pessoa pelo 1º nome junta "Ana · Gestora" e "Ana (gestora)"; por mês, set tem 2 (fatura de ago e a mudança da AL-05)
+
+— A11 · CSV = linhas filtradas, sem segredo; a exportação vira registro (R15)
+OK    A11a CSV com cabeçalho e uma linha por registro filtrado (15 da Ana), separador ";", CRLF
+OK    A11b nenhum texto com cara de segredo no CSV
+OK    A11c a exportação grava "Exportação · 11 registros · pessoa: Ana" (+1); a mesma chave não grava de novo
+
+— A12 · integrações só de demonstração; fila do ERP uma vez por conteúdo; estorno depois de enviado volta uma vez (R16, R17)
+OK    A12a 5 conexões (ERP, estação, telemetria, laboratório, app); fila do ERP 0 no seed; app "Com sinal (simulado)"
+OK    A12b nenhum texto com cara de segredo nas conexões nem na trilha
+OK    A12c consumo da web na fila (1), enviado; "vale este" estorna o dia 5 enviado: volta uma vez como estorno (junto com o consumo novo); depois de enviar, nada; de novo, 0
+OK    A12d reserva, contagem, inspeção e confirmação no app nunca entram na fila
+
+— A18 · CF-05 no mesmo estado (P7): AL-15 pelo Ver como; o backoffice segue com "Admin plataforma"
+OK    A18a Rui (almoxarife) paga: recusado "decisão de Ana (gestora)", nada gravado
+OK    A18b Ana paga: grava "Ana (gestora)" (o formato dos outros comandos)
+OK    A18c com o Ver como em Rui, o backoffice concilia como "Admin plataforma" (assinIni não confere AL-15)
+OK    A18d CF-05 conta as pessoas com acesso do c.conf: 14 no seed
+
+— REV · correções da revisão adversarial (F1..F16, 09/10): cada caso falha no HEAD 9f49bf0 e passa depois
+OK    F1a mesmo minuto: Alterar AL-01 → CMD-42 → CMD-06 na ordem em que foram gravados (antes: CMD-42 e CMD-06 vinham antes da alçada)
+OK    F1b a entrega gravada antes da aprovação do ajuste vem antes dela na trilha
+OK    F1c cada registro novo leva a ordem de gravação (sq = c.rev do comando) e ela não muda depois
+OK    F2a Salvar alçada 2× com a mesma chave e o mesmo pedido: mesmo recibo, nenhum "conflito"
+OK    F2b mesma chave com outro pedido: conflito
+OK    F2c pedido feito sobre a v1 quando a vigente é a v2: recusa "reabra e confira"
+OK    F2d Confirmar 2× com a mesma chave: mesmo recibo, uma confirmação
+OK    F2e Desistir 2× com a mesma chave: mesmo recibo
+OK    F3a Marcos (apontou o dia 6) decide a própria duplicidade: vale, com revisão posterior pendente no registro, no aviso e na trilha
+OK    F3b Paula (não apontou) decide: sem revisão
+OK    F3c AL-12 diz a regra que o comando aplica
+OK    F4a com AL-01 = PCP, Ana (só AL-02) vê "Aprovar vN" nas 3 ordens com estoque ou máquina impedindo a liberação; o impedimento segue no texto
+OK    F4b e o comando aprova (só CMD-42; a liberação continua impedida)
+OK    F4c a regra legal segue segurando a aprovação (sem "Aprovar")
+OK    F5a trilha: célula que começa com = + - @ ou tab vira texto (' na frente); número puro (-5) fica
+OK    F5b fatura (assinCsv): o evento com fórmula também vira texto
+OK    F6a seed: contadores = pessoas ativas com almoxarife (Paula, Rui); 1ª opção vazia, sem padrão
+OK    F6b Paula desativada: sai da lista e contar em nome dela é recusado, nada gravado
+OK    F6c recontagem sem outro almoxarife ativo: contador fica vazio (a pessoa escolhe), nunca a desativada
+OK    F7a quem propôs não recusa (desiste)
+OK    F7b Caio (gestor) recusa: proposta sai, vigente v1 (20 %), recusa na trilha
+OK    F7c Caio desativa Ana (proponente): a proposta sai junto e a alçada não fica presa; Caio propõe outra
+OK    F8 ajuste de −5 L leva o sinal na fila do ERP
+OK    F10 M26 Rui, Paula e Zé (sem gestor nem direção) não confirmam; nada muda
+OK    F10 M25 outra pessoa não desiste da proposta de Ana
+OK    F10 M11 dar papel a pessoa desativada: recusado
+OK    F10 M09 reativar Ana com CREA vencido: volta sem agrônomo (R4)
+OK    F10 M17 aprovar versão fora da bula: recusado, sem CMD-42
+OK    F10 M17b aprovar com dose × área = 0: recusado
+OK    F10 M33 aprovar irrigação só com água: recusado (libera pela prontidão)
+OK    F10 M34 aprovar ordem fora de A liberar: recusado
+OK    F10 M31 registro sem autor: a trilha não infere autor ("autor não registrado" no CSV)
+OK    F10 M32 c.conf de outra versão: confLer volta ao padrão e confGarante troca pelo novo
+OK    F11 Caio (gestor) não desativa o próprio acesso; nada gravado
+OK    F12a sem outro gestor: o texto não manda à própria proponente
+OK    F12b com Caio gestor: "decisão de Caio (gestor)", sem Ana
+OK    F15 relógio antes do seed (05:00 < 06:40): a última sincronização do ERP não volta no tempo
+OK    F16 Marcos desativado: pausar o turno é recusado
+
+— INT · integração com a Colheita (merge de claude/prototipo-v44) e textos por papel (F14, 09/10): os casos (fora as referências INT1a, INT3a, F14a) falham no 3d76176 e passam aqui
+OK    INT1a referência: com acesso, Marcos conta pelo app (CNT-0002)
+OK    INT1b Marcos desativado: contagem, carga e descarte pelo app recusados "Acesso de Marcos desativado"; nada gravado
+OK    INT1c pela web (recebimento) o descarte segue
+OK    INT2a texto "quem publica" vem da AL-17 (Ana (agrônoma) no seed), não de nome fixo
+OK    INT2b AL-17 → PCP: Ana recusada "decisão de Caio (PCP)"; Caio publica e o registro grava "Caio (PCP)"; o texto passa a Caio
+OK    INT2c o nome do registro ("Ana (agrônoma)") vira o perfil pelo 1º nome e passa pela alçada
+OK    INT3a o seed da produção (cargas, previsões, reserva) é histórico anterior: a trilha segue com 18
+OK    INT3b publicar, pesar, liberar e estornar: +4 linhas com autor e objeto, lidas do registro
+OK    INT3c ordem de gravação no mesmo minuto (sq): publicar antes de pesar, pesar antes de liberar
+OK    INT3d filtro por pessoa: Lúcia tem a pesagem e o estorno
+OK    INT4 Rui desativado: o texto "quem pesa" na Santa Rita é o almoxarife ativo (Paula), não o nome fixo; o autor do ato não sai daqui (REV1)
+OK    F14a padrão (Ana nas duas alçadas): "Ana (agrônoma) confere, ajusta se precisar e libera"
+OK    F14b AL-01 → PCP: OS-0430 diz "… e aprova; Caio (PCP) libera"
+OK    F14c ordem nova: a mensagem nomeia quem aprova e quem libera
+OK    F14g v2 da irrigação (produto na água, irrReclassCen): o texto genérico também nomeia quem aprova e quem libera
+OK    F14d padrão: almoxarife Rui, "ao Rui"; entrega sem registro: Rui
+OK    F14e quem entregou vem do movimento (Paula)
+OK    F14f Rui desativado: o almoxarife dos textos é Paula ("à Paula")
+
+— INT5 · beneficiamento (merge de claude/prototipo-v44 0644b1b, CONF-D43): atos da ordem e decisões da Qualidade na trilha, com autor e ordem de gravação
+OK    INT5a o histórico das OB-0110 e OB-0112 que veio do seed não entra: a trilha do seed segue com 18
+OK    INT5b enviar para conferência (Igor; era "Execução concluída" antes do faa47c7), conferir (Paula) e fechar (Igor, CMD-23): linhas do histórico da OB-0110 com autor, lidas do registro
+OK    INT5c resultado e liberação do lote de produção pela Qualidade: 2 linhas "Beneficiamento" por Marta (qualidade)
+OK    INT5d ordem de gravação (benMudar carimba como o cenMudar): concluir < conferir < fechar < resultado < liberar
+OK    INT5e filtro por pessoa: Marta tem as duas decisões; Igor, concluir e fechar
+OK    INT5f cancelar a OB-0112 em A liberar (Igor): +1 linha "Ordem cancelada · v1" com autor Igor e o motivo no efeito
+OK    INT5g NEGATIVO Igor desativado no CF-01 não cancela (acesso pelo estado de Configurações): recusado com "decisão de Ana (gestora)", nada gravado
+OK    INT5h pedir 1 caixa na OB-0110 (Igor): +1 linha "Caixas pedidas" com autor Igor, lida do histórico da ordem
+OK    INT5i a mesma chave repetida não grava outra linha (recibo da ordem)
+OK    INT5j NEGATIVO Igor desativado no CF-01 não pede caixas: recusado, nada gravado
+
+— REV · reverificação adversarial do 8be23d8 (10/10): cada caso, fora as referências, reprova no 8be23d8 (REV2: no mutante M9)
+OK    REV1 referência: OS-0599 de colheita na Santa Rita liberada por Ana
+OK    REV1a NEGATIVO Ver como Zé (mecânico) pesa e recebe na Santa Rita (perfil passado pela tela ou o da sessão): recusado "decisão de Rui (almoxarife)…", nada gravado
+OK    REV1b Ver como Rui (almoxarife): pesa e o registro grava "Rui (almoxarife)", lido pela trilha
+OK    REV1c NEGATIVO Zé estorna a carga recebida: recusado, a carga segue Recebida e nada é gravado
+OK    REV1d Rui estorna: o estorno grava "Rui (almoxarife)" (movimento e carga)
+OK    REV1e NEGATIVO Rui desativado: Zé não pesa em nome de Paula, e o nome "Rui (almoxarife)" não passa; nada gravado
+OK    REV1f Paula pesa: o filtro "Paula" do CF-04 tem só o ato que ela fez (1 pesagem)
+OK    REV1g NEGATIVO Zé descarta pela web a carga a pesar da Santa Rita: recusado, nada gravado
+OK    REV1h Rui descarta: grava "Rui (almoxarife)" e a trilha mostra o autor
+OK    REV1i risco declarado (CONF-D41), agora com o perfil passado pela tela: na Lagoa Grande quem recebe é Lúcia, fora do CD-04; o estorno segue gravado como "Lúcia" até ela entrar no cadastro
+OK    REV2a NEGATIVO quem não tem a AL-02 (Caio, Rui, Paula, Zé, Igor, Marta) não aprova a v1: "decisão de Ana (agrônoma)", nada gravado, sem CMD-42
+OK    REV2b NEGATIVO com a AL-01 no PCP, Caio não aprova nem libera sozinho (cenário do mutante M9): nada gravado
+OK    REV3a contou Paula, registrou Rui: a trilha diz "contou: Paula (almoxarife)", "registrou: Rui (almoxarife)" e a causa; nunca "contou: Rui"
+OK    REV3b o CSV repete o mesmo efeito (contou: Paula; causa)
+OK    REV3c recontagem pedida por Rui: autor Rui; quem contou segue Paula, com a causa
+OK    REV3d referência: contou e registrou a mesma pessoa (Rui): "contou: Rui (almoxarife)" uma vez, sem "registrou"
+OK    REV4a Zé encerra a OS-0508 (Em conferência): +1 linha "Encerrar O.S. · CMD-10" por "Zé (mecânico)", Em conferência → Encerradas
+OK    REV4b NEGATIVO Zé desativado: encerrar recusa "sem o perfil de quem age", nada gravado
+OK    REV4c enviar a OS-0421 para conferência sem ator explícito usa o da sessão (Paula); encerrar a OS-0508 por Ana: CMD-08 e CMD-10 com autor e na ordem de gravação
+OK    REV5a toda linha tem uid único (antes e depois de gravar)
+OK    REV5b outra fonte grava (entrega no Estoque): o uid da linha de Lucas continua apontando para Lucas, embora a posição (seq) tenha mudado
+OK    REV6a NEGATIVO Ana (com Caio gestor) retira os próprios gestora e agrônoma: recusado com o motivo; nada gravado; o Ver como segue Ana
+OK    REV6b referência (R3): retirar parte dos próprios papéis segue valendo (Ana fica só gestora) e o Ver como segue Ana
+OK    REV6c referência: outra pessoa (Caio, gestor) retira os papéis de Ana: vale (não é o próprio)
+
+— REV2 · rodada de 13/10: achados S3/S4 restantes da reverificação e os de base pequenos (cada caso, fora as referências, reprova no 8be23d8 ou no mutante)
+OK    REV7a NEGATIVO Paula desativada (e um perfil forjado fora do cadastro) não sincroniza nem baixa a trilha: "sem o perfil de quem age", nada gravado
+OK    REV7b referência: Rui (ativo) sincroniza e o evento grava "Rui (almoxarife)"
+OK    REV8a dispensa 2× com a mesma chave: 1 CMD-47, o saldo baixa uma vez, 1 linha na trilha; a 2ª responde "já registrado"
+OK    REV8b NEGATIVO mesma chave com outro conteúdo (3 ha): conflito, nada gravado
+OK    REV8c entrega 2× com a mesma chave: 1 movimento e 1 linha "Entregar insumo" na trilha
+OK    REV8d recebimento 2× com a mesma chave: 1 movimento e o lote soma 100 kg uma vez
+OK    REV8e tela do Estoque: entregar e receber 2× com a chave do formulário = 1 entrega e 1 recebimento
+OK    REV9a duas dispensas da OS-0421: "Registro de origem" diferente em cada uma (nº 1 e nº 2), no detalhe e no CSV
+OK    REV9b trilha com O.S., Estoque e beneficiamento: nenhum "Registro de origem" repetido
+OK    REV10a NEGATIVO Paula desativada libera a irrigação só com água: recusado "sem o perfil de quem age", segue em A liberar, nada gravado
+OK    REV10b Caio libera pela prontidão: CMD-06 gravado com "Caio (PCP)", sem CMD-42; a trilha ganha 1 linha "irrigação só com água"
+OK    REV11a Igor (produção e conferência) confere o próprio balanço: vale, com "revisão posterior pendente" no registro, no histórico, no aviso e na trilha
+OK    REV11b referência: Paula confere a ordem que Igor produziu, sem revisão posterior
+OK    REV11c Igor (produção e qualidade) registra o resultado e libera o lote que ele produziu: vale, com revisão posterior no aviso, nos movimentos e na liberação
+OK    REV11d referência: Marta (só qualidade) registra o resultado do lote do Igor, sem revisão posterior
+
+TOTAL · falhas 1
+RESULTADO 220/221

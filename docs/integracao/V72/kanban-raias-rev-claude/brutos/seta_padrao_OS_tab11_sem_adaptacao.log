@@ -1,0 +1,57 @@
+# 1440 px · 1 telas + 2 estados · 15 controles de abrir/recolher · 26 setas desenhadas (20 de ir) · 0 telas com teclado medido
+# 1440 px · desenhos distintos da seta: 1
+       2 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ C1 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ P1 2 ordens»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ Sem talhão 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-A 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-B 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T2 2 ordens»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T3 1 ordem»')
+  a  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T4 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ C1 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ P1 2 ordens»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ Sem talhão 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-A 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-B 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T2 2 ordens»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T3 1 ordem»')
+  b  (1440, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T4 1 ordem»')
+FALHA A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1) · ['OS.dc.html?view=kanban&ag=onde']
+FALHA B1440 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1) · ['OS.dc.html?view=kanban&ag=onde']
+FALHA C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1) · ['rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16']
+FALHA D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0) · []
+FALHA E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0) · []
+OK    F1440 alvo da seta ≥ 24 px sem cobrir outro controle (telas com desvio: 0)
+OK    G1440 sem erro de JavaScript nem estado que não abriu
+# 390 px · 1 telas + 2 estados · 15 controles de abrir/recolher · 26 setas desenhadas (20 de ir) · 0 telas com teclado medido
+# 390 px · desenhos distintos da seta: 1
+       2 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ C1 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ P1 2 ordens»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ Sem talhão 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-A 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-B 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T2 2 ordens»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T3 1 ordem»')
+  a  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T4 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ C1 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ P1 2 ordens»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ Sem talhão 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-A 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T1-B 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T2 2 ordens»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T3 1 ordem»')
+  b  (390, 'OS.dc.html?view=kanban&ag=onde', 'inicial', 'button.os-raia-cab «▾ T4 1 ordem»')
+FALHA A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1) · ['OS.dc.html?view=kanban&ag=onde']
+FALHA B390 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1) · ['OS.dc.html?view=kanban&ag=onde']
+FALHA C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1) · ['rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16']
+FALHA D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0) · []
+FALHA E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0) · []
+OK    F390 alvo da seta ≥ 44 px sem cobrir outro controle; botão com nome e seta ≥ 44 px de altura (telas com desvio: 0)
+OK    G390 sem erro de JavaScript nem estado que não abriu
+RESULTADO: 4 ok · 10 falhas · A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1); B1440 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1); C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1); D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0); A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 1); B390 todo controle de abrir/recolher usa o componente da seta (15 controles; telas com desvio: 1); C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (26 setas; desenhos distintos: 1); D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0)
