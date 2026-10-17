@@ -95,4 +95,8 @@ OK Preparo não reapresenta plano obsoleto após dose nova ou separação
 OK Comuns: três origens sem loteFicha agrupam e liberam por comandos reais
 OK Comuns: vazão de outra versão e dose divergente impedem composição
 OK UI comuns: aprovar individualmente, conferir todas aprovadas, liberar e conservar caldas
-{"ok":97,"fail":0,"scope":"domínio, persistência e CMD06 real com dados sintéticos; não navegador"}
+OK Instrução comum: nova versão exige nova aprovação e replay não duplica
+OK Emissor comum e UI: completar vazão sem inventar parâmetros
+OK Seed comum Santa Rita: três aprovadas e liberadas, dose e vazão excluídas
+OK UI sugere calda comum em um toque e permite retirar sem alterar O.S.
+{"ok":101,"fail":0,"scope":"domínio, persistência e CMD06 real com dados sintéticos; não navegador"}

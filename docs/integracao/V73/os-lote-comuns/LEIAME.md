@@ -1,9 +1,9 @@
-# OS-LOTE — candidata para revisão cruzada
+# OS-LOTE — comuns, revisão S2/S3
 
-Autor Codex; revisor/integrador Claude. Base inicial d2c83287e2ddbac2ebe28e951c94fad27ff56103; recomposição 8a35f21ccc28b81a2c3e2f7d747cc5af09792173 por merge de três vias sem conflitos nos três arquivos. 97/97 repetidos após composição desses arquivos; demais dependências do harness mantidas. Domínio/handlers reais Node:97/97; AST/geração do modal PASS. Não houve execução de navegador pelo Codex.
+Base de composição 8a35f21; delta anterior b5df380. Codex autor, Claude revisor/integrador.
 
-Agrupa O.S. comuns por contexto, atividade, cultura, produtos/doses/unidades e vazão vigente, reutilizando preparo/alocação (parecer Claude6232648739). Sem parâmetros fictícios. Cada talhão mantém suas cargas; não transfere restos entre ordens. Fichas técnicas avançadas preservam seus controles anteriores. Aprovação individual CMD42, liberação das aprovadas CMD06 por origem/recibo, reservas por produto/lote com OS/REQ, plano confirmado persiste e sinaliza obsolescência. Modal ampliado, ações secundárias de origem pelo componente Mais.
+Corrige retorno 6232721040: propostas automáticas por compatibilidade, exclusões recolhidas, seleção em um toque e retirada por linha; tabelas de O.S., separação e sequência, ação primária à direita. Seed acrescenta OS-0595 a 0599, sintéticas, Santa Rita, sem loteFicha: três compatíveis, uma dose distinta, uma vazão ausente. Mantém 0590–0593 e não migra/apaga cenário salvo. Em cenário persistido anterior, usar restauração apenas em perfil isolado de QA.
 
-Pendente: revisão crítica e navegador real 1440/390, teclado/foco/rascunho, DS/TAB08, integração na composição vigente e publicação com recibo. Exercitar três O.S. comuns sem loteFicha, vazão ausente/versão antiga, dose diferente, aprovação individual, liberação parcial, separação e sequência. Contraprovas: base não possui cenGrupoAprovar/cenGrupoCaldas nem projeção de comuns. Teste sintético não comprova toda navegação.
+Conferência AL02 de vazão cria versão e exige nova aprovação, sem aprovar/liberar implicitamente. Cargas comuns preservam cada talhão/conjunto; não inventam parâmetros técnicos.
 
-Gemini Pro/HIGH: tentativa delimitada de crítica de compatibilidade falhou em access_token (CalledProcessError), antes da chamada ao modelo. Nenhum parecer obtido; não confundir com revisão executada.
+Executado: os_lote_unit.js 101/101, domínio/handlers reais com dados sintéticos; geração do modal 13271 caracteres. Não é prova de navegador. Dependências locais restantes do harness são da base anterior; Claude deve repetir na composição completa e testar teclado/foco a 1440 e 390, grupo → aprovar três → liberar → separação → sequência, antes de integrar/publicar. Gemini não respondeu: autenticação do adaptador falhou antes do modelo; parecer não obtido.

@@ -165,6 +165,28 @@ def seed_agrupamento(est):
                     capacidadeHaH=5,deslocamentoH=0.5 if i==0 else 0,setupH=0.25 if i==0 else 0,tanqueUtil=3000,
                     recursos=dict(maquina='Trator',implemento='Pulverizador'),
                     insumos=[dict(p='Sulfato de magnésio',id='DEMO-SULFMG',formulacao='Solúvel · demonstração',concentracao='Demonstração, sem recomendação',base='ha')]))
+    # Demonstração comum no contexto inicial: sem ficha técnica sintética adicional.
+    for i, (area, dose) in enumerate(((10, 2), (15, 2), (5, 2), (5, 3), (5, 2))):
+        oid='OS-%04d' % (595+i)
+        if oid in est['ordens']: raise ValueError('ID demonstrativo ocupado: '+oid)
+        o=copy.deepcopy(est['ordens']['OS-0590'])
+        o.pop('loteFicha')
+        no=o['osc']['novo']
+        parcela='SR-DEMO-'+chr(65+i)
+        origem='Demonstração sintética de agrupamento; não é recomendação agronômica.'
+        no.update(id=oid, faz='Santa Rita', saf='2026/27', cult=parcela,
+            talhao='Talhão demonstrativo '+chr(65+i), talhoes=[dict(id=parcela,nome='Talhão demonstrativo '+chr(65+i))],
+            area=area,saldo=area,keys=[parcela+'|DEMO-AGRUPAR'],orig=[origem],obs=origem,
+            jan='2026-09-30',ini='2026-09-30',fim='2026-09-30',janela='30/09 · 08:00–18:00 UTC−3',resp='Marcos')
+        no['atv']['orig']=origem
+        no['ins'][0].update(dose=dose,tot=_QTD.qtd(dose,area))
+        o.update(id=oid,talhao=no['talhao'],area=area,saldo=area,resp='Marcos',ins=copy.deepcopy(no['ins']))
+        o['instrucao']['origem']=origem
+        if i==4: o.pop('instrucao')
+        ini=(8,10,13,14,15)[i]
+        fim=(10,13,14,15,16)[i]
+        o['prog']=dict(fuso='-03:00',blocos=[dict(r=r,os=oid,dia='2026-09-30',ini=ini,fim=fim,h=fim-ini,sit='condicional') for r in ('T03','PJ','MAR','PAU')])
+        est['ordens'][oid]=o
     return est
 
 
