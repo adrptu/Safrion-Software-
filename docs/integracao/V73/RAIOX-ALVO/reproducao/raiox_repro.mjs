@@ -1,15 +1,18 @@
-// Reprodução, sem navegador, dos números declarados do protótipo "Raio-X do alvo" (artefato versão 3).
-// Uso: node raiox_repro.mjs <caminho do HTML do artefato> [saída.json]
-// O HTML do artefato é privado e NÃO é versionado: o script lê o arquivo indicado, confere o SHA-256,
-// extrai o motor (simulação + camadas 1 a 4) e roda num contexto vm isolado (sem require, sem process).
-// Dados 100 % sintéticos, gerados pelo próprio artefato. Nenhum dado real, nenhum segredo.
+// Reprodução, sem navegador, dos números declarados do protótipo "Raio-X do alvo" (versão 3).
+// Uso: node raiox_repro.mjs <caminho do HTML do v3> [saída.json] [origem] [nota]
+// Fonte: docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html, commit 529adf7, SHA-256 e7872cb0…805e5e (extrair com git show).
+// Conteúdo igual ao do artefato publicado 00b5d915…ed72e, salvo o invólucro de publicação.
+// O script lê o arquivo indicado, registra o SHA-256 e a origem, extrai o motor (simulação + camadas 1 a 4)
+// e roda num contexto vm isolado (sem require, sem process). Dados 100 % sintéticos. Nenhum dado real, nenhum segredo.
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
 
 const htmlPath = process.argv[2];
 const outPath = process.argv[3];
-if (!htmlPath) { console.error('uso: node raiox_repro.mjs <artefato.html> [saida.json]'); process.exit(2); }
+const origem = process.argv[4] || htmlPath;
+const nota = process.argv[5] || '';
+if (!htmlPath) { console.error('uso: node raiox_repro.mjs <v3.html> [saida.json] [origem] [nota]'); process.exit(2); }
 const html = fs.readFileSync(htmlPath, 'utf8');
 const sha = crypto.createHash('sha256').update(html).digest('hex');
 
@@ -117,7 +120,7 @@ function rodar(full) {
 globalThis.__result = rodar(__FULL);
 `;
 
-// Controle de época na regressão: 'nenhum' (como o artefato), 'mes' (mês da vistoria, indicadores) ou 'suave' (tendência quadrática na data).
+// Controle de época na regressão: 'nenhum' (como o v3), 'mes' (mês da vistoria, indicadores) ou 'suave' (tendência quadrática na data).
 const EPOCA = { nenhum: () => [], mes: d => { const m = d <= 30 ? 0 : d <= 61 ? 1 : 2; return [m === 1 ? 1 : 0, m === 2 ? 1 : 0]; }, suave: d => { const t = d / 86; return [t, t * t]; } };
 function run(salt, shift, full, epoca = 'nenhum') {
   const ctx = vm.createContext({ __SALT: salt, __SHIFT: shift, __FULL: full, __EPOCA: EPOCA[epoca], __now: () => performance.now(), Intl, Math, Date, JSON, Map, Set, Object, Array, Number, String, Infinity, NaN, console });
@@ -127,7 +130,7 @@ function run(salt, shift, full, epoca = 'nenhum') {
 }
 
 const t0 = performance.now();
-const resultado = { artefato: { arquivo: htmlPath.split('/').pop(), bytes: Buffer.byteLength(html), sha256: sha, rxkPresente: RXK_OK }, node: process.version, quando: new Date().toISOString() };
+const resultado = { artefato: { origem, nota, arquivo: htmlPath.split('/').pop(), bytes: Buffer.byteLength(html), sha256: sha, rxkPresente: RXK_OK }, node: process.version, quando: new Date().toISOString() };
 // 1) Reprodução do número declarado (semente original, 25/09 = dia 86)
 resultado.original = run('', 0, true);
 // 2) Réplicas: mesma estrutura de fazenda, ruído com outra semente (chuva e ondas de calor ficam fixas no gerador)

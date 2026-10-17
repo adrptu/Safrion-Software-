@@ -1,7 +1,8 @@
-artefato raiox-v3.html · 151928 bytes · sha256 00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e · node v22.22.0 · 27.8 s
+fonte docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html @ 529adf7 (claude/v44-v73-pedidos-1610) · 151382 bytes · sha256 e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e · node v22.22.0 · 34.4 s
+nota: conteúdo igual ao do artefato publicado 00b5d915…ed72e (versão 1792193012-4fc4), salvo o invólucro de publicação
 
 == 1. Semente original, dia 86 (25/09) ==
-acaro: recuperados 4/5 (só Forte/Moderada: 2/5) · falso positivo forte/moderado 0/3 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 180 · talhões 20 · semanas 12 · rxGet 60.7 ms
+acaro: recuperados 4/5 (só Forte/Moderada: 2/5) · falso positivo forte/moderado 0/3 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 180 · talhões 20 · semanas 12 · rxGet 56.9 ms
    gate 3 semanas: ok=true Brier modelo 0.059 × persistência 0.161 · n=31 · eventos=4
    qs     plantado= 1 proxy=-    nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
    tmax   plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
@@ -26,7 +27,7 @@ acaro: recuperados 4/5 (só Forte/Moderada: 2/5) · falso positivo forte/moderad
       chuva até 1 dia   49.4 % (n=3; ic90 28.5–77.8) × sem chuva 78.1 % (n=13; ic90 64.2–82.9)
       barra 100 L/ha    46.3 % (n=2) × atomizador 77.9 % (n=14; ic90 49.4–82.9)
       mesmo grupo seguido 0.5 % (n=1) × rotação 77.8 % (n=15; ic90 64.2–82.9)
-mosca: recuperados 3/4 (só Forte/Moderada: 2/4) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 193 · talhões 20 · semanas 12 · rxGet 33 ms
+mosca: recuperados 3/4 (só Forte/Moderada: 2/4) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 193 · talhões 20 · semanas 12 · rxGet 32.8 ms
    gate 3 semanas: ok=true Brier modelo 0.044 × persistência 0.136 · n=44 · eventos=5
    qs     plantado= 1 proxy=-    nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
    tmax   plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
@@ -51,7 +52,7 @@ mosca: recuperados 3/4 (só Forte/Moderada: 2/4) · falso positivo forte/moderad
       chuva até 1 dia   73.5 % (n=3; ic90 69.3–75.3) × sem chuva 71.2 % (n=13; ic90 64.4–85.3)
       barra 100 L/ha    50.9 % (n=2) × atomizador 74.4 % (n=14; ic90 68.1–82)
       mesmo grupo seguido - % (n=0) × rotação 72.3 % (n=16; ic90 66.1–80.6)
-antrac: recuperados 3/3 (só Forte/Moderada: 2/3) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: def:fraca, ndvi:fraca · a confirmar: nenhum · pares 203 · talhões 20 · semanas 12 · rxGet 35.3 ms
+antrac: recuperados 3/3 (só Forte/Moderada: 2/3) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: def:fraca, ndvi:fraca · a confirmar: nenhum · pares 203 · talhões 20 · semanas 12 · rxGet 33.2 ms
    gate 3 semanas: ok=true Brier modelo 0.003 × persistência 0.020 · n=49 · eventos=1
    qs     plantado= 0 proxy=ur   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
    tmax   plantado= 0 proxy=ur   nível=fraca              efeito=5.2 % ic95=[-0.5; 12.4] janela=1 limiar=29.8 casos=147 talhões=20 semanas=9 q=0.77
@@ -76,7 +77,7 @@ antrac: recuperados 3/3 (só Forte/Moderada: 2/3) · falso positivo forte/modera
       chuva até 1 dia   53 % (n=1) × sem chuva 47.2 % (n=8; ic90 27.8–58.2)
       barra 100 L/ha    6.3 % (n=1) × atomizador 50.4 % (n=8; ic90 38.3–59.5)
       mesmo grupo seguido - % (n=0) × rotação 47.8 % (n=9; ic90 23.7–56.8)
-cochon: recuperados 2/2 (só Forte/Moderada: 1/2) · falso positivo forte/moderado 0/9 · ruído exibido em qualquer nível: chuva:fraca · a confirmar: nenhum · pares 195 · talhões 20 · semanas 12 · rxGet 31.5 ms
+cochon: recuperados 2/2 (só Forte/Moderada: 1/2) · falso positivo forte/moderado 0/9 · ruído exibido em qualquer nível: chuva:fraca · a confirmar: nenhum · pares 195 · talhões 20 · semanas 12 · rxGet 41.2 ms
    gate 3 semanas: ok=true Brier modelo 0.044 × persistência 0.216 · n=37 · eventos=9
    qs     plantado= 1 proxy=-    nível=anda junto de tmax efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
    tmax   plantado= 0 proxy=qs   nível=fraca              efeito=13.1 % ic95=[0.2; 27] janela=0 limiar=32.2 casos=41 talhões=20 semanas=4 q=0.54

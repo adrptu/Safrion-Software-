@@ -1,12 +1,14 @@
 {
  "artefato": {
-  "arquivo": "raiox-v3.html",
-  "bytes": 151928,
-  "sha256": "00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e",
+  "origem": "docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html @ 529adf7 (claude/v44-v73-pedidos-1610)",
+  "nota": "conteúdo igual ao do artefato publicado 00b5d915…ed72e (versão 1792193012-4fc4), salvo o invólucro de publicação",
+  "arquivo": "raiox-v3-repo.html",
+  "bytes": 151382,
+  "sha256": "e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e",
   "rxkPresente": true
  },
  "node": "v22.22.0",
- "quando": "2026-10-16T23:51:35.850Z",
+ "quando": "2026-10-17T00:08:07.854Z",
  "original": {
   "acaro": {
    "hit": 4,
@@ -22,7 +24,7 @@
     "n": 31,
     "ev": 4
    },
-   "msRxGet": 60.7,
+   "msRxGet": 56.9,
    "pares": 180,
    "talhoes": 20,
    "semanas": 12,
@@ -370,7 +372,7 @@
     "n": 44,
     "ev": 5
    },
-   "msRxGet": 33,
+   "msRxGet": 32.8,
    "pares": 193,
    "talhoes": 20,
    "semanas": 12,
@@ -719,7 +721,7 @@
     "n": 49,
     "ev": 1
    },
-   "msRxGet": 35.3,
+   "msRxGet": 33.2,
    "pares": 203,
    "talhoes": 20,
    "semanas": 12,
@@ -1071,7 +1073,7 @@
     "n": 37,
     "ev": 9
    },
-   "msRxGet": 31.5,
+   "msRxGet": 41.2,
    "pares": 195,
    "talhoes": 20,
    "semanas": 12,
@@ -1420,7 +1422,7 @@
      "n": 47,
      "ev": 8
     },
-    "msRxGet": 58.7,
+    "msRxGet": 59,
     "pares": 200,
     "talhoes": 20,
     "semanas": 12,
@@ -1465,7 +1467,7 @@
      "n": 41,
      "ev": 3
     },
-    "msRxGet": 34,
+    "msRxGet": 35.9,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -1507,7 +1509,7 @@
      "n": 45,
      "ev": 3
     },
-    "msRxGet": 32.6,
+    "msRxGet": 36.6,
     "pares": 205,
     "talhoes": 20,
     "semanas": 12,
@@ -1550,7 +1552,7 @@
      "n": 37,
      "ev": 11
     },
-    "msRxGet": 35.6,
+    "msRxGet": 37.8,
     "pares": 196,
     "talhoes": 20,
     "semanas": 12,
@@ -1594,7 +1596,7 @@
      "n": 30,
      "ev": 3
     },
-    "msRxGet": 56.5,
+    "msRxGet": 58.7,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -1638,7 +1640,7 @@
      "n": 45,
      "ev": 6
     },
-    "msRxGet": 37.6,
+    "msRxGet": 34.1,
     "pares": 198,
     "talhoes": 20,
     "semanas": 12,
@@ -1681,7 +1683,7 @@
      "n": 49,
      "ev": 4
     },
-    "msRxGet": 34.2,
+    "msRxGet": 33.5,
     "pares": 213,
     "talhoes": 20,
     "semanas": 12,
@@ -1726,7 +1728,7 @@
      "n": 39,
      "ev": 8
     },
-    "msRxGet": 37.1,
+    "msRxGet": 39.9,
     "pares": 200,
     "talhoes": 20,
     "semanas": 12,
@@ -1770,7 +1772,7 @@
      "n": 35,
      "ev": 5
     },
-    "msRxGet": 59.3,
+    "msRxGet": 104.4,
     "pares": 182,
     "talhoes": 20,
     "semanas": 12,
@@ -1812,7 +1814,7 @@
      "n": 39,
      "ev": 9
     },
-    "msRxGet": 33.3,
+    "msRxGet": 48.8,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -1853,7 +1855,7 @@
      "n": 47,
      "ev": 4
     },
-    "msRxGet": 34.4,
+    "msRxGet": 49.1,
     "pares": 210,
     "talhoes": 20,
     "semanas": 12,
@@ -1897,7 +1899,7 @@
      "n": 36,
      "ev": 10
     },
-    "msRxGet": 37.4,
+    "msRxGet": 41.5,
     "pares": 196,
     "talhoes": 20,
     "semanas": 12,
@@ -1942,7 +1944,7 @@
      "n": 44,
      "ev": 4
     },
-    "msRxGet": 54.8,
+    "msRxGet": 162.3,
     "pares": 192,
     "talhoes": 20,
     "semanas": 12,
@@ -1989,7 +1991,7 @@
      "n": 45,
      "ev": 5
     },
-    "msRxGet": 32.7,
+    "msRxGet": 46.2,
     "pares": 192,
     "talhoes": 20,
     "semanas": 12,
@@ -2034,7 +2036,7 @@
      "n": 50,
      "ev": 1
     },
-    "msRxGet": 33.7,
+    "msRxGet": 36.8,
     "pares": 208,
     "talhoes": 20,
     "semanas": 12,
@@ -2079,7 +2081,7 @@
      "n": 36,
      "ev": 6
     },
-    "msRxGet": 32.2,
+    "msRxGet": 39.4,
     "pares": 188,
     "talhoes": 20,
     "semanas": 12,
@@ -2123,7 +2125,7 @@
      "n": 43,
      "ev": 4
     },
-    "msRxGet": 58.5,
+    "msRxGet": 146.2,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -2167,7 +2169,7 @@
      "n": 43,
      "ev": 4
     },
-    "msRxGet": 35.4,
+    "msRxGet": 64,
     "pares": 196,
     "talhoes": 20,
     "semanas": 12,
@@ -2209,7 +2211,7 @@
      "n": 47,
      "ev": 3
     },
-    "msRxGet": 33.7,
+    "msRxGet": 35.2,
     "pares": 207,
     "talhoes": 20,
     "semanas": 12,
@@ -2251,7 +2253,7 @@
      "n": 43,
      "ev": 11
     },
-    "msRxGet": 33.7,
+    "msRxGet": 35.4,
     "pares": 201,
     "talhoes": 20,
     "semanas": 12,
@@ -2296,7 +2298,7 @@
      "n": 34,
      "ev": 2
     },
-    "msRxGet": 60.2,
+    "msRxGet": 128.3,
     "pares": 182,
     "talhoes": 20,
     "semanas": 12,
@@ -2341,7 +2343,7 @@
      "n": 49,
      "ev": 7
     },
-    "msRxGet": 36.1,
+    "msRxGet": 47.4,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -2385,7 +2387,7 @@
      "n": 54,
      "ev": 6
     },
-    "msRxGet": 36.5,
+    "msRxGet": 34.8,
     "pares": 213,
     "talhoes": 20,
     "semanas": 12,
@@ -2430,7 +2432,7 @@
      "n": 35,
      "ev": 7
     },
-    "msRxGet": 40.4,
+    "msRxGet": 40.3,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -2477,7 +2479,7 @@
      "n": 41,
      "ev": 7
     },
-    "msRxGet": 56.8,
+    "msRxGet": 99.7,
     "pares": 188,
     "talhoes": 20,
     "semanas": 12,
@@ -2520,7 +2522,7 @@
      "n": 46,
      "ev": 5
     },
-    "msRxGet": 33.7,
+    "msRxGet": 39.1,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -2565,7 +2567,7 @@
      "n": 46,
      "ev": 6
     },
-    "msRxGet": 32.7,
+    "msRxGet": 36.5,
     "pares": 201,
     "talhoes": 20,
     "semanas": 12,
@@ -2609,7 +2611,7 @@
      "n": 40,
      "ev": 13
     },
-    "msRxGet": 33,
+    "msRxGet": 33.2,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -2652,7 +2654,7 @@
      "n": 45,
      "ev": 5
     },
-    "msRxGet": 56.7,
+    "msRxGet": 66.9,
     "pares": 187,
     "talhoes": 20,
     "semanas": 12,
@@ -2695,7 +2697,7 @@
      "n": 34,
      "ev": 2
     },
-    "msRxGet": 36.7,
+    "msRxGet": 48.5,
     "pares": 187,
     "talhoes": 20,
     "semanas": 12,
@@ -2737,7 +2739,7 @@
      "n": 44,
      "ev": 2
     },
-    "msRxGet": 34.3,
+    "msRxGet": 35.4,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -2779,7 +2781,7 @@
      "n": 37,
      "ev": 8
     },
-    "msRxGet": 37.9,
+    "msRxGet": 36.8,
     "pares": 196,
     "talhoes": 20,
     "semanas": 12,
@@ -2822,7 +2824,7 @@
      "n": 46,
      "ev": 6
     },
-    "msRxGet": 57.4,
+    "msRxGet": 75.6,
     "pares": 191,
     "talhoes": 20,
     "semanas": 12,
@@ -2869,7 +2871,7 @@
      "n": 43,
      "ev": 9
     },
-    "msRxGet": 34,
+    "msRxGet": 36.7,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -2913,7 +2915,7 @@
      "n": 45,
      "ev": 5
     },
-    "msRxGet": 35.4,
+    "msRxGet": 31.7,
     "pares": 197,
     "talhoes": 20,
     "semanas": 12,
@@ -2956,7 +2958,7 @@
      "n": 40,
      "ev": 9
     },
-    "msRxGet": 46.8,
+    "msRxGet": 47.7,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -3000,7 +3002,7 @@
      "n": 40,
      "ev": 1
     },
-    "msRxGet": 84.8,
+    "msRxGet": 71.7,
     "pares": 189,
     "talhoes": 20,
     "semanas": 12,
@@ -3045,7 +3047,7 @@
      "n": 39,
      "ev": 4
     },
-    "msRxGet": 33.4,
+    "msRxGet": 39.1,
     "pares": 189,
     "talhoes": 20,
     "semanas": 12,
@@ -3090,7 +3092,7 @@
      "n": 40,
      "ev": 3
     },
-    "msRxGet": 34.5,
+    "msRxGet": 40.5,
     "pares": 202,
     "talhoes": 20,
     "semanas": 12,
@@ -3134,7 +3136,7 @@
      "n": 35,
      "ev": 9
     },
-    "msRxGet": 35.3,
+    "msRxGet": 52,
     "pares": 192,
     "talhoes": 20,
     "semanas": 12,
@@ -3176,7 +3178,7 @@
      "n": 30,
      "ev": 3
     },
-    "msRxGet": 76.9,
+    "msRxGet": 67,
     "pares": 183,
     "talhoes": 20,
     "semanas": 12,
@@ -3219,7 +3221,7 @@
      "n": 41,
      "ev": 6
     },
-    "msRxGet": 51.7,
+    "msRxGet": 33.7,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -3263,7 +3265,7 @@
      "n": 45,
      "ev": 6
     },
-    "msRxGet": 33.2,
+    "msRxGet": 33,
     "pares": 209,
     "talhoes": 20,
     "semanas": 12,
@@ -3306,7 +3308,7 @@
      "n": 35,
      "ev": 11
     },
-    "msRxGet": 32.9,
+    "msRxGet": 33.6,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -3349,7 +3351,7 @@
      "n": 40,
      "ev": 5
     },
-    "msRxGet": 57.1,
+    "msRxGet": 56.9,
     "pares": 184,
     "talhoes": 20,
     "semanas": 12,
@@ -3392,7 +3394,7 @@
      "n": 40,
      "ev": 5
     },
-    "msRxGet": 36.8,
+    "msRxGet": 34.2,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -3435,7 +3437,7 @@
      "n": 46,
      "ev": 4
     },
-    "msRxGet": 36.9,
+    "msRxGet": 35.5,
     "pares": 213,
     "talhoes": 20,
     "semanas": 12,
@@ -3477,7 +3479,7 @@
      "n": 40,
      "ev": 10
     },
-    "msRxGet": 62,
+    "msRxGet": 35.8,
     "pares": 198,
     "talhoes": 20,
     "semanas": 12,
@@ -3522,7 +3524,7 @@
      "n": 34,
      "ev": 2
     },
-    "msRxGet": 89.3,
+    "msRxGet": 68,
     "pares": 182,
     "talhoes": 20,
     "semanas": 12,
@@ -3570,7 +3572,7 @@
      "n": 34,
      "ev": 3
     },
-    "msRxGet": 72.4,
+    "msRxGet": 93.2,
     "pares": 186,
     "talhoes": 20,
     "semanas": 12,
@@ -3613,7 +3615,7 @@
      "n": 39,
      "ev": 4
     },
-    "msRxGet": 37.9,
+    "msRxGet": 43.9,
     "pares": 204,
     "talhoes": 20,
     "semanas": 12,
@@ -3654,7 +3656,7 @@
      "n": 38,
      "ev": 10
     },
-    "msRxGet": 32.8,
+    "msRxGet": 34.2,
     "pares": 191,
     "talhoes": 20,
     "semanas": 12,
@@ -3699,7 +3701,7 @@
      "n": 42,
      "ev": 4
     },
-    "msRxGet": 98.6,
+    "msRxGet": 76.1,
     "pares": 189,
     "talhoes": 20,
     "semanas": 12,
@@ -3743,7 +3745,7 @@
      "n": 46,
      "ev": 5
     },
-    "msRxGet": 36.7,
+    "msRxGet": 35.1,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -3786,7 +3788,7 @@
      "n": 48,
      "ev": 6
     },
-    "msRxGet": 38.1,
+    "msRxGet": 37.6,
     "pares": 209,
     "talhoes": 20,
     "semanas": 12,
@@ -3827,7 +3829,7 @@
      "n": 45,
      "ev": 13
     },
-    "msRxGet": 34.5,
+    "msRxGet": 35.9,
     "pares": 201,
     "talhoes": 20,
     "semanas": 12,
@@ -3872,7 +3874,7 @@
      "n": 35,
      "ev": 1
     },
-    "msRxGet": 58,
+    "msRxGet": 117.9,
     "pares": 186,
     "talhoes": 20,
     "semanas": 12,
@@ -3918,7 +3920,7 @@
      "n": 36,
      "ev": 2
     },
-    "msRxGet": 34.9,
+    "msRxGet": 81.2,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -3961,7 +3963,7 @@
      "n": 48,
      "ev": 2
     },
-    "msRxGet": 35.5,
+    "msRxGet": 40.7,
     "pares": 210,
     "talhoes": 20,
     "semanas": 12,
@@ -4002,7 +4004,7 @@
      "n": 34,
      "ev": 11
     },
-    "msRxGet": 37.2,
+    "msRxGet": 39.9,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -4047,7 +4049,7 @@
      "n": 32,
      "ev": 4
     },
-    "msRxGet": 58.1,
+    "msRxGet": 77.8,
     "pares": 184,
     "talhoes": 20,
     "semanas": 12,
@@ -4096,7 +4098,7 @@
      "n": 43,
      "ev": 9
     },
-    "msRxGet": 39.7,
+    "msRxGet": 36.3,
     "pares": 197,
     "talhoes": 20,
     "semanas": 12,
@@ -4141,7 +4143,7 @@
      "n": 48,
      "ev": 6
     },
-    "msRxGet": 39.2,
+    "msRxGet": 34.8,
     "pares": 213,
     "talhoes": 20,
     "semanas": 12,
@@ -4184,7 +4186,7 @@
      "n": 36,
      "ev": 8
     },
-    "msRxGet": 35,
+    "msRxGet": 40.8,
     "pares": 198,
     "talhoes": 20,
     "semanas": 12,
@@ -4227,7 +4229,7 @@
      "n": 31,
      "ev": 8
     },
-    "msRxGet": 52.8,
+    "msRxGet": 74.5,
     "pares": 185,
     "talhoes": 20,
     "semanas": 12,
@@ -4271,7 +4273,7 @@
      "n": 50,
      "ev": 10
     },
-    "msRxGet": 38.7,
+    "msRxGet": 39.7,
     "pares": 199,
     "talhoes": 20,
     "semanas": 12,
@@ -4314,7 +4316,7 @@
      "n": 49,
      "ev": 6
     },
-    "msRxGet": 34.4,
+    "msRxGet": 36.8,
     "pares": 208,
     "talhoes": 20,
     "semanas": 12,
@@ -4398,7 +4400,7 @@
      "n": 37,
      "ev": 4
     },
-    "msRxGet": 57.4,
+    "msRxGet": 131.9,
     "pares": 178,
     "talhoes": 20,
     "semanas": 12,
@@ -4440,7 +4442,7 @@
      "n": 39,
      "ev": 8
     },
-    "msRxGet": 37.1,
+    "msRxGet": 42.6,
     "pares": 197,
     "talhoes": 20,
     "semanas": 12,
@@ -4483,7 +4485,7 @@
      "n": 44,
      "ev": 3
     },
-    "msRxGet": 37.7,
+    "msRxGet": 47.4,
     "pares": 197,
     "talhoes": 20,
     "semanas": 12,
@@ -4526,7 +4528,7 @@
      "n": 40,
      "ev": 10
     },
-    "msRxGet": 38.6,
+    "msRxGet": 53.6,
     "pares": 194,
     "talhoes": 20,
     "semanas": 12,
@@ -4569,7 +4571,7 @@
      "n": 35,
      "ev": 3
     },
-    "msRxGet": 59.7,
+    "msRxGet": 75.1,
     "pares": 184,
     "talhoes": 20,
     "semanas": 12,
@@ -4613,7 +4615,7 @@
      "n": 40,
      "ev": 5
     },
-    "msRxGet": 35.5,
+    "msRxGet": 40.6,
     "pares": 191,
     "talhoes": 20,
     "semanas": 12,
@@ -4655,7 +4657,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 37.2,
+    "msRxGet": 41.1,
     "pares": 212,
     "talhoes": 20,
     "semanas": 12,
@@ -4696,7 +4698,7 @@
      "n": 37,
      "ev": 11
     },
-    "msRxGet": 37.4,
+    "msRxGet": 53.4,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -4739,7 +4741,7 @@
      "n": 36,
      "ev": 4
     },
-    "msRxGet": 67.8,
+    "msRxGet": 110.5,
     "pares": 183,
     "talhoes": 20,
     "semanas": 12,
@@ -4782,7 +4784,7 @@
      "n": 43,
      "ev": 7
     },
-    "msRxGet": 35.4,
+    "msRxGet": 42.2,
     "pares": 197,
     "talhoes": 20,
     "semanas": 12,
@@ -4827,7 +4829,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 37.2,
+    "msRxGet": 38.6,
     "pares": 204,
     "talhoes": 20,
     "semanas": 12,
@@ -4871,7 +4873,7 @@
      "n": 39,
      "ev": 12
     },
-    "msRxGet": 34.5,
+    "msRxGet": 36.9,
     "pares": 199,
     "talhoes": 20,
     "semanas": 12,
@@ -4921,7 +4923,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 54.7,
+    "msRxGet": 92,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -4968,7 +4970,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 39.5,
+    "msRxGet": 51.7,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5017,7 +5019,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 35.6,
+    "msRxGet": 59.1,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5065,7 +5067,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 37.6,
+    "msRxGet": 35.9,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -5108,7 +5110,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 63.6,
+    "msRxGet": 85.5,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -5153,7 +5155,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 36,
+    "msRxGet": 49.6,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5200,7 +5202,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 35.5,
+    "msRxGet": 40.1,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5248,7 +5250,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 34,
+    "msRxGet": 36.9,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -5293,7 +5295,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 64.2,
+    "msRxGet": 118.8,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -5338,7 +5340,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 38.6,
+    "msRxGet": 53,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5382,7 +5384,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 33.2,
+    "msRxGet": 48.8,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5426,7 +5428,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 40.1,
+    "msRxGet": 42.2,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -5471,7 +5473,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 72.1,
+    "msRxGet": 103.6,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -5517,7 +5519,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 39.9,
+    "msRxGet": 42.5,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5563,7 +5565,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 38.2,
+    "msRxGet": 37.4,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5608,7 +5610,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 38.7,
+    "msRxGet": 35.3,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -5658,7 +5660,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 61.3,
+    "msRxGet": 125.4,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -5707,7 +5709,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 43,
+    "msRxGet": 42,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5755,7 +5757,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 38,
+    "msRxGet": 40,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5802,7 +5804,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 54.4,
+    "msRxGet": 41.7,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -5845,7 +5847,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 136.7,
+    "msRxGet": 72.7,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -5891,7 +5893,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 67.5,
+    "msRxGet": 38.9,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -5938,7 +5940,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 44.4,
+    "msRxGet": 51,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -5983,7 +5985,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 45.3,
+    "msRxGet": 40,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -6026,7 +6028,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 99.1,
+    "msRxGet": 84.7,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -6072,7 +6074,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 40.3,
+    "msRxGet": 46.1,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -6162,7 +6164,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 36,
+    "msRxGet": 38.6,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -6209,7 +6211,7 @@
      "n": 31,
      "ev": 4
     },
-    "msRxGet": 92,
+    "msRxGet": 95.2,
     "pares": 180,
     "talhoes": 20,
     "semanas": 12,
@@ -6257,7 +6259,7 @@
      "n": 44,
      "ev": 5
     },
-    "msRxGet": 44.4,
+    "msRxGet": 46.8,
     "pares": 193,
     "talhoes": 20,
     "semanas": 12,
@@ -6303,7 +6305,7 @@
      "n": 49,
      "ev": 1
     },
-    "msRxGet": 40.7,
+    "msRxGet": 48.2,
     "pares": 203,
     "talhoes": 20,
     "semanas": 12,
@@ -6348,7 +6350,7 @@
      "n": 37,
      "ev": 9
     },
-    "msRxGet": 41.6,
+    "msRxGet": 43.3,
     "pares": 195,
     "talhoes": 20,
     "semanas": 12,
@@ -6394,7 +6396,7 @@
       "n": 31,
       "ev": 4
      },
-     "msRxGet": 62.5,
+     "msRxGet": 91.4,
      "pares": 180,
      "talhoes": 20,
      "semanas": 12,
@@ -6438,7 +6440,7 @@
       "n": 44,
       "ev": 5
      },
-     "msRxGet": 37.1,
+     "msRxGet": 38.4,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -6483,7 +6485,7 @@
       "n": 49,
       "ev": 1
      },
-     "msRxGet": 38.4,
+     "msRxGet": 39.2,
      "pares": 203,
      "talhoes": 20,
      "semanas": 12,
@@ -6529,7 +6531,7 @@
       "n": 37,
       "ev": 9
      },
-     "msRxGet": 37.5,
+     "msRxGet": 40,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -6573,7 +6575,7 @@
       "n": 47,
       "ev": 8
      },
-     "msRxGet": 61.2,
+     "msRxGet": 111.9,
      "pares": 200,
      "talhoes": 20,
      "semanas": 12,
@@ -6616,7 +6618,7 @@
       "n": 41,
       "ev": 3
      },
-     "msRxGet": 43.4,
+     "msRxGet": 48.2,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -6660,7 +6662,7 @@
       "n": 45,
       "ev": 3
      },
-     "msRxGet": 41.2,
+     "msRxGet": 42.1,
      "pares": 205,
      "talhoes": 20,
      "semanas": 12,
@@ -6704,7 +6706,7 @@
       "n": 37,
       "ev": 11
      },
-     "msRxGet": 37.2,
+     "msRxGet": 40.1,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -6748,7 +6750,7 @@
       "n": 30,
       "ev": 3
      },
-     "msRxGet": 112.3,
+     "msRxGet": 73,
      "pares": 180,
      "talhoes": 20,
      "semanas": 12,
@@ -6790,7 +6792,7 @@
       "n": 45,
       "ev": 6
      },
-     "msRxGet": 43.4,
+     "msRxGet": 49.3,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -6832,7 +6834,7 @@
       "n": 49,
       "ev": 4
      },
-     "msRxGet": 39.1,
+     "msRxGet": 37.5,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -6877,7 +6879,7 @@
       "n": 39,
       "ev": 8
      },
-     "msRxGet": 36.1,
+     "msRxGet": 38.5,
      "pares": 200,
      "talhoes": 20,
      "semanas": 12,
@@ -6921,7 +6923,7 @@
       "n": 35,
       "ev": 5
      },
-     "msRxGet": 58.4,
+     "msRxGet": 101.5,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -6962,7 +6964,7 @@
       "n": 39,
       "ev": 9
      },
-     "msRxGet": 37.2,
+     "msRxGet": 78.4,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -7003,7 +7005,7 @@
       "n": 47,
       "ev": 4
      },
-     "msRxGet": 40.7,
+     "msRxGet": 41.5,
      "pares": 210,
      "talhoes": 20,
      "semanas": 12,
@@ -7046,7 +7048,7 @@
       "n": 36,
       "ev": 10
      },
-     "msRxGet": 53.2,
+     "msRxGet": 53.1,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -7089,7 +7091,7 @@
       "n": 44,
       "ev": 4
      },
-     "msRxGet": 63.9,
+     "msRxGet": 101.3,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -7133,7 +7135,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 38.7,
+     "msRxGet": 115.1,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -7177,7 +7179,7 @@
       "n": 50,
       "ev": 1
      },
-     "msRxGet": 37.4,
+     "msRxGet": 85.4,
      "pares": 208,
      "talhoes": 20,
      "semanas": 12,
@@ -7222,7 +7224,7 @@
       "n": 36,
       "ev": 6
      },
-     "msRxGet": 36.5,
+     "msRxGet": 39.7,
      "pares": 188,
      "talhoes": 20,
      "semanas": 12,
@@ -7268,7 +7270,7 @@
       "n": 43,
       "ev": 4
      },
-     "msRxGet": 61,
+     "msRxGet": 248.9,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -7312,7 +7314,7 @@
       "n": 43,
       "ev": 4
      },
-     "msRxGet": 38.4,
+     "msRxGet": 50.2,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -7354,7 +7356,7 @@
       "n": 47,
       "ev": 3
      },
-     "msRxGet": 40.8,
+     "msRxGet": 102.6,
      "pares": 207,
      "talhoes": 20,
      "semanas": 12,
@@ -7395,7 +7397,7 @@
       "n": 43,
       "ev": 11
      },
-     "msRxGet": 41.5,
+     "msRxGet": 42.8,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -7440,7 +7442,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 78.7,
+     "msRxGet": 156.5,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -7484,7 +7486,7 @@
       "n": 49,
       "ev": 7
      },
-     "msRxGet": 36.5,
+     "msRxGet": 47.1,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -7526,7 +7528,7 @@
       "n": 54,
       "ev": 6
      },
-     "msRxGet": 37.7,
+     "msRxGet": 49.3,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -7570,7 +7572,7 @@
       "n": 35,
       "ev": 7
      },
-     "msRxGet": 41.6,
+     "msRxGet": 45.8,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -7617,7 +7619,7 @@
       "n": 41,
       "ev": 7
      },
-     "msRxGet": 65.8,
+     "msRxGet": 93.1,
      "pares": 188,
      "talhoes": 20,
      "semanas": 12,
@@ -7660,7 +7662,7 @@
       "n": 46,
       "ev": 5
      },
-     "msRxGet": 37.3,
+     "msRxGet": 53.9,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -7705,7 +7707,7 @@
       "n": 46,
       "ev": 6
      },
-     "msRxGet": 37.2,
+     "msRxGet": 44,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -7749,7 +7751,7 @@
       "n": 40,
       "ev": 13
      },
-     "msRxGet": 35.6,
+     "msRxGet": 42.6,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -7792,7 +7794,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 73.4,
+     "msRxGet": 118.4,
      "pares": 187,
      "talhoes": 20,
      "semanas": 12,
@@ -7835,7 +7837,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 40.2,
+     "msRxGet": 42.7,
      "pares": 187,
      "talhoes": 20,
      "semanas": 12,
@@ -7880,7 +7882,7 @@
       "n": 44,
       "ev": 2
      },
-     "msRxGet": 39.5,
+     "msRxGet": 40.2,
      "pares": 203,
      "talhoes": 20,
      "semanas": 12,
@@ -7923,7 +7925,7 @@
       "n": 37,
       "ev": 8
      },
-     "msRxGet": 40.3,
+     "msRxGet": 45.6,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -7967,7 +7969,7 @@
       "n": 46,
       "ev": 6
      },
-     "msRxGet": 60.1,
+     "msRxGet": 134.5,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -8011,7 +8013,7 @@
       "n": 43,
       "ev": 9
      },
-     "msRxGet": 39.6,
+     "msRxGet": 40.4,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -8054,7 +8056,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 36.9,
+     "msRxGet": 40.9,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -8099,7 +8101,7 @@
       "n": 40,
       "ev": 9
      },
-     "msRxGet": 40.1,
+     "msRxGet": 42.3,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -8144,7 +8146,7 @@
       "n": 40,
       "ev": 1
      },
-     "msRxGet": 66.7,
+     "msRxGet": 77.2,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -8189,7 +8191,7 @@
       "n": 39,
       "ev": 4
      },
-     "msRxGet": 40.5,
+     "msRxGet": 64.3,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -8234,7 +8236,7 @@
       "n": 40,
       "ev": 3
      },
-     "msRxGet": 36.2,
+     "msRxGet": 38.6,
      "pares": 202,
      "talhoes": 20,
      "semanas": 12,
@@ -8280,7 +8282,7 @@
       "n": 35,
       "ev": 9
      },
-     "msRxGet": 40.4,
+     "msRxGet": 44.8,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -8323,7 +8325,7 @@
       "n": 30,
       "ev": 3
      },
-     "msRxGet": 59.2,
+     "msRxGet": 147.1,
      "pares": 183,
      "talhoes": 20,
      "semanas": 12,
@@ -8365,7 +8367,7 @@
       "n": 41,
       "ev": 6
      },
-     "msRxGet": 37,
+     "msRxGet": 64.7,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -8408,7 +8410,7 @@
       "n": 45,
       "ev": 6
      },
-     "msRxGet": 42.1,
+     "msRxGet": 42.2,
      "pares": 209,
      "talhoes": 20,
      "semanas": 12,
@@ -8455,7 +8457,7 @@
       "n": 35,
       "ev": 11
      },
-     "msRxGet": 42,
+     "msRxGet": 39,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -8501,7 +8503,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 65,
+     "msRxGet": 96,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -8545,7 +8547,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 43.2,
+     "msRxGet": 60.6,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -8587,7 +8589,7 @@
       "n": 46,
       "ev": 4
      },
-     "msRxGet": 40.2,
+     "msRxGet": 42.8,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -8629,7 +8631,7 @@
       "n": 40,
       "ev": 10
      },
-     "msRxGet": 39.7,
+     "msRxGet": 64.4,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -8674,7 +8676,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 71,
+     "msRxGet": 69.1,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -8717,7 +8719,7 @@
       "n": 34,
       "ev": 3
      },
-     "msRxGet": 45.5,
+     "msRxGet": 56.2,
      "pares": 186,
      "talhoes": 20,
      "semanas": 12,
@@ -8758,7 +8760,7 @@
       "n": 39,
       "ev": 4
      },
-     "msRxGet": 41,
+     "msRxGet": 40.4,
      "pares": 204,
      "talhoes": 20,
      "semanas": 12,
@@ -8799,7 +8801,7 @@
       "n": 38,
       "ev": 10
      },
-     "msRxGet": 36.9,
+     "msRxGet": 42.8,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -8844,7 +8846,7 @@
       "n": 42,
       "ev": 4
      },
-     "msRxGet": 93.7,
+     "msRxGet": 87.7,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -8933,7 +8935,7 @@
       "n": 48,
       "ev": 6
      },
-     "msRxGet": 41.2,
+     "msRxGet": 47.2,
      "pares": 209,
      "talhoes": 20,
      "semanas": 12,
@@ -8974,7 +8976,7 @@
       "n": 45,
       "ev": 13
      },
-     "msRxGet": 39.8,
+     "msRxGet": 38.8,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -9020,7 +9022,7 @@
       "n": 35,
       "ev": 1
      },
-     "msRxGet": 62.1,
+     "msRxGet": 71.6,
      "pares": 186,
      "talhoes": 20,
      "semanas": 12,
@@ -9068,7 +9070,7 @@
       "n": 36,
       "ev": 2
      },
-     "msRxGet": 40.9,
+     "msRxGet": 51.9,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -9111,7 +9113,7 @@
       "n": 48,
       "ev": 2
      },
-     "msRxGet": 40.9,
+     "msRxGet": 61.6,
      "pares": 210,
      "talhoes": 20,
      "semanas": 12,
@@ -9152,7 +9154,7 @@
       "n": 34,
       "ev": 11
      },
-     "msRxGet": 37.9,
+     "msRxGet": 38.6,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -9196,7 +9198,7 @@
       "n": 32,
       "ev": 4
      },
-     "msRxGet": 63.7,
+     "msRxGet": 77,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -9245,7 +9247,7 @@
       "n": 43,
       "ev": 9
      },
-     "msRxGet": 37.8,
+     "msRxGet": 84.8,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -9288,7 +9290,7 @@
       "n": 48,
       "ev": 6
      },
-     "msRxGet": 39.2,
+     "msRxGet": 42.8,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -9331,7 +9333,7 @@
       "n": 36,
       "ev": 8
      },
-     "msRxGet": 37.6,
+     "msRxGet": 43.1,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -9374,7 +9376,7 @@
       "n": 31,
       "ev": 8
      },
-     "msRxGet": 59.7,
+     "msRxGet": 70.2,
      "pares": 185,
      "talhoes": 20,
      "semanas": 12,
@@ -9416,7 +9418,7 @@
       "n": 50,
       "ev": 10
      },
-     "msRxGet": 38.6,
+     "msRxGet": 42.7,
      "pares": 199,
      "talhoes": 20,
      "semanas": 12,
@@ -9458,7 +9460,7 @@
       "n": 49,
       "ev": 6
      },
-     "msRxGet": 38.6,
+     "msRxGet": 52,
      "pares": 208,
      "talhoes": 20,
      "semanas": 12,
@@ -9500,7 +9502,7 @@
       "n": 30,
       "ev": 7
      },
-     "msRxGet": 40.1,
+     "msRxGet": 44.9,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -9543,7 +9545,7 @@
       "n": 37,
       "ev": 4
      },
-     "msRxGet": 59.7,
+     "msRxGet": 99.6,
      "pares": 178,
      "talhoes": 20,
      "semanas": 12,
@@ -9587,7 +9589,7 @@
       "n": 39,
       "ev": 8
      },
-     "msRxGet": 38.4,
+     "msRxGet": 38.9,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -9630,7 +9632,7 @@
       "n": 44,
       "ev": 3
      },
-     "msRxGet": 41.8,
+     "msRxGet": 47.7,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -9673,7 +9675,7 @@
       "n": 40,
       "ev": 10
      },
-     "msRxGet": 38.8,
+     "msRxGet": 42.6,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -9716,7 +9718,7 @@
       "n": 35,
       "ev": 3
      },
-     "msRxGet": 64.1,
+     "msRxGet": 88,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -9759,7 +9761,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 41.3,
+     "msRxGet": 37.7,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -9799,7 +9801,7 @@
       "n": 49,
       "ev": 1
      },
-     "msRxGet": 43.1,
+     "msRxGet": 42.8,
      "pares": 212,
      "talhoes": 20,
      "semanas": 12,
@@ -9840,7 +9842,7 @@
       "n": 37,
       "ev": 11
      },
-     "msRxGet": 39.1,
+     "msRxGet": 41,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -9883,7 +9885,7 @@
       "n": 36,
       "ev": 4
      },
-     "msRxGet": 62.4,
+     "msRxGet": 87.1,
      "pares": 183,
      "talhoes": 20,
      "semanas": 12,
@@ -9926,7 +9928,7 @@
       "n": 43,
       "ev": 7
      },
-     "msRxGet": 39.3,
+     "msRxGet": 54.7,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -9971,7 +9973,7 @@
       "n": 44,
       "ev": 5
      },
-     "msRxGet": 38.9,
+     "msRxGet": 44.7,
      "pares": 204,
      "talhoes": 20,
      "semanas": 12,
@@ -10015,7 +10017,7 @@
       "n": 39,
       "ev": 12
      },
-     "msRxGet": 39.6,
+     "msRxGet": 41.3,
      "pares": 199,
      "talhoes": 20,
      "semanas": 12,
@@ -10061,7 +10063,7 @@
       "n": 31,
       "ev": 4
      },
-     "msRxGet": 60.1,
+     "msRxGet": 70.4,
      "pares": 180,
      "talhoes": 20,
      "semanas": 12,
@@ -10105,7 +10107,7 @@
       "n": 44,
       "ev": 5
      },
-     "msRxGet": 38,
+     "msRxGet": 63.9,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -10150,7 +10152,7 @@
       "n": 49,
       "ev": 1
      },
-     "msRxGet": 37,
+     "msRxGet": 42.6,
      "pares": 203,
      "talhoes": 20,
      "semanas": 12,
@@ -10194,7 +10196,7 @@
       "n": 37,
       "ev": 9
      },
-     "msRxGet": 40.8,
+     "msRxGet": 41.2,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -10237,7 +10239,7 @@
       "n": 47,
       "ev": 8
      },
-     "msRxGet": 64,
+     "msRxGet": 90.5,
      "pares": 200,
      "talhoes": 20,
      "semanas": 12,
@@ -10280,7 +10282,7 @@
       "n": 41,
       "ev": 3
      },
-     "msRxGet": 50.4,
+     "msRxGet": 45.4,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -10324,7 +10326,7 @@
       "n": 45,
       "ev": 3
      },
-     "msRxGet": 38.1,
+     "msRxGet": 43.1,
      "pares": 205,
      "talhoes": 20,
      "semanas": 12,
@@ -10368,7 +10370,7 @@
       "n": 37,
       "ev": 11
      },
-     "msRxGet": 42.8,
+     "msRxGet": 41.4,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -10411,7 +10413,7 @@
       "n": 30,
       "ev": 3
      },
-     "msRxGet": 89.2,
+     "msRxGet": 71.1,
      "pares": 180,
      "talhoes": 20,
      "semanas": 12,
@@ -10455,7 +10457,7 @@
       "n": 45,
       "ev": 6
      },
-     "msRxGet": 44.6,
+     "msRxGet": 41.7,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -10498,7 +10500,7 @@
       "n": 49,
       "ev": 4
      },
-     "msRxGet": 68.3,
+     "msRxGet": 39.4,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -10544,7 +10546,7 @@
       "n": 39,
       "ev": 8
      },
-     "msRxGet": 41.9,
+     "msRxGet": 53.5,
      "pares": 200,
      "talhoes": 20,
      "semanas": 12,
@@ -10588,7 +10590,7 @@
       "n": 35,
       "ev": 5
      },
-     "msRxGet": 104.5,
+     "msRxGet": 82.1,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -10629,7 +10631,7 @@
       "n": 39,
       "ev": 9
      },
-     "msRxGet": 45.1,
+     "msRxGet": 52.7,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -10670,7 +10672,7 @@
       "n": 47,
       "ev": 4
      },
-     "msRxGet": 38.9,
+     "msRxGet": 45.9,
      "pares": 210,
      "talhoes": 20,
      "semanas": 12,
@@ -10714,7 +10716,7 @@
       "n": 36,
       "ev": 10
      },
-     "msRxGet": 42.9,
+     "msRxGet": 49,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -10756,7 +10758,7 @@
       "n": 44,
       "ev": 4
      },
-     "msRxGet": 62.8,
+     "msRxGet": 83.4,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -10800,7 +10802,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 39,
+     "msRxGet": 41.5,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -10845,7 +10847,7 @@
       "n": 50,
       "ev": 1
      },
-     "msRxGet": 37.2,
+     "msRxGet": 39.7,
      "pares": 208,
      "talhoes": 20,
      "semanas": 12,
@@ -10891,7 +10893,7 @@
       "n": 36,
       "ev": 6
      },
-     "msRxGet": 36.3,
+     "msRxGet": 53.2,
      "pares": 188,
      "talhoes": 20,
      "semanas": 12,
@@ -10937,7 +10939,7 @@
       "n": 43,
       "ev": 4
      },
-     "msRxGet": 62.3,
+     "msRxGet": 99.4,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -10981,7 +10983,7 @@
       "n": 43,
       "ev": 4
      },
-     "msRxGet": 37.7,
+     "msRxGet": 45.7,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -11023,7 +11025,7 @@
       "n": 47,
       "ev": 3
      },
-     "msRxGet": 43.9,
+     "msRxGet": 45.8,
      "pares": 207,
      "talhoes": 20,
      "semanas": 12,
@@ -11068,7 +11070,7 @@
       "n": 43,
       "ev": 11
      },
-     "msRxGet": 42.1,
+     "msRxGet": 49.2,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -11115,7 +11117,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 95,
+     "msRxGet": 110.1,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -11160,7 +11162,7 @@
       "n": 49,
       "ev": 7
      },
-     "msRxGet": 61.9,
+     "msRxGet": 60.9,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -11202,7 +11204,7 @@
       "n": 54,
       "ev": 6
      },
-     "msRxGet": 38.8,
+     "msRxGet": 49.3,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -11246,7 +11248,7 @@
       "n": 35,
       "ev": 7
      },
-     "msRxGet": 44.8,
+     "msRxGet": 50.2,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -11292,7 +11294,7 @@
       "n": 41,
       "ev": 7
      },
-     "msRxGet": 58.2,
+     "msRxGet": 83.1,
      "pares": 188,
      "talhoes": 20,
      "semanas": 12,
@@ -11337,7 +11339,7 @@
       "n": 46,
       "ev": 5
      },
-     "msRxGet": 39.4,
+     "msRxGet": 42.8,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -11380,7 +11382,7 @@
       "n": 46,
       "ev": 6
      },
-     "msRxGet": 38.3,
+     "msRxGet": 40.4,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -11422,7 +11424,7 @@
       "n": 40,
       "ev": 13
      },
-     "msRxGet": 44,
+     "msRxGet": 42.4,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -11464,7 +11466,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 84.2,
+     "msRxGet": 65.9,
      "pares": 187,
      "talhoes": 20,
      "semanas": 12,
@@ -11505,7 +11507,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 38.9,
+     "msRxGet": 48.9,
      "pares": 187,
      "talhoes": 20,
      "semanas": 12,
@@ -11547,7 +11549,7 @@
       "n": 44,
       "ev": 2
      },
-     "msRxGet": 39.3,
+     "msRxGet": 38.4,
      "pares": 203,
      "talhoes": 20,
      "semanas": 12,
@@ -11589,7 +11591,7 @@
       "n": 37,
       "ev": 8
      },
-     "msRxGet": 40.4,
+     "msRxGet": 56.3,
      "pares": 196,
      "talhoes": 20,
      "semanas": 12,
@@ -11635,7 +11637,7 @@
       "n": 46,
       "ev": 6
      },
-     "msRxGet": 64.9,
+     "msRxGet": 136.5,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -11681,7 +11683,7 @@
       "n": 43,
       "ev": 9
      },
-     "msRxGet": 44.8,
+     "msRxGet": 46.2,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -11727,7 +11729,7 @@
       "n": 45,
       "ev": 5
      },
-     "msRxGet": 40,
+     "msRxGet": 38.9,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -11772,7 +11774,7 @@
       "n": 40,
       "ev": 9
      },
-     "msRxGet": 41.4,
+     "msRxGet": 48,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -11817,7 +11819,7 @@
       "n": 40,
       "ev": 1
      },
-     "msRxGet": 119.9,
+     "msRxGet": 102.3,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -11861,7 +11863,7 @@
       "n": 39,
       "ev": 4
      },
-     "msRxGet": 40,
+     "msRxGet": 42.9,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -11906,7 +11908,7 @@
       "n": 40,
       "ev": 3
      },
-     "msRxGet": 40.4,
+     "msRxGet": 37.8,
      "pares": 202,
      "talhoes": 20,
      "semanas": 12,
@@ -11950,7 +11952,7 @@
       "n": 35,
       "ev": 9
      },
-     "msRxGet": 47.4,
+     "msRxGet": 84.8,
      "pares": 192,
      "talhoes": 20,
      "semanas": 12,
@@ -11993,7 +11995,7 @@
       "n": 30,
       "ev": 3
      },
-     "msRxGet": 74.1,
+     "msRxGet": 151.6,
      "pares": 183,
      "talhoes": 20,
      "semanas": 12,
@@ -12035,7 +12037,7 @@
       "n": 41,
       "ev": 6
      },
-     "msRxGet": 58.1,
+     "msRxGet": 134.1,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -12078,7 +12080,7 @@
       "n": 45,
       "ev": 6
      },
-     "msRxGet": 45.8,
+     "msRxGet": 45.1,
      "pares": 209,
      "talhoes": 20,
      "semanas": 12,
@@ -12125,7 +12127,7 @@
       "n": 35,
       "ev": 11
      },
-     "msRxGet": 50.2,
+     "msRxGet": 48.7,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -12171,7 +12173,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 90.6,
+     "msRxGet": 123,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -12215,7 +12217,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 49.1,
+     "msRxGet": 44.8,
      "pares": 193,
      "talhoes": 20,
      "semanas": 12,
@@ -12259,7 +12261,7 @@
       "n": 46,
       "ev": 4
      },
-     "msRxGet": 41.3,
+     "msRxGet": 76.7,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -12301,7 +12303,7 @@
       "n": 40,
       "ev": 10
      },
-     "msRxGet": 42.4,
+     "msRxGet": 60.1,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -12345,7 +12347,7 @@
       "n": 34,
       "ev": 2
      },
-     "msRxGet": 83,
+     "msRxGet": 146.1,
      "pares": 182,
      "talhoes": 20,
      "semanas": 12,
@@ -12389,7 +12391,7 @@
       "n": 34,
       "ev": 3
      },
-     "msRxGet": 39.2,
+     "msRxGet": 140.6,
      "pares": 186,
      "talhoes": 20,
      "semanas": 12,
@@ -12430,7 +12432,7 @@
       "n": 39,
       "ev": 4
      },
-     "msRxGet": 38,
+     "msRxGet": 65,
      "pares": 204,
      "talhoes": 20,
      "semanas": 12,
@@ -12471,7 +12473,7 @@
       "n": 38,
       "ev": 10
      },
-     "msRxGet": 41.4,
+     "msRxGet": 52.8,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -12516,7 +12518,7 @@
       "n": 42,
       "ev": 4
      },
-     "msRxGet": 67.5,
+     "msRxGet": 158.5,
      "pares": 189,
      "talhoes": 20,
      "semanas": 12,
@@ -12560,7 +12562,7 @@
       "n": 46,
       "ev": 5
      },
-     "msRxGet": 39.7,
+     "msRxGet": 149.6,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -12603,7 +12605,7 @@
       "n": 48,
       "ev": 6
      },
-     "msRxGet": 42.6,
+     "msRxGet": 52.4,
      "pares": 209,
      "talhoes": 20,
      "semanas": 12,
@@ -12649,7 +12651,7 @@
       "n": 45,
       "ev": 13
      },
-     "msRxGet": 41.6,
+     "msRxGet": 47.2,
      "pares": 201,
      "talhoes": 20,
      "semanas": 12,
@@ -12699,7 +12701,7 @@
       "n": 35,
       "ev": 1
      },
-     "msRxGet": 108.9,
+     "msRxGet": 154.5,
      "pares": 186,
      "talhoes": 20,
      "semanas": 12,
@@ -12745,7 +12747,7 @@
       "n": 36,
       "ev": 2
      },
-     "msRxGet": 39.1,
+     "msRxGet": 42.9,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -12787,7 +12789,7 @@
       "n": 48,
       "ev": 2
      },
-     "msRxGet": 41.2,
+     "msRxGet": 48.7,
      "pares": 210,
      "talhoes": 20,
      "semanas": 12,
@@ -12828,7 +12830,7 @@
       "n": 34,
       "ev": 11
      },
-     "msRxGet": 68.3,
+     "msRxGet": 62.3,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -12873,7 +12875,7 @@
       "n": 32,
       "ev": 4
      },
-     "msRxGet": 95.6,
+     "msRxGet": 126.2,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -12921,7 +12923,7 @@
       "n": 43,
       "ev": 9
      },
-     "msRxGet": 39.4,
+     "msRxGet": 66.2,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -12967,7 +12969,7 @@
       "n": 48,
       "ev": 6
      },
-     "msRxGet": 48.4,
+     "msRxGet": 41.7,
      "pares": 213,
      "talhoes": 20,
      "semanas": 12,
@@ -13009,7 +13011,7 @@
       "n": 36,
       "ev": 8
      },
-     "msRxGet": 41.4,
+     "msRxGet": 67.9,
      "pares": 198,
      "talhoes": 20,
      "semanas": 12,
@@ -13051,7 +13053,7 @@
       "n": 31,
       "ev": 8
      },
-     "msRxGet": 84.1,
+     "msRxGet": 110.6,
      "pares": 185,
      "talhoes": 20,
      "semanas": 12,
@@ -13095,7 +13097,7 @@
       "n": 50,
       "ev": 10
      },
-     "msRxGet": 42.5,
+     "msRxGet": 54.9,
      "pares": 199,
      "talhoes": 20,
      "semanas": 12,
@@ -13138,7 +13140,7 @@
       "n": 49,
       "ev": 6
      },
-     "msRxGet": 38.3,
+     "msRxGet": 39.3,
      "pares": 208,
      "talhoes": 20,
      "semanas": 12,
@@ -13180,7 +13182,7 @@
       "n": 30,
       "ev": 7
      },
-     "msRxGet": 66.8,
+     "msRxGet": 47.7,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -13222,7 +13224,7 @@
       "n": 37,
       "ev": 4
      },
-     "msRxGet": 137.1,
+     "msRxGet": 177.4,
      "pares": 178,
      "talhoes": 20,
      "semanas": 12,
@@ -13264,7 +13266,7 @@
       "n": 39,
       "ev": 8
      },
-     "msRxGet": 54.5,
+     "msRxGet": 49,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -13307,7 +13309,7 @@
       "n": 44,
       "ev": 3
      },
-     "msRxGet": 39.8,
+     "msRxGet": 38.1,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -13350,7 +13352,7 @@
       "n": 40,
       "ev": 10
      },
-     "msRxGet": 67.2,
+     "msRxGet": 43.3,
      "pares": 194,
      "talhoes": 20,
      "semanas": 12,
@@ -13392,7 +13394,7 @@
       "n": 35,
       "ev": 3
      },
-     "msRxGet": 93,
+     "msRxGet": 183.5,
      "pares": 184,
      "talhoes": 20,
      "semanas": 12,
@@ -13435,7 +13437,7 @@
       "n": 40,
       "ev": 5
      },
-     "msRxGet": 42.8,
+     "msRxGet": 41,
      "pares": 191,
      "talhoes": 20,
      "semanas": 12,
@@ -13476,7 +13478,7 @@
       "n": 49,
       "ev": 1
      },
-     "msRxGet": 42.4,
+     "msRxGet": 43.7,
      "pares": 212,
      "talhoes": 20,
      "semanas": 12,
@@ -13517,7 +13519,7 @@
       "n": 37,
       "ev": 11
      },
-     "msRxGet": 41,
+     "msRxGet": 65.8,
      "pares": 195,
      "talhoes": 20,
      "semanas": 12,
@@ -13560,7 +13562,7 @@
       "n": 36,
       "ev": 4
      },
-     "msRxGet": 64.1,
+     "msRxGet": 178.4,
      "pares": 183,
      "talhoes": 20,
      "semanas": 12,
@@ -13606,7 +13608,7 @@
       "n": 43,
       "ev": 7
      },
-     "msRxGet": 62.2,
+     "msRxGet": 63.8,
      "pares": 197,
      "talhoes": 20,
      "semanas": 12,
@@ -13649,7 +13651,7 @@
       "n": 44,
       "ev": 5
      },
-     "msRxGet": 41.8,
+     "msRxGet": 43.8,
      "pares": 204,
      "talhoes": 20,
      "semanas": 12,
@@ -13690,7 +13692,7 @@
       "n": 39,
       "ev": 12
      },
-     "msRxGet": 44.3,
+     "msRxGet": 55.5,
      "pares": 199,
      "talhoes": 20,
      "semanas": 12,
@@ -13720,5 +13722,5 @@
    }
   }
  },
- "segundos": 27.8
+ "segundos": 34.4
 }

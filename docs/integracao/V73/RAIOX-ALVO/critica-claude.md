@@ -1,6 +1,7 @@
 # Raio-X do alvo · crítica independente do Claude (passo 1)
 
-Versão 1 · 16/10/2026 · autor Claude · sem leitura da crítica do Codex · Gemini não consultado nem simulado (as perguntas de domínio estão na §9).
+Versão 2 · 17/10/2026 · autor Claude · sem leitura da crítica do Codex · Gemini não consultado nem simulado (as perguntas de domínio estão na §9).
+Mudança da v2: a fonte do v3 passa a ser a cópia versionada (commit 529adf7); a reprodução refeita sobre ela deu os mesmos números; as linhas `ART:n` foram recontadas nessa cópia (−1).
 Só leitura e reprodução. Nenhum arquivo de produto foi alterado; nada aqui é decisão final: o Codex registra o desenho e as fatias no checkpoint.
 
 ## 0. Acordo curto (AGENTS §3.4)
@@ -9,21 +10,21 @@ Só leitura e reprodução. Nenhum arquivo de produto foi alterado; nada aqui é
 ID / resultado útil / persona: RAIOX-ALVO passo 1 · crítica do Claude ao pedido "Raio-X do alvo" · agrônomo/RT e gestor no Mapa
 Requisitos do PRD e fora do escopo: AG-01, AG-05, AG-06, 15.1, 16.1, 33.8, 33.10, 33.12, 74 (DS-03, DS-16, DS-70); EX-42 · fora: implantação, checkpoint, Gemini
 Autor / revisor / integrador: Claude / Codex (crítica própria, em separado) / Codex registra o desenho final
-Base (commit ou hashes) / arquivos sob responsabilidade: protótipo b9898643662715a3f7b17bf7797d44e81e5e4a3d; PRD e DECISIONS em origin/main c8274086 (conteúdo igual a 94e19e45); artefato v3 SHA-256 00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e; pedido SHA-256 f50d2d5d…485d · arquivos: docs/integracao/V73/RAIOX-ALVO/**
-Aceite e comando de verificação: bash docs/integracao/V73/RAIOX-ALVO/reproducao/rodar.sh <HTML do artefato v3> <pasta de saída>
+Base (commit ou hashes) / arquivos sob responsabilidade: protótipo b9898643662715a3f7b17bf7797d44e81e5e4a3d; PRD e DECISIONS em origin/main c8274086 (conteúdo igual a 94e19e45); protótipo v3 em docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html, commit 529adf7 (branch claude/v44-v73-pedidos-1610), SHA-256 e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e; pedido SHA-256 f50d2d5d…485d · arquivos: docs/integracao/V73/RAIOX-ALVO/**
+Aceite e comando de verificação: git show 529adf7:docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html > /tmp/v3.html && bash docs/integracao/V73/RAIOX-ALVO/reproducao/rodar.sh /tmp/v3.html <pasta de saída>
 Estado / impedimento / próximo passo: entregue · aguarda a crítica do Codex · divergências por fonte ou reprodução · §9 vai ao Gemini real pelo conector do Codex
 ```
 
-**Como ler as fontes.** `PRD:n` e `DEC:n` = linha de `docs/PRD.md` e `docs/DECISIONS.md` em origin/main c8274086. `ART:n` = linha do HTML do artefato v3 (versão 1792193012-4fc4, 151.928 bytes; privado, não versionado; lido com a ferramenta Artifact). `EX-42:n`, `MMP:n` (MAPA-MIP-PROD.md) e `gen37/arquivo:n` = arquivos do protótipo em b989864. **Executado** = rodei e a saída está em `reproducao/`; **lido** = leitura, sem execução.
+**Como ler as fontes.** `PRD:n` e `DEC:n` = linha de `docs/PRD.md` e `docs/DECISIONS.md` em origin/main c8274086. `ART:n` = linha do protótipo v3 versionado em `docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html` (commit 529adf7, SHA-256 `e7872cb0…805e5e`, 151.382 bytes). Conteúdo igual ao do artefato publicado `00b5d915…ed72e` (versão 1792193012-4fc4), salvo o invólucro de publicação. `EX-42:n`, `MMP:n` (MAPA-MIP-PROD.md) e `gen37/arquivo:n` = arquivos do protótipo em b989864. **Executado** = rodei e a saída está em `reproducao/`; **lido** = leitura, sem execução.
 
-**Insumo do repositório.** O `docs/integracao/V71/insumos/pragas-no-tempo.html` (SHA-256 `8b9e105e…f15`, 94.868 bytes) **não** é o artefato v3: não tem o Raio-X (0 ocorrências de "Raio-X"). É a versão do EX-42. Toda a análise abaixo usa o v3 lido do artefato.
+**Insumo do repositório.** O `docs/integracao/V71/insumos/pragas-no-tempo.html` (SHA-256 `8b9e105e…f15`, 94.868 bytes) **não** é o v3: não tem o Raio-X (0 ocorrências de "Raio-X"). É a versão do EX-42. Toda a análise abaixo usa o v3 versionado em 529adf7.
 
 ## Resumo: o que eu mudaria e por quê
 
 1. **O "12 de 14" é real, mas conta achado fraco.** Reproduzi exatamente: 12/14, nenhum falso positivo Forte/Moderado, previsão acima da persistência nos 4 alvos (executado). Só que 5 dos 12 são "Fraca", com intervalo de 95 % cruzando o zero (ex.: ácaro, calor achado pela UR com q = 1). Contando só Forte/Moderada: **7/14**. Em 20 outras sementes: 85 % em qualquer nível, **46 %** em Forte/Moderada.
 2. **O exemplo-modelo do pedido quase nunca aparece como Forte.** "Dias quentes e secos → +85 % · Forte" saiu Forte/Moderada em 14 de 63 alvo-sementes. Com uma safra, a variação do clima vem de ~12 semanas iguais para a fazenda toda. Proposta: Forte só com 2 safras; antes disso, a referência do protocolo, rotulada "não medido nesta fazenda".
 3. **"Fraca" exibe ruído.** 44 de 504 testes de variável sem efeito (8,7 %) apareceram na lista como Fraca; como Forte/Moderada, 4 (0,8 %). Proposta: as listas mostram só Forte e Moderada.
-4. **O risco de 7 dias foi testado com o clima que de fato ocorreu** (previsão perfeita, ART:661-664). Sem a previsão, o modelo perde para "repetir a última vistoria" em 19 de 20 sementes no ácaro e na mosca. Contra uma referência probabilística simples (nível de partida + estádio), empata na antracnose (9/20) e na cochonilha (10/20). Proposta: camada 4 por último (E4, PRD:6316), testada com previsões arquivadas.
+4. **O risco de 7 dias foi testado com o clima que de fato ocorreu** (previsão perfeita, ART:660-663). Sem a previsão, o modelo perde para "repetir a última vistoria" em 19 de 20 sementes no ácaro e na mosca. Contra uma referência probabilística simples (nível de partida + estádio), empata na antracnose (9/20) e na cochonilha (10/20). Proposta: camada 4 por último (E4, PRD:6316), testada com previsões arquivadas.
 5. **A camada 3 é o AG-06 e a F1b do EX-42.** Uma solução só, sem "melhor produto", sem "rotacione", com retorno ao NC em intervalo (EX-42:40, :42; PRD:6215, :6225).
 6. **Parâmetros saem do protocolo AG-05**, com fonte e adoção do RT: janelas, limiares, condição favorável, métrica de eficácia por tipo de alvo. Sem adoção, "não calculável" (PRD:512; EX-42:38, :44).
 7. **Estado da lavoura não é causa.** O NDVI saiu "Forte" no ácaro como substituto da falta de água plantada, que ficou "Fraca". Fica fora do modelo, como já decidido no E10 da MAPA-MIP-PROD (MMP:456, :466).
@@ -35,26 +36,26 @@ Estado / impedimento / próximo passo: entregue · aguarda a crítica do Codex �
 | ID | Decisão | Ponto | Motivo e fonte |
 |---|---|---|---|
 | C-01 | aceitar | Nada vira recomendação nem O.S.; o motor só calcula e mostra evidência | PRD 15.1 "Calcular" e "Sugerir" (PRD:4744, :4748); 33.8 (PRD:6215) |
-| C-02 | cortar | Frases de ação do v3: "Prefira as horas frescas" (ART:1229) e "Sinal de resistência: rotacione o mecanismo de ação" (ART:1232) | Recomendação e diagnóstico de resistência. PRD:6225 ("controle ruim sozinho não confirma resistência"; evitar "trocar grupo em toda aplicação"); EX-42:40. Já apontado em ed8af42 para o HTML do EX-42; o v3 repete |
-| C-03 | ajustar | "O que funcionou no controle", ordem por eficácia e a frase "teve a maior eficácia" (ART:1227) | Ranking de potência: PRD:6215 e EX-42:40. Nome "Depois da aplicação · comparado com talhões sem aplicação"; ordem padrão por casos válidos; o usuário pode ordenar a coluna Eficácia (TAB-08) |
+| C-02 | cortar | Frases de ação do v3: "Prefira as horas frescas" (ART:1228) e "Sinal de resistência: rotacione o mecanismo de ação" (ART:1231) | Recomendação e diagnóstico de resistência. PRD:6225 ("controle ruim sozinho não confirma resistência"; evitar "trocar grupo em toda aplicação"); EX-42:40. Já apontado em ed8af42 para o HTML do EX-42; o v3 repete |
+| C-03 | ajustar | "O que funcionou no controle", ordem por eficácia e a frase "teve a maior eficácia" (ART:1226) | Ranking de potência: PRD:6215 e EX-42:40. Nome "Depois da aplicação · comparado com talhões sem aplicação"; ordem padrão por casos válidos; o usuário pode ordenar a coluna Eficácia (TAB-08) |
 | C-04 | ajustar | A camada 3 vira a mesma peça do AG-06 e da F1b do EX-42, com a mesma função de domínio | AG-06 já é "intervenções comparadas com observações posteriores… confiança" (PRD:521-531); EX-42 F1b substitui os links fixos do AG-06 (EX-42:24, :55); ENG-011 (fórmula num único serviço) |
 | C-05 | aceitar | Entrada no Mapa › Pragas e doenças, painel ao lado; filtrado no AG-01 e no talhão; sem menu novo | DEC-1610-09 (DEC:111); EX-42:24. Ajuste: no painel do mapa (DS-52), com 2 vistas na F1 (§5), não 4 abas |
-| C-06 | ajustar | Cores de "sobe" e "desce" (ART:207: `.up` em `--bad`, `.dn` em `--ok`; barras vermelha e verde) | DS-16 (PRD:14122): paleta de dados não é cor de estado; DS-03 (PRD:13883): verde é ação ou condição favorável confirmada. Texto neutro com ▲/▼ e a palavra; barra em cinza com o intervalo |
+| C-06 | ajustar | Cores de "sobe" e "desce" (ART:206: `.up` em `--bad`, `.dn` em `--ok`; barras vermelha e verde) | DS-16 (PRD:14122): paleta de dados não é cor de estado; DS-03 (PRD:13883): verde é ação ou condição favorável confirmada. Texto neutro com ▲/▼ e a palavra; barra em cinza com o intervalo |
 | C-07 | cortar (F1) | Mapa de correlações com "cor divergente do design system" | 74.7 (PRD:14616-14716) não tem paleta divergente; criar uma é padrão novo (DEC-1610-12, skill padrao-safrion). Repete o "Quando pesa" do sub-detalhe. Se voltar: tabela TAB-08 com número e sinal, sem cor |
 | C-08 | ajustar | Gráficos da curva e da janela | DS-70 (PRD:14725) e 74.7.8 (PRD:14700): nome acessível e tabela equivalente ("Ver dados"); o v3 só tem `aria-label` |
-| C-09 | ajustar | Validade da vistoria: 14 dias no v3 (ART:655, :1024, :1270) | 7 dias para MIP e 10 para satélite (EX-42:30; DEC-0910-13 b, DEC:149) |
-| C-10 | ajustar | NC único por alvo no v3 (ART:341-361); mosca-branca com NC 5 no v3 e 10 adultos/folha no seed oficial (gen37/dados_mip.py:59) | NC por estádio e unidade da versão válida na observação (EX-42:30; `mipNC`, gen37/mip.js:36). O Raio-X lê a base única de vistorias, não uma simulação própria (PRD 16.1, PRD:4767) |
-| C-11 | ajustar | Janelas, limiares e condição favorável fixos no código (ART:490, :320, :354) | AG-05: "Limiares sem fonte/escopo validados ficam inativos" (PRD:512); EX-42:38 e :44. O próprio pedido proíbe (§9). No protótipo, só como "protocolo demonstrativo" declarado (EX-42:38) |
-| C-12 | ajustar | "Horas de folha molhada (UR ≥ 90 %)" | EX-42:44: UR não substitui molhamento foliar. Sem sensor ou modelo adotado pelo RT, a variável se chama "horas com UR ≥ 90 %". No v3 o molhamento nem usa a UR (ART:320) |
+| C-09 | ajustar | Validade da vistoria: 14 dias no v3 (ART:654, :1023, :1269) | 7 dias para MIP e 10 para satélite (EX-42:30; DEC-0910-13 b, DEC:149) |
+| C-10 | ajustar | NC único por alvo no v3 (ART:340-360); mosca-branca com NC 5 no v3 e 10 adultos/folha no seed oficial (gen37/dados_mip.py:59) | NC por estádio e unidade da versão válida na observação (EX-42:30; `mipNC`, gen37/mip.js:36). O Raio-X lê a base única de vistorias, não uma simulação própria (PRD 16.1, PRD:4767) |
+| C-11 | ajustar | Janelas, limiares e condição favorável fixos no código (ART:489, :319, :353) | AG-05: "Limiares sem fonte/escopo validados ficam inativos" (PRD:512); EX-42:38 e :44. O próprio pedido proíbe (§9). No protótipo, só como "protocolo demonstrativo" declarado (EX-42:38) |
+| C-12 | ajustar | "Horas de folha molhada (UR ≥ 90 %)" | EX-42:44: UR não substitui molhamento foliar. Sem sensor ou modelo adotado pelo RT, a variável se chama "horas com UR ≥ 90 %". No v3 o molhamento nem usa a UR (ART:319) |
 | C-13 | aceitar | Motor sem IA generativa, frases de modelo preenchidas com números | PRD 15.1 (PRD:4744) e IAG-04 (PRD:15350). Obrigação que decorre: probabilidade só com treino, validação, população e calibração registrados (PRD:6304) |
 | C-14 | ajustar | Ordem de entrada | Camada 4 é modelo preditivo de E4 (PRD:6316). O Raio-X é o "posterior" do EX-42 (EX-42:56): começa depois da F1a, F1d e F1b, dentro do teto de 3 frentes (AGENTS §3.6) |
 | C-15 | aceitar | Gabarito sintético | Como cenário separado e rotulado, não misturado à base da Lagoa Grande usada pelo AG-01 (PRD:4769) |
 | C-16 | ajustar | "Criar vistoria" (rascunho) | Usar a ação que já existe: "Programar vistoria" → FO-03 (PRD:430; já usada no Mapa, gen37/areas/inicio.py:41), herdando talhão, alvo e protocolo. Sem verbo nem "rascunho" novos |
-| C-17 | ajustar | Marca do RT guardada no navegador (ART:1080) | No produto: registro no servidor (usuário, data, marca, versão do achado). Promover vira proposta de versão no AG-05 (Criar versão → Validar → Publicar, PRD:510) com aprovador técnico; nunca automático (PRD:6235). As marcas medem o falso positivo por tipo de achado (RF-AI-004, PRD:2715) |
+| C-17 | ajustar | Marca do RT guardada no navegador (ART:1079) | No produto: registro no servidor (usuário, data, marca, versão do achado). Promover vira proposta de versão no AG-05 (Criar versão → Validar → Publicar, PRD:510) com aprovador técnico; nunca automático (PRD:6235). As marcas medem o falso positivo por tipo de achado (RF-AI-004, PRD:2715) |
 
 ## 2. Variáveis
 
-Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só no v3" = existe apenas na simulação do artefato.
+Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só no v3" = existe apenas na simulação do protótipo v3.
 
 | Variável | Hoje | De onde vem no real | F1 |
 |---|---|---|---|
@@ -66,7 +67,7 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 | Clima diário (Tmáx, Tmín, UR, chuva) | Só no v3 (sintético). Oficial: estação com ET₀, chuva e vento (gen37/dados_irrigacao.py:53); Lagoa Grande só ETo demonstrativa (:61) | Estação ou API: integração | Sim, se houver fonte; sem fonte, a camada de clima não calcula |
 | Horário: UR ≥ 90 % por hora, DPV horário, molhamento | Falta | Estação horária ou sensor | Não. DPV diário pela média, rotulado como aproximação |
 | Condição na hora da aplicação (T, UR, vento, Delta T, chuva até 6 h) | Falta: o FO-07 não tem campo de clima | Cruzar o instante do apontamento com a estação horária; sem digitação | Só "chuva até 1 dia depois", com chuva diária |
-| Previsão de 7 a 14 dias | Só no v3 (inventada, ART:311). Oficial: "chuva prevista 48 h", regional (dados_irrigacao.py:60) | Provedor com arquivo das previsões emitidas | Não (camada 4 depois) |
+| Previsão de 7 a 14 dias | Só no v3 (inventada, ART:310). Oficial: "chuva prevista 48 h", regional (dados_irrigacao.py:60) | Provedor com arquivo das previsões emitidas | Não (camada 4 depois) |
 | Irrigação: lâmina, método, suficiência, déficit | Oficial (balanço de dados_irrigacao.py) | IR-* | Sim |
 | NDVI, NDRE, NDMI | Oficial (EX-42 dec. 4) | C4 | Como indicador do estado da lavoura, fora do modelo |
 | N, K, Ca, B, S aplicados | Oficial nos planos; executado pela O.S./fertirrigação | O.S. apontada | Sim, só o executado |
@@ -76,7 +77,7 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 | Foliar, pH da calda, adjuvante, solo, variedade, radiação, roçada/poda, safra anterior | Poucos casos ou colineares; safra anterior exige 2 safras | — | Não |
 
 **Regras que o v3 quebra** (lido, conferido na reprodução):
-- **Ausente vira média.** A soma da chuva da janela é escalada pelos dias com dado (`v * 7 / n`, ART:530): o dia sem dado ganha a média, não "sem dado". O NDVI ausente recebe a média (`impute`, ART:540). Proposta: janela com menos de 80 % dos dias = "sem dado" e o par sai só daquela variável (DS-66, PRD:14721).
+- **Ausente vira média.** A soma da chuva da janela é escalada pelos dias com dado (`v * 7 / n`, ART:529): o dia sem dado ganha a média, não "sem dado". O NDVI ausente recebe a média (`impute`, ART:539). Proposta: janela com menos de 80 % dos dias = "sem dado" e o par sai só daquela variável (DS-66, PRD:14721).
 - **Presença** (viroses do mamão, dados_mip.py:65): o ln não se aplica. Fora da F1, ou resposta própria (aparecimento sim/não).
 - **Vistoria parcial** (`est='coleta'`, `pend`): fora do cálculo; recoleta entra só com os pontos válidos.
 
@@ -85,26 +86,26 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 ### 3.1 Resposta
 
 - **Aceitar** r = ln((y2 + ε) ÷ (y1 + ε)) × 7 ÷ dias, ε = 5 % do NC, para contagem e percentual baixo. **Gemini:** para incidência perto da saturação, usar logit ou cloglog, comuns em epidemiologia de doença (Madden, Hughes e van den Bosch, 2007).
-- **Ajustar: viés de seleção da vistoria mais frequente.** O v3 só aceita pares de 5 a 10 dias (ART:562). O protocolo manda revisitar em 3 dias quando perto do NC (dados_mip.py:14-15; mip.js:59). Justo quando o alvo está alto, o par some. Proposta: pares de 3 a 14 dias, com o intervalo como covariável, ou o par semanal pulando a revisita.
-- **Declarar a zero-inflação.** Pares com y1 < 10 % do NC saem (ART:562). O Raio-X mede crescimento de população instalada, não o aparecimento. A tela diz "a partir de 10 % do NC".
-- **Regressão à média.** O controle ln(y1 ÷ NC) fica (ART:567). O erro de amostragem de y1 continua: pesar o par pela precisão (pontos válidos nas duas leituras).
-- **Viés do avaliador.** O v3 usa só o avaliador da 2ª leitura (ART:563). Usar o das duas e "mudou de avaliador" como controle.
-- **Resíduo.** A exclusão de aplicação é fixa em 10 dias (ART:562); o resíduo plantado chega a 18-20 dias. Executado: 8, 15, 3 e 8 pares "sem aplicação" ainda sob resíduo (2 a 8 %). Proposta: janela de exclusão = período residual do produto, do protocolo.
+- **Ajustar: viés de seleção da vistoria mais frequente.** O v3 só aceita pares de 5 a 10 dias (ART:561). O protocolo manda revisitar em 3 dias quando perto do NC (dados_mip.py:14-15; mip.js:59). Justo quando o alvo está alto, o par some. Proposta: pares de 3 a 14 dias, com o intervalo como covariável, ou o par semanal pulando a revisita.
+- **Declarar a zero-inflação.** Pares com y1 < 10 % do NC saem (ART:561). O Raio-X mede crescimento de população instalada, não o aparecimento. A tela diz "a partir de 10 % do NC".
+- **Regressão à média.** O controle ln(y1 ÷ NC) fica (ART:566). O erro de amostragem de y1 continua: pesar o par pela precisão (pontos válidos nas duas leituras).
+- **Viés do avaliador.** O v3 usa só o avaliador da 2ª leitura (ART:562). Usar o das duas e "mudou de avaliador" como controle.
+- **Resíduo.** A exclusão de aplicação é fixa em 10 dias (ART:561); o resíduo plantado chega a 18-20 dias. Executado: 8, 15, 3 e 8 pares "sem aplicação" ainda sob resíduo (2 a 8 %). Proposta: janela de exclusão = período residual do produto, do protocolo.
 - **Vazamento.** As janelas terminam na vistoria final do par: serve para explicar. Para prever, a janela entre as vistorias exige previsão (3.5).
 
 ### 3.2 Camada 1 (exploração)
 
 - **Aceitar** Spearman parcial e Benjamini-Hochberg só como exploração, fora da primeira camada.
-- **Ajustar: escolha sem correção.** O v3 escolhe a janela (corrige × 3, ART:606), o limiar entre 15 quantis (ART:580) e o representante do grupo, e o bootstrap não refaz essas escolhas (ART:597-602). Isso infla o efeito ("maldição do vencedor"). Proposta: limiar do protocolo; o limiar dos dados só aparece como "limiar sugerido, a confirmar"; no job noturno, refazer a escolha dentro de cada reamostragem.
+- **Ajustar: escolha sem correção.** O v3 escolhe a janela (corrige × 3, ART:605), o limiar entre 15 quantis (ART:579) e o representante do grupo, e o bootstrap não refaz essas escolhas (ART:596-601). Isso infla o efeito ("maldição do vencedor"). Proposta: limiar do protocolo; o limiar dos dados só aparece como "limiar sugerido, a confirmar"; no job noturno, refazer a escolha dentro de cada reamostragem.
 - **Ajustar o piso do p-valor.** O diagnóstico está certo. Mas a aproximação normal com ~12 semanas (os blocos que contam no clima) pode ser otimista. No servidor: B ≥ 2.000 e p = (k + 1) ÷ (B + 1). A normal fica como atalho do protótipo.
 - **Aceitar** o bootstrap em blocos de talhão × semana (o "pigeonhole" de Owen, 2007). Para o clima, o n efetivo é o de semanas: daí "Forte só com 2 safras".
 - **Ajustar o grupo "anda junto".** Executado: no ácaro, o calor plantado foi representado pela UR, e a tela diria "Umidade do ar faz descer". O rótulo mostra o grupo ("tempo quente e seco: calor, ar seco, UR baixa"); o representante é a variável do protocolo, quando houver.
 
 ### 3.3 Camada 2 (modelo explicativo): recomendo um
 
-**Regressão linear com efeito de talhão**, como a do v3 (indicadores de limiar e ridge leve, ART:553), mais:
+**Regressão linear com efeito de talhão**, como a do v3 (indicadores de limiar e ridge leve, ART:552), mais:
 - intercepto por talhão (aleatório, ou centrar por talhão);
-- variável que só muda entre talhões (no simulador, a falta de água, ART:534) comparada entre talhões, com n = número de talhões. No ácaro havia 3 talhões do lado alto: Fraca, e o NDVI levou o crédito como Forte (executado);
+- variável que só muda entre talhões (no simulador, a falta de água, ART:533) comparada entre talhões, com n = número de talhões. No ácaro havia 3 talhões do lado alto: Fraca, e o NDVI levou o crédito como Forte (executado);
 - interação só a declarada no protocolo ("quente e seco" já é calor × seca), nunca procurada nos dados.
 
 **Não GBM+SHAP.** Com ~200 pares por alvo-safra ele decora o ruído. O SHAP divide arbitrariamente o efeito entre variáveis colineares, o contrário da lição "anda junto". Exige Python ou biblioteca nativa, fora da stack TypeScript/Node (PRD:5286; seria ADR). E custa ordens de grandeza mais no job (§7).
@@ -114,21 +115,21 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 ### 3.4 Camada 3 (efeito das aplicações)
 
 - **Aceitar** Henderson-Tilton (Henderson e Tilton, 1955) e Abbott sem leitura antes (Abbott, 1925), com "sem comparação válida" no lugar do número.
-- **Ajustar o controle.** O v3 aceita 2 controles quaisquer com nível ≥ 30 % do tratado e o mesmo "jovem/não jovem" (ART:629-631). Proposta: talhão sem aplicação contra o alvo desde (antes − período residual) até depois; mesma cultura e fase do protocolo; nível antes entre 0,5× e 2× o do tratado; leituras a ±2 dias das do tratado; ≥ 2 talhões distintos.
-- **Corrigir a leitura do mesmo dia.** O v3 aceita como "antes" a vistoria do dia da aplicação (ART:402), que na simulação é feita depois dela (ART:380 antes de :398). Executado: 4 de 16 (ácaro), 2 de 16, 1 de 9 e 1 de 15. Sem hora, fora (EX-42:38).
+- **Ajustar o controle.** O v3 aceita 2 controles quaisquer com nível ≥ 30 % do tratado e o mesmo "jovem/não jovem" (ART:628-630). Proposta: talhão sem aplicação contra o alvo desde (antes − período residual) até depois; mesma cultura e fase do protocolo; nível antes entre 0,5× e 2× o do tratado; leituras a ±2 dias das do tratado; ≥ 2 talhões distintos.
+- **Corrigir a leitura do mesmo dia.** O v3 aceita como "antes" a vistoria do dia da aplicação (ART:401), que na simulação é feita depois dela (ART:379 antes de :397). Executado: 4 de 16 (ácaro), 2 de 16, 1 de 9 e 1 de 15. Sem hora, fora (EX-42:38).
 - **Interferência:** outra aplicação entre antes e depois exclui ou marca o par (EX-42:38).
 - **Janela depois por modo de ação (Gemini).** Reguladores de crescimento (IRAC 7C, 16, 23) agem devagar; 5 a 14 dias fixos os subestimam frente a um de choque (IRAC 6).
 - **Métrica por tipo de alvo (Gemini).** Henderson-Tilton para contagem e folhas infestadas. Para doença em fruto com protetor (antracnose), controle relativo sobre incidência ou área abaixo da curva. Presença: não se aplica.
-- **Dias de proteção.** O v3 usa Kaplan-Meier com dia exato (ART:636, :404). O retorno ao NC é um intervalo entre duas leituras, e o EX-42 manda não introduzir estimador de sobrevivência nesta fase (EX-42:42). F1: contagens com intervalo ("voltou entre 14 e 21 dias: n; seguiu abaixo até a última leitura: n; primeira leitura depois já acima: n; sem seguimento: n"). Turnbull (1976) só com ≥ 20 casos. Executado: no v3, nenhuma "volta" sem leitura abaixo do NC antes; a regra pede contraprova dirigida.
+- **Dias de proteção.** O v3 usa Kaplan-Meier com dia exato (ART:635, :403). O retorno ao NC é um intervalo entre duas leituras, e o EX-42 manda não introduzir estimador de sobrevivência nesta fase (EX-42:42). F1: contagens com intervalo ("voltou entre 14 e 21 dias: n; seguiu abaixo até a última leitura: n; primeira leitura depois já acima: n; sem seguimento: n"). Turnbull (1976) só com ≥ 20 casos. Executado: no v3, nenhuma "volta" sem leitura abaixo do NC antes; a regra pede contraprova dirigida.
 - **Sequência e resistência.** Executado: aplicações seguidas do mesmo grupo com antes/depois = 1 (ácaro) e 0 nos demais. O aceite "detecta perda por aplicações seguidas" não é testável com este gerador. F1: só a coluna "posição na sequência" com n. Alerta de investigação (nunca diagnóstico) só com 2 safras e gerador com sequências.
 - **Sem controle na vida real.** Executado: 0 aplicações sem controle válido, porque o gerador escalona os gatilhos por talhão. Campanha na fazenda inteira é comum. O gabarito precisa de campanhas, para provar o "sem comparação válida".
-- **Frases de comparação com n pequeno.** O v3 publica a frase com n ≥ 2 de cada lado (ART:1228); executado: barra 100 L/ha com n = 2. Aplicar a mesma regra de evidência às frases (EX-42:40: aviso de poucos casos junto ao resultado).
+- **Frases de comparação com n pequeno.** O v3 publica a frase com n ≥ 2 de cada lado (ART:1227); executado: barra 100 L/ha com n = 2. Aplicar a mesma regra de evidência às frases (EX-42:40: aviso de poucos casos junto ao resultado).
 - **Cortar ressurgência da F1.** O gerador não planta o efeito; não há como testar.
 - **Testemunha (posterior).** A medida limpa é a faixa sem aplicação. A peça do teste em faixas (MMP:332-337) serve para defensivo (MMP:198). Proposta: "Propor faixa testemunha" na O.S., mantida a aprovação individual; decisão do RT e do proprietário (§7).
 
 ### 3.5 Camada 4 (risco)
 
-- **Teste otimista.** O gate do v3 (ART:661-664) treina até D − 21 e testa nas 3 semanas seguintes, mas calcula as variáveis com o clima observado: é previsão perfeita. Compara o Brier com a persistência 0/1, que é uma referência fraca para probabilidade. Eventos no teste: 4, 5, 1 e 9; a antracnose "venceu" com 1 evento.
+- **Teste otimista.** O gate do v3 (ART:660-663) treina até D − 21 e testa nas 3 semanas seguintes, mas calcula as variáveis com o clima observado: é previsão perfeita. Compara o Brier com a persistência 0/1, que é uma referência fraca para probabilidade. Eventos no teste: 4, 5, 1 e 9; a antracnose "venceu" com 1 evento.
 - **Executado, origem móvel semanal (semente original):**
 
 | Alvo | Casos | Eventos | Modelo | Sem previsão | Nível + estádio | Persistência 0/1 | Taxa-base |
@@ -139,7 +140,7 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 | Cochonilha | 92 | 13 | 0,049 | 0,058 | 0,049 | 0,130 | 0,133 |
 
   Brier, menor é melhor. "Sem previsão" usa as janelas anteriores à 1ª vistoria (aproximação: também desloca a adubação). Em 20 sementes, o modelo vence nível + estádio em 19, 20, 9 e 10; sem previsão, vence a persistência em 1, 1, 16 e 20.
-- **Previsão.** v3: inventada (ART:311). Protótipo oficial: só chuva 48 h (dados_irrigacao.py:60). Real: provedor com **arquivo das previsões emitidas**, para o teste honesto. Custo e licença são do proprietário (PRD:6308; AGENTS §2). Validade 12 h (DEC:149).
+- **Previsão.** v3: inventada (ART:310). Protótipo oficial: só chuva 48 h (dados_irrigacao.py:60). Real: provedor com **arquivo das previsões emitidas**, para o teste honesto. Custo e licença são do proprietário (PRD:6308; AGENTS §2). Validade 12 h (DEC:149).
 - **Calibração ±10 p.p.** pede centenas de casos por faixa. Com uma safra, não há. Sem probabilidade até haver; mostrar ordem e fatores, como o v3 já faz quando o teste falha.
 - **Cortar 14 dias** até provar com previsões arquivadas.
 
@@ -183,11 +184,11 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 
 ## 5. UX
 
-- **Sem jargão na primeira camada.** "semanas-talhão sem controle" (ART:1088) → "semanas sem aplicação". Henderson-Tilton e Kaplan-Meier aparecem no rodapé da aba Controle (ART:1245): vão para "Como foi calculado".
+- **Sem jargão na primeira camada.** "semanas-talhão sem controle" (ART:1087) → "semanas sem aplicação". Henderson-Tilton e Kaplan-Meier aparecem no rodapé da aba Controle (ART:1244): vão para "Como foi calculado".
 - **Duas ações a partir do mapa.** Lido no código: com a função Pragas e doenças e o alvo já escolhidos, o Raio-X é o painel padrão (0 ações) e a evidência abre em 1. Vindo de outra função: função + alvo + item = 3. O aceite precisa declarar o contexto de partida (EX-42:68).
 - **Cortar da tela na F1:** aba Correlações (C-07); aba Risco (3.5); tabela de gabarito (só no teste e no cenário rotulado). Ficam 2 vistas: "Sobe e desce" e "Depois da aplicação".
 - **TELA-01** (docs/design-system/diretrizes-ux.md): no topo, o estado em palavras (alvo; base "142 vistorias · 23 talhões · 1 safra"; data do cálculo); a atenção é o achado novo sem marca. O painel é consulta: a primária fica no sub-detalhe, a marca do RT.
-- **Acessibilidade.** Nível com palavra e pontos: ok. Cor de estado em dado: C-06. Gráfico sem tabela: C-08. Alvos de 30 a 32 px (ART:233, :65) → 44 px no toque (EX-42:68).
+- **Acessibilidade.** Nível com palavra e pontos: ok. Cor de estado em dado: C-06. Gráfico sem tabela: C-08. Alvos de 30 a 32 px (ART:232, :64) → 44 px no toque (EX-42:68).
 - **"Criar vistoria"** → "Programar vistoria" do AG-01 (C-16).
 - **Marca do RT.** Três marcas, com quem e quando; "Não confere" pede o motivo em uma linha, porque vira dado de falso positivo (C-17).
 
@@ -221,7 +222,7 @@ Situação em b989864 (lido). "Oficial" = base comum do protótipo (gen37); "só
 
 ## 8. Reprodução (executado)
 
-**Comando:** `bash docs/integracao/V73/RAIOX-ALVO/reproducao/rodar.sh <HTML do artefato v3> <saída>`. Node v22.22.0, sem navegador. O script extrai do HTML o motor (simulação e camadas 1 a 4, antes do bloco `// estado`) e o `gabaritoRows` da tela, e roda num contexto `vm` isolado. Dois ganchos de uma linha, conferidos (falham se não acharem o texto exato): a semente (réplicas) e o deslocamento do clima só na análise (nulo). Mais um terceiro, para o controle de época. Tempo total: ~30 s. As saídas (`repro.json`, `resumo.txt`, `calor.txt`) são deterministas, salvo os tempos em ms; duas rodadas deram o mesmo resumo.
+**Comando:** `git show 529adf7:docs/integracao/V73/pedidos-1610/raiox-pragas-no-tempo-v3.html > /tmp/v3.html` e `bash docs/integracao/V73/RAIOX-ALVO/reproducao/rodar.sh /tmp/v3.html <saída> "<origem>" "<nota>"`. A 1ª rodada (16/10) usou o HTML do artefato `00b5d915…`; a de 17/10, a cópia versionada: resumo, `calor.txt` e `repro.json` iguais, fora hash, nome e tempos. Node v22.22.0, sem navegador. O script extrai do HTML o motor (simulação e camadas 1 a 4, antes do bloco `// estado`) e o `gabaritoRows` da tela, e roda num contexto `vm` isolado. Dois ganchos de uma linha, conferidos (falham se não acharem o texto exato): a semente (réplicas) e o deslocamento do clima só na análise (nulo). Mais um terceiro, para o controle de época. Tempo total: ~30 s. As saídas (`repro.json`, `resumo.txt`, `calor.txt`) são deterministas, salvo os tempos em ms; duas rodadas deram o mesmo resumo.
 
 | Declaração do protótipo (25/09) | Reproduzida? | Medido |
 |---|---|---|
@@ -246,6 +247,8 @@ A direção aparece em parte, sempre com n de 1 a 6 de um lado: nenhuma dessas d
 - **Nulo do clima:** clima deslocado 21, 35, 49 e 63 dias só na análise. 18 achados de clima falsos exibidos em 16 alvo-rodadas, 1 deles Forte; com tendência suave, 16 (1 Forte). Com o clima errado, a irrigação virou Forte na mosca (deslocamento 35) e no ácaro (35, 49).
 - **Resíduo:** 8, 15, 3 e 8 pares "sem aplicação" ainda sob resíduo.
 - **Leitura do mesmo dia como "antes":** 4/16, 2/16, 1/9, 1/15.
+
+**Gitleaks 8.30.1** (config `/.gitleaks.toml` da main, `--redact`), 17/10, antes do commit da v2: `gitleaks dir` nesta pasta, ~345 KB, sem achados; `gitleaks git --log-opts=b9898643…..HEAD`, 1 commit (f694006), sem achados. A varredura do intervalo com o commit da v2 vai no recibo ao coordenador.
 
 **Limites.** O gerador fixa os dias de chuva e as ondas de calor (`RAINMM` e `wave`): as réplicas variam só o ruído. O "sem previsão" é aproximação. Não abri a tela. A magnitude contra o plantado **não foi medida**: o v3 não define o efeito verdadeiro de "≥ limiar" para um multiplicador diário plantado. Por isso o RX-0 pede o oráculo no gerador.
 
