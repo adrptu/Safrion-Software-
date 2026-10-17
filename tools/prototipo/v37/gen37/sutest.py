@@ -4,7 +4,7 @@ import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
-R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
+R=os.environ.get('RENDER_DIR') or os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()   # RENDER_DIR: contraprova num render da base sem trocar o _render
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=Chrome(port=free()); J=c.js
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.preventDefault&&0; e.click(); return 'ok';})"""
@@ -65,12 +65,19 @@ try:
     ids=J("[...document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])')].map(i=>i.id)"); print('   campos',ids)
     setv('#'+ids[1],'reservatório P1'); clk('Salvar','aside[role=dialog]'); ok('reservatório P1' in J("document.body.innerText") or 'Salvo' in T(),'SU-07 salvar edição pela linha')
     # ---------- SU-08 ----------
+    # EX-50(a)-SUP (PR #108, composição ac5cd1d7) mudou o contrato da SU-08: perda é o comando real (primária "Registrar perda");
+    # transferência entre locais e estorno genérico ainda não têm comando canônico e viraram prévia, sem alterar saldo. O fluxo antigo
+    # ("Confirmar recebimento" do trânsito e "Estornar com vínculo" com ES-0072) saiu da tela; as regras novas da SU-08 estão em
+    # sup_movimentos_test.cjs e sup_movimentos_ui_test.cjs. Aqui fica o que é da tela (DS-MODULOS-2, 17/10/2026).
+    # Contraprova: com RENDER_DIR no render da base 5bb8f5e (primária "Transferir entre locais", cartões EM TRÂNSITO, botões antigos)
+    # os quatro oks abaixo reprovam.
     go('SU-08.dc.html')
-    clk('Confirmar recebimento'); t=T(); print('   ',t); ok('confirmada no destino' in t,'SU-08 confirma trânsito')
-    clk('Estornar com vínculo'); clk('Estornar com vínculo','aside[role=dialog]'); print('   sem motivo:',J("(document.querySelector('aside [role=alert]')||{}).innerText"))
-    ids=J("[...document.querySelectorAll('aside[role=dialog] input')].map(i=>i.id)"); setv('#'+ids[-1],'quantidade digitada errada'); clk('Estornar com vínculo','aside[role=dialog]'); t=T(); print('   ',t)
-    ok('ES-0072' in t and 'original' in t,'SU-08 estorno cria movimento vinculado')
-    ok('Estornado · ver ES-0072' in row('^MV-8788'),'SU-08 original marcado como estornado')
+    cab=J("document.querySelector('h1').parentElement.parentElement.innerText")
+    ok('Registrar perda' in cab and 'Transferir entre locais' not in cab,'SU-08 primária do cabeçalho: Registrar perda')
+    ok(not J("/EM TRÂNSITO\\s+\\d|PERDAS AGUARDANDO GESTOR\\s+\\d/i.test(document.querySelector('main').innerText)"),'SU-08 TAB-07: sem cartões de resumo sobre a lista')
+    bd=J("document.body.innerText")
+    ok('Prévia de transferência' in bd and 'Prévia de estorno' in bd,'SU-08 transferência e estorno genérico aparecem como prévia')
+    ok(not J("[...document.querySelectorAll('button,a,[role=menuitem]')].some(x=>/^(Confirmar recebimento|Estornar com vínculo)$/.test((x.textContent||'').replace(/\\s+/g,' ').trim()))"),'SU-08 sem os comandos antigos de trânsito e estorno')
     # ---------- SU-09 ----------
     go('SU-09.dc.html')
     clk('Submeter ajuste'); t=T(); ok('Informe causa' in t,'SU-09 submeter sem causa recusa')
