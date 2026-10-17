@@ -1,0 +1,21 @@
+render 05947ad: 156 páginas
+rc=0 node est_onda0_unit.js :: RESULTADO 24/24
+rc=0 node credito_ficha_unit.js :: RESULTADO 18/18
+rc=1 node credito_ficha_motor_unit.js :: 
+rc=0 credito_ficha_build.py :: GE08 gerada; script real extraído: /tmp/claude-0/int90/tools/prototipo/v37/gen37/credito_ficha_generated.js
+rc=0 ds_inventario.py --catraca :: RESULTADO: catraca ok
+rc=0 1s est_onda0_test.py :: OK=24 FALHA=0 · RESULTADO 24/24
+rc=0 34s credito_menu_test.py :: OK=26 FALHA=0 · RESULTADO: 26/26
+rc=0 4s links_ocultos_test.py :: OK=16 FALHA=0 · OK    E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10) 
+rc=0 154s cadastros_rev1_test.py :: OK=19 FALHA=0 · RESULTADO: 19/19
+rc=0 55s cad_gravacao_falha_test.py :: OK=7 FALHA=0 · RESULTADO: 7/7 ok
+rc=0 229s ds_modulos.py --catraca :: OK=0 FALHA=0 · RESULTADO: catraca ok
+rc=0 1s est_a4_test.py :: OK=53 FALHA=0 · RESULTADO 53/53
+rc=0 45s consumo_divergente_test.py :: OK=0 FALHA=0 · 21/21 ok · FALHAS: 0
+rc=0 52s os_cenario_test.py :: OK=0 FALHA=0 · RESULTADO: 22/22 ok
+rc=0 46s tabelas_est_test.py :: OK=0 FALHA=0 · RESULTADO: 34/34 ok
+rc=0 401s ben_fluxo_test.py multilote multilote390 rodape :: OK=15 FALHA=0 · RESULTADO: OK 15/15
+rc=0 301s cadastros_padrao_test.py :: OK=44 FALHA=0 · RESULTADO: 44/44
+rc=0 809s demanda_estado_nav_test.py :: OK=14 FALHA=0 · RESULTADO: 14 ok · 0 falhas
+rc=0 399s paginas_scan_test.py :: OK=5 FALHA=0 · RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

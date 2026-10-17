@@ -1,0 +1,57 @@
+OK E1 abre devolução sem presumir quantidade/condição
+OK E1 salvar o formulário aberto sem editar não registra custódia presumida
+OK E2 pedido e NF vinculados ficam somente leitura, novo recebe seleção
+OK E1 repetir os480 já recebidos devolve recibo mesmo com custódia20
+OK E1 salvar vazio recusa sem alterar cenário
+OK E1 condição ausente recusa mesmo com quantidade
+OK E1 480 aptos deixam custódia20 e um movimento
+OK E1 repetir formulário parcial não duplica
+OK E1 chave repetida com quantidade diferente recusa
+OK E1 bloqueada exige observação e vai para quarentena
+OK E2 NF4533 não aceita PC096 pelo handler
+FALHA E2 validação informa identidade uma vez sem apagar rascunho: Expected values to be strictly equal:
+
+2 !== 1
+
+OK E2 comando direto não aceita NF rebatizada como caixa
+OK E2 mesma NF com id novo continua vinculada
+OK E2 novo documento rejeita item divergente
+OK E2 novo documento rejeita un divergente
+OK E2 novo documento rejeita forn divergente
+OK E2 documento coerente entra uma vez e persiste
+OK E2 formulário novo não descarta item divergente recebido no rascunho
+OK E2 cenário salvo não pode reescrever a identidade da NF de origem
+FALHA A1 seletor real oferece opção vazia e condições textuais: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    {
++     t: {
++       t: 'Escolha a condição',
++       v: ''
++     },
++     v: {
++       t: 'Escolha a condição',
++       v: ''
++     }
+-     t: 'Escolha a condição',
+-     v: ''
+    },
+    {
+      t: 'Apta · volta ao disponível',
+      v: 'Apta · volta ao disponível'
+    },
+
+FALHA A3 ajuda mostra 139 de sobra, 869 em custódia e uso730; entrada vazia: The input did not match the regular expression /139 un = 869 un em custódia − 730 un/. Input:
+
+'Em custódia: 869 un com Igor.'
+
+FALHA A3 ajuda distingue sobra total da parcela desta linha: The input did not match the regular expression /139 un = 869 un/. Input:
+
+'Em custódia: 100 un com Igor.'
+
+FALHA A5 aba desatualizada pede quantidade e condição, limpa ambas sem movimento: The input did not match the regular expression /quantidade e a condição/. Input:
+
+'A OB-0110 mudou depois que você abriu (sobra 139 → 149 un): nada foi gravado. Confira novamente a quantidade e salve de novo.'
+
+RESULTADO 19/24

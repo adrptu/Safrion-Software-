@@ -117,7 +117,7 @@ O realce nunca atrasa a ação nem esconde o resultado: o desenho novo já está
 - **Fecha** com Esc, ao tirar o ponteiro do gatilho e da dica, ao perder o foco ou ao tocar fora.
 - **Leitor de tela:** enquanto a dica está aberta, o gatilho ganha `aria-describedby="g2-dica"`. A dica não repete o nome acessível.
 - **Não depende do `title`**, que não aparece no teclado nem no toque. Se a tela já tinha `title`, ele sai de cima durante o hover e volta depois. O `title` igual ao rótulo visível (item do menu aberto) também sai enquanto o ponteiro está em cima, para o navegador não mostrar a dica nativa repetida; com o menu recolhido ele é a dica do item.
-- **Selo dentro de linha ou cartão:** o selo não recebe foco. Com foco de teclado na linha da tabela ou no cartão do Kanban, a dica é a do selo mais grave de dentro dele (vermelho, depois amarelo), com o nome do selo à frente, e descreve a linha ou o cartão (`aria-describedby`). O clique do ponteiro na linha não abre a dica.
+- **Selo dentro de linha ou cartão:** o selo não recebe foco. Com foco de teclado na linha da tabela ou no cartão do Kanban, a dica é a do selo mais grave de dentro dele (vermelho, depois amarelo), com o nome do selo à frente, e descreve a linha ou o cartão (`aria-describedby`). O ícone de situação antes da identidade (VISOES-2 §3.6) conta como selo: a dica no foco é a mesma do hover, «Situação: Falta insumo · …». O clique do ponteiro na linha não abre a dica.
 
 **Texto, nesta ordem:**
 
