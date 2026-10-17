@@ -366,7 +366,8 @@ function EXTRAVALS(self,v){ const s=self.state;
     )
     shell37('LO-02','Expedições e cargas',corpo,
       subtitle='Fila de presentes aptos, bloqueados e atrasados sobre as cargas da agenda; chamar exige doca livre e carga pronta.',
-      status=(H('lo2_st'),'red'),   # TAB-07 (17/10/2026): o "no pátio" saiu do cartão de resumo e vai no selo, atualizado com a chegadaprimary='Conferir carga do T2',primary_href='LO-02det.dc.html',steps=faixa(2),
+      # TAB-07 (17/10/2026): o "no pátio" saiu do cartão de resumo e vai no selo, atualizado com a chegada
+      status=(H('lo2_st'),'red'),primary='Conferir carga do T2',primary_href='LO-02det.dc.html',steps=faixa(2),
       footer='Sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (FILA-07). DEMO-19/20. '
              f'Política v4 da fila: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › perecibilidade › pontualidade › espera acumulada; tolerância de chegada: {TOLERANCIA}. '
              'Expedição: A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmada; qualidade, financeiro e documentos são dimensões separadas.')

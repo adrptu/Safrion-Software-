@@ -62,11 +62,13 @@ try:
              and 'A contagem INV-2611' in t3 and 'está desatualizada' in t3 and '1 movimento (devolução de 20 L · ' + RQ + ')' in t3 and 'o físico era 880 L e agora é 900 L' in t3
              and 'Nada foi alterado' in t3 and '(Recontar)' in t3,
              f'T3 {tag}: devolução de 20 L por outra tela; "Aprovar ajuste" é recusado com o motivo e o caminho "Recontar"', [r3a, dv, b3, t3])
-        vc = E.J(f"({INTEIRO})({json.dumps(['INV-2611'])},'Desatualizada')"); vb = E.J(f"({INTEIRO})({json.dumps(['INV-2611'])},'Recontar')")
+        vc = E.J(f"({INTEIRO})({json.dumps(['INV-2611'])},'Desatualizada')"); vb = E.J(f"({INTEIRO})({json.dumps(['INV-2611'])},'⋯')")   # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): "Recontar" mora no ⋯ da linha; o ⋯ é que tem de aparecer inteiro
+        rm = E.J("[...([...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('INV-2611')>=0)||document).querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim())") or []
+        vb = vb if 'Recontar' in rm else ['sem Recontar no ⋯', rm]
         E.J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('INV-2611')>=0); r&&r.scrollIntoView({block:'center'}); const e=r&&[...r.querySelectorAll('span')].find(x=>x.innerText.trim()==='Desatualizada'); e&&e.scrollIntoView({block:'center',inline:'nearest'});})()"); time.sleep(.3)
         E.shot(f'a4_{tag}_t3_linha.png')
         E.ok(vc in (True, 'teclado', 'rolando') and vb in (True, 'teclado', 'rolando'),
-             f'T3c {tag}: o selo "Desatualizada" e o botão "Recontar" aparecem inteiros na caixa da grade (à vista, pelo foco ou rolando a grade)', [vc, vb])
+             f'T3c {tag}: o selo "Desatualizada" e o ⋯ da linha (com "Recontar") aparecem inteiros na caixa da grade (à vista, pelo foco ou rolando a grade)', [vc, vb])
         E.ok(s3['fis'] == 900 and s3['mov'] == 0 and s3['aj'] == s3a['aj'] and s3['aj'][-1].endswith('Aguardando gestor') and s3['res'] == s3a['res']
              and 'Desatualizada' in r3 and 'Aprovar ajuste' not in r3 and ok3,
              f'T3b {tag}: recusa atômica (físico 900 L, ajuste pendente, sem movimento de ajuste) e a linha passa a "Desatualizada" com "Recontar"; sem rolagem horizontal', [s3a, s3, r3, w3])

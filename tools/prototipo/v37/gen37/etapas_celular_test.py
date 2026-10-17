@@ -127,7 +127,9 @@ NOMES={'CMP':['Escolha a safra','Confira a demanda','Solicite cotações','Compa
 GUIADO=('CMP','SAF','PA')   # progresso numerado (desde 15/10 a etapa também leva à tela); EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
 ATUAL={'CMP':(1,6),'SAF':(1,4),'PA':(1,3),'EST':(1,6),'IR-02':(2,4)}
 P8=['CMP','SAF','PA','EST','OS','IR-02','MA','AG-07']   # MA: a tela única da Manutenção (sem faixa) segue nos itens 3 e 4
-CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
+CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t));
+  if(!e){ const it=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].find(x=>n(x.textContent)===t||n(x.textContent).startsWith(t)); if(!it) return 'NÃO ACHEI: '+t; it.closest('.g2mais-w').querySelector('.g2mais').click(); it.click(); return 'ok (⋯ da linha)'; }
+  e.click(); return 'ok';})"""   # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): a ação da linha ("Abrir compra") mora no ⋯ da linha; abre-se o ⋯ e escolhe-se o item
 try:
     c=ChromeAnexo(); J=c.js; c.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
     def vp(w,h,d=1): c.call('Emulation.setDeviceMetricsOverride',{'width':w,'height':h,'deviceScaleFactor':d,'mobile':False}); time.sleep(.25)
