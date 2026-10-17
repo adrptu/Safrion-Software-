@@ -28,7 +28,7 @@
 | 17/10 09:18 | Hover e UX dentro do mapa | **Em implantação** (MAPA-UX) | — |
 | 17/10 09:40 | Cartões da O.S. fora do padrão | **Em implantação** (DS-MODULOS-2) | — |
 | 17/10 09:42 | Seta de drill down só onde há detalhamento | **Em implantação** (DRILL) | — |
-| 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Com o Codex**, autor do OS-LOTE (pedido 6232423415) | — |
+| 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Prévia publicada** (v118/v119, PR #105 em revisão): grupo proposto por calda, aprovação uma a uma, liberar as aprovadas, separação e sequência | O.S. › "Agrupar operações compatíveis" › Sulfato de magnésio 2 kg/ha |
 | 17/10 10:35 | Agrupar O.S.: mostrar insumos e datas de cada O.S./talhão logo ao abrir, para conferir e agrupar | **Com o Codex** (PR #105, pedido 6232840459) | — |
 
 ## Por que quase nada da noite chegou ao artefato
