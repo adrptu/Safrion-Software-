@@ -31,7 +31,7 @@
 | 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Publicado e integrado** (v121; PR #105 em 461e296): grupo proposto por calda, aprovação uma a uma, liberar as aprovadas, separação e sequência | O.S. › "Agrupar operações compatíveis" › Sulfato de magnésio 2 kg/ha |
 | 17/10 10:35 | Agrupar O.S.: mostrar insumos e datas de cada O.S./talhão logo ao abrir, para conferir e agrupar | **Publicado e integrado** (v121): insumos e datas visíveis ao abrir | O.S. › "Agrupar operações compatíveis" |
 | 17/10 10:40 | EX-49: padrão único para listas, cartões, pai e filho, botões e ⋯ com ícone | **Combinado com o Codex:** Claude implanta no motor logo depois do DRILL; medida pelo robô v4 antes e depois | — |
-| 17/10 10:40 | EX-50: telas ocultas, levar o que tem valor e excluir o resto | **Decisões tomadas** (exclusão aceita; financeiro no ERP; portal mínimo; implantação assistida). Codex confere a tabela de 123 itens; Claude leva as 12 funções e troca os links; depois exclui | — |
+| 17/10 10:40 | EX-50: telas ocultas, levar o que tem valor e excluir o resto | **Decisões tomadas** (exclusão aceita; financeiro no ERP; portal mínimo; implantação assistida). Classificação dos 123 IDs versionada (`ex50-classificacao-codex.md`). **SU-01 publicado na v122** (PR #106 do Codex em `2249b84`): a falta da OM-0234 vem da manutenção viva e o rolamento e a COT-113 fictícios saíram. Próximo: SU-02 (Codex), depois SU-08, CA-02 e LO-02det; exclusão só depois de migrar as funções e os links | Suprimentos › Necessidades e cobertura (linhas da OM-0234) |
 
 ## Por que quase nada da noite chegou ao artefato
 
