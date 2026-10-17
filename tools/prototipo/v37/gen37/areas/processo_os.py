@@ -1024,7 +1024,13 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
 // OS-LOTE: mesma coleção e contexto, rascunho preservado ao fechar. Sem seleção implícita.
 function osGrupoVals(self,v,recorte){
   const c=cenGet(),pf=g2perfil(),perfil=(g2pf(pf)||{}).k;
-  const put=x=>self.setState({og:Object.assign({},self.state.og||{},x)});
+  const put=x=>{self.setState({og:Object.assign({},self.state.og||{},x)});
+    // A etapa pode remover o botao ativo; manter o teclado dentro do dialogo.
+    setTimeout(()=>{if(!(self.state.og||{}).aberto)return;
+      const d=document.getElementById('og_dialog'),b=document.getElementById('og_close');
+      if(d&&b&&!d.contains(document.activeElement))b.focus();
+    },60);
+  };
   const key=()=> 'os-grupo-'+Date.now()+'-'+Math.random().toString(36).slice(2);
   const snap=g=>Object.fromEntries(g.ids.map(id=>[id,cenGrupoSnapshot(c,id)]));
   let permitido=true;try{cenGrupoAtor(pf)}catch(e){permitido=false}
@@ -1038,7 +1044,16 @@ function osGrupoVals(self,v,recorte){
   v.og_temgrupos=v.og_grupos.length>0;
   const st=self.state.og||{},g=st.grupo&&(c.gruposExec||{})[st.grupo];
   v.og_show=!!st.aberto&&st.perfil===perfil;
-  v.og_fechar=()=>put({aberto:false});v.og_key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();v.og_fechar()}};
+  const soltaEsc=()=>{if(self.__ogEscape){document.removeEventListener('keydown',self.__ogEscape);self.__ogEscape=null;}};
+  v.og_fechar=()=>{soltaEsc();put({aberto:false})};v.og_key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();v.og_fechar()}};
+  // Safari pode clicar sem focar o botao: Escape tambem precisa chegar pelo documento.
+  if(typeof document!=='undefined'){
+    if(!v.og_show)soltaEsc();
+    else if(!self.__ogEscape){self.__ogEscape=e=>{
+      if(!(self.state.og||{}).aberto||!document.getElementById('og_dialog')){soltaEsc();return;}
+      if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();v.og_fechar();}
+    };document.addEventListener('keydown',self.__ogEscape);}
+  }
   v.og_titulo=g?g.id+' · versão '+g.versao:'Agrupar operações';v.og_contexto=st.contexto||'';
   v.og_erro=st.erro||'';v.og_temerro=!!st.erro;v.og_criar=!g;v.og_detalhe=!!g;
   v.og_voltar=()=>put({previa:null,confirmacao:null,instrucao:null,erro:'',chave:key()});
@@ -1077,7 +1092,7 @@ function osGrupoVals(self,v,recorte){
     if(rows.length<2||destinos.size!==rows.length){rows.forEach(x=>fora.push({id:x.o.id,t:x.o.id,motivo:rows.length<2?'Sem outra O.S. compatível neste contexto':'Talhão repetido: conferir O.S. sobrepostas'}));continue}
     const escolhidas=rows.map(x=>x.o.id),area=rows.reduce((a,x)=>a+x.o.area,0);
     const linhas=escolhidas.map(conferir),datas=linhas.flatMap(x=>[x.ini,x.fim]).filter(Boolean).sort(),dias=datas.length?Math.round((Date.parse(datas[datas.length-1]+'T00:00:00Z')-Date.parse(datas[0]+'T00:00:00Z'))/86400000):0;
-    v.og_sugestoes.push({linhas,acao:'Agrupar estas '+rows.length,periodo:datas.length?datas[0]+' a '+datas[datas.length-1]:'Datas não informadas',aviso:dias?'Datas abrangem '+dias+' dias. Confira a sequência antes de liberar.':'',t:rows[0].prods.map(x=>x.p+' '+nf(x.dose)+' '+x.un+'/ha').join(' + ')+' · '+rows.length+' O.S. · '+rows.length+' talhões · '+nf(area)+' ha',escolher:()=>put({ids:escolhidas,previa:null,confirmacao:null,resultado:null,erro:'',chave:key()})});
+    v.og_sugestoes.push({linhas,acao:'Agrupar estas '+rows.length,periodo:datas.length?alDm(datas[0])+' a '+alDm(datas[datas.length-1]):'Datas não informadas',aviso:dias?'Datas abrangem '+dias+' dias. Confira a sequência antes de liberar.':'',t:rows[0].prods.map(x=>x.p+' '+nf(x.dose)+' '+x.un+'/ha').join(' + ')+' · '+rows.length+' O.S. · '+rows.length+' talhões · '+nf(area)+' ha',escolher:()=>put({ids:escolhidas,previa:null,confirmacao:null,resultado:null,erro:'',chave:key()})});
   }
   v.og_mostra_sugestoes=!g&&!ids.length&&!v.og_revisao&&!st.instrucao;
   if(v.og_mostra_sugestoes)v.og_acao_visivel=false;
@@ -2006,9 +2021,9 @@ def _grupo():
     return ('<style>@media(max-width:600px){.og-table,.og-table tbody,.og-table tr,.og-table td{display:block;width:100%;box-sizing:border-box}.og-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.og-table tr{margin:8px 0;border:1px solid #dce4dd;border-radius:8px}.og-table td:before{content:attr(data-label);display:block;font-weight:600}.og-table td{min-width:0;overflow-wrap:anywhere}}</style>'
         f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box">'
         f'<button type="button" aria-label="Fechar agrupamento" onClick="{H("og_fechar")}" style="position:absolute;inset:0;border:0;background:rgba(21,32,26,.32)"></button>'
-        f'<aside role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:960px;max-width:100%;height:min(900px,calc(100dvh - 24px));border-radius:16px;border:1px solid {LINE};box-shadow:0 24px 64px rgba(21,32,26,.2);background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
+        f'<aside id="og_dialog" role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:960px;max-width:100%;height:min(900px,calc(100dvh - 24px));border-radius:16px;border:1px solid {LINE};box-shadow:0 24px 64px rgba(21,32,26,.2);background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
         f'<header style="padding:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid {LINE}"><h2 style="font-size:18px;flex:1;margin:0">{H("og_titulo")}</h2>'
-        f'<button type="button" aria-label="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
+        f'<button id="og_close" type="button" aria-label="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
         f'<div style="flex:1;overflow-y:auto;min-height:0;padding:16px;font-size:13px;line-height:1.5;overflow-wrap:anywhere">'
         f'<p>{H("og_contexto")}</p><p>{H("og_n")}</p>{propostas}'
         f'<sc-if value="{H("og_temresultado")}" hint-placeholder-val="{F()}"><div role="status"><b>{H("og_resultado")}</b>{textos("og_recibos")}</div></sc-if>'

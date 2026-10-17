@@ -62,7 +62,11 @@ try:
         click('Confirmar agrupamento',True)
         verificar(prefix+'recibo das três O.S.',aguardar(c,f"{dialog}.innerText.includes('GRP-1 confirmado')&&{dialog}.innerText.includes('OS-0596 · Vinculada')"))
         verificar(prefix+'confirmação não aprova nem libera nem reserva',c.js("(()=>{const c=window.__cen.cenGet();return ['OS-0595','OS-0596','OS-0597'].every(id=>c.ordens[id].etapa==='A liberar'&&!c.ordens[id].reservado&&!(c.ordens[id].osc.ev||[]).length)&&Object.keys(c.gruposExec).length===1})()"))
+        # WCAG 1.4.13 (g2lib, dica explícita): se o foco está num controle com dica aberta, o 1º Esc fecha só a dica e o 2º fecha o modal
+        dica=c.js("(()=>{const d=document.getElementById('g2-dica');return !!(d&&!d.hidden)})()")
         c.tecla('Escape',vk=27)
+        if dica:
+            verificar(prefix+'1º Esc fecha só a dica e mantém o modal',c.js(f"!!{dialog}")); c.tecla('Escape',vk=27)
         verificar(prefix+'grupo persistido reabre sem perder vínculo',aguardar(c,f"!{dialog}") and c.js("(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.offsetParent&&x.innerText.startsWith('GRP-1 ·'));if(!b)return false;b.click();return true})()") and aguardar(c,f"{dialog}&&{dialog}.innerText.includes('OS-0597')"))
         c.shot(str(saida/f'recibo-{largura}.png'))
         verificar(prefix+'sem exceções JavaScript',not c.js('(window.__errs||[]).length'))
@@ -72,4 +76,4 @@ finally:
     srv.terminate()
     (saida/'resultado.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
 print(f'RESULTADO {sum(r["ok"] for r in result)}/{len(result)}')
-sys.exit(0 if len(result)==34 and all(r['ok'] for r in result) else 1)
+sys.exit(0 if len(result)==36 and all(r['ok'] for r in result) else 1)
