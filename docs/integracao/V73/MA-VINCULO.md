@@ -38,7 +38,8 @@ Estado / impedimento / próximo passo: executado na branch claude/v44-v73-ma-vin
 | Grupo de máquina diferente (plano de trator em pulverizador) é recusado, com o motivo | trava | ordem com tarefas e peças erradas; peça reservada para a máquina errada |
 | Modelo diferente no mesmo grupo | aviso, permite | nenhum bloqueio desnecessário; quem vincula confere tarefas e peças |
 | Mesmo serviço por dois planos no mesmo ativo é recusado (`manDupServ`, regra anterior) | trava | ordem em dobro |
-| Gatilho por h ou km que o ativo não conta: aviso "vence só a cada N dias"; serviço sem nenhum gatilho aplicável é recusado | trava/aviso | plano "válido" que nunca vence (o antigo "Sem gatilho" calado) |
+| Gatilho por h ou km que o ativo não conta: aviso "vence só a cada N dias"; serviço sem nenhum gatilho aplicável é recusado. **Rege a versão publicada** (a mesma da prévia e das linhas); o rascunho de plano publicado só avisa; sem versão publicada, rege o rascunho v1 (revisão Codex 6229032017) | trava/aviso | plano "válido" que nunca vence (o antigo "Sem gatilho" calado); rascunho tornando elegível o que a versão em vigor não atende |
+| Publicar não pode deixar ativo vinculado sem gatilho aplicável: "Publicar vN" desligado com o motivo | trava | máquina que parece coberta e não tem vencimento depois da publicação |
 | Vincular, revincular ou repetir nunca zera nem sobrescreve marco, última execução ou ciclo; nunca registra manutenção como feita (Codex 6226249749) | trava | atraso escondido: 250 h, referência 1.000 h, leitura 1.450 h é Vencida; com a leitura atual como base daria Em dia |
 | Sem execução registrada, a pessoa escolhe: informar a última execução ou contar de agora (marco estimado, marcado) | escolha obrigatória | data ou leitura inventada pelo sistema |
 | Última execução: data futura, leitura negativa ou maior que a atual recusadas; corrigir a base de uma OM pede motivo | trava | base impossível; correção sem rastro |
@@ -74,7 +75,7 @@ Ambiente: `tools/prototipo/v37/gen37`, `SAFRION_DADOS=sintetico`, montagem `buil
 
 | Comando | Resultado |
 |---|---|
-| `python3 ma_vinculo_test.py U` (regras no node, `ma_vinculo_unit.js`) | 37/37 |
+| `python3 ma_vinculo_test.py U` (regras no node, `ma_vinculo_unit.js`) | 37/37 em 4d76bd1; 42/42 com a correção V8 (revisão Codex 6229032017), que reprova em 4d76bd1 (37/41: V8.1, V8.2 e a exceção de `manPubSemGatilho`) |
 | `python3 ma_regras_test.py` (inclui `ma_regras_unit.js` e `ma_os_unit.js`) | 150/150 |
 | `python3 ma_app_test.py` · `python3 compras_materiais_unit_test.py` | 36/36 · 41/41 |
 | `python3 dados_manutencao.py` (autoteste: 14 vencimentos, 4 sem plano) | ok |

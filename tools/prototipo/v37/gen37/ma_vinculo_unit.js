@@ -140,4 +140,33 @@ caso('V7 "Aplica a" e situação', () => {
   ok('V7 · vínculo só em rascunho continua "Sem plano" (distinto: a coluna diz Rascunho)', nomes(manSemPlano(c2)).includes('Distribuidor 3 t') && manPlSit(c2, c2.planos['PM-11'], c2.ativos.a07).t === 'Rascunho');
 });
 
+caso('V8 serviços publicados regem o vínculo (revisão Codex 6229032017)', () => {
+  const rasc = (p, gat) => { p.rasc = { v: (p.versao || 0) + 1, servicos: [Object.assign(manClone(p.servicos[0]), { gat, tol: {} })] }; return p; };
+  // 1 · publicado só por km + rascunho por dias, ativo por horímetro
+  const c = S(); const p = rasc(plano(c, 'PM-11', { grupo: 'Implementos', aplica: { t: 'ativos', v: [] }, serv: 'Revisão', gat: { km: 1000 } }), { d: 30 });
+  const k1 = manVincCompat(c, p, c.ativos.a07); const r1 = run(c, x => manVincular(x, 'PM-11', [{ aid: 'a07', base: { modo: 'agora' } }], OT, 'kv8a'));
+  ok('V8.1 · publicado só por km e rascunho por dias, ativo por horímetro: recusado com o motivo (a v1 em vigor não tem gatilho que o ativo conte)',
+    /Revisão conta só por 1\.000 km e Distribuidor 3 t conta horas \(horímetro\): nenhum gatilho se aplica na v1 em vigor/.test(k1.erro) && /^Nada foi vinculado/.test(r1.erro || '')
+    && !c.vinc['PM-11|a07'] && nomes(manSemPlano(c)).includes('Distribuidor 3 t'), [k1, r1]);
+  p.servicos = p.rasc.servicos; p.rasc = null; p.versao = 2;   // publicação compatível (dias)
+  const r1b = run(c, x => manVincular(x, 'PM-11', [{ aid: 'a07', base: { modo: 'agora' } }], OT, 'kv8b')); const l1 = manLinhas(c, 'PM-11').find(x => x.aid === 'a07');
+  ok('V8.1 · com a versão compatível publicada (dias), o mesmo vínculo passa e tem vencimento', !r1b.erro && l1 && l1.x.gats.length === 1 && l1.x.gats[0].u === 'd' && l1.x.sit !== 'Sem gatilho', [r1b, l1 && l1.x]);
+  // 2 · inverso: publicado por dias + rascunho só por km
+  const c2 = S(); const p2 = rasc(plano(c2, 'PM-11', { grupo: 'Implementos', aplica: { t: 'ativos', v: [] }, serv: 'Revisão', gat: { d: 30 } }), { km: 1000 });
+  const k2 = manVincCompat(c2, p2, c2.ativos.a07); const r2 = run(c2, x => manVincular(x, 'PM-11', [{ aid: 'a07', base: { modo: 'agora' } }], OT, 'kv8c'));
+  const l2 = manLinhas(c2, 'PM-11').find(x => x.aid === 'a07'); const pv2 = c2.vinc['PM-11|a07'] ? manVincPrev(c2, p2, c2.ativos.a07, c2.vinc['PM-11|a07']) : [];
+  ok('V8.2 · publicado por dias e rascunho só por km: aceita pelo publicado (com vencimento) e avisa do rascunho',
+    !k2.erro && k2.avisos.some(x => /^Rascunho v2 \(ainda não vale\): Revisão conta só por 1\.000 km; se for publicado assim, Distribuidor 3 t fica sem gatilho/.test(x))
+    && !r2.erro && l2 && l2.x.gats.length === 1 && pv2[0] && pv2[0].prox !== '—', [k2, r2, l2 && l2.x, pv2]);
+  const sg = manPubSemGatilho(c2, p2, manWork(p2));
+  ok('V8.2 · com o ativo vinculado, o rascunho só por km não pode ser publicado (o motivo diz quem ficaria sem gatilho)', sg.length === 1 && /^Revisão conta só por 1\.000 km e Distribuidor 3 t conta horas/.test(sg[0]) && !manPubSemGatilho(c2, p2, manPub(p2)).length, sg);
+  // 3 · plano ainda não publicado: regem os serviços do rascunho v1 (o que vale ao publicar), como antes, com o motivo à vista
+  const c3 = S(); const p3 = plano(c3, 'PM-11', { grupo: 'Implementos', aplica: { t: 'ativos', v: [] }, serv: 'Revisão', gat: { km: 1000 }, versao: 0 }); const k3 = manVincCompat(c3, p3, c3.ativos.a07);
+  const c4 = S(); const p4 = plano(c4, 'PM-11', { grupo: 'Implementos', aplica: { t: 'ativos', v: [] }, serv: 'Revisão', gat: { d: 30 }, versao: 0 });
+  const r4 = run(c4, x => manVincular(x, 'PM-11', [{ aid: 'a07', base: { modo: 'agora' } }], OT, 'kv8d')); const pv4 = c4.vinc['PM-11|a07'] ? manVincPrev(c4, p4, c4.ativos.a07, c4.vinc['PM-11|a07']) : [];
+  ok('V8.3 · sem versão publicada: km recusado com o motivo (rascunho v1 é o que vale ao publicar); dias aceita, a prévia diz que vence só depois de publicar e o ativo segue "Sem plano"',
+    /nenhum gatilho se aplica \(rascunho v1: é o que vale ao publicar\)/.test(k3.erro) && !r4.erro && pv4[0] && /Rascunho: os vencimentos começam quando o PM-11 for publicado/.test(pv4[0].txt)
+    && nomes(manSemPlano(c4)).includes('Distribuidor 3 t'), [k3, r4, pv4]);
+});
+
 print(JSON.stringify(R));

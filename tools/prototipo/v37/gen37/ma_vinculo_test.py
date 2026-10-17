@@ -225,6 +225,19 @@ def parte_A():
            and not any('› ›' in x[0] for x in lk + lk7),
            'A13 · CD-03: "Plano: PM-01 ›" e "Plano: PM-11 ›" no Trator 02; Distribuidor: "Sem plano · Vincular na Manutenção ›"', [lk, lk7])
         m.sem_erro('A13')
+        # A14 · revisão Codex 6229032017: quem rege o vínculo é a versão publicada (o rascunho só avisa) e publicar não deixa ativo sem gatilho
+        PL = ("(()=>{ window.__man.manMudar(null,(m)=>{ const s=(g)=>({id:'s1',nome:'Revisão',gat:g,tol:{},base:'exec',cumpre:[],tempo:1,esp:'Mecânico',tarefas:[{t:'Revisar',tipo:'Serviço'}],pecas:[]});"
+              " m.planos['PM-12']={id:'PM-12',nome:'Implementos · revisão',grupo:'Implementos',aplica:{t:'ativos',v:['a07']},estado:'Ativo',versao:1,hist:[{v:1,at:'23/09/2026'}],servicos:[s(%s)],rasc:{v:2,servicos:[s(%s)]}};"
+              " if(m.ordemPlanos.indexOf('PM-12')<0) m.ordemPlanos.push('PM-12'); %s return {msg:''}; }); return 1; })()")
+        m.ir('vis=ativos', perfil='Otávio', limpa=True); J(PL % ("{km:1000}", "{d:30}", "")); m.ir('plano=PM-12'); m.clk('Vincular ativos', 'main'); l7 = linha_vl(m, 'a07'); k7 = marcado(m, 'a07')
+        ok('Não serve: Revisão conta só por 1.000 km e Distribuidor 3 t conta horas (horímetro): nenhum gatilho se aplica na v1 em vigor' in l7 and k7 == {'on': False, 'dis': True},
+           'A14 · publicado só por km (rascunho por dias) num ativo por horímetro: recusado no painel com o motivo da versão em vigor', [l7[:220], k7])
+        m.ir('vis=ativos', perfil='Otávio', limpa=True); J(PL % ("{d:30}", "{km:1000}", "m.vinc['PM-12|a07']={marco:{data:'2026-09-20',leit:600,om:null},ult:{}};")); m.ir('plano=PM-12')
+        pb = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>/^Publicar v2/.test(b.innerText.trim())); return b?{dis:b.disabled,t:b.title}:null;})()")
+        a7 = m.linha('PM-12|a07')
+        ok(pb and pb['dis'] and 'Ativo vinculado ficaria sem gatilho: Revisão conta só por 1.000 km e Distribuidor 3 t conta horas' in pb['t'] and 'Em dia' in a7,
+           'A14 · publicado por dias e rascunho só por km: o vínculo vale pelo publicado (Em dia) e "Publicar v2" fica desligado com o motivo', [pb, a7[:160]])
+        m.sem_erro('A14')
     finally:
         fecha(m)
 

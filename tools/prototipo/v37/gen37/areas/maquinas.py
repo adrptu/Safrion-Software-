@@ -808,6 +808,7 @@ function pmPub(self,pid){ return manMudar(self,c=>{ manExige(c,g2perfil(),'plano
   const w=manWork(p); if(!w.length) throw new Error('Inclua ao menos um serviço antes de publicar.');
   const sg=w.find(s=>!Object.keys(s.gat||{}).length); if(sg) throw new Error('“'+sg.nome+'” está sem gatilho.');
   const sk=w.find(s=>!s.tarefas.length); if(sk) throw new Error('“'+sk.nome+'” está sem tarefas no checklist.');
+  const sgt=manPubSemGatilho(c,p,w); if(sgt.length) throw new Error('Não publicado: '+sgt.join(' · ')+'. Ajuste o gatilho ou desvincule o ativo.');   /* MA-VINCULO (Codex 6229032017) */
   const nv=p.versao?p.rasc.v:1; if(p.rasc){ p.servicos=p.rasc.servicos; p.rasc=null; } p.versao=nv; const h=String(c.hoje).split('-'); p.hist.unshift({v:nv,at:h[2]+'/'+h[1]+'/'+h[0]});
   const ab=Object.values(c.oms).filter(o=>o.pid===pid&&MAN_ABERTAS.indexOf(o.etapa)>=0);
   const ls=manLinhas(c,pid).filter(l=>l.s); const dv=ls.filter(l=>manDevida(l)&&!l.om);
@@ -817,7 +818,8 @@ function pmPubV(self,v,c,p,pf){ const nv=p.versao?(p.rasc?p.rasc.v:null):1; v.pa
   const ab=Object.values(c.oms).filter(o=>o.pid===p.id&&MAN_ABERTAS.indexOf(o.etapa)>=0);
   v.pb_oab=ab.map(o=>({t:o.id+' · '+manNome(c.ativos[o.aid])+' · '+o.serv+' · '+o.etapa+' · segue na v'+o.ver})); v.pb_temOab=ab.length>0;
   const na=pmVincs(c,p.id).length; v.pb_imp=nv?(na?('Vencimentos de '+na+(na>1?' ativos':' ativo')+' passam à v'+nv+'; as ordens abertas seguem a versão em que nasceram.'):'Nenhum ativo vinculado.'):'Nada a publicar.';
-  if(!nv) return {P:null,S:[]}; return {P:ma_btn('Publicar v'+nv,()=>pmPub(self,p.id),manPode(c,pf,'plano'),true),S:[]}; }
+  const sgt=nv?manPubSemGatilho(c,p,manWork(p)):[];
+  if(!nv) return {P:null,S:[]}; return {P:ma_btn('Publicar v'+nv,()=>pmPub(self,p.id),manPode(c,pf,'plano')||(sgt.length?('Ativo vinculado ficaria sem gatilho: '+sgt.join(' · ')):''),true),S:[]}; }
 /* ---------- serviços do plano: linha + checklist (com tipo) e peças editáveis na expansão ---------- */
 function pmPcSet(self,sid,patch){ const n=Object.assign({},self.state.pcd||{}); n[sid]=Object.assign({item:'',q:'',err:''},n[sid]||{},patch); self.setState({pcd:n}); }
 function pmTkAdd(self,p,s){ const tk=(self.state.tkd||{})[s.id]||{v:'',tipo:'Serviço'}; const t=String(tk.v||'').trim(); const tipo=tk.tipo||'Serviço'; const set=(o)=>{ const n=Object.assign({},self.state.tkd||{}); n[s.id]=o; self.setState({tkd:n}); };
@@ -878,7 +880,7 @@ function pmPlanoV(self,v,c,p,pf){ const st=self.state; const e=pmEst(p); v.p_nom
   /* primária: Publicar vN (desabilitada com o motivo enquanto faltar serviço, gatilho ou tarefa) · Reativar · nenhuma */
   const nvv=p.versao?(p.rasc?p.rasc.v:null):1; let P=null;
   if(v.ban_i) P={t:'Reativar',fn:reat,dis:pp};
-  else if(nvv){ const sk=w.find(s=>!s.tarefas.length), sg=w.find(s=>!Object.keys(s.gat||{}).length); const why=pp||(!w.length?'Inclua ao menos um serviço':(sg?'“'+sg.nome+'” está sem gatilho':(sk?'“'+sk.nome+'” está sem tarefas':'')));
+  else if(nvv){ const sk=w.find(s=>!s.tarefas.length), sg=w.find(s=>!Object.keys(s.gat||{}).length); const sgt=manPubSemGatilho(c,p,w); const why=pp||(!w.length?'Inclua ao menos um serviço':(sg?'“'+sg.nome+'” está sem gatilho':(sk?'“'+sk.nome+'” está sem tarefas':(sgt.length?'Ativo vinculado ficaria sem gatilho: '+sgt.join(' · '):''))));
     P={t:'Publicar v'+nvv,fn:()=>ma_abrir(self,'pub',p.id),dis:why}; }
   const panAberto=!!(st.pan||st.sv||st.np||st.vl||st.dv);
   v.p_prim=!!P; v.p_pt=P?P.t:''; v.p_pfn=P&&!P.dis?P.fn:(()=>{}); v.p_pdis=!!(P&&P.dis); v.p_pwhy=(P&&P.dis)||''; v.p_pst=(panAberto||(P&&P.dis))?MA_SEC:MA_PRIM;

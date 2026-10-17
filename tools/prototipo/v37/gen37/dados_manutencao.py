@@ -961,18 +961,29 @@ const MAN_NIV={escopo:0,modelo:1,classe:2,grupo:3};
 function manModelosPl(c,p){ const ap=p.aplica; if(ap.t==='modelo') return ap.v.slice(); const m=[];
   ap.v.concat(Object.keys(c.vinc).filter(k=>k.split('|')[0]===p.id&&manVincVale(c.vinc[k])).map(k=>k.split('|')[1])).forEach(id=>{ const a=c.ativos[id]; if(a&&m.indexOf(a.modelo)<0) m.push(a.modelo); }); return m; }
 function manClassesPl(c,p){ const s=[]; c.ordem.forEach(id=>{ const a=c.ativos[id]; if(a&&(manCabe(c,p,a)||manVincVale(c.vinc[p.id+'|'+id]))&&s.indexOf(a.classe)<0) s.push(a.classe); }); return s; }
+/* gatilhos do serviço que o ativo conta (h ou km pelo contador dele; dias sempre) e os que ele não conta */
+function manGatAp(s,a){ const g=s.gat||{}; const fora=['h','km'].filter(u=>g[u]&&a.un!==u); return {fora,ft:fora.map(u=>manN(g[u])+' '+u).join(' e '),vale:['h','km'].filter(u=>g[u]&&a.un===u).concat(g.d?['d']:[])}; }
+/* publicar não pode deixar ativo vinculado sem gatilho aplicável (a máquina pareceria coberta sem vencimento): devolve os motivos */
+function manPubSemGatilho(c,p,ss){ const out=[]; Object.keys(c.vinc).filter(k=>k.split('|')[0]===p.id&&manVincVale(c.vinc[k])).forEach(k=>{ const a=c.ativos[k.split('|')[1]]; if(!a) return;
+    (ss||[]).forEach(s=>{ const x=manGatAp(s,a); if(x.fora.length&&!x.vale.length) out.push(s.nome+' conta só por '+x.ft+' e '+a.nome+' '+manContTxt(a)); }); }); return out; }
 function manContTxt(a){ return a.un==='h'?'conta horas (horímetro)':(a.un==='km'?'conta km (odômetro)':'não tem contador'); }
 function manVincCompat(c,p,a){ const r={erro:'',avisos:[],nivel:''}; if(!p||!a){ r.erro='Plano ou ativo não encontrado.'; return r; }
   if(!manAtvAtivo(a)){ r.erro=a.nome+' está '+String(a.sit||'inativo').toLowerCase()+': não recebe plano.'; return r; }
   if(p.estado==='Inativo'){ r.erro=p.id+' está inativo: reative o plano para vincular.'; return r; }
   if(p.grupo&&a.grupo!==p.grupo){ r.erro=p.id+' é de '+p.grupo+' e '+a.nome+' é de '+a.grupo+': o plano geraria ordem, tarefas e peças erradas.'; return r; }
-  const ss=manWork(p); const dup=manDupServ(c,p.id,a.id,ss.concat(manPub(p)).map(s=>s.nome));
+  /* um serviço por ativo: confere os nomes da versão em vigor e do rascunho (publicar não confere de novo contra os outros planos) */
+  const dup=manDupServ(c,p.id,a.id,manWork(p).concat(manPub(p)).map(s=>s.nome));
   if(dup){ r.erro=manNome(a)+' já faz '+dup.s+' pelo '+dup.pid+': um serviço por ativo evita ordem em dobro.'; return r; }
-  ss.forEach(s=>{ const g=s.gat||{}; const fora=['h','km'].filter(u=>g[u]&&a.un!==u); if(!fora.length) return;
-    const vale=['h','km'].filter(u=>g[u]&&a.un===u).concat(g.d?['d']:[]); const ft=fora.map(u=>manN(g[u])+' '+u).join(' e ');
-    if(!vale.length){ if(!r.erro) r.erro=s.nome+' conta só por '+ft+' e '+a.nome+' '+manContTxt(a)+': nenhum gatilho se aplica.'; return; }
-    r.avisos.push(s.nome+': o gatilho de '+ft+' não vale ('+a.nome+' '+manContTxt(a)+'); vence só a cada '+vale.map(u=>manN(g[u])+' '+manUn(u)).join(' ou ')+'.'); });
+  /* revisão Codex 6229032017: quem rege o vínculo são os serviços PUBLICADOS (manPub, os mesmos da prévia e das linhas); sem versão publicada,
+     os do rascunho v1, que passam a valer ao publicar. O rascunho de um plano publicado só gera aviso: não torna elegível o que a versão em
+     vigor não atende, nem bloqueia o que ela atende. */
+  const pub=!!p.versao; const reg=pub?manPub(p):manWork(p);
+  reg.forEach(s=>{ const x=manGatAp(s,a); if(!x.fora.length) return;
+    if(!x.vale.length){ if(!r.erro) r.erro=s.nome+' conta só por '+x.ft+' e '+a.nome+' '+manContTxt(a)+': nenhum gatilho se aplica'+(pub?' na v'+p.versao+' em vigor':' (rascunho v1: é o que vale ao publicar)')+'.'; return; }
+    r.avisos.push(s.nome+': o gatilho de '+x.ft+' não vale ('+a.nome+' '+manContTxt(a)+'); vence só a cada '+x.vale.map(u=>manN((s.gat||{})[u])+' '+manUn(u)).join(' ou ')+'.'); });
   if(r.erro) return r;
+  if(pub&&p.rasc) manWork(p).forEach(s=>{ const x=manGatAp(s,a); if(!x.fora.length) return;
+    r.avisos.push('Rascunho v'+p.rasc.v+' (ainda não vale): '+s.nome+(x.vale.length?(' perde o gatilho de '+x.ft+' neste ativo'):(' conta só por '+x.ft+'; se for publicado assim, '+a.nome+' fica sem gatilho e a publicação é recusada'))+'.'); });
   const ms=manModelosPl(c,p); r.nivel=manCabe(c,p,a)?'escopo':(ms.indexOf(a.modelo)>=0?'modelo':(manClassesPl(c,p).indexOf(a.classe)>=0?'classe':'grupo'));
   if(ms.length&&ms.indexOf(a.modelo)<0) r.avisos.unshift('Modelo diferente: '+a.modelo+'. Confira tarefas e peças do '+p.id+'.');
   return r; }
@@ -1232,7 +1243,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
 try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
   manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot,
-  manVincular, manDesvincular, manVincCompat, manVincSug, manVincBase, manVincRef, manVincPrev, manAplicaNova, manPlSit, manSemPlano, manPlanosDe }; } catch (e) {}
+  manVincular, manDesvincular, manVincCompat, manPubSemGatilho, manVincSug, manVincBase, manVincRef, manVincPrev, manAplicaNova, manPlSit, manSemPlano, manPlanosDe }; } catch (e) {}
 '''
 
 
