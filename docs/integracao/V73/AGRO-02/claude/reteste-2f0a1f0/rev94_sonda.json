@@ -1,0 +1,1060 @@
+{
+ "1440": {
+  "produtos": [
+   {
+    "nome": "Ciantraniliprole 100 OD",
+    "dmin": 0.5,
+    "dmax": 0.75,
+    "un": "L",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Acaricida D",
+    "dmin": 0.4,
+    "dmax": 0.6,
+    "un": "L",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Inseticida B",
+    "dmin": 1.0,
+    "dmax": 1.0,
+    "un": "kg",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Piriproxifem 100 EC",
+    "dmin": 0.25,
+    "dmax": 0.25,
+    "un": "L",
+    "sit": "Vigente"
+   }
+  ],
+  "abertura": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Escolha um produto registrado."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "pan_x",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "ax_abertura": {
+   "radios": [
+    [
+     "Ciantraniliprole 100 OD",
+     "false"
+    ],
+    [
+     "Acaricida D",
+     "false"
+    ],
+    [
+     "Inseticida B",
+     "false"
+    ],
+    [
+     "Piriproxifem 100 EC",
+     "false"
+    ]
+   ],
+   "grupo": [
+    "Decisão",
+    "Produto registrado"
+   ],
+   "dose": [
+    [
+     "Dose por hectare",
+     null,
+     "false",
+     false
+    ]
+   ],
+   "emitir": [
+    [
+     "Emitir receituário e gerar O.S.",
+     true,
+     "Resolva a trava acima para continuar"
+    ]
+   ]
+  },
+  "escolhe0": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Informe a dose."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Informe a dose Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "Ciantraniliprole 100 OD",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "dose0": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "dose": "0,625",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": false,
+    "title": "Emitir receituário e gerar O.S."
+   },
+   "alerts": [],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Estoque: 0 de 59,38 L · a liberação na O.S. aguarda a compra.",
+    "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "dc_dose",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "troca": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Informe a dose."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Informe a dose Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "Acaricida D",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "reclique": [
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     false,
+     true,
+     false,
+     false
+    ],
+    "dose": "0,5",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "Acaricida D",
+    "sw": 1440,
+    "iw": 1440
+   },
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     false,
+     true,
+     false,
+     false
+    ],
+    "dose": "0,5",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "Acaricida D",
+    "sw": 1440,
+    "iw": 1440
+   }
+  ],
+  "carencia": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "dose": "0,5",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-28",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›"
+   ],
+   "form": true,
+   "ativo": "dc_dose",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "reabre": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Escolha um produto registrado."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "pan_x",
+   "sw": 1440,
+   "iw": 1440
+  },
+  "tab": [
+   [
+    "",
+    "",
+    "Controlar o talhão",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Controle localizado",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Não controlar",
+    "",
+    true
+   ],
+   [
+    "",
+    "Ciantraniliprole 100 OD",
+    "",
+    "dc_prod",
+    true
+   ],
+   [
+    "",
+    "",
+    "Ficha ›",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Ficha ›",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Ficha ›",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Ficha ›",
+    "",
+    true
+   ],
+   [
+    "dc_dose",
+    "Dose por hectare",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "Área em hectares",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "Data da aplicação",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "Data da aplicação",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "Data da aplicação",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "Data da aplicação",
+    "",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Cancelar",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Ver rota e evidências ›",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "Diagnósticos ›",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "VIS-014 · Ácaro-branco",
+    "",
+    true
+   ],
+   [
+    "",
+    "",
+    "VIS-006 · Percevejo",
+    "",
+    true
+   ],
+   [
+    "pan_x",
+    "Fechar",
+    "×",
+    "",
+    true
+   ]
+  ],
+  "emissao": [
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     true,
+     false,
+     false,
+     false
+    ],
+    "dose": "0,625",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 0 de 59,38 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "dc_dose",
+    "sw": 1440,
+    "iw": 1440
+   },
+   {
+    "id": "OS-0440",
+    "etapa": "A liberar",
+    "ins": [
+     {
+      "p": "Ciantraniliprole 100 OD",
+      "dose": 0.625,
+      "un": "L",
+      "tot": 59.38,
+      "emb": ""
+     }
+    ]
+   }
+  ]
+ },
+ "390": {
+  "produtos": [
+   {
+    "nome": "Ciantraniliprole 100 OD",
+    "dmin": 0.5,
+    "dmax": 0.75,
+    "un": "L",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Acaricida D",
+    "dmin": 0.4,
+    "dmax": 0.6,
+    "un": "L",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Inseticida B",
+    "dmin": 1.0,
+    "dmax": 1.0,
+    "un": "kg",
+    "sit": "Vigente"
+   },
+   {
+    "nome": "Piriproxifem 100 EC",
+    "dmin": 0.25,
+    "dmax": 0.25,
+    "un": "L",
+    "sit": "Vigente"
+   }
+  ],
+  "abertura": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Escolha um produto registrado."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "pan_x",
+   "sw": 390,
+   "iw": 390
+  },
+  "ax_abertura": {
+   "radios": [
+    [
+     "Ciantraniliprole 100 OD",
+     "false"
+    ],
+    [
+     "Acaricida D",
+     "false"
+    ],
+    [
+     "Inseticida B",
+     "false"
+    ],
+    [
+     "Piriproxifem 100 EC",
+     "false"
+    ]
+   ],
+   "grupo": [
+    "Decisão",
+    "Produto registrado"
+   ],
+   "dose": [
+    [
+     "Dose por hectare",
+     null,
+     "false",
+     false
+    ]
+   ],
+   "emitir": [
+    [
+     "Emitir receituário e gerar O.S.",
+     true,
+     "Resolva a trava acima para continuar"
+    ]
+   ]
+  },
+  "escolhe0": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Informe a dose."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Informe a dose Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "Ciantraniliprole 100 OD",
+   "sw": 390,
+   "iw": 390
+  },
+  "dose0": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    true,
+    false,
+    false,
+    false
+   ],
+   "dose": "0,625",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": false,
+    "title": "Emitir receituário e gerar O.S."
+   },
+   "alerts": [],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Estoque: 0 de 59,38 L · a liberação na O.S. aguarda a compra.",
+    "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "dc_dose",
+   "sw": 390,
+   "iw": 390
+  },
+  "troca": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Informe a dose."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Informe a dose Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "BODY",
+   "sw": 390,
+   "iw": 390
+  },
+  "reclique": [
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     false,
+     true,
+     false,
+     false
+    ],
+    "dose": "0,5",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "Acaricida D",
+    "sw": 390,
+    "iw": 390
+   },
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     false,
+     true,
+     false,
+     false
+    ],
+    "dose": "0,5",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 14 dias: colheita liberada a partir de 08/10 · prevista 10/10 · aplicar até 26/09."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "Acaricida D",
+    "sw": 390,
+    "iw": 390
+   }
+  ],
+  "carencia": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "dose": "0,5",
+   "lab": "Dose (L/ha)",
+   "area": "95",
+   "data": "2026-09-28",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+    "Estoque: 10 de 47,5 L · a liberação na O.S. aguarda a compra."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Carência × colheita Ficha ›"
+   ],
+   "form": true,
+   "ativo": "dc_dose",
+   "sw": 390,
+   "iw": 390
+  },
+  "reabre": {
+   "n": 4,
+   "nomes": [
+    "Ciantraniliprole 100 OD",
+    "Acaricida D",
+    "Inseticida B",
+    "Piriproxifem 100 EC"
+   ],
+   "checked": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "dose": "",
+   "lab": "Dose (/ha)",
+   "area": "95",
+   "data": "2026-09-24",
+   "emitir": {
+    "dis": true,
+    "title": "Resolva a trava acima para continuar"
+   },
+   "alerts": [
+    "Escolha um produto registrado."
+   ],
+   "notes": [
+    "Resultado de 18/09 sem decisão há 5 dias.",
+    "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02."
+   ],
+   "rows": [
+    "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+    "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+    "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+   ],
+   "form": true,
+   "ativo": "pan_x",
+   "sw": 390,
+   "iw": 390
+  },
+  "emissao": [
+   {
+    "n": 4,
+    "nomes": [
+     "Ciantraniliprole 100 OD",
+     "Acaricida D",
+     "Inseticida B",
+     "Piriproxifem 100 EC"
+    ],
+    "checked": [
+     true,
+     false,
+     false,
+     false
+    ],
+    "dose": "0,625",
+    "lab": "Dose (L/ha)",
+    "area": "95",
+    "data": "2026-09-24",
+    "emitir": {
+     "dis": false,
+     "title": "Emitir receituário e gerar O.S."
+    },
+    "alerts": [],
+    "notes": [
+     "Resultado de 18/09 sem decisão há 5 dias.",
+     "LAU-2048 (folha) inconsistente: não decide o controle de pragas; segue no AG-02.",
+     "Estoque: 0 de 59,38 L · a liberação na O.S. aguarda a compra.",
+     "Carência de 7 dias: colheita liberada a partir de 01/10 · prevista 10/10 · aplicar até 03/10."
+    ],
+    "rows": [
+     "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Acaricida D IRAC 23 · 0,4–0,6 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›",
+     "Inseticida B IRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo Rotação · Sem estoque Ficha ›",
+     "Piriproxifem 100 EC IRAC 7C · 0,25 L/ha · carência 14 dias · máx. 2 por ciclo Sem estoque Ficha ›"
+    ],
+    "form": true,
+    "ativo": "dc_dose",
+    "sw": 390,
+    "iw": 390
+   },
+   {
+    "id": "OS-0440",
+    "etapa": "A liberar",
+    "ins": [
+     {
+      "p": "Ciantraniliprole 100 OD",
+      "dose": 0.625,
+      "un": "L",
+      "tot": 59.38,
+      "emb": ""
+     }
+    ]
+   }
+  ],
+  "layout": {
+   "alturas_label": [
+    134,
+    118,
+    264,
+    118
+   ],
+   "scroll": [
+    390,
+    390,
+    390,
+    390
+   ]
+  }
+ }
+}

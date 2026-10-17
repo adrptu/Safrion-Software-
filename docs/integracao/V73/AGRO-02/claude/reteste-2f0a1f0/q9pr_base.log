@@ -1,0 +1,3 @@
+condição do chk 9: len(ar) >= 8 and na >= 1 and all(x['vazio'] for x in ar) and not any(x['trava'] for x in ar)
+FALHOU 9 do quantidade_test: 10 vistorias; abre vazio em 2; 5 travariam com 1 casa; travas de área no formulário: 0
+rc=1

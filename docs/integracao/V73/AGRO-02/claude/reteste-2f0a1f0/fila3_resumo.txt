@@ -1,0 +1,4 @@
+04:19:27 rc=0 51s sonda :: RESULTADO 32/32
+04:22:16 rc=0 63s mip_fluxo :: RESULTADO 15/15
+04:24:26 rc=0 85s mip_correcoes :: RESULTADO 14/14
+FIM

@@ -1,0 +1,14 @@
+git fetch origin claude/v44-v69-mapa → 6631d58221a9b82f1fe3477a881ea7a07abc8861
+git merge-tree --write-tree --name-only 2f0a1f0 6631d58
+419a7ece29c1e84797beb15260ee9158ec61bd59
+rc=0
+merge-base: d995dedf1f94f6f0819b3c873f74fabe2439b57f
+arquivos do PR alterados entre d995ded e 6631d58:
+(vazio = nenhum)
+
+git diff --check b44ea32 2f0a1f0:
+tools/prototipo/v37/gen37/areas/agronomia.py:1819: new blank line at EOF.
+tools/prototipo/v37/gen37/mip_correcoes_test.py:134: new blank line at EOF.
+tools/prototipo/v37/gen37/mip_fluxo_test.py:114: new blank line at EOF.
+tools/prototipo/v37/gen37/quantidade_test.py:243: new blank line at EOF.
+rc=2

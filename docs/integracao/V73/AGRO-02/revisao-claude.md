@@ -6,7 +6,7 @@ Requisitos do PRD e fora do escopo: AGENTS §3.3 (lote, dose, quantidade e autor
 Autor / revisor / integrador: Codex / Claude / Claude (DEC-0910-02; regime leve do protótipo, AGENTS §3.5)
 Base (commit ou hashes) / arquivos sob responsabilidade: PR HEAD b44ea3294a8384c0828f04fbf110c5d5b60104c5 sobre d995ded · composição local 457ef14 (não enviada) · esta pasta e claude/
 Aceite e comando de verificação: aceite do contrato PR #47 6228584304; comandos e brutos nas seções "Resultados" e claude/brutos/
-Estado / impedimento / próximo passo: mérito favorável; não integrar b44ea32 como está (A1 e A2). Novo HEAD com o patch dos testes e a linha do selo; depois, rodar de novo o que está em "Para o próximo HEAD"
+Estado / impedimento / próximo passo: b44ea32 não integrável (A1 e A2); no reteste de 2f0a1f0 (seção no fim) A1 e A2 estão corrigidos: integrar 2f0a1f0 na composição sobre 6631d58
 ```
 
 Revisor: Claude, 17/10/2026. Sem push e sem comentário no GitHub nesta etapa. Dados só sintéticos.
@@ -141,3 +141,36 @@ Os testes do A1 estão fora da lista de arquivos do contrato. Para isso proponho
 - `rev94_node.py`: A2, B e C verdes. A é a verificação 9 antiga e falha por desenho depois do AGRO-02; quem vale é a A2;
 - `mip_fluxo_test.py` e `mip_correcoes_test.py`;
 - `rev94_sonda.py`, com a meta de 32/32, nas duas larguras.
+
+## Reteste 2f0a1f0
+
+17/10/2026, executado. HEAD novo do PR: `2f0a1f06056187f20a1e8b45fbfca1dfdac70f0f`, filho de b44ea32 (comentário 6229529353 do Codex). O Codex não rodou navegador.
+
+- **Delta b44ea32 → 2f0a1f0.**
+  - `agronomia.py:648` traz o selo `(sel&&!(num(d.dose)>0))?['Informe a dose','gray']:(…)`, igual à correção proposta no A2.
+  - Os três testes recebem o `rev94_testes_obsoletos.patch` linha por linha.
+  - Os quatro arquivos ganharam uma linha em branco no fim (`git diff --check` aponta os quatro). É cosmético, a CI não confere `diff --check`, e não bloqueia.
+- **Junção.** `git merge-tree --write-tree 2f0a1f0 6631d58` (`origin/claude/v44-v69-mapa`): **sem conflito**, árvore `419a7ec`, base comum d995ded. Nenhum arquivo do PR muda entre d995ded e 6631d58.
+- **Render.** Rodado em 2f0a1f0, sem erro (148 artboards, 156 páginas). Navegador com o mesmo comando, um teste por vez atrás do portão (`claude/rev94_fila3.sh`).
+
+| Teste (executado em 2f0a1f0) | Resultado | Leitura |
+|---|---|---|
+| `node agro02_selecao_unit.js` | **7/7** | teste do Codex |
+| `claude/rev94_sonda.py` (1440 mouse e teclado; 390 toque) | **32/32** (antes 28/32) | S2a e S7a passam: o selo do escolhido sem dose ou com 0 é "Informe a dose" cinza (`claude/reteste-2f0a1f0/rev94_1440_2_sem_dose.png`) |
+| `claude/rev94_selo.py` | **5/5** | as 4 doses inválidas ('', '0', '0,', 'abc') dão "Informe a dose" com o cinza do `G2C`, e a dose válida mantém "Sem estoque". Sem escolha, os selos de prévia são os mesmos do b44ea32. Isso equivale às 6 verificações da correção em memória, que já não se aplica porque o trecho mudou |
+| `mip_fluxo_test.py` | **15/15** | A1 |
+| `mip_correcoes_test.py` (a + b) | **14/14** | A1 |
+| Verificação 9 do `quantidade_test.py` **do PR**, isolada (`claude/rev94_q9pr.py`) | **OK** em 2f0a1f0: abre vazio em 10/10, 5 travariam, 0 travas de área. **FALHA** com o produto da base d995ded: abre vazio em 2/10 | A1, com contraprova |
+| `quantidade_test.py` inteiro | aborta em `irrTerminar`, "Antes do fim previsto…" | O1: igual à base, não é do PR |
+| `claude/rev94_node.py` | 10/11: A2, B (7/7) e C (2/2) passam | A é a verificação 9 antiga e falha por desenho |
+| `mip_unit_test.py` | 34/34 | |
+
+Brutos em `claude/reteste-2f0a1f0/`.
+
+### Veredito do reteste
+
+**Integrar 2f0a1f0.** A1 e A2 estão corrigidos e verificados no navegador e sem navegador, com contraprova na base. A junção com 6631d58 não tem conflito.
+
+Ficam abertos, sem bloquear:
+- A3 a A5 (S4) e a linha em branco no fim dos quatro arquivos;
+- O1 a O4, que já existiam.

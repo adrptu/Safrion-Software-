@@ -1,0 +1,9 @@
+OK    HEAD: produto escolhido com dose '' não mostra "Conferido" · {"dose": "", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    HEAD: produto escolhido com dose '0' não mostra "Conferido" · {"dose": "0", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    HEAD: produto escolhido com dose '0,' não mostra "Conferido" · {"dose": "0,", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    HEAD: produto escolhido com dose 'abc' não mostra "Conferido" · {"dose": "abc", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    HEAD: dose válida 0,625 mantém o selo da conferência · {"dose": "0,625", "selo": "Sem estoque", "cor": "background:#FFF3D6", "bloq": false, "tr": []}
+  sem escolha: ['Ciantraniliprole 100 OD: Sem estoque', 'Acaricida D: Sem estoque', 'Inseticida B: Rotação · Sem estoque', 'Piriproxifem 100 EC: Sem estoque']
+trecho original do selo ausente: a correção em memória não se aplica
+RESULTADO 5/5
+rc=0
