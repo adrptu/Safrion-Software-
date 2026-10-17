@@ -1,0 +1,23 @@
+FALHA 1440 S2526 abre · ""
+OK    1440 S2526 R1 alinhamento: 5 trilhas = 5 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANTIO; a última coluna vai até a borda da tabela
+      1440 S2526 R1 larguras: TALHÃO OU PARCELA 284.1, CULTURA 245.7, PLANO AGRONÔMICO 284.1, ÁREA 224.1, PLANTIO 242
+OK    1440 S2526 R4 Cartões: 0 ⋯ = 0 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    1440 S2526 R4 Cartões sem trilha de ação reservada
+OK    1440 S2526 R2 com ação alinhamento: 5 trilhas = 5 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna · {"ult": {"t": "PLANTIO", "nome": "PLANTIO", "w": 242}, "mais": []}
+OK    1440 S2526 R2 busca "T2" alinhamento: 5 trilhas = 5 cabeçalhos; 3 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANTIO até a borda · {"cab": [{"t": "ÁREA", "nome": "ÁREA", "w": 224.1}, {"t": "PLANTIO", "nome": "PLANTIO", "w": 242}], "borda": 0, "tracks": 5}
+OK    1440 S2526 R2 busca "zzz" (nada) alinhamento: 5 trilhas = 5 cabeçalhos; 1 linhas (total: 1) com spans e bordas do cabeçalho; aviso "Nenhuma linha corresponde"
+OK    1440 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista
+OK    1440 S2526 R2 busca limpa alinhamento: 5 trilhas = 5 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+FALHA 1440 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1 · {"ult": {"t": "PLANTIO", "nome": "PLANTIO", "w": 242}, "mais": 0}
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev93/docs/integracao/V73/EX47/claude/rev93_reteste_navegador.py", line 110, in <module>
+    J("document.querySelector('%s').focus()" % sel); c.tecla('ArrowDown', 'ArrowDown', 40); time.sleep(.2)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/drill/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'focus')
+    at <anonymous>:1:88

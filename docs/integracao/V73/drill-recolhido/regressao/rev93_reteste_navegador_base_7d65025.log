@@ -1,0 +1,48 @@
+OK    1440 S2526 abre
+OK    1440 S2526 R1 alinhamento: 5 trilhas = 5 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANTIO; a última coluna vai até a borda da tabela
+      1440 S2526 R1 larguras: TALHÃO OU PARCELA 307, CULTURA 240, PLANO AGRONÔMICO 278.4, ÁREA 218.4, PLANTIO 236.3
+OK    1440 S2526 R4 Cartões: 0 ⋯ = 0 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    1440 S2526 R4 Cartões sem trilha de ação reservada
+OK    1440 S2526 R2 com ação alinhamento: 6 trilhas = 6 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna
+OK    1440 S2526 R2 busca "T2" alinhamento: 5 trilhas = 5 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANTIO até a borda
+OK    1440 S2526 R2 busca "zzz" (nada) alinhamento: 5 trilhas = 5 cabeçalhos; 1 linhas (total: 1) com spans e bordas do cabeçalho; aviso "Nenhuma linha corresponde"
+OK    1440 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista
+OK    1440 S2526 R2 busca limpa alinhamento: 6 trilhas = 6 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1
+OK    1440 S2526 R2 teclado: ↓ abre e foca "Reaplicar"; Esc fecha e devolve o foco; Enter executa (trava "Safra encerrada") e devolve o foco
+OK    1440 S2526 R4 com ação Cartões: 1 ⋯ = 1 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    1440 S2627 abre
+OK    1440 S2627 R3 alinhamento: 6 trilhas = 6 cabeçalhos; 15 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2627 R3 ⋯ (11) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome
+OK    1440 S2627 R3 busca "T1" alinhamento: 6 trilhas = 6 cabeçalhos; 5 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão)
+OK    1440 S2627 R3 filtro rápido "Planejado 7" alinhamento: 6 trilhas = 6 cabeçalhos; 11 linhas (total: 1) com spans e bordas do cabeçalho
+OK    1440 S2627 R4 Cartões: 11 ⋯ = 11 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2526 abre
+OK    390 S2526 R1 alinhamento: 3 trilhas = 3 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2526 R1 sem coluna vazia: todos os cabeçalhos com nome, nenhum de 0 px; último = PLANO AGRONÔMICO; a última coluna vai até a borda da tabela
+      390 S2526 R1 larguras: TALHÃO OU PARCELA 120, CULTURA 100.5, PLANO AGRONÔMICO 139
+OK    390 S2526 R4 Cartões: 0 ⋯ = 0 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2526 R4 Cartões sem trilha de ação reservada
+OK    390 S2526 R2 com ação alinhamento: 4 trilhas = 4 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2526 R2 a coluna aparece com o cabeçalho "Ações" e o ⋯ de T1 (só Reaplicar) na última coluna
+OK    390 S2526 R2 busca "T2" alinhamento: 3 trilhas = 3 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2526 R2 busca "T2" (sem linha com ação): a coluna sai; último cabeçalho PLANO AGRONÔMICO até a borda
+OK    390 S2526 R2 busca "zzz" (nada) alinhamento: 3 trilhas = 3 cabeçalhos; 1 linhas (total: 1) com spans e bordas do cabeçalho; aviso "Nenhuma linha corresponde"
+OK    390 S2526 R2 busca sem resultado: cabeçalho e total sem coluna de ações, aviso à vista
+OK    390 S2526 R2 busca limpa alinhamento: 4 trilhas = 4 cabeçalhos; 6 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2526 R2 busca limpa: a coluna "Ações" volta com o ⋯ de T1
+OK    390 S2526 R4 com ação Cartões: 1 ⋯ = 1 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    390 S2627 abre
+OK    390 S2627 R3 alinhamento: 4 trilhas = 4 cabeçalhos; 9 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2627 R3 ⋯ (8) na última coluna, Excluir só nos cultivos, cabeçalho "Ações", nenhum cabeçalho sem nome
+OK    390 S2627 R3 busca "T1" alinhamento: 4 trilhas = 4 cabeçalhos; 2 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2627 R3 busca "T1": a coluna de ações continua (grade com exclusão)
+OK    390 S2627 R3 filtro rápido "Planejado 7" alinhamento: 4 trilhas = 4 cabeçalhos; 8 linhas (total: 1) com spans e bordas do cabeçalho
+OK    390 S2627 R4 Cartões: 8 ⋯ = 8 da Tabela; sem botão sem nome; sem rolagem lateral
+OK    R5 sem erro de JS
+
+44 OK, 0 falhas

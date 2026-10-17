@@ -94,7 +94,7 @@ def build():
         # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},menu_linha=True,busca_extra=FFZ,
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,menu_linha=True,busca_extra=FFZ,
                sico=dict(k='sit',cores=['red','yellow']),
                tools=f'<sc-if value="{H("us_"+k+"_vis")}" hint-placeholder-val="{F()}">'+UNP.sel_html('us_'+k)+'</sc-if>')   # UNID-PROD: um seletor por tabela (D-U01), só com a Meta à vista (SAF-TAB)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
@@ -187,8 +187,7 @@ def build():
     # no formulário, padrão adotado da PEND-SAF-01) e a g_op abre a folha certa (safra.js · abrirRend)
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rrows=rend_rows(k)
-        x0={r['id']:True for r in rrows}; x0.update({a['id']:True for r in rrows for a in r['kids'] if a.get('grp')})
-        grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
+        grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True)
     # ---------- etapa 3 · Dimensione operações e recursos (ESPECIFICACAO etapa-unica-3-4-5 §2-§3) ----------
     # g_op: 9 colunas, uma variável por coluna e a unidade na célula (ha-op na operação, ha nos demais níveis); a árvore é a lista e o
     # formulário Rendimento é o sub-detalhe. Situação: Com pendência · Janela não informada · Cabe na janela (só chips, sem números).
@@ -280,7 +279,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
     plt_lnk=f'<sc-if value="{H("plt_tem")}" hint-placeholder-val="{F()}"><button type="button" id="plt-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("plt_abrir")}" style="min-height: 28px; white-space: nowrap;">Planejar talhões livres…</button></sc-if>'   # SAF-FAZ-3 (C)
     from areas import saf_lote as SLT   # EDL-01 (16/10/2026): "Editar talhões…" da fazenda numa grade só (safra_lote.js)
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+SLT.link()+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'

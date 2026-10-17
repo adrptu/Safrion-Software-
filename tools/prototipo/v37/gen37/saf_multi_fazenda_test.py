@@ -3,7 +3,7 @@
 "em planejar safra ainda não aparece opção de selecionar fazendas e talhões de mais de 1 fazenda por vez… bem produtiva, rápida, prática e
 fácil e visualmente intuitiva e organizada" e "pode ser que algum talhão o produtor não deseje plantar nada, então isso tem que ser permitido".
 A faixa "Trabalhando em": chips ✓ e "+ Fazenda" (lista do DS); incluir; tirar com vínculo recusado no lugar; tirar vazia; etapa 1.
-B tabela única agrupada por fazenda; filtro rápido por fazenda ao lado da busca; Situação atravessa o grupo; uma fazenda sem grupo; ação
+B tabela única agrupada por fazenda (também com uma só, 17/10; faixa recolhida, TAB-12); filtro rápido por fazenda ao lado da busca; Situação atravessa o grupo; ação
   numa linha de outra fazenda abre a sub-safra dela.
 C "Planejar talhões livres": 3 talhões de 2 fazendas, um cultivo cada, uma vez só (duplo clique e reabrir não duplicam); data fora da
   janela e meta vazia recusam sem gravar nada.
@@ -100,11 +100,15 @@ try:
     c.tecla('Escape', 'Escape', 27); espera("!document.getElementById('sfz-pop')")
     chk('A4 Esc fecha a lista e devolve o foco ao "+ Fazenda"', J("!document.getElementById('sfz-pop')&&document.activeElement&&document.activeElement.id==='sfz-add'"))
     # ---------- B · tabela única agrupada por fazenda ----------
+    # TAB-12 (17/10/2026): a faixa da fazenda nasce recolhida; a Santa Rita está aberta pelo "Expandir tudo" do A1 e a Boa Vista, recém-incluída,
+    # chega recolhida: a pessoa a abre pela seta (antes o grupo novo nascia aberto)
+    SBV = "document.querySelector('[role=row][data-rid=\"fzg_%s\"] button.g2car[aria-expanded]')" % BV
+    bv0 = J(f"(()=>{{const b={SBV}; return b?b.getAttribute('aria-expanded'):null;}})()"); J(f"(()=>{{const b={SBV}; if(b&&b.getAttribute('aria-expanded')==='false') b.click();}})()"); time.sleep(.5)
     g = grupos(); vis = visiveis()
-    chk('B1 a tabela mostra os talhões das duas fazendas juntos, um grupo por fazenda (aberto, mesmo com grupos já abertos antes) com área e "x de y talhões planejados"',
-        [x['id'] for x in g] == ['fzg_S27SF', 'fzg_' + BV] and g[0]['t'].startswith('Santa Rita 553 ha · 3 de 8 talhões planejados')
+    chk('B1 a tabela mostra os talhões das duas fazendas juntos, um grupo por fazenda com área e "x de y talhões planejados"; a fazenda incluída chega recolhida e a seta a abre',
+        bv0 == 'false' and [x['id'] for x in g] == ['fzg_S27SF', 'fzg_' + BV] and g[0]['t'].startswith('Santa Rita 553 ha · 3 de 8 talhões planejados')
         and g[1]['t'].startswith('Boa Vista 0 ha · 0 de 1 talhão planejado') and 'tal_B1' in vis and 'tal_T3' in vis
-        and J("(document.querySelector('[role=table] .g2tot')||{}).innerText||''").replace('\n', ' ').count('553 ha') == 1, [g, vis])
+        and J("(document.querySelector('[role=table] .g2tot')||{}).innerText||''").replace('\n', ' ').count('553 ha') == 1, [bv0, g, vis])
     fz = ffz(); dep = J("(()=>{const s=[...document.querySelectorAll('input[type=search]')].find(x=>x.offsetParent); const f=[...document.querySelectorAll('[role=group][aria-label=Fazenda]')].find(x=>x.offsetParent); const q=[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"]')].find(x=>x.offsetParent); return !!(s&&f&&q&&(s.compareDocumentPosition(f)&Node.DOCUMENT_POSITION_FOLLOWING)&&(f.compareDocumentPosition(q)&Node.DOCUMENT_POSITION_FOLLOWING));})()")
     ffz_clica('Boa Vista'); espera("[...document.querySelectorAll('[role=table] [role=row].g2fgrp')].filter(r=>r.offsetParent).length===1")
     g2 = grupos(); v2 = visiveis(); ffz_clica('Todas'); espera("[...document.querySelectorAll('[role=table] [role=row].g2fgrp')].filter(r=>r.offsetParent).length===2")
@@ -178,10 +182,12 @@ try:
     chk('E1 etapas 3 e 4 seguem por fazenda (Santa Rita · Boa Vista) e "Enviar as 2 fazendas para cotação" gera uma solicitação por fazenda, com itens',
         f3 == ['Santa Rita', 'Boa Vista'] and env == 'Enviar as 2 fazendas para cotação' and 'Santa Rita: SOL-' in t and 'Boa Vista: SOL-' in t
         and sorted(x[0] for x in sols) == sorted(['S27SF', BV]) and all(x[1] > 0 for x in sols), [f3, env, t, sols])
-    # ---------- B5 · uma fazenda só: sem nível de grupo; etapa 1 com safra escolhida mostra os chips ----------
+    # ---------- B5 · uma fazenda só: agrupa por fazenda também (17/10), recolhida; etapa 1 com safra escolhida mostra os chips ----------
+    # proprietário, 17/10/2026: "quando so tem 1 fazenda nao agrupa por fazenda, só quando tem 2 ou mais. corrija." (antes: sem o nível de grupo)
     abre('#saf=S2627&passo=cultivos')
-    chk('B5 safra de uma fazenda (S2627): sem o nível de grupo e sem o filtro de fazenda; chip ✓ Santa Rita na faixa',
-        not grupos() and not ffz() and chips() == ['✓ Santa Rita'] and 'tal_T1' not in visiveis() and len(visiveis()) == 8, [grupos(), ffz(), chips(), visiveis()])
+    g5 = grupos(); v5a = visiveis(); J("(()=>{const b=document.querySelector('[role=row][data-rid=\"fzg_S2627\"] button.g2car[aria-expanded=false]'); if(b) b.click();})()"); time.sleep(.5); v5 = visiveis()
+    chk('B5 safra de uma fazenda (S2627): uma faixa "Santa Rita" recolhida, sem o filtro de fazenda; chip ✓ Santa Rita na faixa; a seta abre os 8 talhões',
+        [x['id'] for x in g5] == ['fzg_S2627'] and not v5a and not ffz() and chips() == ['✓ Santa Rita'] and 'tal_T1' not in v5 and len(v5) == 8, [g5, v5a, ffz(), chips(), v5])
     clica("[...document.querySelectorAll('[data-acoes] button')].find(b=>b.innerText.trim()==='‹ Trocar safra')"); espera("window.__safSelf.state.step===1")
     chk('A7 na etapa 1 com a safra escolhida, a faixa continua com os chips e "+ Fazenda"', chips() == ['✓ Santa Rita'] and J("!!document.getElementById('sfz-add')"), [chips(), faixa_txt()])
     # ---------- F · 390 px ----------

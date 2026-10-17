@@ -85,7 +85,10 @@ try:
             if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button.g2car[aria-expanded=false]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
             time.sleep(.35)
     # etapa 2: cultivos
-    c.goto(URL.replace('passo=operacoes', 'passo=cultivos'), 1.6); TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
+    c.goto(URL.replace('passo=operacoes', 'passo=cultivos'), 1.6)
+    # TAB-12 (17/10/2026): a tabela agrupa por fazenda também com uma só e a faixa nasce recolhida; a pessoa abre a faixa para ver os talhões
+    J("[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].filter(b=>b.offsetParent).forEach(b=>b.click())"); time.sleep(.5)
+    TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
     # decisão do proprietário (05/10/2026): a unidade fica junto do valor ("45 t/ha/ano", "62.500 kg"); filtrar unidade não gera valor
     chk('2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade)',
         all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA', 'ÁREA LIVRE', 'META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS', 'SITUAÇÃO', 'LIVRE A PARTIR DE', 'OCUPA ATÉ', 'FIM POR', 'SAFRA')) and 'UNIDADE DA META' not in h2 and not any('PLANO E AJUSTES' == x for x in h2), h2)

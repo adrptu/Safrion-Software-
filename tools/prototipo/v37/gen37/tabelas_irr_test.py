@@ -54,6 +54,7 @@ def tf03(nome, g, esperado, chips=('Situação', 'Etapa', 'Estado'), extra=()):
             ch = [x for x in g.chips(col) if x is not None]; chk(f'{nome}: {col} em chip ({len(ch)})', ch and all(ch), g.chips(col)[:6])
     return d
 def por_grupo(g, col):
+    g.abre_tudo()   # TAB-12 (17/10/2026): a árvore nasce recolhida; a pessoa abre tudo antes de comparar os grupos
     rows = J(f"[...([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[{g.i}].querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[!!r.querySelector('button.g2car[aria-expanded]'),[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim())])") or []
     k = g.labels().index(col); out = []; cur = None
     for grp, cells in rows:

@@ -24,7 +24,12 @@ def espera(cond, lim=8.0):
     # espera a condição observável (AGENTS §3.6), com limite explícito: sob carga, 1,2 s fixos não bastavam para a tela renderizar
     t0 = time.time()
     while time.time() - t0 < lim:
-        if J("(()=>{try{return !!(%s)}catch(e){return false}})()" % cond): return True
+        # o clique navega: avaliar durante a troca de página dá "Inspected target navigated or closed" (falha da ferramenta, três vezes em 17/10
+        # sob carga). Conta como "ainda não" e espera de novo; o limite e as asserções não mudam
+        try:
+            if J("(()=>{try{return !!(%s)}catch(e){return false}})()" % cond): return True
+        except RuntimeError as e:
+            if 'navigated or closed' not in str(e): raise
         time.sleep(.15)
     return False
 def blocos(): return [b for b in [FICHA] + BLOCOS if J("[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)" % json.dumps(b))]

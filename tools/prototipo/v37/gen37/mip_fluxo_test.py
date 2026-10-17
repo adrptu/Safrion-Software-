@@ -50,7 +50,8 @@ try:
     chk('3 AG-01.dc.html#VIS-053 abre o painel da meleira (Pivô 9) e troca a fazenda para Lagoa Grande · próximo passo "Confirmar foco"',
         a.startswith('VIS-053 · Meleira (virose) · Pivô 9') and 'Confirmar foco' in a and J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")=='Lagoa Grande', a[:300])
     # 4 · mesma situação no Mapa e no AG-01
-    mapa('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('P1:'))"); pr=prim('P1')
+    # MUX-F1 (17/10/2026): rótulo da camada em data-rotulo (o aria-label agora é o nome completo). Oráculo obsoleto na forma de achar; a asserção não muda
+    mapa('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('P1:'))"); pr=prim('P1')
     chk('4 Mapa P1: "Mosca-branca · acima do NC" (+2: VIS-014 em coleta e VIS-006 atrasada, iguais ao AG-01) · primário "Decidir controle" abre a decisão da VIS-013',
         lab=='P1: Mosca-branca · acima do NC · +2' and pr==['Decidir controle','AG-01.dc.html#VIS-013:decidir'], [lab,pr])
     # 5 · no mapa o verbo faz o que diz: "Seguir monitorando" (VIS-008 perto do NC) registra e programa a revisita, que persiste e chega ao AG-01
@@ -82,7 +83,7 @@ try:
     chk('9 OS.dc.html#OS-0440: A liberar com Ciantraniliprole 100 OD (sem lote: a trava de estoque é a da liberação) e origem VIS-013 · RA-0142',
         a.startswith('OS-0440') and 'A liberar' in a and 'Ciantraniliprole 100 OD' in a and 'VIS-013' in org and 'RA-0142' in org, [a[:300],org])
     # 10 · o mapa mostra o controle emitido
-    mapa('P1'); pr=prim('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('P1:'))")
+    mapa('P1'); pr=prim('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('P1:'))")
     chk('10 Mapa P1 depois de emitir: "Mosca-branca · em controle" · primário "Abrir OS-0440"', pr==['Abrir OS-0440','OS.dc.html#OS-0440'] and 'em controle' in (lab or ''), [pr,lab])
     # 11 · abaixo do NC: seguir monitorando programa a próxima no ritmo semanal
     ir_hash('AG-01.dc.html#VIS-015'); clk('Seguir monitorando','aside'); t1=T()

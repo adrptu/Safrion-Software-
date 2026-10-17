@@ -25,9 +25,11 @@ try:
     def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.35); return r
     def faz(v): J(f"({SETV})('select[aria-label=\"Filtrar por fazenda\"]',{json.dumps(v)})"); time.sleep(.4)
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label'),e.getAttribute('fill')]:[null,null];}})()")
-    labs=lambda: J(f"{SV}.map(x=>x.getAttribute('aria-label')||'')") or []
-    tap=lambda t: (J(f"{SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')).dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'),e.getAttribute('fill')]:[null,null];}})()")
+    labs=lambda: J(f"{SV}.map(x=>x.getAttribute('data-talhao')+': '+x.getAttribute('data-rotulo'))") or []
+    tap=lambda t: (J(f"{SV}.find(x=>x.getAttribute('data-talhao')==='{t}').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
     pan=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''
     href=lambda t,txt: J(f"(()=>{{const a=[...document.querySelectorAll('aside[aria-label^=\"{t}\"] a')].filter(a=>a.innerText.trim()==={json.dumps(txt)}); return a.map(x=>x.getAttribute('href'));}})()")
     # "Abrir ordem" de cada ordem do painel: [id da ordem do cartão, destino]

@@ -163,6 +163,8 @@ try:
     chk('TF03 Próxima ação separada do prazo ("entrega" | "até 15/10")', ac.get('OS-0425') == 'entrega' and pr.get('OS-0425') == 'até 15/10', (ac.get('OS-0425'), pr.get('OS-0425')))
     # ---------------- TF06 ----------------
     aba('Agrupada'); time.sleep(.2)   # VISOES-2: agrupar por talhão é a Tabela + "Agrupar por" › Talhão
+    # TAB-12 (17/10/2026): os grupos nascem recolhidos (antes, abertos); a pessoa usa "Expandir tudo" para ver as O.S. de cada talhão
+    J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.4)
     # grupo = linha grp@ (nome sem a seta e sem o "›" de descer); O.S. = código visível da linha filha
     GRP = """(()=>{ const out={}; let cur=null; [...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).forEach(r=>{ const t=r.querySelector('[role=cell]').innerText.replace(/[▾▸]/g,'').replace(/\\s*›\\s*$/,'').trim();
       if(/^grp@/.test(r.getAttribute('data-rid')||'')){ cur=t; out[cur]=[]; } else { const m=t.match(/\\bO[SB]-\\d+/); (out[cur]=out[cur]||[]).push(m?m[0]:t); } }); return out; })()"""

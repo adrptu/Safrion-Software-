@@ -423,23 +423,24 @@ function ocMotivo(L,info){ const by=info.byO, ctx=info.ctx;
 function talBase(self,S){ const ctx=ocCtxSaf(); const todos=ocTodos(self); const occ=ocOcupacoes(ctx,S,todos); const byO={}, byCiclo={}; occ.forEach(o=>{ byO[o.id]=o; byCiclo[o.ciclo]=o; });
   return {ctx,S,todos,occ,byO,byCiclo,adj:adjOf(self)}; }
 function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); const S=safList(self); if(!sp||!S[saf]){ self.__ocG=null; return null; }
-  const subs=sgSubs(self,saf); const B=talBase(self,S);
-  if(subs.length<=1){ const m=talMontar(self,saf,v,B); G2DISP[sp.id]=m.rows; if(m.x0) sp.x0=m.x0; self.__ocG=null; return m.info; }
-  const ffz=subs.some(x=>x.faz===self.state.ffz)?self.state.ffz:''; const grupos=[], x0={}, G={}; let info=null;
+  // 17/10 (proprietário: "quando so tem 1 fazenda nao agrupa por fazenda, só quando tem 2 ou mais. corrija."): a tabela agrupa por fazenda
+  // sempre, também com uma fazenda só; a faixa nasce recolhida, como todo drill down (TAB-12), e mostra a área e quantos talhões estão
+  // planejados; o filtro rápido por fazenda continua só com duas ou mais (ffzVals)
+  const subs0=sgSubs(self,saf); const subs=subs0.length?subs0:[{id:saf,faz:safFaz(self,saf)}]; const B=talBase(self,S);
+  const ffz=subs.some(x=>x.faz===self.state.ffz)?self.state.ffz:''; const grupos=[], G={}; let info=null;
   const band={nesta:0,livre:0,conf:0,perene:0,ocup:0,semp:0}; let linhas=[], tot=0;
   subs.forEach(su=>{ const m=talMontar(self,su.id,v,B); G[su.id]=m.info; if(su.id===saf) info=m.info;
     if(m.info.band) Object.keys(band).forEach(q=>{ band[q]=ocR2(band[q]+(Number(m.info.band[q])||0)); }); linhas=linhas.concat(m.info.linhas||[]); tot+=talTot(su.faz);
     if(su.id!==saf) talDeOutra(self,su.id,m.rows,v);
-    Object.assign(x0,m.x0||{}); x0['fzg_'+su.id]=true;
     if(ffz&&su.faz!==ffz) return;   // filtro rápido por fazenda (ao lado da busca)
     const L=m.info.linhas||[]; const nPl=L.filter(l=>l.own.length).length, nSp=L.filter(l=>l.semp).length, nLv=L.filter(l=>l.planejar).length;
     const area=r2(cultsDe(self,su.id).reduce((a,c)=>a+(Number(c.v.area)||0),0));
     const res=nPl+' de '+L.length+(L.length===1?' talhão planejado':' talhões planejados')+(nSp?' · '+nSp+' sem plantio':'');
     grupos.push({id:'fzg_'+su.id,fgrp:true,nosel:true,ro:true,v:{local:su.faz,area},s:{local:su.faz+' · '+nfa(area)+' ha · '+res},
-      p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true}]:[])
-        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,al:'Editar talhões da '+su.faz}]:[])
+      p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true,alvo:true}]:[])
+        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,alvo:true,al:'Editar talhões da '+su.faz}]:[])
         .concat(!m.info.safra.ro&&L.length&&g2estreito()?[{k:'act',t:'Editar talhões',fn:'slfaz:'+su.id,al:'Editar talhões da '+su.faz}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });   // EDL-01: todos os talhões da fazenda numa grade (safra_lote.js); no estreito, também no ⋯ da faixa
-  sp.x0=x0; G2DISP[sp.id]=grupos; self.__ocG=G;
+  G2DISP[sp.id]=grupos; self.__ocG=G;
   if(info){ info.bandG=band; info.linhasG=linhas; info.totG=tot; } return info; }
 // linha de outra fazenda na tabela da sub-safra aberta: abrir e Excluir levam antes à sub-safra dela (os atalhos da linha já vão pelo talhão)
 function talDeOutra(self,sub,rows,v){ const gid='g_cult_'+sk(sub);
@@ -469,9 +470,9 @@ function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.c
     const rows=g2clone(g2rows(self,sp)).filter(r=>!r.livre&&!r.fora);
     rows.forEach(r=>{ const fill=(c,kid)=>{ ownParts(c,ocDe(c),kid,null); c.p.sit=[{k:'mut',t:'—'}]; c.p.saf=[{k:'mut',t:'—'}]; if(c.v.origem) c.p.local=(c.p.local||[]).concat([{k:'mut',t:c.v.origem}]); };
       if(r.grp){ grpParts(r,adj); (r.kids||[]).forEach(c=>fill(c,true)); ['sit','livre','desde','ate','fimpor','saf'].forEach(f=>{ r.p[f]=[{k:'mut',t:'—'}]; r.s[f]=''; }); } else fill(r,false); });
-    info.ro=true; return {info,rows,x0:null}; }
+    info.ro=true; return {info,rows}; }
   const [linhas,band]=ocTabela(ctx,safra,occ,talOrd(safra.faz),S); info.linhas=linhas; info.band=band;
-  const own=cultsDe(self,saf).map(r=>g2clone([r])[0]); const rows=[]; const x0={}; const estreito=g2estreito();
+  const own=cultsDe(self,saf).map(r=>g2clone([r])[0]); const rows=[];
   linhas.forEach(L=>{ const t=L.t; const mine=own.filter(r=>(r.v.talhao||ocTalhaoDe(r.v.local,r.v.tipo))===t); L._saf=saf;
     // sem plantio (pedido 2): talhão livre, sem cultivo desta safra, que a pessoa decidiu não plantar. Cinza, sem alerta: não é pendência,
     // não trava a etapa, não entra em área plantada, demanda, operações nem custo (nenhum cultivo existe); a faixa conta à parte
@@ -503,8 +504,8 @@ function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.c
     if(mine.length){ grpParts(Object.assign(g,{kids:mine}),adj); g.kids=kids;
       if(mine.length===1&&mine[0].v.tipo!=='Parcela'){ const m=mine[0]; g.v.tipo='Talhão inteiro'; g.p.tipo=[{k:'txt',t:'Talhão inteiro'}]; g.s.tipo='Talhão inteiro'; g.v.meta=m.v.meta; g.p.meta=m.p.meta; g.s.meta=m.s.meta; g.ordk=Object.assign({},g.ordk||{},{meta:(m.ordk||{}).meta}); } } else { ['cult','var','plano','ver','dt_plantio','meta','aj'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; }); g.v.area=''; g.p.area=[{k:'mut',t:'—'}]; g.p.tipo=[{k:'mut',t:'—'}]; g.s.tipo=''; }
     g.p.local=[{k:'b',t}].concat(acts); g.s.local=t; ['ate','fimpor','saf'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; g.v[f]=''; });
-    tal(g); rows.push(g); x0[g.id]=!estreito&&(mine.length>1||L.sit==='A conferir'||L.sit==='Sobreposição'); });   // SAF-TAB: abre aberto só o talhão com parcelas ou com pendência
-  return {info,rows,x0}; }
+    tal(g); rows.push(g); });   // TAB-12 (17/10/2026): o talhão com parcelas nasce recolhido; a linha dele já diz a situação (A conferir, Sobreposição)
+  return {info,rows}; }
 // fazenda e talhões da safra para os textos do painel
 function talhaoArea(t){ return Number((D2.talhoes||{})[t])||0; }
 // ---- painel "Planejar T1" e "Vincular ciclo C1" (§2, R-17, R-19, R-24) ----
@@ -730,7 +731,7 @@ function rendAfter(self,gid,rows,r,isNew){ const x=r.v; let trocou=''; const nv=
     const g=rows.find(q=>q.grp&&q.v.op===nv.op); const ai=g?(g.kids||[]).findIndex(a=>(a.grp?((cfgLeaves(a.kids)[0]||{v:{}}).v.atv):a.v.atv)===nv.atv):-1;
     if(!g||ai<0){ g2set(self,gid,{rows:g2clone(rows)}); self.setState({g2toast:'Atividade não encontrada: configuração não incluída.'}); return; }
     const a=g.kids[ai]; if(a.grp) a.kids.push(r); else g.kids[ai]={id:'atv_'+a.id,grp:true,ro:true,v:{atv:a.v.atv,op:a.v.op,opatv:a.v.opatv,planos:a.v.planos},s:{},p:{},kids:[a,r]};
-    const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); x0[g.id]=true; x0[g.kids[ai].id]=true; g2set(self,gid,{x:x0});
+    const xa=Object.assign({},g2st(self,gid).x||{}); xa[g.id]=true; xa[g.kids[ai].id]=true; g2set(self,gid,{x:xa});   // TAB-12: a ação abre o caminho da linha nova
     novaMsg=' A área de '+nv.atv+' agora se divide entre '+cfgLeaves([g.kids[ai]]).length+' configurações.'; }
   const co=(D2.conj_opts||{})[cfgBase(r)]; const antes=self._conjAntes; self._conjAntes=undefined;
   if(co&&(isNew||(antes!=null&&antes!==String(x.conj_id||'')))){ const o=co.opts.find(q=>q.id===x.conj_id); if(o){ x.nome=o.nome; if(r.s) r.s.nome=o.nome; if(r.p) delete r.p.nome; x.maq=o.maq; x.impl=o.impl; trocou=' Conjunto trocado: custos por hora do cadastro (máquina '+nm(o.maq)+', implemento '+nm(o.impl)+').'; } }
@@ -874,11 +875,11 @@ function cultAfter(self,gid,rows,r,isNew){ let all=g2clone(soDaSafra(rows)); let
     if(n){ delete adj[r.id]; self.setState({adj}); }
     msg=(pl?('Plano de '+r.v.local+': '+pl.nome+' v'+pl.versao):('Plano retirado de '+r.v.local))+(n?(' · '+n+(n>1?' ajustes de dose descartados':' ajuste de dose descartado')):'')+'. Plano operacional, recursos e demanda recalculados.'; }
   if(extra) msg=(msg?msg+' ':'')+'Atenção: '+extra+'.';
-  // grupo aberto depois de salvar: pelo id gravado e pelo id da tabela (grp_<talhão>, o da linha de exibição da safra aberta)
-  // (o padrão da tabela, x0 da exibição, continua valendo: planejar um talhão com ocupação de fora não recolhe o grupo dele)
-  const norm=normCult(all); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); norm.forEach(y=>{ if(!y.grp) return; [y.id,'grp_'+y.v.talhao].forEach(k=>{ if(x0[k]!==false) x0[k]=true; }); });
-  if(tNovo&&x0['grp_'+tNovo]!==false) x0['grp_'+tNovo]=true;
-  g2set(self,gid,{rows:norm,x:x0}); if(msg) self.setState({g2toast:msg}); }
+  // TAB-12 (17/10/2026): gravar abre só o caminho do cultivo gravado (a faixa da fazenda e o grupo do talhão, pelo id gravado e pelo da
+  // linha de exibição, grp_<talhão>); o resto da tabela fica como a pessoa deixou
+  const norm=normCult(all); const st=g2st(self,gid); const xa=Object.assign({},st.x||{}); const tg=tNovo||(r&&r.v&&r.v.talhao)||'';
+  if(tg){ xa['fzg_'+saf]=true; xa['grp_'+tg]=true; norm.forEach(y=>{ if(y.grp&&y.v.talhao===tg) xa[y.id]=true; }); }
+  g2set(self,gid,{rows:norm,x:xa}); if(msg) self.setState({g2toast:msg}); }
 // área livre do talhão depois de gravar (SAF-C01): a mesma conta da coluna Área livre e do painel (ocTabela, R-09), com as folhas novas desta
 // safra no lugar das gravadas e as ocupações de fora (perene sem fim e outras safras)
 function livreDepois(self,saf,t,folhas){ const S=safList(self); const so=S[saf]; if(!so) return 0; const ctx=ocCtxSaf();
@@ -1086,7 +1087,9 @@ function pltGravar(self){ const P=self.state.plt; if(!P) return; self.__pltRec=s
   // um cultivo por talhão, na grade da sub-safra dele; um setState só (as fazendas novas dividem a grade das safras novas)
   const all=Object.assign({},self.state.g2||{}); const porG={}; const stamp=String(Date.now()).slice(-6);
   novos.forEach(({x,d},i)=>{ const gid='g_cult_'+sk(x.sub); if(!porG[gid]) porG[gid]=g2clone(soDaSafra(g2rows(self,GR(gid)))); porG[gid].push(pltCultivo(self,x,d,'c'+String(x.t).replace(/\W/g,'')+'_'+stamp+'_'+i)); });
-  Object.keys(porG).forEach(gid=>{ const st=all[gid]||{}; all[gid]=Object.assign({},st,{rows:normCult(porG[gid]),x:Object.assign({},GR(gid).x0||{},st.x||{})}); });
+  Object.keys(porG).forEach(gid=>{ const st=all[gid]||{}; all[gid]=Object.assign({},st,{rows:normCult(porG[gid])}); });
+  // TAB-12 (17/10/2026): a ação abre o caminho dos cultivos novos na tabela à vista (a da sub-safra aberta): a faixa de cada fazenda e o talhão
+  { const gv='g_cult_'+sk(self.state.saf), xa=Object.assign({},(all[gv]||{}).x||{}); novos.forEach(({x})=>{ xa['fzg_'+x.sub]=true; xa['grp_'+x.t]=true; }); all[gv]=Object.assign({},all[gv]||{},{x:xa}); }
   self.__pltRec[P.ch]={n:novos.length};
   const fz={}; novos.forEach(({x})=>{ (fz[x.faz]||(fz[x.faz]=[])).push(x.t); }); const fks=Object.keys(fz);
   const onde=fks.length>1?fks.map(f=>fz[f].join(', ')+' ('+f+')').join(' e '):fz[fks[0]].join(', ');
@@ -1190,8 +1193,8 @@ function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv
   if(R.soG){ self.setState({dv:Object.assign({},dv,{gerr:R.gerr})}); return; }
   if(!R.kids){ self.setState({dv:Object.assign({},dv,{err:R.err,gerr:R.gerr,warn:false})}); return; }
   const {rest,gi}=dvAplicar(R.all,t,R.kids,saf,R.daSaf); const kids=R.kids, livreD=R.livreD, daSaf=R.daSaf;
-  const norm=normCult(rest); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); x0[gi]=true; x0['grp_'+t]=true;
-  g2set(self,gid,{rows:norm,x:x0,sel:{},fl:null});
+  const norm=normCult(rest); const xa=Object.assign({},g2st(self,gid).x||{}); xa['fzg_'+saf]=true; xa[gi]=true; xa['grp_'+t]=true;   // TAB-12: a ação abre o caminho do talhão dividido
+  g2set(self,gid,{rows:norm,x:xa,sel:{},fl:null});
   const inteiro=norm.some(r=>!r.grp&&r.v.talhao===t&&daSaf(r));
   self.setState({adj:R.adj,dv:null,g2toast:(inteiro?(t+' volta a talhão inteiro.'):(t+' dividido em '+kids.length+(kids.length>1?' parcelas':' parcela')+(livreD>0.005?(' · '+nfa(livreD)+' ha livres'):'')+'.'))+' Plano operacional, recursos e demanda recalculados.'}); }
 function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_rows=[]; return; } const t=dv.t, T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf);
@@ -1393,14 +1396,14 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
     const cu=custo(its); r.v.custo=cu===null?'':cu; r.s.custo=cu===null?'':rs(cu); r.p.custo=cu===null?[{k:'mut',t:''}]:[{k:'txt',t:r.s.custo}];
     return r; };
   const itsDe={};   // operação → ocorrências na tela (Total da grade)
-  const x0={};
+  const xf={};   // TAB-12: caminho do filtro de recurso × mês (capF); sem filtro, tudo nasce recolhido
   const rows=grupo(base).map(o=>{ const cm=comum[o.op]||{}; const id='op:'+o.op; const r=linha(id,o.op,o.its,'','op','ha-op'); itsDe[id]=o.its;
     r.p.nome=[{k:'b',t:o.op},{k:'mut',t:cm.nAtv+(cm.nAtv>1?' atividades':' atividade')}];
     const opConj=!!cm.conj&&!cm.divSo, opRend=opConj&&cm.rend!==null;
     r.v.conj=cm.divSo?cm.n+' conjuntos':(cm.conj||'varia'); r.s.conj=r.v.conj; r.p.conj=[{k:opConj?'txt':'mut',t:r.v.conj}];
     r.v.rend=opRend?cm.rend:''; r.s.rend=cm.divSo?'':(opRend?nf(cm.rend,2)+' ha/h':'varia'); r.p.rend=[{k:opRend?'txt':'mut',t:r.s.rend}];
     map[id]={t:'op',op:o.op,comum:opRend,leaf:cm.leaf};
-    if(r.v.sit==='Com pendência'||capF) x0[id]=true;
+    if(capF) xf[id]=true;
     r.kids=o.ordA.map(a=>{ const aid='at:'+o.op+'|'+a.nome; const cfs=a.its[0].cfs; const div=cfs.length>1;
       const rep=new Set(a.its.map(i=>i.c.id)).size<a.its.length; const ra=linha(aid,a.nome,a.its,r.v.sit,'at',rep?'ha-op':'ha');
       ra.p.nome=[{k:'txt',t:a.nome}];
@@ -1410,7 +1413,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
         if(opConj) vz('conj'); else { ra.v.conj=cfs[0].v.nome; ra.s.conj=ra.v.conj; ra.p.conj=[{k:'txt',t:ra.v.conj}]; }
         if(opRend) vz('rend'); else { ra.v.rend=rr===null?'':rr; ra.s.rend=rr===null?'sem rendimento':nf(rr,2)+' ha/h'; ra.p.rend=[{k:rr===null?'mut':'txt',t:ra.s.rend}]; } }
       map[aid]={t:'at',op:o.op,atv:a.nome,div,leaf:cfs[0]?cfs[0].id:null};
-      if(capF||ra.v.sit==='Com pendência') x0[aid]=true;
+      if(capF) xf[aid]=true;
       ra.kids=a.its.slice().sort((p,q)=>p.dt<q.dt?-1:(p.dt>q.dt?1:0)).map(i=>{ const oid='oc:'+i.c.id+'|'+i.a.id+'|'+i.dt; const ro=linha(oid,i.c.v.local+' · '+i.c.v.cult+' '+i.c.v.var,[i],ra.v.sit,'oc','ha');
         ro.p.nome=[{k:'txt',t:ro.v.nome}]; ['conj','rend'].forEach(f=>{ ro.v[f]=''; ro.s[f]=''; ro.p[f]=[{k:'mut',t:''}]; });
         // o filtro e a busca da grade leem as folhas: a ocorrência leva o conjunto e o rendimento no texto (a célula fica vazia, a linha-pai mostra)
@@ -1432,7 +1435,10 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
         return ro; });
       return ra; });
     return r; });
-  const sp=GR('g_op'); sp.rows=rows; sp.x0=x0;
+  const sp=GR('g_op'); sp.rows=rows;
+  // a célula de Capacidade escolhida é um filtro da pessoa (capSel): abre o caminho até as ocorrências achadas, uma vez por escolha (xcap);
+  // a seta recolhe depois e a próxima escolha abre de novo
+  if(capF){ const ck=capF.rec+'|'+capF.mi+'|'+saf, so=g2st(self,'g_op'); if(so.xcap!==ck){ const all=Object.assign({},self.state.g2||{}); all.g_op=Object.assign({},all.g_op||{},{x:xf,xcap:ck}); self.state.g2=all; } }
   // Total (proprietário, 13/10/2026), sobre o recorte visível: ha-op e custo somados; R$/ha = custo ÷ hectares físicos (cada cultivo uma vez, a
   // conta do Resumo da safra), "parcial" com ocorrência pendente ou tarifa desconhecida, como lá. Horas: soma padrão da grade (segue o filtro de recurso).
   // Revisão Codex V58-TOTAL-FILTRO-01 (S2): com busca ou filtro, soma só o que passou no filtro (e3Partes), não a operação inteira.
@@ -1446,7 +1452,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
   const c6=sp.cols.find(c=>c.k==='horas'); if(c6){ if(c6._l0===undefined) c6._l0=c6.l; c6.l=kF?('Horas de '+G[kF].nome):c6._l0; } }
 // toque na célula ou no atalho: grava state.cap (recurso × mês desta safra) e filtra a g_op; tocar de novo limpa
 function capSel(self,rid,mi){ const cur=self.state.cap; const saf=self.state.saf; const igual=!rid||(!!cur&&cur.rec===rid&&cur.mi===mi&&cur.saf===saf);
-  const st=g2st(self,'g_op'); const f=Object.assign({},st.f||{}); delete f.horas; const pa={f,x:null}; if(st.so&&st.so.k==='horas') pa.so=null; g2set(self,'g_op',pa);
+  const st=g2st(self,'g_op'); const f=Object.assign({},st.f||{}); delete f.horas; const pa={f,x:null,xcap:null}; if(st.so&&st.so.k==='horas') pa.so=null; g2set(self,'g_op',pa);
   self.setState({cap:igual?null:{rec:rid,mi,saf}});
   setTimeout(()=>{ try{ const e=document.getElementById(igual?'saf-v3-ver':'saf-cap-filtro'); if(e){ e.scrollIntoView({block:'nearest'}); if(!igual) e.focus({preventScroll:true}); } }catch(x){} },80); }
 function capTog(self){ const ab=!self.state.capAberta; self.setState({capAberta:ab});
@@ -1454,7 +1460,7 @@ function capTog(self){ const ab=!self.state.capAberta; self.setState({capAberta:
 // g_op → formulário Rendimento (§4.1): operação com conjunto e rendimento comuns abre a 1ª atividade em uso com "Todas"; atividade de uma
 // configuração e talhão abrem "Só esta atividade" (talhão com "Neste talhão"); configuração abre a própria folha ("Nesta configuração")
 function abrirRend(self,rid){ const m=(self.__opmap||{})[rid]; const saf=self.state.saf; if(!m||!saf) return; const gid=rendGid(saf); const sp=GR(gid);
-  const tog=()=>{ const st=g2st(self,'g_op'); const x=Object.assign({},st.x||GR('g_op').x0||{}); x[rid]=!x[rid]; g2set(self,'g_op',{x}); };
+  const tog=()=>{ const st=g2st(self,'g_op'); const x=Object.assign({},st.x||{}); x[rid]=!x[rid]; g2set(self,'g_op',{x}); };
   let esc='', ctx='';
   if(m.t==='op'){ if(!m.comum){ tog(); return; } esc='Todas as atividades da operação'; }
   else if(m.t==='at'){ if(m.div){ tog(); return; } esc='Só esta atividade'; }
@@ -1728,7 +1734,10 @@ function safRolagem(){ const m=document.querySelector('main[data-scroll]'); cons
 function safCorrigir(self,ids){ const r=safRolagem(); const m=document.querySelector('main[data-scroll]');
   self.__revPos={top:r?r.scrollTop:0,rolas:m?[...m.querySelectorAll('.g2rola,.rola')].map(x=>x.scrollTop):[],foco:'[data-acoes] [data-acao=corrigir]'};
   g2etapa(self,{step:2,corr:{ids:ids.slice()}});
-  setTimeout(()=>{ try{ const row=document.querySelector('[role=row][data-rid="'+ids[0]+'"]'); if(row){ row.scrollIntoView({block:'center'}); row.focus({preventScroll:true}); } }catch(e){} },120); }
+  // TAB-12 (17/10/2026): a ação que leva a um registro abre o caminho dele: a faixa da fazenda e o talhão do 1º cultivo sem plano nascem
+  // recolhidos, então abre o caminho (g2caminho) antes de pôr o foco na linha (achado da integração DRILL × acao_unica item 7)
+  setTimeout(()=>{ try{ GRIDS.filter(g=>/^g_cult_/.test(g.id)).forEach(sp=>g2caminho(self,sp,ids[0])); }catch(e){}
+    setTimeout(()=>{ try{ const row=document.querySelector('[role=row][data-rid="'+ids[0]+'"]'); if(row){ row.scrollIntoView({block:'center'}); row.focus({preventScroll:true}); } }catch(e){} },90); },120); }
 // atalho para o cultivo que responde pela saída: "Informar colheita" só quando o painel dele tem o campo (sem plano, safra aberta, fora de
 // ciclo vinculado); com plano a colheita sai do plano e o atalho só abre o cultivo ("Ver"); safra encerrada também é "Ver" (revisão SAF, S3.3)
 function lnkSaida(self,S,o,saf){ const fech=!!(S[o.saf]&&S[o.saf].ro); const r=cultsDe(self,o.saf).find(c=>c.id===o.id);
@@ -1889,6 +1898,8 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   /* laudo validado sem regra ou correção em outra safra (R17): uma frase só aqui, com o caminho para o laudo */
   v.lp_info=SG.info.map(t=>{ const m=/LAU-\d+/.exec(t); return {t, h:m?'AG-02.dc.html#'+m[0]:'AG-02.dc.html'}; }); v.lp_hasInfo=v.lp_info.length>0;
   v.lp_ro=ro; v.lp_edit=!ro; const ex=self.state.lpx||{};
+  // TAB-12 (17/10/2026): grupos e atividades nascem recolhidos (nome, gatilho e data à vista); só o erro de gravação abre o caminho até o campo
+  const temErr=(A)=>Object.keys(lp.err||{}).some(k=>lp.err[k]&&(k.indexOf(A+'|')===0||k==='pick'+A)); const abre=(k,e)=>ex[k]===true||(ex[k]!==false&&e);
   const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false,cmdErr:''})}); };
   const ERR=(k)=>(lp.err||{})[k]||'';
   const doseSt=(k,aj,dis,an)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(an?'#1E5F8F':(aj?'#8A5A00':'#E4E9E5')))+';background:'+(dis?'#F4F6F3':(an?'#E3F0FB':(aj?'#FFF8E6':'#fff')))+';text-align:right;';
@@ -1899,9 +1910,9 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   const grupos={}; pl.atividades.forEach(a=>{ const g=grupoGat(a.g.tipo); ((grupos[g]||(grupos[g]={}))[gatLabel(a.g)+'||'+gatOrder(a.g)]||(grupos[g][gatLabel(a.g)+'||'+gatOrder(a.g)]=[])).push(a); });
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
-      const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
+      const atvs=grupos[g][key]; const gid=g+key; const open=abre(gid,atvs.some(a=>temErr(String(a.id))));
       return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), open, exp:g2seta(open).exp, lab:g2seta(open,key.split('||')[0]).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
-        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
+        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=abre(aid,temErr(String(a.id))); const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
               const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9; const ng=ngAc(a0);
               const ajT=an?('pela análise · '+SRC[key].laudo+(ng?' · '+ng+': vale a dose da O.S.':'')):((a0||acMan(A,p.prod))?'ajustado pelo usuário':'dose deste talhão');

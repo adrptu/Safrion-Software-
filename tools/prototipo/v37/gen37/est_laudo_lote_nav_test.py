@@ -69,8 +69,10 @@ try:
         r=J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf({json.dumps(nome)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
         k2=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''
         return dict(row=r,k2=k2)
+    # MUX-F1 (17/10/2026): o talhão é um botão com data-talhao e o rótulo da camada em data-rotulo (o aria-label agora é o nome completo:
+    # "T4, 204 ha, …"). Oráculo obsoleto na forma de achar; a asserção não muda
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    def tap(t): J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
+    def tap(t): J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
     pan=lambda t: (J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or '').replace('\n',' · ')
     def mapa(tal,faz='Santa Rita'):
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps({'mf_faz':faz,'lay':'Insumos','tsel':[],'flt':{'Insumos':{'per':'Safra toda'}}}))})"); ir('IN-04.dc.html',w=2.0)

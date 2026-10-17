@@ -164,7 +164,13 @@ function tmVals(self, v){ const st = self.state; const real = !!v.map_lg; v.tm_o
   if (!self.__tmhl){ self.__tmhl = 1; try{ window.addEventListener('hashchange', () => { self.__tmh = 0; self.setState({ tmh: Date.now() }); }); }catch(e){} }
   if (!self.__tmh){ self.__tmh = 1; let h = ''; try{ h = decodeURIComponent(location.hash || ''); }catch(e){}
     const md = /desenhar=([^&]+)/.exec(h), mi = /importar/.exec(h), mt = /talhao=([^&]+)/.exec(h);
-    if (md || mi || mt) setTimeout(() => { if (md) tmIniciar(self, md[1]); else if (mi) self.setState({ imp: { etapa: 'arq', err: '' }, dw: null }); else { self.setState({ tsel: [mt[1]], px: null, mpa: null }); const go = (n) => { const a = tmAneis('Lagoa Grande').find(o => o.id === mt[1]); if (a && LGI.map) tmEnquadra(a.ring); else if (n < 20) setTimeout(() => go(n + 1), 300); }; go(0); } }, 0); }
+    // MUX-F0 (D18, 17/10/2026): #talhao=ID abre a fazenda do talhão (pivô ou talhão desenhado da Lagoa Grande, ou talhão da Santa Rita), mesmo com
+    // o contexto salvo em outra fazenda; ID que não existe no mapa dá aviso visível e acessível e não seleciona nenhum outro
+    if (md || mi || mt) setTimeout(() => { if (md) tmIniciar(self, md[1]); else if (mi) self.setState({ imp: { etapa: 'arq', err: '' }, dw: null }); else { const id = mt[1];
+      const daLG = M.lg.ids.indexOf(id) >= 0 || tmAneis('Lagoa Grande').some(o => o.id === id), daSR = M.tids.indexOf(id) >= 0;
+      if (!daLG && !daSR) { const m = 'Talhão ' + id + ' não encontrado no mapa: nada foi selecionado.'; self.setState({ tsel: [], px: null, mpa: null, muxAviso: m, g2toast: m }); return; }
+      self.setState({ mf_faz: daLG ? 'Lagoa Grande' : 'Santa Rita', tsel: [id], px: null, mpa: null, muxAviso: '' }); if (typeof MUX !== 'undefined') MUX.ativo[daLG ? 'Lagoa Grande' : 'Santa Rita'] = id;
+      if (daLG) { const go = (n) => { const a = tmAneis('Lagoa Grande').find(o => o.id === id); if (a && LGI.map) tmEnquadra(a.ring); else if (n < 20) setTimeout(() => go(n + 1), 300); }; go(0); } } }, 0); }
   const sty = (on) => 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;box-shadow:0 1px 3px rgba(21,32,26,.18);' + (on ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;');
   v.r_des_st = sty(!!st.dw); v.r_des_on = st.dw ? 'true' : 'false'; v.r_imp_st = sty(!!st.imp); v.r_imp_on = st.imp ? 'true' : 'false';
   v.r_des = () => { if (self.state.dw) self.setState({ dw: null, g2toast: 'Desenho descartado.' }); else { const tv = typeof assinTrava === 'function' ? assinTrava('ampliar_area') : ''; if (tv) self.setState({ g2toast: tv }); else tmIniciar(self, 'novo'); } };   // PLAT-01 R12

@@ -171,7 +171,9 @@ try:
     cg = next((r for r in grade('OPERAÇÃO')['rows'] if r.get('OPERAÇÃO › ATIVIDADE › TALHÃO', '').startswith('Colheita de grãos')), {})
     chk('B1 janela 50 h na Colheita: 48 ha sem conjunto e Custo R$/ha = custo ÷ área atendida (%s, nunca ÷ 610 ha)' % esp, round(sal, 2) == 48 and cg.get('CUSTO R$/HA') == esp and '48 ha sem conjunto' in cg.get('SITUAÇÃO', ''), (sal, cg))
     # ================= B11 e B15: LG2627 (falta de recurso e ocorrências pendentes) =================
-    abre('#saf=LG2627&passo=operacoes'); time.sleep(.4); R = grade('OPERAÇÃO')['rows']
+    abre('#saf=LG2627&passo=operacoes'); time.sleep(.4)
+    expande_tudo()   # TAB-12 (17/10/2026): a operação "Com pendência" nasce recolhida (antes abria aberta); a pessoa abre para ver as ocorrências
+    R = grade('OPERAÇÃO')['rows']
     chk('B11 g_op LG2627: chip de falta de recurso na operação ("Operadores e equipe … %")', any('Operadores e equipe' in r.get('SITUAÇÃO', '') and '%' in r.get('SITUAÇÃO', '') for r in R), [r.get('SITUAÇÃO') for r in R][:6])
     hk = next((k for k in (R[0] if R else {}) if k.startswith('HORAS')), 'HORAS')
     pend = [r for r in R if r['_kid'] and 'pendente' in r.get('SITUAÇÃO', '') and ' · ' in r.get('OPERAÇÃO › ATIVIDADE › TALHÃO', '')]

@@ -1,0 +1,2 @@
+drill_recolhido exit=1 1162s RESULTADO: 61 ok · 5 falhas · A1440.4 a varredura viu tabelas em árvore, setas e cartões (rodada completa); C1440 C1 busca "T5" abre o caminho (faixa da fazenda) e mostra o T5; limpar a busca volt
+FIM

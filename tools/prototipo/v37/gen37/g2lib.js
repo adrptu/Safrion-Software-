@@ -110,13 +110,20 @@ function g2ac(self,chave,itens,escolhido,pick,o){ o=o||{}; const ac=self.state.g
         const n=(i+(e.key==='ArrowDown'?1:-1)+res.length)%res.length; self.setState({g2ac:{k:chave,q:q,open:true,i:n}}); }
       else if(e.key==='Enter'){ if(aberto&&res.length){ e.preventDefault(); e.stopPropagation(); escolher(res[i]); } else if(o.enter){ e.preventDefault(); o.enter(); } }
       else if(e.key==='Escape'){ if(aberto){ e.preventDefault(); e.stopPropagation(); self.setState({g2ac:Object.assign({},ac,{open:false})}); } else if(o.esc){ e.preventDefault(); o.esc(); } } } }; }
+// TAB-12 (17/10/2026, proprietário: "Por padrão coloque sempre os cartoes e tabelas com drill down recolhido, primeiro usuario tem a visao
+// macro e depois consegue escolher onde precisar detalhar no drill down expandido. Em todas as telas."): toda linha com filhos nasce
+// recolhida, inclusive a faixa da fazenda (r.fgrp) e o grupo do Agrupar por; só abre o que a pessoa abriu (st.x: seta, "Expandir tudo" ou a
+// ação/endereço que leva a um registro e grava o caminho dele). A tela não tem abertura padrão (não há mais sp.x0). Abrem sozinhos só o
+// caminho até o que a busca ou o filtro de coluna achou num filho e, com o filtro rápido escolhido, a faixa da fazenda (o filtro vale nos
+// talhões dela); a seta recolhe esse caminho também (x[id]=false). ab = aberta: a seta, os Cartões e o "Expandir tudo" leem daqui.
 function g2flat(sp,st,rows,mask,added){
-  const out=[]; const exp=st.x||sp.x0||{}; const filt=g2filtering(st);
+  const out=[]; const exp=st.x||{}; const filt=g2filtering(st), qfOn=!!(sp.qf&&st.qv);
   const deep=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(deep);
   const walk=(list,lvl,parentOk,pf)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
       const anyKid=kids.some(deep); if(!(selfOk||anyKid||parentOk)) return;
-      out.push({r,lvl,has:kids.length>0,pf:!!pf});
-      if(kids.length && ((r.fgrp?exp[r.id]!==false:exp[r.id]) || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt,!!r.fgrp); }); };   // grupo transparente nasce aberto
+      const ab=kids.length>0&&(exp[r.id]===true||(exp[r.id]!==false&&((filt&&anyKid&&!selfOk)||(r.fgrp&&qfOn))));
+      out.push({r,lvl,has:kids.length>0,pf:!!pf,ab});
+      if(ab) walk(kids,lvl+1,selfOk&&!filt,!!r.fgrp); }); };
   walk(rows,0,false,false); return out; }
 // TAB-11 (16/10/2026, proprietário: "mude o estilo do drill down daquele preto para a setinha mais intuitiva e amigável dos debaixo, melhore
 // ela e implemente como nosso padrão em tudo"): seta única de abrir/recolher. O desenho é do HTML (engine.seta/seta_abrir: o chevron fino gira
@@ -152,7 +159,7 @@ function g2part(p,v){ const o={isIco:false,isCn:false,isTxt:false,isB:false,isMu
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
-    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=(p.lk?'':'g2cta')+(p.sec?' g2sec':''); if(p.desce){ o.cls='g2desce'; o.st='border:0;background:transparent;padding:0;color:#15201A;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;'; o.t=p.t+' ›'; } else o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA);
+    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=(p.lk?'':'g2cta')+(p.sec?' g2sec':''); if(p.desce){ o.cls='g2desce'; o.st='border:0;background:transparent;padding:0;color:#15201A;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;'; o.t=p.t+' ›'; } else o.st=p.lk?('border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;'+(p.alvo?'min-height:var(--g2-alvo,0px);display:inline-flex;align-items:center;box-sizing:border-box;':'')):(p.u?G2CTAU:G2CTA);   /* p.alvo: link com alvo de 44 px no toque (DS-ALVO), ex.: ações da faixa da fazenda */
       // célula inteira tocável (DS: alvo ≥ 44 px): texto da célula, sem negrito, na cor do estado; aria-pressed quando é o filtro ativo
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
@@ -194,6 +201,10 @@ function g2cond(f,d){ if(!f.cond) return true; const um=(c)=>{ const v=String((d
 // de fora); a grade mostra a cópia e os gravadores continuam no estado (g2rows). Sem cópia, mostra o estado.
 const G2DISP={};
 function g2disp(self,sp){ return G2DISP[sp.id]||g2rows(self,sp); }
+// TAB-12 (17/10/2026): abrir um registro (endereço, ação da tela ou clique) abre o caminho até ele na tabela, se estiver dentro de grupo
+// recolhido; o resto da tabela fica como está. Sem a linha (outra grade, linha do Agrupar por), nada muda
+function g2caminho(self,sp,rid){ if(!sp) return; const pais=[]; const acha=(l,tr)=>(l||[]).some(r=>{ if(r.id===rid){ pais.push(...tr); return true; } return !!(r.kids&&acha(r.kids,tr.concat([r.id]))); });
+  if(!acha(g2disp(self,sp),[])||!pais.length) return; const x=Object.assign({},g2st(self,sp.id).x||{}); if(pais.every(k=>x[k]===true)) return; pais.forEach(k=>{ x[k]=true; }); g2set(self,sp.id,{x}); }
 function g2open(self,sp,rid,e){
   if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return;
   const ed=sp.edit||{m:'none'}; if(ed.m==='none') return;
@@ -201,6 +212,7 @@ function g2open(self,sp,rid,e){
   // VISOES-2 (defeito F do teste adaptado): dentro de um grupo a linha é uma cópia com id "OS-0421@T1"; abre a linha original (OS-0421)
   if(!r&&String(rid).indexOf('@')>0&&String(rid).indexOf('grp@')!==0){ rid=String(rid).split('@')[0]; r=g2find(g2disp(self,sp),rid)||g2find(g2rows(self,sp),rid); }
   if(!r||r.fora) return;
+  g2caminho(self,sp,r.id);
   if(r.dr && self.__v && self.__v[r.dr]){ self.__v[r.dr](); return; }
   if(ed.m==='pick'){ if(self.g2pick) self.g2pick(sp.id,rid,r); g2set(self,sp.id,{fl:rid}); return; }
   let draft={}; (ed.fields||[]).forEach(f=>{ let val=''; if(r.v&&r.v[f.k]!==undefined&&r.v[f.k]!==null&&r.v[f.k]!=='') val=(f.t==='num'? String(r.v[f.k]).replace('.',','):String(r.v[f.k])); else if(r.s&&r.s[f.k]!==undefined) val=String(r.s[f.k]); draft[f.k]=val; });
@@ -389,9 +401,9 @@ function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {row
     const c1=g2colsVis(self,sp)[1]; if(c1){ row.p[c1.k]=[{k:'mut',t:n+' '+(n>1?(D.plural||'itens'):(D.um||'item'))}]; }
     somas.forEach(c=>{ const tot=kids.reduce((s2,x)=>s2+(Number((x.v||{})[c.k])||0),0); row.v[c.k]=tot; });
     return row; });
-  // grupos começam abertos a cada novo agrupamento ou nível (a seta recolhe no lugar)
-  // defeito G: a chave inclui o nível que desceu sozinho (trocar Fazenda muda o nível e os grupos novos nascem abertos)
-  const ch=a.d+'|'+path.join('/')+'|'+lv; if(st.agx!==ch){ const x={}; out.forEach(r=>{ x[r.id]=true; }); const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{x,agx:ch}); self.state.g2=all; }
+  // TAB-12 (17/10/2026): os grupos nascem recolhidos a cada novo agrupamento ou nível (visão macro: nome, contagem e somas); a seta abre no lugar
+  // defeito G: a chave inclui o nível que desceu sozinho (trocar Fazenda muda o nível e os grupos novos nascem recolhidos)
+  const ch=a.d+'|'+path.join('/')+'|'+lv; if(st.agx!==ch){ const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{x:{},agx:ch}); self.state.g2=all; }
   return {rows:out,a,D,lv,base,path}; }
 const G2_AG_ICO={oque:'O quê',quem:'Quem',quando:'Quando',onde:'Onde'};
 function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_aghas']=false; v[id+'_agmenu']=false; v[id+'_agtr']=[]; v[id+'_agtrilha']=false; return; }
@@ -477,7 +489,9 @@ function g2cdLarg(c){ let w=0, n=0; for(const p of ((c&&c.parts)||[])){ if(!p) c
 // 16/10, "um cartão por linha com colunas alinhadas"): grade de cartões (engine.CARTOES_CSS); em cada um, seta (itens dentro), título com o selo
 // de estado, as G2_CD_MAX primeiras colunas à vista com valor, cada uma com o seu rótulo, e o ⋯. A largura medida (_cdgtc) fica sem uso no desenho
 function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+'_mdcols']||g2colsVis(self,sp), off=sp.sel?1:0, n=cols.length;
-  const parte=(rw)=>{ const cs=rw.cells||[]; return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,off+n), tr:cs.slice(off+n)}; };
+  // a faixa da fazenda (g2fgrp) tem uma célula de dados só (as outras saem para o span): o ⋯ vem logo depois dela, não depois de n células
+  const parte=(rw)=>{ const cs=rw.cells||[]; const k=/\bg2fgrp\b/.test(rw.cls||'')?cs.slice(off).findIndex(c=>c&&!c.isData):-1; const fim=k>=0?off+k:off+n;
+    return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,fim), tr:cs.slice(fim)}; };
   const P0=rows.map(parte), dat=P0.filter((P,k)=>!rows[k].grp).map(P=>P.dat);
   // VIS-07 (17/10/2026): o selo de estado (1ª coluna à vista em que toda célula com valor começa por um selo: Fase, Situação) vai ao lado do
   // título e sai dos campos; os campos são as G2_CD_MAX colunas seguintes com valor
@@ -599,9 +613,10 @@ function g2vals(self,sp,v,mask){
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
-  v[id+'_rows']=flat.map(({r,lvl,has,pf})=>{
+  const algumFilho=flat.some(x=>x.has);   // TAB-13: há seta de abrir à vista (a folha guarda o lugar dela)
+  v[id+'_rows']=flat.map(({r,lvl,has,pf,ab})=>{
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
-    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
+    const cells=[]; const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'g2csel',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
@@ -615,11 +630,12 @@ function g2vals(self,sp,v,mask){
       if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!p.decide&&!/›\s*$/.test(String(p.t||''))&&!/^\+?\s*Incluir\b/.test(String(p.t||''));   /* ficam na célula: a decisão do momento (decide: confirmar ou voltar de uma pergunta da linha) e o "Incluir" da linha de inclusão ou da mãe vazia (BOT-10, CAD-03) */ const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;':'')};
-      // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta (TAB-11, sem girar) no começo; com filhos, a seta gira e abre ali mesmo
-      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.drill=!has&&canOpen&&!r.fgrp; cell.caretNo=!has&&!cell.drill; const open=(r.fgrp?exp[r.id]!==false:!!exp[r.id])||(g2filtering(st)&&has);
+      // TAB-13 (17/10/2026, proprietário: "o simbolo de drill down so deve aparecer onde de fato terá um detalhamento drill down"): a seta só na
+      // linha com filhos (gira e abre ali mesmo, TAB-11); a linha folha não tem seta, nem a "seta de ir": abrir o detalhe é o clique na linha
+      // (hover verde e foco, SEL-01/02). Na árvore com algum filho à vista, a folha guarda o lugar da seta (recuo vazio) e os nomes alinham
+      if(ci===0 && arv && (has||algumFilho)){ cell.hasCaret=true; cell.caretOk=has; cell.drill=false; cell.caretNo=!has; const open=!!ab;   /* TAB-12: o estado é o do g2flat (o que a linha mostra) */
         const sa=g2seta(open,g2text(r,c)); cell.caretExp=sa.exp; cell.caretLabel=sa.lab;
-        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=r.fgrp?(x[r.id]===false):!x[r.id]; g2set(self,id,{x}); }; }
-      else if(ci===0 && canOpen){ cell.hasCaret=true; cell.caretOk=false; cell.caretNo=false; cell.drill=true; }
+        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||{}); x[r.id]=!open; g2set(self,id,{x}); }; }
       else { cell.hasCaret=false; }
       cell.carT=!!cell.hasCaret&&!sp.sel;   // TAB-09: com seleção, a seta vai para a 1ª célula (abaixo, depois de todas as linhas)
       cells.push(cell); });
@@ -646,12 +662,12 @@ function g2vals(self,sp,v,mask){
   v[id+'_acoes']=acoes;
   if(sp.rmenu&&!acoes) v[id+'_rows'].forEach(r=>r.cells.pop());
   v[id+'_ncols']=cols.length+(sp.sel?1:0)+(acoes?1:0);
-  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (de abrir ou de ir) fica na 1ª célula,
+  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta de abrir (a de ir saiu, TAB-13) fica na 1ª célula,
   // antes da caixa; a linha sem seta guarda o lugar (22 px) para as caixas ficarem alinhadas; o recuo do nível continua na célula do nome
   v[id+'_selArw']=false;
-  if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&(c.caretOk||c.drill)); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));
-    if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk), dr=!!(c.hasCaret&&c.drill);
-      Object.assign(s0,{carT:true, caretOk:ok, drill:dr, caretNo:!ok&&!dr, caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
+  if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&c.caretOk); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));   // TAB-13: só a seta de abrir
+    if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk);
+      Object.assign(s0,{carT:true, caretOk:ok, drill:false, caretNo:!ok, caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   if(rows.some(r=>r.fgrp)){ const fundo=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(fundo); v[id+'_count']=g2nivel1(g2qrows(sp,st,rows)).filter(fundo).length; v[id+'_all']=g2nivel1(rows).length; }   // SAF-FAZ-3: conta itens, não fazendas
   if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos
@@ -679,7 +695,7 @@ function g2vals(self,sp,v,mask){
   v[id+'_colall']=()=>g2set(self,id,{x:{}});
   // um só botão: "Expandir tudo" até tudo estar aberto; aí vira "Recolher tudo"
   const xids=[]; const wx=(l)=>l.forEach(r=>{ if(r.kids&&r.kids.length){ xids.push(r.id); wx(r.kids); } }); wx(rows);
-  const xe=st.x||sp.x0||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
+  const xe=st.x||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
   v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
   // sp.totf (opcional, posto pela tela em tempo de execução): total vindo do serviço de domínio quando a soma simples não serve (R$/ha, unidade);

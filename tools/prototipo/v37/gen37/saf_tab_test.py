@@ -5,7 +5,7 @@ T2 sem coluna Situação: só o talhão que pede atenção (A conferir, Sobrepos
 T3 a célula do plano mostra só o plano (sem "Ajustar insumos"); o ajuste segue no painel da linha ("Ajustar insumos e doses de T7").
 T4 o seletor "Unidade de produtividade" só aparece com a Meta à vista; mostrar a Meta pelo seletor de colunas traz o seletor.
 T5 (15/10) linha sem botão solto: Dividir, Aplicar plano e Excluir no ⋯ da linha, com ícone.
-T6 talhão com um só cultivo abre recolhido; com parcelas ou pendência, aberto.
+T6 todo talhão nasce recolhido, também com parcelas ou pendência (TAB-12, 17/10; antes: com parcelas ou pendência, aberto).
 T7 nota da área de ações sem a frase repetida ("sem plano não entram…") e sem referência técnica ("CD-02").
 T8 a 390 as 3 primeiras (Talhão, Cultura, Plano agronômico). T11 a 390 o "Dividir" sai da linha e fica no painel do talhão.
 T9 sem erro de JS.
@@ -35,6 +35,8 @@ def abre(w):
     c.aparelho(w, 1000 if w > 400 else 844, 1 if w > 400 else 2, w < 400)
     c.goto(U('Main.dc.html'), .3); J("localStorage.clear();sessionStorage.clear()")
     c.goto(U('SAF.dc.html#saf=S2627&etapa=2'), .6)
+    # TAB-12 (17/10/2026): a tabela agrupa por fazenda também com uma só e a faixa nasce recolhida; a pessoa abre a faixa da Santa Rita
+    espera("document.querySelector('%s [role=row].g2fgrp button.g2car')" % G); J("(()=>{const b=document.querySelector('%s [role=row].g2fgrp button.g2car[aria-expanded=false]'); if(b) b.click();})()" % G)
     espera("document.querySelectorAll('%s [role=row].g2ed').length>=5" % G)
 def head(): return J("[...document.querySelectorAll('%s [role=columnheader]')].filter(h=>h.getClientRects().length).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim()).filter(Boolean)" % G) or []
 def linha(t): return J("(()=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>{const c=r.querySelector('.g2c0'); return c&&c.innerText.replace(/[▾▸]/g,'').trim().split(/\\s+/)[0]===%s;}); return r||null;})()" % (G, json.dumps(t)))
@@ -68,7 +70,9 @@ try:
     sec = J("(()=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>/^T3/.test((r.querySelector('.g2c0')||{}).innerText||'')); if(!r) return null; const m=r.querySelector('.g2mais'); const its=m?[...m.nextElementSibling.querySelectorAll('[role=menuitem]')]:[]; return {solto:[...r.querySelectorAll('button')].filter(b=>b.offsetParent&&!b.classList.contains('g2mais')&&!b.classList.contains('g2car')).map(b=>b.innerText.trim()), menu:its.map(i=>[i.textContent.trim(),!!i.querySelector('svg')])};})()" % G) or {}
     chk('T5 linha T3: nenhum botão solto; o ⋯ tem Dividir, Aplicar plano e Excluir, cada um com ícone', sec.get('solto') == [] and [x[0] for x in sec.get('menu', [])] == ['Dividir', 'Aplicar plano', 'Excluir'] and all(x[1] for x in sec.get('menu', [])), sec)
     exp = J("(()=>{const ex=t=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>{const c=r.querySelector('.g2c0'); return c&&c.innerText.replace(/[▾▸]/g,'').trim().split(/\\s+/)[0]===t;}); const b=r&&r.querySelector('[aria-expanded]'); return b?b.getAttribute('aria-expanded'):null;}; return [ex('T1'),ex('T2'),ex('P1'),ex('P2')];})()" % G)
-    chk('T6 T1 (parcelas) e P1 (a conferir) abertos; T2 e P2 (um cultivo) recolhidos', exp == ['true', 'false', 'true', 'false'], exp)
+    # TAB-12 (17/10/2026, proprietário: "Por padrão coloque sempre os cartoes e tabelas com drill down recolhido"): todo talhão nasce recolhido,
+    # também com parcelas (T1) ou pendência (P1); antes (SAF-TAB, 14/10) T1 e P1 abriam abertos
+    chk('T6 todo talhão nasce recolhido: T1 (parcelas), T2, P1 (a conferir) e P2', exp == ['false', 'false', 'false', 'false'], exp)
     nota = J("(()=>{const a=document.querySelector('[data-acoes]'); return a?(a.innerText+' '+[...a.querySelectorAll('.acoes-menu [role=menuitem]')].map(b=>b.textContent).join(' ')).replace(/\\s+/g,' '):''})()") or ''
     tro = J("[...document.querySelectorAll('[data-acoes] button')].filter(b=>b.getClientRects().length).map(b=>b.innerText.replace(/\\s+/g,' ').trim()).filter(t=>/Trocar safra/.test(t))") or []
     chk('T10 "‹ Trocar safra" embaixo, com a seta de voltar (14/10: "faltou setinha pra trás")', tro == ['‹ Trocar safra'], tro)

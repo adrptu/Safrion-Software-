@@ -211,7 +211,7 @@ function cadQf(self,v,gid,key,defs,opc){ const q=self.state[key]||''; const rows
 // abertura da árvore ao trocar o filtro rápido (opc.pais): abre o pai com filho que passa e recolhe o que passa sozinho; sem filtro, volta a de antes
 function cadQfX(self,gid,d){ const st=g2st(self,gid); const SK='_cadqfx_'+gid;
   if(!d){ if(self[SK]){ g2set(self,gid,{x:self[SK]}); self[SK]=null; } return; }
-  if(!self[SK]) self[SK]=Object.assign({},st.x||GR(gid).x0||{}); const x=Object.assign({},self[SK]);
+  if(!self[SK]) self[SK]=Object.assign({},st.x||{}); const x=Object.assign({},self[SK]);
   const w=l=>l.forEach(g=>{ if(!Array.isArray(g.kids)) return; if(cadRegs(g.kids).some(d.f)) x[g.id]=true; else if(d.fp&&d.fp(g)) x[g.id]=false; w(g.kids); }); w(RW(self,gid));
   g2set(self,gid,{x:x}); }
 // os chips entram no lugar do filtro rápido do motor (TAB-01: logo depois da busca; TAB-02: sem "x de y" com filtro rápido)
@@ -687,7 +687,6 @@ def cd06():
     rows=[dict(id='G_'+g,ro=True,v=dict(item=g),s={},p={},kids=ks) for g,ks in grupos.items()]
     gi=grid([dict(k='item',l='Grupo · item'),dict(k='saldo',l='Saldo em estoque',t='num',a='r'),dict(k='un',l='Unidade-base · conversão'),dict(k='lote',l='Rastreio'),
              dict(k='local',l='Local padrão')],rows,gid='g_itm',tree=True,dele=True,total=False,
-        x0={r['id']:True for r in rows},
         edit=dict(m='form',title='Item',newTitle='Cadastrar item',leafOnly=True,
             sub='Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.',
             fields=[txt('item','Nome do item'),sel('grupo','Grupo',D2.GRUPOS+['Produto agrícola','Embalagem'],**{'def':'Fertilizantes'}),
@@ -720,7 +719,7 @@ function EXTRAVALS(self,v){ protege(self,v,'g_itm'); protege(self,v,'g_loc');
     const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); };
     const cur=rows.find(g=>g.kids&&g.kids.some(k=>k.id===r.id)); if(cur&&cur.v.item===r.v.grupo) return;
     rm(rows); let g=rows.find(x=>x.kids&&x.v.item===r.v.grupo); if(!g){ g={id:'G_'+r.v.grupo,ro:true,v:{item:r.v.grupo},s:{},p:{},kids:[]}; rows.push(g); }
-    g.kids.push(r); const x=Object.assign({},(g2st(self,'g_itm').x)||GR('g_itm').x0||{}); x[g.id]=true; g2set(self,'g_itm',{rows:rows,x:x,fl:r.id}); }; }
+    g.kids.push(r); const x=Object.assign({},(g2st(self,'g_itm').x)||{}); x[g.id]=true; g2set(self,'g_itm',{rows:rows,x:x,fl:r.id}); }; }
 ''')
     HEIGHTS37[fname]=2180
     shell37('CD-06','Produtos, unidades e locais',corpo,fname=fname,subtitle='Cadastre itens com unidade, conversão e rastreio, e os locais onde ficam; saldos e movimentos vivem no Estoque.',
