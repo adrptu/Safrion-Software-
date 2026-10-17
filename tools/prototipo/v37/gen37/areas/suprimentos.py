@@ -577,18 +577,16 @@ function PREVALS(self,v){ const sel=self.state.selp;
     r.p.sit=(sel===r.id)?[chipc('Selecionada','green')]:(i===0?[chipc('Melhor equalizado','green')]:[M('+R$ '+nf(r.v.tot-RW(self,'g_cmp')[0].v.tot))]); });
   }
 function EXTRAVALS(self,v){
-  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); };
-  v.env113=()=>{ window.location.href='SU-01.dc.html'; }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
-    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
-                 ,
-                 acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
+  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
+    # EX-50(a)-SUP (PR #106): sem rascunho fictício; falta de manutenção é conferida em Necessidades (SU-01), não enviada daqui
+    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação.',g)
            + bloco(f'Comparação equalizada · SOL-2026-07 · Fertilizantes','Compare mercadoria, frete, prazo e condição no mesmo critério e selecione a proposta.',gc
                    + nota('Itens: '+', '.join(n+' '+nf(o['qtd'])+' '+o['un'] for n,o in fert.items())+f". Alçada pelo valor: {_alcada(best['tot'])} (até R$ 300 mil)."),
                    acao=alink('SU-05.dc.html','Aprovar contratação','Abre contratos e pedidos','doc')))
     HEIGHTS37[fname]=1190
     shell37('SU-04','Solicitações e cotações',corpo,fname=fname,
       subtitle='Cotações nascem da necessidade (SOL-2026-07 e faltas de manutenção); a comparação equaliza propostas e a seleção registra justificativa.',
-      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar · 1 rascunho','yellow'),
+      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar','yellow'),
       primary_html=primb('sel_prop',f"Selecionar {best['nome']}",'check'),
       footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17). '
              'O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.')
