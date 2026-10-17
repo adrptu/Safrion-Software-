@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contraprova G2 · setas no grupo de talhões</title>
+<style>
+  :root { --tinta: #15201A; --linha: #6B776F; --fundo: #FFFFFF; --foco: #1E7A4C; }
+  body { font-family: system-ui, sans-serif; color: var(--tinta); background: var(--fundo); margin: 16px; line-height: 1.45; }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.1rem; margin-top: 2rem; }
+  .variante { border: 1px solid var(--linha); border-radius: 10px; padding: 12px; max-width: 520px; }
+  .grade { display: grid; grid-template-columns: repeat(2, 200px); gap: 16px; margin: 8px 0; }
+  .grade button { min-height: 48px; min-width: 48px; padding: 8px 10px; border: 2px solid var(--linha); border-radius: 10px;
+                  background: #FFFFFF; color: var(--tinta); font: inherit; text-align: left; }
+  .grade button[aria-pressed="true"] { border-color: var(--tinta); border-width: 4px; }
+  .grade button:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+  #registro { font-family: ui-monospace, monospace; font-size: .85rem; }
+  textarea { width: 100%; max-width: 640px; height: 8rem; }
+</style>
+</head>
+<body>
+<h1>Contraprova G2: as setas chegam ao grupo de talhões com leitor de tela?</h1>
+<p>Página sintética do MAPA-UX (Safrion). Nenhum dado real. Cada variante tem os mesmos quatro botões em grade 2 × 2 e a mesma programação de teclado; só muda o papel do contêiner.</p>
+<p>Como registrar: siga o roteiro do documento <code>gemini-revisao-claude.md</code> §2. Ao fim, use "Mostrar registro" e copie o texto.</p>
+
+<h2 id="t-a">Variante A · role=group</h2>
+<p>Texto antes da variante A.</p>
+<div class="variante" data-variante="A">
+  <p id="instr-a">Setas: talhão vizinho. Enter: marcar. Home e End: primeiro e último.</p>
+  <div role="group" aria-label="Talhões da Fazenda Teste, variante A" aria-describedby="instr-a" class="grade"></div>
+</div>
+<p>Texto depois da variante A.</p>
+
+<h2 id="t-b">Variante A2 · role=toolbar</h2>
+<p>Texto antes da variante A2.</p>
+<div class="variante" data-variante="A2">
+  <p id="instr-b">Setas: talhão vizinho. Enter: marcar. Home e End: primeiro e último.</p>
+  <div role="toolbar" aria-label="Talhões da Fazenda Teste, variante A2" aria-describedby="instr-b" class="grade"></div>
+</div>
+<p>Texto depois da variante A2.</p>
+
+<h2 id="t-c">Variante A3 · role=application só no grupo</h2>
+<p>Texto antes da variante A3.</p>
+<div class="variante" data-variante="A3">
+  <p id="instr-c">Setas: talhão vizinho. Enter: marcar. Home e End: primeiro e último.</p>
+  <div role="application" aria-roledescription="mapa de talhões" aria-label="Talhões da Fazenda Teste, variante A3" aria-describedby="instr-c" class="grade"></div>
+</div>
+<p>Texto depois da variante A3.</p>
+
+<h2 id="t-reg">Registro</h2>
+<p id="estado">Foco atual: nenhum.</p>
+<button type="button" id="mostrar">Mostrar registro</button>
+<textarea id="saida" readonly aria-label="Registro em JSON"></textarea>
+<ol id="registro"></ol>
+
+<script>
+// <vizinho> função pura, testada em vizinho_unit.js (Node)
+function vizinho(centros, i, tecla) {
+  const d = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[tecla];
+  if (!d) return -1;
+  const o = centros[i]; let melhor = -1, nota = Infinity;
+  for (let j = 0; j < centros.length; j++) {
+    if (j === i) continue;
+    const dx = centros[j].x - o.x, dy = centros[j].y - o.y;
+    const ao_longo = dx * d[0] + dy * d[1];          // distância na direção pedida
+    if (ao_longo <= 0) continue;                      // só o semiplano da direção
+    const atravessado = Math.abs(dx * d[1] - dy * d[0]);
+    const n = ao_longo + 2 * atravessado;             // penaliza o desvio lateral
+    if (n < nota - 1e-9) { nota = n; melhor = j; }    // empate: fica o menor índice (ordem do DOM)
+  }
+  return melhor;
+}
+// </vizinho>
+
+const TALHOES = [
+  'P1, 30 ha, café em produção, a liberar',
+  'P2, 45 ha, milho V10, em dia',
+  'T3, 120 ha, soja em semeadura, impedida',
+  'T4, 80 ha, feijão em colheita, em curso'
+];
+const registro = [];
+function anota(variante, tecla, alvo, impedido, foco) {
+  const e = { n: registro.length + 1, variante, tecla, alvo, padrao_impedido: impedido, foco_depois: foco, t: Math.round(performance.now()) };
+  registro.push(e);
+  const li = document.createElement('li');
+  li.textContent = `[${variante}] ${tecla} · alvo: ${alvo} · impedido: ${impedido} · foco depois: ${foco}`;
+  document.getElementById('registro').appendChild(li);
+}
+function nomeDe(el) { return el ? (el.getAttribute('aria-label') || el.textContent.trim().slice(0, 40) || el.tagName) : 'nenhum'; }
+
+document.querySelectorAll('.grade').forEach((grupo) => {
+  TALHOES.forEach((nome, k) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = nome; b.setAttribute('aria-pressed', 'false');
+    b.tabIndex = k === 0 ? 0 : -1;                    // tabindex móvel: só um botão na ordem de Tab
+    b.addEventListener('click', () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'));
+    grupo.appendChild(b);
+  });
+  const botoes = [...grupo.querySelectorAll('button')];
+  const move = (j) => { botoes.forEach((b) => (b.tabIndex = -1)); botoes[j].tabIndex = 0; botoes[j].focus(); };
+  grupo.addEventListener('focusin', (ev) => { const j = botoes.indexOf(ev.target); if (j >= 0) { botoes.forEach((b) => (b.tabIndex = -1)); botoes[j].tabIndex = 0; } });
+  grupo.addEventListener('keydown', (ev) => {
+    const i = botoes.indexOf(document.activeElement); if (i < 0) return;
+    if (ev.key === 'Home') { ev.preventDefault(); move(0); return; }
+    if (ev.key === 'End') { ev.preventDefault(); move(botoes.length - 1); return; }
+    if (!ev.key.startsWith('Arrow')) return;
+    ev.preventDefault();                               // a página não rola com as setas dentro do grupo
+    const centros = botoes.map((b) => { const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    const j = vizinho(centros, i, ev.key); if (j >= 0) move(j);
+  });
+});
+
+// tudo o que a página recebe; se o leitor de tela consumir a tecla, ela não aparece aqui
+document.addEventListener('keydown', (ev) => {
+  const v = ev.target.closest && ev.target.closest('[data-variante]');
+  setTimeout(() => {
+    anota(v ? v.dataset.variante : 'fora', ev.key, nomeDe(ev.target), ev.defaultPrevented, nomeDe(document.activeElement));
+    document.getElementById('estado').textContent = 'Foco atual: ' + nomeDe(document.activeElement);
+  }, 0);
+});
+document.getElementById('mostrar').addEventListener('click', () => {
+  document.getElementById('saida').value = JSON.stringify({ agente: navigator.userAgent, registro }, null, 1);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+## páginas (data UTC: 2026-10-17T01:52Z)
+200 39088 bytes sha256=833d0187ef781172 https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
+200 82438 bytes sha256=c387b1907b2a6025 https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/
+200 52534 bytes sha256=9615728f44a32e09 https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
+200 1410696 bytes sha256=c0fea16fc7477795 https://www.w3.org/TR/wai-aria-1.2/
+200 48929 bytes sha256=c3905630a35b6e82 https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html
+200 45539 bytes sha256=b42109151ffd48c9 https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html
+200 48570 bytes sha256=53d9dc5260337c5b https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts.html
+200 85770 bytes sha256=bc0b7f0afa54f9f3 https://www.w3.org/WAI/WCAG22/Understanding/reflow.html
+200 203097 bytes sha256=2f48093e72b1070c https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+200 49534 bytes sha256=9515bdd0faab14d6 https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html
+200 52023 bytes sha256=3803f84695f66fbe https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html
+200 515427 bytes sha256=b9328e02cfdc4bb5 https://www.nvaccess.org/files/nvda/documentation/userGuide.html
+200 121194 bytes sha256=2cdf7db3a595e6c8 https://developer.chrome.com/blog/viewport-resize-behavior
+
+## apg_toolbar :: Implement focus management so the keyboard tab sequence includes one stop for the toolbar and arrow keys move focus among the controls in the toolbar. In horizontal toolbars, Left Arrow and Right Arrow navigate among controls. Up Arrow and Down Arrow can dupli
+
+## apg_toolbar :: If the controls are arranged vertically, the toolbar element has aria-orientation set to vertical . The default orientation is horizontal. H
+
+## apg_toolbar :: However, in circumstances where discoverability of a function is crucial, it may be helpful if disabled controls are focusable so screen reader users are more likely to be aware of their presence. For
+
+## apg_teclado :: When using roving tabindex to manage focus in a composite UI component, the element that is to be included in the tab sequence has tabindex="0" and all other focusable elements contained in the composite have tabindex="-1" . The a
+
+## apg_listbox :: Shift + Down Arrow (Optional): Moves focus to and toggles the selected state of the next option. Shift + Up Arrow (Optional): Move
+
+## aria12 :: toolbar role A colle
+
+## aria12 :: Characteristic Value Superclass Role: group Related Concepts: menubar 
+
+## aria12 :: And, when a user navigates into an element with role application , assistive technologies that intercept standard input events SHOULD switch to a mode that passes most or all standard input events through to the web application. F
+
+## aria12 :: For example, a presentation slide editor uses arrow keys to change the positions of textbox and image elements on the slide. There are not any WAI-ARIA widget roles that correspond to such an interact
+
+## aria12 :: Identifies the currently active element when DOM focus is on a composite widget, combobox , textbox , group , or application . aria-atomic I
+
+## aria12 :: navigation role A landmark containing a collection of navigational elements (usually links) for navigating the document or related documents. User agents SHOULD treat ele
+
+## u257 :: A map allows users to drag the view of the map around, and the map has up/down/left/right buttons to move the view as well. A sortable list 
+
+## u257 :: However, achieving keyboard equivalence for a dragging operation does not automatically meet this success criterion, unless that equivalent keyboard operation also provides controls that can be clicked or tapped with a pointer. It
+
+## u251 :: All functionality that uses multipoint or path-based gestures for operation can be operated with a single pointer without a path-based gesture, unless a multipoint or path-based gesture is essential .
+
+## u214 :: Active only on focus The keyboard shortcut for a user interface component is only active when that component has focus. 
+
+## u1410 :: Except for parts of the content which require two-dimensional layout for usage or meaning.
+
+## u1410 :: Examples of content which requires two-dimensional layout are images required for understanding (such as maps and diagrams), video, games, p
+
+## u1411 :: The visual presentation of the following have a contrast ratio of at least 3:1 against adjacent color(s): User Interface Components Visual information required to identify user int
+
+## u2411 :: When a user interface component receives keyboard focus, the component is not entirely hidden due to author-created content. Note 1 Where co
+
+## u2411 :: Content opened by the user may obscure the component receiving focus. If the user can reveal the focused component without advancing the keyboard focus, the component with focus is not considered visually hidden due to author-crea
+
+## u1413 :: Hoverable If pointer hover can trigger the additional content, then the pointer can be moved over the additional content without the additional content disappearing; Persistent The additional content 
+
+## nvda :: You do this by switching to focus mode, where almost all keys are passed to the control. When in Browse mode, by default, NVDA will automatically switch to focus mode if you tab to or click on a particular control that requires it. Conversely, tabbing to or clicking on a control that does not require focus mode will switch back 
+
+## nvda versão :: NVDA 2026.2 User Guide
+
+## chrome_vp :: Depending on which browser and OS combination a visitor uses, one of the behaviors is used, beyond your control. Mapping
+
+## chrome_vp :: resizes-visual : Resize only the Visual Viewport but not the Layout Viewport. resizes-content : Resize both the Visual Viewport and Layout Viewport. overlays-content : Do not resize any viewport. To o
+

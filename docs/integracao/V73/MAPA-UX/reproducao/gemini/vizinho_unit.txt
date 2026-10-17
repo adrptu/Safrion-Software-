@@ -1,0 +1,12 @@
+ok    NO → direita: 1
+ok    NO → baixo: 2
+ok    NO → esquerda (borda): -1
+ok    NO → cima (borda): -1
+ok    SE → cima: 1
+ok    SE → esquerda: 2
+ok    tecla que não é seta: -1
+ok    alinhado vence torto: 1
+ok    empate → menor índice: 1
+ok    propriedade (2000 casos × 4 setas): violações: 0
+
+TOTAL ok 10 · falha 0
