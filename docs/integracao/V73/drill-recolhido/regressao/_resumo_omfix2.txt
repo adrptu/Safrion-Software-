@@ -1,3 +1,7 @@
 ma_revisao exit=0 74s RESULTADO: 18/18 ok
 ma_correcoes_pm exit=0 72s RESULTADO: 12/12 ok
 FIM
+ma_unica exit=0 296s RESULTADO: 23/23 ok
+ma_rastreio exit=0 112s RESULTADO: 58/58 ok
+ma_atrito exit=0 123s RESULTADO: 13/13 ok
+FIM
