@@ -576,7 +576,7 @@ function g2vals(self,sp,v,mask){
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+(sp.del?1:0);   // trilhas da grade = colunas visíveis
+  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+((sp.del||sp.rmenu)?1:0);   // trilhas da grade = colunas visíveis
   v[id+'_mdcols']=cols;   // modo Cartões (15/10/2026): as colunas à vista, na ordem das células da linha (g2cdVals)
   g2cabVals(self,sp,v,st,rows,cols);   // cabeçalho (⇅ e funil) e filtro da coluna: a mesma peça das tabelas próprias (TAB-08)
   const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
@@ -611,14 +611,14 @@ function g2vals(self,sp,v,mask){
     // SAF-FAZ-3: o grupo transparente (fazenda) é uma faixa de cabeçalho: a 1ª célula ocupa as colunas de dados (nome, área e contagem juntos)
     if(r.fgrp){ const d=cells.filter(x=>x.isData); if(d.length){ d[0].st+='grid-column:span '+(d.length)+';'; d[0].pw='max-width:none;'; } for(let i=cells.length-1;i>=0;i--){ if(cells[i].isData&&cells[i]!==d[0]) cells.splice(i,1); } }
     const semDel=!sp.del||r.livre||r.fora||r.nosel||!!r.ro;
-    if(sp.rmenu&&sp.del&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
-      const asking=(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
+    if(sp.rmenu&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
+      const asking=!semDel&&(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
       const its=acts.map(p=>({t:p.al||p.t, ico:g2acaoIco(p.al||p.t), cls:'', fn:fnDe(p)}));
       if(!semDel) its.push({t:'Excluir', ico:g2acaoIco('Excluir'), cls:'g2mais-destr', fn:()=>{ if(r.xdel&&v&&v[r.xdel]){ v[r.xdel](r.id); return; } g2set(self,id,{cf:r.id}); }});   // SAF-FAZ-3: r.xdel = linha guardada em outra grade
       cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,trash:false,rm:true,rmLabel:'Mais ações de '+nome,rmItems:its,st:'padding:4px 6px;white-space:nowrap;',
         delLabel:'Excluir '+nome, ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); } }); }
-    else if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+    else if((sp.rmenu&&semDel)||(sp.del&&(r.livre||r.fora||r.nosel))) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     // lvl…gk: para o modo Cartões (g2cdVals); grp é só o grupo do Agrupar por (r.grp = {k, lv}); o grp:true das linhas-pai da tela (talhão
@@ -626,6 +626,11 @@ function g2vals(self,sp,v,mask){
     return {id:r.id, lvl, has, nk:(r.kids||[]).length, grp:!!(r.grp&&typeof r.grp==='object'), gk:(r.grp&&typeof r.grp==='object')?String(r.grp.k):'',
       cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0&&!pf?' g2kid':'')+(r.fgrp?' g2fgrp':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
+  // EX47 A1: não reservar uma coluna inteira quando nenhuma linha oferece ação.
+  const acoes=!!sp.del||v[id+'_rows'].some(r=>r.cells.some(c=>c.rm));
+  v[id+'_acoes']=acoes;
+  if(sp.rmenu&&!acoes) v[id+'_rows'].forEach(r=>r.cells.pop());
+  v[id+'_ncols']=cols.length+(sp.sel?1:0)+(acoes?1:0);
   // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (▸/▾ ou ›) fica na 1ª célula,
   // antes da caixa; a linha sem seta guarda o lugar (22 px) para as caixas ficarem alinhadas; o recuo do nível continua na célula do nome
   v[id+'_selArw']=false;
@@ -1506,3 +1511,4 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
   window.addEventListener('resize',()=>fecha(false)); document.addEventListener('scroll',e=>{ if(ab&&!(e.target&&e.target.nodeType===1&&ab.box.contains(e.target))) fecha(false); },true);
   window.g2dselAbre=abre;   // teste e sonda
 })();
+
