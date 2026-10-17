@@ -13,6 +13,11 @@ Mede, pela fórmula da WCAG 2.2 (1.4.3 texto 4,5:1; 1.4.11 não-texto 3:1):
      no envelope P5/P50/P95 de luminância da imagem inteira (não só sob os pivôs);
   E. candidatos para o token "concluído" que passem 4,5:1 e mantenham a separação ΔE00 nas quatro visões.
 Funções de cor copiadas de reproducao/cores.py (6c03d7e), sem mudança.
+
+Δ2 17/10 (Codex, PR #47, comentário 6227901968): o "pior caso" da seção B vale só para os fundos testados da
+Santa Rita. O limite para qualquer fundo opaco sai do modo --placa-limite (placa a 90 % sobre preto), que roda
+sozinho, sem o render: python3 -I -B contraste_pares.py --placa-limite > contraste_pares_placa.txt
+A saída contraste_pares.txt (modo normal) fica como foi gerada.
 """
 import math, sys, os, zlib, struct, colorsys
 
@@ -58,6 +63,24 @@ FUNDO='#E3EADB'; TEXTO='#15201A'; BRANCO='#FFFFFF'; FOCO='#1E7A4C'; SEL='#15201A
 PROP={'impede':'#89291A','urgente':'#CD6F1D','atencao':'#EAC453','em-dia':'#4CA96B',
       'em-curso':'#275A86','programado':'#A0C4E3','concluido':'#73827A','neutro':'#C9CFCB','nao-se-aplica':'#E4E9DF'}
 ok=lambda v,lim: 'ok' if v>=lim else 'FALHA'
+
+if len(sys.argv) > 1 and sys.argv[1] == '--placa-limite':
+    # Δ2 17/10: limite da placa branca translúcida para QUALQUER fundo opaco. A luminância do composto cresce com a do
+    # fundo, então o fundo mais escuro possível (preto) dá o menor contraste; texto opaco #15201A.
+    PRETO = '#000000'
+    p8 = mix(BRANCO, PRETO, 0.90)                       # composição em 8 bits, como mix() faz nas seções A–F
+    Lexato = (lambda c: c/12.92 if c <= 0.04045 else ((c+0.055)/1.055)**2.4)(0.90)   # 0,9 sem arredondar a 8 bits
+    c8 = cr(TEXTO, p8); cx = (Lexato+0.05)/(L(TEXTO)+0.05)
+    print('G. Placa branca a 90 % atrás do texto #15201A: limite para qualquer fundo opaco (fundo preto)')
+    print(f'   placa sobre preto, composta em 8 bits: {p8} → texto #15201A {c8:.3f}:1')
+    print(f'   placa sobre preto, sem arredondar (0,9 em sRGB): {cx:.3f}:1')
+    print(f'   placa sobre branco: {cr(TEXTO, mix(BRANCO, BRANCO, 0.90)):.3f}:1 (teto)')
+    print(f'   os {cr(TEXTO, mix(BRANCO, mix("#89291A", FUNDO, 0.88), 0.90)):.2f}:1 da seção B valem só para os fundos testados da Santa Rita')
+    print('   Opacidade no ancestral do texto torna o texto translúcido e derruba o par. Exemplo do protótipo: o sub da Santa Rita')
+    print('   usa opacity .85 (areas/inicio.py:1405). Texto #15201A a 0,85 sobre a mesma placa (fundo preto):')
+    t85 = mix(TEXTO, p8, 0.85)
+    print(f'   texto efetivo {t85} × placa {p8} → {cr(t85, p8):.3f}:1 (ainda ≥ 4,5 aqui, mas deixa de ser o par medido; regra: sem opacity no ancestral do texto)')
+    sys.exit(0)
 
 print('A. Texto do rótulo sobre o preenchimento (WCAG 1.4.3: 4,5:1)')
 print(f"{'token':14} {'hex':8} | {'escuro opaco':>12} {'branco opaco':>12} | {'SR 0,88 hex':>11} {'escuro SR':>9} {'branco SR':>9}")

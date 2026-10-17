@@ -1,0 +1,8 @@
+G. Placa branca a 90 % atrás do texto #15201A: limite para qualquer fundo opaco (fundo preto)
+   placa sobre preto, composta em 8 bits: #E6E6E6 → texto #15201A 13.424:1
+   placa sobre preto, sem arredondar (0,9 em sRGB): 13.362:1
+   placa sobre branco: 16.754:1 (teto)
+   os 14.39:1 da seção B valem só para os fundos testados da Santa Rita
+   Opacidade no ancestral do texto torna o texto translúcido e derruba o par. Exemplo do protótipo: o sub da Santa Rita
+   usa opacity .85 (areas/inicio.py:1405). Texto #15201A a 0,85 sobre a mesma placa (fundo preto):
+   texto efetivo #343E39 × placa #E6E6E6 → 8.883:1 (ainda ≥ 4,5 aqui, mas deixa de ser o par medido; regra: sem opacity no ancestral do texto)
