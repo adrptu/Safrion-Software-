@@ -1312,7 +1312,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
       if(reds.length>3) at.push({t:'e mais '+(reds.length-3),al:'e mais '+(reds.length-3)+' recursos em falta: abrir a capacidade por mês',go:()=>capTog(self),st:'min-height:24px;'}); }
     else { let b=null; Object.values(G).forEach(g=>{ const c=g.max; if(c&&c.ocup!==null&&c.ocup>0&&(!b||c.ocup>b.c.ocup+1e-12)) b={g,c}; });
       if(b) at.push(atalho(b.g,b.c,'Maior uso: '+b.g.nome+' '+fmtOcup(b.c.ocup)+' · '+b.c.mes,false)); } }
-  v.v3_atalhos=at; v.v3_capexp=String(capAb); v.v3_captog=()=>capTog(self); v.v3_capt=(capAb?'▾':'▸')+' Capacidade por mês';   /* TAB-09: a seta da seção vem antes do nome (▸ fechada, ▾ aberta) */ v.v3_capab=capAb;
+  v.v3_atalhos=at; v.v3_captog=()=>capTog(self); v.v3_capexp=g2seta(capAb).exp;   /* TAB-09: a seta da seção vem antes do nome; TAB-11: a seta única, que gira com o aria-expanded (engine.seta) */ v.v3_capab=capAb;
   // g_cap: recurso × mês (ocupação); só a célula com demanda desta safra é tocável (filtra a g_op); "—" e cinza ficam inertes
   const capF=(st.cap&&st.cap.saf===saf&&G[st.cap.rec])?st.cap:null; const gc=GR('g_cap_'+sk(saf));
   if(gc){ const mis=capMeses(me.ini,me.fim); gc._c0=gc._c0||gc.cols.slice(); gc.cols=gc._c0.filter(c=>!/^m\d+$/.test(c.k)||mis.indexOf(Number(c.k.slice(1)))>=0); }
@@ -1581,7 +1581,7 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   self.__oc=(saf&&(st.step||1)===2)?syncTalhoes(self,saf,v):null; if(!self.__oc) self.__ocG=null;
   if(self.__xfn&&self.__xfn.sub===saf){ const f=self.__xfn.fn; self.__xfn=null; setTimeout(f,0); }   // SAF-FAZ-3: a ação pedida numa linha de outra fazenda, já na sub-safra dela (sgNaFazenda)
   // etapa 3: valores de partida (o bloco só aparece com safra e plano; os buracos existem sempre)
-  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capt:'▸ Capacidade por mês',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
+  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
   v.v3_captog=()=>capTog(self); v.v3_filx=()=>capSel(self,null,null);
   self.__e3=null;
   if(!saf) return;
@@ -1885,7 +1885,7 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
-      return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), sym:open?'▾':'▸', open, lab:(open?'Recolher ':'Expandir ')+key.split('||')[0], tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
+      return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), open, exp:g2seta(open).exp, lab:g2seta(open,key.split('||')[0]).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
         atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
               const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9; const ng=ngAc(a0);
@@ -1913,7 +1913,7 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
                 ret:()=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).filter((_,q)=>q!==j); if(!ad[A].length) delete ad[A]; upd({add:ad,err:{}}); } }; }));
           const usados=a.prods.filter((p,i)=>!rmMap[A+'|'+i]).map(p=>p.prod).concat(adds.map(x=>x.prod));
           const pk=(lp.pick||{})[A]; const pkOpen=pk!==undefined; const cat=catalogo().filter(p=>usados.indexOf(p.prod)<0);
-          return (o=>Object.assign(o,lpAc(self,A,cat,pk,upd,ERR,c,o)))({t:a.nome, op:a.op, sym:ao?'▾':'▸', open:ao, lab:(ao?'Recolher ':'Expandir ')+a.nome, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
+          return (o=>Object.assign(o,lpAc(self,A,cat,pk,upd,ERR,c,o)))({t:a.nome, op:a.op, open:ao, exp:g2seta(ao).exp, lab:g2seta(ao,a.nome).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
             semProd:!prods.length, prods, podeIncl:!ro&&!pkOpen, pkOpen:!ro&&pkOpen,
             pkOpts:[{v:'',t:'Escolha o insumo'}].concat(cat.map(p=>({v:p.prod,t:p.grupo+' · '+prodNome(p.prod,c)+' ('+p.un+')'}))), pkV:pk||'', pkErr:ERR('pick'+A), pkHasErr:!!ERR('pick'+A), pkFid:'lp_pick_'+A,
             incl:()=>{ const cur=self.state.lp; self.setState({g2ac:null}); upd({pick:Object.assign({},cur.pick||{},{[A]:''})}); setTimeout(()=>{ const el=document.getElementById(('ac-saf-lp-'+A).replace(/[^A-Za-z0-9_-]/g,'_')+'-in'); if(el) el.focus(); },0); },

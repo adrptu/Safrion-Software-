@@ -353,7 +353,7 @@ def navlink(m,act):
     return (f'<a href="{MODHOME.get(m,"#")}" style="display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 10px; font-size: 13px; text-decoration: none; color: {"#fff" if act else SIDE_TX}; background: {ACC if act else "transparent"}; font-weight: {700 if act else 500};">{icon(m,17,"#fff" if act else SIDE_MUTED)}{esc(m)}</a>')
 def openlink(href=None):
     href=href or ROW or TABLEHREF.get(CUR) or '#'
-    return f'<a href="{href}" aria-label="Abrir" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; text-decoration: none; font-size: 18px;">›</a>'
+    return f'<a href="{href}" aria-label="Abrir" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; text-decoration: none;">{seta_ir()}</a>'
 def act(text=None,href=None,urgent=False,open=False):
     """Célula de ação de linha: botão pequeno (opcional) e, quando a linha abre um detalhe, a seta › sempre na borda direita."""
     b=''
@@ -584,7 +584,7 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
     trs=''; ri=0; rowtexts=[]; coltexts=[]
     for r in rows:
         if isinstance(r,tuple) and r and r[0]=='__group__':
-            trs+=f'<tr><td colspan="{n}" style="padding: 9px 14px; font-size: 13px; font-weight: 700; background: {ACCS}; border-top: 1px solid {LINE}; color: {ACC};"><span aria-hidden="true" style="display: inline-block; margin-right: 8px;">▾</span>{r[1]}<span style="color: {MUTED}; font-weight: 600; margin-left: 10px;">{r[2]}</span></td></tr>'
+            trs+=f'<tr><td colspan="{n}" style="padding: 9px 14px; font-size: 13px; font-weight: 700; background: {ACCS}; border-top: 1px solid {LINE}; color: {ACC};"><span style="display: inline-flex; vertical-align: middle; margin-right: 8px;">{seta("g2seta-on")}</span>{r[1]}<span style="color: {MUTED}; font-weight: 600; margin-left: 10px;">{r[2]}</span></td></tr>'
             continue
         tds=''
         for c in r:
@@ -1492,8 +1492,49 @@ def acao_motivo(botao, dis, motivo):
 # TAB-08 · Tabela padrão (16/10/2026, proprietário: "padronize o visual desse modo de visão tabela em todos, mas adicionando nessa e nas demais o
 # drill down e os ícones em cada coluna de ordenação e filtro"; referência: Planos agronômicos › Atividades do plano). A tabela numa moldura própria
 # (borda e raio de 12 px, alinhada à barra), cabeçalho em maiúsculas pequenas sobre o fundo da DS, sem linha vertical, linhas de 44 px, ⇅ e funil
-# em toda coluna (cab_colunas_html, também nas tabelas próprias) e, na 1ª célula, a seta de quem abre: ▸/▾ abre os itens ali mesmo; › abre o detalhe (TAB-04)
-_SETA_DRILL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
+# em toda coluna (cab_colunas_html, também nas tabelas próprias) e, na 1ª célula, a seta de quem abre (TAB-04, desenho único da TAB-11): gira e abre os itens ali mesmo, ou leva ao detalhe
+# TAB-11 · Seta única de abrir e de ir (16/10/2026, proprietário, com a captura do CD-01: "mude o estilo do drill down daquele preto para a
+# setinha mais intuitiva e amigável dos debaixo, melhore ela e implemente como nosso padrão em tudo"). Um só desenho em todas as telas: o
+# chevron fino (traço de 1,75 px, 16 px) da linha que abre o detalhe, na cor do texto secundário, nunca o triângulo cheio (▸ ▾).
+#  - abrir/recolher ali mesmo: o ícone fica DENTRO do controle nativo que tem aria-expanded (botão só com a seta: seta_abrir; botão com o nome
+#    visível: seta() como 1º filho) e gira 90° com ele (fechado → direita; aberto → baixo; 120 ms, sem animação com prefers-reduced-motion);
+#  - ir para o detalhe (TAB-08): a mesma seta, sem girar (seta_ir), na linha ou no link que navega.
+# A função vem da semântica (botão com aria-expanded e nome "Abrir …"/"Recolher …" × linha/link que abre); o desenho é um só.
+# JS: g2seta(aberta, nome) no g2lib dá o aria-expanded e o nome; o ícone é sempre este (nada de glifo no estado da tela).
+SETA_SVG=('<svg class="g2seta-i" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" '
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3.5 10.5 8 6 12.5"/></svg>')
+def seta(cls=''):
+    """Ícone da TAB-11 (span.g2seta). Dentro de um controle com aria-expanded (filho direto) gira com ele; fora, aponta para a direita."""
+    return f'<span class="g2seta{(" "+cls) if cls else ""}" aria-hidden="true">{SETA_SVG}</span>'
+def seta_abrir(exp, rotulo, acao, controla='', cls=''):
+    """Botão só com a seta (abrir/recolher ali mesmo, TAB-11): nativo, aria-expanded, nome "Abrir …"/"Recolher …" (g2seta no JS).
+    exp, rotulo, acao e controla são buracos do template (ou texto). Alvo de 24 px no mouse e 44 px no toque (SETA_CSS)."""
+    ctl=f' aria-controls="{controla}"' if controla else ''
+    return (f'<button type="button" class="g2car{(" "+cls) if cls else ""}" aria-label="{rotulo}" aria-expanded="{exp}"{ctl} '
+            f'onClick="{acao}">{seta()}</button>')
+def seta_ir():
+    """A mesma seta para quem leva ao detalhe (TAB-08/TAB-11): não gira, não é alvo (a linha ou o link é), a mesma largura do botão."""
+    return seta('g2drill')
+SETA_VAZIO='<span class="g2seta-vazio" aria-hidden="true"></span>'   # linha sem seta guarda o lugar: os nomes ficam alinhados
+SETA_CSS=(
+    ":root{--g2seta-alvo:24px}@media (pointer:coarse){:root{--g2seta-alvo:44px}}"   # alvo: 24 px no mouse, 44 px no toque
+    ".g2seta{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:16px;height:16px;color:#65736A;line-height:0}"
+    ".g2seta>svg{display:block;width:16px;height:16px;transition:transform .12s ease-out}"
+    "[aria-expanded=true]>.g2seta>svg,[aria-expanded=true]>:is(sc-if,sc-for)>.g2seta>svg,details[open]>summary>.g2seta>svg,.g2seta.g2seta-on>svg{transform:rotate(90deg)}"
+    "@media (prefers-reduced-motion:reduce){.g2seta>svg{transition:none}}"
+    ".g2car{width:var(--g2seta-alvo);height:var(--g2seta-alvo);display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;"
+    "background:transparent;cursor:pointer;flex-shrink:0;padding:0;margin:0;color:#65736A;font:inherit;line-height:0}"
+    ".g2seta.g2drill,.g2seta-vazio{width:var(--g2seta-alvo);height:16px;flex-shrink:0;display:inline-flex}"
+    ".g2car:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}"   # anel inteiro: o botão fica na borda da célula
+    # no toque, na 1ª célula da tabela, o alvo de 44 px ocupa o recuo da célula (8 px) e o espaço até o nome (6 px): o nome perde 8 px em vez
+    # de 22 (a 390 px a 1ª coluna é estreita); a seta de ir e a linha sem seta acompanham, para os nomes seguirem alinhados
+    "@media (pointer:coarse){[data-g2g] :is([role=cell].g2c0,[role=cell].g2csel,[role=columnheader].g2th) :is(.g2car,.g2seta.g2drill,.g2seta-vazio){margin-left:-8px;margin-right:-6px}}"
+    ".g2seta-nome{display:inline-flex;align-items:center;gap:6px}"   # botão com o nome à vista e a seta antes dele
+    "@media (pointer:coarse){[aria-expanded]:has(>.g2seta),summary:has(>.g2seta){min-height:44px;box-sizing:border-box}}"   # seção, lote, "Capacidade por mês": 44 px no toque
+    "summary:has(>.g2seta){list-style:none}summary:has(>.g2seta)::-webkit-details-marker{display:none}summary:has(>.g2seta)::marker{content:''}"
+    # VIS-02: hover verde no botão e na seta da linha que abre o detalhe (só onde há ponteiro com hover)
+    "@media (hover:hover){.g2car:hover{background:#E4F3E9}.g2car:hover>.g2seta,:is(button,a,summary):hover>.g2seta,.g2ed:hover .g2seta.g2drill{color:#1E7A4C}}"
+)
 TABELA_CSS=(
     ".g2rola:has(>[role=table][data-g2g]){border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;margin:0 0 12px;flex:0 1 auto!important}"   # a moldura acaba na última linha; rola só quando passa da altura; sem margem lateral: a largura é dos dados (Agrofit a 1280 px sem rolagem lateral) e a borda alinha ao título do bloco
     "[data-g2g] [role=cell]{min-height:44px;box-sizing:border-box}"
@@ -1509,8 +1550,6 @@ TABELA_CSS=(
     # celular (até 480 px): "Agrupar por" e "Colunas" só com o ícone e o valor (o nome fica no aria-label), para a barra caber numa linha com
     # Tabela | Cartões e sobrar altura para as linhas (AC-PCM-22: ≥ 5 linhas acima da dobra a 390 px)
     "@media (max-width:480px){.g2rot{display:none}}"
-    ".g2drill{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex-shrink:0;color:#9AA59E}"
-    "@media (hover:hover){[data-g2g] .g2ed:hover .g2drill{color:#1E7A4C}}"
 )
 # VIS-06 · cartões em linha (16/10/2026, _cartoes_html; referência: Atividades do plano › Cartões): um cartão por linha com borda e raio de
 # 12 px, colunas alinhadas entre os cartões (grade em cada linha, g2cdVals._cdgtc), rótulos uma vez no alto, seta à esquerda que abre os
@@ -1524,7 +1563,6 @@ CARTOES_CSS=(
     ".g2cd-g{display:grid;align-items:center;min-width:0;box-sizing:border-box;padding:0 4px 0 6px}"
     ".g2cd-lin{min-height:52px}.g2cd-fs{display:contents}"
     ".g2cd-s,.g2cd-c,.g2cd-a{display:flex;align-items:center;justify-content:center;min-width:0}"
-    ".g2cd-c .g2car{width:30px;height:36px}"
     ".g2cd-tit{min-width:0;padding:6px 8px;display:flex;flex-direction:column;gap:2px}"
     ".g2cd-tl{display:flex;align-items:center;gap:8px;min-width:0}"
     ".g2cd-tl>.g2pw{flex:0 1 auto;flex-wrap:nowrap;min-width:0;overflow:hidden;font-size:13.5px;font-weight:700;line-height:1.3}"
@@ -1553,11 +1591,11 @@ CARTOES_CSS=(
     ".g2cd-k{min-height:44px;border-top:1px solid #F0F2EF}.g2cd-k:first-child{border-top:0}.g2cd-k:last-child{border-radius:0 0 12px 12px}.g2cd-k.g2ed{cursor:pointer}"
     ".g2cd-k .g2cd-tl>.g2pw{font-size:13px;font-weight:600}"
     "@media (hover:hover){.g2cd-k.g2ed:hover{background:#F2F8F4}}"
-    "@media (pointer:coarse){.g2cd-c .g2car{height:44px}.g2cd-k{min-height:48px}}"
+    "@media (pointer:coarse){.g2cd-k{min-height:48px}}"
     # estreito (contêiner até 640 px): título e ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
     "@container (max-width:640px){"
     ".g2cd-g{grid-template-columns:0px auto minmax(0,1fr) auto!important}"
-    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:36px auto minmax(0,1fr) auto!important}"
+    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
     ".g2cd-hd{display:none}"
     ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
     ".g2cd-c{grid-column:1;grid-row:1}.g2cd-s{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
@@ -1572,13 +1610,12 @@ G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto
     ".g2dsel .g2dsel-at{background:#F2F8F4}.g2dsel [aria-disabled=true]{color:#8A968E;cursor:not-allowed}"
     ".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
-        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
+        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}.g2fgrp{background:#F2F8F4}.g2fgrp .g2c0{background:#F2F8F4!important}.g2fgrp .g2pw{max-width:min(100%,calc(100vw - 172px))!important;flex-wrap:wrap}.g2fgrp .g2pw *{white-space:normal}"   # SAF-FAZ-3: grupo da fazenda com cara de cabeçalho; no celular cabe na parte visível da tabela
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:var(--g2hbw,104px);line-height:1.2}"
         ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:800;padding:4px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;line-height:1}"   # funil de filtro da coluna (15/10)
         ".g2fb .g2fi-ico{flex-shrink:0;display:block}"
-        ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
         ".g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}"
         ".g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}"
         "sc-if,sc-for{display:contents}"
@@ -1627,7 +1664,7 @@ G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto
         # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
         # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
         ".g2sepd[data-ini]{opacity:0}"
-        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + MAIS_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS + TABELA_CSS + CARTOES_CSS)
+        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + MAIS_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS + TABELA_CSS + CARTOES_CSS + SETA_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap; {ALVO_ST}'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap; {ALVO_ST}'
@@ -1818,7 +1855,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             + '</div>')
     fpanel=filtro_coluna_html(gid)
     lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
-    hsel=f'<div role="columnheader" class="g2th" style="padding: 6px 4px 6px 12px; display: flex; align-items: center; gap: 6px;"><sc-if value="{H("_selArw")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
+    hsel=f'<div role="columnheader" class="g2th" style="padding: 6px 4px 6px 12px; display: flex; align-items: center; gap: 6px;"><sc-if value="{H("_selArw")}" hint-placeholder-val="{{{{false}}}}">{SETA_VAZIO}</sc-if><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader" class="g2th"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
           + cab_colunas_html(gid,len(cols),headtools) + f'{hdel}</div>')
@@ -1833,8 +1870,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
           f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
           # TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): a seta vem antes de tudo na linha, inclusive
           # da caixa de seleção (g2lib põe a seta na 1ª célula, c.carT); o recuo da árvore fica na célula do nome, depois da seta
-          f'<sc-if value="{_h("c.carT")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if>'
-          f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}"><span class="g2drill" aria-hidden="true">{_SETA_DRILL}</span></sc-if></sc-if>'
+          f'<sc-if value="{_h("c.carT")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}">{seta_abrir(_h("c.caretExp"),_h("c.caretLabel"),_h("c.toggle"))}</sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}">{SETA_VAZIO}</sc-if>'
+          f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}">{seta_ir()}</sc-if></sc-if>'
           + _cel_sel +
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
           + _cel_del +
@@ -1920,10 +1957,10 @@ def _cartoes_html(gid,cel_sel,cel_del):
     vazio='<span class="g2cd-c"></span><span class="g2cd-s"></span>'   # TAB-09: a coluna da seta vem antes da seleção
     kid=(f'<div role="listitem" data-rid="{_h("k.id")}" class="{_h("k.cls")}" {G} tabIndex="{_h("k.tab")}" onClick="{_h("k.open")}" onKeyDown="{_h("k.key")}">' + vazio
          + f'<div class="g2cd-tit" style="{_h("k.tst")}"><span class="g2cd-tl">'
-         f'<sc-if value="{_h("k.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("k.caretLabel")}" aria-expanded="{_h("k.caretExp")}" onClick="{_h("k.toggle")}">{_h("k.caretSym")}</button></sc-if>'
+         f'<sc-if value="{_h("k.caretOk")}" hint-placeholder-val="{F_}">{seta_abrir(_h("k.caretExp"),_h("k.caretLabel"),_h("k.toggle"))}</sc-if>'
          f'<span class="g2pw">{pt("k.tparts")}</span></span></div>' + campos('k.fs') + acao('k.acts') + '</div>')
     card=(f'<div role="listitem" data-rid="{_h("cd.id")}" class="{_h("cd.cls")}" tabIndex="{_h("cd.tab")}" onClick="{_h("cd.open")}" onKeyDown="{_h("cd.key")}">'
-          f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}"><button type="button" class="g2car g2cd-nk" aria-label="{_h("cd.kal")}" aria-expanded="{_h("cd.kexp")}" onClick="{_h("cd.ktog")}">{_h("cd.ksym")}</button></sc-if></span>'
+          f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}">{seta_abrir(_h("cd.kexp"),_h("cd.kal"),_h("cd.ktog"),cls="g2cd-nk")}</sc-if></span>'
           f'<span class="g2cd-s" data-noedit="1"><sc-for list="{_h("cd.sels")}" as="c" hint-placeholder-count="0">{cel_sel}</sc-for></span>'
           f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw">{pt("cd.tparts")}</span><sc-if value="{_h("cd.temKn")}" hint-placeholder-val="{F_}"><span class="g2cd-kn">{_h("cd.kn")}</span></sc-if></span>'
           f'<sc-if value="{_h("cd.temNota")}" hint-placeholder-val="{F_}"><span class="g2cd-nota"><span class="g2pw">{pt("cd.nota")}</span></span></sc-if></div>'
@@ -1931,7 +1968,7 @@ def _cartoes_html(gid,cel_sel,cel_del):
           f'<sc-if value="{_h("cd.kopen")}" hint-placeholder-val="{F_}"><div role="list" aria-label="{_h("cd.klab")}" class="g2cd-kids">'
           f'<sc-for list="{_h("cd.kids")}" as="k" hint-placeholder-count="1">{kid}</sc-for></div></sc-if></div>')
     cab=(f'<sc-if value="{_h("gr.temCab")}" hint-placeholder-val="{F_}"><div class="g2cd-gcab g2cd-g" {G} data-rid="{_h("gr.id")}"><span class="g2cd-c">'
-         f'<sc-if value="{_h("gr.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("gr.caretLabel")}" aria-expanded="{_h("gr.caretExp")}" onClick="{_h("gr.toggle")}">{_h("gr.caretSym")}</button></sc-if></span><span class="g2cd-s"></span>'
+         f'<sc-if value="{_h("gr.caretOk")}" hint-placeholder-val="{F_}">{seta_abrir(_h("gr.caretExp"),_h("gr.caretLabel"),_h("gr.toggle"))}</sc-if></span><span class="g2cd-s"></span>'
          f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw g2cd-gnome">{pt("gr.tparts")}</span>'
          f'<sc-for list="{_h("gr.ext")}" as="l" hint-placeholder-count="1"><span class="g2cd-gx"><sc-if value="{_h("l.temL")}" hint-placeholder-val="{F_}"><span class="g2cd-kr">{_h("l.l")}:</span> </sc-if>'
          f'<span class="g2pw">{pt("l.parts")}</span></span></sc-for></span></div>' + campos('gr.fs') + '<span class="g2cd-a"></span></div></sc-if>')
@@ -1945,10 +1982,10 @@ def _cartoes_html(gid,cel_sel,cel_del):
          '<span class="g2cd-a"></span></div></sc-if>')
     return f'<div class="g2rola g2cartoes" data-g2cd="{gid}" data-car="{H("_cdcar")}">{hd}{tot}<sc-for list="{H("_cdg")}" as="gr" hint-placeholder-count="1">{sec}</sc-for></div>'
 def seta_xtog(sobe,desce):
-    """Seta à esquerda de "Expandir tudo"/"Recolher tudo": ícone SVG (não entra no texto nem é lido); sobe/desce = buracos booleanos."""
-    ic=lambda d: f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{d}"/></svg>'
-    return (f'<sc-if value="{sobe}" hint-placeholder-val="{{{{false}}}}">{ic("M6 15l6-6 6 6")}</sc-if>'
-            f'<sc-if value="{desce}" hint-placeholder-val="{{{{true}}}}">{ic("M6 9l6 6 6-6")}</sc-if>')
+    """Seta à esquerda de "Expandir tudo"/"Recolher tudo" (TAB-11): a mesma seta das linhas, no estado delas: para a direita enquanto há
+    linhas recolhidas ("Expandir tudo"), para baixo com tudo aberto ("Recolher tudo"). Não entra no texto nem é lida; sobe/desce = buracos."""
+    return (f'<sc-if value="{sobe}" hint-placeholder-val="{{{{false}}}}">{seta("g2seta-on")}</sc-if>'
+            f'<sc-if value="{desce}" hint-placeholder-val="{{{{true}}}}">{seta()}</sc-if>')
 def ac_campo(p,rotulo='Produto',largura='300px'):
     """Autocompletar do cadastro: campo de busca + lista (role=listbox). Os buracos vêm de g2ac() em g2lib.js (acId, acQ, acItens...)."""
     h=lambda s: '{{'+p+s+'}}'

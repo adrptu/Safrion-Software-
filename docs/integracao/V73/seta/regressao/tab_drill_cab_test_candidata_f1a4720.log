@@ -1,0 +1,13 @@
+# 1440 px · 148 telas + 4 estados por endereço · 1580 setas e 215 cabeçalhos medidos
+# 1440 px · alturas de cabeçalho: 40 px em 123 telas
+# 1440 px · rótulos de cabeçalho com reticências (3ª linha; nome inteiro no aria-label): 0 · 
+OK    A1440 TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna (1580 setas; telas com desvio: 0)
+OK    B1440 TAB-10 cabeçalho de tabela com 40 px ±1 (215 cabeçalhos; alturas distintas: 1; telas com desvio: 0)
+OK    C1440 sem erro de JavaScript em nenhuma tela e estado (inicial, Expandir tudo, outro modo)
+# 390 px · 148 telas + 4 estados por endereço · 1436 setas e 199 cabeçalhos medidos
+# 390 px · alturas de cabeçalho: 40 px em 114 telas
+# 390 px · rótulos de cabeçalho com reticências (3ª linha; nome inteiro no aria-label): 34 · AG-04.dc.html: PRODUTO · DOSE · JANELA; AG-05.dc.html: ESCOPO (CULTURA · REGIÃO · FASE); AG-07.dc.html#pasteuria-nishizawae-fs: INGREDIENTE ATIVO · GRUPO QUÍMICO; AG-07.dc.html: CLASSE · MODO DE AÇÃO; AG-07.dc.html: INGREDIENTE ATIVO · GRUPO QUÍMICO; CD-07.dc.html: CONTA NO ERP (SANKHYA); CO-01.dc.html: PARCELA · CULTURA · ÁREA; CO-01.dc.html: REND. COMERCIAL · PERDAS; CO-03.dc.html: CARGA · HORA · VEÍCULO; CO-05.dc.html: LOTES DE ENTRADA · ORIGEM; CO-05.dc.html: ORDEM · PRODUTO · ROTA; CO-05.dc.html: SAÍDAS · BALANÇO · QUALIDADE DO LOTE; CO-07.dc.html: PRODUTO · CLASSE · VALIDADE; GE-04.dc.html: CONCILIAÇÃO · PRÓXIMA AÇÃO; GE-04.dc.html: PRINCIPAL · PAGO / SALDO; GE-06.dc.html: REALIZADO · TENDÊNCIA; GE-07.dc.html: HIPÓTESE · AÇÃO DEFINIDA; LO-01.dc.html: CANDIDATA A AGRUPAR COM A CARGA 07; ON-01.dc.html: AO ESGOTAR OU EXPIRAR; ON-01.dc.html: DADO PEDIDO NO MOMENTO DO USO; PL-02.dc.html
+OK    A390 TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna (1436 setas; telas com desvio: 0)
+OK    B390 TAB-10 cabeçalho de tabela com 40 px ±1 (199 cabeçalhos; alturas distintas: 1; telas com desvio: 0)
+OK    C390 sem erro de JavaScript em nenhuma tela e estado (inicial, Expandir tudo, outro modo)
+RESULTADO: 6 ok · 0 falhas

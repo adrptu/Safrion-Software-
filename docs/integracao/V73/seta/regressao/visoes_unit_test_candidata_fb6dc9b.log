@@ -1,0 +1,27 @@
+   TOTAL 30 · OK 30 · FALHAS 0
+OK  1 node visoes_unit.js (U1–U10)
+OK  1b node visoes2_ag_unit.js (A1–A7: trilha com "/" no endereço; filtro de Talhão limita os grupos)
+OK  1c node visoes_sico_unit.js (S1–S4: ícone da situação oculta, com selo e pela cor da coluna)
+OK  P1 validas(os) = lista (Tabela), cartoes (DS VIS-05), kanban, calendario, carga; a Tabela agrupada foi fundida na Tabela (VISOES-2), com motivo; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)
+OK  P2 negativos: sem data sem Calendário; sem início e fim sem Timeline; sem geometria sem Mapa; sem fluxo sem Kanban; sem somável sem Agrupada; sem pai/filho sem Árvore; sem foto sem Galeria
+OK  P2b uma visão só: sem barra (devolve só o painel)
+OK  P3 painel para visão não sustentada, painel faltando ou apelido sem painel e visão sem fonte fazem o build falhar (ValueError)
+OK  C0 barra: role=toolbar "Visão das ordens", 5 botões data-visao na ordem fixa, aria-label "Ver em …", aria-pressed e tabIndex do estado, só ícone aria-hidden, sem title, "mais" (5 visões), sem verde cheio
+OK  C0b corpo: estado da visão (role=status) e um painel por grupo (Tabela e Cartões no mesmo painel), sem invólucro em volta do painel
+OK  C0c CSS: 32 px no computador; 44 px e ícone 20 px com ponteiro grosso OU até 640 px; até 640 px só as 3 primeiras e o "mais"; no G2_CSS de toda tela
+OK  C0d ativo tonal: fundo #E4F3E9, ícone #1E6B47, borda e barra interna de 2 px (#1E7A4C), nunca fundo verde cheio
+OK  C0e contraste do ícone: inativo 5.25:1 sobre o trilho e ativo 5.63:1 sobre o tonal (≥ 4,5:1)
+OK  C0f licença: LICENSES/lucide-ISC.txt com o ISC do Lucide 1.45.0 e o MIT do Feather (Cole Bemis); ícones v_* no engine
+OK  M1 mutante "precedência invertida" (preferência antes da URL) fica vermelho
+OK  M2 mutante "seta que ativa" fica vermelho
+OK  M3 mutante "aria-pressed ausente" é acusado pela verificação do componente
+OK  M4 mutante "Calendário aceito sem data" fica vermelho em P2
+OK  M5 mutante "Voltar pelo histórico" (history.back no clique) fica vermelho
+OK  M6 mutante "contexto de outro perfil aceito" fica vermelho
+OK  B4b checagem estática: acusa replaceState/pushState/location.replace/assign/href= com location.pathname sem location.search (7 formas) e aceita as que preservam a query ou passam por g2visaoUrl (5)
+OK  B1 só a O.S. tem o seletor nesta fatia, com as 5 visões (Tabela, Cartões pela DS VIS-05, Kanban, Calendário, Carga; VISOES-2 fundiu a agrupada); G2_VISOES vai na página
+OK  B1b o nível Talhão do "Agrupar por" da O.S. declara a coluna de filtro (fc = tal): o filtro de Talhão limita os grupos
+OK  B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram
+OK  B3 nenhum arrastar (Kanban e Carga sem draggable)
+OK  B4 telas com seletor: nenhuma escrita de URL que apague a query (?view)
+RESULTADO: OK 25/25

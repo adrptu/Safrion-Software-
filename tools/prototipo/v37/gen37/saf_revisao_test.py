@@ -140,7 +140,7 @@ try:
     chk('S3.1 veredito: "Fora da conta: 2 ocorrências depois do fim da safra", sem falta em ago/27', 'Fora da conta: 2 ocorrências depois do fim da safra' in v and 'ago/27' not in v, v)
     ago = c.js("(()=>{const e=window.__safSelf.__e3; return Object.values(e.G).map(g=>[g.id,g.cells[11].dThis]);})()")
     chk('S3.1 nenhuma hora desta safra em ago/27 (Colhedoras e Operadores somavam 19 h e 42,4 h)', all(h == 0 for _, h in ago), ago)
-    botao('Capacidade por mês ▾'); K = grade('RECURSO')
+    botao('Capacidade por mês'); K = grade('RECURSO')
     chk('S3.1 g_cap da S27SF com os meses do período (fev/27 a jul/27), sem ago/27', K['hs'][3:] == ['FEV/27', 'MAR/27', 'ABR/27', 'MAI/27', 'JUN/27', 'JUL/27'], K['hs'])
     c.js("(()=>{const r=document.querySelector('[role=row][data-rid=\"op:Colheita de grãos\"] .g2car'); if(r&&r.getAttribute('aria-expanded')!=='true') r.click();})()"); time.sleep(.5)
     sits = [r.get('SITUAÇÃO', '') for r in grade('OPERAÇÃO')['rows']]
@@ -148,7 +148,7 @@ try:
     # safra nova com período parcial no calendário: a g_cap_NOVA mostra só os meses dela (capMeses), não os 12
     abre('#saf=S2627&passo=safra'); cria_safra('Safrinha BV 2027', '2027-03-01', '2027-08-31', 'Boa Vista'); na_linha('B1', 'Planejar ›')
     for k, v in (('cult', 'Soja'), ('var', '58 W'), ('plano', 'SOJA-AT'), ('meta', '60')): fset('g_cult_NOVA', k, v)
-    salvar(); c.js("window.__safSelf.setState({step:3})"); time.sleep(1.2); botao('Capacidade por mês ▾'); K = grade('RECURSO')
+    salvar(); c.js("window.__safSelf.setState({step:3})"); time.sleep(1.2); botao('Capacidade por mês'); K = grade('RECURSO')
     chk('S3.1 g_cap de safra nova (mar/27 a ago/27) com os meses do período, pelos dados', K['hs'][3:] == ['MAR/27', 'ABR/27', 'MAI/27', 'JUN/27', 'JUL/27', 'AGO/27'] and len(K['rows']) == 6, (K['hs'], len(K['rows'])))
     # ================= E3 (R-16): o lote não aplica o plano em quem trava =================
     abre('#saf=S27SF&passo=cultivos'); na_linha('T3', 'Planejar ›'); g = 'g_cult_S27SF'
