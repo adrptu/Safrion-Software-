@@ -10,7 +10,7 @@ barra do lote do CA-01 com uma linha escolhida), a 1440 × 900 e a 390 × 844
   B  todo controle de abrir/recolher (aria-expanded ou summary; fora lista suspensa, menu ⋯ e campo) tem o componente .g2seta como filho
      direto, ou é o nome visível de uma linha cuja seta (.g2car) controla a mesma região (aria-controls);
   C  a seta é uma só: cor computada (texto secundário #65736A), 16 × 16 px, traço de 1,75 e o mesmo desenho em todas as telas;
-  D  o giro segue o estado: aria-expanded=true (ou details aberto) → rotate(90°); fechado e a seta de ir (.g2drill) → sem giro;
+  D  o giro segue o estado: aria-expanded=true (ou details aberto) → rotate(90°); fechado → sem giro (a seta de ir, .g2drill, saiu: TAB-13);
   E  teclado: Enter e Espaço na seta alternam o aria-expanded sem abrir painel; o foco é visível (anel de 2 px verde) — uma seta por tela;
   F  alvo: botão da seta ≥ 44 × 44 px a 390 (toque) e ≥ 24 × 24 px a 1440, sem cobrir outro controle da linha; botão com o nome à vista
      (seção, lote, summary) ≥ 44 px de altura a 390;
@@ -36,6 +36,10 @@ SO = [x for x in (os.environ.get('SPT_SO') or '').split(',') if x]   # diagnóst
 if SO: PAGS, EXTRAS = [p for p in PAGS if any(x in p for x in SO)], [p for p in EXTRAS if any(x in p for x in SO)]
 COR, TAM, TRACO = 'rgb(101, 115, 106)', 16, '1.75'
 OK, FAIL = [], []
+# mínimos da rodada completa (contagem de controles e de setas desenhadas, somando os estados): desde 17/10 a abertura é recolhida (TAB-12:
+# os filhos e as setas deles só aparecem com "Expandir tudo") e a seta de ir saiu das linhas folha (TAB-13), então há menos setas à vista;
+# antes eram 300 controles e 500 setas (1.340 delas de ir, na composição bde9f57)
+MIN_CTL, MIN_ICO = 150, 150
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:1500]), flush=True)
 
@@ -85,8 +89,9 @@ ESTADOS = r"""((k)=>{ const vis=e=>!!e&&e.getClientRects().length>0;
  if(k==='expandir'){ const bs=[...document.querySelectorAll('.g2xtog')].filter(b=>vis(b)&&/Expandir/.test(b.innerText)); bs.forEach(b=>b.click()); return bs.length; }
  if(k==='modo'){ const bs=[...document.querySelectorAll('[data-g2md]')].filter(vis).map(g=>g.querySelector('[data-modo][aria-pressed=false]')).filter(Boolean); bs.forEach(b=>b.click()); return bs.length; }
  return 0; })"""
-# ajuste local do Planejar safra: linha do cultivo → painel → "Ajustar insumos e doses de …" (o painel tem grupos e atividades que abrem)
+# ajuste local do Planejar safra: faixa da fazenda → linha do cultivo → painel → "Ajustar insumos e doses de …" (o painel tem grupos e atividades que abrem)
 AJUSTE = r"""(async ()=>{ const vis=e=>!!e&&e.getClientRects().length>0, N=s=>(s||'').replace(/\s+/g,' ').trim(), espera=ms=>new Promise(r=>setTimeout(r,ms));
+ for(let i=0;i<4;i++){ const f=[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].find(vis); if(!f) break; f.click(); await espera(400); }   // TAB-12 (17/10): a faixa da fazenda nasce recolhida; a pessoa a abre
  for(const t of ['T7','T3','T2','T4','T5','T6']){ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(vis).find(r=>new RegExp('^'+t+'\\b').test(N(r.innerText))); if(!row) continue;
    (row.querySelector('.g2pw')||row).click(); await espera(500);
    const b=[...document.querySelectorAll('aside[role=dialog] button')].filter(vis).find(x=>/^(Ajustar|Ver) insumos e doses de /.test(N(x.innerText))); if(b){ b.click(); await espera(600); return 'ok'; } }
@@ -151,11 +156,11 @@ try:
         for k in ('a', 'b', 'd', 'f', 'e'):
             for x in dd(res[k])[:30]: print(f'  {k} ', x, flush=True)
         chk(f'A{w} nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: {len(telas["a"])})', not res['a'], sorted(telas['a']))
-        chk(f'B{w} todo controle de abrir/recolher usa o componente da seta ({n["ctl"]} controles; telas com desvio: {len(telas["b"])})', n['ctl'] > 300 and not res['b'], sorted(telas['b']))
+        chk(f'B{w} todo controle de abrir/recolher usa o componente da seta ({n["ctl"]} controles; telas com desvio: {len(telas["b"])})', n['ctl'] > MIN_CTL and not res['b'], sorted(telas['b']))
         so = list(estilos)
         ok_c = len(so) == 1 and so[0].startswith(f'{COR} | {TAM}x{TAM} | {TRACO} | ')
-        chk(f'C{w} uma seta só: {COR}, {TAM}×{TAM} px, traço {TRACO}, o mesmo desenho ({n["ico"]} setas; desenhos distintos: {len(so)})', n['ico'] > 500 and ok_c, so[:4])
-        chk(f'D{w} giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: {len(telas["d"])})', n['ico'] > 500 and not res['d'], sorted(telas['d']))
+        chk(f'C{w} uma seta só: {COR}, {TAM}×{TAM} px, traço {TRACO}, o mesmo desenho ({n["ico"]} setas; desenhos distintos: {len(so)})', n['ico'] > MIN_ICO and ok_c, so[:4])
+        chk(f'D{w} giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: {len(telas["d"])})', n['ico'] > MIN_ICO and not res['d'], sorted(telas['d']))
         chk(f'E{w} teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px ({n["tecla"]} telas; desvios: {len(telas["e"])})', n['tecla'] >= 12 and not res['e'], sorted(telas['e']))
         chk(f'F{w} alvo da seta ≥ {44 if w <= 500 else 24} px sem cobrir outro controle' + ('; botão com nome e seta ≥ 44 px de altura' if w <= 500 else '') + f' (telas com desvio: {len(telas["f"])})', not res['f'], sorted(telas['f']))
         chk(f'G{w} sem erro de JavaScript nem estado que não abriu', not res['err'], res['err'][:6])

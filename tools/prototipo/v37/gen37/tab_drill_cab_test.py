@@ -20,6 +20,9 @@ from areas.maquinas import REDIRECIONA
 
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 CAB_PX = 40   # TAB-10: altura do cabeçalho (engine.TABELA_CSS, .g2th)
+# mínimo de setas medidas na rodada completa: desde 17/10 a abertura é recolhida (TAB-12) e a linha folha não tem a seta de ir (TAB-13);
+# antes, 500 (a maioria eram setas de ir das linhas folha)
+MIN_SETAS = 150
 LARGS = [int(x) for x in (os.environ.get('TDC_LARG') or '1440,390').split(',')]
 FORA = set(REDIRECIONA) | {'Main.dc.html'}
 PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)
@@ -107,7 +110,7 @@ try:
         print(f'# {w} px · rótulos de cabeçalho com reticências (3ª linha; nome inteiro no aria-label): {len(cortes)} · ' + '; '.join(sorted(f'{p}: {t}' for p, t in cortes))[:900], flush=True)
         for x in dedup(setas)[:40]: print('  seta', x, flush=True)
         for x in dedup(cabs)[:40]: print('  cab ', x, flush=True)
-        chk(f'A{w} TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna ({n_setas} setas; telas com desvio: {len(ts)})', n_setas > 500 and not setas, sorted(ts))
+        chk(f'A{w} TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna ({n_setas} setas; telas com desvio: {len(ts)})', n_setas > MIN_SETAS and not setas, sorted(ts))
         chk(f'B{w} TAB-10 cabeçalho de tabela com {CAB_PX} px ±1 ({n_cab} cabeçalhos; alturas distintas: {len(alt)}; telas com desvio: {len(tc)})', n_cab > 100 and not cabs, sorted(tc))
         chk(f'C{w} sem erro de JavaScript em nenhuma tela e estado (inicial, Expandir tudo, outro modo)', not erros, erros[:6])
 finally:

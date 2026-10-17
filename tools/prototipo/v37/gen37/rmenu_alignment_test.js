@@ -28,8 +28,9 @@ function mkRows(){ return [
 ]; }
 const COLS=[{k:'nome',l:'Nome'},{k:'q',l:'Qtd',t:'num',a:'r',agg:'sum'},{k:'z',l:'Plano'}];
 function render(C,o,state){ let called=[];
-  const sp=Object.assign({id:'t',cols:COLS,rows:mkRows(),edit:{m:'none'},total:true,tree:true,x0:{fz:true},so:{}},o);
-  const self={state:{g2:{t:Object.assign({},state||{})}},setState(x){Object.assign(this.state,x);}};
+  const sp=Object.assign({id:'t',cols:COLS,rows:mkRows(),edit:{m:'none'},total:true,tree:true,so:{}},o);
+  // TAB-12 (17/10/2026): a faixa fz nasce recolhida; a sonda a abre como a seta abriria (st.x), para medir as linhas filhas
+  const self={state:{g2:{t:Object.assign({x:{fz:true}},state||{})}},setState(x){Object.assign(this.state,x);}};
   const v={conf:x=>called.push('conf:'+x),ir:x=>called.push('ir:'+x),xd:x=>called.push('xd:'+x)};
   C.g2vals(self,sp,v); return {v,sp,self,called}; }
 const span=c=>{ const m=/grid-column:span (\d+)/.exec(c.st||''); return m?+m[1]:1; };
@@ -72,7 +73,7 @@ for(const rmenu of [false,true]) for(const del of [false,true]) for(const sel of
   if(CB&&!rmenu){ const b=render(CB,{rmenu,del,sel}).v; const s=x=>JSON.stringify({n:x.t_ncols,rows:x.t_rows.map(r=>({id:r.id,cls:r.cls,cells:r.cells}))});
     chk(tag+' A6 caminho antigo idêntico à base',s(v)===s(b),'difere'); }
   // A7: Cartões
-  CH.g2cdVals({state:{g2:{t:{}}},setState(){}},Object.assign({id:'t',cols:COLS,rows:mkRows(),edit:{m:'none'},total:true,tree:true,x0:{fz:true},so:{}},{rmenu,del,sel}),v);
+  CH.g2cdVals({state:{g2:{t:{x:{fz:true}}}},setState(){}},Object.assign({id:'t',cols:COLS,rows:mkRows(),edit:{m:'none'},total:true,tree:true,so:{}},{rmenu,del,sel}),v);
   const cards=[]; (v.t_cdg||[]).forEach(s=>s.cards.forEach(cd=>{ cards.push(cd); (cd.kids||[]).forEach(k=>cards.push(k)); }));
   for(const cd of cards){ const rw=vis.find(x=>x.id===cd.id); const last=rw.cells[rw.cells.length-1];
     chk(tag+' '+cd.id+' A7 cartão sem ação estrutural',(cd.acts||[]).every(c=>c.isDel),cd.acts);

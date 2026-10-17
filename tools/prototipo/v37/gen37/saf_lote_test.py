@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """EDL-01 · "Editar talhões" da fazenda no Planejar safra (proprietário, 16/10/2026: "coloque um botao para poder editar de uma vez todos
 talhoes de uma fazenda numa tela só. como no outro anexo. todos inputs do usuário no sistema devem ser mais rápido e fácil."). Dados sintéticos.
-A abrir pelo título do bloco (uma fazenda) e pela faixa de cada fazenda (várias), também no modo Cartões
+A abrir pela faixa da fazenda (uma ou várias: a tabela agrupa por fazenda sempre, 17/10), também no modo Cartões
 B planilha: Tab, Enter/↓, ↑, foco que seleciona o número, contador e destaque das células alteradas
 C aplicar aos marcados (cultura + plano), com a recusa da O.S. em execução
 D colar bloco do Excel (TSV) com datas dd/mm, vírgula decimal e recusas (O.S., cultura fora do cadastro, plano de outra cultura, área acima)
@@ -26,10 +26,16 @@ p, srv = servir(R); c = Chrome(); J = c.js
 U = lambda x: f'http://127.0.0.1:{p}/{x}'
 q = json.dumps
 def esp(t=.5): time.sleep(t)
+# 17/10 (proprietário): a tabela agrupa por fazenda também com uma fazenda só, e o "Editar talhões" mora na faixa da fazenda (sem o
+# "Editar talhões…" do título do bloco); a faixa nasce recolhida (TAB-12) e a pessoa a abre pela seta para ver os talhões
+SLB = "[...document.querySelectorAll('[role=row].g2fgrp button')].find(b=>b.offsetParent&&/^Editar talhões/.test(b.innerText.trim()))"
 def abrir_saf(hash_, w=1440):
     c.aparelho(w, 900 if w > 400 else 844, 1 if w > 400 else 2, w < 400); c.call('Page.bringToFront')   # janela com o foco, como a de quem usa
     c.goto(U('Main.dc.html'), .2); J("localStorage.clear();sessionStorage.clear()")
     c.goto(U('SAF.dc.html#' + hash_), 1.6); esp(1.0)
+    for _ in range(4):   # TAB-12: a pessoa abre a faixa (uma por vez: cada clique redesenha a tabela)
+        if not J("(()=>{const b=[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].find(b=>b.offsetParent); if(!b) return false; b.click(); return true;})()"): break
+        esp(.4)
 def painel(): return J("(()=>{const a=document.getElementById('sl-painel'); return a&&a.offsetParent!==null?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 def linhas(): return J("[...document.querySelectorAll('#sl-grade .sl-l:not(.sl-cab):not(.sl-ap) .sl-id b')].map(b=>b.innerText.trim())") or []
 def cel(k, col): return f"document.querySelector('#sl-grade [data-l=\"{k}\"][data-c=\"{col}\"]')"
@@ -65,11 +71,11 @@ def erros(): return J("(window.__errs||[]).join(' | ')") or ''
 try:
     # ---------------- A · abrir ----------------
     abrir_saf('saf=S2627&passo=cultivos')
-    lk = J("(()=>{const b=document.getElementById('sl-abrir'); return b&&b.offsetParent?b.innerText.trim():null;})()")
-    chk('A1 Safra 2026/27 (uma fazenda): "Editar talhões…" no título do bloco Talhões e cultivos, ao lado de "Planejar talhões livres…"', lk == 'Editar talhões…', lk)
-    if lk != 'Editar talhões…':
+    lk = J(f"(()=>{{const b={SLB}; return b?b.innerText.trim():null;}})()"); tit = J("!!document.getElementById('sl-abrir')")
+    chk('A1 Safra 2026/27 (uma fazenda): "Editar talhões ›" na faixa da fazenda (a tabela agrupa por fazenda também com uma só, 17/10) e não no título do bloco', lk == 'Editar talhões ›' and not tit, [lk, tit])
+    if lk != 'Editar talhões ›':
         print('RESULTADO: FALHOU (sem o botão; o resto não se executa)'); raise SystemExit(1)
-    J("document.getElementById('sl-abrir').click()"); esp(1.2)
+    J(f"({SLB}).click()"); esp(1.2)
     pn = painel(); ls = linhas()
     chk('A2 abre "Editar talhões da Santa Rita" com uma linha por talhão (T1 com as parcelas recuadas embaixo), resumo da área e selo "Tudo salvo"; Salvar com contador 0',
         pn.startswith('Editar talhões da Santa Rita') and ls == ['T1', 'T1-A', 'T1-B', 'T2', 'T3', 'T4', 'P1', 'P2', 'T7', 'C1'] and 'Área 1.165 ha · planejada 1.165 ha' in pn and 'Tudo salvo' in pn and salvarT() == 'Salvar alterações (0)', [pn[:200], ls, salvarT()])
@@ -141,18 +147,18 @@ try:
     chk('F2 demanda recalculada pela mesma conta: Atrazina 500 (só no plano do milho) passa a ter demanda; Glifosato (só no da soja de T1/T2) não cresce', dem0[0] == 0 and dem1[0] > 0 and dem1[1] <= dem0[1], [dem0, dem1])
     tab = J("[...document.querySelectorAll('[role=table] [role=row]')].filter(r=>r.offsetParent).map(r=>r.innerText.replace(/\\s+/g,' ')).filter(t=>/^.?\\s?(T3|P2) /.test(t))")
     chk('F3 a tabela mostra os valores novos (T3 e P2 com milho e Milho safrinha)', any('Milho' in t and 'Milho safrinha' in t for t in tab) and len(tab) >= 2, tab)
-    J("document.getElementById('sl-abrir').click()"); esp(1.2)
+    J(f"({SLB}).click()"); esp(1.2)
     chk('F4 reabrir mostra o salvo (T3 milho, meta 181) e o resumo com 1.155 ha planejados (T1-A 150)', val('c5', 'cult') == 'Milho' and val('c5', 'meta') == '181' and 'planejada 1.155 ha' in painel() and salvarT() == 'Salvar alterações (0)', [val('c5', 'cult'), val('c5', 'meta'), painel()[:160]])
     # ---------------- G · Esc, conflito, falha, Dividir ----------------
     foca('c7', 'meta'); digita('77'); tecla('Escape'); w1 = J("!!document.querySelector('#sl-painel .saida')"); botao('Continuar editando'); w2 = J("!!document.querySelector('#sl-painel .saida')")
     tecla('Escape'); botao('Descartar alterações'); cv3 = cultivos('S2627')
     chk('G1 Esc com alteração pede confirmação ("Há alterações não salvas"); Continuar editando fica; Descartar fecha sem gravar', w1 and not w2 and not painel() and cv3['P2']['meta'] == cv2['P2']['meta'] and 'Alterações descartadas' in toast(), [w1, w2, cv3['P2']])
-    J("document.getElementById('sl-abrir').click()"); esp(1.2); foca('c7', 'meta'); digita('77')
+    J(f"({SLB}).click()"); esp(1.2); foca('c7', 'meta'); digita('77')
     J("(()=>{const c=window.__solo.cen(); c.ordens['OS-0430'].etapa='Liberadas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")   # outra aba libera a OS-0430 (T1-A)
     botao('Salvar alterações'); g3 = gerr()
     chk('G2 conflito: outra aba liberou a OS-0430 (T1-A) depois de abrir; Salvar recusa com o motivo, nada gravado, o rascunho fica', 'mudaram depois que você abriu' in g3 and val('c7', 'meta') == '77' and cultivos('S2627')['P2']['meta'] == cv2['P2']['meta'], g3)
     botao('Cancelar'); botao('Descartar alterações')
-    J("document.getElementById('sl-abrir').click()"); esp(1.2)
+    J(f"({SLB}).click()"); esp(1.2)
     chk('G3 reaberto, T1-A passa a travar cultura, variedade e plano pela OS-0430 (a fase vem do cenário compartilhado)', J(f"{cel('c1','cult')}.disabled") is True and 'OS-0430' in (J(f"{cel('c1','cult')}.title") or ''), J(f"{cel('c1','cult')}.title"))
     foca('c7', 'meta'); digita('79')
     J("""(()=>{const s=window.__safSelf; const v=s.state.adj; Object.defineProperty(s.state,'adj',{configurable:true,get(){ Object.defineProperty(s.state,'adj',{configurable:true,writable:true,value:v}); throw new Error('falha simulada'); }});})()""")
@@ -160,14 +166,14 @@ try:
     chk('G4 falha no meio da gravação: "Não foi possível salvar (falha simulada)", nada gravado, painel aberto com o rascunho', 'Não foi possível salvar (falha simulada)' in g4 and val('c7', 'meta') == '79' and cultivos('S2627')['P2']['meta'] == cv2['P2']['meta'], g4)
     botao('Salvar alterações'); esp(.4)
     chk('G5 repetir depois grava uma vez (P2 meta 79)', not painel() and cultivos('S2627')['P2']['meta'] == 79, [painel()[:80], cultivos('S2627')['P2']])
-    J("document.getElementById('sl-abrir').click()"); esp(1.2); foca('c5', 'meta'); digita('1'); botao('Dividir T1'); w3 = J("!!document.querySelector('#sl-painel .saida')")
+    J(f"({SLB}).click()"); esp(1.2); foca('c5', 'meta'); digita('1'); botao('Dividir T1'); w3 = J("!!document.querySelector('#sl-painel .saida')")
     botao('Descartar alterações'); esp(.6); dvt = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.getAttribute('aria-label'):'';})()")
     chk('G6 "Dividir T1" na linha: com alteração pergunta antes; descartado, abre o painel Dividir existente', w3 and dvt == 'Dividir T1 em parcelas', [w3, dvt])
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); if(b) b.click();})()"); esp(.5)
     chk('G7 sem erro de JavaScript até aqui', not erros(), erros())
     # ---------------- F5 · linhas livres da Safrinha: planejar e duplo clique ----------------
     abrir_saf('saf=S27SF&passo=cultivos')
-    J("document.getElementById('sl-abrir').click()"); esp(1.2); pn = painel()
+    J(f"({SLB}).click()"); esp(1.2); pn = painel()
     ro = J("[...document.querySelectorAll('#sl-grade .sl-tit')].map(r=>r.innerText.replace(/\\s+/g,' '))")
     chk('G8 Safrinha 2027: perenes de outra safra (T7 mamão e C1 café) só leitura, com o motivo; talhões livres com a área livre calculada (não digitada)',
         any(t.startswith('T7') and 'Perene · só leitura' in t and 'Mamão Formosa' in t for t in ro) and any(t.startswith('C1') and 'Perene · só leitura' in t and 'Café' in t for t in ro)
@@ -178,7 +184,7 @@ try:
     J("(()=>{const b=document.getElementById('sl-salvar'); b.click(); b.click();})()"); esp(1.0); cv1 = cultivos('S27SF')
     novos = [k for k in cv1 if k not in cv0]
     chk('F6 duplo clique no Salvar: grava uma vez (2 cultivos novos, T3 e T4, não 4)', sorted(novos) == ['T3', 'T4'] and len(cv1) == len(cv0) + 2 and cv1['T3']['cult'] == 'Milho' and cv1['T3']['area'] == 96, [novos, len(cv0), len(cv1)])
-    J("document.getElementById('sl-abrir').click()"); esp(1.2)
+    J(f"({SLB}).click()"); esp(1.2)
     chk('F7 o resumo da fazenda muda (planejados e livres) e as linhas planejadas passam a cultivo', r0 != painel() and val('novo:T3', 'cult') is None and len([l for l in linhas() if l == 'T3']) == 1, [r0[:200], painel()[:200]])
     botao('Cancelar')
     # ---------------- A4 · várias fazendas e Cartões ----------------
@@ -214,13 +220,13 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); if(b) b.click();})()"); esp(.4)
     # ---------------- H · 390 px ----------------
     abrir_saf('saf=S2627&passo=cultivos', 390)
-    hl = J("(()=>{const b=document.getElementById('sl-abrir'); const r=b.getBoundingClientRect(); return [Math.round(r.height),!!b.offsetParent];})()")
-    J("document.getElementById('sl-abrir').click()"); esp(1.6)
+    hl = J(f"(()=>{{const b={SLB}; const r=b.getBoundingClientRect(); return [Math.round(r.height),!!b.offsetParent];}})()")
+    J(f"({SLB}).click()"); esp(1.6)
     m = J("""(()=>{const a=document.getElementById('sl-painel'); const vis=e=>e.offsetParent!==null&&getComputedStyle(e).display!=='none';
       const alvos=[...a.querySelectorAll('input:not([type=checkbox]),select,button,label.sl-s')].filter(vis).map(e=>{const r=e.getBoundingClientRect(); return [e.getAttribute('aria-label')||e.innerText.trim().slice(0,24),Math.round(r.height)];});
       const pe=a.querySelector('.sl-pe').getBoundingClientRect(); return {pag:[document.documentElement.scrollWidth,innerWidth],pn:[a.scrollWidth,a.clientWidth],menores:alvos.filter(x=>x[1]<44),n:alvos.length,cab:getComputedStyle(a.querySelector('.sl-cab')).display,
         pe:[Math.round(pe.bottom),innerHeight],apCampos:[...a.querySelectorAll('.sl-ap .sl-c')].filter(vis).length,ativo:document.activeElement&&document.activeElement.tagName};})()""")
-    chk('H1 390 px: "Editar talhões…" com 44 px; painel sem rolagem de lado (página e painel), cabeçalho de colunas trocado por rótulos em cada campo, foco não abre o teclado',
+    chk('H1 390 px: "Editar talhões ›" da faixa com 44 px; painel sem rolagem de lado (página e painel), cabeçalho de colunas trocado por rótulos em cada campo, foco não abre o teclado',
         hl == [44, True] and m['pag'][0] <= m['pag'][1] and m['pn'][0] <= m['pn'][1] and m['cab'] == 'none' and m['ativo'] != 'INPUT', [hl, m])
     chk('H2 390 px: todo campo, lista, botão e caixa de marcar com alvo de 44 px ou mais', m['n'] > 40 and not m['menores'], m['menores'][:8])
     J("document.getElementById('sl-painel').scrollTop=900"); esp(.4)

@@ -82,17 +82,17 @@ chk('B1b vazão em L/s da grade publicada ordena pelo valor em m³/h (0,5 L/s �
 r = [tenta(getattr(CF, '_doc_agua', AUS('_doc_agua')), x) for x in ('Outorga', 'Outorga estadual', 'Certidão de uso insignificante', '')]
 chk('B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio', r == ['Outorga', 'Outorga', 'Certidão', ''], r)
 pr = tenta(getattr(CF, '_parc_rows', AUS('_parc_rows')), ['T1'], 'Santa Rita')
-safras = [g['v']['safra'] for g in pr[0]] if isinstance(pr, tuple) else [pr]
-chk('B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)', isinstance(pr, tuple) and safras and not any('Mamão' in x for x in safras), safras)
+safras = [g['v']['safra'] for g in pr] if isinstance(pr, list) else [pr]   # TAB-12 (17/10): devolve só as linhas (sem a abertura padrão x0)
+chk('B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)', isinstance(pr, list) and safras and not any('Mamão' in x for x in safras), safras)
 # B7 (revisão TABR, pré-existente): a lista (CD-01, "Parcelas na safra") e o detalhe do talhão (CD-01det) contam as mesmas parcelas em todo
 # talhão; o PV01 da Lagoa Grande tinha 1 parcela na lista e nenhuma no detalhe (o local do cultivo é o nome do pivô, "Pivô 1")
 import dados_lagoa_safra as DL
 try:
     npc = CF._nparc(); div = []
     for t in CF._tal_rows():
-        rr, _ = CF._parc_rows([t['id']], t['v']['faz']); k = sum(len(g['kids']) for g in rr if g['v']['sid'] in (CF.SAF_ATUAL['id'], DL.SAFRA['id']))
+        rr = CF._parc_rows([t['id']], t['v']['faz']); k = sum(len(g['kids']) for g in rr if g['v']['sid'] in (CF.SAF_ATUAL['id'], DL.SAFRA['id']))
         if k != npc.get(t['id'], 0): div.append((t['id'], k, npc.get(t['id'], 0)))
-    pv = CF._parc_rows(['PV01'], 'Lagoa Grande')[0]; pv01 = [(k['v']['parc'], k['v']['area']) for g in pv for k in g['kids']]
+    pv = CF._parc_rows(['PV01'], 'Lagoa Grande'); pv01 = [(k['v']['parc'], k['v']['area']) for g in pv for k in g['kids']]
 except Exception as e: div, pv01 = [repr(e)], []
 chk('B7 parcelas da lista = parcelas do detalhe em todo talhão (PV01: Pivô 1 com 29,92 ha na Safra Mamão)', not div and pv01 == [('Pivô 1', 29.92)], (div[:4], pv01))
 
