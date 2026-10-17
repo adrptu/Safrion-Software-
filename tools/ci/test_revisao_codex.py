@@ -66,6 +66,30 @@ class Portao(unittest.TestCase):
             with self.subTest(nome):
                 self.assertIsNotNone(self.motivo([comentario(resumo()), c]), nome)
 
+    def test_rodape_de_atribuicao(self):
+        # A plataforma do Claude acrescenta este rodapé a todo comentário (PR #67, 6227385884): o ato continua dedicado.
+        rod = revisao_codex.RODAPE
+        def c(corpo):
+            return comentario(corpo, login='adrptu', acesso='OWNER', atualizado='2026-10-09T15:00:00Z')
+        self.assertIsNone(self.motivo([comentario(resumo()), c(f'Parecer favorável do revisor: {HEAD}{rod}')]))
+        self.assertIsNone(self.motivo([comentario(resumo()), c(f'Parecer favorável do revisor: {HEAD}{rod}\n')]))
+        retirada = comentario(f'Parecer retirado: {HEAD}{rod}', login='adrptu', acesso='OWNER',
+                              atualizado='2026-10-09T16:00:00Z')
+        self.assertIn('retirou', self.motivo([comentario(resumo()), c(f'Parecer favorável do revisor: {HEAD}'), retirada]))
+        recusados = {
+            'texto depois do rodapé': f'Parecer favorável do revisor: {HEAD}{rod}\nok',
+            'texto antes do ato': f'Revisão.\nParecer favorável do revisor: {HEAD}{rod}',
+            'texto entre o ato e o rodapé': f'Parecer favorável do revisor: {HEAD}\nobs{rod}',
+            'rodapé duplicado': f'Parecer favorável do revisor: {HEAD}{rod}{rod}',
+            'rodapé com outro link': f'Parecer favorável do revisor: {HEAD}' + rod.replace('claude.ai/code', 'exemplo.com'),
+            'rodapé sem a linha em branco': f'Parecer favorável do revisor: {HEAD}' + rod[1:],
+            'só o rodapé': rod.strip(),
+            'sha curto com rodapé': f'Parecer favorável do revisor: {HEAD[:7]}{rod}',
+        }
+        for nome, corpo in recusados.items():
+            with self.subTest(nome):
+                self.assertIsNotNone(self.motivo([comentario(resumo()), c(corpo)]), nome)
+
     def test_bloqueios(self):
         casos = {
             'sem resumo': [],
