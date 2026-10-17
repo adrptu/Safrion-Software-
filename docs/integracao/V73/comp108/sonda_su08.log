@@ -1,0 +1,43 @@
+A linhas: 10
+    TR-0452 23/09 10:12 Transferência reforço da dessecação Galpão Boa Vista → Almox. defensivos Glifosato 480 · G26-15 200 L Histórico (exemplo)
+    Devolução REQ-031 23/09 09:41 Devolução recebida sobras de campo · quarentena Custódia OS-0417 → Galpão 2 MAP 11-52 · M26-05 20 sc Histórico (exemplo)
+    MV-8821 22/09 16:20 Saída p/ custódia de ordem REQ-035 Almox. defensivos → OS-0421 Fungicida A · F26-02 160 L Histórico (exemplo)
+A ações em histórico: 0
+A cabeçalho: Fazenda Santa Rita Safra 2026/27 Suprimentos › Transferências e movimentos Transferências e movimentos i Sem perda pendente Registrar perda
+A primária: i | Registrar perda
+A sem kpis: True
+A corpo topo: Extrato imutável Prévia de transferência Prévia de estorno Devolver › 10 de 10 DOCUMENTO · DATA ⇅ MOVIMENTO · MOTIVO ⇅ ORIGEM → DESTINO ⇅ ITEM · LOTE ⇅ QUANTIDADE ⇅ ESTADO ⇅ TR-0452 23/09 10:12 Transferência reforço da dessecação Galpão Boa Vista → Almox. defensivos Glifosato 480 · G26-15 200 L Histórico (exemplo) Devolução REQ-031 23/09 09:41 Devolução recebida sobras de campo · quarentena Custód
+A movs canônicos: sem estado salvo | lotes: sem estado salvo
+B registrar perda: ok
+B painel: Submeter perda | × | Cria ajuste pendente (AL-09); aprove aqui em Revisar perda. O saldo só muda após aprovação. | Origem | Galpão 2 | Unidade | kg | Físico | 60.000 kg | Reservado | 0 kg | Efeito | Submeter ajuste; saldo só muda após aprovação AL-09. | Item · lote · local * | KCl 60% · K26-11 · Galpão 2 | MAP 11-52 · M26-07 · G
+B campos: ['pn_it=KCl 60% · K26-11 · Galpão 2', 'pn_q=', 'pn_causa=', 'pn_ev=']
+B submeter: ok
+B toast: AJ-71 aguarda aprovação do gestor. O saldo não foi alterado. | painel: (fechado)
+B ajustes: [["AJ-71","perda","Aguardando gestor",-5,"KCl 60%|K26-11"]] | lotes: KCl 60%|K26-11=60000/0 ; MAP 11-52|M26-07=90000/0
+B cabeçalho: vimentos Transferências e movimentos i 1 perda aguardando gestor Registrar perda
+B linhas topo: ['AJ-71 17/10 às 15:39 Perda por ajuste Embalagem rompida Galpão 2 → perda KCl 60% · K26-11 5 kg Aguardando gestor Revisar perda', 'TR-0452 23/09 10:12 Transferência reforço da dessecação Galpão Boa Vista → Almox. defensivos Glifosato 480 · G26-15 200 L Histórico (exemplo)']
+C Rui revisar: ok
+C painel: Revisar perda | × | A aprovação revalida o ajuste e altera o físico do lote; reservas são preservadas. | Lote | KCl 60% · K26-11 | Perda | 5 kg | Motivo | Embalagem rompida | Evidência | foto IMG-1 | Aprovação | Alçada AL-09; revalida saldo e reservas. | Ajuste | Cancelar | Aprovar perda
+C aprovar: ok
+C toast: Não concluído: Aprovar o ajuste AJ-71: decisão de Ana (gestora). Nada foi alterado. | ajustes: ["Aguardando gestor"] | lotes: KCl 60%|K26-11=60000/0 ; MAP 11-52|M26-07=90000/0
+D Ana revisar: ok
+D aprovar: ok
+D toast: AJ-71 aprovado por Ana (gestora): lote K26-11 passa a 59.995 kg. | ajustes: [["Aprovado","Ana (gestora)"]] | lotes: KCl 60%|K26-11=59995/0 ; MAP 11-52|M26-07=90000/0
+D movs: [{"tipo":"ajuste","prod":"KCl 60%","lote":"K26-11","qtd":-5,"un":"kg","quem":"Ana (gestora)","origem":"web","rev":"","id":"MV-1001","at":"15:39","sq":2}]
+D cabeçalho: as e movimentos Transferências e movimentos i Sem perda pendente Registrar perda
+D linhas topo: ['AJ-71 17/10 às 15:39 Perda por ajuste Embalagem rompida Galpão 2 → perda KCl 60% · K26-11 5 kg Aprovado', 'MV-1001 15:39 Ajuste de estoque Galpão 2 → ajuste KCl 60% · K26-11 -5 kg Registrado', 'TR-0452 23/09 10:12 Transferência reforço da dessecação Galpão Boa Vista → Almox. defensivos Glifosato 480 · G26-15 200 L Histórico (exemplo)']
+E Estoque mostra AJ: False 
+F transferir: ok
+F painel: Prévia de transferência | × | Não registra movimento nem altera saldo. | Origem | Galpão 2 | Unidade | kg | Físico | 59.995 kg | Reservado | 0 kg | Efeito | Somente prévia; não registra transferência. | Item · lote · local * | KCl 60% · K26-11 · Galpão 2 | MAP 11-52 · M26-07 · Galpão 2 | Fungicida A · F26-02 · Almox. defensivos | Gl
+F ok: ok
+F toast: Prévia: 3 kg de KCl 60% · K26-11 · Galpão 2 → Galpão 1 · abastecer frente. Registro pendente de comando de transferência; nenhum saldo alterado. | movs antes/depois: 1 1
+G estornar: ok
+G painel: Prévia de estorno | × | Estorno genérico sem comando: não altera original nem cria vínculo. Entregas: confira a devolução no Estoque ou na O.S. | Movimento original * | MV-1001 | Motivo * | Cancelar | Conferir prévia
+G ok: ok
+G toast: Prévia de estorno de MV-1001 · teste. Estorno genérico indisponível: nenhum movimento ou vínculo criado. Entregas são conferidas no Estoque e na O.S. | movs: 1
+erros JS: 
+H 390 rolagem horizontal: False
+H 390 primária visível: True
+K foco em Registrar perda: True
+K Enter abre: Submeter perda | × | Cria ajuste pendente (AL-09); aprove aq
+erros JS final: 

@@ -1063,7 +1063,7 @@ def su08():
       subtitle='Extrato imutável dos movimentos de estoque; perda passa pela alçada do gestor (AL-09) antes de baixar o saldo.',
       status=(MARK,'gray'),primary_html=primb('open_per','Registrar perda','alert'),
       footer='Perda vira ajuste pendente e só baixa o físico do lote na aprovação AL-09; reservas são preservadas (SU-08 · FO-32). '
-             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção nunca apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
+             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção não apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================

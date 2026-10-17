@@ -1,0 +1,8 @@
+PASS formulário real PN submete perda e reflete ajuste canônico
+PASS falha de gravação mantém formulário e chave para retry
+PASS aprovação exige AL09 e só fecha após sucesso
+PASS transferência é prévia, mantém estoque e extrato
+PASS estorno genérico não muda original ou cria vínculo
+PASS histórico demonstrativo somente leitura sem ação nem efeito canônico
+PASS perda tem destino de revisão correto, rótulo e singular
+7 testes PN real, layout e storage simulados; sem navegador.
