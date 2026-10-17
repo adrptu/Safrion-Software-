@@ -426,12 +426,16 @@ caso('INT5 pedir mais caixas (3b1e7e2, complemento da mesma REQ)', () => { ini()
 
 console.log('\n— REV · reverificação adversarial do 8be23d8 (10/10): cada caso, fora as referências, reprova no 8be23d8 (REV2: no mutante M9)');
 /* O.S. de colheita sintética na Santa Rita (cultivo c8, onde o almoxarife recebe), liberada por Ana; Ver como = perfil guardado (a web passa g2perfil()) */
-const osSR = () => { M(c => osc_nova(c, { id: 'OS-0599', tipo: 'Colheita · semana 39 · Mamão', talhao: 'T-SR', area: 10, versao: 'v1', resp: 'Marcos', ins: [], selos: [], cult: 'c8' }));
-  return M(c => osc_liberar(c, 'OS-0599', false, '', 'Ana')); };
-const kSR = (tk, ch, quem) => ({ os: 'OS-0599', ticket: tk, bruto: '5000', tara: '1000', cond: 'Íntegra', frutos: '4000', dcol: '2026-09-25', chave: ch, quem });
+/* ordem emitida pelo caso: id fora da semente. Desde o 3f6be1d8 (17/10) a semente ocupa OS-0590…OS-0599 (demonstração de agrupamento); o osc_nova
+   recusa id repetido e o caso seguia, calado, numa pulverização da semente. Emissão recusada agora para o caso (ERRO), em vez de testar outra ordem. */
+const emitir = no => { const r = M(c => osc_nova(c, no)); if (r.erro) throw new Error('fixture: emitir ' + no.id + ' recusado (' + r.erro + ')'); return r; };
+const OS_SR = 'OS-0699';
+const osSR = () => { emitir({ id: OS_SR, tipo: 'Colheita · semana 39 · Mamão', talhao: 'T-SR', area: 10, versao: 'v1', resp: 'Marcos', ins: [], selos: [], cult: 'c8' });
+  return M(c => osc_liberar(c, OS_SR, false, '', 'Ana')); };
+const kSR = (tk, ch, quem) => ({ os: OS_SR, ticket: tk, bruto: '5000', tara: '1000', cond: 'Íntegra', frutos: '4000', dcol: '2026-09-25', chave: ch, quem });
 const verComo = k => { __ls['safrion.perfilDemo'] = k; };
-caso('REV1 colheita pela web confere quem age', () => { ini(); const l0 = osSR(); const fz = prFazDaOS(G(), G().ordens['OS-0599']);
-  ok('REV1 referência: OS-0599 de colheita na Santa Rita liberada por Ana', !l0.erro && fz === 'Santa Rita' && G().ordens['OS-0599'].etapa === 'Liberadas', [l0.erro, fz]);
+caso('REV1 colheita pela web confere quem age', () => { ini(); const l0 = osSR(); const fz = prFazDaOS(G(), G().ordens[OS_SR]);
+  ok('REV1 referência: ' + OS_SR + ' de colheita na Santa Rita liberada por Ana', !l0.erro && prEhColheita(G().ordens[OS_SR]) && fz === 'Santa Rita' && G().ordens[OS_SR].etapa === 'Liberadas', [l0.erro, fz]);
   verComo('Zé'); const rv = G().rev; const n0 = Object.keys(G().producao.cargas).length;
   const a = M(c => prReceber(c, kSR('TK-9001', 'W-REC-z1', g2perfil()))); const b = M(c => prReceber(c, kSR('TK-9001', 'W-REC-z2')));
   ok('REV1a NEGATIVO Ver como Zé (mecânico) pesa e recebe na Santa Rita (perfil passado pela tela ou o da sessão): recusado "decisão de Rui (almoxarife)…", nada gravado',
@@ -450,7 +454,7 @@ caso('REV1 almoxarife desativado não vira autor', () => { ini(); osSR(); M(c =>
   verComo('Paula'); const p = M(c => prReceber(c, kSR('TK-9002', 'W-REC-p3', g2perfil())));
   const T = trilha().filter(x => x.k === 'Paula' && x.cmd === 'Colheita');
   ok('REV1f Paula pesa: o filtro "Paula" do CF-04 tem só o ato que ela fez (1 pesagem)', !p.erro && T.length === 1 && T[0].oq === 'Pesar e receber carga' && T[0].quem === 'Paula (almoxarife)', [p.erro, T.map(x => [x.oq, x.quem])]); });
-caso('REV1 descartar carga a pesar na Santa Rita', () => { ini(); osSR(); const cg = M(c => prCarga(c, { os: 'OS-0599', cx: 50, via: 'app', quem: 'Marcos', chave: 'APP-SR-1' })); const id = cg.g && cg.g.id;
+caso('REV1 descartar carga a pesar na Santa Rita', () => { ini(); osSR(); const cg = M(c => prCarga(c, { os: OS_SR, cx: 50, via: 'app', quem: 'Marcos', chave: 'APP-SR-1' })); const id = cg.g && cg.g.id;
   verComo('Zé'); const rv = G().rev; const d0 = M(c => prDescartarCarga(c, id, 'registro em dobro', g2perfil()));
   ok('REV1g NEGATIVO Zé descarta pela web a carga a pesar da Santa Rita: recusado, nada gravado', !cg.erro && /Descartar a .*: decisão de Rui \(almoxarife\)/.test(d0.erro || '') && G().rev === rv && G().producao.cargas[id].st === 'A pesar', [cg.erro, d0.erro]);
   verComo('Rui'); const d1 = M(c => prDescartarCarga(c, id, 'registro em dobro', g2perfil()));
@@ -539,7 +543,7 @@ caso('REV9 registro de origem único por ato', () => { ini(); M(c => osc_dispens
   const T = trilha().filter(x => x.src); const dup = T.map(x => x.src).filter((s, i, a) => a.indexOf(s) !== i);
   ok('REV9b trilha com O.S., Estoque e beneficiamento: nenhum "Registro de origem" repetido', !dup.length, dup.slice(0, 5)); });
 caso('REV10 irrigação só com água: o CMD-06 tem autor', () => { ini();   /* a semente não tem irrigação só com água em A liberar: emite uma, como a tela */
-  M(c => osc_nova(c, { id: 'OS-0598', tipo: 'Irrigação · lâmina 12 mm', talhao: 'P1', area: 10, versao: 'v1', resp: 'Marcos', ins: [], selos: [] })); const W = G().ordens['OS-0598'];
+  emitir({ id: 'OS-0698', tipo: 'Irrigação · lâmina 12 mm', talhao: 'P1', area: 10, versao: 'v1', resp: 'Marcos', ins: [], selos: [] }); const W = G().ordens['OS-0698'];   /* id fora da semente (ver emitir) */
   M(c => confAcesso(c, pid('Paula'), false, 'k-p', 'Ana')); const rv = G().rev;
   const a = M(c => osc_liberar(c, W.id, true, '', { k: 'Paula' }));
   ok('REV10a NEGATIVO Paula desativada libera a irrigação só com água: recusado "sem o perfil de quem age", segue em A liberar, nada gravado',
