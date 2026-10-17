@@ -192,12 +192,12 @@ O pós-processamento seguro tem duas partes:
 
 **Seção, rolagem e gatilho:**
 
-- **Saída.** O ouvinte de clique em link para outra tela já existe (`g2lib.js:1177-1181`). Ele grava `{h, sec, rol, gat, t, perfil}` em `history.state.g2reg` e em `sessionStorage['g2reg:'+arq+h]`:
+- **Saída.** O ouvinte de clique em link para outra tela já existe (`g2lib.js:1177-1181`). Ele grava o `g2ctx` do contrato v1 abaixo, que é o **dono único** da restauração; não existe um `g2reg` separado. A cópia em `sessionStorage['g2ctx:'+arq+h]` serve só ao bilhete de uso único do Voltar da faixa:
   - **`sec`:** o `[data-sec]` mais próximo do gatilho. As seções passam a levar `data-sec`; na OS, isso entra no `sec()` (`processo_os.py:1543`).
   - **`rol`:** a rolagem do painel.
   - **`gat`:** o `data-ref` do gatilho.
 - **Chegada.** Depois de abrir pelo endereço, a dona chama `g2regAbriu(self, id, {secAbre})`.
-  - **Quando restaura:** só se a navegação for `back_forward` ou `reload` e `history.state.g2reg.h === location.hash`, ou se houver o bilhete de uso único que o Voltar da faixa deixa.
+  - **Quando restaura:** só se a navegação for `back_forward` ou `reload` e `history.state.g2ctx.h === location.hash` (com as validações do contrato v1), ou se houver o bilhete de uso único que o Voltar da faixa deixa.
   - **O que faz:**
     - abre a seção pelo gancho da dona (na OS, `psx`);
     - rola até onde estava;
@@ -250,7 +250,9 @@ O pós-processamento seguro tem duas partes:
 
 O endereço continua sem a pilha, porque os leitores acima são estritos e o `ma_hashSync` reescreve o hash a cada desenho (`maquinas.py:96`). A sintaxe `#OS-0502>PC-…` não entra. O contexto completo vai num contrato versionado em `history.state`, que sobrevive ao Voltar e ao recarregar.
 
-- **Estado:** `history.state.g2ctx = {v:1, h, sec, rol, gat, foco, pilha:[{ref, gat}], t}`.
+- **Estado:** `history.state.g2ctx = {v:1, h, sec, rol, gat, foco, pilha:[{ref, gat}], t, perfil, faz, saf, origem, arq}`.
+  - **Só referências e posição:** nenhum dado de domínio é guardado. Na restauração, cada nível relê os dados atuais da dona antes de mostrar o resumo.
+  - **Identidade para revalidar:** `perfil`, `faz`, `saf`, `origem` e `arq` são as mesmas garantias que o `g2voltaValida` aplica hoje (`g2lib.js:1348-1351`). O estado histórico não dá permissão.
   - `h`: o hash do registro de baixo;
   - `sec`, `rol`: a seção aberta e a rolagem do painel;
   - `gat`: o `data-ref` que levou para fora;
@@ -266,9 +268,15 @@ O endereço continua sem a pilha, porque os leitores acima são estritos e o `ma
 | **`g2ctx` de outra versão, malformado ou com mais de 1 h** | Tratado como link: só o registro do hash, com aviso `[R4]` no console. |
 
 - **Validação na restauração** (revisão do Codex, 6241404422):
-  - **o contexto inteiro:** confere a versão, o hash, a idade (até 1 h), o perfil atual (`g2perfil().k`), o escopo atual e a permissão de ver cada registro. Se o perfil ou o escopo mudou, ou se não há permissão, o contexto vira link: abre só o registro do hash, se ele for visível;
+  - **o contexto inteiro:** confere a versão, os tipos e o tamanho (pilha com até 2 níveis), o hash, a idade (até 1 h), a origem, o arquivo, o perfil atual (`g2perfil().k`) e a permissão de ver cada registro;
+  - **troca de perfil ou perda de acesso:** recusa restaurar o detalhe e os resumos. O foco vai para um destino seguro (o título da tela), com o aviso "Contexto não restaurado: perfil ou acesso mudou";
+  - **escopo mudado:** segue a decisão da F2, que é aplicar o contexto no escopo atual com aviso. Nunca volta em silêncio ao escopo antigo. Antes da F2, a recusa vira link, com o aviso;
   - **cada nível da pilha:** o registro ainda existe, a dona ainda o resume e a pessoa pode vê-lo;
-  - **nível inválido:** sai junto com todos os que dependem dele, ou seja, os de cima, abertos a partir dele. Os ancestrais ficam. O `g2vivo` anuncia "OS-0502 › PC-101 não está mais disponível; voltamos para OS-0502";
+  - **nível inválido:** sai junto com todos os que dependem dele, ou seja, os de cima, abertos a partir dele. Os ancestrais ficam e reabrem em ordem.
+    - Com a pilha [A, B]: se A some, saem A e B, e o B órfão não sobe de nível. Se só B some, A fica.
+    - O foco inválido cai no título do nível válido de cima.
+    - Um único anúncio no `g2vivo`, por exemplo: "OS-0502 › PC-101 não está mais disponível; voltamos para OS-0502".
+    - O detalhe de baixo nunca fecha na recuperação; o Esc continua fechando só o nível de cima;
   - **resumo só de leitura** em todos os níveis restaurados.
 - **Robô:** o diálogo de cima depois do Voltar precisa ter o título do empilhado de origem quando havia pilha, ou do detalhe quando não havia. O critério (b) do §4 passa a exigir isso.
 
@@ -451,7 +459,7 @@ O endereço continua sem a pilha, porque os leitores acima são estritos e o `ma
 |---|---|---|---|
 | T1 (unidade, node) | Partição do texto: ID próprio, `aceita`, `existe`, prefixo desconhecido e link legado | g2lib | `aceita:true` em `RA-`; remover `ctx.self` |
 | T2 (estático) | Toda dona do `G2_REF` existe em `_render` e não está marcada Excluir (`ocultas.json`) | Todas | Entrada apontando para AG-04det |
-| T3 (navegador) | **Volta completa:** clicar na linha grava o formato da dona; recarregar reabre o mesmo título; fechar limpa hash e `de`; voltar do destino reabre na seção, com foco no gatilho **Negativos:** `g2ctx` de outro perfil, de outro escopo, de outra versão ou com mais de 1 h abre só o registro do hash; registro sem permissão não reabre; um nível intermediário inválido derruba os descendentes e mantém os ancestrais. | OS, MA, AG-01, CMP (SC), EST (ent), PROD, CARGA, BEN, VEN, EXPED | `g2hashSync` sem efeito (chave de teste); OS sem limpar ao fechar |
+| T3 (navegador) | **Volta completa:** clicar na linha grava o formato da dona; recarregar reabre o mesmo título; fechar limpa hash e `de`; voltar do destino reabre na seção, com foco no gatilho **Negativos:** outro perfil; acesso revogado; escopo alterado (aplica com aviso, sem voltar ao antigo); pai removido (saem A e B); filho removido (A fica); versão ou TTL inválidos; tipos ou tamanho inválidos; foco ausente (título do nível válido); um só anúncio de recuperação; Esc depois da recuperação não fecha o detalhe de baixo. | OS, MA, AG-01, CMP (SC), EST (ent), PROD, CARGA, BEN, VEN, EXPED | `g2hashSync` sem efeito (chave de teste); OS sem limpar ao fechar |
 | T4 (navegador) | **Jornada A-8/A-9:** OS-0424 → REQ-039 → `EST#ent=REQ-039`, com a linha aberta e a faixa "Aberto a partir de OS-0424" → Voltar → OS-0424 em Insumos, com foco em REQ-039. Também EST → `OS#OS-n`. | OS, EST | Sem tratar `de` (faixa ausente); `:868` comparando texto |
 | T5 (navegador) | **Empilhado:** foco no título; Tab preso; Esc fecha só o empilhado e devolve o foco; nível 2; 3º clique navega; tela cheia em 390 × 844; sem erro de JS **Negativos:** o resumo não tem campo editável nem botão de comando; o 3º nível não abre como empilhado (navega); Esc com o formulário de baixo sujo não fecha o de baixo. | OS, EST, PROD | `modal()` com `.find`; Esc sem captura (fecha a OS) |
 | T6 (navegador) | Nenhum `[R2]` em `window.__g2refTexto` | Telas adotadas | Fixture com ID em texto dá 1 aviso |
