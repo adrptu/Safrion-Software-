@@ -311,7 +311,10 @@ const EST_ITEM_DIFERENTE='Item diferente do pedido: não confirme como o produto
 function estRecIdentidadeErro(c,d){
   const p=epedBase(d.ped), num=x=>String(x||'').replace(/\D/g,'');
   const notas=E2.recs.concat(erecs(c));
-  const origem=notas.find(r=>r.id===d.id)||notas.find(r=>num(r.nf)&&num(r.nf)===num(d.nf)&&(!p||r.item===p.item&&r.un===p.un));
+  const mesmas=notas.filter(r=>num(r.nf)&&num(r.nf)===num(d.nf));
+  const outro=mesmas.find(r=>p&&r.ped&&elotId(r.ped)!==p.id);
+  if(outro) return 'Esta nota já está vinculada ao '+elotId(outro.ped)+'. Mantenha o pedido de origem; nada foi gravado.';
+  const origem=notas.find(r=>r.id===d.id)||mesmas.find(r=>p&&r.item===p.item&&r.un===p.un&&(p.linha==null||r.linha==null||String(r.linha)===String(p.linha)))||mesmas[0];
   if(!p) return (d.ped||(origem&&origem.ped))?'Escolha um pedido válido para conferir a nota. Nada foi gravado.':'';
   const nf=origem||d, fornecedor=nf.forn||(origem&&epedBase(origem.ped)||{}).forn;
   const dif=[];

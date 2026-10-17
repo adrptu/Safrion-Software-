@@ -19,6 +19,10 @@ Contraprovas da base já entregues em 6241912132 (memo antes da escrita impede r
 
 ## Retorno P1–P6 (6242615315)
 
-P1: est_dem de dados2.py usa a mesma identidade PC/item/unidade/linha e deduplicação de cenEstDem. P2: RECEB_DT conserva unidade/linha dos pedidos; previsão ambígua fica fora da oferta, registrada em recebNaoApuravel e sinalizada em Compras. P3: marcador de migração após recibo e antes de reset impede ressurreição do legado; falha no marcador antes de reset interrompe o reset. P4: armazenamento bloqueado gera aviso distinto de cópia corrompida, inclusive no EST. P5: SOL_KEY referencia CEN_COMP_ANTIGA. P6: histórico da quarentena está no tooltip de uma única linha.
+P1: est_dem de dados2.py usa a mesma identidade PC/item/unidade/linha e deduplicação de cenEstDem. P2: RECEB_DT conserva unidade/linha dos pedidos; previsão ambígua fica fora da oferta, registrada em recebNaoApuravel e sinalizada em Compras. P3: marcador de migração após recibo e antes de reset impede ressurreição do legado; com armazenamento disponível, o marcador preserva o reset entre sessões. P4: armazenamento bloqueado gera aviso distinto de cópia corrompida, inclusive no EST. P5: SOL_KEY referencia CEN_COMP_ANTIGA. P6: histórico da quarentena está no tooltip de uma única linha.
 
 c34_paridade_test.py passou em 6 comparações das funções reais JS/Python: duas fazendas da previsão canônica, parcial deduplicado, multi-item, legado ambíguo e lotes de unidades diferentes. Extração AST evita importar o build inteiro. Ordens vazias e lotes explicitamente tratados como não vencidos delimitam o teste à previsão/recebimento; não valida vencimento, build completo nem navegador. Os 17 testes JS incluem reset antes/depois da migração e armazenamento bloqueado. Revisão cruzada e execução de navegador seguem pendentes.
+
+## Retorno Q1/Q2 (6242793381)
+
+Marcador tolera armazenamento ausente/bloqueado; reset restaura compras vazias em memória. Sem escrita disponível não promete persistir reset entre sessões. Identidade da NF é verificada contra todos os pedidos antes de escolher linha/item/unidade dentro do mesmo PC. 19 testes JS PASS, incluindo os dois contraexemplos devolvidos; AST Estoque PASS. Baterias completas citadas pelo revisor e navegador pendentes de reteste pelo Claude.
