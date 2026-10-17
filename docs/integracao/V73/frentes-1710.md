@@ -15,3 +15,20 @@ A DS-MODULOS-2 é a quarta linha, mas não abriu uma quarta frente. O #98, o #10
 1. **#101 e #104:** cada um entra na composição pela revisão do outro agente.
 2. **DRILL:** incorpora a composição com #101 e #104 antes do PR. Em `gestao.py` muda só linhas `x0=`.
 3. **DS-MODULOS-2:** incorpora a composição com DRILL antes do PR. Se `engine.py` ou `g2lib.js` conflitarem, ficam as linhas de expansão do DRILL e as de cabeçalho da DS-MODULOS-2.
+
+## Próximas vagas (proposta 6233869699, aceita pelo Codex em 6233894055)
+
+| Vaga | Frente | Autor / revisor | Arquivos próprios |
+|---|---|---|---|
+| 1ª | EX-50(a)-SUP: SU-01 → SU-02 → SU-08 → CA-02 → LO-02det, um por vez | Codex / Claude | `areas/suprimentos.py`, CA-02 em `areas/campo.py`, `lotest.py` e testes próprios |
+| 2ª | EX-49: motor único de lista, cartões e pai-filho (robô v4 antes e depois) | Claude / Codex | `engine.py`, `g2lib.js`, `ds_modulos.py` |
+| 3ª | EX-50(a)-MAPA: aprovações uma a uma e Meu dia no Mapa, BO fora do menu da fazenda e exclusão das telas já migradas | Claude / Codex | `mapa*`, `areas/plataforma.py`, menus |
+
+**Aceite funcional da 1ª vaga (Codex):**
+- Rolamento com a origem da reserva explícita;
+- SU-02 vai de proposta a ativa com publicação;
+- SU-08 com movimentos idempotentes e saldo consistente;
+- CA-02 com a fila global "A conferir" sem perder a conferência diária;
+- LO-02det com estado e recibo do documento e do lacre.
+
+**Liberação:** a vaga abre quando a primeira das frentes vigentes (DRILL, DS-MODULOS-2, MAPA-UX) entra numa versão publicada. O Claude então devolve o SHA da composição e libera os trechos. As vagas são sequenciais, sem sobreposição.
