@@ -1,0 +1,38 @@
+OBS   1440px · foco logo após abrir pelo teclado · DENTRO BUTTON:×
+OK    1440px · Esc logo após abrir (sem Tab) fecha o painel
+OBS   1440px · linhas no painel (recorte LG) · 15
+OK    1440px · três origens marcadas por ponteiro
+OK    1440px · OS-0593 (dose 3) bloqueada com motivo em texto
+OK    1440px · campos de programação aparecem
+OBS   1440px · fuso inicia vazio (precisa escolher, apesar da janela da origem trazer -03:00) · False
+OBS   1440px · selects · ['Fuso da fazenda', 'Máquina', 'Implemento', 'Operador', 'Caldeiro']
+OBS   1440px · prévia (texto) · Agrupar operações × Lagoa Grande · Todas · Todas · recorte da abertura 3 selecionadas 30 ha · receita DEMO-AGRUPAR v1 · 6,75 h Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00) Sulfato de magnésio · 60 kg (2 kg/ha) Carga 1 · 3.000 L · OS-0590: 10 ha / OS-0591: 15 ha / OS-0592: 5 ha OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00) OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00) OS-0592 · Pulverizador PJ-3030 36 m · 29/09 13:45–14:45 (UTC-03:00) OS-05
+OK    1440px · prévia: 30 ha, 60 kg, 6,75 h
+OBS   1440px · janela comum exibida · Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00)
+OBS   1440px · blocos programados exibidos · ['OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Pulverizador PJ-3030 36 m · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Marcos · operador · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Paula · caldeiro · 29/09 13:45–14:45 (UTC-03:00)']
+OK    1440px · janela na mesma hora local dos blocos (08:00, fuso da fazenda)
+OK    1440px · primária única no rodapé, ≥44 px, dentro da tela
+OK    1440px · sem rolagem horizontal da página
+OK    1440px · duplo acionamento cria um só grupo e mostra recibo
+OK    1440px · agrupar não aprova, não libera, não reserva; programação gravada
+OK    1440px · "Agrupar operações compatíveis" após um grupo abre nova composição
+OBS   1440px · detalhe do grupo (Caio) · GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 0 selecionadas Programar grupo Escolha explicitamente as origens deste recorte. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00) OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00) OS-0592 · Pulverizador PJ-30
+OK    1440px · detalhe mostra aprovação pendente por origem
+OBS   1440px · detalhe OS-0590 menciona o grupo? · False
+OK    1440px · detalhe da O.S. mostra recursos programados (Marcos, T03)
+OBS   1440px · botões do detalhe OS-0590 (Ana, AL-01 padrão) · ['×', 'Liberar para execução', 'Ajustar antes de liberar', 'Cancelar sem execução']
+OK    1440px · CF-01: AL-01 passa a PCP · Caio (configuração do cenário, pela tela)
+OBS   1440px · botões do detalhe OS-0590 (Ana, AL-01=PCP) · ['×', 'Aprovar v1', 'Ajustar antes de aprovar', 'Cancelar sem execução']
+OBS   1440px · botões do detalhe OS-0591 (Ana, AL-01=PCP) · ['×', 'Aprovar v1', 'Ajustar antes de aprovar', 'Cancelar sem execução']
+OBS   1440px · eventos após aprovar · ['CMD-42 v1', 'CMD-42 v1', '']
+OK    1440px · aprovar pela O.S. grava só CMD-42 (sem CMD-06) e mantém A liberar
+OK    1440px · no grupo, só as aprovadas e prontas ficam selecionáveis
+OBS   1440px · confirmação de liberação · GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 2 selecionadas Programar grupo Liberar OS-0590, OS-0591. Cada origem terá seu resultado; nenhuma aprovação será criada. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:
+OK    1440px · recarregar antes de confirmar não libera nada
+OBS   1440px · recibo da liberação · GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 0 selecionadas 2 liberadas · 0 pendentes; consulte cada origem. OS-0590 · Liberada OS-0591 · Liberada Escolha explicitamente as origens deste recorte. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:
+OBS   1440px · estado após liberar · ['Liberadas|CMD-42 v1,CMD-06 v1', 'Liberadas|CMD-42 v1,CMD-06 v1', 'A liberar|']
+OK    1440px · liberação por origem: 2 Liberadas só com CMD-06 novo; 3ª segue A liberar sem eventos
+OK    1440px · duplo acionamento não duplica movimento/reserva
+OK    1440px · aba velha: confirmação recusada com motivo, sem segundo grupo
+OK    1440px · sem exceções JavaScript
+RESULTADO 21/21

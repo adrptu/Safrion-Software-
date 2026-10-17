@@ -1,0 +1,11 @@
+origem_grupo_cand exit=0 secs=12 | RESULTADO 3/3
+config_test_cf01-base exit=0 secs=316 | RESULTADO: OK 39/39
+carencia_test-base exit=1 secs=107 | RESULTADO: 85/90 verificações · FALHAS: LC-0510-1: conforme só no escopo do mercado interno (aplicação posterior não conta) | liberação comercial do LC-0510-1 re
+FIM
+config_test_resto exit=0 secs=536 | RESULTADO: OK 49/49
+FIM2
+build pr88c exit=0 _render montado: 156 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+build c9base exit=0 _render montado: 156 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+ds_test-b989864+PR exit=0 secs=361 | RESULTADO: OK 72/72
+ds_test-b989864-base exit=0 secs=376 | RESULTADO: OK 72/72
+FIM3

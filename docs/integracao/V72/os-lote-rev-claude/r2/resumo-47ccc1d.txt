@@ -1,0 +1,9 @@
+build 916339b exit=0 _render montado: 156 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+links_ocultos_test-916339b exit=0 secs=4 | TOTAL 16 · falhas 0
+est_onda0_test-916339b exit=0 secs=1 | RESULTADO 24/24
+os_lote_unit-916339b exit=0 secs=1 | {"ok":85,"fail":0,"scope":"domínio, persistência e CMD06 real com dados sintéticos; não navegador"}
+os_lote_test-916339b exit=0 secs=15 | RESULTADO 32/32
+demanda_estado_nav_test-916339b exit=0 secs=818 | RESULTADO: 14 ok · 0 falhas
+map_decisoes_test-916339b exit=0 secs=56 | 18 ok · 0 falhas []
+est_cenario_test-916339b exit=0 secs=25 | RESULTADO: 15/15 ok
+FIM

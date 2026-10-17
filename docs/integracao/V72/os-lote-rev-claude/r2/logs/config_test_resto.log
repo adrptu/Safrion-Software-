@@ -1,0 +1,50 @@
+OK  CF-04 seed: "18 registros · 3 autores · lidos dos comandos gravados; nada é digitado aqui"; uma primária "Baixar trilha (CSV)"
+OK  filtro rápido por mês: Todos 18 · jul/2026 12 · ago/2026 3 · jun/2026 2 · set/2026 1
+OK  A11 CSV = as 12 linhas de jul/2026 (+ cabeçalho), sem segredo; a exportação vira registro
+OK  a própria exportação aparece na trilha: 19 registros
+OK  F13 a linha da exportação fica realçada (g2flash)
+OK  F16 duplo clique em "Baixar trilha": 1 registro e 1 arquivo
+OK  filtro por pessoa (Quem): Provedor → 2 registros de 20 (faturas pagas pelo provedor simulado; a 2ª exportação, do F16, entra na conta)
+OK  detalhe só leitura: de onde vem a data (simulada da cobrança), registro de origem e "A trilha não se edita"
+OK  filtro sem resultado: "Nenhuma linha corresponde aos filtros" e a primária desabilitada "Nenhum registro para baixar"
+OK  ato do CF-01 entra na trilha na hora: "Alterar alçada · AL-05" por Ana (gestora), 26/09/2026 hh:mm, web
+OK  A12 nenhum texto com cara de segredo no CF-04
+OK  CF-04 sem erro de JS
+OK  CF-03 seed: selo "Demonstração · nenhuma conexão real", 5 conexões, fila do ERP 0, uma primária "Sincronizar agora (simulado)"
+OK  fila do ERP 1 (a entrega; as 3 reservas ficam fora)
+OK  painel do ERP: quem escreve cada objeto, ambiente de demonstração, credencial "Não configurada" mascarada, pendência com o movimento da entrega
+OK  sincronizar envia 1; de novo, nada é reenviado; cada sincronização é um registro
+OK  REPETIÇÃO: duplo clique em "Sincronizar" = 1 registro (chave do desenho)
+OK  F13 a linha do ERP fica realçada depois de sincronizar
+OK  F15 app de campo: "pelo sinal do aparelho (simulado)", sem "tempo real"
+OK  app de campo: "Com sinal (simulado)", nunca "online" ou "ao vivo"
+OK  A12 nenhum texto com cara de segredo no CF-03
+OK  CF-03 sem erro de JS
+OK  A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)
+OK  A18 Ver como Rui: pagar a fatura é recusado "decisão de Ana (gestora)" e nada é pago
+OK  A18 com Ana: paga e o evento grava "por Ana (gestora)"
+OK  A18 backoffice com o Ver como em Rui: conciliar segue com "Admin plataforma" (sem AL-15)
+OK  o pagamento entra na trilha com Ana (gestora) e a data simulada da cobrança
+OK  CF-05 sem erro de JS
+OK  REV6 prévia no painel da própria Ana sem nenhum papel: "Você sem nenhum papel" com o porquê
+OK  REV6 NEGATIVO Salvar: recusado "Ninguém retira todos os próprios papéis", nada gravado; o Ver como segue Ana
+OK  REV5 outra aba entrega no Estoque (19 registros): o detalhe aberto segue o de Lucas (01/08/2026), o mesmo registro
+OK  REV1 NEGATIVO Ver como Zé (mecânico) estorna a CG-2109 (Santa Rita) pela tela: recusado "decisão de Rui (almoxarife)", a carga segue Recebida, nada gravado
+OK  REV1 Ver como Rui estorna: a carga grava "Rui (almoxarife)" e o CF-04 mostra Rui (almoxarife) · Estornar carga
+OK  REV4 Ver como Zé encerra a OS-0508: o aviso diz por quem; o CF-04 passa a 19 registros · 4 autores com "Encerrar O.S. · CMD-10" por Zé (mecânico)
+OK  REV sem erro de JS
+OK  REV12a duplo clique real (120 ms) em "Baixar trilha": 1 exportação e 1 arquivo
+OK  REV12b referência: um novo clique depois do duplo clique é outra exportação (+1)
+OK  REV12c F13: outra aba entrega no Estoque e o realce segue na linha da exportação gravada (não pula de linha)
+OK  REV12d duplo clique real em "Sincronizar agora (simulado)": 1 registro
+OK  REV13a CF-04 a 390 px, rolado até o fim à direita: a 1ª coluna (presa) mostra Quando e Quem ("Ana (gestora)")
+OK  REV13b Ver como Rui a 390 px: a primária desabilitada diz no rótulo "decisão de Ana (gestora)"
+OK  REV13c painel da Paula a 390 px: "Salvar papéis" à vista (rodapé preso no fim do painel)
+OK  REV14a abrir o painel da Paula põe o foco dentro dele, e Esc fecha sem um Tab antes
+OK  REV14b Resolver AL-12: um só ponto de Tab no grupo; seta para baixo marca e foca o 2º candidato
+OK  REV14c "Confirmar dispensa" grava 1 CMD-47 com a chave gerada ao abrir o painel (W-DSP-OS-0421-…)
+OK  REV2 sem erro de JS
+OK  A16 390 px: primária visível e sem rolagem horizontal da página
+OK  A16 390 px: painel da pessoa em largura total
+OK  CF-01 390 px sem erro de JS
+RESULTADO: OK 49/49

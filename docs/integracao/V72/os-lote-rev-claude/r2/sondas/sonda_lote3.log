@@ -1,0 +1,3 @@
+R tamanho do cenário inicial (bytes JSON) => 95140
+R recibos: antes/criar/programar/liberar => [2,13604,28777,60050]
+R maior recibo => [["k3",15392],["k2",15167],["k1",13597],["k3|OS-0590",5280],["k3|OS-0591",5279]]

@@ -1,0 +1,26 @@
+22:44:43 ativos=1 pgrep_literal=3
+22:45:03 ativos=1 pgrep_literal=3
+22:46:05 ativos=1 pgrep_literal=3
+22:47:07 ativos=1 pgrep_literal=3
+22:47:33 ativos=1 pgrep_literal=3
+22:49:29 ativos=1 pgrep_literal=3
+22:50:26 ativos=1 pgrep_literal=3
+22:51:49 ativos=1 pgrep_literal=3
+22:52:26 ativos=1 pgrep_literal=3
+22:53:37 ativos=1 pgrep_literal=3
+23:22:53 ativos=1 (limite 2 h)
+23:24:15 ativos=1 (limite 2 h)
+23:30:36 ativos=1 (limite 2 h)
+23:32:32 literal=0 ativos<2h=1
+23:40:37 literal=0 ativos<2h=1
+23:47:15 literal=0 ativos<2h=1
+23:47:27 literal=0 ativos<2h=1
+23:52:43 literal=0 ativos<2h=1
+23:54:45 config patch gate ok
+00:00:12 literal=0 ativos<2h=1
+00:09:50 literal=0 ativos<2h=1
+00:18:34 literal=0 ativos<2h=1
+00:39:18 literal=0 ativos<2h=1
+00:53:20 literal=0 ativos<2h=1
+01:06:58 literal=0 ativos<2h=1
+01:07:54 literal=0 ativos<2h=1

@@ -1,0 +1,11 @@
+--- a/tools/prototipo/v37/gen37/config_test.py	2026-10-16 23:42:47.573790177 +0000
++++ b/tools/prototipo/v37/gen37/config_test.py	2026-10-16 23:42:47.585071518 +0000
+@@ -157,7 +157,7 @@
+         chk('AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador', 'gestor · Ana' in l and 'Editável: papel' in l and 'Liberador do domínio' not in J("document.body.innerText"), l)
+         # ---------- AL-01 → PCP (vale na hora; R13 na O.S.) ----------
+         abre(1, 'AL-01 · Liberar'); d = dlg()
+-        chk('painel da AL-01: definição, ordens afetadas (6 em A liberar) e versões; com o painel aberto, nenhuma primária fora dele', 'ordens e registros afetados agora (6)' in d.lower() and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [d[-500:], prims()])
++        chk('painel da AL-01: definição, ordens afetadas (10 em A liberar: 6 + as 4 origens de demonstração OS-0590…0593 do OS-LOTE) e versões; com o painel aberto, nenhuma primária fora dele', 'ordens e registros afetados agora (10)' in d.lower() and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [d[-500:], prims()])
+         clk('PCP', 'aside[role=dialog]'); setv('#cf1_mot', 'decisão do proprietário'); d = dlg()
+         chk('prévia: muda gestor → PCP, Caio ganha, Ana perde, vale na hora; primária do painel "Salvar alçada" (uma só)', 'gestor → PCP' in d and 'Quem ganha Caio' in d and 'Quem perde Ana' in d and 'vale na hora' in d
+             and prims()['prims'] == ['Salvar alçada'], [d[:600], prims()])

@@ -1,0 +1,40 @@
+OK  A15 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado no CF-01; a tela de entrada ("‹ Configurações") tem no máximo 4 cartões na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura, e o cartão abre o CF-01
+OK  CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS
+OK  A14 as duas grades têm filtro rápido e ordenação/filtro por coluna e um campo de busca só, para as duas; "%" na célula da AL-05
+OK  AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador
+FALHOU painel da AL-01: definição, ordens afetadas (6 em A liberar) e versões; com o painel aberto, nenhuma primária fora dele · ['0431 · T2 Plantio · Soja 58 W OS-0501 · Pivô 13 Dessecação pré-plantio OS-0502 · Pivô 12 Calagem OS-0511 · Pivô 15 Sexagem e desbaste OS-0590 · Parcela demonstrativa A Pulverização · demonstração de agrupamento OS-0591 · Parcela demonstrativa B Pulverização · demonstração de agrupamento OS-0592 · Parcela demonstrativa C Pulverização · demonstração de agrupamento OS-0593 · Parcela demonstrativa D Pulverização · demonstração de agrupamento VERSÕES v1 · 01/07/2026 implantação · gestor Salvar alçada', {'prims': ['Salvar alçada'], 'dialogo': True}]
+OK  prévia: muda gestor → PCP, Caio ganha, Ana perde, vale na hora; primária do painel "Salvar alçada" (uma só)
+OK  AL-01 v2 vigente: PCP · Caio; 1 evento; painel fechado
+OK  F13 a linha da AL-01 gravada fica realçada (g2flash)
+OK  O.S. com AL-01 = PCP: Ana vê "Aprovar v1" (não "Liberar para execução")
+OK  Ana aprova: selo "Aprovada v1 · aguarda liberação" e a ordem segue em A liberar
+OK  Ver como Caio (PCP): libera a v1 aprovada; só o CMD-06 (aviso cita a aprovação anterior)
+OK  F1 trilha (mais recente primeiro): CMD-06, CMD-42 e a mudança da AL-01 na ordem em que foram gravados, mesmo no mesmo minuto
+OK  F1 coluna Quando em ordem crescente: mudança da AL-01, CMD-42, CMD-06 (ordena pela ordem da trilha, não só pela data)
+OK  AL-05 20 → 25 % por Ana: prévia "aguarda 2º aprovador" (amplia o seu poder); OS-0421 70 → 87,5 ha; primária "Enviar para confirmação"
+OK  AL-05 "Aguarda 2º aprovador"; o cabeçalho diz "AL-05 aguarda confirmação"; Ana não confirma (primária segue "Convidar pessoa")
+OK  Ana concede gestor a Caio pelo painel da pessoa
+OK  F13 a linha de Caio fica realçada depois de "Salvar papéis"
+OK  F12 Ver como Rui na AL-05 pendente: "Confirma ou recusa: Caio (gestor)", sem mandar à própria proponente (Ana)
+OK  Ver como Caio: a primária vira "Confirmar AL-05"
+OK  F7 painel da AL-05 para Caio: "Recusar mudança" como secundária e uma só primária "Confirmar mudança"
+OK  Caio confirma: AL-05 v2 vigente com 25 %
+OK  F11 Ver como Caio (gestor): o painel dele não oferece "Desativar acesso"
+OK  ERRO R3: Ana concede direção a si mesma → recusa com o motivo no painel; nada gravado
+OK  ERRO R5: Ana retira o próprio gestor (última gestora) → recusa; nada gravado
+OK  R4 no painel: "agrônomo" desabilitado para Caio, com o motivo (exige CREA válido no CD-04)
+OK  REPETIÇÃO: duplo clique em "Salvar papéis" = 1 evento (chave de quem inicia)
+OK  A8 desativar Paula: cabeçalho vermelho "AL-12 sem titular" e primária "Resolver AL-12"; Paula fora do Ver como
+OK  A8 O.S.: ninguém diz "Paula (conferência) decide"
+OK  Resolver AL-12: lista curta com quem tem a habilidade "Conferir" primeiro (Caio, Rui)
+OK  um toque escolhe: primária "Conceder conferência a Rui"
+OK  AL-12 volta a ter titular (Rui); cabeçalho sem pendência
+OK  F9 Ana retira o próprio agrônomo: a prévia avisa AL-02 sem titular e a primária vira "Resolver AL-02"
+OK  F9 painel da AL-02 sem candidato: diz por quê e o caminho (R3: outra pessoa com gestor; conceda gestor antes; CREA no CD-04); botão com o motivo
+OK  Convidar pessoa → Beto (lista curta) → painel com "Convidar (simulado)" como única primária
+OK  A9 Beto com acesso Ativo, só app de campo; cabeçalho "15 com acesso · 0 sem acesso"; primária desabilitada "Todas as pessoas do cadastro têm acesso"
+OK  CD-04 lê o acesso de Configurações: Beto sem "Sem acesso ao app"; no formulário, origem "Acesso ao app: Ativo desde 26/09/2026" com link; sem campo de acesso
+OK  perfil Rui (sem gestor): primária desabilitada com "decisão de Ana (gestora)"
+OK  perfil Rui: papéis só leitura e o motivo no painel
+OK  CF-01 sem erro de JS na jornada
+RESULTADO: FALHOU 38/39

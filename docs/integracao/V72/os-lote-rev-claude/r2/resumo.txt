@@ -1,0 +1,24 @@
+os_lote_unit exit=0 secs=1 | {"ok":85,"fail":0,"scope":"domínio, persistência e CMD06 real com dados sintéticos; não navegador"}
+alocacao_unit_test exit=0 secs=1 | RESULTADO 21/21
+mip_unit_test exit=0 secs=0 | RESULTADO 34/34
+demanda_unica_test exit=1 secs=15 |   - H1 rateio do Mapa pela área (J1, I1, I2): a OS-0421 (15 L em T1 e T2) divide 7,67 L / 7,33 L por 312 / 298 ha; Fungicida A T1 = 300,64 L e T2 = 219,84 L (meio a meio
+cal01_test exit=0 secs=1 | RESULTADO: 45 ok · 0 falhas
+config_unit_test exit=0 secs=2 | RESULTADO 226/226
+links_ocultos_test exit=0 secs=5 | TOTAL 16 · falhas 0
+aprova_quem_decide_test exit=1 secs=1 | RESULTADO 102/103
+ds_inventario_catraca exit=0 secs=1 | RESULTADO: catraca ok
+os_lote_test exit=0 secs=20 | RESULTADO 32/32
+ui_rev_1440 exit=0 secs=62 | RESULTADO 21/21
+ui_rev_390 exit=0 secs=62 | RESULTADO 21/21
+os_v39_liberar_test exit=0 secs=26 | RESULTADO: 20/20 ok
+carencia_test exit=1 secs=116 | RESULTADO: 85/90 verificações · FALHAS: LC-0510-1: conforme só no escopo do mercado interno (aplicação posterior não conta) | liberação comercial do LC-0510-1 re
+mip_fluxo_test exit=0 secs=57 | RESULTADO 15/15
+mip_correcoes_test exit=0 secs=83 | RESULTADO 14/14
+os_recurso_test exit=0 secs=37 | RESULTADO: 16/16
+tabelas_os_test exit=0 secs=71 | RESULTADO: 40/40 ok
+os_cenario_test exit=0 secs=82 | RESULTADO: 22/22 ok
+ctl5_test exit=0 secs=82 | RESULTADO 30/30 []
+config_test_cf01 exit=1 secs=320 | RESULTADO: FALHOU 38/39
+ds_modulos_catraca exit=0 secs=235 | RESULTADO: catraca ok
+paginas_scan_test exit=0 secs=398 | RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

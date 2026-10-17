@@ -1,0 +1,10 @@
+arquivo                             css tabela cartao  exceção
+maquinas.py                           4      0      0  
+agronomia.py                          0      3      0  
+paineis.py                            0      0      3  
+processo_planos.py                    1      1      0  
+producao.py                           1      0      1  
+modulos.py                            0      0      1  
+processo_os.py                        0      1      0  
+TOTAL (sem exceções): css 6 · tabela 5 · cartao 5
+RESULTADO: catraca ok
