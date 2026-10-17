@@ -26,7 +26,10 @@ TELAS = [   # (nome, endereço, ações [(js, espera)])
     ('colh_colheita', 'COLH.dc.html', []),
     ('cd06_cartoes', 'CD-06.dc.html?view=cartoes', [(f"{FECHA}('[data-g2cd] .g2cd-nk')", .6)]),
     ('os_painel_secoes', 'OS.dc.html#OS-0420', []),
+    ('os_kanban_raias', 'OS.dc.html?view=kanban&ag=onde', [(f"{FECHA}('.os-raia-cab')", .6)]),   # raias recolhíveis (PR #89): uma fechada, as outras abertas
 ]
+SO = [x for x in (os.environ.get('SETA_GAL_SO') or '').split(',') if x]   # só as fotos cujo nome contém um destes trechos
+if SO: TELAS = [t for t in TELAS if any(x in t[0] for x in SO)]
 p, srv = servir(R); c = Chrome(); J = c.js; B = f'http://127.0.0.1:{p}/'; fotos = []
 try:
     for w in (1440, 390):

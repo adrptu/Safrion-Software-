@@ -195,3 +195,9 @@ Reexecutados na e54bef1 (cruzam os merges: SAF carrega o `cenario.js` do #88; to
 - Leitor de tela real (NVDA, VoiceOver): o nome e o `aria-expanded` foram conferidos no DOM, não com leitor.
 - Aparelho físico: o toque foi emulado (CDP, 390 × 844, ponteiro grosso).
 
+## Galeria (olhada)
+
+`docs/integracao/V73/seta/fotos/<tela>_<largura>_<antes|depois>.jpg`, a 1440 e 390 px, por `seta_galeria.py` (antes: render da c9ffa08; depois: render da f1a4720; a raia do Kanban, da composição bde9f57). Telas: `cd01_arvore` (a captura do proprietário), `co06_lotes`, `pa_atividades_tabela`, `pa_atividades_cartoes`, `saf_capacidade`, `ma_ativo_blocos`, `ma_plano_servicos`, `colh_colheita`, `cd06_cartoes`, `os_painel_secoes` e `os_kanban_raias` (só depois; a 390 px as raias ficam abaixo da dobra).
+
+O que as fotos mostraram: uma seta só em cada tela (grupo e filhas iguais no CD-01); giro coerente (aberta para baixo, fechada para a direita); "Expandir tudo"/"Recolher tudo" com a seta no estado das linhas. A 390 px, o alvo de 44 px custa 8 px ao nome na 1ª coluna presa ("Rio Verde/GO" quebra; "Santa Rita" cabe).
+
