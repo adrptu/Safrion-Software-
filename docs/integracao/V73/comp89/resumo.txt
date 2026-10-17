@@ -1,0 +1,7 @@
+FIM visoes2_formas_test.py rc=0 37s :: RESULTADO: 23/23
+FIM tabelas_os_test.py rc=0 76s :: RESULTADO: 40/40 ok
+FIM os_cenario_test.py rc=0 56s :: RESULTADO: 22/22 ok
+FIM os_lote_test.py rc=1 0s :: (sem RENDER_DIR no script; refeito com RENDER_DIR=_render: RESULTADO 32/32)
+FIM config_test.py_cf01 rc=0 317s :: RESULTADO: OK 41/41
+FIM paginas_scan_test.py rc=0 398s :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+TUDO
