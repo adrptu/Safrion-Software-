@@ -28,16 +28,17 @@ try:
     # 3 · marco negativo é recusado no vínculo
     m.ir('plano=PM-11'); m.clk('Incluir serviço'); m.setv('#sv_nome', 'Revisão 100 h'); m.setv('#sv_h', '100'); m.setv('#sv_tempo', '2'); m.setv('#sv_esp', 'Mecânico'); m.clk('Salvar', '#sv-painel')
     m.setv('#pm-tk-s1', 'Lubrificar pontos de graxa'); m.clk('Incluir tarefa', 'main')
-    m.clk('Vincular ativo'); m.setv('#vk_data', '2026-09-01'); m.setv('#vk_leit', '-50'); m.clk('Salvar', '#vk-painel'); e = J("(document.querySelector('#vk-painel')||{}).innerText||''")
-    m.ok('Zero ou mais.' in e and J("!!document.querySelector('#vk-painel')"), 'vincular: leitura negativa recusada no campo', e[-120:])
-    m.setv('#vk_leit', '600'); m.clk('Salvar', '#vk-painel'); v1 = m.toast()
-    m.ok('Distribuidor 3 t vinculado ao PM-11' in v1 and not J("!!document.querySelector('#vk-painel')"), 'vincular: leitura 600 aceita', v1[:100])
+    # MA-VINCULO (16/10): o painel "Vincular ativo" (um por vez) virou "Vincular ativos" (1 ou vários, SEL-04); sem execução registrada a pessoa escolhe a base
+    m.clk('Vincular ativos'); m.clk('Informar a última execução', '#vl-painel'); m.setv('#vl_data_a07', '2026-09-01'); m.setv('#vl_leit_a07', '-50'); m.clk('Vincular ao PM-11', '#vl-painel'); e = J("(document.querySelector('#vl-painel')||{}).innerText||''")
+    m.ok('Zero ou mais.' in e and J("!!document.querySelector('#vl-painel')"), 'vincular: leitura negativa recusada no campo', e[-120:])
+    m.setv('#vl_leit_a07', '600'); m.clk('Vincular ao PM-11', '#vl-painel'); v1 = m.toast()
+    m.ok('Distribuidor 3 t vinculado ao PM-11' in v1 and not J("!!document.querySelector('#vl-painel')"), 'vincular: leitura 600 aceita', v1[:100])
     # 4 · ativo em dois planos com o mesmo serviço: aviso no novo plano e vínculo recusado
     m.ir('vis=planos', perfil='Otávio', limpa=True); m.clk('Criar plano')
     m.setv('#np_nome', 'MF 7719 cópia'); m.setv('#np_tipo', 'modelo'); m.setv('#np_modelo', 'MF 7719'); av = J("(document.querySelector('#np-painel')||{}).innerText||''"); m.setv('#np_base', 'PM-01'); m.clk('Salvar', '#np-painel')
-    m.clk('Vincular ativo'); m.setv('#vk_data', '2026-09-02'); m.setv('#vk_leit', '2793'); m.clk('Salvar', '#vk-painel'); e = J("(document.querySelector('#vk-painel')||{}).innerText||''")
-    m.ok('Trator 02 já está no PM-01' in av and 'já faz Revisão 250 h pelo PM-01' in e, 'dois planos, mesmo serviço: aviso ao criar e vínculo recusado', [av[-120:], e[-160:]])
-    J("(()=>{const b=document.querySelector('#vk-painel button[aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.3); m.clk('Descartar alterações', '#vk-painel')
+    m.clk('Vincular ativos'); e = J("(document.querySelector('#vl-painel')||{}).innerText||''"); dis = J("(()=>{const i=document.querySelector('#vl-painel [data-aid=\"a02\"] input[type=checkbox]'); return i?i.disabled:null;})()")
+    m.ok('Trator 02 já está no PM-01' in av and 'já faz Revisão 250 h pelo PM-01' in e and dis is True, 'dois planos, mesmo serviço: aviso ao criar e vínculo recusado (sem caixa para marcar)', [av[-120:], e[-160:], dis])
+    J("(()=>{const b=document.querySelector('#vl-painel button[aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.3); m.clk('Descartar alterações', '#vl-painel')
     # 5 · inativar plano com vencida pede confirmação; Manter ativo não muda nada
     m.ir('plano=PM-02', perfil='Otávio', limpa=True); m.clk('⋯ Inativar plano'); a = J("[...document.querySelectorAll('main [role=alert]')].map(x=>x.innerText).join(' ')") or ''
     est = m.man("m.planos['PM-02'].estado"); m.clk('Manter ativo', 'main')
@@ -46,7 +47,7 @@ try:
     m.ir('vis=planos'); m.abre('PM-04'); h = m.hash(); m.recarregar(); h2 = J("(document.querySelector('main h2')||{}).innerText||''")
     m.ok(h == '#plano=PM-04' and h2.startswith('PM-04'), f'F5 reabre o plano ({h})', h2[:60])
     # 7 · Vincular ativo some quando todos já estão vinculados
-    m.ok(not J("[...document.querySelectorAll('main button')].some(b=>b.innerText.trim()==='Vincular ativo'&&b.getClientRects().length)"), 'PM-04: sem candidatos, sem botão Vincular ativo')
+    m.ok(not J("[...document.querySelectorAll('main button')].some(b=>/^Vincular ativos?$/.test(b.innerText.trim())&&b.getClientRects().length)"), 'PM-04: sem candidatos, sem botão Vincular ativos')
     # 8 · painel do serviço: Tab gira dentro; Esc fecha
     m.clk('Revisão 250 h', 'main'); time.sleep(.3)
     for _ in range(30): m.tecla('Tab', 'Tab', 9)

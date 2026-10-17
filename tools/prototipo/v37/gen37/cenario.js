@@ -851,11 +851,36 @@ function cenGrupoCompromisso(c,o) {
   if((c.movs||[]).some(m=>m.os===o.id)) return 'Há movimento vinculado: conferir a origem';
   return '';
 }
+// O.S. comuns: projetar instrução vigente e alocação; não inventar ficha técnica.
+function cenGrupoComum(c,o){
+  const b=(o.osc||{}).novo||(typeof OSD!=='undefined'?(OSD.ords||[]).find(x=>x.id===o.id):null)||o;
+  const preparo=cenPreparoOrdem(c,o);if(!preparo.ok)throw Error(o.id+': '+preparo.motivo);
+  const fazenda=b.faz||o.faz,safra=b.saf||o.saf,cultura=b.cultura||o.cultura||((b.culturas||[]).length?(b.culturas||[]).slice().sort().join(' / '):''),operacao=(b.atv||{}).op||o.operacao;
+  if(!fazenda||!safra||!cultura||!operacao)throw Error(o.id+': conferir fazenda, safra, cultura e atividade na origem');
+  const rec=alDaOrdem(c,o.id),maquina=rec.find(x=>AL0.tipo[x.r]==='Máquina');
+  if(!maquina)throw Error(o.id+': alocar máquina na O.S.');
+  const prods=(o.ins||[]).map(x=>{const d=cenGrupoDose(x.dose,x.un);return {id:x.p,p:x.p,un:d.un,dose:d.dose,chave:d.chave}}).sort((a,b)=>a.id.localeCompare(b.id));
+  if(!prods.length||new Set(prods.map(x=>x.id)).size!==prods.length)throw Error(o.id+': conferir produtos da instrução');
+  const f={comum:true,fazenda,safra,cultura,operacao,tipo:'liquido',volumeHa:preparo.vazao,tanqueUtil:preparo.tanque,parcela:b.cult||b.talhao||o.talhao,
+    receita:(b.atv||{}).nome||operacao,receitaVersao:o.versao,recursos:{maquina:AL0.classe[maquina.r],implemento:'Pulverizador'},insumos:prods.map(x=>({p:x.p,id:x.id})),prazo:b.jan||''};
+  if(!f.parcela)throw Error(o.id+': conferir talhão da origem');
+  return {o,f,prods,preparo,eq:cenGrupoCanon({comum:true,fazenda,safra,cultura,operacao,atividade:f.receita,implemento:'Pulverizador',volumeHa:f.volumeHa,insumos:prods.map(({id,un,chave})=>({id,un,chave}))})};
+}
+function cenGrupoPreviaComum(c,rows,ator,programa){
+  if(programa)throw Error('Conferir os recursos na O.S.; o grupo usa a alocação vigente de cada origem.');
+  const a=rows[0];if(rows.some(x=>!x.f.comum||x.eq!==a.eq))throw Error('Atividade, receita efetiva, cultura, vazão ou contexto incompatíveis: reveja as origens.');
+  if(new Set(rows.map(x=>x.f.parcela)).size!==rows.length)throw Error('Destino repetido na mesma operação.');
+  rows=rows.slice().sort((a,b)=>a.f.prazo.localeCompare(b.f.prazo)||a.o.id.localeCompare(b.o.id));
+  const ids=rows.map(x=>x.o.id),cargas=[];
+  for(const r of rows)for(const x of r.preparo.cargas)cargas.push({n:cargas.length+1,vol:x.vol,destinos:[{os:r.o.id,area:x.area}],produtos:x.prods.map(i=>{const d=cenDec(i.q),div=['mL','g'].includes(i.un)?1000:1;return {id:i.p,p:i.p,un:i.un==='mL'?'L':i.un==='g'?'kg':i.un,q:Number(d.n)/10**d.e/div}})});
+  return {comum:true,ids,versoes:Object.fromEntries(ids.map(id=>[id,cenGrupoSnapshot(c,id)])),assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:'versão individual por O.S.',area:rows.reduce((s,x)=>s+x.o.area,0),produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)})),cargas,horas:null,inicio:null,fim:null,programa:null,programacao:null,pendencias:['Sequência por prazo da origem; cada talhão usa seu conjunto e suas cargas, sem transferir restos entre O.S.']};
+}
 function cenGrupoFicha(c,id,grupoPermitido) {
   const o=c.ordens[id]; if(!o) throw new Error(id+': ordem não encontrada');
   const bloqueio=cenGrupoCompromisso(c,o); if(bloqueio) throw new Error(id+': '+bloqueio);
   const outro=Object.values(c.gruposExec||{}).find(g=>g.id!==grupoPermitido&&g.ids.includes(id));
   if(outro) throw new Error(id+': vinculada a '+outro.id);
+  if(!o.loteFicha){if(!(Number.isFinite(o.area)&&o.area>0&&o.saldo===o.area))throw Error(id+': área autorizada deve estar integralmente disponível');return cenGrupoComum(c,o);}
   const f=o.loteFicha;
   if(!f||f.versaoOS!==o.versao) throw new Error(id+': definir parâmetros da versão vigente');
   const keys=['organizacao','fazenda','safra','cultura','operacao','metodo','receita','receitaVersao','perfil','regulagem','ocorrencia','parcela'];
@@ -878,7 +903,7 @@ function cenGrupoFicha(c,id,grupoPermitido) {
   eq.insumos=prods.map(({id,formulacao,concentracao,base,un,chave})=>({id,formulacao,concentracao,base,un,chave}));
   return {o,f,prods,eq:cenGrupoCanon(eq)};
 }
-function cenGrupoEscopo(c,id){const o=c.ordens[id];return cenGrupoCanon({area:o.area,ins:o.ins,ficha:o.loteFicha});}
+function cenGrupoEscopo(c,id){const o=c.ordens[id];return cenGrupoCanon({area:o.area,ins:o.ins,ficha:o.loteFicha,comum:o.loteFicha?null:cenGrupoComum(c,o).eq,preparo:o.loteFicha?null:cenGrupoComum(c,o).preparo.tanque});}
 function cenGrupoSnapshot(c,id) {
   const o=c.ordens[id];return cenGrupoCanon({o,req:o&&o.req?c.reqs[o.req]:null,movs:(c.movs||[]).filter(m=>m.os===id)});
 }
@@ -893,6 +918,7 @@ function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   cenGrupoAtor(ator);
   if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length) throw new Error('Selecione ao menos duas O.S. distintas.');
   const rows=ids.map(id=>cenGrupoFicha(c,id,grupoPermitido)),a=rows[0];
+  if(rows.some(x=>x.f.comum))return cenGrupoPreviaComum(c,rows,ator,programa);
   if(rows.some(x=>x.eq!==a.eq)) throw new Error('Receita, dose, base, cultura ou método incompatíveis: reveja as origens.');
   if(new Set(rows.map(x=>x.f.ocorrencia+'|'+x.f.parcela)).size!==rows.length||new Set(rows.map(x=>x.f.parcela)).size!==rows.length) throw new Error('Destino repetido ou sobreposto na mesma operação.');
   const inicio=Math.max(...rows.map(x=>Date.parse(x.f.janela[0]))),fim=Math.min(...rows.map(x=>Date.parse(x.f.janela[1])));
@@ -937,6 +963,7 @@ function cenGrupoCriar(c,previa,ator,chave) {
     const gs=c.gruposExec||(c.gruposExec={});let seq=1;while(gs['GRP-'+seq])seq++;
     const id='GRP-'+seq,g={id,versao:1,ids:p.ids,receita:p.receita,assinatura:p.assinatura,origens:p.origens,escopos:Object.fromEntries(p.ids.map(os=>[os,cenGrupoEscopo(c,os)])),por,at:cenAgora(),historico:[{acao:'Composição confirmada',versao:1,ids:p.ids.slice(),por,at:cenAgora()}]};
     if(p.programacao){for(const os of p.ids){const o=c.ordens[os];o.prog=p.programacao[os];o.rec={};o.resp=AL0.pessoas[p.programa.operador].nome;o.recHist=(o.recHist||[]).concat([{por,at:cenAgora(),t:'Programação confirmada no '+id}]);}g.programa=p.programa;}
+    g.preparo=cenClone({ids:p.ids,cargas:p.cargas,produtos:p.produtos,area:p.area});
     gs[id]=g;
     return {msg:id+' confirmado · origens preservadas; aprovação e liberação continuam por O.S.',grupo:id,versao:1,itens:p.ids.map(os=>({os,estado:'Vinculada',versao:c.ordens[os].versao}))};
   },{resultado:true});
@@ -953,6 +980,43 @@ function cenGrupoSeparar(c,id,os,versao,esperadas,ator,chave) {
     return {msg:os+' separada de '+id+' · origem, aprovação e demanda preservadas.',grupo:id,versao:g.versao,itens:[{os,estado:'Separada'}]};
   },{resultado:true});
 }
+// Plano confirmado: não recalcular silenciosamente depois de reservar ou executar.
+function cenGrupoCaldas(c,id){
+  const g=(c.gruposExec||{})[id],p=g&&g.preparo;
+  const vazio=motivo=>({cargas:[],talhoes:[],motivo});
+  if(!p)return vazio('Conferir o preparo na programação do grupo.');
+  let mudou=false;try{mudou=cenGrupoCanon(p.ids)!==cenGrupoCanon(g.ids)||g.ids.some(os=>!c.ordens[os]||c.ordens[os].etapa==='Canceladas'||g.origens[os]!==c.ordens[os].versao||g.escopos[os]!==cenGrupoEscopo(c,os))}catch(e){mudou=true}if(mudou)return vazio('Composição ou versão mudou: conferir novamente o preparo antes de executar.');
+  if(!p.cargas)return vazio('Preparo não calculado: conferir capacidade útil do conjunto.');
+  const cargas=cenClone(p.cargas);
+  const talhoes=g.ids.map((os,i)=>{const o=c.ordens[os],cs=cargas.filter(x=>x.destinos.some(d=>d.os===os));
+    return {ordem:i+1,os,talhao:o.talhao||os,area:o.area,cargas:cs.map(x=>x.n),quantidade:cs.length,
+      volume:cs.reduce((s,x)=>s+x.destinos.filter(d=>d.os===os).reduce((n,d)=>n+d.area*(o.loteFicha?o.loteFicha.volumeHa:cenGrupoComum(c,o).f.volumeHa),0),0)};});
+  return {cargas,talhoes,motivo:''};
+}
+// Projeção logística: reservas continuam pertencendo às requisições de cada O.S.
+function cenGrupoSeparacao(c,id) {
+  const g=(c.gruposExec||{})[id];if(!g)throw Error('Grupo não encontrado.');
+  const linhas=new Map(),pendencias=[];
+  for(const os of new Set(g.ids)){
+    const o=c.ordens[os],r=o&&o.req&&c.reqs[o.req];
+    if(!o||!r||r.os!==os){pendencias.push({os,motivo:!o?'Origem não encontrada':!r?'Sem requisição liberada':'Requisição de outra origem'});continue;}
+    if(o.etapa==='Canceladas'||r.estado==='Cancelada')continue;
+    for(const it of r.itens||[]){
+      const l=(c.lotes||{})[it.prod+'|'+it.lote];
+      if(!l){pendencias.push({os,motivo:'Lote '+it.lote+' não encontrado'});continue;}
+      if(cenLoteVencido(l)){pendencias.push({os,motivo:'Lote '+it.lote+' vencido: revisar a reserva antes de separar'});continue;}
+      const q=cenResPropria(c,r.id,it,l);
+      if(!(q>0))continue;
+      const key=JSON.stringify([it.prod,it.lote,it.un]),row=linhas.get(key)||{produto:it.prod,lote:it.lote,un:it.un,q:0,origens:[]};
+      row.origens.push({os,req:r.id,q});linhas.set(key,row);
+    }
+  }
+  for(const row of linhas.values()){
+    const ds=row.origens.map(x=>cenDec(x.q)),e=Math.max(...ds.map(x=>x.e));
+    row.q=Number(ds.reduce((n,x)=>n+x.n*10n**BigInt(e-x.e),0n))/10**e;
+  }
+  return {linhas:Array.from(linhas.values()),pendencias};
+}
 function cenGrupoRealizado(c,id) {
   const g=(c.gruposExec||{})[id];if(!g) throw new Error('Grupo não encontrado.');
   return g.ids.map(os=>{const o=c.ordens[os];if(!o)return {os,etapa:'Origem ausente',area:null,realizado:null,saldo:null,pendentes:1,consumo:[]};return {os,etapa:o.etapa,area:o.area,realizado:o.realizado||0,saldo:o.saldo,pendentes:(o.ap||[]).filter(a=>a.sinc===false||!['Previsto','Conferido','Provisório'].includes(a.st)).length,consumo:(o.ap||[]).filter(a=>a.sinc!==false&&['Conferido','Provisório'].includes(a.st)).map(a=>({dia:a.dia,cons:a.cons,sinc:a.sinc}))};});
@@ -962,7 +1026,7 @@ function cenGrupoRecursos(c,ids) {
   ids.forEach(id=>{
     const blocos=A.filter(x=>x.os===id);
     if(!blocos.length) out.push({os:id,motivo:'Sem programação de recursos · alocar na O.S.'});
-    const o=c.ordens[id],f=o&&o.loteFicha||{},recs=[...new Set(blocos.map(x=>x.r))];
+    const o=c.ordens[id];let f=o&&o.loteFicha||{};if(o&&!o.loteFicha){try{f=cenGrupoComum(c,o).f}catch(e){out.push({os:id,motivo:e.message});return}}const recs=[...new Set(blocos.map(x=>x.r))];
     const maquinas=recs.filter(r=>AL0.tipo[r]==='Máquina'),impl=recs.filter(r=>AL0.tipo[r]==='Implemento'),pessoas=recs.filter(r=>AL0.tipo[r]==='Pessoa');
     if(maquinas.length!==1||impl.length!==1||pessoas.length!==(f.tipo==='liquido'?2:1))out.push({os:id,motivo:'Conjunto incompleto · conferir máquina, implemento, operador e caldeiro'});
     const req=f.recursos;
@@ -980,7 +1044,7 @@ function cenGrupoRecursos(c,ids) {
         if(!valida.ok)out.push({os:id,motivo:AL0.nome[r]+' · '+valida.m});
         if(ex.some(h=>!h||!tem.includes(h)))out.push({os:id,motivo:AL0.nome[r]+' · habilidade da operação ausente'});}}
     const fuso=(o.prog||{}).fuso||(f.janela&&f.janela[0].slice(-6));
-    for(const b of blocos){const dt=Date.parse(b.dia+'T00:00:00'+fuso),ini=dt+b.ini*3600000,fim=dt+b.fim*3600000;
+    for(const b of (f.comum?[]:blocos)){const dt=Date.parse(b.dia+'T00:00:00'+fuso),ini=dt+b.ini*3600000,fim=dt+b.fim*3600000;
       if(!Number.isFinite(ini)||!Number.isFinite(fim)||fim<=ini||!f.janela||ini<Date.parse(f.janela[0])||fim>Date.parse(f.janela[1]))out.push({os:id,motivo:'Programação fora da janela técnica ou inválida'});}
     for(const r of new Set(blocos.map(x=>x.r))){
       if(alBloqueado(c,r)) out.push({os:id,motivo:'Recurso '+r+' bloqueado na Manutenção'});
@@ -1021,7 +1085,26 @@ function cenGrupoProgramar(c,id,versao,previa,ator,chave){
     if(!p.programacao)throw Error('Escolha recursos e início para programar.');
     if(p.assinatura!==g.assinatura||g.ids.some(os=>g.origens[os]!==c.ordens[os].versao||!g.escopos||g.escopos[os]!==cenGrupoEscopo(c,os)))throw Error('Versão técnica mudou após a composição.');
     for(const os of g.ids){c.ordens[os].prog=p.programacao[os];c.ordens[os].rec={};c.ordens[os].resp=AL0.pessoas[p.programa.operador].nome;c.ordens[os].recHist=(c.ordens[os].recHist||[]).concat([{por,at:cenAgora(),t:'Programação revista no '+id}]);}
+    g.preparo=cenClone({ids:p.ids,cargas:p.cargas,produtos:p.produtos,area:p.area});
     g.programa=p.programa;g.versao++;g.historico.push({acao:'Programação confirmada',versao:g.versao,por,at:cenAgora()});
     return {grupo:id,versao:g.versao,msg:id+' programado · aprovação e liberação permanecem por origem.',itens:g.ids.map(os=>({os,estado:'Programada'}))};
   },{resultado:true});
+}
+
+
+// SU-08: perda usa o ajuste canônico; aprovação permanece em cenAprovarAjuste.
+function cenPerdaNova(c, key, qtd, motivo, ator) {
+  const l = c.lotes[key];
+  if (!l) throw new Error('Lote não encontrado.');
+  if (typeof qtd !== 'number' || !Number.isFinite(qtd) || qtd <= 0 || qtd > l.fisico)
+    throw new Error('Informe uma perda positiva até o físico do lote.');
+  const mot = String(motivo || '').trim();
+  if (!mot) throw new Error('Informe o motivo da perda.');
+  const por = cenQuem(ator, 'almoxarife', 'Registrar perda');
+  const contado = l.fisico - qtd;
+  const dc = cenAjusteDecisao(c, l, contado);
+  if (dc.erro) throw new Error(dc.erro);
+  const aj = cenAjusteNovo(c, key, l.fisico, contado, (c.movs || []).length, cenDia() + ' às ' + cenAgora());
+  aj.tipo = 'perda'; aj.motivo = mot; aj.reg = por;
+  return {id: aj.id, alerta: dc.alerta, msg: aj.id + ' aguarda aprovação do gestor. O saldo não foi alterado.'};
 }

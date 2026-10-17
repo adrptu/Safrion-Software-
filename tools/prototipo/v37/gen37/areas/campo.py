@@ -414,9 +414,7 @@ def _ca02():
          for i,(q,ev,ef,qm) in enumerate(proj)],
         edit=dict(m='ro',title='Passo do roteiro',fields=[dict(k='q',l='Quando',ro=True),dict(k='ev',l='Evento',ro=True),dict(k='ef',l='Efeito',ro=True),dict(k='quem',l='Quem',ro=True)]),
         search=False,gid='g_proj',total=False,headtools=False)
-    reabrir=idrawer('Reabrir saldo da OS-0417',dict(title='Reabrir saldo para execução',sub='Volta a Em execução preservando o término anterior e a trilha; a instrução do saldo é revalidada pelo responsável competente.',
-             fields=[('Ordem','OS-0417 · Adubação de cobertura'),('Motivo','Falha de aplicação em 5 ha detectada na conferência'),('Saldo a reabrir','5 ha'),('Programação','24/09 · turno da manhã'),('Responsável','PCP · Ana')],
-             confirm='Reabrir saldo',done='Reaberta · Em execução'),'calendar','Reabrir saldo de ordem em conferência (conferente ou PCP)')
+    reabrir=imsg('Conferir reabertura do saldo', 'Prévia · nada foi alterado. A reabertura do saldo da OS-0417 ainda não está disponível neste protótipo. Confira os apontamentos e as condições na O.S.; a conferência e a aprovação continuam necessárias.', 'calendar', 'Ver disponibilidade da reabertura do saldo')+ilink('Abrir O.S.','OS.dc.html#OS-0417','arrow','Conferir a OS-0417')
     corpo=(
       kpis([('PROVISÓRIOS','52 ha','aguardam conferência'),('FORA DA TOLERÂNCIA','1','horas · OS-0420'),('SOBRAS A RECEBER','10 sc','OS-0417 · com Paula')])
       + bloco('Fila de conferência diária','Confira previsto contra observado por turno; clique no apontamento para corrigir com histórico.',g_fila,
@@ -576,4 +574,5 @@ def _ca04():
 
 def build():
     _ca01(); _ca01det(); _ca01x_0420(); _ca02(); _ca03(); _ca03det(); _ca04()
+
 

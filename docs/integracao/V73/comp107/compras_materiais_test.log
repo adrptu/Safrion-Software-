@@ -1,0 +1,33 @@
+  ok  CMP · Insumos da safra: sem erro de JS
+  ok  1a seletor "Insumos da safra | Materiais, peças e serviços" no começo da faixa da tela; Insumos abre por padrão com as etapas e a safra
+  ok  1b Materiais: sem as etapas e a safra dos insumos; faixa Filtros com o seletor, Origem e Situação; endereço #tipo=materiais
+  ok  1c a fila mostra as três origens: serviço da OM-0233 (urgente), avulsa da oficina (alta), Graxa EP2 abaixo do ponto de pedido e a reposição SC-039
+  ok  1d cada linha diz a origem e o próximo passo (SC-038 · OM-0233 · Pedido emitido; Graxa EP2 · livre 18 kg · ponto de pedido 20 kg)
+  ok  1e filtro Origem = Avulsa deixa só a SC-040
+  ok  CMP · Materiais pelo endereço: sem erro de JS
+  ok  1f o endereço #tipo=materiais reabre Materiais (F5 e link)
+  ok  1g voltar a Insumos da safra devolve as etapas e limpa o endereço
+  ok  2a Manutenção: "Solicitar compra" da OM-0235 envia a SC-041 a Compras
+  ok  2b a SC-041 chega na fila de Compras com a origem OM-0235 e o filtro em falta (sem safra)
+  ok  2c Zé (mecânico) vê "Solicitar cotações" indisponível, com o motivo em texto (só quem compra)
+  ok  2d detalhe (F5 reabre): origem OM-0235, apropriação no ativo Trator 03, "rateio pelo uso do ativo", nada de safra
+  ok  2e cotação simulada: os 2 homologados de Peças; a referência é a de menor custo que chega a tempo da janela da OM (24/09)
+  ok  2f escolher a mais barata que chega depois da janela pede justificativa (recusa sem pedido)
+  ok  2g Ana emite o PC-202 (R$ 160,00, Agro Peças Centro-Oeste) vinculado à SC-041 e à OM-0235
+  ok  2h Rui recebe (Tudo · 1 un): +1 un no saldo, já reservada para a OM-0235 (D5, 16/10), que fica pronta para liberar; SC Recebida
+  ok  2i recebida não oferece receber de novo (nada soma)
+  ok  2j na Manutenção a OM-0235 sai de "Falta peça": o filtro aparece "Peça chegou · reservada" e a primária é "Liberar serviço"
+  ok  2k liberar a OM-0235 não reserva o filtro de novo (segue +1 desde o recebimento)
+  ok  MA depois do recebimento: sem erro de JS
+  ok  3a Graxa EP2: saldo livre 18 kg, ponto de pedido 20 kg, sugere 22 kg; primária "Abrir requisição de reposição"
+  ok  3b Rui abre a SC-042 de reposição; a sugestão sai da fila e a requisição entra
+  ok  3c a reposição recebida entra no estoque da oficina (+22 kg, sem reserva)
+  ok  4a serviço da OM-0233: sem recebimento de estoque; primária "Registrar aceite do serviço"
+  ok  4b aceite da SC-038: R$ 1.843,00 como custo de terceiro da OM-0233; SC Aceita
+  ok  4c o custo estimado da OM-0233 passa a R$ 8.023,00 (peças 4.100 + 6,5 h × 320 + terceiro 1.843), pela função única
+  ok  4d na Manutenção a linha da OM-0233 mostra o custo com o serviço aceito
+  ok  5a o formulário de requisição avulsa não tem campo de safra nem de cultura (destino é ativo ou centro de custo)
+  ok  5b Zé abre a SC-043 (serviço avulso no centro de custo Armazém e beneficiamento) sem safra nem cultura
+  ok  5c celular 390 px: sem rolagem lateral; o painel cabe na tela com a primária
+  ok  CMP · celular: sem erro de JS
+RESULTADO: 32/32 ok

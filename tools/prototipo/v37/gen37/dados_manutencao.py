@@ -411,7 +411,7 @@ def js_prefixo():
 def js_regras():
     """Regras da manutenção sobre o cenário único (1a): exige cenario.js_prefixo() antes (MAN0 = CEN0.man)."""
     import dados_compras_mat as CM   # V69: Compras de materiais, peças e serviços (c.man.cmp) com as mesmas regras em toda página do estado
-    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS + '\n' + CM.js() + '\n'
+    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS_VINC_BASE + JS + '\n' + CM.js() + '\n'
 
 
 JS_ACESSO_CEN = r'''
@@ -419,17 +419,42 @@ JS_ACESSO_CEN = r'''
 function manClone(o){ return JSON.parse(JSON.stringify(o)); }
 function manGet(){ return cenGet().man; }
 function manReset(self){ cenReset(); try{ cenSave(cenClone(CEN0)); }catch(e){} if(self) self.setState({manrev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: manutenção, ordens, estoque, colheita e app voltam ao início.'}); }
-function manMudar(self,fn){ const c=cenClone(cenGet()); let r;
+/* opt.estrito (MA-VINCULO, 16/10): o comando só vale se o navegador gravou; se a gravação falha, nada muda (memória e armazenamento) e volta o erro */
+function manMudar(self,fn,opt){ const c=cenClone(cenGet()); let r;
   try{ r=fn(c.man,c)||{}; }catch(e){ r={erro:String(e.message||e)}; }
   if(r.erro){ if(self) self.setState({g2toast:r.erro}); return r; }
   if(r.nada){ if(self&&r.msg) self.setState(Object.assign({g2toast:r.msg},r.st||{})); return r; }
-  c.man.rev=(c.man.rev||0)+1; c.rev=(c.rev||0)+1; cenSave(c); if(self) self.setState(Object.assign({manrev:c.man.rev,cenrev:c.rev,g2toast:r.msg||''},r.st||{})); return r; }
+  c.man.rev=(c.man.rev||0)+1; c.rev=(c.rev||0)+1;
+  if(opt&&opt.estrito){ try{ cenSave(c,true); }catch(e){ const er={erro:String(e.message||e),naoGravado:true}; if(self) self.setState({g2toast:er.erro}); return er; } }
+  else cenSave(c); if(self) self.setState(Object.assign({manrev:c.man.rev,cenrev:c.rev,g2toast:r.msg||''},r.st||{})); return r; }
 function manOuvir(self){ if(self.__manOuvindo) return; self.__manOuvindo=true;
   try{ window.addEventListener('storage',(e)=>{ if(e.key===CEN_KEY) self.setState({manrev:Date.now()}); }); }catch(e){} }
 '''
 
-JS = r'''
-/* ===== Regras da manutenção (fonte única: tela MA, CD-03, O.S. e app) ===== */
+JS_VINC_BASE = r'''
+/* ===== Vínculo ativo × plano · recorte comum (MA-VINCULO, 16/10/2026): a mesma regra de "Sem plano" na Manutenção, na entrada do módulo e no CD-03 =====
+   c.vinc['PM|ativo'] é o vínculo; desvincular guarda o registro com fim (nada se apaga). "Sem plano" = ativo em uso sem vínculo em plano ativo e
+   publicado (o vínculo só em rascunho ou em plano inativo continua "Sem plano", com o motivo à vista). */
+function manAtvAtivo(a){ return !!a&&a.sit!=='Inativo'&&a.sit!=='Baixado'; }
+function manVincVale(v){ return !!v&&!v.fim; }
+function manPlVale(p){ return !!p&&p.estado!=='Inativo'&&!!p.versao; }
+function manPlanosDe(c,aid){ return Object.keys(c.vinc||{}).filter(k=>k.split('|')[1]===aid&&manVincVale(c.vinc[k])).map(k=>(c.planos||{})[k.split('|')[0]]).filter(Boolean); }
+function manSemPlano(c){ return (c.ordem||[]).map(id=>(c.ativos||{})[id]).filter(a=>manAtvAtivo(a)&&!manPlanosDe(c,a.id).some(manPlVale)); }
+'''
+
+
+def hub_semplano_js():
+    """Entrada do módulo (MOD-MAN) e CD-03: o recorte comum + o estado mínimo do seed; com o cenário gravado (mesma versão), vale o gravado."""
+    import cenario
+    s = seed(); v = cenario.seed()['v']
+    mini = dict(ordem=s['ordem'], ativos={k: dict(id=a['id'], nome=a['nome']) for k, a in s['ativos'].items()},
+                planos={k: dict(id=p['id'], estado=p['estado'], versao=p['versao']) for k, p in s['planos'].items()}, vinc={k: {} for k in s['vinc']})
+    return (JS_VINC_BASE + 'const MAN_HUB0 = ' + json.dumps(dict(v=v, man=mini), ensure_ascii=False) + ';\n'
+            + "const CEN_LS = 'talhao-os-cenario-v1';\n"
+            + 'function manHubEstado(){ try{ const t=localStorage.getItem(CEN_LS); if(t){ const x=JSON.parse(t); if(x&&x.v===MAN_HUB0.v&&x.man) return x.man; } }catch(e){} return MAN_HUB0.man; }\n')
+
+
+JS = r'''/* ===== Regras da manutenção (fonte única: tela MA, CD-03, O.S. e app) ===== */
 const MAN_FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
 const MAN_ABERTAS=['A liberar','Liberadas','Em execução'];
 const MAN_RESP={'Serviço':['Feito','Não feito','Não se aplica'],'Verificação':['Conforme','Não conforme','Não se aplica','Não foi possível verificar'],'Medição':['Conforme','Não conforme'],'Teste':['Aprovado','Reprovado']};
@@ -490,9 +515,12 @@ function manTk(t){ return (t&&typeof t==='object')?t:{t:String(t),tipo:'Serviço
 function manTkT(t){ return manTk(t).t; }
 function manGatTxt(s){ const g=s.gat||{}; const t=[]; if(g.h) t.push(manN(g.h)+' h'); if(g.km) t.push(manN(g.km)+' km'); if(g.d) t.push(manN(g.d)+' dias'); return t.length?('a cada '+t.join(' ou ')):'sem gatilho'; }
 function manTolTxt(s){ const g=s.gat||{}, o=s.tol||{}; const t=[]; if(g.h) t.push('± '+manN(o.h||0)+' h'); if(g.km) t.push('± '+manN(o.km||0)+' km'); if(g.d) t.push('± '+manN(o.d||0)+' dias'); return t.join(' · '); }
-function manCabe(c,p,a){ return p.aplica.t==='modelo'? p.aplica.v.indexOf(a.modelo)>=0 : p.aplica.v.indexOf(a.id)>=0; }
-function manAplTxt(c,p){ if(p.aplica.t==='modelo') return (p.aplica.v.length>1?'Modelos ':'Modelo ')+p.aplica.v.join(' e ');
-  const n=p.aplica.v.map(id=>(c.ativos[id]||{}).nome).filter(Boolean); return n.length>2?(n.length+' ativos'):n.join(' e '); }
+/* a quem o plano se aplica (MA-VINCULO): {t:'modelo', v:[modelos], x:[ativos de outro modelo vinculados como exceção]} ou {t:'ativos', v:[ativos escolhidos]} */
+function manCabe(c,p,a){ return p.aplica.t==='modelo'? (p.aplica.v.indexOf(a.modelo)>=0||(p.aplica.x||[]).indexOf(a.id)>=0) : p.aplica.v.indexOf(a.id)>=0; }
+function manAplTxt(c,p){ const ap=p.aplica; const na=(n)=>n+(n===1?' ativo':' ativos');
+  if(ap.t==='modelo'){ const n=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&manAtvAtivo(a)&&ap.v.indexOf(a.modelo)>=0).length; const x=(ap.x||[]).filter(id=>c.ativos[id]).length;
+    return 'Todos '+(ap.v.length>1?'dos modelos ':'do modelo ')+ap.v.join(' e ')+' ('+na(n)+')'+(x?' + '+na(x)+' de outro modelo':''); }
+  return 'Ativos escolhidos ('+ap.v.filter(id=>c.ativos[id]).length+')'; }
 function manRef(v,sid){ return (v.ult&&v.ult[sid])||v.marco; }
 function manCiclo(pid,aid,sid,ref){ return pid+'|'+aid+'|'+sid+'@'+ref.data+'|'+(ref.leit===null||ref.leit===undefined?'':ref.leit); }
 /* ---------- vencimento: o que vencer primeiro (mesma fórmula do dados_manutencao.vencimento) ---------- */
@@ -529,7 +557,7 @@ function manResDe(c,k,exceto){ const out=[]; Object.values(c.oms).forEach(o=>{ i
 function manResTxt(c,k,exceto){ const it=c.itens[k]||{}; const rs=manResDe(c,k,exceto); return rs.length?rs.map(x=>manN(x.qtd,1)+' '+(it.un||'')+' reservada'+(x.qtd>1?'s':'')+' para a '+x.om).join(', '):''; }
 /* todas as linhas plano × ativo × serviço (publicado), com cálculo, ordem do ciclo e selos */
 function manLinhas(c,pid){ const out=[];
-  Object.keys(c.vinc).forEach(vk=>{ const v=c.vinc[vk]; const k=vk.split('|'); if(pid&&k[0]!==pid) return; const p=c.planos[k[0]], a=c.ativos[k[1]]; if(!p||!a) return;
+  Object.keys(c.vinc).forEach(vk=>{ const v=c.vinc[vk]; const k=vk.split('|'); if(pid&&k[0]!==pid) return; if(!manVincVale(v)) return; const p=c.planos[k[0]], a=c.ativos[k[1]]; if(!p||!a) return;
     const ss=manPub(p); if(!ss.length){ out.push({vk,pid:p.id,aid:a.id,sid:'',p,a,s:null,x:{sit:'Aguarda publicar',gats:[],prim:null,prev:null},ref:v.marco,om:null}); return; }
     ss.forEach(s=>{ const ref=manRef(v,s.id); const x=p.estado==='Inativo'?{sit:'Plano inativo',gats:[],prim:null,prev:null}:manVenc(c,s,a,ref);
       const ciclo=manCiclo(p.id,a.id,s.id,ref); const om=manOmCiclo(c,p.id,a.id,s.id,ciclo);
@@ -546,7 +574,7 @@ function manSemOrdem(c,hz){ const h=hz===undefined?c.horiz:hz;
   return {venc,ach,n:venc.length+ach.length}; }
 function manLinhaOm(c,o){ if(!o||!o.pid) return null; return manLinhas(c,o.pid).find(x=>x.aid===o.aid&&x.sid===o.sid&&x.om&&x.om.id===o.id)||null; }
 function manDupServ(c,pid,aid,nomes){ const ns=nomes.map(x=>String(x).toLowerCase());
-  for(const k of Object.keys(c.vinc)){ const q=k.split('|'); if(q[1]!==aid||q[0]===pid) continue; const o=c.planos[q[0]]; if(!o||o.estado==='Inativo') continue;
+  for(const k of Object.keys(c.vinc)){ const q=k.split('|'); if(q[1]!==aid||q[0]===pid||!manVincVale(c.vinc[k])) continue; const o=c.planos[q[0]]; if(!o||o.estado==='Inativo') continue;
     const s=manWork(o).concat(manPub(o)).find(x=>ns.indexOf(String(x.nome).toLowerCase())>=0); if(s) return {pid:o.id,s:s.nome}; }
   return null; }
 function manSelosLinha(c,l){ const s=[]; if(l.a.cond==='Bloqueado'){ s.push({t:'Ativo bloqueado',c:'red'}); }
@@ -592,7 +620,7 @@ function manCusto(c,o,modo){ const pc=(o.pecas||[]).reduce((s,p)=>s+(modo==='est
   const h=modo==='est'?(Number(o.tempo)||0):((o.exec&&o.exec.horas)||0); return pc+h*c.custoh+(Number(o.terc)||0); }
 function manCustoFinal(c,o){ return (o.custo!==undefined&&o.custo!==null)?o.custo:manCusto(c,o); }
 /* ---------- gerar: uma OM por ativo × serviço × ciclo; serviço maior que "cumpre também" e também está devido gera uma só OM ---------- */
-function manGerar(c,vk,sid,pf){ if(pf!==undefined) manExige(c,pf,'gerar'); const k=vk.split('|'); const p=c.planos[k[0]], a=c.ativos[k[1]], v=c.vinc[vk]; if(!p||!a||!v) throw new Error('Vínculo não encontrado.');
+function manGerar(c,vk,sid,pf){ if(pf!==undefined) manExige(c,pf,'gerar'); const k=vk.split('|'); const p=c.planos[k[0]], a=c.ativos[k[1]], v=c.vinc[vk]; if(!p||!a||!manVincVale(v)) throw new Error('Vínculo não encontrado.');
   const ls=manLinhas(c,p.id).filter(l=>l.aid===a.id); let l=ls.find(x=>x.sid===sid); if(!l) throw new Error('Serviço não está na versão publicada.');
   const maior=ls.find(x=>x.s&&(x.s.cumpre||[]).indexOf(sid)>=0&&manDevida(x)); if(maior) l=maior;
   if(l.om) return {nada:true,msg:'Já existe a '+l.om.id+' para este ciclo · nenhuma ordem nova.',id:l.om.id};
@@ -920,6 +948,121 @@ function manMarcoSug(c,p,aid){ const nomes=manWork(p).concat(manPub(p)).map(s=>S
     const cob=[String(o.serv).toLowerCase()].concat(pl?manPub(pl).filter(s=>(o.cobre||[]).indexOf(s.id)>=0).map(s=>String(s.nome).toLowerCase()):[]);
     if(!nomes.some(n=>cob.indexOf(n)>=0)) return; if(!best||o.exec.data>best.data) best={data:o.exec.data,leit:o.exec.leit,om:o.id}; });
   return best; }
+/* ---------- vínculo ativo × plano (MA-VINCULO, 16/10/2026; revisão Codex 6226249749) ----------
+   Um só modelo: p.aplica diz a quem o plano se aplica; c.vinc['PM|ativo'] = {marco, ult, desde, fim?, hist?} é o vínculo, com a base de contagem
+   (marco = a última execução antes do vínculo; ult = a última por serviço, que vale primeiro: manRef).
+   - Vincular, revincular ou repetir nunca zera nem sobrescreve marco, ult ou ciclo e nunca registra manutenção como feita: a leitura atual como
+     base esconderia atraso (250 h, referência 1.000 h, leitura 1.450 h = Vencida; com 1.450 h de referência ficaria Em dia).
+   - Sem execução registrada, quem vincula escolhe: informar a última execução ou contar de agora (marco estimado, à vista).
+   - Grupo de máquina diferente é recusado (o plano geraria ordem, tarefas e peças erradas); modelo diferente no mesmo grupo é aviso.
+   - Gatilho por h ou km que o ativo não conta é dito; serviço sem nenhum gatilho aplicável é recusado (nunca "Sem gatilho" calado).
+   - Lote: tudo ou nada. Desvincular guarda o vínculo com fim e motivo; a OM aberta continua; vincular de novo retoma a mesma contagem. */
+const MAN_NIV={escopo:0,modelo:1,classe:2,grupo:3};
+function manModelosPl(c,p){ const ap=p.aplica; if(ap.t==='modelo') return ap.v.slice(); const m=[];
+  ap.v.concat(Object.keys(c.vinc).filter(k=>k.split('|')[0]===p.id&&manVincVale(c.vinc[k])).map(k=>k.split('|')[1])).forEach(id=>{ const a=c.ativos[id]; if(a&&m.indexOf(a.modelo)<0) m.push(a.modelo); }); return m; }
+function manClassesPl(c,p){ const s=[]; c.ordem.forEach(id=>{ const a=c.ativos[id]; if(a&&(manCabe(c,p,a)||manVincVale(c.vinc[p.id+'|'+id]))&&s.indexOf(a.classe)<0) s.push(a.classe); }); return s; }
+/* gatilhos do serviço que o ativo conta (h ou km pelo contador dele; dias sempre) e os que ele não conta */
+function manGatAp(s,a){ const g=s.gat||{}; const fora=['h','km'].filter(u=>g[u]&&a.un!==u); return {fora,ft:fora.map(u=>manN(g[u])+' '+u).join(' e '),vale:['h','km'].filter(u=>g[u]&&a.un===u).concat(g.d?['d']:[])}; }
+/* publicar não pode deixar ativo vinculado sem gatilho aplicável (a máquina pareceria coberta sem vencimento): devolve os motivos */
+function manPubSemGatilho(c,p,ss){ const out=[]; Object.keys(c.vinc).filter(k=>k.split('|')[0]===p.id&&manVincVale(c.vinc[k])).forEach(k=>{ const a=c.ativos[k.split('|')[1]]; if(!a) return;
+    (ss||[]).forEach(s=>{ const x=manGatAp(s,a); if(x.fora.length&&!x.vale.length) out.push(s.nome+' conta só por '+x.ft+' e '+a.nome+' '+manContTxt(a)); }); }); return out; }
+function manContTxt(a){ return a.un==='h'?'conta horas (horímetro)':(a.un==='km'?'conta km (odômetro)':'não tem contador'); }
+function manVincCompat(c,p,a){ const r={erro:'',avisos:[],nivel:''}; if(!p||!a){ r.erro='Plano ou ativo não encontrado.'; return r; }
+  if(!manAtvAtivo(a)){ r.erro=a.nome+' está '+String(a.sit||'inativo').toLowerCase()+': não recebe plano.'; return r; }
+  if(p.estado==='Inativo'){ r.erro=p.id+' está inativo: reative o plano para vincular.'; return r; }
+  if(p.grupo&&a.grupo!==p.grupo){ r.erro=p.id+' é de '+p.grupo+' e '+a.nome+' é de '+a.grupo+': o plano geraria ordem, tarefas e peças erradas.'; return r; }
+  /* um serviço por ativo: confere os nomes da versão em vigor e do rascunho (publicar não confere de novo contra os outros planos) */
+  const dup=manDupServ(c,p.id,a.id,manWork(p).concat(manPub(p)).map(s=>s.nome));
+  if(dup){ r.erro=manNome(a)+' já faz '+dup.s+' pelo '+dup.pid+': um serviço por ativo evita ordem em dobro.'; return r; }
+  /* revisão Codex 6229032017: quem rege o vínculo são os serviços PUBLICADOS (manPub, os mesmos da prévia e das linhas); sem versão publicada,
+     os do rascunho v1, que passam a valer ao publicar. O rascunho de um plano publicado só gera aviso: não torna elegível o que a versão em
+     vigor não atende, nem bloqueia o que ela atende. */
+  const pub=!!p.versao; const reg=pub?manPub(p):manWork(p);
+  reg.forEach(s=>{ const x=manGatAp(s,a); if(!x.fora.length) return;
+    if(!x.vale.length){ if(!r.erro) r.erro=s.nome+' conta só por '+x.ft+' e '+a.nome+' '+manContTxt(a)+': nenhum gatilho se aplica'+(pub?' na v'+p.versao+' em vigor':' (rascunho v1: é o que vale ao publicar)')+'.'; return; }
+    r.avisos.push(s.nome+': o gatilho de '+x.ft+' não vale ('+a.nome+' '+manContTxt(a)+'); vence só a cada '+x.vale.map(u=>manN((s.gat||{})[u])+' '+manUn(u)).join(' ou ')+'.'); });
+  if(r.erro) return r;
+  if(pub&&p.rasc) manWork(p).forEach(s=>{ const x=manGatAp(s,a); if(!x.fora.length) return;
+    r.avisos.push('Rascunho v'+p.rasc.v+' (ainda não vale): '+s.nome+(x.vale.length?(' perde o gatilho de '+x.ft+' neste ativo'):(' conta só por '+x.ft+'; se for publicado assim, '+a.nome+' fica sem gatilho e a publicação é recusada'))+'.'); });
+  const ms=manModelosPl(c,p); r.nivel=manCabe(c,p,a)?'escopo':(ms.indexOf(a.modelo)>=0?'modelo':(manClassesPl(c,p).indexOf(a.classe)>=0?'classe':'grupo'));
+  if(ms.length&&ms.indexOf(a.modelo)<0) r.avisos.unshift('Modelo diferente: '+a.modelo+'. Confira tarefas e peças do '+p.id+'.');
+  return r; }
+/* planos que servem ao ativo (opções explícitas, nunca vínculo automático): do âmbito, do mesmo modelo, da mesma classe e do mesmo grupo, nessa ordem */
+function manVincSug(c,a){ if(!manAtvAtivo(a)) return [];
+  return c.ordemPlanos.map(id=>c.planos[id]).filter(p=>p&&p.estado!=='Inativo'&&!manVincVale(c.vinc[p.id+'|'+a.id])).map(p=>({p,cp:manVincCompat(c,p,a)})).filter(x=>!x.cp.erro)
+    .sort((x,y)=>(MAN_NIV[x.cp.nivel]-MAN_NIV[y.cp.nivel])||((y.p.versao?1:0)-(x.p.versao?1:0))||x.p.id.localeCompare(y.p.id)); }
+/* base de contagem proposta: o vínculo encerrado volta como estava ('hist'); senão a última OM encerrada do mesmo serviço ('om'); senão a pessoa escolhe */
+function manVincBase(c,p,a){ const v=c.vinc[p.id+'|'+a.id]; if(v&&v.fim) return {modo:'hist',v};
+  const m=manMarcoSug(c,p,a.id); return m?{modo:'om',data:m.data,leit:m.leit,om:m.om}:{modo:''}; }
+/* b = {modo:'agora'|'ult', corr, data, leit, mot}: devolve o marco ou os erros por campo (a mesma conferência da prévia e do comando) */
+function manVincRef(c,p,a,b){ b=b||{}; const b0=manVincBase(c,p,a); const errs={}; let ref=null;
+  if(b0.modo==='hist') return {ref:null,errs,modo:'hist'};
+  const modo=b0.modo==='om'?(b.corr?'ult':'om'):(b.modo||'');
+  if(modo==='om') ref={data:b0.data,leit:a.un&&b0.leit!==undefined?b0.leit:null,om:null,est:false,de:b0.om};
+  else if(modo==='agora'){ if(a.un&&!a.leit) errs.leit=a.nome+' não tem leitura registrada: registre a leitura ou informe a última execução.'; else ref={data:c.hoje,leit:a.un?a.leit.val:null,om:null,est:true}; }
+  else if(modo==='ult'){ let n=null;
+    if(manVazio(b.data)) errs.data='Informe a data da última execução.'; else if(String(b.data)>c.hoje) errs.data='A data não pode ser futura.';
+    if(a.un){ n=manNum(b.leit); if(manVazio(b.leit)||isNaN(n)) errs.leit='Informe a leitura na última execução ('+a.un+').'; else if(n<0) errs.leit='Zero ou mais.'; else if(a.leit&&n>a.leit.val) errs.leit='Maior que a leitura atual ('+manLeitTxt(a)+').'; }
+    if(b0.modo==='om'&&manVazio(b.mot)) errs.mot='Informe o motivo da correção ('+b0.om+').';
+    if(!Object.keys(errs).length) ref={data:String(b.data),leit:a.un?n:null,om:null,est:false,de:'',mot:b0.modo==='om'?String(b.mot).trim():''}; }
+  else errs.modo='Escolha como contar: informe a última execução ou conte de agora.';
+  return {ref,errs,modo}; }
+function manVincDeTxt(a,ref){ return manBr(ref.data)+(ref.leit!==null&&ref.leit!==undefined&&a.un?' · '+manQ(ref.leit,a.un):''); }
+/* prévia = os vencimentos que o vínculo vai gerar, pela mesma conta das linhas (manRef + manVenc + manProxTxt) */
+function manVincPrev(c,p,a,v){ if(p.estado==='Inativo') return [{nome:'',txt:'Plano inativo: não gera vencimentos.',sit:'Plano inativo',prox:'—'}];
+  const ss=manPub(p); if(!ss.length) return [{nome:'',txt:'Rascunho: os vencimentos começam quando o '+p.id+' for publicado.',sit:'Aguarda publicar',prox:'—'}];
+  return ss.map(s=>{ const ref=manRef(v,s.id); const x=manVenc(c,s,a,ref); const prox=x.gats.length?manProxTxt(c,x):'—';
+    return {sid:s.id,nome:s.nome,x,sit:x.sit,prox,txt:'próxima em '+prox+' · '+manSitTxt(c,x),de:manVincDeTxt(a,ref)}; }); }
+function manAplicaInclui(p,a){ const ap=p.aplica; if(ap.t==='ativos'){ if(ap.v.indexOf(a.id)<0) ap.v.push(a.id); } else if(ap.v.indexOf(a.modelo)<0){ ap.x=ap.x||[]; if(ap.x.indexOf(a.id)<0) ap.x.push(a.id); } }
+/* vincular 1 ou vários ativos a um plano: itens = [{aid, base:{modo, corr, data, leit, mot}}]; tudo ou nada; repetir não muda nada (chave e vínculo existente) */
+function manVincular(c,pid,itens,pf,chave){ return manCmd(c,chave,'vincular',()=>{ if(pf!==undefined) manExige(c,pf,'plano'); const p=c.planos[pid]; if(!p) throw new Error('Plano não encontrado.');
+  const visto={}; const its=(itens||[]).filter(x=>x&&x.aid&&!visto[x.aid]&&(visto[x.aid]=1)); if(!its.length) throw new Error('Marque ao menos um ativo.');
+  const er=[]; const ok=its.map(it=>{ const a=c.ativos[it.aid]; const k=pid+'|'+it.aid; const v=c.vinc[k]; if(!a){ er.push('ativo '+it.aid+' não encontrado'); return null; }
+    if(manVincVale(v)) return {a,k,ja:true};
+    const cp=manVincCompat(c,p,a); if(cp.erro){ er.push(cp.erro.replace(/\.$/,'')); return null; }
+    if(v&&v.fim) return {a,k,volta:true};
+    const r=manVincRef(c,p,a,it.base); const e=Object.values(r.errs); if(e.length){ er.push(a.nome+': '+e[0].replace(/\.$/,'')); return null; }
+    return {a,k,ref:r.ref}; });
+  if(er.length) throw new Error('Nada foi vinculado: '+er.join(' · ')+'.');
+  const por=manPor(pf); const novos=[], jas=[], voltas=[];
+  ok.forEach(x=>{ if(x.ja){ jas.push(x.a); return; }
+    if(x.volta){ const v=c.vinc[x.k]; v.hist=(v.hist||[]).concat([Object.assign({},v.fim,{desde:v.desde||null})]); delete v.fim; v.desde={em:c.hoje,por}; voltas.push(x.a); }
+    else { c.vinc[x.k]={marco:x.ref,ult:{},desde:{em:c.hoje,por}}; novos.push(x.a); }
+    manAplicaInclui(p,x.a); });
+  const fe=novos.concat(voltas); if(!fe.length) return {nada:true,msg:(jas.length>1?'Já vinculados':'Já vinculado')+' ao '+pid+': '+jas.map(a=>a.nome).join(', ')+' · nada mudou.'};
+  const prox=(a)=>{ const ls=manLinhas(c,pid).filter(l=>l.aid===a.id&&l.s); return ls.length?ls.map(l=>l.s.nome+' '+manProxTxt(c,l.x)).join(', '):'vence quando o plano for publicado'; };
+  return {msg:(fe.length>1?fe.length+' ativos vinculados ao '+pid:manNome(fe[0])+' vinculado ao '+pid)+' · '+fe.map(a=>(fe.length>1?a.nome+': ':'')+prox(a)).join(' · ')
+      +(voltas.length?' · retoma a contagem de antes ('+voltas.map(a=>a.nome).join(', ')+')':'')+(jas.length?' · já estava: '+jas.map(a=>a.nome).join(', '):'')+'.',ids:fe.map(a=>a.id)}; }); }
+function manDesvincular(c,pid,aid,motivo,pf,chave){ return manCmd(c,chave,'desvincular',()=>{ if(pf!==undefined) manExige(c,pf,'plano'); const p=c.planos[pid], a=c.ativos[aid], v=c.vinc[pid+'|'+aid];
+  if(!p||!a) throw new Error('Plano ou ativo não encontrado.'); if(!manVincVale(v)) return {nada:true,msg:a.nome+' não está vinculado ao '+pid+' · nada mudou.'};
+  if(manVazio(motivo)) throw new Error('Informe o motivo para desvincular.');
+  v.fim={em:c.hoje,por:manPor(pf),mot:String(motivo).trim()};
+  const ap=p.aplica; const lst=ap.t==='ativos'?ap.v:(ap.x||[]); const i=lst.indexOf(aid); if(i>=0) lst.splice(i,1);
+  const ab=Object.values(c.oms).filter(o=>o.pid===pid&&o.aid===aid&&manAberta(o));
+  return {msg:manNome(a)+' desvinculado do '+pid+' · histórico guardado'+(ab.length?' · '+ab.map(o=>o.id).join(', ')+(ab.length>1?' continuam abertas':' continua aberta'):'')+'.'}; }); }
+/* trocar "Aplica a" sem perder vínculo: devolve o âmbito novo, o grupo e o efeito (mostrado antes de salvar) */
+function manAplicaNova(c,p,d){ const L=Object.keys(c.vinc).filter(k=>k.split('|')[0]===p.id&&manVincVale(c.vinc[k])).map(k=>c.ativos[k.split('|')[1]]).filter(Boolean);
+  const ef=[]; let ap, as; const nm=(xs)=>xs.map(a=>a.nome).join(', ');
+  if(d.tipo==='modelo'){ if(!d.modelo) return {erro:'Escolha o modelo.',efeito:[]}; as=c.ordem.map(x=>c.ativos[x]).filter(a=>a&&a.modelo===d.modelo&&manAtvAtivo(a));
+    const x=L.filter(a=>a.modelo!==d.modelo); ap={t:'modelo',v:[d.modelo]}; if(x.length) ap.x=x.map(a=>a.id);
+    ef.push('Vale para todos do modelo '+d.modelo+' ('+as.length+(as.length===1?' ativo).':' ativos).'));
+    const nc=as.filter(a=>L.indexOf(a)<0); if(nc.length) ef.push(nm(nc)+(nc.length>1?' entram como candidatos':' entra como candidato')+': o vínculo pede a base de contagem.');
+    if(x.length) ef.push(nm(x)+(x.length>1?' seguem vinculados':' segue vinculado')+' (outro modelo).'); }
+  else { const esc=(d.ativos||[]).slice(); if(!esc.length&&!L.length) return {erro:'Marque ao menos um ativo.',efeito:[]};
+    const v=esc.concat(L.map(a=>a.id).filter(id=>esc.indexOf(id)<0)); ap={t:'ativos',v}; as=v.map(id=>c.ativos[id]).filter(Boolean);
+    ef.push('Vale para os ativos escolhidos ('+v.length+').');
+    const ks=L.filter(a=>esc.indexOf(a.id)<0); if(ks.length) ef.push(nm(ks)+(ks.length>1?' seguem vinculados':' segue vinculado')+': vínculo feito não se perde (para tirar, desvincule).');
+    const sai=c.ordem.map(x=>c.ativos[x]).filter(a=>a&&manCabe(c,p,a)&&v.indexOf(a.id)<0); if(sai.length) ef.push(nm(sai)+(sai.length>1?' deixam':' deixa')+' de ser candidato.'); }
+  const gs=[...new Set(as.concat(L).map(a=>a.grupo))]; if(gs.length>1) return {erro:'O plano ficaria com '+gs.join(' e ')+': um plano serve a um grupo de máquina.',efeito:ef};
+  return {aplica:ap,grupo:gs[0]||p.grupo,efeito:ef}; }
+/* situação do plano no ativo (coluna Plano da visão Ativos e detalhe do plano): Atrasado · Vence em N h ou dias · Em dia · Rascunho · Plano inativo */
+function manPlSit(c,p,a){ if(p.estado==='Inativo') return {t:'Plano inativo',c:'gray',r:5}; if(!p.versao) return {t:'Rascunho',c:'gray',r:4};
+  const ls=manLinhas(c,p.id).filter(l=>l.aid===a.id&&l.s&&l.x.gats.length); if(!ls.length) return {t:'Sem gatilho',c:'gray',r:4};
+  const v=ls.find(l=>l.x.sit==='Vencida'); if(v) return {t:'Atrasado',c:'red',r:0,dica:v.s.nome+' · '+manSitTxt(c,v.x)};
+  const b=ls.filter(l=>l.x.sit==='Vence em breve').sort((x,y)=>x.x.gats[x.x.prim].dd-y.x.gats[y.x.prim].dd)[0];
+  if(b){ const g=b.x.gats[b.x.prim]; let t; if(g.u==='d'){ const n=Math.max(0,Math.ceil(g.dd)); t=n?('Vence em '+n+(n>1?' dias':' dia')):'Vence hoje'; } else t=g.falta>0?('Vence em '+manQ(g.falta,g.u)):'Na tolerância';
+    return {t,c:'yellow',r:1,dica:b.s.nome+' · '+manProxTxt(c,b.x)}; }
+  return {t:'Em dia',c:'green',r:2}; }
 /* ---------- condição única (CMD-18, PRD 47.3 l.7720; D-10, D-34): painel Condição ---------- */
 function manCondicao(c,aid,acao,d,pf){ const a=c.ativos[aid]; if(!a) throw new Error('Ativo não encontrado.'); if(pf!==undefined) manExige(c,pf,'condicao',{aid}); d=d||{}; const por=manPor(pf);
   const hist=(x)=>{ a.condHist=(a.condHist||[]).concat([Object.assign({por,em:c.hoje},x)]); };
@@ -1099,7 +1242,8 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
 try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
-  manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot }; } catch (e) {}
+  manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot,
+  manVincular, manDesvincular, manVincCompat, manPubSemGatilho, manVincSug, manVincBase, manVincRef, manVincPrev, manAplicaNova, manPlSit, manSemPlano, manPlanosDe }; } catch (e) {}
 '''
 
 

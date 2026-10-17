@@ -1,0 +1,49 @@
+OK    1440 CA-02.dc.html: botão "Conferir reabertura do saldo" alcançável (visivel)
+OK    1440 CA-02.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (OS-0417)
+OK    1440 CA-02.dc.html: nada gravado no navegador
+OK    1440 CA-02.dc.html: nenhuma confirmação fictícia na tela
+OK    1440 CA-02.dc.html: sem painel lateral aberto
+OK    1440 GE-02det.dc.html: botão "Conferir proposta de parâmetro" alcançável (visivel)
+OK    1440 GE-02det.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (parâmetro)
+OK    1440 GE-02det.dc.html: nada gravado no navegador
+OK    1440 GE-02det.dc.html: nenhuma confirmação fictícia na tela
+OK    1440 GE-02det.dc.html: sem painel lateral aberto
+OK    1440 GE-03.dc.html: botão "Conferir reabertura de 08/2026" alcançável (menu)
+OK    1440 GE-03.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (Controladoria)
+OK    1440 GE-03.dc.html: nada gravado no navegador
+OK    1440 GE-03.dc.html: nenhuma confirmação fictícia na tela
+OK    1440 GE-03.dc.html: sem painel lateral aberto
+OK    1440 GE-08.dc.html: botão "Conferir envio ao credor" alcançável (visivel)
+OK    1440 GE-08.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (credor)
+OK    1440 GE-08.dc.html: nada gravado no navegador
+OK    1440 GE-08.dc.html: nenhuma confirmação fictícia na tela
+OK    1440 GE-08.dc.html: sem painel lateral aberto
+OK    1440 CA-02: "Abrir O.S." para a OS-0417 alcançável (menu)
+OK    1440 CA-02 → OS.dc.html#OS-0417 abre a OS-0417
+OK    1440 GE-08: "Registrar liberação da 2ª parcela" alcançável (menu)
+OK    1440 GE-08: 2ª parcela fica bloqueada (prévia, nenhuma parcela liberada) e nada gravado
+OK    390 CA-02.dc.html: botão "Conferir reabertura do saldo" alcançável (visivel)
+OK    390 CA-02.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (OS-0417)
+OK    390 CA-02.dc.html: nada gravado no navegador
+OK    390 CA-02.dc.html: nenhuma confirmação fictícia na tela
+OK    390 CA-02.dc.html: sem painel lateral aberto
+OK    390 GE-02det.dc.html: botão "Conferir proposta de parâmetro" alcançável (visivel)
+OK    390 GE-02det.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (parâmetro)
+OK    390 GE-02det.dc.html: nada gravado no navegador
+OK    390 GE-02det.dc.html: nenhuma confirmação fictícia na tela
+OK    390 GE-02det.dc.html: sem painel lateral aberto
+OK    390 GE-03.dc.html: botão "Conferir reabertura de 08/2026" alcançável (menu)
+OK    390 GE-03.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (Controladoria)
+OK    390 GE-03.dc.html: nada gravado no navegador
+OK    390 GE-03.dc.html: nenhuma confirmação fictícia na tela
+OK    390 GE-03.dc.html: sem painel lateral aberto
+OK    390 GE-08.dc.html: botão "Conferir envio ao credor" alcançável (visivel)
+OK    390 GE-08.dc.html: Enter mostra a prévia "nada foi alterado" com o assunto (credor)
+OK    390 GE-08.dc.html: nada gravado no navegador
+OK    390 GE-08.dc.html: nenhuma confirmação fictícia na tela
+OK    390 GE-08.dc.html: sem painel lateral aberto
+OK    390 CA-02: "Abrir O.S." para a OS-0417 alcançável (menu)
+OK    390 CA-02 → OS.dc.html#OS-0417 abre a OS-0417
+OK    390 GE-08: "Registrar liberação da 2ª parcela" alcançável (menu)
+OK    390 GE-08: 2ª parcela fica bloqueada (prévia, nenhuma parcela liberada) e nada gravado
+RESULTADO: 48 OK · 0 falhas
