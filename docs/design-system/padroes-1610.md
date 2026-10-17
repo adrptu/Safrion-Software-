@@ -3,8 +3,8 @@
 Pedidos do proprietário em 16/10, transformados em padrão pelo método da skill `padrao-safrion` (`.claude/skills/padrao-safrion/SKILL.md`).
 
 - **Valem para todas as telas do mesmo tipo**, no protótipo e no software real.
-- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; paridade dos módulos em `ds_modulos.py`.
-- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b.
+- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; TAB-11 em `seta_padrao_test.py`; paridade dos módulos em `ds_modulos.py`.
+- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b; para TAB-11, a c9ffa08.
 
 ## MET-01 · Método: pedido vira padrão
 
@@ -28,9 +28,9 @@ Pedidos do proprietário em 16/10, transformados em padrão pelo método da skil
 - Sem linha vertical.
 - Linhas de 44 px.
 - Toda coluna tem **⇅** (ordenar) e **funil** (filtrar por valores).
-- Na 1ª célula, a **seta de abrir** (TAB-04):
-  - **▸/▾** abre os itens ali mesmo;
-  - **›** abre o detalhe.
+- Na 1ª célula, a **seta de abrir** (TAB-04), com o desenho único da TAB-11:
+  - a seta que gira abre os itens ali mesmo;
+  - a mesma seta, parada, abre o detalhe.
 
 **Celular (até 480 px):** "Agrupar por" e "Colunas" aparecem só com o ícone e o valor; o nome fica no `aria-label`. Assim a barra cabe numa linha com Tabela | Cartões, e a lista mostra pelo menos 5 linhas acima da dobra (AC-PCM-22).
 
@@ -86,12 +86,12 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 
 > "colone os icones de drill down sempre na esquerda, fica mais intuitivo em todas telas" (print: Planos agronômicos › Atividades do plano, a coluna DAP vinha antes da seta)
 
-**Referência:** Atividades do plano, modo Tabela: a seta ▸/▾ abre a 1ª coluna, antes do DAP.
+**Referência:** Atividades do plano, modo Tabela: a seta abre a 1ª coluna, antes do DAP.
 
 **Regra:**
-- A seta de abrir (TAB-04: ▸/▾ abre ali; › abre o detalhe) é a primeira coisa da linha, à esquerda de qualquer outra coluna: número, caixa de seleção, ícone ou texto.
+- A seta de abrir (TAB-04; desenho e alvo da TAB-11: gira e abre ali, ou leva ao detalhe) é a primeira coisa da linha, à esquerda de qualquer outra coluna: número, caixa de seleção, ícone ou texto.
 - Árvore e grupos: o recuo do nível continua; a seta do subnível fica no recuo, sempre antes do nome.
-- Com seleção, a seta vem antes da caixa. A linha sem seta guarda o lugar (22 px), para as caixas ficarem alinhadas. Nos cartões, a coluna da seta vem antes da seleção.
+- Com seleção, a seta vem antes da caixa. A linha sem seta guarda o lugar (a largura do alvo da TAB-11), para as caixas ficarem alinhadas. Nos cartões, a coluna da seta vem antes da seleção.
 - Seta de seção ou de item que abre ali (lotes da Qualidade, raia do Kanban da O.S., "Capacidade por mês") vem antes do nome.
 - Lista suspensa ("Agrupar por ▾", escolha de alvos) não é seta de abrir: o ▾ continua no fim.
 
@@ -142,6 +142,40 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
 **Dano evitado:** a tabela muda de cara de uma tela para outra, e o rótulo em 3 ou 4 linhas empurra os dados para baixo.
 
 **Teste:** `tab_drill_cab_test.py` parte B, que também conta os rótulos que terminam em reticências: nenhum a 1440 px e 30 a 390 px, em coluna estreita. O render da 519ed7b reprova.
+
+## TAB-11 · Seta única de abrir e de ir
+
+> "mude o estilo do drill down daquele preto para a setinha mais intuitiva e amigável dos debaixo, melhore ela e implemente como nosso padrão em tudo" (captura do CD-01: o grupo "Santa Rita" com o triângulo preto ▾ e os talhões com a seta fina cinza ›)
+
+**Referência:** a seta fina das linhas filhas do CD-01 (talhões), agora a única.
+
+**Regra:**
+- **Um só desenho em todas as telas:** chevron fino em SVG (16 px, traço de 1,75 px, pontas arredondadas), na cor do texto secundário (#65736A). Nunca o triângulo cheio de texto (▸ ▾ ▶) nem preto.
+- **Abrir e recolher ali mesmo** (a linha tem filhos, a seção tem conteúdo):
+  - fechada aponta para a direita; aberta gira 90° para baixo;
+  - o giro leva 120 ms e não anima com `prefers-reduced-motion`;
+  - o controle é um botão nativo com `aria-expanded` e o nome "Abrir …" / "Recolher …"; ou o botão inteiro com o nome à vista (seção da Manutenção e da O.S., lote da Qualidade, "Capacidade por mês", `summary`), com a seta antes do nome.
+- **Ir para o detalhe** (TAB-08): a mesma seta para a direita, sem girar; quem navega é a linha ou o link.
+- **"Expandir tudo" / "Recolher tudo":** a mesma seta, no estado das linhas (direita com linhas recolhidas; baixo com tudo aberto).
+- **Alvo:** 24 × 24 px no mouse, 44 × 44 px no toque, sem cobrir o controle vizinho. A seta de ir e a linha sem seta guardam a mesma largura, para os nomes alinharem.
+- **Interação:** hover verde (VIS-02: fundo #E4F3E9 e seta #1E7A4C); anel de foco verde de 2 px; Enter e Espaço alternam sem abrir o painel da linha. Alinhada ao centro da linha, na 1ª coluna, antes do nome (TAB-09).
+- **Sem dica**, como a TAB-04 (15/10: "a seta é óbvia, e a dica cobria a linha de baixo"); o nome fica para o leitor de tela.
+- **Fora:** a lista suspensa (o ▾ continua no fim de "Agrupar por", TAB-09), a ordenação do cabeçalho (⇅ ▲ ▼), o › de trilha e de texto corrido e o › no fim de atalho de texto ("Planejar ›", BOT-08).
+
+**Peça única:**
+- HTML: `engine.seta`, `engine.seta_abrir`, `engine.seta_ir`, `engine.SETA_VAZIO` e `engine.SETA_CSS`;
+- JS: `g2seta(aberta, nome)` no `g2lib` (estado e nome acessível); o desenho é sempre o do HTML, e nenhum estado da tela carrega glifo.
+
+**Aplicado em:** motor (Tabela, árvore, Agrupar por, Cartões, "Expandir tudo"), Atividades do plano (Tabela e Cartões), Planejar safra ("Capacidade por mês" e ajuste local do plano), Manutenção (blocos do ativo e da ordem, serviços do plano e Versões), Qualidade (lotes do CO-06), painel da O.S. (seções) e laudo de solo (`summary` "Ver original").
+
+**Inventário na base (c9ffa08):**
+- 35 triângulos de abrir no código de produto (19 ▸ e 16 ▾), em 6 arquivos: motor (`g2lib`), Atividades do plano, Planejar safra, Manutenção e Qualidade; os 9 ▾ de lista suspensa ficam;
+- 5 desenhos para o mesmo gesto: o triângulo de texto preto (13 px), a seta cinza da linha de ir (14 px, #9AA59E), as duas setas do painel da O.S., as setas de "Expandir tudo" e o marcador nativo do `summary`;
+- detalhe, números depois e pendências em `docs/integracao/V73/SETA-PADRAO.md`.
+
+**Dano evitado:** dois desenhos para o mesmo gesto (o triângulo preto chama mais atenção que o conteúdo e parece outra função), alvo pequeno no celular e tela nova voltando ao glifo solto.
+
+**Teste:** `seta_padrao_test.py` (148 telas e 9 estados por endereço, a 1440 e 390 px, no estado inicial, com "Expandir tudo" e no outro modo): A sem triângulo de texto; B todo controle de abrir com o componente; C uma seta só (cor, tamanho e traço computados); D giro coerente com o `aria-expanded`; E Enter e Espaço com foco visível; F alvo. O render da c9ffa08 reprova.
 
 ## PAR-01 · Paridade dos módulos com o Agrícola
 
@@ -238,7 +272,7 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
   - Posse (com o fim do contrato na linha apagada) e situação.
   - O clique abre o painel da mãe.
 - **Com todas as colunas, a árvore cabe na caixa a 1440 px** (TABELAS-FOCO A1): a situação, a posse e o nome quebram linha; o selo é curto ("Incompleto") e o que falta vai na dica.
-- **Filhas nas linhas de baixo,** com a seta ▸/▾ (TAB-04). O clique abre a filha.
+- **Filhas nas linhas de baixo,** com a seta de abrir (TAB-04, desenho da TAB-11). O clique abre a filha.
 - **A primária do cabeçalho cria a mãe** ("Criar fazenda").
 - **A filha se inclui de dentro da mãe:** "Incluir talhão" no painel da fazenda, ou na própria linha quando a fazenda está vazia (BOT-03).
 - **As outras entidades da tela continuam em abas** (Ambiental, Água).
@@ -293,3 +327,44 @@ E `cadastros_rev1_test.py`, R2a a R2e: "A resolver" com fazenda incompleta sem e
 **Dano evitado:**
 - duas colunas de ícones lado a lado, que se confundem;
 - importar laudo exigir sair do mapa e achar o talhão de novo.
+
+## Entrada rápida (frente SAF-LOTE)
+
+> "coloque um botao para poder editar de uma vez todos talhoes de uma fazenda numa tela só. como no outro anexo. todos inputs do usuário no sistema devem ser mais rápido e fácil."
+
+O "outro anexo" é o painel "Dividir T1 em parcelas" (grade editável com a soma conferida). Detalhe, números e testes: `docs/integracao/V73/SAF-LOTE.md`; próximas telas: `docs/integracao/V73/ENTRADA-RAPIDA.md`.
+
+### EDL-01 · Editar em lote numa grade
+
+**Regra:** quando a tela lista N itens do mesmo tipo com os mesmos campos, ela oferece a edição em grade, num painel largo do mesmo desenho do Dividir.
+- **Onde fica a ação:** secundária, verbo "Editar <itens>…", no título do bloco (com um contexto só) ou na faixa de cada contexto (uma fazenda por faixa, também no modo Cartões). Nunca uma segunda primária.
+- **Grade:** uma linha por item; os filhos (parcelas) recuados embaixo do pai; as colunas do formulário do item; uma coluna Situação curta com o motivo na dica e o link do que trava.
+- **Navegação de planilha:** Tab e Shift+Tab nas colunas; Enter ou ↓ desce e Shift+Enter ou ↑ sobe na mesma coluna; Esc fecha e, com alteração, pergunta antes.
+- **Aplicar aos marcados:** caixa em cada linha e "todas"; uma faixa com os mesmos campos da linha, preenchidos uma vez, vale para as linhas marcadas. Preenche só onde pode e diz quantas recusou e por quê.
+- **Colar do Excel/Planilhas:** bloco (tabulação e quebra de linha) a partir da célula focada, com conversão (vírgula decimal, datas dd/mm/aaaa e dd/mm) e o resumo "Colados 3 × 2: 6 células; 2 recusados (motivo)". Célula vazia do bloco não apaga.
+- **Nada é salvo antes do "Salvar alterações (N)":** o contador diz quantas células mudaram, as alteradas ficam destacadas (borda âmbar), e o selo do resumo diz "N alterações não salvas".
+- **Mesmas regras e mesmo caminho de gravação do formulário do item** (uma fonte só, ENG-011). A gravação é atômica por contexto (fazenda), com a chave do comando gerada ao abrir: o duplo clique não duplica. Falha ou conflito (outra aba mudou o que a grade mostra) não grava nada e mantém o rascunho.
+- **Celular:** cada linha vira um bloco com os mesmos campos em duas colunas e o rótulo em cima; alvos de 44 px; barra de salvar fixa; sem rolagem de lado. A faixa "Aplicar" mostra os campos quando há linha marcada.
+- **Peça própria sem tabela:** é uma grade de edição, como o Dividir (sem ordenar nem filtrar, sem `role=table`, sem CSS sobre classe do motor). A lista continua sendo a do motor.
+
+**Dano evitado:** abrir, preencher e salvar um painel por item quando os itens são muitos e os campos são os mesmos (no cenário medido, 29 cliques e 64 teclas viram 11 cliques e 30 teclas, ou 3 cliques e 2 teclas colando o bloco da planilha; ver SAF-LOTE.md).
+
+**Referência e teste:** Planejar safra › Cultivos e planos › "Editar talhões…" (`safra_lote.js`, `areas/saf_lote.py`). `saf_lote_test.py` (1440 e 390 px) e `saf_lote_unit_test.py` (colar, datas, número e recusas no node). A base c9ffa08 reprova (sem o botão).
+
+### INP · Entrada rápida (todo campo do sistema)
+
+| ID | Regra | Onde já vale | Prova |
+|---|---|---|---|
+| INP-01 | **Contexto herdado e visível.** A tela já sabe a organização, a fazenda, a safra, o talhão e a ordem: o painel diz o contexto no título e não pede de novo. Corrigível onde faz sentido. | Planejar safra (título "Editar talhões da Santa Rita", "Safra 2026/27 · Santa Rita") | `saf_lote_test.py` A2 |
+| INP-02 | **Campo calculável não se digita.** Área do talhão inteiro (cadastro CD-01), área livre (ocupação), primeiro plantio possível, totais e selos vêm calculados; a célula fica só leitura com o motivo. | Editar talhões (área do talhão inteiro e da área livre) | `saf_lote_test.py` G8, `saf_lote_unit_test.py` slPode |
+| INP-03 | **Teclado numérico com a unidade à vista.** Quantidade, área, dose e meta abrem o teclado decimal (`inputmode=decimal`), aceitam "1.234,5" e mostram a unidade ao lado (ha, sc/ha, t/ha/ano). | Formulário do motor (já tinha), Dividir, Editar talhões | `saf_lote_test.py` B4 |
+| INP-04 | **Número selecionado ao receber o foco** pelo toque ou pela navegação da tela: o número digitado substitui o anterior. O clique do mouse põe o cursor onde a pessoa clicou; o Tab já seleciona no navegador. | Toda página (`g2lib.js`, `g2inp`) | `saf_lote_test.py` B1 e I1 |
+| INP-05 | **Datas com atalho.** dd/mm sem ano assume o ano que cai dentro da safra; aceita ddmm, ddmmaaaa e dd/mm/aa; data que não existe é recusada com o formato. | Colar e aplicar no Editar talhões | `saf_lote_unit_test.py` slData |
+| INP-06 | **Lista curta em um toque; catálogo com busca.** Cultura em lista (a letra inicial escolhe), variedade com sugestão do cadastro e da safra, plano só da cultura da linha. | Editar talhões | `saf_lote_test.py` C1, D3 |
+| INP-07 | **Número, data e código sem corretor ortográfico nem maiúscula automática** (placa, lote, nota, CPF, CNPJ, chassi, série, matrícula, CAR). | Toda página (`g2lib.js`, `g2inp`) | `saf_lote_test.py` B4 e I1 |
+| INP-08 | **Enter avança só em grade de edição.** Na grade, Enter desce na coluna, como na planilha. Em formulário, o Enter não muda: não envia nem salva sem querer. | Editar talhões | `saf_lote_test.py` B1 e B2 |
+| INP-09 | **Colar em bloco** da planilha, com conversão e resumo do que entrou e do que foi recusado (EDL-01). | Editar talhões | `saf_lote_test.py` D1 a D4 |
+| INP-10 | **Nunca o último valor** para lote, dose, quantidade e autorização (AGENTS §3.3). Sugestão só de contexto (variedade e plano mais usados na safra, primeiro plantio possível), sempre destacada como alteração. A meta nunca é sugerida. | Editar talhões, Planejar ›, Planejar talhões livres | `saf_lote_unit_test.py` slTrocaCult |
+| INP-11 | **Erro junto ao campo.** A célula com problema fica destacada, a mensagem fica na linha, e a recusa é atômica: o que foi digitado continua. | Formulário do motor (já tinha), Dividir, Editar talhões | `saf_lote_test.py` C3 e E1 |
+
+**Dano evitado:** digitar de novo o que a tela já sabe, apagar dígito a dígito, corretor trocando código ou número, data digitada em formato que a tela não aceita e Enter que envia sem querer.

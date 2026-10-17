@@ -436,7 +436,9 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     const area=r2(cultsDe(self,su.id).reduce((a,c)=>a+(Number(c.v.area)||0),0));
     const res=nPl+' de '+L.length+(L.length===1?' talhão planejado':' talhões planejados')+(nSp?' · '+nSp+' sem plantio':'');
     grupos.push({id:'fzg_'+su.id,fgrp:true,nosel:true,ro:true,v:{local:su.faz,area},s:{local:su.faz+' · '+nfa(area)+' ha · '+res},
-      p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });
+      p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true}]:[])
+        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,al:'Editar talhões da '+su.faz}]:[])
+        .concat(!m.info.safra.ro&&L.length&&g2estreito()?[{k:'act',t:'Editar talhões',fn:'slfaz:'+su.id,al:'Editar talhões da '+su.faz}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });   // EDL-01: todos os talhões da fazenda numa grade (safra_lote.js); no estreito, também no ⋯ da faixa
   sp.x0=x0; G2DISP[sp.id]=grupos; self.__ocG=G;
   if(info){ info.bandG=band; info.linhasG=linhas; info.totG=tot; } return info; }
 // linha de outra fazenda na tabela da sub-safra aberta: abrir e Excluir levam antes à sub-safra dela (os atalhos da linha já vão pelo talhão)
@@ -1137,23 +1139,29 @@ function openDiv(self,t,extra){ const saf=self.state.saf; if(!saf){ self.setStat
   else { base=JSON.stringify(lst); if(extra){ if(inteiro) lst[0].local=t+'-A'; const e=dvRow(extra); e.id=null; e.decl=true;
       const usados=lst.map(x=>x.local).concat(faixasEmUso(self,saf,t,null)); if(!e.local||e.local===t||usados.indexOf(e.local)>=0) e.local=nextNome(t,usados); lst.push(e); } }
   self.setState({dv:{t,rows:lst,base,ro,err:{},gerr:'',warn:false}}); }
-function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv.t, T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf); const rows=g2rows(self,GR(gid));
+// campos de um cultivo na grade (Dividir e Editar talhões, EDL-01): cultura, variedade, plantio, meta e plano da mesma cultura
+function dvCampos(x){ const e={}; const m=g2num(x.meta);
+  if(!x.cult) e.cult='Escolha a cultura'; if(!String(x.var||'').trim()) e.var='Informe a variedade';
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x.plantio||''))) e.plantio='Informe o plantio';
+  if(String(x.meta).trim()===''||isNaN(m)||m<0) e.meta='Informe a meta (≥ 0)';
+  const plx=planById(x.plano); if(plx&&plx.cultura!==x.cult) e.plano='Plano de '+plx.cultura+' não serve para '+x.cult+': escolha outro ou deixe sem plano';
+  return e; }
+// conferência da divisão de um talhão da safra aberta (SAF-C01): a mesma no Dividir e no Editar talhões (EDL-01). lst no formato do dvRow;
+// adj0: ajustes de partida (o lote encadeia os talhões). Devolve {gerr, soG} (só o aviso), {err, gerr} (recusa) ou {kids, adj, livreD, all, daSaf}
+function dvConferir(self,t,lst,adj0){ const T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf); const rows=g2rows(self,GR(gid));
   const daSaf=(c)=>sk(saf)!=='NOVA'||c.v.saf===saf;   // R-22: a g_cult_NOVA guarda as safras novas; só as linhas desta safra mudam (revisão SAF, S1)
-  if(!dv.rows.length){ self.setState({dv:Object.assign({},dv,{gerr:'Mantenha pelo menos uma parcela. Para tirar o talhão da safra, exclua a linha dele na tabela.'})}); return; }
+  if(!lst.length) return {soG:true,gerr:'Mantenha pelo menos uma parcela. Para tirar o talhão da safra, exclua a linha dele na tabela.'};
   const outros=cultsDe(self,saf).filter(c=>c.v.talhao!==t); const err={}; let A=0; const nomes={};
-  dv.rows.forEach((x,i)=>{ const e={}; const nm=String(x.local||'').trim(); const a=g2num(x.area); const m=g2num(x.meta);
+  lst.forEach((x,i)=>{ const e={}; const nm=String(x.local||'').trim(); const a=g2num(x.area);
     if(!nm) e.local='Informe o nome da parcela'; else if(nomes[nm]||outros.some(c=>c.v.local===nm)) e.local='Nome '+nm+' repetido'; nomes[nm]=1;
     if(isNaN(a)||a<0.01) e.area='Informe a área (mínimo 0,01 ha)'; else A+=a;
-    if(!x.cult) e.cult='Escolha a cultura'; if(!String(x.var||'').trim()) e.var='Informe a variedade';
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x.plantio||''))) e.plantio='Informe o plantio';
-    if(String(x.meta).trim()===''||isNaN(m)||m<0) e.meta='Informe a meta (≥ 0)';
-    const plx=planById(x.plano); if(plx&&plx.cultura!==x.cult) e.plano='Plano de '+plx.cultura+' não serve para '+x.cult+': escolha outro ou deixe sem plano';
+    Object.assign(e,dvCampos(x));
     if(Object.keys(e).length) err[i]=e; });
   const exc=A>T+0.005;
-  if(Object.keys(err).length||exc){ self.setState({dv:Object.assign({},dv,{err,gerr:(exc?('As parcelas somam '+nfa(A)+' ha; o talhão tem '+nfa(T)+' ha. Reduza '+nfa(A-T)+' ha.'):'Corrija os campos destacados; o que você digitou foi mantido.'),warn:false})}); return; }
-  const all=g2clone(soDaSafra(rows)); const adj=JSON.parse(JSON.stringify(adjOf(self))); const old=leaves(all).filter(c=>c.v.talhao===t&&daSaf(c)); const byId={}; old.forEach(c=>{ byId[c.id]=c; });
+  if(Object.keys(err).length||exc) return {err,gerr:(exc?('As parcelas somam '+nfa(A)+' ha; o talhão tem '+nfa(T)+' ha. Reduza '+nfa(A-T)+' ha.'):'Corrija os campos destacados; o que você digitou foi mantido.')};
+  const all=g2clone(soDaSafra(rows)); const adj=JSON.parse(JSON.stringify(adj0||adjOf(self))); const old=leaves(all).filter(c=>c.v.talhao===t&&daSaf(c)); const byId={}; old.forEach(c=>{ byId[c.id]=c; });
   const stamp=String(Date.now()).slice(-6);
-  const kids=dv.rows.map((x,i)=>{ const b=(x.id&&byId[x.id])||null; const c=b||{id:'p'+t+'_'+stamp+'_'+i,v:{},s:{},p:{},decl:true};
+  const kids=lst.map((x,i)=>{ const b=(x.id&&byId[x.id])||null; const c=b||{id:'p'+t+'_'+stamp+'_'+i,v:{},s:{},p:{},decl:true};
     if(b&&String(b.v.plano||'')!==String(x.plano||'')) delete adj[b.id];
     const mg=metaGravar(x);   /* UNID-PROD: linha a linha, sem regravar a meta que não mudou (R-U06) */
     Object.assign(c.v,{talhao:t,faz:(b?b.v.faz:(old[0]?old[0].v.faz:safFaz(self,saf))),local:String(x.local).trim(),cult:x.cult,var:String(x.var).trim(),area:r2(g2num(x.area)),plantio:x.plantio,meta:mg.meta,unm:mg.unm,plano:x.plano||'',colheita:x.colheita||''});
@@ -1166,19 +1174,26 @@ function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv
     // a trava de área de cada parcela conta as irmãs como ocupação; a mensagem sai agregada, com a capacidade do painel (SAF-C01)
     recs.forEach((rr,i)=>{ const chk=ocChecar(ctx,S,todos,depois,saf,rr.id,T); if(!chk.o||!chk.trav.length) return; const ar=chk.trav.filter(x=>x[0]==='safra'||x[0]==='soma'), ou=chk.trav.filter(x=>ar.indexOf(x)<0);
       if(ar.length) area.push(i); if(ou.length){ pl.push(i); er2[i]={plantio:ocMsgTrava(ctx,Object.assign({},chk,{trav:ou}),saf,T,null)}; } });
-    if(area.length||pl.length){ const D=dvCap(self,t,dv.rows);
+    if(area.length||pl.length){ const D=dvCap(self,t,lst);
       const ta=area.length?((D.p?ocPeriodoTxt(D.g,D.p)+', '+nfa(D.pior)+' ha de '+t+' estão com '+ocQuemTxt(D.p)+'. ':'')+'As parcelas somam '+nfa(A)+' ha; o máximo é '+nfa(D.cap)+' ha nesse período. '):'';
       area.forEach(i=>{ er2[i]=Object.assign({},er2[i]||{},{area:'Reduza a área: as parcelas somam '+nfa(A)+' ha e o máximo é '+nfa(D.cap)+' ha.'}); });
       const tp=pl.length?(pl.length+(pl.length>1?' parcelas':' parcela')+' com ocupação certa no período. '):'';
-      self.setState({dv:Object.assign({},dv,{err:er2,gerr:'A divisão travaria a área: '+ta+tp+'Nada foi gravado.',warn:false})}); return; }
+      return {err:er2,gerr:'A divisão travaria a área: '+ta+tp+'Nada foi gravado.'}; }
     livreD=ocTabela(ctx,S[saf],ocOcupacoes(ctx,S,depois),[[t,T]],S)[0][0].area_livre; }
   const keep=kids.map(c=>c.id); old.forEach(c=>{ if(keep.indexOf(c.id)<0) delete adj[c.id]; });
-  const isT=(r)=>r.v.talhao===t&&(r.grp?(r.kids||[]).some(daSaf):daSaf(r)); let pos=all.findIndex(isT); const rest=all.filter(r=>!isT(r)); if(pos<0) pos=rest.length;
-  const gi=grpId(t,sk(saf)==='NOVA'?saf:''); rest.splice(pos,0,{id:gi,grp:true,dr:'div_'+t,ro:false,v:{talhao:t,faz:kids[0].v.faz,local:t},s:{},p:{},kids});
+  return {kids,adj,livreD,all,daSaf}; }
+// troca as linhas do talhão pelo grupo com as parcelas conferidas, na mesma posição da lista (antes do normCult)
+function dvAplicar(all,t,kids,saf,daSaf){ const isT=(r)=>r.v.talhao===t&&(r.grp?(r.kids||[]).some(daSaf):daSaf(r)); let pos=all.findIndex(isT); const rest=all.filter(r=>!isT(r)); if(pos<0) pos=rest.length;
+  const gi=grpId(t,sk(saf)==='NOVA'?saf:''); rest.splice(pos,0,{id:gi,grp:true,dr:'div_'+t,ro:false,v:{talhao:t,faz:kids[0].v.faz,local:t},s:{},p:{},kids}); return {rest,gi}; }
+function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv.t; const saf=self.state.saf; const gid='g_cult_'+sk(saf);
+  const R=dvConferir(self,t,dv.rows,null);
+  if(R.soG){ self.setState({dv:Object.assign({},dv,{gerr:R.gerr})}); return; }
+  if(!R.kids){ self.setState({dv:Object.assign({},dv,{err:R.err,gerr:R.gerr,warn:false})}); return; }
+  const {rest,gi}=dvAplicar(R.all,t,R.kids,saf,R.daSaf); const kids=R.kids, livreD=R.livreD, daSaf=R.daSaf;
   const norm=normCult(rest); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); x0[gi]=true; x0['grp_'+t]=true;
   g2set(self,gid,{rows:norm,x:x0,sel:{},fl:null});
   const inteiro=norm.some(r=>!r.grp&&r.v.talhao===t&&daSaf(r));
-  self.setState({adj,dv:null,g2toast:(inteiro?(t+' volta a talhão inteiro.'):(t+' dividido em '+kids.length+(kids.length>1?' parcelas':' parcela')+(livreD>0.005?(' · '+nfa(livreD)+' ha livres'):'')+'.'))+' Plano operacional, recursos e demanda recalculados.'}); }
+  self.setState({adj:R.adj,dv:null,g2toast:(inteiro?(t+' volta a talhão inteiro.'):(t+' dividido em '+kids.length+(kids.length>1?' parcelas':' parcela')+(livreD>0.005?(' · '+nfa(livreD)+' ha livres'):'')+'.'))+' Plano operacional, recursos e demanda recalculados.'}); }
 function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_rows=[]; return; } const t=dv.t, T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf);
   // capacidade pelo serviço (SAF-C01): com ocupação de fora no período das parcelas (perene, outra safra), o livre e o selo saem dela, não de T
   const lst=dv.rows; const A=lst.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const D=dv.ro?{cap:T,pior:0}:dvCap(self,t,lst); const L=D.cap-A; const exc=L< -0.005, ok=Math.abs(L)<=0.005;
@@ -1312,7 +1327,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
       if(reds.length>3) at.push({t:'e mais '+(reds.length-3),al:'e mais '+(reds.length-3)+' recursos em falta: abrir a capacidade por mês',go:()=>capTog(self),st:'min-height:24px;'}); }
     else { let b=null; Object.values(G).forEach(g=>{ const c=g.max; if(c&&c.ocup!==null&&c.ocup>0&&(!b||c.ocup>b.c.ocup+1e-12)) b={g,c}; });
       if(b) at.push(atalho(b.g,b.c,'Maior uso: '+b.g.nome+' '+fmtOcup(b.c.ocup)+' · '+b.c.mes,false)); } }
-  v.v3_atalhos=at; v.v3_capexp=String(capAb); v.v3_captog=()=>capTog(self); v.v3_capt=(capAb?'▾':'▸')+' Capacidade por mês';   /* TAB-09: a seta da seção vem antes do nome (▸ fechada, ▾ aberta) */ v.v3_capab=capAb;
+  v.v3_atalhos=at; v.v3_captog=()=>capTog(self); v.v3_capexp=g2seta(capAb).exp;   /* TAB-09: a seta da seção vem antes do nome; TAB-11: a seta única, que gira com o aria-expanded (engine.seta) */ v.v3_capab=capAb;
   // g_cap: recurso × mês (ocupação); só a célula com demanda desta safra é tocável (filtra a g_op); "—" e cinza ficam inertes
   const capF=(st.cap&&st.cap.saf===saf&&G[st.cap.rec])?st.cap:null; const gc=GR('g_cap_'+sk(saf));
   if(gc){ const mis=capMeses(me.ini,me.fim); gc._c0=gc._c0||gc.cols.slice(); gc.cols=gc._c0.filter(c=>!/^m\d+$/.test(c.k)||mis.indexOf(Number(c.k.slice(1)))>=0); }
@@ -1581,7 +1596,7 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   self.__oc=(saf&&(st.step||1)===2)?syncTalhoes(self,saf,v):null; if(!self.__oc) self.__ocG=null;
   if(self.__xfn&&self.__xfn.sub===saf){ const f=self.__xfn.fn; self.__xfn=null; setTimeout(f,0); }   // SAF-FAZ-3: a ação pedida numa linha de outra fazenda, já na sub-safra dela (sgNaFazenda)
   // etapa 3: valores de partida (o bloco só aparece com safra e plano; os buracos existem sempre)
-  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capt:'▸ Capacidade por mês',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
+  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
   v.v3_captog=()=>capTog(self); v.v3_filx=()=>capSel(self,null,null);
   self.__e3=null;
   if(!saf) return;
@@ -1679,12 +1694,12 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   Object.keys(D2.talhoes||{}).forEach(t=>{ v['div_'+t]=()=>sgPorTalhao(self,t,()=>openDiv(self,t)); }); v.divide=(t)=>sgPorTalhao(self,t,()=>openDiv(self,t));
   v.planejar=(t)=>sgPorTalhao(self,t,()=>abrirPlanejar(self,t)); v.vincular=(arg)=>{ const a=String(arg).split('|'); sgPorTalhao(self,a[0],()=>abrirVincular(self,a[0],a[1])); };
   v.semplantio=(t)=>sempMarcar(self,t,true); v.replanejar=(t)=>sempMarcar(self,t,false); v.pltfaz=(f)=>pltAbrir(self,f);
-  sfzVals(self,v,saf,step,ro); ffzVals(self,v,saf,step); pltVals(self,v,saf,step,ro);
+  sfzVals(self,v,saf,step,ro); ffzVals(self,v,saf,step); pltVals(self,v,saf,step,ro); slVals(self,v,saf,step,ro);   // EDL-01 · Editar talhões (safra_lote.js)
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
   apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
   try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet()),linhas:()=>sgLista(self),
-    semPlantio:()=>JSON.parse(JSON.stringify(self.state.semp||{})),cultivos:(saf)=>cultsGrupo(self,saf||self.state.saf).map(x=>({saf:x.saf,id:x.c.id,talhao:x.c.v.talhao,faz:x.c.v.faz,local:x.c.v.local,cult:x.c.v.cult,area:x.c.v.area,plano:x.c.v.plano,plantio:x.c.v.plantio}))}; }catch(e){}   /* SAF-FAZ-3: testes leem as marcas e os cultivos do grupo */   /* adaptador do comando da F2 (PR #58) e teste */
+    semPlantio:()=>JSON.parse(JSON.stringify(self.state.semp||{})),cultivos:(saf)=>cultsGrupo(self,saf||self.state.saf).map(x=>({saf:x.saf,id:x.c.id,talhao:x.c.v.talhao,faz:x.c.v.faz,local:x.c.v.local,cult:x.c.v.cult,var:x.c.v.var,area:x.c.v.area,plano:x.c.v.plano,plantio:x.c.v.plantio,meta:x.c.v.meta,unm:x.c.v.unm}))}; }catch(e){}   /* SAF-FAZ-3: testes leem as marcas e os cultivos do grupo */   /* adaptador do comando da F2 (PR #58) e teste */
   try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
     registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
     sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),
@@ -1885,7 +1900,7 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
-      return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), sym:open?'▾':'▸', open, lab:(open?'Recolher ':'Expandir ')+key.split('||')[0], tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
+      return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), open, exp:g2seta(open).exp, lab:g2seta(open,key.split('||')[0]).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
         atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
               const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9; const ng=ngAc(a0);
@@ -1913,7 +1928,7 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
                 ret:()=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).filter((_,q)=>q!==j); if(!ad[A].length) delete ad[A]; upd({add:ad,err:{}}); } }; }));
           const usados=a.prods.filter((p,i)=>!rmMap[A+'|'+i]).map(p=>p.prod).concat(adds.map(x=>x.prod));
           const pk=(lp.pick||{})[A]; const pkOpen=pk!==undefined; const cat=catalogo().filter(p=>usados.indexOf(p.prod)<0);
-          return (o=>Object.assign(o,lpAc(self,A,cat,pk,upd,ERR,c,o)))({t:a.nome, op:a.op, sym:ao?'▾':'▸', open:ao, lab:(ao?'Recolher ':'Expandir ')+a.nome, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
+          return (o=>Object.assign(o,lpAc(self,A,cat,pk,upd,ERR,c,o)))({t:a.nome, op:a.op, open:ao, exp:g2seta(ao).exp, lab:g2seta(ao,a.nome).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[aid]=!ao; self.setState({lpx:x}); },
             semProd:!prods.length, prods, podeIncl:!ro&&!pkOpen, pkOpen:!ro&&pkOpen,
             pkOpts:[{v:'',t:'Escolha o insumo'}].concat(cat.map(p=>({v:p.prod,t:p.grupo+' · '+prodNome(p.prod,c)+' ('+p.un+')'}))), pkV:pk||'', pkErr:ERR('pick'+A), pkHasErr:!!ERR('pick'+A), pkFid:'lp_pick_'+A,
             incl:()=>{ const cur=self.state.lp; self.setState({g2ac:null}); upd({pick:Object.assign({},cur.pick||{},{[A]:''})}); setTimeout(()=>{ const el=document.getElementById(('ac-saf-lp-'+A).replace(/[^A-Za-z0-9_-]/g,'_')+'-in'); if(el) el.focus(); },0); },

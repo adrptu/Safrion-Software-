@@ -193,7 +193,7 @@ def _ca01():
                     dict(k='jan',l='Janela',t='txt',req=True,help='Ex.: 24–26/09. A ordem mantém produto, dose e área da versão liberada.'),
                     dict(k='eq',l='Equipe · conjunto',t='sel',opts=EQ_OPTS,req=True,help='Conjunto bloqueado só volta a ser elegível com a manutenção liberada.')]),
         sel=True,gid='g_os',total=False,
-        bulk=('<details style="max-width: 100%; white-space: normal;"><summary style="'+BTN_ST(False,True)+'">Conferir caminho de liberação</summary><p>Prévia dos dados da lista ao abrir a tela, sem executar liberação. Confira a prontidão atual na O.S.; com produto, aprove a versão antes de liberar.</p><ul>' + ''.join('<li>'+esc(o['id'])+' · '+esc(o['etapa'])+' · '+esc(' · '.join(t for t,_ in _selos(o)) or 'Conferir prontidão na O.S.')+' · <a href="OS.dc.html#'+esc(o['id'])+'">Abrir O.S. ›</a></li>' for o in ordens if o['etapa']=='A liberar') + '</ul><p>Todas as O.S. a liberar da lista, independentemente da seleção. Nenhuma ordem foi alterada.</p></details>'))
+        bulk=('<details style="max-width: 100%; white-space: normal;"><summary style="'+BTN_ST(False,True)+'">'+E.seta()+'Conferir caminho de liberação</summary><p>Prévia dos dados da lista ao abrir a tela, sem executar liberação. Confira a prontidão atual na O.S.; com produto, aprove a versão antes de liberar.</p><ul>' + ''.join('<li>'+esc(o['id'])+' · '+esc(o['etapa'])+' · '+esc(' · '.join(t for t,_ in _selos(o)) or 'Conferir prontidão na O.S.')+' · <a href="OS.dc.html#'+esc(o['id'])+'">Abrir O.S. ›</a></li>' for o in ordens if o['etapa']=='A liberar') + '</ul><p>Todas as O.S. a liberar da lista, independentemente da seleção. Nenhuma ordem foi alterada.</p></details>'))
     kan=_kanban(ordens)
     mapa=_mapa()+f'<div style="margin-top: 8px;">{legend([(ACC,"Em execução ou liberada"),(YEL,"Em conferência ou a liberar"),(RED,"Impedida ou em conflito (tracejado)"),("#9AA59E","Encerrada")])}</div>'
     bar,panes=tabs(['Lista','Kanban','Mapa'],[g_os,kan,mapa],active=0,label='Visão das ordens')
@@ -234,8 +234,15 @@ function EXTRAVALS(self,v){
     const msg='Salvo · acumulado refeito: '+t.real.toLocaleString('pt-BR')+' / '+AREA+' ha · saldo '+saldo.toLocaleString('pt-BR')+' ha'
       +(dif===0?' · os turnos previstos cobrem o saldo.':(dif>0?' · faltam '+dif.toLocaleString('pt-BR')+' ha nos turnos previstos.':' · os previstos excedem o saldo em '+(-dif).toLocaleString('pt-BR')+' ha.'));
     self.setState({g2toast:msg}); };
-  const on=!!((self.state.added||{})[DID]); v.v3_on=on;
-  v.fichas=()=>self.setState({g2toast:on?FICHAS_REV:FICHAS_V2});
+  v.ajuste_indisponivel=!!self.state.ajuste_indisponivel;
+  v.ajustar_saldo=()=>{
+    const c=cenGet(), o=c.ordens&&c.ordens['OS-0421'];
+    if(o&&Number(o.saldo)>0&&o.etapa==='A liberar'){
+      window.location.href='OS.dc.html#OS-0421:ajustar'; return;
+    }
+    self.setState({ajuste_indisponivel:true});
+  };
+  v.fichas=()=>self.setState({g2toast:FICHAS_V2});
 }
 '''
 def _ca01det():
@@ -268,21 +275,14 @@ def _ca01det():
                  dict(t=f'Em custódia = {r["entregue"]} − {r["consumido"]} = {r["custodia"]} L · volta ao estoque só por devolução recebida')])],
         edit=dict(m='origin',title='Custódia',fields=[dict(k='item',l='Item · lote',ro=True),dict(k='ent',l='Entregue',ro=True,u='L'),dict(k='cons',l='Consumido',ro=True,u='L'),dict(k='cust',l='Em custódia',ro=True,u='L')]),
         search=False,gid='g_mat',total=False)
-    ajuste=idrawer('Ajustar produtos e doses do saldo',dict(title='Ajustar produtos e doses do saldo',
-             sub='Gera a v3 só para o saldo de 160 ha; os 190 ha realizados ficam preservados na v2. Ao liberar, as fichas do saldo passam à v3.',
-             fields=[('Ordem','OS-0421 · v2'),('Área alcançada (ha)','160 · saldo'),('Ação do ajuste','Reduzir dose'),('Produto','Fungicida A'),('Nova dose por ha','0,45 L'),('Motivo','')],
-             confirm='Ajustar e liberar saldo',done='v3 liberada · saldo de 160 ha'),'leaf','Ajustar e liberar o saldo (agrônomo)')
-    DID=E.DRAWN['Ajustar produtos e doses do saldo']
+    ajuste=(f'<button type="button" onClick="{H("ajustar_saldo")}" style="{BTN_ST(False,True)}">Ajustar produtos e doses do saldo</button>'
+            +f'<sc-if value="{H("ajuste_indisponivel")}" hint-placeholder-val="{H("false")}"><div role="status">Prévia · nada foi alterado. Neste protótipo, o ajuste exige saldo positivo e estado A liberar. Ajustar uma ordem liberada ou em execução ainda não está disponível. '
+             '<a href="OS.dc.html#OS-0421">Abrir O.S. ›</a></div></sc-if>')
     fichas=(f'<button type="button" onClick="{H("fichas")}" title="Consultar as fichas do caldeiro, do operador e do almoxarife" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{icon("doc",14)}Ver fichas</button>')
-    FV2=(f'Fichas da v2 liberada para o saldo de 160 ha · caldeiro: Fungicida A 0,50 L/ha = 80 L · operador: T1+T2, faixas pendentes dos dias 5 a 7 · '
+    FV2=(f'Prévia demonstrativa das fichas da v2 · confira a versão vigente na O.S. · saldo de 160 ha · caldeiro: Fungicida A 0,50 L/ha = 80 L · operador: T1+T2, faixas pendentes dos dias 5 a 7 · '
          f'almoxarife: 65 L em custódia de Marcos + 15 L a entregar da REQ-035.')
-    FREV=('Fichas do saldo de 160 ha reemitidas na v3 liberada por Ana (agrônoma) · as fichas dos 190 ha realizados permanecem no histórico da v2.')
-    banner=(f'<sc-if value="{H("v3_on")}" hint-placeholder-val="{H("false")}">'
-            + alerta(f'{chip("v3 liberada no saldo","green")} &nbsp;Saldo de 160 ha na v3 · liberada por Ana (agrônoma). '
-                     f'Os 190 ha realizados continuam preservados na v2.') + '</sc-if>')
     corpo=(
       continuity('Plano de safra · janela 20–26/09','Em execução · 190/350 ha','160 ha em 3 turnos','Registrar avanço')
-      + banner
       + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],'')
       + kpis([('AUTORIZADO','350 ha','v2'),('REALIZADO','190 ha','150 conf. + 40 prov.'),('SALDO','160 ha','3 turnos'),('HOJE','Dia 4 de 7','40 ha · chuva')])
       + bloco('Apontamentos de turno','Confira um apontamento por dia na mesma ordem; clique no turno para corrigir com motivo ou redistribuir os previstos.',g_ap,
@@ -294,13 +294,14 @@ def _ca01det():
       + bloco('Plano, versão e fichas','Ajuste produtos e doses só no saldo; as fichas do caldeiro, do operador e do almoxarife derivam da versão vigente.',
           nota(f'Recomendação de origem: <b style="color:{INK};">fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada</b>.'),
           ajuste + fichas + ilink('Ver recomendação','AG-04.dc.html','leaf','Abrir a recomendação de origem') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo no PCP')))
-    EXTRAJS[0]=(f'const AREA={area}; const DID={json.dumps(DID)}; const FICHAS_V2={json.dumps(FV2,ensure_ascii=False)}; const FICHAS_REV={json.dumps(FREV,ensure_ascii=False)};\n'+APJS)
+    import cenario
+    EXTRAJS[0]=cenario.js_prefixo()+(f'const AREA={area}; const FICHAS_V2={json.dumps(FV2,ensure_ascii=False)};\n'+APJS)
     prim=f'<a href="MB-03.dc.html" style="{BTN_ST(True)} text-decoration: none; display: inline-flex; align-items: center;">Registrar avanço</a>'
     HEIGHTS37[fname]=1480; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
     shell37('CA-01','OS-0421 · Fungicida 1ª aplicação',corpo,fname=fname,crumbs_extra=['OS-0421'],primary_html=prim,
       status=('Em execução · Parcial · dia 4 de 7','yellow'),
       subtitle='350 ha em T1+T2 · 7 turnos (50, 50, 50, 40, 50, 50 e 60 ha) · os mesmos acumulados aparecem na conferência, no app e no Kanban.',
-      footer='Finalizar o turno não encerra a ordem; conferir um dia não muda a fase. Ajuste de dose só alcança o saldo: o agrônomo ajusta e libera a v3 só para o saldo, e as fichas do saldo passam à v3. '
+      footer='Finalizar o turno não encerra a ordem; conferir um dia não muda a fase. Ajuste de dose só alcança o saldo: abra a O.S. para ajustar o saldo; aprovar o ajuste não libera a ordem automaticamente. '
              'Término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em conferência; nenhum botão pula etapa.')
 
 # ---------------- CA-01x-os0420 · OS-0420 (DEMO-01 / DEMO-14) ----------------
@@ -575,3 +576,4 @@ def _ca04():
 
 def build():
     _ca01(); _ca01det(); _ca01x_0420(); _ca02(); _ca03(); _ca03det(); _ca04()
+

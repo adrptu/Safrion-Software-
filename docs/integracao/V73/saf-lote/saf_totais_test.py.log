@@ -1,0 +1,18 @@
+OK    · T0 a grade da etapa 3 abriu, com ocorrências
+OK    · T1 coluna nova "Custo total" ao lado do Custo R$/ha
+     (medido) oráculo: custo 264617.07 · 5234 ha-op · 690 ha físicos · R$/ha 383.5030 · parcial=False
+OK    · T2 Total da Área trabalhada = Σ ha-op das ocorrências, com a unidade
+OK    · T3 Total do Custo total = Σ custo das ocorrências = "Custo de operação" do topo
+OK    · T4 Total do R$/ha = custo ÷ hectares físicos (Resumo da safra), não a soma dos R$/ha das linhas
+OK    · T5 Custo total de cada operação = Σ custo das suas ocorrências (oráculo)
+OK    · T6 Horas-conjunto do Total continua a soma das operações
+OK    · T7 contraprova: com uma ocorrência pendente o R$/ha do Total vira "parcial"; sem ela, volta o valor
+OK    · T8 com a busca "Colheita", o Total soma só o recorte (operações de colheita inteiras; das demais, só o que casa), custo, ha-op e R$/ha pela área dele
+OK    · T11 busca "T1-A ·": o Total soma só as ocorrências do T1-A (ha-op, custo e R$/ha pela área física delas; oráculo em Decimal)
+OK    · T12 recolher e expandir não mudam o Total do recorte (sem somar pai e filho)
+OK    · T13 limpar a busca devolve o Total cheio (= Σ de todas as ocorrências)
+     (medido) largura da grade em 1440: 1280 de 1280 px visíveis
+     (medido) largura da grade em 1024: 1277 de 864 px visíveis
+OK    · T9 nenhuma célula do Total corta o texto (1440 e 1024)
+OK    · T10 sem erro de JS
+RESULTADO: 14 ok · 0 falhas

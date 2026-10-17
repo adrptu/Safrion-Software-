@@ -49,6 +49,31 @@ R.recusa=recusa();
 R.lagoa=['OS-0506','OS-0507'].map(id=>{ const c=JSON.parse(JSON.stringify(CEN0)); const o=c.ordens[id]; const r=c.reqs[o.req]; let erro='';
   try{ osc_apontar(c,id,'24/09',o.saldo); }catch(e){ erro=e.message; }
   return {id,erro,saldo:o.saldo,custodias:r.itens.map(i=>i.custodia),consumido_vs_total:r.itens.map(i=>[i.consumido,i.solicitado])}; });
+
+// 16 · calda: divisão fracionária e conversão após arredondamento por origem.
+R.calda=[];
+{
+ const savedAloc=AL0.aloc,aid=AL0.ativo.PJ,savedAtivo=CEN_PREP_ATIVOS[aid];
+ try {
+  AL0.aloc=[{r:'PJ',os:'CALDA',dia:'2026-09-29',ini:6,fim:7}];
+  CEN_PREP_ATIVOS[aid]=Object.assign({},savedAtivo,{tanque:2000});
+  for(const area of [49.31,0,0.01,40]) {
+   const o={id:'CALDA',versao:1,saldo:area,instrucao:{versao:1,vazao:150},ins:[{p:'demo',dose:.5,un:'L'}]},c={ordens:{CALDA:o}},antes=JSON.stringify(c);
+   const p=cenPreparoOrdem(c,o);
+   R.calda.push({tipo:'individual',area,ok:p.ok,intacto:antes===JSON.stringify(c),esperado:cenQtd(.5,area),
+    soma:p.cargas.reduce((s,k)=>s+k.prods[0].q,0),qs:p.cargas.map(k=>k.prods[0].q),cheia:p.produtos&&p.produtos[0].q});
+  }
+ } finally {AL0.aloc=savedAloc;CEN_PREP_ATIVOS[aid]=savedAtivo;}
+ for(const unidades of [['L','L','L'],['L','mL','L'],['kg','g','kg']]) {
+  const c=cenClone(CEN0),ids=['OS-0590','OS-0591','OS-0592'],ars=[49.31,.01,13.34];
+  ids.forEach((id,i)=>{const o=c.ordens[id];o.area=o.saldo=ars[i];o.ins[0].un=unidades[i];o.ins[0].dose=i===1&&['mL','g'].includes(unidades[i])?500:.5;
+   o.ins[0].tot=cenQtd(o.ins[0].dose,o.area);o.loteFicha.volumeHa=150;o.loteFicha.tanqueUtil=2000;});
+  const antes=JSON.stringify(c),p=cenGrupoPrevia(c,ids,'Caio');
+  R.calda.push({tipo:'grupo',unidades,intacto:antes===JSON.stringify(c),ok:true,esperado:p.produtos[0].q,
+   soma:p.cargas.reduce((s,k)=>s+k.produtos[0].q,0),qs:p.cargas.map(k=>k.produtos[0].q)});
+ }
+}
+
 print(JSON.stringify(R));
 """
 # 7/8 · produtores de total fora da O.S.: MIP (mipEmitir) e fertirrigação (irrReclassTudo), percorrendo liberar → entregar → confirmar →
@@ -247,12 +272,13 @@ chk('14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pi
 EXC_LINHAS = {
     ('areas/custo_dominio.py', "const prHa=(o.ins||[]).reduce((s,x)=>{ const p=cusPreco(D,x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);"): 'custo por hectare: dose × preço; extraído do Mapa',
     ('cenario.js', "if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');"): 'validação de finitude do preparo, sem baixa de custódia',
-    ('cenario.js', 'prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*ha}))}; });'): 'prévia de produto por carga do tanque',
-    ('cenario.js', 'produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*haCarga})),'): 'prévia de produto por tanque cheio',
-    ('cenario.js', 'return {n:i+1,vol,destinos,produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,q:x.dose*vol/a.f.volumeHa}))}; });'): 'prévia de carga agrupada; volume dividido pela vazão por hectare',
 }
 chk('15 guardas de término: cedo e sem hidrômetro recusam sem alterar o estado',
     'Antes do fim previsto' in F['tempo']['cedo'] and F['tempo']['intacto'] and 'volume medido' in F['tempo']['semMedicao'] and F['tempo']['semBaixa'], F['tempo'])
+chk('16 calda: cargas fecham a regra única, sem quantidade negativa, nas unidades originais e convertidas; prévia não altera cenário',
+    all(x['ok'] and x['intacto'] and abs(x['soma']-x['esperado'])<1e-9 and all(q>=0 for q in x['qs']) for x in R['calda'])
+    and R['calda'][0]['qs']==[6.67,6.66,6.67,4.66] and R['calda'][0]['cheia']==6.67
+    and R['calda'][1]['qs']==[], R['calda'])
 crus = []
 for fn in sorted(glob.glob(os.path.join(HERE, '*.js')) + glob.glob(os.path.join(HERE, '*.py')) + glob.glob(os.path.join(HERE, 'areas', '*.py'))):
     rel = os.path.relpath(fn, HERE)
