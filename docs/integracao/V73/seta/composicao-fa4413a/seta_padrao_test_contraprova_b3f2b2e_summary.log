@@ -1,0 +1,81 @@
+# 1440 px · 1 telas + 2 estados · 33 controles de abrir/recolher · 45 setas desenhadas (45 de ir) · 0 telas com teclado medido
+# 1440 px · desenhos distintos da seta: 1
+       3 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  b  (1440, 'PL-04.dc.html', 'inicial', 'summary «Conferir caminho de liberação»')
+  b  (1440, 'PL-04.dc.html', 'modo', 'summary «Conferir caminho de liberação»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · pH»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · P»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · MO»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Ca»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Mg»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · K»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · H+Al»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Al»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · S»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · B»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Cu»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Fe»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Mn»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Zn»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Argila»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · pH»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · P»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · MO»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Ca»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Mg»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · K»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · H+Al»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Al»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · S»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · B»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Cu»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Fe»')
+  b  (1440, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Mn»')
+OK    A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+FALHA B1440 todo controle de abrir/recolher usa o componente da seta (33 controles; telas com desvio: 3) · ['AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'CA-01.dc.html|sel1', 'PL-04.dc.html']
+FALHA C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (45 setas; desenhos distintos: 1) · ['rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16']
+FALHA D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0) · []
+FALHA E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0) · []
+OK    F1440 alvo da seta ≥ 24 px sem cobrir outro controle (telas com desvio: 0)
+OK    G1440 sem erro de JavaScript nem estado que não abriu
+# 390 px · 1 telas + 2 estados · 33 controles de abrir/recolher · 45 setas desenhadas (45 de ir) · 0 telas com teclado medido
+# 390 px · desenhos distintos da seta: 1
+       3 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  b  (390, 'PL-04.dc.html', 'inicial', 'summary «Conferir caminho de liberação»')
+  b  (390, 'PL-04.dc.html', 'modo', 'summary «Conferir caminho de liberação»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · pH»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · P»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · MO»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Ca»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Mg»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · K»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · H+Al»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Al»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · S»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · B»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Cu»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Fe»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Mn»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Zn»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'inicial', 'summary.so-met-summary «Método e limites · Argila»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · pH»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · P»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · MO»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Ca»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Mg»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · K»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · H+Al»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Al»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · S»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · B»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Cu»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Fe»')
+  b  (390, 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'modo', 'summary.so-met-summary «Método e limites · Mn»')
+OK    A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+FALHA B390 todo controle de abrir/recolher usa o componente da seta (33 controles; telas com desvio: 3) · ['AG-02.dc.html#registrar=Santa%20Rita%2FT3', 'CA-01.dc.html|sel1', 'PL-04.dc.html']
+FALHA C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (45 setas; desenhos distintos: 1) · ['rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16']
+FALHA D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0) · []
+FALHA E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0) · []
+OK    F390 alvo da seta ≥ 44 px sem cobrir outro controle; botão com nome e seta ≥ 44 px de altura (telas com desvio: 0)
+OK    G390 sem erro de JavaScript nem estado que não abriu
+RESULTADO: 6 ok · 8 falhas · B1440 todo controle de abrir/recolher usa o componente da seta (33 controles; telas com desvio: 3); C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (45 setas; desenhos distintos: 1); D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0); B390 todo controle de abrir/recolher usa o componente da seta (33 controles; telas com desvio: 3); C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (45 setas; desenhos distintos: 1); D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0); E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (0 telas; desvios: 0)

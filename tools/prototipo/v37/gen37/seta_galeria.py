@@ -27,6 +27,8 @@ TELAS = [   # (nome, endereço, ações [(js, espera)])
     ('cd06_cartoes', 'CD-06.dc.html?view=cartoes', [(f"{FECHA}('[data-g2cd] .g2cd-nk')", .6)]),
     ('os_painel_secoes', 'OS.dc.html#OS-0420', []),
     ('os_kanban_raias', 'OS.dc.html?view=kanban&ag=onde', [(f"{FECHA}('.os-raia-cab')", .6)]),   # raias recolhíveis (PR #89): uma fechada, as outras abertas
+    ('pl04_previa', 'PL-04.dc.html', []),                                                            # summary "Conferir caminho de liberação" (PR #97)
+    ('ag02_registrar', 'AG-02.dc.html#registrar=Santa%20Rita%2FT3', []),                             # summary "Método e limites" (PR #94, AGRO-06)
 ]
 SO = [x for x in (os.environ.get('SETA_GAL_SO') or '').split(',') if x]   # só as fotos cujo nome contém um destes trechos
 if SO: TELAS = [t for t in TELAS if any(x in t[0] for x in SO)]
