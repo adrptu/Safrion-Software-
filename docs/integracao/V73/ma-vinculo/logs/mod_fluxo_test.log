@@ -1,0 +1,18 @@
+OK    F1 três blocos, cada um uma lista ordenada (ol), na ordem do processo
+OK    F1 cartões de cada bloco na ordem decidida (Agrofit → … → Orçamento · Pragas e doenças → … → Colheita · Recebimento → … → Painel)
+OK    F1 a definição do gerador (ui37.FLUXO37) é a mesma ordem, com os títulos
+OK    F2 os 14 cartões do menu Agrícola presentes uma vez cada (nenhum a mais)
+OK    F2 nome de cada cartão = nome curto do menu (CURTO37), com ícone, alvo ≥ 44 px
+OK    F3 nenhuma das palavras Entrada/Processamento/Saída/Input/Output/Processing na página (texto e rótulos)
+OK    F3 título em cima de cada bloco (h2 que nomeia a seção): Planejamento, Execução, Resultados; sem numeração visível
+OK    F4 sem setas; cartões alinhados no bloco (mesma borda esquerda e largura); F5 três colunas lado a lado, sem estouro nem rolagem lateral
+OK    F5 1440: cada bloco num painel discreto (fundo próprio ou borda, cantos arredondados)
+OK    F5 hover do design system no cartão (borda verde e fundo claro)
+OK    F6 Tab percorre os 14 cartões na ordem do fluxo, com foco visível; antes do 1º não há cartão
+OK    F7 o clique no cartão abre a tela; "‹ Agrícola" volta com o foco no cartão aberto
+OK    F8 800 × 900: três colunas com título em cima, cartões alinhados, sem setas, nenhum nome estoura o cartão
+OK    F9 390: uma coluna, blocos empilhados com respiro (≥ 12 px) e título em cima, cartões alinhados, sem rolagem lateral
+OK    F9 700 × 900, 1024 × 768 (toque) e 844 × 390 (celular deitado: uma coluna): títulos em cima, alinhados, sem estouro nem rolagem lateral
+OK    F10 MOD-SUP continua em grade, na ordem do menu, sem blocos
+OK    F10 sem erro de JS (MOD-AGR a 1440, 800, 390, 700, 1024 e 844 × 390, PROD e MOD-SUP)
+RESULTADO: 17 ok · 0 falhas

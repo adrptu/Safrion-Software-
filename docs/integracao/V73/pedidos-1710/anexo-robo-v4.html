@@ -1,0 +1,134 @@
+<!--
+Robô v4 da varredura do Safrion (17/10/2026, versão 1792184197-5a81): comportamento de clique em tabelas e cartões.
+Como usar para repetir a medida:
+1. Sirva na mesma origem: as telas em /v3/<TELA>.dc.html (com support.js e os dados), este arquivo em /robot3/v4.html e a lista /robot3/screens.json ([{"n":"OS","mobile":false}, ...]).
+2. O servidor precisa aceitar POST /save?name=<arquivo> e gravar o corpo (JSON).
+3. Abra /robot3/v4.html e rode no console: run4() (todas as telas) ou run4(['OS','EST']).
+4. Saída: <TELA>.v4.json, com cada lista (grade) nos modos tabela e cartoes e o que aconteceu ao clicar na linha, na linha pai, na seta, na filha, no ⋯ e no primeiro botão da linha; e as listas e ⋯ próprios da tela.
+5. O resumo usa o anexo-robo-v4-resumo.py: python3 anexo-robo-v4-resumo.py <pasta v4out> <grids.json> <saida.json>.
+-->
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>robo4</title>
+<style>body{font:12px system-ui;margin:8px} iframe{border:1px solid #ccc;margin:4px;vertical-align:top} #log{white-space:pre;height:140px;overflow:auto;background:#f4f4f4}</style></head>
+<body><div id="st">parado</div><div id="log"></div><div id="frames"></div>
+<script>
+'use strict';
+// Robô v4: comportamento de clique em tabelas e cartões (linha, pai, seta, filho, ⋯, botão da linha), nos dois modos.
+const Wk = new Worker(URL.createObjectURL(new Blob(["onmessage=e=>setTimeout(()=>postMessage(e.data[0]),e.data[1])"])));
+let wid = 0; const waits = {}; Wk.onmessage = e => { const f = waits[e.data]; delete waits[e.data]; f && f(); };
+const sleep = ms => new Promise(r => { const i = ++wid; waits[i] = r; Wk.postMessage([i, ms]); });
+const log = t => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; };
+const norm = t => (t || '').replace(/\s+/g, ' ').trim();
+const vis = e => !!(e && e.getClientRects().length) && e.ownerDocument.defaultView.getComputedStyle(e).visibility !== 'hidden';
+const txt = e => norm(e.getAttribute('aria-label') || e.innerText || e.title || '').slice(0, 80);
+const CHEV = 'M9 18l6-6-6-6';
+const ACCENT = 'rgb(30, 122, 76)';
+const INTER = 'a,button,input,select,textarea,label,[role=button],[role=menuitem],[data-noedit]';
+let BASE_LS = null, LOADN = 0;
+function restoreLS() { localStorage.clear(); for (const k in BASE_LS) localStorage.setItem(k, BASE_LS[k]); }
+async function load(fr, url) {
+  restoreLS(); const u = url + (url.includes('?') ? '&' : '?') + 'r=' + (++LOADN);
+  await new Promise(res => { let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    fr.onload = () => { try { if (fr.contentWindow.location.href !== 'about:blank') fin(); } catch (e) { fin(); } }; fr.src = u; setTimeout(fin, 20000); });
+  await sleep(600); for (let i = 0; i < 30 && !(fr.contentDocument && fr.contentDocument.body && fr.contentDocument.body.innerText.length > 50); i++) await sleep(300);
+}
+const cur = fr => { try { return fr.contentWindow.location.pathname.split('/').pop().replace('.dc.html', '') + fr.contentWindow.location.hash; } catch (e) { return '?'; } };
+const dialogs = doc => [...doc.querySelectorAll('[role=dialog],dialog[open],[aria-modal=true]')].filter(vis);
+const menusOpen = doc => [...doc.querySelectorAll('[role=menu],[role=listbox]')].filter(m => vis(m) && m.querySelector('[role=menuitem],[role=option],button'));
+function panelOf(doc, d) {   // o retângulo visível do diálogo (desce no fundo escurecido de tela inteira)
+  const W = doc.defaultView.innerWidth; let el = d, r = d.getBoundingClientRect();
+  if (r.width >= W * .95) { const q = [...d.querySelectorAll(':scope > *, :scope > * > *')].filter(vis).map(x => ({ x, r: x.getBoundingClientRect(), bg: doc.defaultView.getComputedStyle(x).backgroundColor }))
+      .filter(o => o.r.width < W * .95 && o.r.width > 200 && o.bg && o.bg !== 'rgba(0, 0, 0, 0)' && o.bg !== 'transparent').sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height)[0];
+    if (q) { el = q.x; r = q.r; } }
+  return { el, r };
+}
+function dlgKind(doc, d) { const W = doc.defaultView.innerWidth, H = doc.defaultView.innerHeight, { r } = panelOf(doc, d);
+  if (r.width >= W * .9 && r.height >= H * .85) return 'tela cheia';
+  if (r.right >= W - 6 && r.height >= H * .7) return 'painel lateral';
+  if (r.left <= 6 && r.height >= H * .7) return 'painel lateral à esquerda';
+  if (r.bottom >= H - 6 && r.width >= W * .85) return 'folha inferior';
+  return 'modal central'; }
+function dlgInfo(doc, d) { const { el } = panelOf(doc, d), h = el.querySelector('h1,h2,h3,[role=heading]');
+  const flds = [...el.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(vis), edit = flds.filter(f => !f.readOnly && !f.disabled && f.type !== 'checkbox' && f.type !== 'radio' && !/^(buscar|filtrar)/i.test(f.getAttribute('aria-label') || f.placeholder || ''));
+  const btns = [...el.querySelectorAll('button,[role=button]')].filter(vis).map(b => ({ t: txt(b), p: doc.defaultView.getComputedStyle(b).backgroundColor === ACCENT || undefined })).filter(b => b.t);
+  return { tipo: dlgKind(doc, d), modal: d.getAttribute('aria-modal') === 'true', titulo: h ? norm(h.innerText).slice(0, 90) : '', campos: edit.length, consulta: /\bConsulta\b|Valor calculado/.test(el.innerText || ''),
+    primarias: btns.filter(b => b.p).map(b => b.t), botoes: btns.map(b => b.t).slice(0, 14), editar: btns.some(b => /^editar\b/i.test(b.t)) }; }
+function menuItems(doc, m) { return [...m.querySelectorAll('[role=menuitem],[role=option],button')].filter(vis).map(it => { const p = it.querySelector('svg path'), d = p ? p.getAttribute('d') : '';
+  const cs = doc.defaultView.getComputedStyle(it); return { t: norm(it.innerText).slice(0, 60), icone: !it.querySelector('svg,img,i[class*=icon]') ? 'sem' : (d === CHEV ? 'genérico' : 'próprio'), dis: it.disabled || it.getAttribute('aria-disabled') === 'true' || undefined,
+    destr: /destr|danger|perig/.test(it.className || '') || /rgb\((1[5-9]\d|2\d\d), (\d{1,2}|1[0-2]\d), (\d{1,2}|1[0-2]\d)\)/.test(cs.color) || undefined }; }); }
+function snap(fr, doc, root) { return { url: cur(fr), dlg: new Set(dialogs(doc)), menu: new Set(menusOpen(doc)), rows: root ? rowsIn(root, 'any').length : 0, text: doc.body.innerText.length, inputs: new Set(doc.querySelectorAll('input,select,textarea')) }; }
+async function observe(fr, before, root) {
+  await sleep(450); let doc; try { doc = fr.contentDocument; } catch (e) { doc = null; }
+  if (!doc || (cur(fr).split('#')[0] !== before.url.split('#')[0])) return { r: 'navega', para: cur(fr) };
+  const dl = dialogs(doc).filter(d => !before.dlg.has(d)); if (dl.length) return Object.assign({ r: 'diálogo' }, dlgInfo(doc, dl[dl.length - 1]), cur(fr) !== before.url ? { hash: cur(fr) } : {});
+  const mn = menusOpen(doc).filter(m => !before.menu.has(m)); if (mn.length) return { r: 'menu', itens: menuItems(doc, mn[0]) };
+  if (cur(fr) !== before.url) return { r: 'muda o endereço', para: cur(fr) };
+  if (root && root.isConnected) { const n = rowsIn(root, 'any').length; if (n > before.rows) return { r: 'expande', mais: n - before.rows }; if (n < before.rows) return { r: 'recolhe', menos: before.rows - n }; }
+  const ni = [...doc.querySelectorAll('input,select,textarea')].filter(i => !before.inputs.has(i) && vis(i)); if (ni.length) return { r: 'edita na linha', campos: ni.length };
+  const sel = doc.querySelector('.g2flash,[aria-selected=true]'); if (doc.body.innerText.length !== before.text) return { r: 'muda a tela' + (sel ? ' (seleciona)' : '') };
+  return { r: 'nada' }; }
+function rowsIn(root, mode) { const t = [...root.querySelectorAll('.g2r')].filter(vis), c = [...root.querySelectorAll('.g2cd-lin, .g2cd-kr')].filter(vis);
+  if (mode === 'tabela') return t; if (mode === 'cartoes') return c; return t.concat(c); }
+function caretOf(row) { return [...row.querySelectorAll('button,[role=button]')].find(b => b.hasAttribute('aria-expanded') && /^(expandir|recolher)/i.test(b.getAttribute('aria-label') || '')); }
+function bodyTarget(row) { const cells = [...row.children].filter(c => vis(c) && !c.querySelector(INTER) && !c.closest(INTER) && (c.innerText || '').trim()); if (cells.length) return cells[Math.min(1, cells.length - 1)];
+  const spans = [...row.querySelectorAll('span,div,b')].filter(s => vis(s) && !s.closest(INTER) && !s.querySelector(INTER) && (s.innerText || '').trim().length > 1); return spans[0] || row; }
+function rowInfo(row) { const cs = row.ownerDocument.defaultView.getComputedStyle(row); return { role: row.getAttribute('role') || '', tab: row.getAttribute('tabindex'), cursor: cs.cursor, seta: /›|▸|▾/.test((row.innerText || '').slice(0, 4)) || !!row.querySelector('.g2car') }; }
+function gridRoots(doc) {   // listagens do motor: pelo seletor de modo; sem seletor, pelo contêiner das linhas
+  const out = [], seen = new Set();
+  [...doc.querySelectorAll('[data-g2md]')].filter(vis).forEach(sw => { let a = sw.parentElement; while (a && a !== doc.body && !a.querySelector('.g2r, .g2cd-lin, .g2cd-kr')) a = a.parentElement; if (a && a !== doc.body && !seen.has(a)) { seen.add(a); out.push({ gid: sw.getAttribute('data-g2md'), sw: true, root: a }); } });
+  const rest = [...doc.querySelectorAll('.g2r')].filter(vis).filter(r => !out.some(o => o.root.contains(r)));
+  if (rest.length) { let a = rest[0].parentElement; while (a && a !== doc.body && a.querySelectorAll('.g2r').length < Math.min(2, rest.length)) a = a.parentElement; if (a) out.push({ gid: 'sem-seletor', sw: false, root: a }); }
+  return out.slice(0, 3); }
+async function setMode(fr, gi, mode) { const doc = fr.contentDocument, g = gridRoots(doc)[gi]; if (!g) return null; if (mode === 'cartoes') { if (!g.sw) return null; const b = doc.querySelector('[data-g2md="' + g.gid + '"] [data-modo="cartoes"]'); if (!b) return null; b.click(); await sleep(350); }
+  return gridRoots(fr.contentDocument)[gi]; }
+async function doScreen(fr, s) {
+  const url = '/v3/' + s.n + '.dc.html'; fr.style.width = s.mobile ? '390px' : '1280px'; fr.style.height = s.mobile ? '844px' : '900px';
+  await load(fr, url); const doc0 = fr.contentDocument; const R = { screen: s.n, landed: cur(fr), h1: norm((doc0.querySelector('h1') || {}).innerText || ''), grades: [], outros: [] };
+  const roots0 = gridRoots(doc0);
+  for (let gi = 0; gi < roots0.length; gi++) for (const mode of ['tabela', 'cartoes']) {
+    if (mode === 'cartoes' && !roots0[gi].sw) continue;
+    const G = { gid: roots0[gi].gid, modo: mode, testes: {} }; R.grades.push(G);
+    const prep = async () => { await load(fr, url); return await setMode(fr, gi, mode); };
+    let g = await prep(); if (!g) { G.erro = 'sem modo'; continue; }
+    const rows = rowsIn(g.root, mode); G.linhas = rows.length; if (!rows.length) continue;
+    G.amostra = rowInfo(rows[0]); G.temMais = rows.some(r => r.querySelector('[aria-haspopup=menu]')); G.botoesNaLinha = [...new Set(rows.slice(0, 6).flatMap(r => [...r.querySelectorAll('button,[role=button]')].filter(b => vis(b) && !b.hasAttribute('aria-haspopup') && !b.hasAttribute('aria-expanded') && b.type !== 'checkbox').map(txt)))].slice(0, 10);
+    G.linksNaLinha = [...new Set(rows.slice(0, 6).flatMap(r => [...r.querySelectorAll('a[href]')].filter(vis).map(a => txt(a) + ' → ' + (a.getAttribute('href') || '').slice(0, 40))))].slice(0, 6);
+    const tests = [
+      ['linha', r => !caretOf(r)], ['pai', r => !!caretOf(r)] ];
+    for (const [name, pick] of tests) { g = await prep(); if (!g) break; const rr = rowsIn(g.root, mode).find(pick); if (!rr) continue; const b = snap(fr, fr.contentDocument, g.root);
+      bodyTarget(rr).click(); G.testes[name] = Object.assign({ alvo: norm(rr.innerText).slice(0, 60) }, await observe(fr, b, g.root)); }
+    // seta e filho
+    g = await prep(); if (g) { const par = rowsIn(g.root, mode).find(r => !!caretOf(r)); if (par) { const c = caretOf(par), was = c.getAttribute('aria-expanded'); let b = snap(fr, fr.contentDocument, g.root); c.click();
+        G.testes.seta = Object.assign({ antes: was }, await observe(fr, b, g.root));
+        let kids = rowsIn(g.root, mode).filter(r => r.classList.contains('g2kid') || r.classList.contains('g2cd-kr')); if (!kids.length && was === 'true') kids = [];
+        const kid = kids.find(r => !caretOf(r)) || kids[0]; if (kid) { b = snap(fr, fr.contentDocument, g.root); bodyTarget(kid).click(); G.testes.filho = Object.assign({ alvo: norm(kid.innerText).slice(0, 60) }, await observe(fr, b, g.root)); } } }
+    // ⋯ da linha
+    g = await prep(); if (g) { const m = [...g.root.querySelectorAll('[aria-haspopup=menu]')].filter(vis).find(x => x.closest('.g2r, .g2cd-lin, .g2cd-kr')); if (m) { const b = snap(fr, fr.contentDocument, g.root); m.click(); await sleep(250);
+        const mw = m.parentElement && m.parentElement.querySelector('[role=menu]'); const its = mw && vis(mw) ? menuItems(fr.contentDocument, mw) : null;
+        G.testes.mais = its ? { r: 'menu', itens: its, aria: m.getAttribute('aria-expanded') } : Object.assign({}, await observe(fr, b, g.root)); } }
+    // botão de ação na linha
+    g = await prep(); if (g) { const rr = rowsIn(g.root, mode); const bt = rr.flatMap(r => [...r.querySelectorAll('button,[role=button]')]).filter(x => vis(x) && !x.hasAttribute('aria-haspopup') && !x.hasAttribute('aria-expanded') && !/^(selecionar|marcar)/i.test(x.getAttribute('aria-label') || ''))[0];
+      if (bt) { const b = snap(fr, fr.contentDocument, g.root); const t = txt(bt); bt.click(); G.testes.botao = Object.assign({ alvo: t }, await observe(fr, b, g.root)); } }
+  }
+  // listas fora do motor: tabelas e ⋯ próprios da tela
+  await load(fr, url); let doc = fr.contentDocument;
+  const own = [...doc.querySelectorAll('tbody tr, [role=row]')].filter(r => vis(r) && !r.closest('.g2r') && !r.classList.contains('g2r') && !r.querySelector('th,[role=columnheader]'));
+  if (own.length) { const r = own[0], b = snap(fr, doc, null); bodyTarget(r).click(); R.outros.push(Object.assign({ onde: 'tabela própria', alvo: norm(r.innerText).slice(0, 60), linha: rowInfo(r) }, await observe(fr, b, null))); }
+  await load(fr, url); doc = fr.contentDocument;
+  const kebabs = [...doc.querySelectorAll('button,[role=button]')].filter(x => vis(x) && !x.closest('.g2r, .g2cd-lin, .g2cd-kr') && (/^(⋯|…|⋮|\.\.\.)$/.test(norm(x.innerText)) || /mais a[cç][õo]es/i.test(x.getAttribute('aria-label') || '')));
+  for (const k of kebabs.slice(0, 2)) { await load(fr, url); doc = fr.contentDocument; const kk = [...doc.querySelectorAll('button,[role=button]')].filter(x => vis(x) && !x.closest('.g2r, .g2cd-lin, .g2cd-kr') && (/^(⋯|…|⋮|\.\.\.)$/.test(norm(x.innerText)) || /mais a[cç][õo]es/i.test(x.getAttribute('aria-label') || '')))[kebabs.indexOf(k)];
+    if (!kk) continue; const b = snap(fr, doc, null); const lab = txt(kk); kk.click(); await sleep(250); const mw = kk.parentElement && kk.parentElement.querySelector('[role=menu]');
+    R.outros.push(Object.assign({ onde: '⋯ próprio da tela', alvo: lab }, mw && vis(mw) ? { r: 'menu', itens: menuItems(doc, mw) } : await observe(fr, b, null))); }
+  return R;
+}
+window.run4 = async function (only) {
+  localStorage.setItem('safrion.perfilDemo', 'Proprietário'); BASE_LS = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); BASE_LS[k] = localStorage.getItem(k); }
+  let list = await (await fetch('/robot3/screens.json')).json(); if (only) list = list.filter(s => only.includes(s.n));
+  const q = [...list]; window.__total = list.length; window.__done = 0;
+  const frs = [0, 1, 2].map(() => { const f = document.createElement('iframe'); document.getElementById('frames').appendChild(f); return f; });
+  await Promise.all(frs.map(async (fr, i) => { while (q.length) { const s = q.shift(); const t0 = Date.now();
+    try { const R = await doScreen(fr, s); await fetch('/save?name=' + s.n + '.v4.json', { method: 'POST', body: JSON.stringify(R) }); log('w' + i + ' ' + s.n + ' ok ' + R.grades.length + ' ' + ((Date.now() - t0) / 1000).toFixed(0) + 's'); }
+    catch (e) { log('w' + i + ' ' + s.n + ' ERRO ' + e); await fetch('/save?name=' + s.n + '.v4err.json', { method: 'POST', body: JSON.stringify({ screen: s.n, err: String(e && e.stack || e) }) }); }
+    window.__done++; document.getElementById('st').textContent = 'feitas ' + window.__done + ' de ' + window.__total; } }));
+  document.getElementById('st').textContent += ' · FIM'; window.__fim = true;
+};
+</script></body></html>

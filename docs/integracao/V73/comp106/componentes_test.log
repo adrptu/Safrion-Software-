@@ -1,0 +1,8 @@
+OK    1 viewport do aparelho · casca e App de campo com a largura do celular (360 px), sem desenho em 980 px reduzido 
+     (informativo, pendência os_campo.py) OS-0424-app ainda desenha em 360 px no celular
+OK    2 matriz 7 dimensões × SAF, CMP, O.S., PA · título, comando principal e etapa atual visíveis/alcançáveis, barra lateral recolhida (68 px, ao lado, ícones e avatar alcançáveis, sem expandir), nada cortado fora de região rolável, sem rolagem lateral da página, fonte ≥ 10 px, sem escala global 
+     (informativo) área útil, menu e etapa: {'SAF 360x800': (660, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 360x800': (567, [68, 'static'], ''), 'SAF 800x360': (210, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 800x360': (210, [68, 'static'], ''), 'SAF 768x1024': (874, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 768x1024': (874, [68, 'static'], ''), 'SAF 1024x768': (597, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1024x768': (668, [68, 'static'], ''), 'SAF 1280x720': (565, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1280x720': (623, [68, 'static'], ''), 'SAF 1440x900': (745, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1440x900': (803, [68, 'static'], ''), 'SAF zoom200': (300, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS zoom200': (303, [68, 'static'], '')}
+OK    3 barra lateral · sempre recolhida (68 px, ao lado, conteúdo com o restante) em 360, 768, zoom 200 %, 1024 e 1440, na 1ª visita e com "aberto" guardado; um ícone com nome por módulo, sem botão de expandir nem fundo; ícones e avatar do perfil alcançáveis; o toque no conteúdo não muda a barra e a escolha guardada não muda 
+     erros JS (matriz): []
+
+RESULTADO: 3 ok · 0 falhas (matriz)

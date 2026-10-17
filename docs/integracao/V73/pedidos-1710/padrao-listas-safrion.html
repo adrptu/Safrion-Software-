@@ -1,0 +1,502 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Padrão de listas do Safrion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: especificação viva. Resumo da varredura, regras, demonstração clicável (tabela e cartões com painel lateral), tabelas de decisão e dicionário de ícones. */
+:root {
+  --bg: #F3F5F1; --surface: #FFFFFF; --surface-2: #EEF2EC; --line: #DCE3DA; --ink: #16211B; --ink-2: #3D4A42; --muted: #637168;
+  --accent: #1E7A4C; --accent-weak: #E2F1E7; --ok: #2E7A4F; --warn: #8A5A00; --warn-bg: #FFF1D6; --bad: #A3261B; --bad-bg: #FBE4E1; --info: #2F6F9F; --info-bg: #E3EEF7;
+  --scrim: rgba(16, 24, 19, .38); --shadow: 0 18px 40px -18px rgba(22,33,27,.45);
+  --font-d: 'Sora', 'Segoe UI', system-ui, sans-serif; --font-b: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif; --font-m: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1612; --surface: #161F1A; --surface-2: #1C2721; --line: #2A3830; --ink: #E4ECE6; --ink-2: #C1CDC5; --muted: #92A398;
+  --accent: #52B585; --accent-weak: #1C3527; --ok: #52B585; --warn: #E0B04F; --warn-bg: #33290F; --bad: #EC8A7E; --bad-bg: #3A1D1A; --info: #7DB2DE; --info-bg: #17293A;
+  --scrim: rgba(0,0,0,.55); --shadow: 0 18px 40px -18px rgba(0,0,0,.8); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0F1612; --surface: #161F1A; --surface-2: #1C2721; --line: #2A3830; --ink: #E4ECE6; --ink-2: #C1CDC5; --muted: #92A398;
+  --accent: #52B585; --accent-weak: #1C3527; --ok: #52B585; --warn: #E0B04F; --warn-bg: #33290F; --bad: #EC8A7E; --bad-bg: #3A1D1A; --info: #7DB2DE; --info-bg: #17293A;
+  --scrim: rgba(0,0,0,.55); --shadow: 0 18px 40px -18px rgba(0,0,0,.8); color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-b);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 48px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-d); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h1 { font-size: clamp(26px, 3.6vw, 34px); font-weight: 800; }
+h2 { font-size: 20px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font: 600 12px/1 var(--font-b); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 78ch; margin-top: 8px; }
+.mono { font-family: var(--font-m); font-size: .9em; }
+.num { font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 12px; min-width: 0; }
+.intro { color: var(--ink-2); max-width: 85ch; }
+.muted { color: var(--muted); }
+svg.lucide { width: 16px; height: 16px; stroke-width: 2; flex: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* resumo */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.fact .big { font: 800 26px/1 var(--font-d); }
+.fact .big small { font: 600 14px var(--font-b); color: var(--muted); margin-left: 4px; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: minmax(120px, 42%) 1fr 34px; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.bar .t { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.bar .t i { display: block; height: 100%; background: var(--muted); border-radius: 5px; }
+.bar .t i.good { background: var(--accent); }
+.bar b { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* regras */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 10px; counter-reset: r; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.rule h3 { display: flex; gap: 8px; align-items: baseline; }
+.rule h3::before { counter-increment: r; content: counter(r); font: 700 12px var(--font-m); color: var(--accent); background: var(--accent-weak); border-radius: 6px; padding: 1px 6px; }
+.rule p { color: var(--ink-2); font-size: 14.5px; }
+
+/* demonstração */
+.demo { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: visible; position: relative; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.toolbar h3 { margin-right: auto; }
+.seg { display: inline-flex; gap: 3px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; color: var(--muted); font: 700 13px var(--font-b); padding: 6px 12px; border-radius: 999px; cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; gap: 6px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; background: var(--accent-weak); border-bottom: 1px solid var(--line); }
+.bulk b { margin-right: 4px; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 700 13.5px var(--font-b); cursor: pointer; min-height: 34px; display: inline-flex; align-items: center; gap: 7px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: 13px; }
+.listwrap { overflow-x: auto; }
+table.list { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 720px; }
+.list th { text-align: left; font: 700 11.5px var(--font-b); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 9px 10px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+.list td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.list tr.row { cursor: pointer; }
+.list tr.row:hover > td { background: var(--accent-weak); }
+.list tr.row.open > td { background: var(--accent-weak); box-shadow: inset 0 0 0 0 var(--accent); }
+.list tr.row.open > td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+.list tr.kid td.name { padding-left: 44px; }
+.list tr.grp td { background: var(--surface-2); font-weight: 700; }
+.c-sel { width: 40px; } .c-car { width: 36px; padding-right: 0 !important; } .c-more { width: 48px; text-align: right; }
+.car { width: 28px; height: 28px; border: 0; background: transparent; color: var(--ink-2); border-radius: 8px; cursor: pointer; display: inline-grid; place-items: center; }
+.car:hover { background: var(--surface-2); }
+.car[aria-expanded="true"] svg { transform: rotate(90deg); }
+.car svg { transition: transform .15s; }
+.idl { font-family: var(--font-m); font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 500; }
+.idl:hover { text-decoration: underline; }
+.name b { font-weight: 700; }
+.cnt { font-size: 12px; color: var(--muted); margin-left: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12.5px; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.s-ok { color: var(--ok); background: var(--accent-weak); } .s-warn { color: var(--warn); background: var(--warn-bg); } .s-bad { color: var(--bad); background: var(--bad-bg); } .s-info { color: var(--info); background: var(--info-bg); }
+.next { color: var(--ink-2); font-size: 13.5px; }
+.next b { color: var(--ink); }
+.kebab { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--ink-2); cursor: pointer; display: inline-grid; place-items: center; }
+.kebab:hover, .kebab[aria-expanded="true"] { background: var(--surface-2); border-color: var(--line); }
+@media (pointer: coarse) { .kebab, .car { width: 44px; height: 44px; } }
+
+/* cartões */
+.cards { display: grid; gap: 8px; padding: 12px; }
+.card { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 12px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; cursor: pointer; position: relative; }
+.card:hover { border-color: var(--accent); }
+.card.open { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.card .ttl { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; min-width: 0; }
+.card .meta { grid-column: 3 / 4; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--ink-2); }
+.card .meta span b { color: var(--muted); font-weight: 600; margin-right: 4px; }
+.card .kids { grid-column: 3 / 5; display: grid; gap: 6px; margin-top: 6px; }
+.card .kidrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); cursor: pointer; font-size: 13.5px; }
+.card .kidrow:hover { outline: 1px solid var(--accent); }
+.card .cb { width: 18px; height: 18px; }
+
+/* menu */
+.menu { position: absolute; z-index: 40; min-width: 260px; max-width: 320px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; }
+.menu .mi { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 2px 10px; align-items: center; width: 100%; border: 0; background: transparent; color: var(--ink); text-align: left; padding: 8px 10px; border-radius: 8px; font: 400 14px var(--font-b); cursor: pointer; }
+.menu .mi:hover:not([aria-disabled="true"]), .menu .mi:focus-visible { background: var(--accent-weak); outline: none; }
+.menu .mi.first { font-weight: 700; }
+.menu .mi.danger { color: var(--bad); }
+.menu .mi[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; }
+.menu .mi small { grid-column: 2; font-size: 12px; color: var(--muted); }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 5px 4px; }
+.menu .mh { font: 700 11px var(--font-b); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 10px 2px; }
+
+/* painel lateral e modal */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 60; }
+.drawer { position: fixed; z-index: 61; top: 0; right: 0; bottom: 0; width: min(560px, 100vw); background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow); display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.dh { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.dh .trail { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.dh .trail button { border: 0; background: transparent; color: var(--accent); font: 600 12.5px var(--font-b); cursor: pointer; padding: 0; }
+.dh .top { display: flex; align-items: flex-start; gap: 8px; }
+.dh .top h2 { flex: 1; min-width: 0; font-size: 18px; }
+.dh .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.iconbtn { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); display: inline-grid; place-items: center; cursor: pointer; }
+.iconbtn:hover { border-color: var(--accent); }
+.db { overflow: auto; padding: 14px 16px; display: grid; gap: 14px; align-content: start; }
+.db dl { margin: 0; display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; }
+.db dt { color: var(--muted); }
+.db dd { margin: 0; }
+.db .items { display: grid; gap: 6px; }
+.db .it { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.db .it:hover { border-color: var(--accent); }
+.df { border-top: 1px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+.modal { position: fixed; z-index: 71; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 12px; }
+.modal label { font-weight: 600; font-size: 14px; display: grid; gap: 4px; }
+.modal select, .modal textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.modal .row2 { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.toast { position: fixed; z-index: 80; left: 50%; transform: translateX(-50%); bottom: max(18px, env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px; display: flex; gap: 12px; align-items: center; max-width: calc(100vw - 32px); box-shadow: var(--shadow); }
+.toast button { border: 0; background: transparent; color: var(--bg); font-weight: 700; text-decoration: underline; cursor: pointer; }
+.hint { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.hint kbd { font: 600 11.5px var(--font-m); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--surface-2); color: var(--ink-2); }
+
+/* tabelas de decisão e dicionário */
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.tbl th { text-align: left; font: 700 11.5px var(--font-b); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.tbl td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.scrollx { overflow-x: auto; border-radius: 12px; }
+.dict { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+.dg { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+.dg h3 { margin-bottom: 4px; }
+.dv { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; padding: 3px 0; }
+.dv code { font: 500 11.5px var(--font-m); color: var(--muted); }
+.dg.danger .dv { color: var(--bad); }
+.refs { display: grid; gap: 6px; font-size: 14px; color: var(--ink-2); padding-left: 18px; margin: 0; }
+.refs a { color: var(--accent); }
+.foot { font-size: 13px; color: var(--muted); max-width: 90ch; }
+@media (max-width: 640px) { .db dl { grid-template-columns: 1fr; } .card { grid-template-columns: auto minmax(0, 1fr) auto; } .card .meta, .card .kids { grid-column: 1 / -1; } .card .cbw { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Safrion · Design system</div>
+    <h1>Padrão de listas do Safrion</h1>
+    <p class="lede">Um comportamento previsível para toda tabela e todo cartão: o mesmo clique faz sempre a mesma coisa, as ações ficam no lugar certo e o ⋯ mostra ícone e texto. Abaixo, o que a varredura achou hoje, as regras, uma demonstração para clicar e as tabelas de decisão para o Claude Code e o Codex implantarem.</p>
+  </header>
+
+  <section aria-labelledby="h-hoje">
+    <h2 id="h-hoje">O que acontece hoje</h2>
+    <p class="intro" id="hoje-intro"></p>
+    <div class="facts" id="facts"></div>
+  </section>
+
+  <section aria-labelledby="h-regras">
+    <h2 id="h-regras">As regras</h2>
+    <div class="rules">
+      <div class="rule"><h3>Clicar na linha abre o registro</h3><p>Linha ou cartão abre o detalhe no painel lateral, sempre em modo de consulta, com o estado e a ação primária no topo. Nunca abre edição direta, nunca executa uma ação e nunca leva para outra tela.</p></div>
+      <div class="rule"><h3>A seta só expande</h3><p>A seta ▸ à esquerda abre e fecha os filhos. Clicar no corpo da linha pai abre o detalhe do pai; na filha, o da filha, no mesmo painel, com a trilha "pai › filho". Linha de grupo (Agrupar por) não tem detalhe: o clique nela inteira expande.</p></div>
+      <div class="rule"><h3>Ações no ⋯, com ícone e texto</h3><p>Toda ação da linha fica no ⋯ ao fim da linha ou no canto do cartão, sempre visível. Próximo passo em primeiro e em negrito, depois as frequentes, depois consultar e arquivos, e as destrutivas por último, em vermelho. Cada item com ícone do dicionário e texto.</p></div>
+      <div class="rule"><h3>Indisponível ensina</h3><p>Ação que o estado não permite aparece desabilitada com o motivo embaixo ("falta 1.140 kg de ureia"). Ação que o papel não pode fazer não aparece.</p></div>
+      <div class="rule"><h3>Botão só para a ação principal</h3><p>Botão visível existe no topo do detalhe (a primária do estado), na barra da listagem (criar, importar) e na barra de lote. Na linha, só em fila de trabalho de ação única, e só o próximo passo.</p></div>
+      <div class="rule"><h3>O destino certo para cada coisa</h3><p>Painel lateral para ver e agir num registro; modal pequeno só para confirmar ou dar motivo; página inteira para trabalho longo. Link no ID leva à entidade relacionada.</p></div>
+      <div class="rule"><h3>Tabela e cartões são a mesma lista</h3><p>Os dois modos têm o mesmo clique, a mesma seta, o mesmo ⋯, a mesma seleção e o mesmo painel. O cartão recebe foco pelo teclado como a linha.</p></div>
+      <div class="rule"><h3>O contexto nunca se perde</h3><p>Com o painel aberto, a linha fica marcada; setas ↑ ↓ andam pelos registros; Esc fecha e devolve o foco à linha; filtros, ordem, grupos abertos e rolagem ficam como estavam.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-demo">
+    <h2 id="h-demo">Demonstração</h2>
+    <p class="intro">Ordens de serviço da Santa Rita. Clique numa linha, na seta, numa linha filha (insumo), no ⋯ e no ID. Marque linhas para ver o lote. Troque para Cartões: o comportamento é o mesmo.</p>
+    <div class="demo" id="demo">
+      <div class="toolbar">
+        <h3>Ordens de serviço <span class="muted num" id="cnt"></span></h3>
+        <div class="seg" role="group" aria-label="Agrupar por"><button type="button" data-g="" aria-pressed="true">Sem grupo</button><button type="button" data-g="tal" aria-pressed="false">Por talhão</button></div>
+        <div class="seg" role="group" aria-label="Modo de ver"><button type="button" data-m="tabela" aria-pressed="true"><i data-lucide="rows-3"></i>Tabela</button><button type="button" data-m="cartoes" aria-pressed="false"><i data-lucide="layout-grid"></i>Cartões</button></div>
+        <button type="button" class="btn primary" id="nova"><i data-lucide="calendar-plus"></i>Criar O.S.</button>
+      </div>
+      <div class="bulk" id="bulk" hidden></div>
+      <div id="view"></div>
+      <div class="hint"><span><kbd>Tab</kbd> chega na linha</span><span><kbd>Enter</kbd> abre</span><span><kbd>→</kbd> <kbd>←</kbd> expande e recolhe</span><span><kbd>Espaço</kbd> no ⋯ abre o menu</span><span><kbd>↑</kbd> <kbd>↓</kbd> no painel trocam de registro</span><span><kbd>Esc</kbd> fecha e volta à linha</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-onde">
+    <h2 id="h-onde">Onde cada clique leva</h2>
+    <div class="scrollx"><table class="tbl">
+      <thead><tr><th>O usuário clica em</th><th>Acontece</th><th>Componente</th><th>Nunca</th></tr></thead>
+      <tbody>
+        <tr><td>Corpo da linha ou do cartão</td><td>Abre o detalhe do registro, em consulta, com estado, próximo passo e ações</td><td>Painel lateral à direita (480 a 640 px; tela cheia no celular)</td><td>Abrir edição direta, executar ação, navegar para outra tela</td></tr>
+        <tr><td>Seta ▸ à esquerda</td><td>Mostra ou esconde os filhos no lugar</td><td>Linha em árvore (treegrid) ou itens dentro do cartão</td><td>Abrir detalhe</td></tr>
+        <tr><td>Linha de grupo (Agrupar por)</td><td>Expande ou recolhe o grupo; mostra contagem e somas</td><td>Cabeçalho de grupo</td><td>Abrir painel de algo que não é registro</td></tr>
+        <tr><td>Linha filha</td><td>Abre o detalhe da filha no mesmo painel, com a trilha "pai › filho" e voltar ao pai</td><td>Painel lateral</td><td>Abrir o pai</td></tr>
+        <tr><td>⋯</td><td>Abre o menu de ações da linha, com ícone e texto</td><td>Menu (menu button)</td><td>Abrir painel ou executar direto</td></tr>
+        <tr><td>Item do ⋯ sem risco e sem dados</td><td>Executa e mostra o resultado com Desfazer</td><td>Aviso no rodapé (snackbar)</td><td>Confirmação extra</td></tr>
+        <tr><td>Item do ⋯ com dados (motivo, quantidade, data)</td><td>Abre o formulário curto da ação</td><td>Painel lateral (ou modal se tiver até 2 campos)</td><td>Formulário genérico de edição</td></tr>
+        <tr><td>Item destrutivo ou irreversível</td><td>Pede confirmação com a consequência e, se a regra pedir, motivo</td><td>Modal central pequeno, primária vermelha com verbo e objeto</td><td>"Tem certeza?" sem dizer o que acontece</td></tr>
+        <tr><td>ID de outra entidade (REC-014, OS-0421)</td><td>Abre aquela entidade, no painel ou na tela dela, com voltar</td><td>Link</td><td>Botão com aparência de link</td></tr>
+        <tr><td>Caixa de seleção</td><td>Marca a linha; aparece a barra de lote com a contagem</td><td>Barra de ações em lote no topo</td><td>Abrir detalhe</td></tr>
+        <tr><td>Botão "Editar" no detalhe</td><td>O painel passa a editar, com Salvar e Cancelar no rodapé</td><td>Mesmo painel</td><td>Abrir outro modal por cima</td></tr>
+        <tr><td>Trabalho longo (muitas seções, mapa, grade de itens)</td><td>"Abrir página completa" no painel</td><td>Página do registro, com voltar à lista preservada</td><td>Modal grande rolando</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section aria-labelledby="h-botao">
+    <h2 id="h-botao">Botão, linha ou ⋯</h2>
+    <div class="scrollx"><table class="tbl">
+      <thead><tr><th>Use</th><th>Quando</th><th>Exemplo</th></tr></thead>
+      <tbody>
+        <tr><td><b>Clique na linha</b></td><td>Para ver o registro e decidir. É o caminho padrão de toda lista.</td><td>Clicar na OS-0424 abre o painel com "Liberar" no topo.</td></tr>
+        <tr><td><b>Botão primário no topo do detalhe</b></td><td>O próximo passo do estado, para quem tem permissão. Um por painel.</td><td>Aprovada → "Liberar"; Falta insumo → "Pedir compra urgente".</td></tr>
+        <tr><td><b>⋯ na linha, no cartão e no detalhe</b></td><td>Todas as ações do registro, o mesmo conteúdo nos três lugares.</td><td>Reprogramar, Trocar produto, Ver no mapa, Imprimir ficha, Cancelar.</td></tr>
+        <tr><td><b>Botão na barra da listagem</b></td><td>Ações que não são de um registro: criar, importar, exportar a lista.</td><td>"Criar O.S.", "Importar talhões".</td></tr>
+        <tr><td><b>Barra de lote</b></td><td>Ação repetida em vários registros, onde a regra permite lote.</td><td>Programar 4 O.S.; nunca liberar O.S. com produto.</td></tr>
+        <tr><td><b>Botão do próximo passo na linha</b></td><td>Só em fila de trabalho de ação única e repetitiva, se o teste com usuários mostrar ganho. Texto curto, sem cor de primária, antes do ⋯.</td><td>Fila do almoxarife: "Separar".</td></tr>
+        <tr><td><b>Link</b></td><td>Ir para outra entidade. Nunca para executar.</td><td>REC-014, OS-0421, "Ver contrato".</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section aria-labelledby="h-dic">
+    <h2 id="h-dic">Dicionário de ações e ícones</h2>
+    <p class="intro">Um verbo, um ícone, em todo o sistema (biblioteca Lucide, traço 2, 16 px no desktop e 20 px no toque). O ícone ajuda a achar; o texto diz o que acontece. Verbo que não está aqui entra no dicionário antes de entrar na tela.</p>
+    <div class="dict" id="dict"></div>
+  </section>
+
+  <section aria-labelledby="h-anat">
+    <h2 id="h-anat">Medidas e acessibilidade</h2>
+    <div class="scrollx"><table class="tbl">
+      <thead><tr><th>Peça</th><th>Desktop</th><th>Toque</th><th>Acessibilidade</th></tr></thead>
+      <tbody>
+        <tr><td>Linha</td><td>40 a 48 px de altura</td><td>56 px</td><td>Linha focável; Enter abre; em árvore, role treegrid com aria-expanded e aria-level</td></tr>
+        <tr><td>Cartão</td><td>Linha de cartão com até 4 campos</td><td>Cartão inteiro tocável</td><td>Focável, com nome acessível pelo título; Enter abre</td></tr>
+        <tr><td>Seta ▸</td><td>28 px, sempre à esquerda</td><td>44 px</td><td>Botão "Expandir T1"; → e ← no teclado</td></tr>
+        <tr><td>⋯</td><td>32 px, sempre visível</td><td>44 px</td><td>Botão de menu "Ações de OS-0424" (aria-haspopup e aria-expanded); ↑ ↓ Home End no menu; Esc devolve o foco</td></tr>
+        <tr><td>Item do menu</td><td>Ícone 16 px + texto; até 7 itens visíveis</td><td>Ícone 20 px, 48 px de altura; vira folha inferior</td><td>role menuitem; desabilitado anunciado com o motivo</td></tr>
+        <tr><td>Painel lateral</td><td>480 px (consulta) a 640 px (formulário)</td><td>Tela cheia</td><td>Diálogo com título; foco no título ao abrir; Esc fecha e volta à linha</td></tr>
+        <tr><td>Modal de confirmação</td><td>Até 480 px, uma pergunta</td><td>Folha inferior</td><td>aria-modal; foco preso; primária com verbo e objeto</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section aria-labelledby="h-ref">
+    <h2 id="h-ref">Referências</h2>
+    <ul class="refs">
+      <li><a href="https://carbondesignsystem.com/components/data-table/usage/">IBM Carbon · Data table</a>: linhas expansíveis, menu da linha, ações em lote; painel lateral quando o conteúdo expandido fica apertado.</li>
+      <li><a href="https://carbondesignsystem.com/components/overflow-menu/usage/">IBM Carbon · Overflow menu</a>: para opções a mais em linhas e cartões; ações que mudam dados de forma significativa ficam separadas por divisor, no fim.</li>
+      <li><a href="https://fluent2.microsoft.design/components/web/react/drawer/usage">Microsoft Fluent 2 · Drawer</a>: painel para informação e ações ligadas ao conteúdo; diálogo para confirmar.</li>
+      <li><a href="https://polaris-react.shopify.com/components/tables/index-table">Shopify Polaris · Index table</a>: clicar no item leva ao detalhe dele; seleção fica na caixa; lote para tarefas aplicadas a muitos itens.</li>
+      <li><a href="https://www.nngroup.com/videos/overflow-menu-icons/">Nielsen Norman Group · Overflow menu icons</a>: menu de três pontos para ações secundárias; esconder ações-chave nele prejudica o uso.</li>
+      <li><a href="https://www.nngroup.com/topic/icons/">Nielsen Norman Group · Icons</a>: ícones não são universais; rótulo e teste garantem a clareza.</li>
+      <li><a href="https://m2.material.io/go/design-menus">Material Design · Menus</a>: item de menu com ícone à esquerda, texto e divisores para agrupar.</li>
+    </ul>
+  </section>
+
+  <p class="foot">Demonstração com dados de exemplo. Os números da seção "O que acontece hoje" vêm da leitura das 261 listagens do protótipo (versão 1792184197-5a81) e do robô que clicou em cada uma, nos modos Tabela e Cartões.</p>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script>
+const EVID = {"grades": 261, "intro": "Leitura do código das 261 listagens de 118 telas e um robô que clicou em cada lista das 148 telas, nos modos Tabela e Cartões (380 testes), e abriu o detalhe da primeira linha em 36 telas do menu.", "cards": [{"t": "Clicar na linha · robô, 380 testes", "bars": [["Abre consulta", 246], ["Abre edição direta", 105], ["Não faz nada", 15], ["Vai para outra tela", 11], ["Edita ou muda a própria linha", 3]], "total": 380, "good": ["Abre consulta"], "p": "Sempre num painel lateral, o que é bom; o conteúdo é que muda: consulta, edição ou nada."}, {"t": "O que cada listagem manda abrir · código", "bars": [["Formulário de edição", 105], ["Consulta", 58], ["Valor calculado, veja a origem", 50], ["Função própria da tela", 41], ["Nada", 7]], "total": 261, "good": ["Consulta"]}, {"t": "Linha pai × filha", "bars": [["Seta expande", 12], ["Pai abre edição", 4], ["Pai abre consulta", 1], ["Pai não faz nada", 6], ["Filha abre edição", 6], ["Filha abre consulta", 5]], "total": 12, "good": ["Seta expande", "Pai abre consulta", "Filha abre consulta"], "p": "A seta funciona; o corpo da linha pai faz uma coisa diferente em cada árvore."}, {"t": "Menu ⋯", "big": "5", "small": "de 261 listagens com ⋯ na linha", "p": "O ícone vem de uma lista de 8 verbos; Liberar, Conferir, Registrar e os demais recebem uma seta genérica. Nos menus desenhados à mão, o mesmo ícone serve a 9 verbos e \"Ver\" tem 8 ícones. Nenhum dos 36 painéis de detalhe tem ⋯; em Planos agronômicos o ⋯ é só texto."}, {"t": "Botões soltos na linha", "big": "34", "small": "de 42 executam sem abrir nada", "p": "26 listagens têm botões de ação na célula e 58 têm links. Nos painéis, há tela com 4 botões e o destrutivo ao lado da primária, e 9 telas só com \"Fechar\", sem próximo passo."}, {"t": "Cartões", "big": "188", "small": "de 188 sem foco do teclado", "p": "Em 9 listas, clicar no cartão não faz o mesmo que clicar na linha (CD-01det, CD-07, COLH, EST, GE-01, GE-05, IR-02, PCOM, PROD)."}]};
+(function () {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ic = n => '<i data-lucide="' + n + '"></i>';
+  const paint = () => { try { if (window.lucide) lucide.createIcons({ attrs: { 'aria-hidden': 'true' } }); } catch (e) {} };
+  const nf = new Intl.NumberFormat('pt-BR');
+
+  // ---------- dicionário ----------
+  const DICT = [
+    ['Avançar o processo', '', [['Liberar', 'unlock'], ['Programar', 'calendar-plus'], ['Reprogramar', 'calendar-clock'], ['Iniciar ou retomar', 'play'], ['Pausar', 'pause'], ['Apontar ou registrar', 'clipboard-pen'], ['Conferir', 'clipboard-check'], ['Confirmar', 'check'], ['Concluir ou encerrar', 'check-circle'], ['Aprovar ou autorizar', 'shield-check'], ['Decidir', 'scale'], ['Validar', 'badge-check'], ['Reabrir', 'rotate-ccw'], ['Reprocessar', 'refresh-cw']]],
+    ['Editar e organizar', '', [['Editar ou ajustar', 'pencil'], ['Duplicar', 'copy'], ['Dividir', 'split'], ['Agrupar ou mesclar', 'merge'], ['Vincular', 'link'], ['Atribuir ou convidar', 'user-plus'], ['Trocar produto', 'replace'], ['Comparar', 'git-compare'], ['Desfazer', 'undo-2']]],
+    ['Materiais e compras', '', [['Reservar', 'lock'], ['Requisitar', 'clipboard-list'], ['Separar', 'package'], ['Receber', 'package-check'], ['Devolver ao estoque', 'package-minus'], ['Transferir', 'arrow-left-right'], ['Pedir compra ou repor', 'shopping-cart'], ['Ler código', 'scan']]],
+    ['Comunicar e cobrar', '', [['Enviar ou encaminhar', 'send'], ['Comentar', 'message-square'], ['Lembrar ou avisar', 'bell'], ['Cobrar', 'banknote']]],
+    ['Consultar e ir para', '', [['Ver detalhe', 'eye'], ['Ver no mapa', 'map-pin'], ['Ver histórico', 'history'], ['Ir para a origem', 'arrow-up-right']]],
+    ['Documentos', '', [['Emitir documento', 'file-text'], ['Imprimir', 'printer'], ['Exportar ou baixar', 'download'], ['Importar', 'upload'], ['Anexar', 'paperclip']]],
+    ['Destrutivas (sempre por último)', 'danger', [['Cancelar', 'x-circle'], ['Recusar ou revogar', 'ban'], ['Inativar ou arquivar', 'archive'], ['Excluir', 'trash-2']]] ];
+  $('#dict').innerHTML = DICT.map(([t, cls, its]) => '<div class="dg ' + cls + '"><h3>' + esc(t) + '</h3>' + its.map(([v, n]) => '<div class="dv">' + ic(n) + '<span>' + esc(v) + '</span><code>' + n + '</code></div>').join('') + '</div>').join('');
+
+  // ---------- o que acontece hoje (evidência) ----------
+  (function () {
+    const E = EVID || {}; if (!E.grades) { $('#hoje-intro').textContent = 'Evidência em carregamento.'; return; }
+    $('#hoje-intro').textContent = E.intro || '';
+    const bars = (list, total, good) => '<div class="bars">' + list.map(([l, n]) => '<div class="bar"><span>' + esc(l) + '</span><span class="t"><i class="' + (good && good(l) ? 'good' : '') + '" style="width:' + (total ? Math.max(2, n / total * 100) : 0).toFixed(1) + '%"></i></span><b>' + nf.format(n) + '</b></div>').join('') + '</div>';
+    $('#facts').innerHTML = (E.cards || []).map(c => '<div class="fact"><h3>' + esc(c.t) + '</h3>' + (c.big != null ? '<div class="big num">' + esc(c.big) + (c.small ? '<small>' + esc(c.small) + '</small>' : '') + '</div>' : '') + (c.bars ? bars(c.bars, c.total, c.good ? (l => c.good.indexOf(l) >= 0) : null) : '') + (c.p ? '<p class="muted">' + esc(c.p) + '</p>' : '') + '</div>').join('');
+  })();
+
+  // ---------- dados da demonstração ----------
+  const OS = [
+    { id: 'OS-0424', at: 'Fungicida', tal: 'T1-B', area: '84 ha', jan: '23/09 a 25/09', st: ['Aprovada', 's-ok'], nx: 'Liberar', nxi: 'unlock', who: 'gestor',
+      kids: [{ id: 'i1', n: 'Tebuconazol 200 EC', q: '40 L', st: ['Coberto', 's-ok'], nx: 'Nada a fazer' }, { id: 'i2', n: 'Adjuvante Agral', q: '2 L', st: ['Falta 1,2 L', 's-bad'], nx: 'Pedir compra urgente' }],
+      menu: [['Liberar', 'unlock', 'first'], ['Reprogramar', 'calendar-clock'], ['Editar', 'pencil'], ['Trocar produto', 'replace', '', 'só o agrônomo'], '—', ['Ver no mapa', 'map-pin'], ['Ver histórico', 'history'], ['Imprimir ficha', 'printer'], '—', ['Cancelar O.S.', 'x-circle', 'danger']] },
+    { id: 'OS-0418', at: 'Fertirrigação', tal: 'P1', area: '29,9 ha', jan: '24/09', st: ['Falta insumo', 's-bad'], nx: 'Pedir compra urgente', nxi: 'shopping-cart', who: 'comprador',
+      kids: [{ id: 'i3', n: 'Ureia 45 %', q: '1.140 kg', st: ['Falta 1.140 kg', 's-bad'], nx: 'Pedir compra urgente' }],
+      menu: [['Pedir compra urgente', 'shopping-cart', 'first'], ['Trocar produto', 'replace'], ['Pedir transferência', 'arrow-left-right', '', 'sem saldo em outra fazenda', true], ['Liberar', 'unlock', '', 'falta 1.140 kg de ureia', true], ['Editar', 'pencil'], '—', ['Ver no mapa', 'map-pin'], '—', ['Cancelar O.S.', 'x-circle', 'danger']] },
+    { id: 'OS-0421', at: 'Fungicida 1ª aplicação', tal: 'T1', area: '190 de 350 ha', jan: '20/09 a 26/09', st: ['Em execução', 's-info'], nx: 'Apontar o dia', nxi: 'clipboard-pen', who: 'líder de campo',
+      kids: [{ id: 'i4', n: 'Azoxistrobina 250 SC', q: '70 L', st: ['Reservado', 's-ok'], nx: 'Retirar' }, { id: 'i5', n: 'Óleo mineral', q: '140 L', st: ['Retirado', 's-ok'], nx: 'Nada a fazer' }],
+      menu: [['Apontar o dia', 'clipboard-pen', 'first'], ['Pausar', 'pause'], '—', ['Ver no mapa', 'map-pin'], ['Ver histórico', 'history'], ['Imprimir ficha', 'printer'], '—', ['Encerrar', 'check-circle', '', 'falta conferir o apontamento', true]] },
+    { id: 'OS-0417', at: 'Adubação de cobertura', tal: 'P1', area: '29,9 ha', jan: '17/09', st: ['Em conferência', 's-warn'], nx: 'Conferir e encerrar', nxi: 'clipboard-check', who: 'conferente',
+      kids: [{ id: 'i6', n: 'MAP 11-52', q: '1.100 kg', st: ['Sobra 30 kg', 's-warn'], nx: 'Devolver ao estoque' }],
+      menu: [['Conferir e encerrar', 'clipboard-check', 'first'], ['Devolver sobra', 'package-minus'], '—', ['Ver custo', 'eye'], ['Ver histórico', 'history'], ['Exportar apontamentos', 'download']] },
+    { id: 'OS-0430', at: 'Dessecação', tal: 'T3', area: '310 ha', jan: '27/09', st: ['Aguarda aprovação', 's-warn'], nx: 'Aprovar (agrônomo)', nxi: 'shield-check', who: 'agrônomo',
+      kids: [{ id: 'i7', n: 'Glifosato 480', q: '930 L', st: ['Coberto', 's-ok'], nx: 'Nada a fazer' }, { id: 'i8', n: '2,4-D 806', q: '310 L', st: ['Coberto', 's-ok'], nx: 'Nada a fazer' }],
+      menu: [['Aprovar', 'shield-check', 'first'], ['Pedir ajuste', 'message-square'], ['Ver receituário', 'file-text'], '—', ['Ver no mapa', 'map-pin'], '—', ['Recusar', 'ban', 'danger']] } ];
+  const KMENU = k => k.st[1] === 's-bad' ? [['Pedir compra urgente', 'shopping-cart', 'first'], ['Trocar produto', 'replace'], ['Pedir transferência', 'arrow-left-right', '', 'sem saldo em outra fazenda', true], '—', ['Ver lote e validade', 'eye'], '—', ['Remover da O.S.', 'trash-2', 'danger']]
+    : k.nx === 'Devolver ao estoque' ? [['Devolver ao estoque', 'package-minus', 'first'], '—', ['Ver lote e validade', 'eye']] : k.nx === 'Retirar' ? [['Retirar', 'package', 'first'], ['Trocar produto', 'replace'], '—', ['Ver lote e validade', 'eye']]
+    : [['Ver lote e validade', 'eye', 'first'], ['Trocar produto', 'replace'], '—', ['Remover da O.S.', 'trash-2', 'danger']];
+  const S = { mode: 'tabela', group: '', exp: { 'OS-0424': true }, gexp: {}, sel: {}, open: null };
+  try { const m = localStorage.getItem('pl.mode'); if (m === 'cartoes' || m === 'tabela') S.mode = m; } catch (e) {}
+  const view = $('#view');
+  const flat = () => { const out = []; OS.forEach(o => { out.push({ o }); if (S.exp[o.id]) o.kids.forEach(k => out.push({ o, k })); }); return out; };
+  const groups = () => { const g = {}; OS.forEach(o => { (g[o.tal] = g[o.tal] || []).push(o); }); return Object.entries(g); };
+  const stChip = st => '<span class="chip ' + st[1] + '">' + esc(st[0]) + '</span>';
+
+  function renderTable() {
+    const rowHTML = (o, k, lvl) => {
+      const key = k ? o.id + '/' + k.id : o.id, isOpen = S.open === key;
+      return '<tr class="row' + (k ? ' kid' : '') + (isOpen ? ' open' : '') + '" tabindex="0" data-k="' + key + '" role="row" aria-level="' + lvl + '"' + (!k ? ' aria-expanded="' + !!S.exp[o.id] + '"' : '') + '>' +
+        '<td class="c-sel">' + (!k ? '<input type="checkbox" class="cb" aria-label="Selecionar ' + o.id + '"' + (S.sel[o.id] ? ' checked' : '') + '>' : '') + '</td>' +
+        '<td class="c-car">' + (!k ? '<button type="button" class="car" aria-expanded="' + !!S.exp[o.id] + '" aria-label="' + (S.exp[o.id] ? 'Recolher' : 'Expandir') + ' insumos de ' + o.id + '">' + ic('chevron-right') + '</button>' : '') + '</td>' +
+        '<td class="name">' + (k ? '<b>' + esc(k.n) + '</b> <span class="muted">· ' + esc(k.q) + '</span>' : '<a class="idl" href="#h-demo" data-id="' + o.id + '">' + o.id + '</a> <b>' + esc(o.at) + '</b><span class="cnt">' + o.kids.length + ' insumos</span>') + '</td>' +
+        '<td>' + (k ? '' : esc(o.tal) + ' <span class="muted">· ' + esc(o.area) + '</span>') + '</td>' +
+        '<td>' + stChip(k ? k.st : o.st) + '</td>' +
+        '<td class="next">' + (k ? esc(k.nx) : '<b>' + esc(o.nx) + '</b>') + '</td>' +
+        '<td class="c-more"><button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" aria-label="Ações de ' + (k ? k.n + ' em ' + o.id : o.id) + '" data-k="' + key + '">' + ic('more-horizontal') + '</button></td></tr>';
+    };
+    let body = '';
+    if (S.group) groups().forEach(([g, list]) => { const open = S.gexp[g] !== false;
+      body += '<tr class="row grp" tabindex="0" data-g="' + g + '" aria-expanded="' + open + '"><td></td><td class="c-car"><button type="button" class="car" aria-expanded="' + open + '" aria-label="' + (open ? 'Recolher' : 'Expandir') + ' talhão ' + g + '" data-g="' + g + '">' + ic('chevron-right') + '</button></td><td colspan="5">Talhão ' + esc(g) + ' <span class="cnt">' + list.length + ' O.S.</span></td></tr>';
+      if (open) list.forEach(o => { body += rowHTML(o, null, 2); if (S.exp[o.id]) o.kids.forEach(k => { body += rowHTML(o, k, 3); }); }); });
+    else flat().forEach(({ o, k }) => { body += rowHTML(o, k, k ? 2 : 1); });
+    view.innerHTML = '<div class="listwrap"><table class="list" role="treegrid" aria-label="Ordens de serviço"><thead><tr><th class="c-sel"><input type="checkbox" id="all" aria-label="Selecionar todas"></th><th class="c-car"></th><th>O.S. · atividade</th><th>Talhão</th><th>Estado</th><th>Próximo passo</th><th class="c-more"><span style="position:absolute;left:-9999px">Ações</span></th></tr></thead><tbody>' + body + '</tbody></table></div>';
+  }
+  function renderCards() {
+    const card = o => { const key = o.id, open = S.open === key;
+      return '<div class="card' + (open ? ' open' : '') + '" tabindex="0" role="group" aria-label="' + o.id + ' ' + esc(o.at) + '" data-k="' + key + '">' +
+        '<span class="cbw"><input type="checkbox" class="cb" aria-label="Selecionar ' + o.id + '"' + (S.sel[o.id] ? ' checked' : '') + '></span>' +
+        '<button type="button" class="car" aria-expanded="' + !!S.exp[o.id] + '" aria-label="' + (S.exp[o.id] ? 'Recolher' : 'Expandir') + ' insumos de ' + o.id + '">' + ic('chevron-right') + '</button>' +
+        '<div class="ttl"><a class="idl" href="#h-demo" data-id="' + o.id + '">' + o.id + '</a><b>' + esc(o.at) + '</b><span class="cnt">' + o.kids.length + ' insumos</span>' + stChip(o.st) + '</div>' +
+        '<button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" aria-label="Ações de ' + o.id + '" data-k="' + key + '">' + ic('more-horizontal') + '</button>' +
+        '<div class="meta"><span><b>Talhão</b>' + esc(o.tal) + ' · ' + esc(o.area) + '</span><span><b>Janela</b>' + esc(o.jan) + '</span><span><b>Próximo passo</b>' + esc(o.nx) + '</span></div>' +
+        (S.exp[o.id] ? '<div class="kids">' + o.kids.map(k => '<div class="kidrow" tabindex="0" data-k="' + o.id + '/' + k.id + '"><span><b>' + esc(k.n) + '</b> <span class="muted">· ' + esc(k.q) + '</span></span>' + stChip(k.st) + '<button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" aria-label="Ações de ' + esc(k.n) + ' em ' + o.id + '" data-k="' + o.id + '/' + k.id + '">' + ic('more-horizontal') + '</button></div>').join('') + '</div>' : '') + '</div>'; };
+    let html = '';
+    if (S.group) groups().forEach(([g, list]) => { const open = S.gexp[g] !== false; html += '<div class="card" style="background:var(--surface-2);grid-template-columns:auto minmax(0,1fr)" tabindex="0" data-g="' + g + '" aria-expanded="' + open + '"><button type="button" class="car" aria-expanded="' + open + '" aria-label="' + (open ? 'Recolher' : 'Expandir') + ' talhão ' + g + '" data-g="' + g + '">' + ic('chevron-right') + '</button><b>Talhão ' + esc(g) + ' <span class="cnt">' + list.length + ' O.S.</span></b></div>'; if (open) list.forEach(o => { html += card(o); }); });
+    else OS.forEach(o => { html += card(o); });
+    view.innerHTML = '<div class="cards" role="list" aria-label="Ordens de serviço em cartões">' + html + '</div>';
+  }
+  function render() {
+    $$('[data-m]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === S.mode)));
+    $$('[data-g]').forEach(b => { if (b.tagName === 'BUTTON' && b.closest('.seg')) b.setAttribute('aria-pressed', String(b.dataset.g === S.group)); });
+    if (S.mode === 'tabela') renderTable(); else renderCards();
+    $('#cnt').textContent = '· ' + OS.length;
+    const n = Object.values(S.sel).filter(Boolean).length, bulk = $('#bulk'); bulk.hidden = !n;
+    bulk.innerHTML = '<b class="num">' + n + (n === 1 ? ' selecionada' : ' selecionadas') + '</b><button type="button" class="btn sm" data-bulk="Programar">' + ic('calendar-plus') + 'Programar</button><button type="button" class="btn sm" data-bulk="Imprimir fichas">' + ic('printer') + 'Imprimir fichas</button><button type="button" class="btn sm" data-bulk="Exportar">' + ic('download') + 'Exportar</button><span class="muted" style="font-size:13px">Liberar O.S. com produto não entra no lote: a aprovação agronômica é uma a uma.</span><button type="button" class="btn ghost sm" id="clr">' + ic('x') + 'Limpar seleção</button>';
+    const all = $('#all'); if (all) { const tot = OS.length; all.checked = n === tot; all.indeterminate = n > 0 && n < tot; }
+    paint();
+  }
+
+  // ---------- menu ----------
+  let MENU = null;
+  function closeMenu(focus) { if (!MENU) return; MENU.el.remove(); MENU.btn.setAttribute('aria-expanded', 'false'); if (focus) MENU.btn.focus(); MENU = null; }
+  function itemsFor(key) { const [oid, kid] = key.split('/'), o = OS.find(x => x.id === oid); if (!kid) return { o, list: o.menu, nome: o.id }; const k = o.kids.find(x => x.id === kid); return { o, k, list: KMENU(k), nome: k.n }; }
+  function openMenu(btn, key) {
+    closeMenu(); const { o, k, list, nome } = itemsFor(key), m = document.createElement('div'); m.className = 'menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', 'Ações de ' + nome);
+    m.innerHTML = list.map(x => x === '—' ? '<hr>' : '<button type="button" role="menuitem" class="mi ' + (x[2] || '') + '"' + (x[4] ? ' aria-disabled="true"' : '') + ' data-t="' + esc(x[0]) + '">' + ic(x[1]) + '<span>' + esc(x[0]) + '</span>' + (x[3] ? '<small>' + esc(x[3]) + '</small>' : '') + '</button>').join('');
+    document.body.appendChild(m); const r = btn.getBoundingClientRect(), mw = 280; let left = Math.min(window.innerWidth - mw - 12, r.right - mw) + window.scrollX, top = r.bottom + 6 + window.scrollY;
+    m.style.left = Math.max(12, left) + 'px'; m.style.top = top + 'px'; paint();
+    const mh = m.offsetHeight; if (r.bottom + mh + 12 > window.innerHeight && r.top - mh - 6 > 0) m.style.top = (r.top - mh - 6 + window.scrollY) + 'px';
+    btn.setAttribute('aria-expanded', 'true'); MENU = { el: m, btn };
+    const its = $$('[role=menuitem]', m); its[0].focus();
+    m.addEventListener('keydown', e => { const i = its.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); its[(i + 1) % its.length].focus(); } else if (e.key === 'ArrowUp') { e.preventDefault(); its[(i - 1 + its.length) % its.length].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); its[0].focus(); } else if (e.key === 'End') { e.preventDefault(); its[its.length - 1].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeMenu(true); } else if (e.key === 'Tab') closeMenu(false); });
+    m.addEventListener('click', e => { const b = e.target.closest('[role=menuitem]'); if (!b) return; e.stopPropagation(); const t = b.dataset.t;
+      if (b.getAttribute('aria-disabled') === 'true') { toast(t + ' está indisponível: ' + (b.querySelector('small') || {}).textContent + '.'); return; }
+      closeMenu(true); act(t, o, k); });
+  }
+  function act(t, o, k) {
+    if (/cancelar|recusar|remover/i.test(t)) return confirmBox(t, o, k);
+    if (/editar|pedir compra|trocar|reprogramar|apontar|pedir ajuste/i.test(t)) { openDrawer(k ? o.id + '/' + k.id : o.id, t); return; }
+    toast((k ? k.n + ' · ' : o.id + ' · ') + t + ': feito.', true);
+  }
+
+  // ---------- painel lateral ----------
+  let DR = null;
+  function keysInView() { return $$('[data-k]', view).filter(e => e.classList.contains('row') || e.classList.contains('card') || e.classList.contains('kidrow')).map(e => e.dataset.k); }
+  function openDrawer(key, form) {
+    const back = document.activeElement; closeDrawer(false); S.open = key; render();
+    const [oid, kid] = key.split('/'), o = OS.find(x => x.id === oid), k = kid && o.kids.find(x => x.id === kid);
+    const sc = document.createElement('div'); sc.className = 'scrim'; const d = document.createElement('aside'); d.className = 'drawer'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-labelledby', 'dr-t');
+    const primary = k ? (k.nx === 'Nada a fazer' ? null : [k.nx, k.st[1] === 's-bad' ? 'shopping-cart' : k.nx === 'Retirar' ? 'package' : 'package-minus']) : [o.nx.replace(' (agrônomo)', ''), o.nxi];
+    let body;
+    if (form) body = '<p class="intro">Formulário curto da ação <b>' + esc(form) + '</b>, já preenchido com o contexto. Salvar volta ao detalhe; Cancelar descarta e volta.</p><dl><dt>Registro</dt><dd>' + esc(k ? k.n + ' · ' + o.id : o.id) + '</dd><dt>Quantidade</dt><dd>' + esc(k ? k.q : '—') + '</dd><dt>Precisa até</dt><dd>' + esc(o.jan) + '</dd></dl>';
+    else if (k) body = '<dl><dt>Insumo</dt><dd>' + esc(k.n) + '</dd><dt>Na O.S.</dt><dd>' + esc(k.q) + '</dd><dt>Estado</dt><dd>' + stChip(k.st) + '</dd><dt>Próximo passo</dt><dd>' + esc(k.nx) + '</dd><dt>Lote</dt><dd>' + (k.st[1] === 's-bad' ? 'sem saldo na Santa Rita' : 'L-2611 · validade 03/2027 · Galpão 1') + '</dd></dl>';
+    else body = '<dl><dt>Atividade</dt><dd>' + esc(o.at) + '</dd><dt>Talhão</dt><dd>' + esc(o.tal) + ' · ' + esc(o.area) + '</dd><dt>Janela</dt><dd>' + esc(o.jan) + '</dd><dt>Quem age agora</dt><dd>' + esc(o.who) + '</dd></dl><h3>Insumos</h3><div class="items">' +
+      o.kids.map(x => '<div class="it" tabindex="0" data-kid="' + x.id + '"><span><b>' + esc(x.n) + '</b> <span class="muted">· ' + esc(x.q) + '</span></span>' + stChip(x.st) + '<span class="muted">' + ic('chevron-right') + '</span></div>').join('') + '</div>';
+    d.innerHTML = '<div class="dh">' + (k ? '<div class="trail"><button type="button" data-up="' + o.id + '">' + ic('chevron-left') + o.id + ' · ' + esc(o.at) + '</button><span>›</span><span>' + esc(k.n) + '</span></div>' : '<div class="trail">Ordens de serviço › Santa Rita</div>') +
+      '<div class="top"><h2 id="dr-t" tabindex="-1">' + esc(form ? form : (k ? k.n : o.id + ' · ' + o.at)) + '</h2><button type="button" class="iconbtn" data-nav="-1" aria-label="Registro anterior">' + ic('chevron-up') + '</button><button type="button" class="iconbtn" data-nav="1" aria-label="Próximo registro">' + ic('chevron-down') + '</button><button type="button" class="iconbtn" data-x aria-label="Fechar">' + ic('x') + '</button></div>' +
+      (form ? '' : '<div class="acts">' + stChip(k ? k.st : o.st) + (primary ? '<button type="button" class="btn primary" data-p>' + ic(primary[1]) + esc(primary[0]) + '</button>' : '') + '<button type="button" class="btn" data-ed>' + ic('pencil') + 'Editar</button><button type="button" class="kebab" aria-haspopup="menu" aria-expanded="false" aria-label="Mais ações de ' + esc(k ? k.n : o.id) + '" data-k="' + key + '">' + ic('more-horizontal') + '</button></div>') + '</div>' +
+      '<div class="db">' + body + '</div>' +
+      '<div class="df">' + (form ? '<span></span><span style="display:flex;gap:8px"><button type="button" class="btn" data-cancel>Cancelar</button><button type="button" class="btn primary" data-save>' + ic('check') + 'Salvar</button></span>' : '<span><kbd style="font:600 11px var(--font-m)">↑</kbd> <kbd style="font:600 11px var(--font-m)">↓</kbd> trocam de registro · <kbd style="font:600 11px var(--font-m)">Esc</kbd> fecha</span><a class="idl" href="#h-demo">Abrir página completa ›</a>') + '</div>';
+    document.body.appendChild(sc); document.body.appendChild(d); paint(); DR = { d, sc, back, key };
+    $('#dr-t', d).focus();
+    sc.addEventListener('click', () => closeDrawer(true));
+    d.addEventListener('click', e => { const t = e.target;
+      if (t.closest('[data-x]')) return closeDrawer(true);
+      const kb = t.closest('.kebab'); if (kb) { e.stopPropagation(); return MENU && MENU.btn === kb ? closeMenu(true) : openMenu(kb, kb.dataset.k); }
+      if (t.closest('[data-p]')) return act(primary[0], o, k);
+      if (t.closest('[data-ed]')) return openDrawer(key, 'Editar');
+      if (t.closest('[data-cancel]')) return openDrawer(key);
+      if (t.closest('[data-save]')) { openDrawer(key); return toast('Salvo.', true); }
+      const up = t.closest('[data-up]'); if (up) return openDrawer(up.dataset.up);
+      const it = t.closest('[data-kid]'); if (it) return openDrawer(o.id + '/' + it.dataset.kid);
+      const nv = t.closest('[data-nav]'); if (nv) return step(+nv.dataset.nav); });
+    d.addEventListener('keydown', e => { if (e.key === 'Escape' && !MENU) { e.preventDefault(); closeDrawer(true); } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !MENU && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); step(e.key === 'ArrowDown' ? 1 : -1); }
+      else if (e.key === 'Enter' && e.target.closest('[data-kid]')) openDrawer(o.id + '/' + e.target.closest('[data-kid]').dataset.kid);
+      else if (e.key === 'Tab') { const f = $$('button,a,[tabindex="0"],[tabindex="-1"]#dr-t', d).filter(x => x.getClientRects().length); const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } } });
+  }
+  function step(dir) { const ks = keysInView(), i = ks.indexOf(DR ? DR.key : ''); if (i < 0) return; const n = ks[i + dir]; if (n) openDrawer(n); }
+  function closeDrawer(focus) { if (!DR) return; const key = DR.key; DR.d.remove(); DR.sc.remove(); DR = null; S.open = null; render(); if (focus) { const el = $$('[data-k]', view).find(e => e.dataset.k === key && !e.classList.contains('kebab')); if (el) el.focus(); } }
+
+  // ---------- confirmação ----------
+  function confirmBox(t, o, k) {
+    const sc = document.createElement('div'); sc.className = 'scrim'; sc.style.zIndex = 70; const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-labelledby', 'cf-t');
+    const what = k ? k.n + ' em ' + o.id : o.id;
+    m.innerHTML = '<h2 id="cf-t">' + esc(t) + '?</h2><p class="intro">' + (k ? 'O insumo sai da O.S. e a reserva é liberada para outras ordens.' : 'A O.S. ' + esc(o.id) + ' deixa de valer, a reserva dos insumos é liberada e o histórico fica guardado.') + '</p>' +
+      '<label for="cf-m">Motivo<select id="cf-m"><option value="">Escolha o motivo</option><option>Mudança de plano</option><option>Clima</option><option>Erro de cadastro</option><option>Outro</option></select></label><p class="muted" id="cf-e" style="font-size:13px" aria-live="polite"></p>' +
+      '<div class="row2"><button type="button" class="btn" data-no>Voltar</button><button type="button" class="btn danger" data-yes>' + ic(/remover/i.test(t) ? 'trash-2' : /recusar/i.test(t) ? 'ban' : 'x-circle') + esc(t) + '</button></div>';
+    document.body.appendChild(sc); document.body.appendChild(m); paint(); $('#cf-m', m).focus();
+    const done = () => { m.remove(); sc.remove(); };
+    sc.addEventListener('click', done); m.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); done(); } });
+    m.addEventListener('click', e => { if (e.target.closest('[data-no]')) return done(); if (e.target.closest('[data-yes]')) { if (!$('#cf-m', m).value) { $('#cf-e', m).textContent = 'Escolha o motivo para continuar.'; $('#cf-m', m).focus(); return; } done(); toast(t + ': ' + what + ' · motivo "' + $('#cf-m', m).value + '".', true); } });
+  }
+
+  // ---------- aviso ----------
+  let TT = null;
+  function toast(msg, undo) { const old = $('.toast'); if (old) old.remove(); clearTimeout(TT); const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status');
+    t.innerHTML = '<span>' + esc(msg) + '</span>' + (undo ? '<button type="button">Desfazer</button>' : ''); document.body.appendChild(t);
+    const b = t.querySelector('button'); if (b) b.addEventListener('click', () => { t.querySelector('span').textContent = 'Desfeito.'; b.remove(); });
+    TT = setTimeout(() => t.remove(), 5000); }
+
+  // ---------- eventos da lista ----------
+  $('#demo').addEventListener('click', e => {
+    const t = e.target;
+    const mb = t.closest('[data-m]'); if (mb) { S.mode = mb.dataset.m; try { localStorage.setItem('pl.mode', S.mode); } catch (x) {} return render(); }
+    const gb = t.closest('.seg [data-g]'); if (gb) { S.group = gb.dataset.g; return render(); }
+    if (t.closest('#nova')) return toast('Criar O.S.: abre o painel lateral com o formulário curto (talhão, operação, janela).');
+    const bb = t.closest('[data-bulk]'); if (bb) return toast(bb.dataset.bulk + ': resultado por O.S. (feitas, com erro, pendentes).', true);
+    if (t.closest('#clr')) { S.sel = {}; return render(); }
+    if (t.id === 'all') { OS.forEach(o => { S.sel[o.id] = t.checked; }); return render(); }
+    const cb = t.closest('.cb'); if (cb) { const k = cb.closest('[data-k]').dataset.k; S.sel[k] = cb.checked; return render(); }
+    const kb = t.closest('.kebab'); if (kb) { e.stopPropagation(); return MENU && MENU.btn === kb ? closeMenu(true) : openMenu(kb, kb.dataset.k); }
+    const car = t.closest('.car'); if (car) { if (car.dataset.g) S.gexp[car.dataset.g] = S.gexp[car.dataset.g] === false; else { const k = car.closest('[data-k]').dataset.k; S.exp[k] = !S.exp[k]; } render(); const again = $$('.car', view).find(x => x.getAttribute('aria-label').endsWith(car.getAttribute('aria-label').replace(/^(Expandir|Recolher)/, '').trim()) || false); if (again) again.focus(); return; }
+    const idl = t.closest('.idl'); if (idl && idl.dataset.id) { e.preventDefault(); return openDrawer(idl.dataset.id); }
+    const grp = t.closest('[data-g]'); if (grp && !t.closest('.seg')) { S.gexp[grp.dataset.g] = S.gexp[grp.dataset.g] === false; return render(); }
+    const row = t.closest('[data-k]'); if (row) return openDrawer(row.dataset.k);
+  });
+  $('#demo').addEventListener('keydown', e => {
+    const row = e.target.closest('[data-k],[data-g]'); if (!row || e.target !== row) return;
+    if (e.key === 'Enter') { e.preventDefault(); if (row.dataset.g) { S.gexp[row.dataset.g] = S.gexp[row.dataset.g] === false; render(); } else openDrawer(row.dataset.k); }
+    else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && row.dataset.k && !row.dataset.k.includes('/')) { e.preventDefault(); S.exp[row.dataset.k] = e.key === 'ArrowRight'; render(); const el = $$('[data-k]', view).find(x => x.dataset.k === row.dataset.k && !x.classList.contains('kebab')); if (el) el.focus(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const els = $$('.row,.card,.kidrow', view); const i = els.indexOf(row); const n = els[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (n) n.focus(); }
+  });
+  document.addEventListener('click', e => { if (MENU && !MENU.el.contains(e.target) && e.target !== MENU.btn) closeMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && MENU) { e.preventDefault(); closeMenu(true); } });
+  render();
+})();
+</script>

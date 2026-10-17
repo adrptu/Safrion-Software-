@@ -1,0 +1,31 @@
+{
+ "versao": "depois",
+ "M1": {
+  "cliques": 1,
+  "digitos": 0,
+  "ok": true,
+  "linhas": [
+   "a07",
+   "a09",
+   "a10",
+   "a12"
+  ]
+ },
+ "M2": {
+  "cliques": 3,
+  "digitos": 0,
+  "ok": true,
+  "bases": [
+   2988,
+   5120,
+   3410
+  ]
+ },
+ "M3": {
+  "cliques": 3,
+  "digitos": 0,
+  "ok": true,
+  "base": 5210
+ },
+ "erros_js": ""
+}

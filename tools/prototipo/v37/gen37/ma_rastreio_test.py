@@ -65,9 +65,10 @@ try:
     F('F06, F07', 'endereços e redirecionamentos; Tab preso só no painel aberto pelo usuário', len(REDIRECIONA) == 7 and all(f in SRC for f in REDIRECIONA) and "pan_role" in MAS and 'complementary' in MAS)
     F('F08, F09, F10', 'visão Planos (grade, filtro Grupo, "4 ativos sem plano"); filtro "Sem plano" em Ativos', tem('pl', '4 ativos sem plano', 'Todos os grupos', 'PM-10') and tem('at', 'Sem plano'))
     F('F11, F12, F13, F14, F15, F16, F17, F19, F20, F23, F24', 'detalhe do plano e painéis Serviço, Novo/Editar plano e Publicar',
-      tem('pm01', 'Incluir serviço', 'Editar plano', 'Versões', 'Inativar plano', 'tarefas') and all(x in MAS for x in ('id="sv_nome"', 'id="np_nome"', 'id="vk_data"', 'Novo plano')))
+      tem('pm01', 'Incluir serviço', 'Editar plano', 'Versões', 'Inativar plano', 'tarefas') and all(x in MAS for x in ('id="sv_nome"', 'id="np_nome"', 'id="vl-painel"', 'Novo plano')))
     F('F18', 'expandir por serviço; "Expandir tudo" sai', "'checklist e peças de '" in MAS and 'g2seta(' in MAS and nao('pm01', 'Expandir tudo'))
-    F('F21', 'detalhe do plano › Ativos vinculados só leitura (sem Gerar)', tem('pm01', 'ATIVOS VINCULADOS · SÓ LEITURA') and 'Gerar' not in T['pm01'].split('ATIVOS VINCULADOS')[1].split('Versões')[0])
+    # MA-VINCULO (16/10): a seção virou "Ativos deste plano" (vincular e desvincular moram nela); continua sem Gerar
+    F('F21', 'detalhe do plano › Ativos deste plano (sem Gerar)', tem('pm01', 'ATIVOS DESTE PLANO') and 'GERAR' not in T['pm01'].upper().split('ATIVOS DESTE PLANO')[1].split('VERSÕES')[0])
     F('F22', 'painel Vínculo com marco pré-preenchido (D-41)', 'o marco é a última execução do serviço' in MAS and 'manMarcoSug' in MAS)
     # MAN-LIMPA-01 (14/10): os cartões saem da tela de trabalho (indicadores no Painel); o recorte vai pela faixa Filtros (Tipo, Criticidade, Grupo)
     F('F25, F26', 'Sem ordem com a faixa Filtros (Tipo) e sem cartões; selo de impedimentos; filtro "Com conflito" em Ordens', tem('so', 'Todos os tipos', '1 ativo bloqueado') and nao('so', 'VENCIDAS SEM ORDEM') and tem('or', 'Com conflito'))
