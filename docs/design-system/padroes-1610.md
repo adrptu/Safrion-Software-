@@ -3,8 +3,8 @@
 Pedidos do proprietário em 16/10, transformados em padrão pelo método da skill `padrao-safrion` (`.claude/skills/padrao-safrion/SKILL.md`).
 
 - **Valem para todas as telas do mesmo tipo**, no protótipo e no software real.
-- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; paridade dos módulos em `ds_modulos.py`.
-- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b.
+- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; TAB-11 em `seta_padrao_test.py`; paridade dos módulos em `ds_modulos.py`.
+- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b; para TAB-11, a c9ffa08.
 
 ## MET-01 · Método: pedido vira padrão
 
@@ -28,9 +28,9 @@ Pedidos do proprietário em 16/10, transformados em padrão pelo método da skil
 - Sem linha vertical.
 - Linhas de 44 px.
 - Toda coluna tem **⇅** (ordenar) e **funil** (filtrar por valores).
-- Na 1ª célula, a **seta de abrir** (TAB-04):
-  - **▸/▾** abre os itens ali mesmo;
-  - **›** abre o detalhe.
+- Na 1ª célula, a **seta de abrir** (TAB-04), com o desenho único da TAB-11:
+  - a seta que gira abre os itens ali mesmo;
+  - a mesma seta, parada, abre o detalhe.
 
 **Celular (até 480 px):** "Agrupar por" e "Colunas" aparecem só com o ícone e o valor; o nome fica no `aria-label`. Assim a barra cabe numa linha com Tabela | Cartões, e a lista mostra pelo menos 5 linhas acima da dobra (AC-PCM-22).
 
@@ -86,12 +86,12 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 
 > "colone os icones de drill down sempre na esquerda, fica mais intuitivo em todas telas" (print: Planos agronômicos › Atividades do plano, a coluna DAP vinha antes da seta)
 
-**Referência:** Atividades do plano, modo Tabela: a seta ▸/▾ abre a 1ª coluna, antes do DAP.
+**Referência:** Atividades do plano, modo Tabela: a seta abre a 1ª coluna, antes do DAP.
 
 **Regra:**
-- A seta de abrir (TAB-04: ▸/▾ abre ali; › abre o detalhe) é a primeira coisa da linha, à esquerda de qualquer outra coluna: número, caixa de seleção, ícone ou texto.
+- A seta de abrir (TAB-04; desenho e alvo da TAB-11: gira e abre ali, ou leva ao detalhe) é a primeira coisa da linha, à esquerda de qualquer outra coluna: número, caixa de seleção, ícone ou texto.
 - Árvore e grupos: o recuo do nível continua; a seta do subnível fica no recuo, sempre antes do nome.
-- Com seleção, a seta vem antes da caixa. A linha sem seta guarda o lugar (22 px), para as caixas ficarem alinhadas. Nos cartões, a coluna da seta vem antes da seleção.
+- Com seleção, a seta vem antes da caixa. A linha sem seta guarda o lugar (a largura do alvo da TAB-11), para as caixas ficarem alinhadas. Nos cartões, a coluna da seta vem antes da seleção.
 - Seta de seção ou de item que abre ali (lotes da Qualidade, raia do Kanban da O.S., "Capacidade por mês") vem antes do nome.
 - Lista suspensa ("Agrupar por ▾", escolha de alvos) não é seta de abrir: o ▾ continua no fim.
 
@@ -142,6 +142,40 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
 **Dano evitado:** a tabela muda de cara de uma tela para outra, e o rótulo em 3 ou 4 linhas empurra os dados para baixo.
 
 **Teste:** `tab_drill_cab_test.py` parte B, que também conta os rótulos que terminam em reticências: nenhum a 1440 px e 30 a 390 px, em coluna estreita. O render da 519ed7b reprova.
+
+## TAB-11 · Seta única de abrir e de ir
+
+> "mude o estilo do drill down daquele preto para a setinha mais intuitiva e amigável dos debaixo, melhore ela e implemente como nosso padrão em tudo" (captura do CD-01: o grupo "Santa Rita" com o triângulo preto ▾ e os talhões com a seta fina cinza ›)
+
+**Referência:** a seta fina das linhas filhas do CD-01 (talhões), agora a única.
+
+**Regra:**
+- **Um só desenho em todas as telas:** chevron fino em SVG (16 px, traço de 1,75 px, pontas arredondadas), na cor do texto secundário (#65736A). Nunca o triângulo cheio de texto (▸ ▾ ▶) nem preto.
+- **Abrir e recolher ali mesmo** (a linha tem filhos, a seção tem conteúdo):
+  - fechada aponta para a direita; aberta gira 90° para baixo;
+  - o giro leva 120 ms e não anima com `prefers-reduced-motion`;
+  - o controle é um botão nativo com `aria-expanded` e o nome "Abrir …" / "Recolher …"; ou o botão inteiro com o nome à vista (seção da Manutenção e da O.S., lote da Qualidade, "Capacidade por mês", `summary`), com a seta antes do nome.
+- **Ir para o detalhe** (TAB-08): a mesma seta para a direita, sem girar; quem navega é a linha ou o link.
+- **"Expandir tudo" / "Recolher tudo":** a mesma seta, no estado das linhas (direita com linhas recolhidas; baixo com tudo aberto).
+- **Alvo:** 24 × 24 px no mouse, 44 × 44 px no toque, sem cobrir o controle vizinho. A seta de ir e a linha sem seta guardam a mesma largura, para os nomes alinharem.
+- **Interação:** hover verde (VIS-02: fundo #E4F3E9 e seta #1E7A4C); anel de foco verde de 2 px; Enter e Espaço alternam sem abrir o painel da linha. Alinhada ao centro da linha, na 1ª coluna, antes do nome (TAB-09).
+- **Sem dica**, como a TAB-04 (15/10: "a seta é óbvia, e a dica cobria a linha de baixo"); o nome fica para o leitor de tela.
+- **Fora:** a lista suspensa (o ▾ continua no fim de "Agrupar por", TAB-09), a ordenação do cabeçalho (⇅ ▲ ▼), o › de trilha e de texto corrido e o › no fim de atalho de texto ("Planejar ›", BOT-08).
+
+**Peça única:**
+- HTML: `engine.seta`, `engine.seta_abrir`, `engine.seta_ir`, `engine.SETA_VAZIO` e `engine.SETA_CSS`;
+- JS: `g2seta(aberta, nome)` no `g2lib` (estado e nome acessível); o desenho é sempre o do HTML, e nenhum estado da tela carrega glifo.
+
+**Aplicado em:** motor (Tabela, árvore, Agrupar por, Cartões, "Expandir tudo"), Atividades do plano (Tabela e Cartões), Planejar safra ("Capacidade por mês" e ajuste local do plano), Manutenção (blocos do ativo e da ordem, serviços do plano e Versões), Qualidade (lotes do CO-06), painel da O.S. (seções) e laudo de solo (`summary` "Ver original").
+
+**Inventário na base (c9ffa08):**
+- 35 triângulos de abrir no código de produto (19 ▸ e 16 ▾), em 6 arquivos: motor (`g2lib`), Atividades do plano, Planejar safra, Manutenção e Qualidade; os 9 ▾ de lista suspensa ficam;
+- 5 desenhos para o mesmo gesto: o triângulo de texto preto (13 px), a seta cinza da linha de ir (14 px, #9AA59E), as duas setas do painel da O.S., as setas de "Expandir tudo" e o marcador nativo do `summary`;
+- detalhe, números depois e pendências em `docs/integracao/V73/SETA-PADRAO.md`.
+
+**Dano evitado:** dois desenhos para o mesmo gesto (o triângulo preto chama mais atenção que o conteúdo e parece outra função), alvo pequeno no celular e tela nova voltando ao glifo solto.
+
+**Teste:** `seta_padrao_test.py` (148 telas e 9 estados por endereço, a 1440 e 390 px, no estado inicial, com "Expandir tudo" e no outro modo): A sem triângulo de texto; B todo controle de abrir com o componente; C uma seta só (cor, tamanho e traço computados); D giro coerente com o `aria-expanded`; E Enter e Espaço com foco visível; F alvo. O render da c9ffa08 reprova.
 
 ## PAR-01 · Paridade dos módulos com o Agrícola
 
@@ -238,7 +272,7 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
   - Posse (com o fim do contrato na linha apagada) e situação.
   - O clique abre o painel da mãe.
 - **Com todas as colunas, a árvore cabe na caixa a 1440 px** (TABELAS-FOCO A1): a situação, a posse e o nome quebram linha; o selo é curto ("Incompleto") e o que falta vai na dica.
-- **Filhas nas linhas de baixo,** com a seta ▸/▾ (TAB-04). O clique abre a filha.
+- **Filhas nas linhas de baixo,** com a seta de abrir (TAB-04, desenho da TAB-11). O clique abre a filha.
 - **A primária do cabeçalho cria a mãe** ("Criar fazenda").
 - **A filha se inclui de dentro da mãe:** "Incluir talhão" no painel da fazenda, ou na própria linha quando a fazenda está vazia (BOT-03).
 - **As outras entidades da tela continuam em abas** (Ambiental, Água).

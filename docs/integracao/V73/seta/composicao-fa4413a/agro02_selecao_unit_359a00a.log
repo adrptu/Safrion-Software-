@@ -1,0 +1,8 @@
+PASS open requires explicit product and dose eligible
+PASS open requires explicit product and dose empty
+PASS first selection stays blank
+PASS changing product clears typed comma dose
+PASS same product preserves typed comma dose
+PASS same product preserves explicit zero for validation
+PASS same product preserves incomplete draft
+7 passed; 0 failed

@@ -69,7 +69,7 @@ try:
     c.goto(f'http://127.0.0.1:{p}/EST.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     for i in range(1, 7):
         secao(i)
-        for _ in range(2): J(f"[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent).forEach(b=>b.click())"); time.sleep(.3)
+        for _ in range(2): J(f"[...({TB}).querySelectorAll('button.g2car[aria-expanded=false]')].filter(b=>b.offsetParent).forEach(b=>b.click())"); time.sleep(.3)
         hs = heads(); d = dicts(); shot(f'est{i}-1440')
         chk(f'seção {i}: colunas próprias {", ".join(esperado[i][:4])}…; sem coluna Unidade', all(k in hs for k in esperado[i]) and 'UNIDADE' not in hs and not any(' · ' in h for h in hs), hs)
         # cada quantidade mostrada leva a unidade junto (1ª parte da célula; chips e ações podem vir depois); diferença zero é "0"

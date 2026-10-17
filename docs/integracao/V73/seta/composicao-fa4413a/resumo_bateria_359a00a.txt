@@ -1,0 +1,10 @@
+07:50 rc=0 752s seta_padrao_test :: RESULTADO: 14 ok · 0 falhas
+08:01 rc=0 648s tab_drill_cab_test :: RESULTADO: 6 ok · 0 falhas
+08:02 rc=0 102s solo_ag02_test :: RESULTADO: OK 32/32
+08:05 rc=0 174s mapa9_test :: RESULTADO: 13 ok · 0 falhas
+08:08 rc=0 195s solo_saf_test :: RESULTADO: OK 36/36
+08:13 rc=0 297s solo_rev_test :: RESULTADO: OK 22/22
+08:17 rc=0 234s ds_1510_test :: RESULTADO: 17 ok · 0 falhas
+08:21 rc=0 252s ds_1610_test :: RESULTADO: 14 ok · 0 falhas
+08:28 rc=0 395s paginas_scan_test :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

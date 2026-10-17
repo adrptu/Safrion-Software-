@@ -49,7 +49,8 @@ try:
     limpa(); c.goto(U('COLH.dc.html'), 1.4)
     t0 = opts('Filtrar por talhão'); sel('Filtrar por cultura', 'Café'); t1 = opts('Filtrar por talhão')
     sel('Filtrar por cultura', 'Todas'); sel('Filtrar por talhão', 'T2'); r = json.loads(J(ROWS) or '[]')
-    folhas = [x for x in r if not x.startswith('▾') and not x.startswith('▸')]
+    # folha = linha sem a seta de abrir/recolher (TAB-11: a seta é o botão .g2car com aria-expanded; antes, o texto começava com ▾/▸)
+    folhas = json.loads(J(ROWS.replace("!r.classList.contains('g2tot'))", "!r.classList.contains('g2tot')&&!r.querySelector('button.g2car[aria-expanded]'))")) or '[]')
     chk('F2 Colheita: o Talhão segue a Cultura (Café → só C1) e "T2" deixa só linhas do T2', t0[:1] == ['Todos'] and len(t0) > 3 and t1 == ['Todos', 'C1'] and folhas and all('T2' in x for x in folhas),
         [t0[:6], t1, folhas[:3]])
     # F3 · O.S.: total do agrupado e aviso do talhão que sai do filtro
