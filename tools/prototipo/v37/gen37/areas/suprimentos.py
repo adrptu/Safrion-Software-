@@ -1019,6 +1019,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
 # ================= SU-08 · Transferências e movimentos =================
 def su08():
     fname='SU-08.dc.html'; E._reset_screen(fname)
+    import cenario
     M=[('tr452','23/09 10:12','TR-0452','Transferência','Galpão Boa Vista → Almox. defensivos','Glifosato 480 · G26-15',200,'L','própria','reforço da dessecação','transito'),
        ('dv031','23/09 09:41','Devolução REQ-031','Devolução recebida','Custódia OS-0417 → Galpão 2','MAP 11-52 · M26-05',20,'sc','própria','sobras de campo · quarentena','conf'),
        ('mv8821','22/09 16:20','MV-8821','Saída p/ custódia de ordem','Almox. defensivos → OS-0421','Fungicida A · F26-02',160,'L','própria','REQ-035','conf'),
@@ -1039,68 +1040,30 @@ def su08():
          'nf5520':[dict(t='Transferência entre empresas com NF 5520 · muda o proprietário do saldo')],
          'pe012':[dict(t='R$ 195 (50 kg × R$ 3,90/kg) · alçada do gestor de suprimentos (até R$ 50 mil)')],
          'nf4501':[dict(t='Entrada do PC-088 · 50.000 kg aptos + 10.000 kg em quarentena'),dict(t='Ver o recebimento',h='SU-06.dc.html')]}
-    rows=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    historico=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    rows=[]
     g=grid([dict(k='doc',l='Documento · data',w=170),dict(k='mov',l='Movimento · motivo',w=200),dict(k='od',l='Origem → destino',w=200),dict(k='it',l='Item · lote',w=190),
             dict(k='q',l='Quantidade',t='num',a='r'),dict(k='est',l='Estado',w=200)],rows,gid='g_mov',total=False,
         edit=dict(m='ro',title='Movimento',fields=[fs('doc','Documento',ro=True),fs('mov','Movimento',ro=True),fs('od','Origem → destino',ro=True),fs('it','Item · lote',ro=True),fs('mot','Motivo',ro=True)]))
-    LOCS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Tanque Sede','Galpão Boa Vista']
-    ESTORNAVEIS=['MV-8788 · KCl 60% 4.800 kg → OS-0420','MV-8821 · Fungicida A 160 L → OS-0421','NF 5520 · Diesel S10 2.000 L → Boa Vista Ltda']
-    pn={'trf':dict(title='Transferir entre locais',sub='A transferência fica em trânsito até a confirmação no destino.',ok='Iniciar transferência',
-          fields=[fs('it','Item · lote','sel',opts=['KCl 60% · K26-11','MAP 11-52 · M26-07','Glifosato 480 · G26-14','Semente de soja 58 W · S58-0801'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=1,u='kg ou L'),fs('o','Origem','sel',opts=LOCS,req=True,**{'def':'Galpão 2'}),fs('d','Destino','sel',opts=LOCS,req=True,**{'def':'Galpão 1'}),
-                  fs('mot','Motivo','txt',req=True,help='Ex.: abastecer a frente de plantio.')]),
-        'per':dict(title='Registrar perda em alçada',sub='A perda entra no extrato só depois da aprovação na alçada; o saldo não muda antes disso.',ok='Submeter perda',
-          fields=[fs('it','Item · lote','sel',opts=['MAP 11-52 · M26-07','KCl 60% · K26-11','Glifosato 480 · G26-14'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=0.1,u='kg ou L'),fs('causa','Causa','txt',req=True),fs('ev','Evidência','txt',req=True,help='Ex.: foto, laudo, boletim.'),
-                  fs('apr','Aprovador','sel',opts=['Ana (gestora)','Gerente da fazenda'],req=True,**{'def':'Ana (gestora)'})]),
-        'est':dict(title='Estornar com vínculo',sub='O estorno cria um movimento novo que referencia o original; nada é apagado.',ok='Estornar com vínculo',
-          fields=[fs('orig','Movimento original','sel',opts=ESTORNAVEIS,req=True,**{'def':ESTORNAVEIS[0]}),fs('mot','Motivo','txt',req=True,help='Ex.: quantidade digitada errada.')])}
-    code=r'''
-const ST={transito:['Em trânsito','yellow'],conf:['Confirmado','green'],estorno:['Estorno lançado','gray'],estornado:['Estornado · ver ES-0071','gray'],gestor:['Aguarda gestor','yellow'],aprov:['Aprovada · lançada','green']};
-function qq(n,un){ return nf(n,(n%1)?1:0)+' '+un; }
-function un(it){ return /Glifosato|Fungicida|Diesel/.test(it)?'L':'kg'; }
-CHECK.trf=(self,d)=>(d.o===d.d?{d:'O destino precisa ser diferente da origem.'}:null);
-CHECK.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const r=RW(self,'g_mov').find(x=>x.v.doc===doc); return (r&&r.v.st==='estornado')?{orig:doc+' já foi estornado · nada estornado de novo.'}:null; };
-function add(self,row){ setRows(self,'g_mov',rows=>{ rows.unshift(row); }); }
-function nx(self,k,base){ const n=(self.state[k]||base)+1; self.setState({[k]:n}); return n; }
-RUN.trf=(self,d)=>{ const n=nx(self,'ntr',452); const id='TR-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Transferência',od:d.o+' → '+d.d,it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.mot,st:'transito'},s:{},p:{},o:[{t:'Em trânsito; o saldo só muda de local ao confirmar no destino'}]});
-  return id+' iniciada: '+qq(q,un(d.it))+' de '+d.it+' em trânsito '+d.o+' → '+d.d+' · confirme no destino'; };
-RUN.per=(self,d)=>{ const n=nx(self,'npe',12); const id='PE-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Perda em alçada',od:d.it.split(' · ')[0]+' → perda',it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.causa,st:'gestor'},s:{},p:{},o:[{t:'Evidência: '+d.ev},{t:'Aprovador: '+d.apr}]});
-  return id+' submetida a '+d.apr+' · o saldo só baixa depois da aprovação'; };
-RUN.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const n=nx(self,'nes',71); const id='ES-00'+n; let src=null;
-  setRows(self,'g_mov',rows=>{ src=rows.find(x=>x.v.doc===doc); src.v.st='estornado'; src.v.est_ref=id;
-    const p=src.v.od.split(' → '); rows.unshift({id:id,v:{dh:'23/09 agora',doc:id,mov:'Estorno · vínculo '+doc,od:p[1]+' → '+p[0],it:src.v.it,q:src.v.q,un:src.v.un,prop:src.v.prop,mot:d.mot,st:'estorno'},s:{},p:{},o:[{t:'Estorna o '+doc+'; o original segue no extrato'}]}); });
-  return id+' lançado com vínculo ao '+doc+' · o original fica no extrato como estornado'; };
-function PREVALS(self,v){ RW(self,'g_mov').forEach(r=>{ const V=r.v;
-  r.p.doc=[B(V.doc),BRK,M(V.dh)]; r.s.doc=V.doc+' '+V.dh; r.p.q=[T(qq(V.q,V.un))];
-  r.p.mov=[T(V.mov),BRK,M(V.mot)]; r.s.mov=V.mov+' '+V.mot; r.p.od=[T(V.od)].concat(V.prop!=='própria'?[BRK,M(V.prop)]:[]);
-  const s=ST[V.st]||[V.st,'gray']; const t=V.st==='estornado'?'Estornado · ver '+(V.est_ref||'ES-0071'):s[0];
-  r.p.est=[chipc(t,s[1])].concat(V.st==='transito'?[BRK,{k:'act',t:'Confirmar recebimento',fn:'conf:'+r.id}]:(V.st==='gestor'?[BRK,{k:'act',t:'Aprovar perda',fn:'apr:'+r.id}]:[])); r.s.est=t; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_mov');
-  const tr=rs.filter(x=>x.v.st==='transito'), pe=rs.filter(x=>x.v.st==='gestor'), es=rs.filter(x=>x.v.st==='estorno');
-  v.k_tr=String(tr.length); v.k_tr_s=tr.map(x=>x.v.doc).join(' · ')||'nada em trânsito'; v.k_pe=String(pe.length); v.k_pe_s=pe.map(x=>x.v.doc).join(' · ')||'nenhuma aguardando';
-  v.k_es=String(es.length); v.k_es_s=es.map(x=>x.v.doc).join(' · ');
-  const parts=[]; if(tr.length) parts.push(tr.length+' em trânsito'); if(pe.length) parts.push(pe.length+(pe.length>1?' perdas':' perda')+' em alçada');
-  hstatus(v,parts.join(' · ')||'Sem pendência no extrato',parts.length?'yellow':'green');
-  v.conf=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='transito') return toast(self,(r?r.v.doc:id)+' já confirmada no destino · nada muda');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='conf'; }); toast(self,r.v.doc+' confirmada no destino: '+qq(r.v.q,r.v.un)+' de '+r.v.it+' saem do trânsito e entram em '+r.v.od.split(' → ')[1]); };
-  v.apr=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='gestor') return toast(self,(r?r.v.doc:id)+' já aprovada · nada lançado de novo');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='aprov'; }); toast(self,r.v.doc+' aprovada por Ana (gestora) · '+qq(r.v.q,r.v.un)+' baixados de '+r.v.it+' com vínculo à perda'); }; }'''
-    js(pn,code)
+    pn={'trf':dict(title='Prévia de transferência',sub='Não registra movimento nem altera saldo.',ok='Conferir prévia',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('d','Destino','txt',req=True),fs('mot','Motivo','txt',req=True)]),
+        'per':dict(title='Submeter perda',sub='Cria ajuste pendente (AL-09); aprove aqui em Revisar perda. O saldo só muda após aprovação.',ok='Submeter perda',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('causa','Motivo','txt',req=True),fs('ev','Evidência','txt',req=True)]),
+        'est':dict(title='Prévia de estorno',sub='Estorno genérico sem comando: não altera original nem cria vínculo. Entregas: confira a devolução no Estoque ou na O.S.',ok='Conferir prévia',fields=[fs('orig','Movimento original','sel',opts=[],req=True),fs('mot','Motivo','txt',req=True)]),
+        'aprovar':dict(title='Revisar perda',sub='A aprovação revalida o ajuste e altera o físico do lote; reservas são preservadas.',ok='Aprovar perda',fields=[fs('id','Ajuste',ro=True)])}
+    code=(Path(__file__).resolve().parent.parent/'sup_movimentos_ui.js').read_text()
+    js(pn,cenario.js_prefixo()+'\nconst SUP_MOV_HIST='+json.dumps(historico,ensure_ascii=False)+';\n'+code)
     painel()
-    corpo=(kpis([('Em trânsito',H('k_tr'),H('k_tr_s')),('Perdas aguardando gestor',H('k_pe'),H('k_pe_s')),('Estornos lançados',H('k_es'),H('k_es_s'))])
-           + bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
+    # EX-50(a)-SUP (PR #108) + TAB-07: sem cartões de resumo; o selo do cabeçalho conta as perdas pendentes. Perda é o comando real (principal);
+    # transferência e estorno genérico ainda não têm comando canônico, então ficam como prévia
+    corpo=(bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
                    g,
-                   acao=mini('open_per','Registrar perda','Submete perda à alçada do gestor','alert')+mini('open_est','Estornar com vínculo','Cria estorno que referencia o movimento original','doc')
+                   acao=mini('open_trf','Prévia de transferência','Mostra origem, destino, lote e unidade; não registra nem altera saldo','truck')+mini('open_est','Prévia de estorno','Confere o movimento a estornar; não altera o original nem cria vínculo','doc')
                         +alink('SU-07.dc.html','Devolver','Devoluções de campo entram pela requisição','truck')))
     HEIGHTS37[fname]=1180
     shell37('SU-08','Transferências e movimentos',corpo,fname=fname,
-      subtitle='Extrato imutável e transferências entre locais, custódias e empresas; cada linha com documento e confirmação.',
-      status=(MARK,'gray'),primary_html=primb('open_trf','Transferir entre locais','truck'),
-      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32). '
-             'Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.')
+      subtitle='Extrato imutável dos movimentos de estoque; perda passa pela alçada do gestor (AL-09) antes de baixar o saldo.',
+      status=(MARK,'gray'),primary_html=primb('open_per','Registrar perda','alert'),
+      footer='Perda vira ajuste pendente e só baixa o físico do lote na aprovação AL-09; reservas são preservadas (SU-08 · FO-32). '
+             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção não apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================
@@ -1183,5 +1146,6 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
       footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
              'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)
+
 
 
