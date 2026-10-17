@@ -59,8 +59,10 @@ ativa = lambda: J(f"{TRI}.filter(b=>b.getAttribute('aria-selected')==='true').ma
 BLOCO = "(()=>{const n=document.querySelector('nav[aria-label=\"Funcionalidades do mapa\"]'); let s=n; while(s&&s.parentElement&&!(s.innerText||'').match(/Selecionar área/)) s=s.parentElement; return s;})()"
 legenda = lambda: J(f"(()=>{{const s={BLOCO}; const d=s&&[...s.querySelectorAll('div')].filter(x=>x.getClientRects().length&&/position: absolute; left: 12px; bottom: 12px/.test(x.getAttribute('style')||''))[0]; return d?d.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def tal(t):   # rótulo (aria-label sem o "T1: ") e cor do talhão desenhado (Santa Rita)
-    return json.loads(J(f"JSON.stringify((()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label').slice({len(t) + 2}),e.getAttribute('fill')]:['',''];}})())") or '["",""]')
-def toca(t): J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.6)
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    return json.loads(J(f"JSON.stringify((()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-rotulo'),e.getAttribute('fill')]:['',''];}})())") or '["",""]')
+def toca(t): J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.6)
 painel = lambda: (J("(()=>{const a=[...document.querySelectorAll('main aside[aria-label]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or '')
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})

@@ -24,7 +24,9 @@ TSR = ['T1', 'T2', 'P1', 'P2', 'T4', 'T3', 'T7', 'C1']
 def abre(ctx):
     c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear(); 1")
     J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(ctx))}); 1"); c.goto(U('IN-04.dc.html'), 1.8)
-def rot(t): return J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?e.getAttribute('aria-label').slice({len(t)+2}):'';}})()") or ''
+# MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+# rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+def rot(t): return J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?e.getAttribute('data-rotulo'):'';}})()") or ''
 def faixa(): return json.loads(J("""JSON.stringify((()=>{const g=document.querySelector('.mf-tela'); if(!g) return null; return [...g.querySelectorAll('select')].map(s=>({l:s.getAttribute('aria-label'),v:s.value,o:[...s.options].map(o=>o.value)}));})())""") or 'null')
 def escolhe(rotulo, val):
     J(f"""(()=>{{const s=document.querySelector('.mf-tela select[aria-label={json.dumps(rotulo)}]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,{json.dumps(val)});

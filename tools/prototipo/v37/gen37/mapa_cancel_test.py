@@ -25,7 +25,9 @@ def mapa_avanco(tal, mutante=False):
     if mutante: J("osAb=function(os){ return os.filter(o=>o.fase!=='Encerradas'); }; 1")   # contraprova: a regra de antes da correção
     J(f"(()=>{{const b={TRI}.find(b=>b.innerText.trim()==='Ordens de serviço'); b&&b.click();}})()"); time.sleep(.8)
     J("(()=>{const b=[...document.querySelectorAll('main [role=group][aria-label=\"Mostrar\"] button')].find(b=>b.innerText.trim()==='Avanço'); b&&b.click();})()"); time.sleep(.9)
-    return J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{tal}:')); return e?e.getAttribute('aria-label').slice({len(tal) + 2}):'';}})()") or ''
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    return J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{tal}'); return e?e.getAttribute('data-rotulo'):'';}})()") or ''
 # oráculo: abertas do talhão no cenário gravado (a mesma fonte do mapa), sem Encerradas nem Canceladas
 ORACULO = """((tal)=>{ const c=window.__cen.cenGet(); const os=Object.values(c.ordens||{}).filter(o=>o.talhao===tal);
   const ab=os.filter(o=>['Encerradas','Canceladas'].indexOf(o.etapa)<0&&(o.area||0)>0); const a=ab.reduce((s,o)=>s+o.area,0), r=ab.reduce((s,o)=>s+Math.min(o.realizado||0,o.area),0);

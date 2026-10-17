@@ -120,7 +120,7 @@ RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste;
       'venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6). CRE-BANCO F1 (PR #90): '
       'o dossiê do contrato abre a visão interna GE-08#vis=dossie e a primária que levava ao portal PT-04 saiu'
     for x in p('GE-08','GE-04','VE-05')},
- **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-02','AG-03det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
+ **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-02','AG-03det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')},   # MUX-F0 (D7, 17/10/2026): o IN-04 não leva mais ao AG-06 (o par sai, regra L2b)
  **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}
 fora=sorted(pares-set(RESIDUAL))
 ok('L2 todo o resto da varredura está na lista residual, por par e com motivo', not fora, fora)

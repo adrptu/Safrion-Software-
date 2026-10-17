@@ -56,7 +56,9 @@ try:
         chk('4 1280 × 800: AG-01, AG-03 e AG-04 sem rolagem lateral (Próximo passo à vista)', all(v and max(v)<=0 for v in larg.values()), larg)
         # 5 · Mapa (7 dias) e AG-01 iguais no T7: VIS-008 perto do NC, "Seguir monitorando" como botão
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(dict(mf_faz='Santa Rita',lay='MIP/MID',tsel=['T7'])))})"); ir('IN-04.dc.html',1.6)
-        lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('T7:'))")
+        # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+        # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+        lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('T7:'))")
         pr=J("(()=>{const a=[...document.querySelectorAll('aside[aria-label^=\"T7\"] a, aside[aria-label^=\"T7\"] button')].find(a=>(a.getAttribute('style')||'').indexOf('30, 122, 76')>=0||(a.getAttribute('style')||'').indexOf('#1E7A4C')>=0); return a?[a.tagName,a.innerText.trim()]:null;})()")
         fonte=J("document.body.innerText.indexOf('a mesma base do AG-01')")
         ir('AG-01.dc.html'); l08=next((x for x in linhas() if x.startswith('VIS-008')),'')
