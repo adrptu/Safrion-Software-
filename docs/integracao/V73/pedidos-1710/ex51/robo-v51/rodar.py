@@ -24,6 +24,7 @@ Fases (nesta ordem):
 Regras: só 127.0.0.1; espera haver menos de 4 processos Chrome principais antes de abrir o seu; encerra só os processos que
 iniciou (pelo PID); perfil do Chrome temporário em /dev/shm, apagado no fim.
 """
+import hashlib, uuid
 import argparse, base64, json, os, re, shutil, socket, struct, subprocess, sys, tempfile, time, unicodedata
 import urllib.parse, urllib.request
 
@@ -339,6 +340,8 @@ def fase_robo(chrome, srvs, trab, modo, so, limite_min, workers):
     saida = os.path.join(trab, 'saida-' + modo)
     shutil.rmtree(saida, ignore_errors=True)
     os.makedirs(saida)
+    fingerprint=hashlib.sha256(open(os.path.join(trab,'v3.sha256'),'rb').read()).hexdigest()
+    json.dump({'execucao':str(uuid.uuid4()),'renderManifestSha256':fingerprint},open(os.path.join(saida,'execucao-v51.json'),'w'))
     telas = json.load(open(os.path.join(trab, 'robot3', 'screens.json'), encoding='utf-8'))
     if so:
         telas = [t for t in telas if t['n'] in so]
@@ -638,7 +641,7 @@ def fase_resumo(trab, modos):
         shutil.rmtree(so1, ignore_errors=True)
         os.makedirs(so1)
         for f in os.listdir(saida):
-            if f.endswith('.v5.json'):
+            if f.endswith(('.v5.json','.v5err.json')) or f in ('casos-criticos.json','casos-criticos-endereco.json','execucao-v51.json'):
                 os.symlink(os.path.join(saida, f), os.path.join(so1, f))
         resumir(trab, so1, os.path.join(trab, f'resumo-{modo}-1a-passada.json'))
     json.dump({'metodo':'v5.1','comparavel_com_v5':False,'motivo':'oráculos corrigidos; confrontar os brutos caso a caso'},open(os.path.join(trab,'comparacao.json'),'w'),ensure_ascii=False,indent=2)
@@ -752,7 +755,12 @@ def main():
         for sufixo, extra in [('', []), ('-endereco', ['--por-endereco'])]:
             destino = os.path.join(trab, 'saida-isolado', 'casos-criticos'+sufixo+'.json')
             cmd = [sys.executable, '-I', os.path.join(os.path.dirname(__file__), 'casos_criticos.py'), '--rodar', os.path.abspath(__file__), '--trabalho', trab, '--saida', destino, '--chrome', a.chrome] + extra
-            result = subprocess.run(cmd, timeout=max(60, a.limite_min*60-(time.time()-t0)))
+            tcrit=time.time()
+            try:
+                result = subprocess.run(cmd + ['--limite-seg', str(max(1, a.limite_min*60-(time.time()-t0)))])
+            finally:
+                reg['criticos'+sufixo]={'segundos':round(time.time()-tcrit,2)}
+                json.dump(reg, open(exec_json, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
             if result.returncode: raise RuntimeError('Casos críticos falharam; aceite bloqueado')
     reg['chrome'] = subprocess.run([a.chrome, '--version'], capture_output=True, text=True).stdout.strip()
     json.dump(reg, open(exec_json, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

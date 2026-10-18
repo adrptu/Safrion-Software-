@@ -1,14 +1,20 @@
 """Portão da medição: ausência ou inconclusão nunca passa por taxa agregada."""
-import json, os, re
+import json, os, re, hashlib
 
 def avaliar(diretorio, taxas, erros):
     if not isinstance(taxas,dict):taxas={"chegada":taxas}
     casos=[]; bloqueios=[]
+    vinculo_path=os.path.join(diretorio,'execucao-v51.json')
+    vinculo=json.load(open(vinculo_path,encoding='utf-8')) if os.path.exists(vinculo_path) else None
+    render_path=os.path.join(os.path.dirname(diretorio),'v3.sha256')
+    if not vinculo or not vinculo.get('execucao') or not os.path.exists(render_path) or vinculo.get('renderManifestSha256')!=hashlib.sha256(open(render_path,'rb').read()).hexdigest():
+        bloqueios.append('Vínculo da execução/render ausente ou divergente')
     for nome in ('casos-criticos.json','casos-criticos-endereco.json'):
         path=os.path.join(diretorio,nome)
         if not os.path.exists(path):
             bloqueios.append('Execução ausente: '+nome); continue
         data=json.load(open(path,encoding='utf-8'))
+        if not vinculo or data.get('vinculo')!=vinculo:bloqueios.append('Recibo de outra execução/render: '+nome)
         casos.extend(data.get('casos',[]))
         if data.get('naoRodados'): bloqueios.append('Percursos críticos não executados: '+nome)
         if any(o.get('linhas',0)>1000 for o in data.get('origens',[])): bloqueios.append('Inventário truncado: '+nome)

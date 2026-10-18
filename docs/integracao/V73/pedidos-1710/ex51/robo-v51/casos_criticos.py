@@ -11,6 +11,7 @@ Manutenção na visão de ordens (MA#vis=ordens). O hash vai depois do ?r= de lo
 
 Uso: python3 -I casos_criticos.py --rodar <robo-v51/rodar.py> --trabalho <trabalho já preparado> --saida <arquivo.json>
 """
+import signal, hashlib
 import argparse, importlib.util, json, os, re, sys, time
 
 ap = argparse.ArgumentParser()
@@ -18,6 +19,7 @@ ap.add_argument('--rodar', required=True)
 ap.add_argument('--trabalho', required=True)
 ap.add_argument('--saida', required=True)
 ap.add_argument('--chrome', default=None)
+ap.add_argument('--limite-seg', type=float, default=5400)
 ap.add_argument('--max-linhas', type=int, default=1000)
 ap.add_argument('--max-por-grupo', type=int, default=1000)
 ap.add_argument('--por-endereco', action='store_true', help='origens abertas pelo endereço do registro (painel aberto pelo hash)')
@@ -92,13 +94,20 @@ def classe(org, sig, det):
     return None, None
 
 
+def prazo(signum, frame):
+    raise TimeoutError('Prazo dos casos críticos excedido; encerrando recursos')
+signal.signal(signal.SIGALRM, prazo)
 R.esperar_vaga()
 srvs = R.Servidores()
 c = None
 out = {'quando': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'origens': [], 'casos': []}
+vinculo=json.load(open(os.path.join(trab,'saida-isolado','execucao-v51.json'),encoding='utf-8'))
+assert vinculo['renderManifestSha256']==hashlib.sha256(open(os.path.join(trab,'v3.sha256'),'rb').read()).hexdigest(), 'Manifesto do render mudou'
+out['vinculo']=vinculo
 t0 = time.time()
 try:
     c = R.Chrome(a.chrome or R.CHROME)
+    signal.setitimer(signal.ITIMER_REAL, max(.001,a.limite_seg-(time.time()-t0)))
     base = srvs.subir(trab, robo, os.path.join(trab, 'robot3', 'screens.json'), os.path.join(trab, 'saida-criticos'))
     aba = c.abas[0]
     R.limpar_origem(aba, base)
@@ -133,6 +142,7 @@ try:
             R.log(f"{cl}/{sub} {tela}[{row}] {t[:40]!r} → r={r.get('r')} alvo={r.get('alvo')!r} abriu={r.get('abriu')} destacou={r.get('destacou')}")
         out.setdefault('naoRodados', []).extend([{'percurso': cl, 'sub': sub, 'tela': x[0], 'linha': x[1], 't': x[3], 'h': x[4]} for x in lst[a.max_por_grupo:]])
 finally:
+    signal.setitimer(signal.ITIMER_REAL, 0)
     if c:
         c.close()
         R.log(f'Chrome PID {c.p.pid} encerrado')
