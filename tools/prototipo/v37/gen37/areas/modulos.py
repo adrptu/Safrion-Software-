@@ -111,11 +111,12 @@ def itens_do(nome):
 
 
 def _extra_do(nome):
-    """MA-VINCULO (16/10/2026) punha o aviso "N ativos sem plano" acima dos cartões da Manutenção. DS-MAN (17/10/2026): a entrada fica como a do
-    Agrícola, só os blocos, sem aviso solto; os ativos sem plano continuam à vista onde se resolve: Ativos (filtro rápido "Sem plano" e a primária
-    "Vincular a plano") e Planos (faixa "N ativos sem plano · Criar plano"). Nenhum módulo tem extra hoje."""
-    return {}
-
+    """MA-VINCULO (16/10/2026, só Manutenção): aviso "N ativos sem plano" acima dos cartões, que abre Ativos já no filtro com a ação em lote.
+    DS-MAN (18/10/2026, revisão do integrador): a entrada fica em blocos como a do Agrícola e mantém esta única linha de pendência, porque ela
+    resolve em um toque o que a lista resolve em dois (Ativos + filtro "Sem plano"); só aparece quando há ativo sem plano."""
+    if nome != 'Manutenção': return {}
+    from areas.maquinas import hub_aviso
+    return hub_aviso()
 
 def build():
     for nome, ic, items in MENU2:

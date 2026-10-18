@@ -63,7 +63,10 @@ try:
     chk('B5 depois de Salvar: aviso "Salvo" e a linha salva com o realce verde', 'Salvo' in av and bool(fl) and 'TMG 2383' in fl[0] and fl[1] not in ('rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'), [av, fl])
     # B4 · indisponível com motivo (Manutenção, perfil que não pode gerar ordens)
     c.goto(U('MA.dc.html#vis=semordem'), 1.6)
-    ind = J("(()=>{const b=[...document.querySelectorAll('header button, main button')].find(b=>b.disabled&&b.getClientRects().length); if(!b) return null; const s=getComputedStyle(b); const id=b.getAttribute('aria-describedby'); const m=id&&document.getElementById(id);"
+    # DS-MAN (17/10/2026): a primária indisponível da Manutenção é a peça comum acao_motivo (aria-disabled, motivo .g2motivo junto do botão),
+    # não mais disabled + texto solto ao lado (aria-describedby); a exigência é a mesma: apagado, cursor de proibido e o motivo em texto à vista
+    ind = J("(()=>{const b=[...document.querySelectorAll('header button, main button')].find(b=>(b.disabled||b.getAttribute('aria-disabled')==='true')&&b.getClientRects().length); if(!b) return null; const s=getComputedStyle(b); const id=b.getAttribute('aria-describedby'); const pr=b.closest('.g2ind');"
+            " const m=(id&&document.getElementById(id))||(pr&&pr.querySelector('.g2motivo'));"
             " return {t:b.innerText.trim(),op:s.opacity,cur:s.cursor,mot:m&&m.getClientRects().length?m.innerText.trim():''};})()")
     chk('B4 indisponível: apagado, cursor de proibido e o motivo em texto ao lado', bool(ind) and float(ind['op']) < 1 and ind['cur'] == 'not-allowed' and bool(ind['mot']), ind)
     chk('B6 sem erro de JS', not (J("window.__err") or ''), J("window.__err"))

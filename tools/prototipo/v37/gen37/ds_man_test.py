@@ -8,7 +8,7 @@ dava 0 desvio para a Manutenção; a comparação por captura mostrava os desvio
      mesmo da lista aberta ou de um filtro rápido da visão
   B  bloco (BLO-01): a lista dentro de um bloco com título; os filtros rápidos dentro do bloco; Ordens com as fases e no máximo 2 recortes
   L  linhas (TAB-14): célula da tabela com no máximo 2 linhas e cabeçalho de coluna numa linha, a 1440 px
-  E  entrada do módulo (MOD-MAN): cartões em blocos com título, como o MOD-AGR, sem aviso solto acima deles; os mesmos 5 destinos
+  E  entrada do módulo (MOD-MAN): cartões em blocos com título, como o MOD-AGR; acima deles só a linha de pendência (MA-VINCULO); os mesmos 5 destinos
   R  referência: a O.S. do Agrícola passa nas mesmas medidas C e L (controle do oráculo: a régua é a da tela aprovada)
 Contraprova: RENDER_DIR=<render da v129 (5466c6d)> reprova C, A, B, L e E.
 Inventário (proteção "nenhuma função some"): --inventario <saida.json> grava, por visão e perfil Otávio, os rótulos de botões, links, itens
@@ -188,7 +188,10 @@ def main():
         ir('MOD-MAN.dc.html'); e = J(ENTRADA) or {}
         dest = sorted(h for _, h in e.get('cartoes') or [])
         chk('E1 MOD-MAN: cartões em blocos com título (como o MOD-AGR)', len(e.get('blocos') or []) >= 2 and all(b['t'] and b['cartoes'] for b in e['blocos']), e.get('blocos'))
-        chk('E2 MOD-MAN: sem aviso solto acima dos cartões', not e.get('acima'), e.get('acima'))
+        # ENT-01 (revisão do integrador, 18/10/2026): acima dos blocos só a linha de pendência do MA-VINCULO (um toque para a lista filtrada)
+        ac = e.get('acima') or []
+        chk('E2 MOD-MAN: acima dos cartões, só a linha de pendência "N ativos sem plano · Vincular ›" (um toque) e nada mais',
+            len(ac) <= 1 and all(x.endswith('Vincular ›') and 'sem plano' in x for x in ac), ac)
         chk('E3 MOD-MAN: os mesmos 5 destinos (Painel e as 4 visões)', dest == sorted(['PMAN.dc.html', 'MA.dc.html#vis=semordem', 'MA.dc.html#vis=ordens', 'MA.dc.html#vis=ativos', 'MA.dc.html#vis=planos']), dest)
         ir('MOD-AGR.dc.html'); ea = J(ENTRADA) or {}
         chk('E4 referência MOD-AGR: blocos com título e sem aviso solto (a régua é a da tela aprovada)', len(ea.get('blocos') or []) >= 2 and not ea.get('acima'), ea.get('blocos'))

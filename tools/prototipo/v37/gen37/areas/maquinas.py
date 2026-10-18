@@ -1538,6 +1538,16 @@ def _paineis_plano():
     return _aside('sv',sv_body,w=560)+_aside('np',np_body,w=520)+_aside('vl',vl_body,w=720,dyn=True)+_aside('dv',dv_body,w=480,dyn=True)
 
 # =====================================================================================
+def hub_aviso():
+    """Entrada do módulo (MOD-MAN): "N ativos sem plano de manutenção · Vincular ›" pela regra comum (DM.JS_VINC_BASE) sobre o cenário gravado.
+    DS-MAN (18/10/2026): mantido como a única linha de pendência acima dos blocos (ENT-01): um toque leva à lista já filtrada (MA-VINCULO, 16/10)."""
+    js=DM.hub_semplano_js()+('function modExtra(self,v){ let n=0; try{ n=manSemPlano(manHubEstado()).length; }catch(e){ n=0; } v.man_semp=n>0; '
+                            "v.man_semp_t=n+(n>1?' ativos sem plano de manutenção':' ativo sem plano de manutenção'); }\n")
+    topo=IF('man_semp',f'<a class="mod-aviso" href="MA.dc.html#vis=ativos&pend=semplano" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; '
+                       f'padding: 8px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 14px; font-weight: 800; text-decoration: none;">'
+                       f'<span aria-hidden="true">⚠</span><span>{H("man_semp_t")}</span><span style="text-decoration: underline; text-underline-offset: 3px;">Vincular ›</span></a>')
+    return dict(topo=topo,js=js)
+
 def _redirect(fname,destino):
     """página antiga = só redirecionamento (fora do canvas e do Índice): leva a âncora antiga (#OM-0234, #PM-01, #novo:a14) ao endereço novo"""
     js=("(function(){var h=decodeURIComponent((location.hash||'').slice(1)),d='"+destino+"';"

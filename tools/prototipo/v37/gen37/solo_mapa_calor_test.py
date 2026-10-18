@@ -93,7 +93,8 @@ try:
     c.goto(U('MA.dc.html#vis=planos'), 2.0)
     J("(()=>{const b=document.querySelector('[data-g2agb=\"g_pl\"]'); b&&b.click();})()"); time.sleep(.5)
     ags = J("[...document.querySelectorAll('[data-g2agm=\"g_pl\"] [role=menuitemradio]')].map(x=>x.innerText.trim().split('\\n')[0].trim())") or []
-    chk('M1 Planos da Manutenção: "Agrupar por" com Grupo de máquina', 'Grupo de máquina' in ags, ags)
+    # DS-MAN (17/10/2026): a coluna passou a "Grupo" (rótulo curto, cabeçalho numa linha; o mesmo nome do filtro Grupo da faixa): é a mesma coluna
+    chk('M1 Planos da Manutenção: "Agrupar por" com o grupo de máquina (coluna Grupo)', 'Grupo' in ags, ags)
     chk('J sem erro de JS', not J("window.__err||''"), J("window.__err||''"))
 finally:
     c.close() if hasattr(c, 'close') else None
