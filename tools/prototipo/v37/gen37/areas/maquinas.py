@@ -57,8 +57,8 @@ CSS=('.ma-vis-m{display:none}'
      # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
      # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
      '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
-     # DS-MAN (17/10/2026): o bloco da lista no celular sem a linha do título (a visão já está no título da tela e na lista Visão)
-     '.ma-blo>div:first-child{display:none!important}.ma-blo>div:last-child{padding:10px 8px 8px!important}'
+     # DS-MAN (17/10/2026): o bloco da lista no celular sem o título (a visão já está no título da tela e na lista Visão); a linha fica só com a escolha Ativos | Abastecimentos
+     '.ma-blo>div:first-child h3{display:none!important}.ma-blo>div:first-child:not(:has(button)){display:none!important}.ma-blo>div:first-child{padding:10px 8px 0!important}.ma-blo>div:last-child{padding:10px 8px 8px!important}'
      # e a barra da lista numa linha que rola de lado (busca, filtros rápidos, Pendência, Ativos | Abastecimentos, Colunas), como a faixa Filtros
      '.ma-blo .g2caixa>div:first-child{flex-wrap:nowrap!important;overflow-x:auto}.ma-blo .g2caixa>div:first-child>*{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
@@ -1118,7 +1118,7 @@ def _prim_cab():
 # sem rolagem lateral a 1280 px (ds_man_test L1 a L4; ma_correcoes_om_test 8).
 def _blo(html):
     """o bloco da O.S. (processo_os.bloco) com a classe ma-blo: no celular o título do bloco sai (a visão já está no título da tela e na lista
-    Visão) e a lista sobe: ≥ 5 linhas acima da dobra a 390 px (AC-PCM-22)"""
+    Visão; fica a linha só quando tem a escolha Ativos | Abastecimentos) e a lista sobe: ≥ 5 linhas acima da dobra a 390 px (AC-PCM-22)"""
     assert html.startswith('<section style='), 'bloco sem <section>'
     return html.replace('<section style=','<section class="ma-blo" style=',1)
 
@@ -1137,9 +1137,9 @@ def _visoes():
              + FOR('at_modos','x',f'<button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}</button>',2) + '</div>')
     g_at=G([dict(k='ativo',l='Ativo · local',w=175),dict(k='plano',l='Plano',w=150),dict(k='cond',l='Condição',w=110),dict(k='leit',l='Leitura',t='num',w=105),dict(k='prox',l='Próxima',t='num',w=115,pq='quando'),
             dict(k='ab',l='Em aberto',w=140),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=100),dict(k='cons',l='Consumo',w=95,ajuda='Consumo do último abastecimento de tanque cheio a tanque cheio (L/h); o selo mostra o desvio da referência do ativo.')],'g_at',total=True,
-           qf=dict(k='cond',l='condição'),busca_extra=semp+fsel('Pendência','f_pend','f_setpend','f_pends'),tools=modo_at)
+           qf=dict(k='cond',l='condição'),busca_extra=semp+fsel('Pendência','f_pend','f_setpend','f_pends'))
     g_ab=G([dict(k='id',l='Lançamento',w=130),dict(k='ativo',l='Ativo',w=170),dict(k='tq',l='Tanque/lote',w=130),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
-            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=150),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=135)],'g_ab',qf=dict(k='qual',l='qualidade'),tools=modo_at)
+            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=150),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=135)],'g_ab',qf=dict(k='qual',l='qualidade'))
     g_pl=G([dict(k='nome',l='Plano',w=230),dict(k='grupo',l='Grupo',w=110),dict(k='est',l='Estado',w=110),dict(k='apl',l='Aplica-se a',w=190),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=115),dict(k='sit',l='Situação',w=140)],'g_pl')
     linha=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
     chipsN=lambda lst,lab,n,pre='x': (f'<div role="group" aria-label="{lab}" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">'
@@ -1158,10 +1158,10 @@ def _visoes():
     ordens=_blo(bloco('Ordens por fase','',
                       linha(chipsN('fchips','Filtrar por fase',6,'fc'),chipsN('rotinas','Rotina',2),'<span style="flex-grow: 1;"></span>',mais_om,modos)
                       + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban())))
-    # ---- Ativos | Abastecimentos: a escolha fica na barra da lista, dentro do bloco ----
+    # ---- Ativos | Abastecimentos: a escolha fica na linha do título do bloco, à direita (como a troca de visão do "Ordens por fase") ----
     # a classe ma-gat (desenho da linha no celular) vai na própria caixa da grade: a caixa abre o corpo do bloco e o título fica sem linha (SEP-20261015 b)
     g_at=g_at.replace('<div class="g2caixa"','<div class="g2caixa ma-gat"',1)
-    ativos=(IF('at_ativos',_blo(bloco('Ativos por condição','',g_at)),True) + IF('at_abast',_blo(bloco('Abastecimentos por qualidade','',g_ab))))
+    ativos=(IF('at_ativos',_blo(bloco('Ativos por condição','',g_at,acao=modo_at)),True) + IF('at_abast',_blo(bloco('Abastecimentos por qualidade','',g_ab,acao=modo_at))))
     # ---- Planos ----
     planos=_blo(bloco('Planos e cobertura','',
                  # faixa com fundo logo abaixo do título: a borda neutra (que some dentro do bloco, SEP_CSS) diz ao separador que não precisa de linha
