@@ -58,3 +58,38 @@ o=OC.mk(ctx,dict(id='c',saf='S',faz='F',faixa='T',tipo='Talhão inteiro',area=1,
 assert o['fim'] is None and o['classe']=='semdata'
 assert OC.P(ctx,o)==OC.INF
 print('OK plano sem âncora não inventa fim nem liberação confirmada')
+
+# Percurso real: plano substituído na tela → origens da compra → CAL01.
+saf, cultivo = next((s, c) for s, cs in D.CULTIVOS.items() for c in cs
+                    if c.get('plano') and any(a.get('prods') for a in D.PLANO[c['plano']]['atividades']))
+plano = copy.deepcopy(D.PLANO[cultivo['plano']])
+atv = next(a for a in plano['atividades'] if a.get('prods'))
+atv['g'] = dict(tipo='DAPC', dias=2)
+plano['id'] = 'TESTE-PERCURSO-SEM-ANCORA'
+plano['atividades'] = [atv]
+D.PLANO[plano['id']] = plano
+copia = copy.deepcopy(cultivo)
+copia['colheita'] = None
+anteriores = D.CULTIVOS[saf]
+D.CULTIVOS[saf] = [copia]
+try:
+    override = {copia['id']: plano['id']}
+    origens = D.demanda_datada(saf, ajustes={}, planos_extra=override)
+    linhas = [x for xs in origens.values() for x in xs]
+    assert linhas and all(x['data'] is None for x in linhas), linhas
+    # Uma unidade/produto por cálculo; não somar unidades diferentes.
+    for produto, xs in origens.items():
+        esperado=sum(p['dose']*copia['area'] for p in atv['prods'] if D.prod_nome(p['prod'],copia)==produto)
+        assert abs(sum(x['q'] for x in xs)-esperado)<1e-6
+        r=D.cal01(0,[dict(dt=x['data'],q=x['q'],tipo='dem',own=True) for x in xs])
+        assert r['parcial'] and r['liq']==0 and r['falta'] is None, (produto,r)
+        assert abs(r['semData']-esperado)<1e-6
+    copia['colheita']='2027-01-10'
+    resolvidas=D.demanda_datada(saf, ajustes={}, planos_extra=override)
+    assert all(x['data']=='2027-01-12' for xs in resolvidas.values() for x in xs)
+    for produto, xs in resolvidas.items():
+        assert [x['q'] for x in xs]==[x['q'] for x in origens[produto]]
+finally:
+    D.CULTIVOS[saf]=anteriores
+    del D.PLANO[plano['id']]
+print('OK percurso compra: override sem âncora preserva quantidade; resolução atualiza data sem alterar dose/área')
