@@ -301,6 +301,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
   *Dano evitado: compra e quantidade de calcário ou KCl baseadas num laudo substituído, sem sinal.*
 - **R23 Medição de água no solo.** Comando `soloMedir` com a chave de quem inicia (R13). Exige fazenda, talhão, data (não futura), profundidade amostrada, profundidade efetiva, método, unidade, CC numérica, fonte e responsável; PMP é opcional. Medição repetida (mesmo talhão, zona, data, profundidade e método) é recusada. Sem PMP, com PMP ≥ CC ou com unidade sem conversão para lâmina (ex.: g/g), a CAD fica "não calculável", nunca 0. *Dano evitado: lâmina balizada por número inventado ou por medição duplicada.*
 - **R24 Propriedade, equipamento e recomendação separados.** A CAD é referência de leitura: não muda a lâmina máxima, o intervalo, a eficiência, a necessidade nem a programação da Irrigação, e nenhuma lâmina recomendada é calculada a partir dela. Vale a medição mais recente do talhão (empate na data: o talhão inteiro antes da zona). *Dano evitado: uma medição isolada virar prescrição de irrigação sem o responsável técnico.*
+  - **Emenda de 18/10/2026 (AGUA-SOLO-IRR, pedido do proprietário: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do solo para os calculos, deficit e recomendações de irrigação"):** a grade Água no solo mudou para Irrigação › IR-01, com o mesmo comando e o mesmo estado. A CAD passa a entrar no balanço do setor (FAO-56, cap. 8): o déficit não passa da CAD; o gatilho é o limiar do setor, nunca acima da AFD = f × CAD; a lâmina líquida recomendada continua sendo o déficit (repõe até a capacidade de campo), nunca a CAD. Lâmina máxima, intervalo e eficiência continuam independentes da CAD. Medição com PMP ≥ CC é recusada. Prova: `agua_irr_test.py` W1–W9.
 
 ## 5. Integração com o estado único e os outros módulos
 
@@ -429,6 +430,7 @@ O laudo nasce **Aguardando validação**; o OCR nunca valida. Se já existe laud
 | AC-SOLO-22 | CAD: T7 56 mm (% vol.), P1 39 mm, P2 zona 45 mm (mm/cm); Pivô 12 só com CC → "não calculável"; PMP ≥ CC e unidade g/g → "não calculável" | `solo_unit.js` |
 | AC-SOLO-23 | Registrar a medição do Pivô 12 (CC 30, PMP 16 % vol., 40 cm) → AGS-005, CAD 56 mm na prévia e no aviso; repetida → recusada junto ao campo; sem CC → recusada; nada gravado nos dois casos | `solo_ag02_test.py`, `solo_unit.js` |
 | AC-SOLO-24 | IR-01: o setor do T7 mostra "CAD 56 mm em 0–40 cm" como referência, com o texto de que não é a capacidade do equipamento nem a lâmina. Uma medição nova do T7 com CAD 120 mm muda só essa referência: lâmina máxima, intervalo, eficiência, déficit, necessidade e equipamento continuam iguais (R24) | `solo_ag02_test.py` |
+| AC-SOLO-24 (emenda 18/10) | IR-01: a CAD entra no balanço como teto do déficit e define a AFD; o gatilho é o menor entre o limiar e a AFD; a lâmina líquida é o déficit. Uma CAD maior que o déficit e com AFD acima do limiar não muda nada (solo_ag02_test); a CAD pequena muda déficit e gatilho (agua_irr_test W4, W5). |
 
 ## 9. Fora de escopo e condição de retorno
 

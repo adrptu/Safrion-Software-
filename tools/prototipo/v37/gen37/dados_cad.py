@@ -82,6 +82,8 @@ ATIVOS=[
  dict(id='a12',nome='Gotejo T7',modelo='cabeçal + injetora de fertilizante',classe='Irrigação',vazao=838.8,custo_h=25,cont=5210,exige='Sim',calib='2026-09-05',interv=60,local='Talhão T7',fonte='Ensaio da fazenda'),
  dict(id='a13',nome='Packing linha 1',modelo='esteira + balança',classe='Beneficiamento',kgh=2400,custo_h=120,cont=12301,exige='Sim',calib='2026-09-01',interv=30,local='Armazém Sede',fonte='Ensaio da fazenda'),
  dict(id='a14',nome='Silo 01',modelo='aeração + termometria',classe='Armazenagem',cap_sc=60000,custo_h='',cont='',exige='Sim',calib='2026-09-18',interv=90,local='Armazém Sede',fonte='Fabricante'),
+ # ATIVO-UNICO (18/10/2026): o comboio de abastecimento existia só na Manutenção (dados_manutencao); o cadastro é a fonte única do ativo
+ dict(id='cb01',nome='Comboio CB-01',modelo='caminhão comboio 6 m³',classe='Veículo',carga=6000,custo_h='',cont=48200,exige='Não',local='Sede',fonte='Fabricante'),
 ]
 # condição técnica vem da Manutenção (somente leitura no cadastro)
 CONDICAO={'a01':dict(t='Em manutenção',om=D.OM['id'],det='retorno previsto 24/09 · aguardando teste',ordens=['OS-0420','OS-0431'])}

@@ -169,11 +169,12 @@ try:
         chk(f'M4c {nome}: voltar à Tabela grava a escolha e tira o view= do endereço', 'view=' not in J("location.search") and na_tela(gid) == {'tab': True, 'car': False}, [J("location.href"), na_tela(gid)])
 
     # M4d · chegada pelo endereço: ?view=cartoes abre a listagem principal (a 1ª à vista) em Cartões, sem preferência gravada; a outra
-    # listagem da mesma tela (AG-02: Laudos e Água) fica na Tabela, e trocar o modo dela não mexe no endereço
-    abrir('AG-02.dc.html?view=cartoes', perfil='Ana', limpa=True); espera("!!document.querySelector('[data-g2cd=\"g_lau\"]')")
-    a1, a2 = na_tela('g_lau'), na_tela('g_agua')
+    # listagem da mesma tela fica na Tabela, e trocar o modo dela não mexe no endereço. AGUA-SOLO-IRR (18/10/2026): a Água no solo saiu do AG-02
+    # (que ficou com uma listagem só) e foi para a Irrigação; o par de listagens deste caso passa a ser o do IR-01 (Setores e Água no solo)
+    abrir('IR-01.dc.html?view=cartoes', perfil='Ana', limpa=True); espera("!!document.querySelector('[data-g2cd=\"g_set\"]')")
+    a1, a2 = na_tela('g_set'), na_tela('g_agua')
     modo('g_agua', 'cartoes'); u1 = J("location.search"); a3 = na_tela('g_agua')
-    chk('M4d endereço ?view=cartoes: a listagem principal (AG-02 Laudos) abre em Cartões; a segunda (Água) fica na Tabela e trocar o modo dela não mexe no endereço',
+    chk('M4d endereço ?view=cartoes: a listagem principal (IR-01 Setores) abre em Cartões; a segunda (Água no solo) fica na Tabela e trocar o modo dela não mexe no endereço',
         a1 == {'tab': False, 'car': True} and a2 == {'tab': True, 'car': False} and a3 == {'tab': False, 'car': True} and u1 == '?view=cartoes', [a1, a2, a3, u1])
 
     # M3b · teclado: Enter no cartão abre o mesmo que o clique (CD-05: o formulário do parceiro)

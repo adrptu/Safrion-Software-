@@ -42,6 +42,7 @@ EXTRA = {
  'a12': dict(un='h', leit=(5210, '2026-09-23', 'Telemetria'), ritmo=9, cond='Apto'),
  'a13': dict(un='h', leit=(12301, '2026-09-22', 'Apontamento de turno'), ritmo=9, cond='Apto'),
  'a14': dict(un='', leit=None, ritmo=0, cond='Apto'),
+ 'cb01': dict(un='km', leit=(48200, '2026-09-23', 'Abastecimento AB-1040'), ritmo=80, cond='Apto'),
 }
 GRUPO = {'Trator': 'Tratores', 'Pulverizador': 'Pulverizadores', 'Plantadeira': 'Plantadeiras', 'Distribuidor': 'Implementos',
          'Colhedora': 'Colhedoras', 'Tratamento de sementes': 'Beneficiamento', 'Implemento': 'Implementos', 'Irrigação': 'Irrigação',
@@ -67,14 +68,11 @@ def _ativos():
                             condInfo=(dict(ci, cond=x['cond']) if ci else None), rt=RT.get(a['id'], 'Otávio'),
                             condHist=([dict(cond=x['cond'], motivo=ci['motivo'], por=ci['por'], em=ci['desde'], achado=ci['achado'], om=ci['om'], ate=ci['ate'])] if ci else []),
                             leit=(dict(val=x['leit'][0], data=x['leit'][1], origem=x['leit'][2]) if x['leit'] else None))
-    out['cb01'] = dict(id='cb01', nome='Comboio CB-01', modelo='caminhão comboio 6 m³', classe='Veículo', grupo='Veículos', local='Sede',
-                       un='km', ritmo=80, cond='Apto', lh=None, condInfo=None, rt='Otávio', condHist=[],
-                       leit=dict(val=48200, data='2026-09-23', origem='Abastecimento AB-1040'))
-    return out
+    return out   # ATIVO-UNICO (18/10): o CB-01 veio para o dados_cad.ATIVOS (o cadastro é a fonte única)
 
 
 ATIVOS = _ativos()
-ORDEM_ATIVOS = [a['id'] for a in DC.ATIVOS] + ['cb01']
+ORDEM_ATIVOS = [a['id'] for a in DC.ATIVOS]
 
 # ---------- itens de estoque da manutenção (grupo Peças / Lubrificantes) · saldo próprio até o 1b ----------
 # min = ponto de pedido e max = repor até (V69, Compras › Materiais: saldo livre + já pedido abaixo do min sugere a reposição até o max)
@@ -417,10 +415,26 @@ def js_regras():
 JS_ACESSO_CEN = r'''
 /* ===== Estado da manutenção dentro do cenário único (1a, PCMS-M01): c.man de 'talhao-os-cenario-v1'; O.S., Estoque, App e CD-03 leem o mesmo ===== */
 function manClone(o){ return JSON.parse(JSON.stringify(o)); }
-function manGet(){ return cenGet().man; }
+function manGet(){ return manComCadastro(cenGet().man); }
+/* ATIVO-UNICO (proprietário, 18/10: "Tem cadastro de ativos no módulo manutenção e cadastros"): a identidade do ativo é do Cadastros (CD-03),
+   gravada na chave dos cadastros ('ativos'). A Manutenção lê na hora: nome, modelo, classe e local seguem o cadastro; ativo novo entra sem
+   leitura e sem plano (nada inventado: sem restrição registrada é Apto, como o CD-03 já mostra); o que saiu do cadastro fica inativo aqui,
+   com o histórico. Sem a chave (cadastro nunca aberto), vale a semente, que já é a do cadastro. */
+const MAN_CAD_LS='talhao-os-cadastros-v1', MAN_GRUPO='''+json.dumps(GRUPO,ensure_ascii=False)+r''';
+function manCadAtivos(){ try{ const o=JSON.parse(localStorage.getItem(MAN_CAD_LS)||'{}'); return Array.isArray(o.ativos)&&o.ativos.length?o.ativos:null; }catch(e){ return null; } }
+function manComCadastro(m){ const L=manCadAtivos(); if(!L||!m||!m.ativos) return m; const ids={};
+  L.forEach(r=>{ const V=r.v||{}; if(!r.id) return; ids[r.id]=1; let a=m.ativos[r.id];
+    if(!a){ a=m.ativos[r.id]={id:r.id,nome:V.nome||r.id,modelo:V.modelo||'',classe:V.classe||'',grupo:MAN_GRUPO[V.classe]||V.classe||'',local:V.local||'',
+        un:V.classe==='Veículo'?'km':(V.classe==='Armazenagem'?'':'h'),ritmo:0,cond:'Apto',lh:null,condInfo:null,rt:'Otávio',condHist:[],leit:null,doCadastro:true};
+      if((m.ordem||[]).indexOf(r.id)<0) m.ordem=(m.ordem||[]).concat([r.id]); }
+    else { if(V.nome) a.nome=V.nome; if(V.modelo!==undefined) a.modelo=V.modelo; if(V.local) a.local=V.local; if(V.classe&&V.classe!==a.classe){ a.classe=V.classe; a.grupo=MAN_GRUPO[V.classe]||V.classe; } }
+    if(V.sit==='Inativo') a.sit='Inativo'; else if(a.sit==='Inativo'&&a.sitCad) delete a.sit;
+    if(V.sit==='Inativo') a.sitCad=true; else delete a.sitCad; });
+  Object.keys(m.ativos).forEach(id=>{ const a=m.ativos[id]; if(!ids[id]&&a&&manAtvAtivo(a)){ a.sit='Inativo'; a.sitCad=true; } });
+  return m; }
 function manReset(self){ cenReset(); try{ cenSave(cenClone(CEN0)); }catch(e){} if(self) self.setState({manrev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: manutenção, ordens, estoque, colheita e app voltam ao início.'}); }
 /* opt.estrito (MA-VINCULO, 16/10): o comando só vale se o navegador gravou; se a gravação falha, nada muda (memória e armazenamento) e volta o erro */
-function manMudar(self,fn,opt){ const c=cenClone(cenGet()); let r;
+function manMudar(self,fn,opt){ const c=cenClone(cenGet()); manComCadastro(c.man); let r;   /* ATIVO-UNICO: o comando vê o ativo novo do cadastro */
   try{ r=fn(c.man,c)||{}; }catch(e){ r={erro:String(e.message||e)}; }
   if(r.erro){ if(self) self.setState({g2toast:r.erro}); return r; }
   if(r.nada){ if(self&&r.msg) self.setState(Object.assign({g2toast:r.msg},r.st||{})); return r; }

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Agrícola › Análises de solo (AG-02 · SOLO-01; docs/analise-solo/ESPECIFICACAO.md §3.1 e §3.3).
 Laudos de solo (e o foliar do MIP, só consulta): lista → painel do laudo (original ao lado do extraído, índices com 'não calculável',
-uso no plano, validar) → painel "Por quê" (memória da sugestão). Água no solo por talhão ou zona: capacidade de campo, ponto de murcha e
-CAD (referência para a Irrigação; não é a lâmina). Uma ação primária na tela: Registrar laudo. Regras e comandos em solo.js; dados em
+uso no plano, validar) → painel "Por quê" (memória da sugestão). A água no solo (capacidade de campo, ponto de murcha e CAD) mudou para
+Irrigação › IR-01 (AGUA-SOLO-IRR, proprietário 18/10/2026), onde entra no déficit e no gatilho; aqui fica o link. Uma ação primária: Registrar laudo. Regras e comandos em solo.js; dados em
 dados_solo.py; estado em c.solo do cenário compartilhado (a mesma fonte do Planejar safra e da O.S.). Dados sintéticos."""
 import json
 from engine import (grid,esc,icon,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
@@ -138,18 +138,6 @@ function PREVALS(self,v){ cenOuvir(self); if(self.state.mf_faz===undefined) self
       const t=cenNum(x,ind.dec)+(ind.un==='%'?' %':(ind.un==='CaCl₂'?'':' '+ind.un)); r.v[k]=x; r.p[k]=[{k:'txt',t}]; r.s[k]=t; });
     r.p.sit=[{k:'chip',t:l.sit,c:SOLO_SITC[l.sit]||'gray'}].concat(l.motivo?[{k:'br'},{k:'mut',t:l.motivo}]:[]); r.s.sit=l.sit;
     r.p.plano=np.c?[{k:'chip',t:np.t,c:np.c}]:[{k:'mut',t:np.t}]; r.s.plano=np.t; return r; });
-  /* ---- água no solo ---- */
-  const S=(c.solo||{}); const ms=(SOLO0.agua||[]).concat(Object.values(S.agua||{})).filter(m=>soFazOk(self,m.faz));
-  GR('g_agua').rows=ms.map(m=>{ const cad=soloCAD(m); const r={id:m.id,ro:true,v:{},s:{},p:{}};
-    r.p.med=[{k:'b',t:m.id}]; r.s.med=m.id; r.p.tal=[{k:'txt',t:m.tal}].concat(m.zona?[{k:'br'},{k:'mut',t:m.zona}]:[]); r.s.tal=m.tal+(m.zona?' · '+m.zona:'');
-    soDiaCol(r,'data',m.data); r.p.prof=[{k:'txt',t:m.prof+' cm'},{k:'br'},{k:'mut',t:'raízes até '+prFmtT(m.z,1)+' cm'}]; r.s.prof=m.prof+' cm · raízes '+prFmtT(m.z,1)+' cm';
-    r.p.met=[{k:'txt',t:m.met}]; r.s.met=m.met;
-    const vu=(x)=>x===''||x===null||x===undefined?'—':prFmtT(x,2)+' '+(m.un==='% volume'?'% vol.':m.un);
-    r.p.cc=[{k:'txt',t:vu(m.cc)}]; r.s.cc=vu(m.cc); r.v.cc=Number(m.cc); r.p.pmp=m.pmp===''?[{k:'mut',t:'não medido'}]:[{k:'txt',t:vu(m.pmp)}]; r.s.pmp=m.pmp===''?'não medido':vu(m.pmp); r.v.pmp=m.pmp===''?'':Number(m.pmp);
-    r.p.cad=cad.v===null?[{k:'mut',t:'não calculável'},{k:'br'},{k:'mut',t:cad.nc}]:[{k:'b',t:prFmtT(cad.v,1)+' mm'}]; r.s.cad=cad.v===null?'não calculável':prFmtT(cad.v,1)+' mm'; r.v.cad=cad.v===null?'':cad.v;
-    r.p.fonte=[{k:'txt',t:m.fonte},{k:'br'},{k:'mut',t:m.resp}]; r.s.fonte=m.fonte+' · '+m.resp;
-    Object.assign(r.v,{faz:m.faz,talv:m.tal,zona:m.zona,datav:m.data,profv:m.prof,z:m.z,metv:m.met,un:m.un,ccv:m.cc,pmpv:m.pmp,fontev:m.fonte,resp:m.resp,cadT:cad.v===null?'não calculável: '+cad.nc:cad.e});
-    return r; });
   /* ---- painel do laudo: extraído e uso no plano ---- */
   const l=ls.find(x=>x.id===self.state.lau)||null; self.__l=l;
   if(l){ const rows=l.an.map(x=>{ const r={id:'a:'+x.a,v:{atr:x.a,val:Number(x.v),un:x.un,orig:'medido'},s:{},p:{}};
@@ -289,20 +277,6 @@ def build():
                 *[dict(k='V',l='V %',t='num',a='r',w=120) if i['k']=='V' else (dict(k='K',l='K',t='num',a='r',w=140) if i['k']=='K' else dict(k=_ik(i),l=i['l'],t='num',a='r',w=100)) for i in DS.IND],
                 dict(k='sit',l='Situação',w=190),dict(k='plano',l='No plano',w=170)],[],
                edit=dict(m='pick'),gid='g_lau',total=False,so=dict(k='coleta',d=True),qf=dict(k='sit',l='situação',todas='Todos'))
-    g_agua=grid([dict(k='med',l='Medição',w=100),dict(k='tal',l='Talhão · zona',w=120),dict(k='data',l='Data',t='num',w=110),dict(k='prof',l='Profundidade',w=150),
-                 dict(k='met',l='Método',w=200),dict(k='cc',l='Capacidade de campo',t='num',a='r',w=140),dict(k='pmp',l='Ponto de murcha',t='num',a='r',w=130),
-                 dict(k='cad',l='CAD',t='num',a='r',w=130),dict(k='fonte',l='Fonte · responsável',w=170)],[],
-                edit=dict(m='form',title='Medição de água no solo',newTitle='Registrar medição de água no solo',
-                          sub='Propriedade do solo por talhão ou zona. A CAD é referência para a Irrigação; não é a lâmina, que segue a política de água e o responsável técnico.',
-                          fields=[dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Lagoa Grande','Boa Vista'],req=True,**{'def':'Santa Rita'}),
-                                  dict(k='talv',l='Talhão',t='sel',dyn=True,opts=[],req=True),dict(k='zona',l='Zona (opcional)',t='txt',help='Ex.: Z1 (baixada). Vazio = talhão inteiro.'),
-                                  dict(k='datav',l='Data da medição',t='date',req=True),dict(k='profv',l='Profundidade amostrada',t='sel',opts=['0–20','0–30','0–40','20–40'],req=True,u='cm'),
-                                  dict(k='z',l='Profundidade efetiva das raízes',t='num',req=True,min=1,max=200,u='cm'),
-                                  dict(k='metv',l='Método',t='sel',opts=DS.METODOS_AGUA,req=True),dict(k='un',l='Unidade',t='sel',opts=DS.UN_AGUA,req=True,**{'def':'% volume'}),
-                                  dict(k='ccv',l='Capacidade de campo (CC)',t='num',req=True,min=0,max=100),dict(k='pmpv',l='Ponto de murcha permanente (PMP)',t='num',min=0,max=100,help='Sem PMP medido, a CAD fica "não calculável".'),
-                                  dict(k='fontev',l='Fonte ou laboratório',t='sel',opts=DS.LABS+['Equipe da fazenda'],req=True),dict(k='resp',l='Responsável',t='sel',opts=DS.RESP_AGUA,req=True,**{'def':'Ana (agrônoma)'}),
-                                  dict(k='cadT',l='Água disponível (CAD)',ro=True,live=True,help='CAD = (CC − PMP) × profundidade efetiva; unidades explícitas.')]),
-                add='Registrar medição',gid='g_agua',total=False,so=dict(k='data',d=True))
     g_ext=grid([dict(k='atr',l='Atributo',w=70),dict(k='val',l='Valor',w=150),dict(k='met',l='Método · extrator',w=140),dict(k='ld',l='Qualificador · LD',w=90),dict(k='orig',l='Origem',w=90)],[],
                edit=dict(m='form',title='Valor do laudo',sub='Corrija o valor ou a unidade lidos do PDF; o original não muda e o laudo volta à validação do agrônomo.',
                          fields=[dict(k='atr',l='Atributo',ro=True),dict(k='orig',l='',t='txt',cond=dict(k='orig',eq='__nunca')),
@@ -333,27 +307,21 @@ function EXTRAVALS(self,v){ try{ window.__soloSelf=self; window.__solo={get:()=>
       if(!x0||(Number(x0.v)===Number(r.v.val)&&(x0.un||'')===(r.v.un||''))){ self.setState({g2toast:'Nada mudou em '+a+'.'}); return; }
       if(!r.v.un){ self.setState({g2toast:'Informe a unidade de '+a+'.'}); return; }
       const res=cenMudar(null,cc=>soloCorrigir(cc,l.id,a,r.v.val,r.v.un,'COR-'+l.id+'-'+Date.now(),soAtor()));
-      self.setState({cenrev:Date.now(),g2toast:res.erro||res.msg}); }
-    if(gid==='g_agua'&&r){ g2set(self,'g_agua',{rows:null}); const d=soAgDados(r.v); const ch=self.__agK||('AGS-'+Date.now()); self.__agK=null;
-      const res=cenMudar(null,cc=>soloMedir(cc,d,ch,soAtor())); self.setState({cenrev:Date.now(),g2toast:res.erro||(res.repetido?res.msg:res.msg+' A lâmina segue a política de água e o responsável técnico.')}); } };
-  self.g2check=(gid,rows,r,d,isNew)=>{ if(gid==='g_ext'){ if(d.orig==='medido'&&!d.un) return {un:'Escolha a unidade: sem unidade o laudo fica inconsistente.'}; return {}; }
-    if(gid!=='g_agua') return {}; if(!self.__agK) self.__agK='AGS-'+Date.now(); const k=cenClone(cenGet()); try{ soloMedir(k,soAgDados(d),'PREVIA-'+Date.now(),soAtor()); return {}; }
-    catch(e){ const m=String(e.message||e); const f=/capacidade de campo/.test(m)?'ccv':(/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje/i.test(m)?'datav':(/já está registrada/.test(m)?'datav':'talv')))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };
-  self.g2opts=(gid,k,d)=>{ if(gid==='g_agua'&&k==='talv') return [{v:'',t:'Escolha o talhão'}].concat((SOLO_TAL[d.faz||'Santa Rita']||[]).map(x=>({v:x[0],t:x[0]+' · '+cenNum(x[1])+' ha'}))); return null; };
-  self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
+      self.setState({cenrev:Date.now(),g2toast:res.erro||res.msg}); } };
+  self.g2check=(gid,rows,r,d,isNew)=>{ if(gid==='g_ext'){ if(d.orig==='medido'&&!d.un) return {un:'Escolha a unidade: sem unidade o laudo fica inconsistente.'}; return {}; } return {}; };
   /* abrir pelo endereço: AG-02.dc.html#LAU-2061 (laudo) · AG-02.dc.html#registrar=Santa Rita/T3 (Registrar laudo com fazenda e talhão, vindo do Mapa) ·
      AG-02.dc.html#registrar=Lagoa Grande (ícone Importar laudo do Mapa › Solo sem talhão escolhido: só a fazenda vem preenchida) */
   if(!self.__hashIni){ self.__hashIni=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').replace('#',''); }catch(e){} if(/^LAU-\d+$/.test(h)) setTimeout(()=>self.setState({lau:h,mf_faz:'Todas'}),0);
       const m=/^registrar=([^/]+)(?:\/(.+))?$/.exec(h); if(m) setTimeout(()=>{ self.setState({lau:null,mf_faz:'Todas'}); soRlNovo(self,m[1],m[2]||''); },0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} } }
-function soAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav,prof:x.profv,z:x.z,met:x.metv,un:x.un,cc:x.ccv,pmp:x.pmpv,fonte:x.fontev,resp:x.resp}; }
 ''')
     EXTRA.append('<style>'+CSS+'</style>')
     EXTRA.append(_painel_laudo(g_ext,g_uso)); EXTRA.append(_painel_registro()); EXTRA.append(porque_html())
+    # AGUA-SOLO-IRR (18/10/2026): a água no solo mudou para Irrigação › IR-01; o link fica para quem a procura aqui
     corpo=(bloco('Laudos','Clique no laudo para conferir valores e índices, validar e ver o uso no plano.',g_lau)
-           + bloco('Água no solo','Registre capacidade de campo e ponto de murcha por talhão; a CAD é referência para a Irrigação, não a lâmina.',g_agua))
+           + f'<p class="so-agua-link" style="margin: 4px 0 0; font-size: 13px;"><a href="IR-01.dc.html#agua" style="color: {ACC}; font-weight: 700;">Água no solo (capacidade de campo e CAD) está em Irrigação ›</a></p>')
     HEIGHTS37[fname]=1100
     prim=f'<button type="button" class="pr-prim" onClick="{H("prim_go")}" style="{BTN_ST(True)}">{H("prim_t")}</button>'
-    shell37('AG-02','Análises de solo',corpo,fname=fname,subtitle='Laudos e água no solo por talhão. O que a análise indica entra como sugestão nas doses do plano.',
+    shell37('AG-02','Análises de solo',corpo,fname=fname,subtitle='Laudos por talhão. O que a análise indica entra como sugestão nas doses do plano.',
             status=(H('st_t'),'yellow'),primary_html=prim,search=False,
             footer='Sem laudo vale a dose do plano. O OCR nunca valida; só o agrônomo valida. Regra de demonstração: tabela regional a decidir pelo proprietário.')
     import os

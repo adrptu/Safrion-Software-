@@ -78,7 +78,9 @@ FLUXO37={'Agrícola':[('Planejamento',['AG-07.dc.html','AG-02.dc.html','PA.dc.ht
                      ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PG.dc.html#mod=agr'])],
          # DS-MAN (17/10/2026, proprietário: "Design system de manutenção ainda não está no padrão"): a entrada da Manutenção nos mesmos blocos do
          # Agrícola, na ordem do processo (14/10: "onde as coisas começam e terminam"): o cadastro do que se mantém, a execução e o resultado
-         'Manutenção':[('Cadastro',['MA.dc.html#vis=ativos','MA.dc.html#vis=planos']),
+         # ATIVO-UNICO (proprietário, 18/10: "Tem cadastro de ativos no módulo manutenção e cadastros"): o cadastro do ativo é só em Cadastros ›
+         # Máquinas (CD-03); aqui Ativos e Planos são o planejamento da manutenção, na mesma régua do Agrícola
+         'Manutenção':[('Planejamento',['MA.dc.html#vis=ativos','MA.dc.html#vis=planos']),
                        ('Execução',['MA.dc.html#vis=semordem','MA.dc.html#vis=ordens']),
                        ('Resultados',['PG.dc.html#mod=man'])]}
 CURTO37={'PG.dc.html#mod=agr':('Painel','grafico'),'PG.dc.html#mod=man':('Painel','grafico'),'PG.dc.html#mod=sup':('Painel','grafico'),'PG.dc.html#mod=com':('Painel','grafico'),'PG.dc.html#mod=cre':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),

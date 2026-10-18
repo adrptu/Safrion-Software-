@@ -217,9 +217,21 @@ def deficit(st, sid):
     return max(0.0, b['d0'] + b['etc'] - b['pef'] - _gov(b['ap'], x['ha']))
 
 
+# fração de depleção f da cultura (água facilmente disponível = f × CAD), FAO-56 (Allen et al., 1998), Tabela 22, para ETc ≈ 5 mm/dia.
+# Cultura fora da tabela (mamão) usa 0,50 com aviso para o responsável técnico confirmar no setor (AGUA-SOLO-IRR, 18/10/2026).
+F_DEPL = {'Milho': dict(f=0.55, fonte='FAO-56, Tabela 22 (milho grão)'), 'Feijão': dict(f=0.45, fonte='FAO-56, Tabela 22 (feijão seco)'),
+          'Soja': dict(f=0.50, fonte='FAO-56, Tabela 22 (soja)')}
+
+
+def solo_js():
+    """medições de água no solo semeadas (dados_solo.AGUA, a mesma fonte do AG-02 de antes) e a fração f por cultura"""
+    import dados_solo as DSO
+    return 'const IRR_SOLO0 = ' + json.dumps(dict(agua=DSO.AGUA, fdep=F_DEPL), ensure_ascii=False).replace('</', '<\\/') + ';\n'
+
+
 def js_prefixo():
     import ficha_pivo   # registro da ficha do pivô (a vazão do equipamento): irrGet() repõe a vazão do setor com ele (revisão de 10/10, A2)
-    return ('const IRR0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + ficha_pivo.store_js()
+    return ('const IRR0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + solo_js() + ficha_pivo.store_js()
             + open(os.path.join(HERE, 'irrigacao_estado.js'), encoding='utf-8').read() + '\n')
 
 

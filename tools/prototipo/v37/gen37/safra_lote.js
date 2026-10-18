@@ -255,6 +255,8 @@ function slVals(self,v,saf,step,ro){
   // "Editar talhões ›" mora na faixa de cada fazenda da tabela, que agora agrupa por fazenda sempre (17/10), também com uma fazenda só:
   // um lugar só para a ação (filtrada uma fazenda, a faixa dela continua à vista)
   v.slfaz=(sub)=>sgNaFazenda(self,sub,()=>slAbrir(self));
+  // SAF-MAPA (18/10): "Planejar no mapa ›" na faixa da fazenda abre a mesma edição na visão Mapa
+  v.slmapa=(sub)=>sgNaFazenda(self,sub,()=>{ slAbrir(self); const cur=self.state.sl; if(cur) self.setState({sl:Object.assign({},cur,{vista:'mapa'})}); });
   const sl=self.state.sl; v.sl_open=!!sl&&step===2; if(!v.sl_open){ v.sl_lins=[]; return; }
   const lins=self.__slLin||[]; const ctx=slCtx(self,sl.saf); const ed=lins.filter(l=>l.tipo!=='grp'&&l.tipo!=='ro'); const dados=lins.filter(l=>l.tipo!=='grp');
   const n=slContar(ed,sl.vals,sl.base); const so=safById(self,sl.saf)||{v:{}};
@@ -311,4 +313,5 @@ function slVals(self,v,saf,step,ro){
   v.sl_colar=(e)=>{ const t=e&&e.target; if(!t||!t.getAttribute||t.getAttribute('data-l')===null) return; let txt=''; try{ txt=(e.clipboardData||window.clipboardData).getData('text/plain')||''; }catch(er){ txt=''; }
     const bloco=/[\t\n\r]/.test(String(txt).replace(/[\r\n]+$/,'')); const col=t.getAttribute('data-c');
     if(!bloco&&!(t.tagName==='SELECT'||t.readOnly||t.disabled||col==='area'||col==='meta'||col==='plantio')) return;
-    e.preventDefault(); slColar(self,t.getAttribute('data-l'),col,txt); }; }
+    e.preventDefault(); slColar(self,t.getAttribute('data-l'),col,txt); };
+  if(typeof smVals==='function') smVals(self,v); }   // SAF-MAPA (18/10): a visão Mapa do mesmo estado (safra_mapa.js)

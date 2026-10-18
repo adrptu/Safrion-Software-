@@ -77,9 +77,9 @@ def ctx02(tam, tec):
         J(f"{SEL}.focus()"); time.sleep(.1); c.tecla(seta, seta, 40 if seta == 'ArrowDown' else 38); time.sleep(1)
         return J(f"[{SEL}.value, document.activeElement==={SEL}]") == [f, True]
     def busca(t):
-        J(f"""(()=>{{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(t)});
+        J(f"""(()=>{{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"],input[aria-label="Buscar nesta tela"]')].find(x=>x.offsetParent); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(t)});
           i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.4)
-    bval = lambda: J("(([...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(x=>x.offsetParent))||{}).value") or ''
+    bval = lambda: J("(([...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"],input[aria-label=\"Buscar nesta tela\"]')].find(x=>x.offsetParent))||{}).value") or ''
     abre('IR-01.dc.html'); fazenda('Todas'); limpa(J); g = Grade(J, 0)
     SIT = ('Impedida', 'Programada'); busca('Pivô'); prep = [g.filtra('Situação', list(SIT)), g.filtra('Fazenda', ['Santa Rita']), g.ordena('Fazenda', desc=True)]
     d0, c0 = g.dicts(), fchips(); cs = [x for x in c0 if x.startswith('Situação: ')]
@@ -310,7 +310,7 @@ try:
     abre('IR-03.dc.html'); g = Grade(J, 0); n0 = len(g.dicts())
     g.filtra('Etapa', ['A liberar']); a1 = [r.get('Ordem') for r in g.dicts()]; g.ordena('Início'); ini = [instante(x) for x in g.col('Início') if instante(x)]
     chk('390 px (normal): filtro Etapa = A liberar pelo menu da coluna e ordem por Início (instante), com toque', a1 and all(r.get('Etapa') == 'A liberar' for r in g.dicts()) and crescente(ini), (a1, g.col('Início')))
-    J("""(()=>{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"]')].find(x=>x.offsetParent); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Pivô 9');
+    J("""(()=>{const i=[...document.querySelectorAll('input[aria-label="Buscar nesta tabela"],input[aria-label="Buscar nesta tela"]')].find(x=>x.offsetParent); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Pivô 9');
       i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.5)
     vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
     chk('390 px (recusa): Etapa = A liberar + busca "Pivô 9" (setor da Lagoa Grande) → nenhuma linha e o aviso "Nenhuma linha corresponde aos filtros"', g.dicts() == [] and vaz, len(g.dicts()))

@@ -82,7 +82,8 @@ try:
         # TAB-08 usa botões nomeados e funil SVG; a busca continua única e compartilhada.
         nq = J("document.querySelectorAll('[data-g2q]').length")
         buscas = J("[...document.querySelectorAll('main input[type=search]')].filter(VIS).length")
-        t.chk('AC-SOLO-18 laudos e água no solo com filtro por coluna e ordenação e um campo de busca só, para as duas', nb and [x[0] for x in nb] == [True, False] and all(x[1] >= 5 and x[2] for x in nb) and nq >= 2 and buscas == 1, [nb, nq, buscas])
+        # AGUA-SOLO-IRR (18/10/2026): a Água no solo mudou para Irrigação › IR-01; o AG-02 ficou com a listagem de laudos (a da água tem o mesmo padrão no IR-01)
+        t.chk('AC-SOLO-18 laudos com filtro por coluna e ordenação e um campo de busca só', nb and [x[0] for x in nb] == [True] and all(x[1] >= 5 and x[2] for x in nb) and nq >= 1 and buscas == 1, [nb, nq, buscas])
         o1 = J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].map(r=>N(r.innerText).split(' ')[0])")
         t.chk('lista ordenada pela coleta (mais recente primeiro): LAU-2050 (19/09) antes de LAU-2043 (12/09)', o1 and o1.index('LAU-2050') < o1.index('LAU-2043'), o1)
         t.chk('V "não calculável" no LAU-2050 (sem H+Al) e "difere do laboratório" no LAU-2071', 'não calculável' in rowtxt('LAU-2050') and 'difere do laboratório' in rowtxt('LAU-2071'), [rowtxt('LAU-2050'), rowtxt('LAU-2071')])
@@ -135,33 +136,23 @@ try:
         t.chk('AC-SOLO-15 OS-0502 liberada: a calagem do Pivô 12 fica "não aplicável: OS-0502 já liberada"', 'não aplicável: OS-0502 já liberada' in p, p[-500:])
         clk('Fechar', 'aside[role=dialog]')
         J("(()=>{ const c=__solo.cen(); c.ordens['OS-0502'].etapa='A liberar'; __solo.salvar(c); })()")
-        # ---- água no solo
-        clk('+ Registrar medição'); f0 = pan()
-        for k, v in [('faz', 'Lagoa Grande')]: t.fset(k, v)
-        time.sleep(.3)
-        for k, v in [('talv', 'Pivô 12'), ('datav', '2026-09-22'), ('profv', '0–40'), ('z', '40'), ('metv', 'Curva de retenção (laboratório)'), ('un', '% volume'), ('ccv', '30'), ('pmpv', '16'), ('fontev', 'Agrolab')]: t.fset(k, v)
-        live = t.fv('cadT')
-        t.btn('Salvar'); time.sleep(.4)
-        t.chk('água no solo: registrar a medição do Pivô 12 → AGS-005 com CAD 56 mm (prévia no formulário)', 'AGS-005' in rowtxt('AGS-005') and '56 mm' in rowtxt('AGS-005') and 'CAD 56 mm' in toast() and '= 56 mm' in (live or ''), [f0[:80], live, rowtxt('AGS-005'), toast()])
-        clk('+ Registrar medição'); t.fset('faz', 'Lagoa Grande'); time.sleep(.3)
-        for k, v in [('talv', 'Pivô 12'), ('datav', '2026-09-22'), ('profv', '0–40'), ('z', '40'), ('metv', 'Curva de retenção (laboratório)'), ('ccv', '30'), ('pmpv', '16'), ('fontev', 'Agrolab')]: t.fset(k, v)
-        t.btn('Salvar'); a = t.alerts()
-        t.chk('medição repetida é recusada junto ao campo e nada é gravado', 'já está registrada como AGS-005' in a and t.isopen(), a)
-        t.fset('ccv', ''); t.btn('Salvar'); a = t.alerts()
-        t.chk('sem capacidade de campo: recusado junto ao campo', 'capacidade de campo' in a.lower(), a)
-        t.cancel()
+        # ---- água no solo: mudou para Irrigação › IR-01 (AGUA-SOLO-IRR, proprietário 18/10/2026); a medição e o efeito no balanço estão em
+        # agua_irr_test.py. Aqui: o AG-02 não tem mais a grade e leva à Irrigação; a R24 (emendada em 18/10) segue no IR-01
+        lk = J("[...document.querySelectorAll('main a')].filter(VIS).filter(a=>/Água no solo/.test(a.innerText)).map(a=>[N(a.innerText),a.getAttribute('href')])") or []
+        t.chk('água no solo: o AG-02 não tem a grade e leva à Irrigação (IR-01.dc.html#agua)', not J("!!document.querySelector('[data-g2g=g_agua]')") and lk and lk[0][1] == 'IR-01.dc.html#agua', lk)
         shot('desktop')
         ir('IR-01.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.5); lib()
         row('Gotejo T7'); d = t.dlg(); IRK = ('lmax', 'imin', 'efic', 'necT', 'eqT', 'defT'); v0 = [t.fv(k) for k in IRK]
-        t.chk('IR-01: a CAD do talhão aparece como referência no setor (T7: 56 mm), dizendo que não é a lâmina', 'Água disponível no solo (referência)' in d and t.fv('cadT') and 'CAD 56 mm' in t.fv('cadT') and 'não é' in d.lower(), [t.fv('cadT'), d[-300:]])
+        t.chk('IR-01: o setor do T7 mostra a água no solo usada no cálculo (CAD 56 mm e AFD)', 'Água no solo usada no cálculo' in d and 'CAD 56 mm' in (t.fv('aguaT') or '') and 'AFD' in (t.fv('aguaT') or ''), [t.fv('aguaT'), d[-300:]])
         t.cancel()
-        # R24 (AC-SOLO-24): uma medição nova do T7 com outra CAD (120 mm) muda só a referência; lâmina, intervalo, eficiência, necessidade e equipamento ficam iguais
+        # R24 emendada (AGUA-SOLO-IRR): uma medição nova do T7 com CAD 120 mm, maior que o déficit e com AFD acima do limiar, não muda lâmina, intervalo,
+        # eficiência, déficit, necessidade nem equipamento; o efeito da CAD pequena (teto do déficit e gatilho pela AFD) está em agua_irr_test.py W4/W5
         J("(()=>{ const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}'); c.solo=c.solo||{}; c.solo.agua=c.solo.agua||{};"
           " c.solo.agua['AGS-099']={id:'AGS-099',faz:'Santa Rita',tal:'T7',zona:'',data:'2026-09-22',prof:'0–40',z:'40',met:'Curva de retenção (laboratório)',un:'% volume',cc:'40',pmp:'10',fonte:'Lab Solo Vale',resp:'Ana (agrônoma)'};"
           " localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c)); })()")
         ir('IR-01.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.5); lib()
-        row('Gotejo T7'); t.dlg(); v1 = [t.fv(k) for k in IRK]; cad1 = t.fv('cadT') or ''
-        t.chk('R24 outra CAD no T7 (120 mm) muda só a referência: lâmina máxima, intervalo, eficiência, déficit, necessidade e equipamento iguais', 'CAD 120 mm' in cad1 and v1 == v0 and all(x is not None for x in v0), [cad1, v0, v1])
+        row('Gotejo T7'); t.dlg(); v1 = [t.fv(k) for k in IRK]; cad1 = t.fv('aguaT') or ''
+        t.chk('R24 CAD 120 mm no T7 (maior que o déficit, AFD acima do limiar): lâmina máxima, intervalo, eficiência, déficit, necessidade e equipamento iguais', 'CAD 120 mm' in cad1 and v1 == v0 and all(x is not None for x in v0), [cad1, v0, v1])
         t.cancel()
         t.chk('nenhum erro de JS (desktop)', not t.errs(), t.errs())
     if 'celular' in MODOS:

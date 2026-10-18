@@ -442,7 +442,7 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
   v.at_prim=!!P; v.at_pt=P?P.t:''; v.at_pfn=P?P.fn:(()=>{}); v.at_pdis=!!(P&&P.dis); v.at_pwhy=(P&&P.dis)||''; v.at_pst=(panAberto||(P&&P.dis))?MA_SEC:MA_PRIM;
   v.at_secs=[{t:'Registrar achado',fn:()=>ma_novoAch(self,a.id),dis:manPode(c,pf,'registrar')}].concat(a.un&&(!P||P.t!=='Registrar leitura')?[{t:'Registrar leitura',fn:()=>ma_novaLeit(self,a.id),dis:manPode(c,pf,'registrar')}]:[])
     .map(x=>({t:x.t,fn:x.fn,dis:!!x.dis,why:x.dis||'',st:MA_SEC}));
-  v.at_cd03='CD-03.dc.html'; v.at_rec='OS.dc.html';
+  v.at_cd03='CD-03.dc.html#maq='+encodeURIComponent(a.id); v.at_rec='OS.dc.html';   /* ATIVO-UNICO: a identidade se edita só no cadastro (abre a ficha do ativo) */
   /* MA-VINCULO: os planos do ativo à vista no cabeçalho; sem plano, "Vincular ao PM-xx ›" (sugestão explícita: abre o painel) ou "Criar plano ›" */
   const pls=manPlanosDe(c,a.id); const semp=manAtvAtivo(a)&&!pls.some(manPlVale); const sg=semp?manVincSug(c,a)[0]:null;
   v.at_pls=pls.map(p=>{ const si=manPlSit(c,p,a); return {t:p.id,h:'#plano='+p.id,s:si.t,st:ma_chipSt(si.c),dot:ma_dotSt(si.c)}; }); v.at_temPls=pls.length>0;
@@ -1204,7 +1204,7 @@ def _pag_ativo():
          f'<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{_btns("at_secs")}'
          + IF('at_prim',f'<button type="button" disabled="{H("at_pdis")}" title="{H("at_pwhy")}" onClick="{H("at_pfn")}" style="{H("at_pst")}">{H("at_pt")}</button>')
          + f'</div></div>'
-         f'<div style="display: flex; gap: 14px; flex-wrap: wrap;"><a href="{H("at_cd03")}" style="color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none;">Abrir no CD-03 ›</a>'
+         f'<div style="display: flex; gap: 14px; flex-wrap: wrap;"><a href="{H("at_cd03")}" style="color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none;">Editar cadastro ›</a>'
          f'<a href="{H("at_rec")}" style="color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none;">Ver agenda em O.S. › Recursos ›</a></div>')
     sit=(_kv('at_kv',4)
          + f'<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;"><button type="button" disabled="{H("at_mudar_dis")}" title="{H("at_mudar_why")}" onClick="{H("at_mudar")}" style="{LNK}">Mudar condição ›</button>'

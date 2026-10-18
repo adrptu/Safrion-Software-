@@ -402,8 +402,10 @@ function soloMedir(c, d, chave, ator) {
     if (typeof soloNum(d.cc) !== 'string') throw new Error('Informe a capacidade de campo com um número. Nada foi gravado.');
     if (d.pmp !== '' && d.pmp !== undefined && typeof soloNum(d.pmp) !== 'string') throw new Error('Ponto de murcha inválido: use um número ou deixe vazio. Nada foi gravado.');
     if (typeof soloNum(d.z) !== 'string') throw new Error('Informe a profundidade efetiva das raízes (cm). Nada foi gravado.');
+    if (d.pmp !== '' && d.pmp !== undefined && prCmp(soloNum(d.pmp), soloNum(d.cc)) >= 0) throw new Error('Ponto de murcha deve ser menor que a capacidade de campo. Nada foi gravado.');   /* AGUA-SOLO-IRR: medição incoerente não entra no balanço */
     if (d.data > soloHoje()) throw new Error('A medição não pode ser depois de hoje (' + soloBr(soloHoje()) + '). Nada foi gravado.');
-    const todos = ((typeof SOLO0 !== 'undefined' && SOLO0.agua) || []).concat(Object.values(S.agua));
+    /* as medições semeadas vêm do SOLO0 (Agrícola) ou do IRR_SOLO0 (Irrigação, onde a grade mora desde 18/10): sem elas o número se repetia (AGUA-SOLO-IRR W4) */
+    const todos = ((typeof SOLO0 !== 'undefined' && SOLO0.agua) || (typeof IRR_SOLO0 !== 'undefined' && IRR_SOLO0.agua) || []).concat(Object.values(S.agua));
     const dup = todos.find(m => m.faz === d.faz && m.tal === d.tal && (m.zona || '') === (d.zona || '') && m.data === d.data && m.prof === d.prof && m.met === d.met);
     if (dup) throw new Error('Esta medição já está registrada como ' + dup.id + '. Nada foi gravado.');
     const id = 'AGS-' + String(todos.reduce((mx, m) => Math.max(mx, Number(String(m.id).replace(/\D/g, '')) || 0), 0) + 1).padStart(3, '0');

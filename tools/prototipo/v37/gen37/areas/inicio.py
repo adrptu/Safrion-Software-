@@ -99,10 +99,7 @@ function nfx(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDi
 # IN-04 · MAPA
 # =====================================================================================================
 TAL={t:dict(ha=ha,cult=c,fase=f) for t,ha,c,f,_ in D.TALHOES}
-GEO=[('T1','poly','30,30 300,22 312,282 40,292'),('T2','poly','326,22 580,28 574,280 332,286'),
-     ('P1','circ','700,158,104'),('P2','circ','902,158,92'),
-     ('T4','poly','40,344 306,336 312,598 46,606'),('T3','poly','328,338 572,334 578,596 334,600'),
-     ('T7','poly','598,344 782,338 788,598 604,602'),('C1','poly','804,338 976,334 982,596 810,600')]
+from geo_talhoes import GEO_SR as GEO   # SAF-MAPA (18/10/2026): a geometria dos talhões tem fonte única, lida também pelo Planejar safra em mapa
 TIDS=[g[0] for g in GEO]
 PERIM={'T1':'7,1','T2':'6,9','T3':'3,9','T4':'5,7','P1':'3,5','P2':'3,2','T7':'2,6','C1':'2,5'}
 # DEC-0910-36 · PLA-01 (proprietário, 16/10/2026): a barra volta aos nove nomes da DEC-2609-12, nesta ordem. A decisão de 16/10 é a mais nova e
