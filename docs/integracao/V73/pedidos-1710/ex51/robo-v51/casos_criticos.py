@@ -87,7 +87,7 @@ def classe(org, sig, det):
         return 'receituário→OS', org
     if org == 'IN-02' and (d == 'OS' or re.search(r'\bOS-\d', th)):
         return 'Aprovações→OS', ''
-    if org == 'MA' and (d == 'OS' or re.search(r'\bOS-\d', th)):
+    if org == 'MA' and d == 'OS':
         return 'OM→OS', ''
     return None, None
 

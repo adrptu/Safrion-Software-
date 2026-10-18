@@ -39,12 +39,12 @@ def chegou(p):
     if not p.get('alvo'): return False
     return bool(p.get('abriu') or p.get('destacou') or CHK.get((p['tela'], p.get('i')), False))
 voltarDet = [p for p in nav if p.get('origem') == 'detalhe']
-intencao = [p for p in nav if p.get('origem')=='detalhe' or p.get('alvo') or '#' in (p.get('para') or '')]
+intencao = [p for p in nav if p.get('origem')=='detalhe' or p.get('alvo') or bool(ENTR.search((p.get('el') or {}).get('t',''))) or '#' in (p.get('para') or '')]
 rec = [p for p in nav if p.get('alvo')]   # passagens que levam um registro
 rows = []
 for p in pas:
     if p['r'] == 'navega':
-        isrec = p.get('origem') == 'detalhe' or bool(p.get('alvo')) or '#' in (p.get('para') or '')
+        isrec = p.get('origem') == 'detalhe' or bool(p.get('alvo')) or bool(ENTR.search((p.get('el') or {}).get('t',''))) or '#' in (p.get('para') or '')
         c = chegou(p) if p.get('alvo') else None; v = bool(p.get('voltaOrigem')); rb = (p.get('voltar') or {}).get('detalheReaberto') if p.get('origem') == 'detalhe' else None
         rows.append({'de': p['tela'], 'ctx': '' if p.get('origem') == 'tela' else 'no detalhe', 'clique': p['el']['t'], 'para': p.get('para', ''), 'tipo': 'registro' if p.get('alvo') else ('registro inconclusivo' if isrec else 'tela'), 'chegou': c, 'volta': v, 'reabre': rb, 'prob': (c is False) or (not v) or (rb is False)})
     elif p['r'] in ('abre no lugar', 'mesma tela'):
@@ -62,14 +62,15 @@ dp = [x for x in det if x['tela'] in PROC]
 proc = {'det': len(dp), 'passo': sum(1 for x in dp if (x.get('passo') or {}).get('tem')), 'quem': sum(1 for x in dp if (x.get('passo') or {}).get('tem') and QUEM.search((x['passo'].get('texto') or '')))}
 res = {'processo': proc, 'telas': len(telas), 'detalhes': len(det), 'refsTotal': refsT, 'refsClic': refsC, 'rotTotal': rotT, 'rotClic': rotC, 'passagens': len(pas), 'navega': len(nav),
        'noLugar': sum(1 for p in pas if p['r'] in ('abre no lugar', 'mesma tela')), 'nada': sum(1 for p in pas if p['r'] == 'nada'),
-       'metodo':'v5.1', 'erros':len(erros), 'inconclusivasProporcao':sum(1 for p in intencao if not p.get('alvo'))/len(intencao) if intencao else None, 'navegacoesTela':len(nav)-len(intencao), 'inconclusivas':sum(1 for p in intencao if not p.get('alvo')), 'empilhados':sum(1 for p in pas if p.get('empilhado')), 'empilhadosChegaramDona':sum(1 for p in pas if p.get('empilhado') and chegou(p)), 'empilhadosVolta':sum(1 for p in pas if p.get('empilhado') and (p.get('voltar') or {}).get('detalheReaberto')), 'empilhadosCorretos':sum(1 for p in pas if (p.get('empilhado') or {}).get('abriu')), 'navRegistro': len(rec), 'naoLeva': sum(1 for p in rec if not leva(p)), 'levaIgnora': sum(1 for p in rec if leva(p) and not chegou(p)), 'chegou': sum(1 for p in rec if chegou(p)), 'voltaOrigem': sum(1 for p in rec if p.get('voltaOrigem')), 'voltarDet': len(voltarDet), 'reabre': sum(1 for p in voltarDet if (p.get('voltar') or {}).get('detalheReaberto')),
+       'metodo':'v5.1', 'erros':len(erros), 'inconclusivasProporcao':sum(1 for p in intencao if not p.get('alvo'))/len(intencao) if intencao else None, 'navegacoesTela':len(nav)-len(intencao), 'inconclusivas':sum(1 for p in intencao if not p.get('alvo')), 'empilhados':sum(1 for p in pas if p.get('empilhado')), 'empilhadosChegaramDona':sum(1 for p in pas if p.get('empilhado') and p.get('r')=='navega' and chegou(p)), 'empilhadosVolta':sum(1 for p in pas if p.get('empilhado') and (p.get('voltar') or {}).get('detalheReaberto')), 'empilhadosCorretos':sum(1 for p in pas if (p.get('empilhado') or {}).get('abriu')), 'navRegistro': len(rec), 'naoLeva': sum(1 for p in rec if not leva(p)), 'levaIgnora': sum(1 for p in rec if leva(p) and not chegou(p)), 'chegou': sum(1 for p in rec if chegou(p)), 'voltaOrigem': sum(1 for p in rec if p.get('voltaOrigem')), 'voltarDet': len(voltarDet), 'reabre': sum(1 for p in voltarDet if (p.get('voltar') or {}).get('detalheReaberto')),
        'passoTotal': passoT, 'passoPessoa': passoP, 'semPasso': semPasso, 'escopo': {'telas': len(PRINC), 'faz': faz, 'saf': saf, 'herda': 0}}
 top = collections.Counter((r['de'], r['para'].split('#')[0]) for r in rows if r['prob'])
 escfile=os.path.join(os.path.dirname(D),'escopo-28.json')
 res['escopo']['herda']=sum(x.get('resultado')=='herda' for x in json.load(open(escfile,encoding='utf-8'))) if os.path.exists(escfile) else None
 spec=importlib.util.spec_from_file_location('aceite',os.path.join(os.path.dirname(__file__),'aceite.py'))
 gate=importlib.util.module_from_spec(spec);spec.loader.exec_module(gate)
-aceite=gate.avaliar(D, res['chegou']/res['navRegistro'] if res['navRegistro'] else None, erros)
+taxas={k:(res[a]/res[b] if res[b] else None) for k,a,b in [('ids','refsClic','refsTotal'),('chegada','chegou','navRegistro'),('volta','voltaOrigem','navRegistro'),('voltar','reabre','voltarDet')]}
+aceite=gate.avaliar(D,taxas,erros)
 json.dump({'robo': res, 'erros':erros, 'aceite':aceite, 'prefixosTexto':dict(collections.Counter(k.split('-')[0] for x in det for k,v in (x.get('refs') or {}).items() if not v.get('clic'))), 'passagens': rows, 'piores': top.most_common(25)}, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
 print(json.dumps(res, ensure_ascii=False))
 print('linhas', len(rows), 'com problema', sum(r['prob'] for r in rows))

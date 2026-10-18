@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/robot.html','utf8');
 const code=src.slice(src.indexOf('const ENT_SRC'),src.indexOf('const LABENT'));
-const ctx={topDlg:d=>d.dialog,dTitle:(_,d)=>d?.title||'',vis:()=>true};vm.createContext(ctx);vm.runInContext(code,ctx);
+const ctx={URLSearchParams,topDlg:d=>d.dialog,dTitle:(_,d)=>d?.title||'',vis:()=>true};vm.createContext(ctx);vm.runInContext(code,ctx);
 const target=(raw,h,t)=>ctx.expectedTarget({getAttribute:()=>raw},{h,t});
 assert.equal(target(null,'OS.dc.html#OS-0502','Abrir').id,'OS-0502');
 assert.equal(target(null,'OS.dc.html#OS-0502','OS-0503').id,'');
@@ -25,3 +25,8 @@ page.dialog={title:''};assert(!ctx.arrival(page,{id:'OS-0502'}).abriu);
 console.log('PASS A2/A3: query de não fornece alvo; h1 somente sem diálogo.');
 
 assert(!ctx.exactId('OS-0502/2','OS-0502'));assert(!ctx.exactId('PC-0012 · da OS-0502','OS-0502'));assert.equal(target(null,'EST#dev=saldo&para=OS-0502','Abrir').id,'');console.log('PASS A10 limites e entidade primária');
+
+assert.equal(target(null,'OS#painel=OS-0420&abre=OS-0431','Abrir').id,'OS-0431');
+assert.equal(target(null,'MA#vis=ordens&om=OM-0233','Abrir').id,'OM-0233');
+assert.equal(target(null,'OS#a=OS-0420&b=OS-0431','Abrir').id,'');
+console.log('PASS N2 fragmentos compostos e ambiguidade');
