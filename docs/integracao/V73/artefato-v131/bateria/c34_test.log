@@ -1,0 +1,25 @@
+PASS cota não grava recibo; mesma chave repete depois da recuperação
+PASS migração única conserva chave antiga e outra safra
+PASS legado ilegível não derruba leitura nem permite sobrescrever
+PASS cenário ilegível não é substituído
+PASS PC-X 100kg A + 50L B: receber20kg A deixa80kg/50L
+PASS quarentena atual cai após inspeção, recebido e conferência permanecem
+PASS unidade e linha diferentes não são abatidas
+PASS lote misturado entre pedidos não inventa rateio da quarentena
+PASS somente pedidos aprovados entram no EST, com opções por linha
+9 testes de domínio; localStorage em memória, sem navegador/banco real.
+PASS previsão legada sem unidade só aceita unidade única do produto
+PASS procGravar real: memo só após durabilidade, draft e chave conservados na falha
+TOTAL 11 PASS
+PASS EST seleciona linha exata e recusa PC multi-item sem linha
+PASS quarentena de origem desconhecida não é atribuída à linha
+TOTAL FINAL 13 PASS
+PASS emitir real só confirma compra após recibo; falha mantém formulário e retry
+TOTAL COM CONFIRMACAO 14 PASS
+PASS P3 reset não ressuscita compras antigas e conserva legado
+PASS P3 reset antes da primeira migração também descarta releitura antiga
+PASS P4 armazenamento bloqueado se distingue de cópia ilegível, EST avisa
+TOTAL P1-P6 17 PASS
+PASS Q1 reset sem armazenamento ou com quota restaura em memória
+PASS Q2 mesma NF não troca de PC com id item e unidade novos
+TOTAL Q1-Q2 19 PASS
