@@ -1,12 +1,12 @@
 # Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 18/10, noite (UTC)
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v136 (versão 146, `1792356309-bb6f`).
+**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v137 (versão 147, `1792361592-0e5f`).
 
 **Conferência do artefato (executada):**
-- v136: 4 páginas que mudaram (OS, IN-04, PG, LO-02det), enviadas num lote (versão 146);
-- as 4 lidas de volta e conferidas por sha256 (`artefato-v136/LEIAME.md`);
-- origem: `61cd6e4c` (EX-32 v2 + EX-55 D2 do Codex + núcleo da agenda do Codex, ainda sem tela). O render desse commit é idêntico ao que os testes usaram (180 arquivos, 0 diferenças; `v136/LEIAME.md`).
+- v137: 10 páginas que mudaram (OS, AG-01, IR-01, SAF, IN-04 e as telas que carregam o código da Irrigação), enviadas num lote (versão 147);
+- as 10 lidas de volta e conferidas por sha256 (`artefato-v137/LEIAME.md`);
+- origem: `aa506fc2` (EX-55 F1). O render desse commit é idêntico ao que os testes usaram (179 arquivos, 0 diferenças).
 
 | Quando | Pedido | Situação | Onde conferir no artefato |
 |---|---|---|---|
@@ -47,6 +47,7 @@
 | 18/10 | Ideias dos jogos e simuladores (EX-52) e prompt de excelência | **Recebido**: validação do Claude e pedido de classificação independente ao Codex | — |
 | 18/10 | Perenes: idade, fase e ciclo no plano agronômico (EX-57) | **Em implantação** (EX-57): consenso Claude × Codex; Gemini real recebido e criticado (`EX-57-confronto.md` §7). F0a e F0b (regra única de datas, com a correção da âncora ausente) do Codex revisadas e integradas, ainda sem tela. Falta ligar as telas à regra única. As F1–F4 esperam o RT validar os parâmetros por cultura | — |
 | 18/10 | Decisões da seção 5 (lote, irrigação, turno, clima, alçadas, IA, portal/onboarding/backoffice) | **Registrado; o lote foi publicado na v136** (`pedidos-1810/decisoes-proprietario-1810.md`): **aprovação e liberação de O.S. em lote permitidas** (confirmado depois: "pode aprovar em lote as O.S sim"), com registro por O.S., papel, prévia e travas; irrigação só com água sem aprovação; turno aceito na tolerância; clima como alerta; alçadas por valor; IA desligada por ora; EX-50 delegado aos agentes. **EX-32 v2 publicado na v136** (versão 146): no grupo da O.S., quem tem o papel de RT ou agrônomo vê "Conferir aprovação das N pendentes" e depois "Aprovar as N"; cada O.S. recebe o próprio registro (CMD-42), a que mudou depois da prévia fica fora com o motivo, e nada é liberado. Liberar continua sendo a ação seguinte, também em lote | O.S. › Frentes › grupo (roteiro em `artefato-v136/LEIAME.md`) |
+| 18/10 | Mapa dentro do próprio submenu (Planejar safra, Ordem de serviço, Irrigação etc.), sem ir ao Mapa principal (EX-55) | **Publicado na v137** (versão 147; EX-55 F1). Ordens de serviço, Pragas e doenças e Irrigação ganham a visão Mapa, com as mesmas cores do Mapa da fazenda (paridade conferida talhão a talhão). O mapa pinta só o que a lista mostra, com o recorte em etiquetas removíveis. Tocar no talhão abre a O.S., a vistoria ou o setor. O Planejar safra já tinha o mapa (v135) e agora mostra a 2ª linha do rótulo. Fica para a F2 a migração do mapa do Planejar safra e das Frentes para o mesmo componente | O.S. › ícone de mapa; Pragas e doenças › Mapa; Irrigação › Mapa (roteiro em `docs/mapa/EX-55-F1/LEIAME.md`) |
 | 18/10 | Varredura final e encerramento do protótipo (EX-56) | **Portão fechado** (`pedidos-1810/EX-56-portao.md`): começa quando todos os outros EX estiverem decididos, implantados e aceitos. O teste moderado com 3 a 5 pessoas por persona depende do proprietário convidar as pessoas | — |
 
 ## Por que quase nada da noite chegou ao artefato
