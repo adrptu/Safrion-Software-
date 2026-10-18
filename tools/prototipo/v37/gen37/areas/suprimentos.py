@@ -213,7 +213,7 @@ def _origens():
             for i,p in enumerate(a['prods']):
                 dose=D2.AJUSTES.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 nm=D2.prod_nome(p['prod'],c)
-                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat(),q=dose*c['area'],
+                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat() if dt is not None else None,q=dose*c['area'],
                     memo=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha",
                     o=[dict(t=f"Cultivo {c['local']} · {c['cultura']} {c['variedade']} · {nf(c['area'])} ha"),
                        dict(t=f"Plano {pl['nome']} v{pl['versao']} · {a['nome']} · {a['g']['tipo']} {a['g']['dias'] if a['g']['dias'] is not None else ''}".strip()),

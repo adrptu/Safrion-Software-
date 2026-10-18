@@ -93,3 +93,41 @@ finally:
     D.CULTIVOS[saf]=anteriores
     del D.PLANO[plano['id']]
 print('OK percurso compra: override sem âncora preserva quantidade; resolução atualiza data sem alterar dose/área')
+
+# SU-01: executar a função real isolada do gerador de telas; D2 não é simulado.
+import ast
+from pathlib import Path
+fonte_su = Path(__file__).with_name('areas').joinpath('suprimentos.py')
+func = next(n for n in ast.parse(fonte_su.read_text()).body if isinstance(n, ast.FunctionDef) and n.name == '_origens')
+ns = {'D2': D, 'nf': lambda v, d=0: f'{v:.{d}f}'}
+exec(compile(ast.Module(body=[func], type_ignores=[]), str(fonte_su), 'exec'), ns)
+base_c = next(c for c in D.CULTIVOS['S2627'] if c.get('plano') and any(a.get('prods') for a in D.PLANO[c['plano']]['atividades']))
+pl_su = copy.deepcopy(D.PLANO[base_c['plano']])
+a_su = copy.deepcopy(next(a for a in pl_su['atividades'] if a.get('prods')))
+a_su['g'] = dict(tipo='DAPC', dias=2)
+pl_su['id'] = 'TESTE-SU01-SEM-ANCORA'
+pl_su['atividades'] = [a_su]
+c_su = copy.deepcopy(base_c)
+c_su.update(plano=pl_su['id'], colheita=None)
+cs_antes = D.CULTIVOS['S2627']
+D.PLANO[pl_su['id']] = pl_su
+D.CULTIVOS['S2627'] = [c_su]
+try:
+    pend = ns['_origens']()
+    assert pend and all(x['dt'] is None for xs in pend.values() for x in xs)
+    for produto, xs in pend.items():
+        esperado = sum(D.AJUSTES.get(c_su['id'], {}).get(f"{a_su['id']}|{i}", p['dose']) * c_su['area']
+                       for i, p in enumerate(a_su['prods']) if D.prod_nome(p['prod'], c_su) == produto)
+        assert abs(sum(x['q'] for x in xs) - esperado) < 1e-6
+    c_su['colheita'] = '2027-01-10'
+    resol = ns['_origens']()
+    assert resol.keys() == pend.keys()
+    for produto in pend:
+        assert len(pend[produto]) == len(resol[produto])
+        for antes, depois in zip(pend[produto], resol[produto]):
+            assert depois['dt'] == '2027-01-12'
+            assert {k:v for k,v in antes.items() if k != 'dt'} == {k:v for k,v in depois.items() if k != 'dt'}
+finally:
+    D.CULTIVOS['S2627'] = cs_antes
+    del D.PLANO[pl_su['id']]
+print('OK SU01 _origens real: DAPC+2 sem colheita mantém quantidade/memória/origens; resolver só muda data')
