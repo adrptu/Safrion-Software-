@@ -139,56 +139,74 @@ def perfis_js():
 
 
 def seed_agrupamento(est):
-    """Quatro origens sintéticas, sem assinatura/reserva. Não altera ordens salvas nem aplica migração."""
+    """EX-54 Frentes de trabalho (proprietário, 18/10/2026): O.S. A liberar sobre talhões reais do mapa, como sairiam do plano.
+    Lagoa Grande: a semana da especificação viva (O.S. 0601 a 0611: acaricida, fungicida e calagem), com ficha técnica completa (OS-LOTE).
+    Santa Rita: "Dessecação pré-plantio" (mesma receita da OS-0430) em T1-B, T3 e P1 (P1 sem vazão: "Definir vazão") e KCl a lanço em P2 e T2.
+    Sem assinatura nem reserva; os IDs 0595–0599 e 0601–0611 ficam fora da numeração das O.S. novas (demoLote). Não é recomendação agronômica."""
     import copy
-    for i, (area, dose) in enumerate(((10, 2), (15, 2), (5, 2), (5, 3))):
-        oid='OS-%04d' % (590+i)
-        if oid in est['ordens']: raise ValueError('ID da demonstração de agrupamento já ocupado: '+oid)
-        parcela='LG-DEMO-%s' % chr(65+i)
-        ins=[dict(p='Sulfato de magnésio',g='Fertilizante',dose=dose,un='kg',tot=_QTD.qtd(dose,area),emb='saco 25 kg')]
-        origem='Demonstração de agrupamento · parcelas sintéticas sem sobreposição no contexto Lagoa Grande / Mamão Formosa. Não é recomendação agronômica.'
-        no=dict(id=oid,novo=True,demoLote=True,tipo='Pulverização · demonstração de agrupamento',talhao='Parcela demonstrativa '+chr(65+i),
-                talhoes=[dict(id=parcela,nome='Parcela demonstrativa '+chr(65+i))],faz=DL.FAZ,saf='2026/27',cult='LG-DEMO',
-                cultura='Mamão Formosa',culturas=['Mamão Formosa'],area=area,etapa='A liberar',selos=[dict(t='Demonstração',c='gray')],
-                versao='v1',realizado=0,saldo=area,ap=[],ins=ins,req=None,reservado=False,resp='A programar',
-                jan='2026-09-29',ini='2026-09-29',fim='2026-09-29',janela='29/09 · 08:00–18:00 UTC−3',
-                atv=dict(op='Pulverização',nome='Demonstração de agrupamento',orig=origem,conj='',rend=5),
-                keys=[parcela+'|DEMO-AGRUPAR'],cond='Revisar a versão de cada origem; agrupar não aprova nem libera.',
-                dono='Agrônomo',prazo='Revisar versão',orig=[origem],obs=origem,nota='',agua=False,local='',semins='',bloq=None,aviso='',link='')
-        est['ordens'][oid]=dict(id=oid,tipo=no['tipo'],talhao=no['talhao'],area=area,etapa='A liberar',versao='v1',realizado=0,saldo=area,
-                resp=no['resp'],ins=copy.deepcopy(ins),req=None,selos=no['selos'],ap=[],reservado=False,osc=dict(novo=no),
-                instrucao=dict(vazao=100,versao='v1',origem=origem),
-                loteFicha=dict(versaoOS='v1',organizacao='DEMO-LG',fazenda=DL.FAZ,safra='LG2627',cultura='Mamão Formosa',
-                    operacao='Pulverização',metodo='barra',receita='DEMO-AGRUPAR',receitaVersao='v1',perfil='barra',regulagem='DEMO-100L',
-                    ocorrencia='DEMO-AGRUPAR-'+chr(65+i),parcela=parcela,tipo='liquido',base='ha',
-                    janela=['2026-09-29T08:00:00-03:00','2026-09-29T18:00:00-03:00'],volumeHa=100,
-                    capacidadeHaH=5,deslocamentoH=0.5 if i==0 else 0,setupH=0.25 if i==0 else 0,tanqueUtil=3000,
-                    recursos=dict(maquina='Trator',implemento='Pulverizador'),
-                    insumos=[dict(p='Sulfato de magnésio',id='DEMO-SULFMG',formulacao='Solúvel · demonstração',concentracao='Demonstração, sem recomendação',base='ha')]))
-    # Demonstração comum no contexto inicial: sem ficha técnica sintética adicional.
-    for i, (area, dose) in enumerate(((10, 2), (15, 2), (5, 2), (5, 3), (5, 2))):
-        oid='OS-%04d' % (595+i)
-        if oid in est['ordens']: raise ValueError('ID demonstrativo ocupado: '+oid)
-        o=copy.deepcopy(est['ordens']['OS-0590'])
-        o.pop('loteFicha')
-        no=o['osc']['novo']
-        parcela='SR-DEMO-'+chr(65+i)
-        origem='Demonstração sintética de agrupamento; não é recomendação agronômica.'
-        no.update(id=oid, faz='Santa Rita', saf='2026/27', cult=parcela,
-            talhao='Talhão demonstrativo '+chr(65+i), talhoes=[dict(id=parcela,nome='Talhão demonstrativo '+chr(65+i))],
-            area=area,saldo=area,keys=[parcela+'|DEMO-AGRUPAR'],orig=[origem],obs=origem,
-            jan='2026-09-30',ini='2026-09-30',fim='2026-09-30',janela='30/09 · 08:00–18:00 UTC−3',resp='Marcos')
-        no['atv']['orig']=origem
-        no['ins'][0].update(dose=dose,tot=_QTD.qtd(dose,area))
-        o.update(id=oid,talhao=no['talhao'],area=area,saldo=area,resp='Marcos',ins=copy.deepcopy(no['ins']))
-        o['instrucao']['origem']=origem
-        if i==4: o.pop('instrucao')
-        ini=(8,10,13,14,15)[i]
-        fim=(10,13,14,15,16)[i]
-        o['prog']=dict(fuso='-03:00',blocos=[dict(r=r,os=oid,dia='2026-09-30',ini=ini,fim=fim,h=fim-ini,sit='condicional') for r in ('T03','PJ','MAR','PAU')])
-        est['ordens'][oid]=o
+    PIV = DL.PIVOS
+    def _no(oid, faz, cult, cultura, talhao, tid, area, ins, atv, op, jan, rend, resp, chave):
+        orig = 'Do plano · ' + atv + ' (' + chave + '). Dados sintéticos; não é recomendação agronômica.'
+        return dict(id=oid, novo=True, demoLote=True, tipo=atv, talhao=talhao, talhoes=[dict(id=tid, nome=talhao)], faz=faz, saf='2026/27', cult=cult,
+                    cultura=cultura, culturas=[cultura], area=area, etapa='A liberar', selos=[], versao='v1', realizado=0, saldo=area, ap=[], ins=ins, req=None,
+                    reservado=False, resp=resp, jan=jan[0], ini=jan[0], fim=jan[1], janela=jan[0][8:10] + '/' + jan[0][5:7] + '–' + jan[1][8:10] + '/' + jan[1][5:7],
+                    atv=dict(op=op, nome=atv, orig=orig, conj='', rend=rend), keys=[tid + '|' + chave], cond='Revisar a versão de cada origem; agrupar não aprova nem libera.',
+                    dono='Agrônomo', prazo='Revisar versão', orig=[orig], obs=orig, nota='', agua=False, local='', semins='', bloq=None, aviso='', link='')
+    def _ordem(no, extra):
+        o = dict(id=no['id'], tipo=no['tipo'], talhao=no['talhao'], area=no['area'], etapa='A liberar', versao='v1', realizado=0, saldo=no['area'], resp=no['resp'],
+                 ins=copy.deepcopy(no['ins']), req=None, selos=[], ap=[], reservado=False, osc=dict(novo=no))
+        o.update(extra); return o
+    def _ins(itens, area, emb):
+        return [dict(p=p_, g=g_, dose=d_, un=u_, tot=_QTD.qtd(d_, area), emb=emb.get(p_, '')) for p_, g_, d_, u_ in itens]
+    # ---------- Lagoa Grande: a semana de 28/09 a 05/10 da especificação viva do EX-54 (O.S. 0601 a 0611; pivôs, áreas, produtos e doses do
+    # cenário): acaricida (abamectina 0,5 L/ha e uma de 0,6 L/ha em infestação maior), fungicida (tebuconazol 1 L/ha) e calagem (calcário
+    # 2.000 kg/ha, distribuidor 3 t). Ficha técnica completa (OS-LOTE): rendimento, tanque e volume de calda são premissas da demonstração ----------
+    aba = lambda d: [('Abamectina 18 EC', 'Inseticidas', d, 'L')]   # como na especificação viva (calda aba5/aba6: só abamectina)
+    teb = [('Tebuconazol 200 EC', 'Fungicidas', 1.0, 'L')]
+    cal = [('Calcário dolomítico filler', 'Corretivos', 2000.0, 'kg')]
+    emb = {'Abamectina 18 EC': 'galão 5 L', 'Óleo mineral': 'galão 20 L', 'Tebuconazol 200 EC': 'galão 5 L', 'Calcário dolomítico filler': 'granel'}
+    MOL = {'Abamectina 18 EC': ('LG-ABAM18', 'EC', '18 g/L'), 'Óleo mineral': ('LG-OLEO', 'EC', 'óleo mineral (demonstração)'),
+           'Tebuconazol 200 EC': ('LG-TEBU200', 'EC', '200 g/L'), 'Calcário dolomítico filler': ('LG-CALC', 'pó', 'PRNT da demonstração')}
+    # Pivô 2 no lugar do Pivô 6 da especificação: o 6 já tem as 2 aplicações de abamectina permitidas no ciclo (OS-0504, caderno 28/08)
+    lg = [('OS-0601', 2, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-28', '2026-10-02')), ('OS-0602', 4, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')),
+          ('OS-0603', 9, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')), ('OS-0604', 17, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-30', '2026-10-04')),
+          ('OS-0605', 14, aba(0.6), 'Controle de ácaro', 'q2-RT', ('2026-09-30', '2026-10-04')),
+          ('OS-0606', 20, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')), ('OS-0607', 21, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')),
+          ('OS-0608', 22, teb, 'Fungicida para antracnose', 'q4', ('2026-09-30', '2026-10-05')), ('OS-0609', 24, teb, 'Fungicida para antracnose', 'q4', ('2026-10-01', '2026-10-05')),
+          ('OS-0610', 10, cal, 'Calagem', 'i1', ('2026-09-27', '2026-10-02')), ('OS-0611', 8, cal, 'Calagem', 'i1', ('2026-09-29', '2026-10-03'))]
+    for oid, n, itens, atv, rec, jan in lg:
+        if oid in est['ordens']: raise ValueError('ID da demonstração de frentes já ocupado: ' + oid)
+        area = PIV[n]; tid = 'PV%02d' % n; talhao = 'Pivô %d' % n; liq = itens is not cal
+        op = 'Pulverização' if liq else 'Adubação a lanço'
+        no = _no(oid, DL.FAZ, 'lg%02d' % n, 'Mamão Formosa', talhao, tid, area, _ins(itens, area, emb), atv, op, jan, 6 if liq else 5, 'Wesley' if liq else 'Lúcia',
+                 ('MAMAO-PROD ' if liq else 'MAMAO-IMP ') + rec)
+        ficha = dict(versaoOS='v1', organizacao='DEMO-LG', fazenda=DL.FAZ, safra='LG2627', cultura='Mamão Formosa', operacao=op,
+                     metodo='turboatomizador' if liq else 'a lanço', receita=('MAMAO-PROD-' if liq else 'MAMAO-IMP-') + rec, receitaVersao='v1',
+                     perfil='turbo' if liq else 'lanço', regulagem='TURBO-200L' if liq else 'DIST-2000KG', ocorrencia=rec + '-' + tid, parcela=tid,
+                     tipo='liquido' if liq else 'solido', base='ha', janela=[jan[0] + 'T06:00:00-03:00', jan[1] + 'T18:00:00-03:00'],
+                     volumeHa=200 if liq else None, capacidadeHaH=6 if liq else 5, deslocamentoH=0, setupH=0, tanqueUtil=2000 if liq else None,
+                     recursos=dict(maquina='Trator', implemento='Pulverizador' if liq else 'Distribuidor'),   # classes do cadastro de recursos (alocacao.py)
+                     insumos=[dict(p=p_, id=MOL[p_][0], formulacao=MOL[p_][1], concentracao=MOL[p_][2], base='ha') for p_, _g, _d, _u in itens])
+        if not liq: ficha.pop('volumeHa'); ficha.pop('tanqueUtil')
+        extra = dict(loteFicha=ficha)
+        if liq: extra['instrucao'] = dict(vazao=200, versao='v1', origem=no['obs'])
+        est['ordens'][oid] = _ordem(no, extra)
+    # ---------- Santa Rita: dessecação pré-plantio (calda, pulverizador PJ) e KCl a lanço (sólido, distribuidor DI) ----------
+    des = [('Glifosato 480', 'Herbicidas', 2.0, 'L'), ('2,4-D 806', 'Herbicidas', 1.0, 'L'), ('Óleo mineral', 'Adjuvantes', 0.5, 'L')]
+    kcl = [('KCl 60%', 'Fertilizantes', 150.0, 'kg')]
+    emb = {'Glifosato 480': 'galão 20 L', '2,4-D 806': 'galão 20 L', 'Óleo mineral': 'galão 20 L', 'KCl 60%': 'big bag 1.000 kg'}
+    sr = [('OS-0595', 'c2', 'T1-B', 152, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 6, 13), True),
+          ('OS-0596', 'c5', 'T3', 96, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 13, 17.5), True),
+          ('OS-0597', 'c6', 'P1', 95, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 17.5, 22), False),
+          ('OS-0598', 'c7', 'P2', 80, kcl, 'KCl a lanço antes do plantio', 'Adubação a lanço', ('2026-10-01', '2026-10-03'), 12, ('T04', 'DI', 'CAR'), ('2026-10-01', 6, 13), None),
+          ('OS-0599', 'c3', 'T2', 298, kcl, 'KCl a lanço antes do plantio', 'Adubação a lanço', ('2026-10-01', '2026-10-03'), 12, ('T04', 'DI', 'CAR'), ('2026-10-02', 6, 18), None)]
+    for oid, cult, talhao, area, itens, atv, op, jan, rend, recs, (dia, ini, fim), vaz in sr:
+        if oid in est['ordens']: raise ValueError('ID demonstrativo ocupado: ' + oid)
+        no = _no(oid, 'Santa Rita', cult, 'Soja', talhao, talhao, area, _ins(itens, area, emb), atv, op, jan, rend, 'Marcos', 'SOJA-AT')
+        extra = dict(prog=dict(fuso='-03:00', blocos=[dict(r=r, os=oid, dia=dia, ini=ini, fim=fim, h=fim - ini, sit='condicional') for r in recs]))
+        if vaz: extra['instrucao'] = dict(vazao=100, versao='v1', origem=no['obs'])   # P1 (vaz False) sem vazão: a frente mostra "Definir vazão"
+        est['ordens'][oid] = _ordem(no, extra)
     return est
-
 
 if __name__ == '__main__':
     import sys; sys.path.insert(0, HERE)

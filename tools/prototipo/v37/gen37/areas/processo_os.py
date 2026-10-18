@@ -1048,6 +1048,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil(),cur.chave),{pa:null}); };
 }
 // OS-LOTE: mesma coleção e contexto, rascunho preservado ao fechar. Sem seleção implícita.
+// números de carga em faixas: 1, 2, 3, 5 → 1–3, 5
+function osFaixas(ns){const out=[];(ns||[]).forEach(n=>{const u=out[out.length-1];if(u&&n===u[1]+1)u[1]=n;else out.push([n,n]);});return out.map(([a,b])=>a===b?String(a):a+'–'+b).join(', ')||'—';}
 function osGrupoVals(self,v,recorte){
   const c=cenGet(),pf=g2perfil(),perfil=(g2pf(pf)||{}).k;
   const put=x=>{self.setState({og:Object.assign({},self.state.og||{},x)});
@@ -1080,7 +1082,7 @@ function osGrupoVals(self,v,recorte){
       if(e.key==='Escape'&&!e.defaultPrevented){e.preventDefault();v.og_fechar();}
     };document.addEventListener('keydown',self.__ogEscape);}
   }
-  v.og_titulo=g?g.id+' · versão '+g.versao:'Agrupar operações';v.og_contexto=st.contexto||'';
+  v.og_titulo=g?g.id+' · versão '+g.versao:'Frentes de trabalho';v.og_contexto=st.contexto||'';
   v.og_erro=st.erro||'';v.og_temerro=!!st.erro;v.og_criar=!g;v.og_detalhe=!!g;
   v.og_voltar=()=>put({previa:null,confirmacao:null,instrucao:null,erro:'',chave:key()});
   v.og_revisao=!!(st.previa||st.confirmacao);v.og_selecao=!v.og_revisao&&!st.modoPrograma;v.og_semcheckbox=!v.og_selecao;
@@ -1123,8 +1125,9 @@ function osGrupoVals(self,v,recorte){
   v.og_mostra_sugestoes=!g&&!ids.length&&!v.og_revisao&&!st.instrucao;
   if(v.og_mostra_sugestoes)v.og_acao_visivel=false;
   v.og_fora=fora.map(x=>Object.assign(x,conferir(x.id),{instrucao:()=>{const r=v.og_linhas.find(o=>o.id===x.id);if(r&&r.podeInstrucao)r.instrucao()},podeInstrucao:!!(v.og_linhas.find(o=>o.id===x.id)||{}).podeInstrucao}));v.og_fora_t='Fora de grupo ('+fora.length+')';
-  v.og_escolhidas=v.og_linhas.filter(x=>st.instrucao?st.instrucao.id===x.id:(g||ids.includes(x.id))).map(x=>Object.assign({},x,conferir(x.id),{estado:x.estado,talhao:(c.ordens[x.id]||{}).talhao||((ords(self).find(o=>o.id===x.id)||{}).talhao)||'—',podeRetirar:!g&&!v.og_revisao,retirar:()=>selecionar(x.id)}));
-  v.og_vazia=!v.og_linhas.length;v.og_n=g?'':ids.length+' selecionadas';
+  // OS-AGRUPA-2: as escolhidas aparecem na ordem da rota (a ordem de ids), não na da lista
+  v.og_escolhidas=v.og_linhas.slice().sort((a,b)=>g?0:ids.indexOf(a.id)-ids.indexOf(b.id)).filter(x=>st.instrucao?st.instrucao.id===x.id:(g||ids.includes(x.id))).map(x=>Object.assign({},x,conferir(x.id),{estado:x.estado,talhao:(c.ordens[x.id]||{}).talhao||((ords(self).find(o=>o.id===x.id)||{}).talhao)||'—',podeRetirar:!g&&!v.og_revisao,retirar:()=>selecionar(x.id)}));
+  v.og_vazia=!v.og_linhas.length;v.og_n=g||v.og_mostra_sugestoes?'':ids.length+' selecionadas';
   v.og_programar_grupo=()=>put({modoPrograma:true,programar:true,previa:null,confirmacao:null,erro:'',chave:key()});
   v.og_programar=!!st.programar;v.og_programar_mudar=e=>put({programar:!!e.target.checked,previa:null,erro:'',chave:key()});
   const fz0=(()=>{const id=(g?g.ids:ids)[0],f=id&&c.ordens[id]&&c.ordens[id].loteFicha,m=f&&f.janela&&/([+-]\d\d:\d\d)$/.exec(f.janela[0]);return m?m[1]:'';})();
@@ -1132,17 +1135,17 @@ function osGrupoVals(self,v,recorte){
   v.og_inicio=st.inicio||'';v.og_inicio_mudar=e=>put({inicio:e.target.value,previa:null,erro:'',chave:key()});
   v.og_fuso=st.fuso||fz0;v.og_fuso_mudar=e=>put({fuso:e.target.value,previa:null,erro:'',chave:key()});
   v.og_campos=[['maquina','Máquina','Máquina'],['implemento','Implemento','Implemento'],['operador','Operador','Pessoa','operador'],['caldeiro','Caldeiro','Pessoa','caldeiro']].filter(([k])=>k!=='caldeiro'||!((c.ordens[(g?g.ids:ids)[0]]||{}).loteFicha)||c.ordens[(g?g.ids:ids)[0]].loteFicha.tipo==='liquido').map(([k,l,t,cl])=>({k,l,val:st[k]||'',mudar:e=>put({[k]:e.target.value,previa:null,erro:'',chave:key()}),opcoes:[{v:'',t:'Escolha…'}].concat(Object.keys(AL0.nome).filter(r=>AL0.tipo[r]===t&&(!cl||AL0.classe[r]===cl)).map(r=>({v:r,t:AL0.nome[r]})))}));
-  v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao&&(g?g.ids:ids).every(id=>(c.ordens[id]||{}).loteFicha);
+  v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao&&(g?g.ids:ids).length>0&&(g?g.ids:ids).every(id=>(c.ordens[id]||{}).loteFicha);
   v.og_previa=()=>{try{if(!g||st.modoPrograma){const p=cenGrupoPrevia(c,g?g.ids:ids,pf,g?g.id:undefined,st.programar?{maquina:st.maquina,implemento:st.implemento,operador:st.operador,caldeiro:st.caldeiro,inicio:(st.inicio||'')+(st.fuso||fz0)}:null);put({previa:p,versaoGrupo:g?g.versao:null,erro:'',chave:key()})}
     else{const escolhidas=ids.length?ids:aprovadas;if(!escolhidas.length)throw Error('Aprove cada O.S. e confira os impedimentos antes de liberar.');cenExigeAlc(pf,'AL-01','Liberar selecionadas');put({confirmacao:{tipo:'liberar',ids:escolhidas.slice(),versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}}catch(e){put({erro:e.message})}};
   const p=st.previa,q=st.confirmacao;
   v.og_resumo=revisaAprovacao?'Aprovar somente '+st.confirmacao.os+' na versão e dose exibidas. As demais origens permanecem como estão. Aprovar não libera nem reserva insumos.':p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
-    q?(q.tipo==='separar'?'Separar '+q.os+' do grupo. IDs, versões e demanda das origens permanecem.':'Liberar '+q.ids.join(', ')+'. Cada origem terá seu resultado; nenhuma aprovação será criada.'):g?'Aprove cada O.S. e confira os impedimentos antes de liberar.':'Escolha uma calda compatível; depois confira as O.S.';
+    q?(q.tipo==='separar'?'Separar '+q.os+' do grupo. IDs, versões e demanda das origens permanecem.':'Liberar '+q.ids.join(', ')+'. Cada origem terá seu resultado; nenhuma aprovação será criada.'):g?'Aprove cada O.S. e confira os impedimentos antes de liberar.':v.og_mostra_sugestoes?'':'Confira as O.S. na ordem da rota e o agrupamento.';
   v.og_janela=p&&p.inicio?'Janela comum: '+hl(p.inicio,fz0)+' a '+hl(p.fim,fz0):'';
   v.og_produtos=p?p.produtos.map(x=>({t:x.p+' · '+nf(x.q)+' '+x.un+' ('+nf(x.dose)+' '+x.un+'/ha)'})):[];
   const preparo=g?cenGrupoCaldas(c,g.id):{cargas:[],talhoes:[],motivo:''};
   v.og_cargas=(p?(p.cargas||[]):preparo.cargas).map(x=>({t:'Carga '+x.n+' · '+nf(x.vol)+' L · '+x.destinos.map(d=>d.os+': '+nf(d.area)+' ha').join(' / ')+' · '+x.produtos.map(i=>i.p+': '+nf(i.q)+' '+i.un).join(' · ')}));
-  v.og_sequencia=preparo.talhoes.map(x=>({ordem:x.ordem,talhao:x.talhao,os:x.os,area:nf(x.area)+' ha',cargas:x.cargas.join(', '),volume:nf(x.volume)+' L',t:x.ordem+'. '+x.talhao+' · '+x.os+' · '+nf(x.area)+' ha · '+x.quantidade+' carga(s): '+x.cargas.join(', ')+' · '+nf(x.volume)+' L destinados ao talhão'}));
+  v.og_sequencia=preparo.talhoes.map(x=>({ordem:x.ordem,talhao:x.talhao,os:x.os,area:nf(x.area)+' ha',cargas:osFaixas(x.cargas),volume:nf(x.volume)+' L',t:x.ordem+'. '+x.talhao+' · '+x.os+' · '+nf(x.area)+' ha · '+x.quantidade+' carga(s): '+x.cargas.join(', ')+' · '+nf(x.volume)+' L destinados ao talhão'}));
   v.og_preparo_motivo=preparo.motivo;
   v.og_pendencias=p?p.pendencias.map(t=>({t})):[];
   const programacao=p?p.programacao:g?Object.fromEntries(g.ids.map(id=>[id,(c.ordens[id]||{}).prog])):null;
@@ -1171,6 +1174,72 @@ function osGrupoVals(self,v,recorte){
   v.og_hist=g?g.historico.map(x=>({t:x.acao+' · v'+x.versao+' · '+x.por+' · '+x.at})):[];
 }
 
+// EX-54 · visão Frentes (docs/os-agrupa/OS-AGRUPA-2.md; prompt-safrion-frentes-trabalho.md): família pelo implemento, caldas em sequência, rota pelo
+// mapa, ganho contra cada O.S. sozinha. Só lê: não aprova, não libera, não reserva. "Agrupar a mesma calda" leva ao diálogo do OS-LOTE (conferir e confirmar).
+function osFrentesVals(self,v,recorte){
+  const c=cenGet(),G=typeof OS_GEO!=='undefined'?OS_GEO:{},IDX=typeof OG_IDX!=='undefined'?OG_IDX:[],st=self.state.ofr||{};
+  const geoKey=(faz,nome)=>{const g=G[faz];if(!g||!nome)return null;if(g.c[nome])return nome;const p=String(nome).replace(/-[A-Z0-9]+$/,'');return g.c[p]?p:null;};
+  const iso=x=>/^\d{4}-\d{2}-\d{2}/.test(String(x||''))?String(x).slice(0,10):'';
+  const fora={},rows=[];
+  (recorte||[]).forEach(x=>{const id=x.id,o=c.ordens[id];if(!o||/^OB-/.test(id))return;
+    if(!['A liberar','Liberadas','Em execução'].includes(o.etapa)){(fora['Em conferência, encerradas ou canceladas']=fora['Em conferência, encerradas ou canceladas']||[]).push(id);return;}
+    const b=(o.osc||{}).novo||ords(self).find(y=>y.id===id)||o,f=o.loteFicha,tals=(b.talhoes||[]).map(t=>t.nome).filter(Boolean),talhao=tals[0]||b.talhao||o.talhao||'',talhaoTxt=tals.length>1?tals.join(' + '):talhao;
+    const faz=f?f.fazenda:(b.faz||o.faz||''),texto=[(b.atv||{}).op,(b.atv||{}).nome,o.tipo].filter(Boolean).join(' ');
+    let impl=f?(f.recursos||{}).implemento:'';if(!impl){try{const r=alDaOrdem(c,id).find(z=>AL0.tipo[z.r]==='Implemento');impl=r?AL0.classe[r.r]||AL0.nome[r.r]:'';}catch(e){}}
+    const fam=frFamilia(impl,texto),liquido=fam==='Pulverização';
+    let vazao=null,tanque=null,bloq='';
+    if(f){vazao=f.volumeHa||null;tanque=f.tanqueUtil||null;}
+    else if(liquido){const pr=cenPreparoOrdem(c,o);if(pr.ok){vazao=pr.vazao;tanque=pr.tanque;}else bloq=/Vazão/.test(pr.motivo)?'Definir vazão':pr.motivo;}
+    const exec=o.etapa==='Em execução',liberada=o.etapa!=='A liberar',vn=osVn(o.versao),apr=osAprovada(o,vn);
+    const sit=exec?'Em execução · saldo '+nf(o.saldo)+' ha':liberada?'Liberada':apr?'Aprovada '+o.versao+' · liberar (PCP)':'Aprovação '+o.versao+' pendente · RT decide';
+    rows.push({id,faz,saf:f?f.safra:(b.saf||o.saf||''),cultura:f?f.cultura:(b.cultura||(b.culturas||[]).join(' / ')||o.cultura||''),fam,atv:(b.atv||{}).nome||String(o.tipo||'').split(' · ')[0],
+      talhao:talhaoTxt,tkey:geoKey(faz,talhao),area:exec?o.saldo:o.area,ins:o.ins||[],liquido,vazao,tanque,rend:Number((b.atv||{}).rend)||(f&&f.capacidadeHaH)||null,
+      ini:f?f.janela[0].slice(0,10):iso(b.ini||b.jan),fim:f?f.janela[1].slice(0,10):iso(b.fim||b.jan),liberada,etapa:o.etapa,sit,bloq,apr});});
+  const porFaz={};rows.forEach(r=>{(porFaz[r.faz]=porFaz[r.faz]||[]).push(r)});
+  let frentes=[];Object.keys(porFaz).forEach(fz=>{const x=osFrentes(porFaz[fz],G[fz]||null);frentes=frentes.concat(x.frentes);x.soltas.forEach(z=>{(fora[z.motivo]=fora[z.motivo]||[]).push(z.id)});});
+  const sel=frentes.find(f=>f.k===st.k)||frentes[0]||null;
+  const dm=x=>x?x.slice(8,10)+'/'+x.slice(5,7):'',jan=(a,b)=>a&&b?(a===b?dm(a):dm(a)+'–'+dm(b)):'sem janela';
+  const un=f=>{const n=f.seq.length,p=f.seq.every(r=>/^Pivô/.test(r.talhao));return n+' '+(p?(n>1?'pivôs':'pivô'):(n>1?'talhões':'talhão'));};
+  const ganhoTxt=f=>{const g=[];if(f.km!==null&&f.kmSo!==null&&f.kmSo>f.km)g.push(frNum(f.kmSo-f.km,1)+' km a menos');
+    if(f.cargas.porOS!==null&&f.cargas.continuas!==null&&f.cargas.porOS>f.cargas.continuas){const d=f.cargas.porOS-f.cargas.continuas;g.push(d+(d>1?' cargas':' carga')+' a menos com calda contínua (RT decide)');}
+    return g.join(' · ')||f.porque[0];};
+  v.ofr_tem=frentes.length>0;v.ofr_vazio=!frentes.length;
+  v.ofr_vazio_t=rows.length?'Nenhuma frente neste recorte: são precisas duas O.S. da mesma família e produto com janelas que se encontram. Amplie Fazenda, Safra ou Talhão.':'Nenhuma O.S. a liberar, liberada ou em execução neste recorte.';
+  v.ofr_lista=frentes.map(f=>({k:f.k,fam:f.fam+' · '+f.faz,t:f.compat||f.atv,sub:f.caldas>1?f.caldas+(f.fam==='Pulverização'?' caldas':' regulagens')+' · '+f.atv:f.atv,
+    info:un(f)+' · '+nf(f.area)+' ha · '+jan(f.janela.ini,f.janela.fim),ganho:ganhoTxt(f),on:!!sel&&f.k===sel.k,go:()=>self.setState({ofr:Object.assign({},st,{k:f.k})})}));
+  const marca={};if(sel)sel.seq.forEach(r=>{if(r.tkey)marca[sel.faz+'|'+r.tkey]=r.ordem;});
+  IDX.forEach(([fz,t],i)=>{const n=marca[fz+'|'+t];v['ofrt'+i+'_fill']=n?'rgba(46,125,50,.32)':'#e3e9e3';v['ofrt'+i+'_stk']=n?'#2E7D32':'#c4cfc5';v['ofrt'+i+'_n']=n?String(n):'';v['ofrt'+i+'_nop']=n?1:0;});
+  Object.keys(G).forEach(fz=>{const g=G[fz],on=!!sel&&sel.faz===fz;v['ofr_mf_'+g.fk]=on;
+    const pts=on?sel.seq.filter(r=>r.tkey&&g.xy[r.tkey]).map(r=>g.xy[r.tkey]):[];if(on&&g.sedeXy&&pts.length){pts.unshift(g.sedeXy);pts.push(g.sedeXy);}
+    v['ofr_pts_'+g.fk]=pts.map(p=>p.join(',')).join(' ');
+    const vis={};v['ofr_marcas_'+g.fk]=on?sel.seq.filter(r=>r.tkey&&g.xy[r.tkey]).map(r=>{const q=g.xy[r.tkey],d=(vis[r.tkey]=(vis[r.tkey]||0)+1)-1;return {n:String(r.ordem),st:'left:'+(q[0]/g.vb[2]*100+d*3).toFixed(2)+'%;top:'+(q[1]/g.vb[3]*100).toFixed(2)+'%'};}):[];});
+  const vazio=()=>{v.ofr_tit='';v.ofr_res='';v.ofr_porque='';v.ofr_ganho=[];v.ofr_rota=[];v.ofr_temtrocas=false;v.ofr_trocas=[];v.ofr_tempend=false;v.ofr_pend='';v.ofr_prods='';v.ofr_temblocos=false;v.ofr_blocos=[];v.ofr_mapa_al='';v.ofr_nota='';};
+  if(!sel)vazio();else{const f=sel;
+    v.ofr_tit=f.fam+' · '+(f.compat||f.atv)+' · '+f.faz;
+    v.ofr_res=un(f)+' · '+nf(f.area)+' ha · '+jan(f.janela.ini,f.janela.fim)+(f.horas?' · '+frNum(f.horas,1)+' h de trabalho pelo rendimento do conjunto':'')+(f.km!==null?' · rota de '+frNum(f.km,1)+' km':'');
+    v.ofr_porque=f.porque.join(' · ')+(f.herb?' · herbicida no fim':'');
+    const g=[];if(f.km!==null&&f.kmSo!==null)g.push({v:frNum(f.km,1)+' km',t:'na frente × '+frNum(f.kmSo,1)+' km com cada O.S. sozinha (ida e volta da sede, linha reta)'});
+    else if(f.km===null)g.push({v:'km',t:'sem medida: '+(G[f.faz]&&G[f.faz].tipo==='plano'?'o desenho desta fazenda não tem escala (importe o KML no cadastro de talhões)':'a sede não tem posição no mapa')});
+    if(f.cargas.porOS!==null)g.push({v:f.cargas.porOS+' cargas',t:'fechadas por O.S. (vale hoje)'+(f.cargas.continuas!==null&&f.cargas.continuas<f.cargas.porOS?'; com calda contínua seriam '+f.cargas.continuas+' (o rateio depende da decisão do RT)':'')});
+    if(f.caldas>1)g.push({v:(f.caldas-1)+(f.caldas-1>1?' trocas':' troca'),t:f.fam==='Pulverização'?'de calda na sequência':'de regulagem na sequência'});
+    v.ofr_ganho=g;
+    v.ofr_rota=f.seq.map(r=>({ordem:String(r.ordem),talhao:r.talhao+(r.tkey?'':' (sem contorno)'),os:r.id,area:nf(r.area)+' ha',calda:frCaldaTxt(r)+(r.liquido&&r.vazao?' · '+nf(r.vazao)+' L/ha':''),
+      janela:jan(r.ini,r.fim),sit:r.bloq?r.sit+' · '+r.bloq:r.sit,abrirAl:'Abrir '+r.id,abrir:()=>self.setState({pan:r.id,pa:null})}));
+    v.ofr_temtrocas=f.trocas.length>0;v.ofr_trocas=f.trocas.map(x=>({t:'Antes do nº '+x.antes+' · '+x.t}));
+    const pend=f.seq.filter(r=>!r.liberada);v.ofr_tempend=pend.length>0;
+    v.ofr_pend=pend.length?'A frente executa só as liberadas'+(f.liberadas.length?' ('+f.liberadas.join(', ')+')':' (nenhuma ainda)')+'. Esperam decisão: '+pend.map(r=>r.id+' ('+r.sit.replace(/^.*· /,'')+')').join(', ')+'.':'';
+    v.ofr_prods=f.produtos.map(x=>x.p+' '+nf(x.q)+' '+x.un).join(' · ');
+    let perm=true;try{cenGrupoAtor(g2perfil())}catch(e){perm=false}
+    const blocos=[];const porC={};f.seq.forEach(r=>{if(r.etapa!=='A liberar'||r.bloq)return;let ok=true;try{cenGrupoFicha(c,r.id)}catch(e){ok=false}if(ok)(porC[r.calda]=porC[r.calda]||[]).push(r);});
+    Object.values(porC).filter(l=>l.length>=2).forEach(l=>blocos.push({t:'Agrupar '+l.length+' O.S. desta calda: '+frCaldaTxt(l[0]),go:()=>{const pf=(g2pf(g2perfil())||{}).k,ids=l.map(r=>r.id);
+      self.setState({og:{aberto:true,perfil:pf,ids,candidatos:ids,contexto:f.fam+' · '+f.faz+' · '+(f.compat||f.atv),chave:'os-grupo-'+Date.now()+'-'+Math.random().toString(36).slice(2)}});}}));
+    v.ofr_temblocos=perm&&blocos.length>0;v.ofr_blocos=perm?blocos:[];
+    v.ofr_mapa_al='Mapa da '+f.faz+' com a rota da frente: '+f.seq.map(r=>r.ordem+' '+r.talhao).join(', ');
+    v.ofr_nota='Sugestão: a frente não aprova, não libera nem reserva; cada O.S. mantém aprovação, reserva, apontamento e custo. Programar a frente (datas, conjunto e requisição) vem na próxima fatia.';
+  }
+  const fl=Object.keys(fora).map(m=>({m,ids:fora[m]})).sort((a,b)=>b.ids.length-a.ids.length||a.m.localeCompare(b.m));
+  v.ofr_fora=fl.map(x=>({t:x.m+' ('+x.ids.length+'): '+x.ids.join(', ')}));v.ofr_fora_t='Fora das frentes ('+fl.reduce((s2,x)=>s2+x.ids.length,0)+')';
+}
 
 // AGR-02: recolher é estado visual local; não altera filtros, seleção nem o agrupamento da coleção (não há trilha desde a AGR-02).
 function osKbRaia(self,dim,path,nome,n,cols,nivel){
@@ -1269,6 +1338,7 @@ function EXTRAVALS(self,v){
   const recR=(self.__osBase||[]).filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)), recIds=new Set(recR.map(r=>r.id));
   const escD=[mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self)].concat(mfSaf(self)==='Todas'?[]:['safra '+mfSaf(self)]).join(' · ');
   osGrupoVals(self,v,recR);
+  g2visaoTenta(self,'g_os','frentes',()=>osFrentesVals(self,v,recR));   /* EX-54: a falha desta visão não derruba a Lista */
   const rDesc=escD+(filtrando?' no recorte':'');
   const extOk=(id)=>{ const x=RC_EXT[id]; return !!x&&!filtrando&&(mfFaz(self)==='Todas'||mfFaz(self)===x[0])&&(mfSaf(self)==='Todas'||mfSaf(self)===x[1]); };
   v.rc_nota='A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de '+rDesc+'; conflitos, manutenção e uso continuam da semana inteira.';
@@ -1878,7 +1948,7 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab(),'frentes':_frentes_view()},rotulo='Visão das ordens')
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>'
             # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): no Kanban o mesmo "Agrupar por" da Tabela (as raias seguem o grupo)
@@ -1900,7 +1970,9 @@ def build():
     # cenário compartilhado (O.S. ↔ Estoque ↔ App) antes do JS da tela
     # blocos da Carga de ordens fora da lista da O.S. (irrigação só com água, do módulo Irrigação): Fazenda e Safra delas, para seguirem o recorte do topo
     rc_ext={o['id']:[o['faz'],o['saf']] for o in D.ORDENS if o['id'] in {a['os'] for a in AL.ALOC if a['sit']!='manutenção'} and o['id'] not in {x['id'] for x in ordens}}
-    EXTRAJS[0]=cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_EXT = '+json.dumps(rc_ext,ensure_ascii=False)+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+'const RC_LAM = '+json.dumps(sorted(LAM))+';\nconst RC_COR = '+json.dumps(dict(bg=BG,reds=REDS,yels=YELS,accs=ACCS,acc=ACC))+';\n'+RC_JS+JS_NUCLEO+JS
+    _g,_idx,_js=_fr_geo()
+    FRJS='const OS_GEO = '+json.dumps(_js,ensure_ascii=False)+';\nconst OG_IDX = '+json.dumps(_idx,ensure_ascii=False)+';\n'+open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'os_frentes.js'),encoding='utf-8').read()+'\n'
+    EXTRAJS[0]=FRJS+cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_EXT = '+json.dumps(rc_ext,ensure_ascii=False)+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+'const RC_LAM = '+json.dumps(sorted(LAM))+';\nconst RC_COR = '+json.dumps(dict(bg=BG,reds=REDS,yels=YELS,accs=ACCS,acc=ACC))+';\n'+RC_JS+JS_NUCLEO+JS
     prim=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Nova ordem</button>'
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,
@@ -2007,10 +2079,80 @@ def _car_rev_html():
 
 
 
+# OS-AGRUPA-2 · mapa da frente: contorno fixo de cada talhão (geo_talhoes, a fonte do Mapa); cor, número da ordem e linha da rota vêm do estado
+def _fr_geo():
+    import geo_talhoes as GT
+    geo=GT.mapa(); idx=[]; js={}
+    for fi,(faz,g) in enumerate(geo.items()):
+        pr=g.get('proj'); c={}; xy={}
+        for t,T in g['t'].items():
+            idx.append([faz,t]); xy[t]=[T['lx'],T['ly']]
+            # centro em lon/lat só com a projeção da geometria real (Lagoa Grande); o desenho da Santa Rita não tem escala
+            c[t]=[round(pr['lon0']+(T['lx']-pr['mx'])/(pr['kx']*pr['esc']),6),round(pr['lat1']-(T['ly']-pr['my'])/pr['esc'],6)] if pr else [T['lx'],T['ly']]
+        js[faz]=dict(tipo='lonlat' if pr else 'plano',c=c,xy=xy,fk='f%d'%fi,vb=g['vb'])
+        import dados_lagoa_fonte as _F
+        if pr and faz=='Lagoa Grande' and not _F.REAL:
+            lon,lat=-47.1435,-34.6118   # "Sede · água e calda" da especificação viva (frentes-trabalho-safrion.html); premissa da demonstração
+            js[faz].update(sede=[lon,lat],sedeNome='Sede (posição da demonstração)',sedeXy=[round(pr['mx']+(lon-pr['lon0'])*pr['kx']*pr['esc'],1),round(pr['my']+(pr['lat1']-lat)*pr['esc'],1)])
+    return geo,idx,js
+
+def _fr_mapa():
+    # números da rota como marcadores HTML sobre o desenho (o template não desenha texto ligado dentro de <text> do SVG); o mapa tem a proporção
+    # da geometria (sem faixa vazia), então a posição em % do viewBox cai no lugar certo
+    geo,idx,js=_fr_geo(); out=''; k=0
+    for fi,(faz,g) in enumerate(geo.items()):
+        vb=g['vb']; r=vb[2]*0.024; fs=r*1.1; els=''; bad=''
+        for t,T in g['t'].items():
+            P='ofrt%d'%k; k+=1
+            els+=(f'<path d="{T["d"]}" fill="{H(P+"_fill")}" stroke="{H(P+"_stk")}" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>{esc(t)}</title></path>'
+                  f'<text x="{T["lx"]}" y="{T["ly"]+r*2.1:.1f}" text-anchor="middle" font-size="{fs*0.8:.0f}" fill="#4b5a50" pointer-events="none">{esc(t)}</text>')
+        rota=f'<polyline points="{H("ofr_pts_f%d"%fi)}" fill="none" stroke="#1B5E20" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>'
+        sx=js[faz].get('sedeXy')
+        if sx: bad+=(f'<g pointer-events="none"><rect x="{sx[0]-r*0.7:.1f}" y="{sx[1]-r*0.7:.1f}" width="{r*1.4:.1f}" height="{r*1.4:.1f}" fill="#5b6b60" rx="3"></rect>'
+                     f'<text x="{sx[0]}" y="{sx[1]+r*1.9:.1f}" text-anchor="middle" font-size="{fs*0.8:.0f}" fill="#4b5a50">Sede</text></g>')
+        out+=(f'<sc-if value="{H("ofr_mf_f%d"%fi)}" hint-placeholder-val="{F()}"><div class="fr-mapa" style="max-width:{340*vb[2]/vb[3]:.0f}px">'
+              f'<svg class="fr-svg" viewBox="{" ".join(str(n) for n in vb)}" role="img" aria-label="{H("ofr_mapa_al")}">{els}{rota}{bad}</svg>'
+              f'<sc-for list="{H("ofr_marcas_f%d"%fi)}" as="m" hint-placeholder-count="0"><span class="fr-n" aria-hidden="true" style="{H("m.st")}">{H("m.n")}</span></sc-for></div></sc-if>')
+    return out
+
+# EX-54 · visão Frentes da Ordem de Serviço: frentes sugeridas à esquerda; mapa com a rota numerada, porquê, ganho, sequência e trocas à direita
+def _frentes_view():
+    mapa=_fr_mapa()
+    cols=[('Nº','ordem'),('Talhão','talhao'),('O.S.','os'),('Área','area'),('Calda','calda'),('Janela','janela'),('Situação','sit')]
+    cab=''.join(f'<th scope="col">{t}</th>' for t,k in cols)+'<th scope="col" aria-label="Ações"></th>'
+    cel=''.join(f'<td data-label="{t}">{H("o."+k)}</td>' for t,k in cols)+f'<td><button type="button" onClick="{H("o.abrir")}" style="{_MINI};min-height:44px" aria-label="{H("o.abrirAl")}">Abrir</button></td>'
+    tabela=(f'<div style="max-width:100%;overflow-x:auto"><table class="og-table fr-tab"><thead><tr>{cab}</tr></thead><tbody><sc-for list="{H("ofr_rota")}" as="o" hint-placeholder-count="3">'
+            f'<tr>{cel}</tr></sc-for></tbody></table></div>')
+    css=('<style>.fr-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}.fr-lista{display:flex;flex-direction:column;gap:8px}'
+         '.fr-card{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border:1px solid #dce4dd;border-radius:10px;background:#fff;min-height:44px;cursor:pointer;width:100%;font:inherit;color:inherit}'
+         '.fr-card[aria-pressed=true]{border-color:#2E7D32;box-shadow:inset 4px 0 0 #2E7D32}.fr-card:hover{border-color:#2E7D32}.fr-info,.fr-cg{font-size:12px;color:#5b6b60}'
+         '.fr-fam{font-size:11px;font-weight:700;letter-spacing:.02em;color:#2E7D32;text-transform:uppercase}'
+         '.fr-det{display:flex;flex-direction:column;gap:8px;min-width:0}.fr-det h3{margin:0;font-size:16px}.fr-det p{margin:0}'
+         '.fr-mapa{position:relative;width:100%;margin:0 auto}.fr-svg{display:block;width:100%;height:auto;background:#f3f6f3;border-radius:10px}.fr-n{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:#2E7D32;color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none}'
+         '.fr-ganho{display:flex;flex-wrap:wrap;gap:8px}.fr-ganho span{padding:6px 10px;border-radius:8px;background:#eef5ee;font-size:12.5px}'
+         '.fr-tab{width:100%;border-collapse:collapse;font-size:13px}.fr-tab th{text-align:left;font-size:12px;color:#5b6b60;padding:8px;border-bottom:1px solid #dce4dd}'
+         '.fr-tab td{padding:8px;border-bottom:1px solid #dce4dd;vertical-align:top}.fr-tab td:nth-child(-n+4){white-space:nowrap}'
+         '.fr-acoes{display:flex;gap:8px;flex-wrap:wrap}'
+         '@media(max-width:760px){.fr-grid{grid-template-columns:minmax(0,1fr)}}</style>')
+    lista=(f'<div class="fr-lista" role="list" aria-label="Frentes sugeridas, por família e pela janela que fecha antes"><sc-for list="{H("ofr_lista")}" as="f" hint-placeholder-count="3">'
+           f'<button type="button" role="listitem" class="fr-card" aria-pressed="{H("f.on")}" onClick="{H("f.go")}"><span class="fr-fam">{H("f.fam")}</span><b>{H("f.t")}</b>'
+           f'<span>{H("f.sub")}</span><span class="fr-info">{H("f.info")}</span><span class="fr-cg">{H("f.ganho")}</span></button></sc-for></div>')
+    txt=lambda nome: f'<sc-for list="{H(nome)}" as="x" hint-placeholder-count="0"><p>{H("x.t")}</p></sc-for>'
+    det=(f'<section class="fr-det" aria-label="{H("ofr_tit")}"><h3>{H("ofr_tit")}</h3><p>{H("ofr_res")}</p><p><b>Por que juntou:</b> {H("ofr_porque")}</p>{mapa}'
+         f'<div class="fr-ganho" role="list" aria-label="Ganho contra fazer cada O.S. sozinha"><sc-for list="{H("ofr_ganho")}" as="g" hint-placeholder-count="2"><span role="listitem"><b>{H("g.v")}</b> {H("g.t")}</span></sc-for></div>'
+         f'{tabela}<sc-if value="{H("ofr_temtrocas")}" hint-placeholder-val="{F()}"><h4 style="margin:4px 0 0">Trocas e lavagens</h4>{txt("ofr_trocas")}</sc-if>'
+         f'<sc-if value="{H("ofr_tempend")}" hint-placeholder-val="{F()}"><p role="note">{H("ofr_pend")}</p></sc-if>'
+         f'<p><b>Insumos da frente:</b> {H("ofr_prods")}</p>'
+         f'<sc-if value="{H("ofr_temblocos")}" hint-placeholder-val="{F()}"><div class="fr-acoes"><sc-for list="{H("ofr_blocos")}" as="b" hint-placeholder-count="1"><button type="button" onClick="{H("b.go")}" style="{_MINI};min-height:44px">{H("b.t")}</button></sc-for></div></sc-if>'
+         f'<p class="fr-info">{H("ofr_nota")}</p></section>')
+    return (css+f'<section aria-label="Frentes de trabalho" data-os-frentes="1"><sc-if value="{H("ofr_tem")}" hint-placeholder-val="{T()}"><div class="fr-grid">{lista}{det}</div></sc-if>'
+            f'<sc-if value="{H("ofr_vazio")}" hint-placeholder-val="{F()}"><p style="padding:24px;background:#f3f6f3;border-radius:12px">{H("ofr_vazio_t")}</p></sc-if>'
+            f'<details style="margin-top:12px"><summary style="min-height:44px;cursor:pointer">{H("ofr_fora_t")}</summary>{txt("ofr_fora")}</details></section>')
+
+
 # OS-LOTE-F1 · coleção e detalhe contextual, sem menu novo.
 def _grupos_barra():
     return (f'<div role="group" aria-label="Agrupamentos de execução" style="display:flex;gap:8px;flex-wrap:wrap">'
-        f'<sc-if value="{H("og_pode")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_abrir")}" style="{_MINI};min-height:44px">Agrupar operações compatíveis</button></sc-if>'
         f'<sc-for list="{H("og_grupos")}" as="g" hint-placeholder-count="0"><button type="button" onClick="{H("g.go")}" style="{_MINI};min-height:44px">{H("g.t")}</button></sc-for></div>')
 
 def _grupo():
@@ -2036,21 +2178,19 @@ def _grupo():
     sequencia=tabela('og_sequencia',[('Ordem','ordem'),('Talhão','talhao'),('O.S.','os'),('Área','area'),('Cargas','cargas'),('Volume','volume')])
     colunas=[('O.S.','id'),('Talhão','talhao'),('Área','area'),('Insumos','insumos'),('Data','data'),('Estado','estado')]
     foraAcao=f'<sc-if value="{H("o.podeInstrucao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.instrucao")}" style="{_MINI};min-height:44px">Conferir instrução</button></sc-if>'
-    propostas=(f'<sc-if value="{H("og_mostra_sugestoes")}" hint-placeholder-val="{T()}"><h3>Caldas compatíveis</h3><sc-for list="{H("og_sugestoes")}" as="s" hint-placeholder-count="0"><section><header><h4>{H("s.t")} · {H("s.periodo")}</h4><button type="button" onClick="{H("s.escolher")}" style="{_MINI};min-height:44px">{H("s.acao")}</button></header><p>{H("s.aviso")}</p>'
-        +tabela('s.linhas',colunas)+'</section></sc-for>'
-        +f'<details><summary style="min-height:44px;cursor:pointer">{H("og_fora_t")}</summary>'+tabela('og_fora',colunas+[('Motivo','motivo')],foraAcao)+'</details></sc-if>')
+    propostas=''   # EX-54: as frentes moram na visão Frentes da lista; o diálogo só confere e confirma o agrupamento da mesma calda (OS-LOTE)
     programar=(f'<sc-if value="{H("og_edprograma")}" hint-placeholder-val="{F()}"><label style="display:flex;align-items:center;gap:8px;min-height:44px"><input type="checkbox" checked="{H("og_programar")}" onChange="{H("og_programar_mudar")}"/>Programar recursos do grupo</label>'
         f'<sc-if value="{H("og_programar")}" hint-placeholder-val="{F()}"><div style="display:flex;flex-direction:column;gap:8px">'
         f'<label>Início da sequência<input type="datetime-local" value="{H("og_inicio")}" onChange="{H("og_inicio_mudar")}" style="display:block;min-height:44px;max-width:100%;box-sizing:border-box"/></label>'
         f'<label>Fuso da fazenda<select value="{H("og_fuso")}" onChange="{H("og_fuso_mudar")}" style="display:block;min-height:44px"><option value="">Escolha…</option><option value="-03:00">UTC−3</option><option value="-04:00">UTC−4</option><option value="-05:00">UTC−5</option></select></label>'
         f'<sc-for list="{H("og_campos")}" as="f" hint-placeholder-count="4"><label>{H("f.l")}<select value="{H("f.val")}" onChange="{H("f.mudar")}" style="display:block;min-height:44px;width:100%"><sc-for list="{H("f.opcoes")}" as="r" hint-placeholder-count="2"><option value="{H("r.v")}">{H("r.t")}</option></sc-for></select></label></sc-for>'
         '<p>A sequência usa a capacidade, o deslocamento e o setup de cada O.S. Sem programação, o grupo fica pendente.</p></div></sc-if></sc-if>')
-    return ('<style>@media(max-width:600px){.og-table,.og-table tbody,.og-table tr,.og-table td{display:block;width:100%;box-sizing:border-box}.og-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.og-table tr{margin:8px 0;border:1px solid #dce4dd;border-radius:8px}.og-table td:before{content:attr(data-label);display:block;font-weight:600}.og-table td{min-width:0;overflow-wrap:anywhere}}</style>'
+    return ('<style>.fr-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}.fr-lista{display:flex;flex-direction:column;gap:8px}.fr-card{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 12px;border:1px solid #dce4dd;border-radius:10px;background:#fff;min-height:44px;cursor:pointer;width:100%;font:inherit;color:inherit}.fr-card[aria-pressed=true]{border-color:#2E7D32;box-shadow:inset 4px 0 0 #2E7D32}.fr-card:hover{border-color:#2E7D32}.fr-info,.fr-cg{font-size:12px;color:#5b6b60}.fr-det .og-table td:not(:nth-child(6)),.fr-det .og-table th{white-space:nowrap}.fr-svg{display:block;width:100%;height:auto;max-height:300px;background:#f3f6f3;border-radius:10px}@media(max-width:760px){.fr-grid{grid-template-columns:minmax(0,1fr)}}@media(max-width:600px){.og-table,.og-table tbody,.og-table tr,.og-table td{display:block;width:100%;box-sizing:border-box}.og-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.og-table tr{margin:8px 0;border:1px solid #dce4dd;border-radius:8px}.og-table td:before{content:attr(data-label);display:block;font-weight:600}.og-table td{min-width:0;overflow-wrap:anywhere}}</style>'
         f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box">'
         f'<button type="button" aria-label="Fechar agrupamento" onClick="{H("og_fechar")}" style="position:absolute;inset:0;border:0;background:rgba(21,32,26,.32)"></button>'
         f'<aside id="og_dialog" role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:960px;max-width:100%;height:min(900px,calc(100dvh - 24px));border-radius:16px;border:1px solid {LINE};box-shadow:0 24px 64px rgba(21,32,26,.2);background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
         f'<header style="padding:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid {LINE}"><h2 style="font-size:18px;flex:1;margin:0">{H("og_titulo")}</h2>'
-        f'<button id="og_close" type="button" aria-label="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
+        f'<button id="og_close" type="button" aria-label="Fechar e preservar rascunho" data-dica="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
         f'<div style="flex:1;overflow-y:auto;min-height:0;padding:16px;font-size:13px;line-height:1.5;overflow-wrap:anywhere">'
         f'<p>{H("og_contexto")}</p><p>{H("og_n")}</p>{propostas}'
         f'<sc-if value="{H("og_temresultado")}" hint-placeholder-val="{F()}"><div role="status"><b>{H("og_resultado")}</b>{textos("og_recibos")}</div></sc-if>'
