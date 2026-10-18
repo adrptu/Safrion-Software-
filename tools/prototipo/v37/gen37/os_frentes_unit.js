@@ -1,5 +1,9 @@
 // EX-54 · regras das frentes de trabalho (os_frentes.js), sem navegador. Uso: node os_frentes_unit.js
 const assert = require('assert'), path = require('path');
+// a regra única de quantidade (cenQtd) vem do cenario.js real, como na página
+{ const src = require('fs').readFileSync(path.join(__dirname, 'cenario.js'), 'utf8'), pega = n => { const i = src.indexOf('function ' + n + '('); let d = 0, j = src.indexOf('{', i);
+    for (; j < src.length; j++) { if (src[j] === '{') d++; else if (src[j] === '}' && --d === 0) break; } return src.slice(i, j + 1); };
+  (0, eval)(pega('cenDec') + '\n' + pega('cenQtd') + '\nglobalThis.cenQtd = cenQtd;'); }
 const F = require(path.join(__dirname, 'os_frentes.js'));
 let n = 0; const ok = (nome, fn) => { fn(); n++; console.log('PASS', nome); };
 const ABA = [{ p: 'Abamectina 18 EC', dose: 0.5, un: 'L' }, { p: 'Óleo mineral', dose: 1, un: 'L' }];

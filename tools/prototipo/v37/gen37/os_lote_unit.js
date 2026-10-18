@@ -77,10 +77,10 @@ check('programação explícita continua na troca, detecta outros compromissos e
 check('destinos de área muito pequena não desaparecem das cargas',()=>{const c=novo();ids.forEach(id=>{c.ordens[id].area=1e-10;c.ordens[id].saldo=1e-10});const p=previa(c);assert.equal(p.cargas[0].destinos.length,3);assert.ok(p.cargas[0].destinos.every(x=>x.area>0))});
 
 // patch do integrador (Claude, EX-54, 18/10/2026): a semente saiu dos talhões fictícios para os pivôs reais (O.S. 0601 a 0611); área e quantidade vêm da própria semente
-check('Seed real: três compatíveis e uma dose distinta, nenhuma aprovação/reserva criada',()=>{const c=cenClone(CEN0),ds=['OS-0601','OS-0602','OS-0603'];const p=cenGrupoPrevia(c,ds,'Caio');const A=ds.reduce((s,id)=>s+c.ordens[id].area,0);assert.ok(Math.abs(p.area-A)<1e-9);assert.ok(Math.abs(p.produtos[0].q-ds.reduce((s,id)=>s+c.ordens[id].ins[0].tot,0))<0.011);assert.throws(()=>cenGrupoPrevia(c,[ds[0],'OS-0605'],'Caio'),/incompat/);assert.ok(ds.every(id=>!osAprovada(c.ordens[id],'v1')&&!c.ordens[id].reservado))});
+check('Seed real: três compatíveis e uma dose distinta, nenhuma aprovação/reserva criada',()=>{const c=cenClone(CEN0),ds=['OS-0584','OS-0585','OS-0586'];const p=cenGrupoPrevia(c,ds,'Caio');const A=ds.reduce((s,id)=>s+c.ordens[id].area,0);assert.ok(Math.abs(p.area-A)<1e-9);assert.ok(Math.abs(p.produtos[0].q-ds.reduce((s,id)=>s+c.ordens[id].ins[0].tot,0))<0.011);assert.throws(()=>cenGrupoPrevia(c,[ds[0],'OS-0588'],'Caio'),/incompat/);assert.ok(ds.every(id=>!osAprovada(c.ordens[id],'v1')&&!c.ordens[id].reservado))});
 check('Jornada real da seed: compor, programar depois, aprovar duas, liberar parcialmente e apontar por origem',()=>{const saved=AL0.aloc;AL0.aloc=alBase;try{
  // a programação do OS-LOTE cabe num dia: capacidade alta só neste teste (a frente de vários dias é a F2 do EX-54)
- const c=cenClone(CEN0),ds=['OS-0601','OS-0602','OS-0603'];ds.forEach(id=>{c.ordens[id].loteFicha.capacidadeHaH=40});const p=cenGrupoPrevia(c,ds,'Caio'),r=cenGrupoCriar(c,p,'Caio','seed-grp');
+ const c=cenClone(CEN0),ds=['OS-0584','OS-0585','OS-0586'];ds.forEach(id=>{c.ordens[id].loteFicha.capacidadeHaH=40});const p=cenGrupoPrevia(c,ds,'Caio'),r=cenGrupoCriar(c,p,'Caio','seed-grp');
  const prev=cenGrupoPrevia(c,ds,'Caio',r.grupo,plano());cenGrupoProgramar(c,r.grupo,1,prev,'Caio','seed-prog');
  assert.equal(c.gruposExec[r.grupo].versao,2);assert.equal(osProjecao(c).find(o=>o.id===ds[0]).resp,'Marcos');
  ds.slice(0,2).forEach(id=>osc_aprovar(c,id,'Ana'));const vv=Object.fromEntries(ds.map(id=>[id,cenGrupoSnapshot(c,id)]));

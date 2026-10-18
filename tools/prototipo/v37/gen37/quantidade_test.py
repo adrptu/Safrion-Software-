@@ -65,7 +65,7 @@ R.calda=[];
   }
  } finally {AL0.aloc=savedAloc;CEN_PREP_ATIVOS[aid]=savedAtivo;}
  for(const unidades of [['L','L','L'],['L','mL','L'],['kg','g','kg']]) {
-  const c=cenClone(CEN0),ids=['OS-0590','OS-0591','OS-0592'],ars=[49.31,.01,13.34];
+  const c=cenClone(CEN0),ids=['OS-0584','OS-0585','OS-0586'],ars=[49.31,.01,13.34];   // EX-54: a semente do OS-LOTE passou a 0584–0594 (abamectina com ficha); patch de integrador
   ids.forEach((id,i)=>{const o=c.ordens[id];o.area=o.saldo=ars[i];o.ins[0].un=unidades[i];o.ins[0].dose=i===1&&['mL','g'].includes(unidades[i])?500:.5;
    o.ins[0].tot=cenQtd(o.ins[0].dose,o.area);o.loteFicha.volumeHa=150;o.loteFicha.tanqueUtil=2000;});
   const antes=JSON.stringify(c),p=cenGrupoPrevia(c,ids,'Caio');

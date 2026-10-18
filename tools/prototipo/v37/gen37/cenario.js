@@ -205,7 +205,7 @@ function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const 
     if (!(x.chaves || []).length && !itens.some(i => i.q > 0)) return;
     out.push({ id: x.id, faz: x.faz, saf: x.saf, chaves: (x.chaves || []).slice(), area: co.area || 0, dt: (x.ini && x.ini > hoje) ? x.ini : hoje, etapa: co.etapa, t: x.t, loc: (x.loc || []).slice(), itens }); };
   (b.ords || []).forEach(x => { vistos[x.id] = 1; um(x, ((c && c.ordens) || {})[x.id]); });
-  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no) return;
+  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no || no.demoLote) return;   // semente de demonstração (EX-54) fora da compra, como em dados2.os_dem
     const faz = no.faz || 'Santa Rita'; const saf = safDe(faz, no.saf || ''); if (!saf) return;
     um({ id: k, faz, saf, chaves: (no.keys || []).slice(), loc: [no.talhao], ini: no.jan || '', t: no.talhao + ' · ' + k + ' · ' + (((no.atv || {}).nome) || no.tipo || '') }, co); });
   return out; }

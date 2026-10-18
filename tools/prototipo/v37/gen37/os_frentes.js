@@ -4,6 +4,8 @@
    Entrada: linhas normalizadas pela tela (O.S. não encerradas do recorte) e a geometria da fazenda (OS_GEO). ===== */
 const FR_UN = { mL: ['L', 1e-3], g: ['kg', 1e-3], L: ['L', 1], kg: ['kg', 1], un: ['un', 1] };
 function frDose(dose, un){ const u = FR_UN[un] || [un, 1]; return { un: u[0], dose: Math.round(Number(dose) * u[1] * 1e6) / 1e6 }; }
+// quantidade de cada O.S. pela regra única (cenQtd, cenario.js: dose × área em decimal exato, 2 casas); a frente soma as O.S. em centésimos
+function frSoma(a, b){ return Math.round(a * 100 + b * 100) / 100; }
 function frNum(x, d){ return Number(x).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
 const FR_ADJ = /adjuvante|óleo|oleo|espalhante|surfactante|redutor de deriva/i;
 const FR_HERB = /glifosato|2,4-d|dicamba|paraquat|diquat|glufosinato|atrazina|imazet|clorimurom|herbicida/i;
@@ -96,7 +98,7 @@ function osFrentes(rows, geo){
     if (jg.length < 2){ soltas.push({ id: jg[0].id, motivo: gr.length > 1 ? 'Janela sem encontro com as outras da mesma família' : 'Sem outra O.S. da mesma família e produto neste período' }); return; }
     const seq = frOrdem(jg, geo), r0 = seq[0], caldas = seq.reduce((l, r) => l.some(x => frMesma(x, r)) ? l : l.concat([r]), []);
     const ini = seq.map(r => r.ini).filter(Boolean).sort()[0] || '', fim = seq.map(r => r.fim).filter(Boolean).sort().pop() || '';
-    const prods = {}; seq.forEach(r => (r.ins || []).forEach(i => { const d = frDose(i.dose, i.un), k = i.p + '|' + d.un; prods[k] = prods[k] || { p: i.p, un: d.un, q: 0 }; prods[k].q += d.dose * r.area; }));
+    const prods = {}; seq.forEach(r => (r.ins || []).forEach(i => { const d = frDose(i.dose, i.un), k = i.p + '|' + d.un; prods[k] = prods[k] || { p: i.p, un: d.un, q: 0 }; prods[k].q = frSoma(prods[k].q, cenQtd(d.dose, r.area)); }));
     const lonlat = !!geo && geo.tipo === 'lonlat', ult = seq[seq.length - 1];
     const volta = lonlat && geo.sede && geo.c[ult.tkey] ? frDist(geo, geo.c[ult.tkey], geo.sede).m : 0;
     const km = lonlat && seq.every(r => r.leg !== null) ? (seq.reduce((s, r) => s + r.leg, 0) + volta) / 1000 : null;

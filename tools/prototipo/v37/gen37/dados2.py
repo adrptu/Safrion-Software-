@@ -1035,7 +1035,7 @@ def os_dem(cen=None):
     for x in b['ords']: vistos.add(x['id']); um(x,c['ordens'].get(x['id']))
     for k,co in c['ordens'].items():   # ordem nova emitida no cenário (tela O.S.): leva chave, talhão e janela
         no=((co or {}).get('osc') or {}).get('novo')
-        if k in vistos or not no: continue
+        if k in vistos or not no or no.get('demoLote'): continue   # semente de demonstração (EX-54, cenario.seed_agrupamento): fora da compra
         saf=_saf_id(no.get('faz') or 'Santa Rita',no.get('saf') or '')
         if saf: um(dict(id=k,faz=no.get('faz') or 'Santa Rita',saf=saf,chaves=list(no.get('keys') or []),loc=[no.get('talhao')],ini=no.get('jan') or '',
                         t=f"{no.get('talhao')} · {k} · {(no.get('atv') or {}).get('nome') or no.get('tipo') or ''}"),co)

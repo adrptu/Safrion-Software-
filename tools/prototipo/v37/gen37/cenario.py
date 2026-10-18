@@ -140,25 +140,26 @@ def perfis_js():
 
 def seed_agrupamento(est):
     """EX-54 Frentes de trabalho (proprietário, 18/10/2026): O.S. A liberar sobre talhões reais do mapa, como sairiam do plano.
-    Lagoa Grande: a semana da especificação viva (O.S. 0601 a 0611: acaricida, fungicida e calagem), com ficha técnica completa (OS-LOTE).
+    Lagoa Grande: a semana da especificação viva (O.S. 0584 a 0594: acaricida, fungicida e calagem), com ficha técnica completa (OS-LOTE).
     Santa Rita: "Dessecação pré-plantio" (mesma receita da OS-0430) em T1-B, T3 e P1 (P1 sem vazão: "Definir vazão") e KCl a lanço em P2 e T2.
-    Sem assinatura nem reserva; os IDs 0595–0599 e 0601–0611 ficam fora da numeração das O.S. novas (demoLote). Não é recomendação agronômica."""
+    Sem assinatura nem reserva; os IDs 0584–0599 ficam fora da numeração das O.S. novas (demoLote) e fora da demanda de compra (cenOsDem e
+    dados2.os_dem): a demonstração não muda os totais de compra e estoque conferidos. Selo "Demonstração". Não é recomendação agronômica."""
     import copy
     PIV = DL.PIVOS
     def _no(oid, faz, cult, cultura, talhao, tid, area, ins, atv, op, jan, rend, resp, chave):
         orig = 'Do plano · ' + atv + ' (' + chave + '). Dados sintéticos; não é recomendação agronômica.'
         return dict(id=oid, novo=True, demoLote=True, tipo=atv, talhao=talhao, talhoes=[dict(id=tid, nome=talhao)], faz=faz, saf='2026/27', cult=cult,
-                    cultura=cultura, culturas=[cultura], area=area, etapa='A liberar', selos=[], versao='v1', realizado=0, saldo=area, ap=[], ins=ins, req=None,
+                    cultura=cultura, culturas=[cultura], area=area, etapa='A liberar', selos=[dict(t='Demonstração', c='gray')], versao='v1', realizado=0, saldo=area, ap=[], ins=ins, req=None,
                     reservado=False, resp=resp, jan=jan[0], ini=jan[0], fim=jan[1], janela=jan[0][8:10] + '/' + jan[0][5:7] + '–' + jan[1][8:10] + '/' + jan[1][5:7],
                     atv=dict(op=op, nome=atv, orig=orig, conj='', rend=rend), keys=[tid + '|' + chave], cond='Revisar a versão de cada origem; agrupar não aprova nem libera.',
                     dono='Agrônomo', prazo='Revisar versão', orig=[orig], obs=orig, nota='', agua=False, local='', semins='', bloq=None, aviso='', link='')
     def _ordem(no, extra):
         o = dict(id=no['id'], tipo=no['tipo'], talhao=no['talhao'], area=no['area'], etapa='A liberar', versao='v1', realizado=0, saldo=no['area'], resp=no['resp'],
-                 ins=copy.deepcopy(no['ins']), req=None, selos=[], ap=[], reservado=False, osc=dict(novo=no))
+                 ins=copy.deepcopy(no['ins']), req=None, selos=copy.deepcopy(no['selos']), ap=[], reservado=False, osc=dict(novo=no))
         o.update(extra); return o
     def _ins(itens, area, emb):
         return [dict(p=p_, g=g_, dose=d_, un=u_, tot=_QTD.qtd(d_, area), emb=emb.get(p_, '')) for p_, g_, d_, u_ in itens]
-    # ---------- Lagoa Grande: a semana de 28/09 a 05/10 da especificação viva do EX-54 (O.S. 0601 a 0611; pivôs, áreas, produtos e doses do
+    # ---------- Lagoa Grande: a semana de 28/09 a 05/10 da especificação viva do EX-54 (O.S. 0584 a 0594; pivôs, áreas, produtos e doses do
     # cenário): acaricida (abamectina 0,5 L/ha e uma de 0,6 L/ha em infestação maior), fungicida (tebuconazol 1 L/ha) e calagem (calcário
     # 2.000 kg/ha, distribuidor 3 t). Ficha técnica completa (OS-LOTE): rendimento, tanque e volume de calda são premissas da demonstração ----------
     aba = lambda d: [('Abamectina 18 EC', 'Inseticidas', d, 'L')]   # como na especificação viva (calda aba5/aba6: só abamectina)
@@ -168,12 +169,12 @@ def seed_agrupamento(est):
     MOL = {'Abamectina 18 EC': ('LG-ABAM18', 'EC', '18 g/L'), 'Óleo mineral': ('LG-OLEO', 'EC', 'óleo mineral (demonstração)'),
            'Tebuconazol 200 EC': ('LG-TEBU200', 'EC', '200 g/L'), 'Calcário dolomítico filler': ('LG-CALC', 'pó', 'PRNT da demonstração')}
     # Pivô 2 no lugar do Pivô 6 da especificação: o 6 já tem as 2 aplicações de abamectina permitidas no ciclo (OS-0504, caderno 28/08)
-    lg = [('OS-0601', 2, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-28', '2026-10-02')), ('OS-0602', 4, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')),
-          ('OS-0603', 9, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')), ('OS-0604', 17, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-30', '2026-10-04')),
-          ('OS-0605', 14, aba(0.6), 'Controle de ácaro', 'q2-RT', ('2026-09-30', '2026-10-04')),
-          ('OS-0606', 20, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')), ('OS-0607', 21, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')),
-          ('OS-0608', 22, teb, 'Fungicida para antracnose', 'q4', ('2026-09-30', '2026-10-05')), ('OS-0609', 24, teb, 'Fungicida para antracnose', 'q4', ('2026-10-01', '2026-10-05')),
-          ('OS-0610', 10, cal, 'Calagem', 'i1', ('2026-09-27', '2026-10-02')), ('OS-0611', 8, cal, 'Calagem', 'i1', ('2026-09-29', '2026-10-03'))]
+    lg = [('OS-0584', 2, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-28', '2026-10-02')), ('OS-0585', 4, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')),
+          ('OS-0586', 9, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')), ('OS-0587', 17, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-30', '2026-10-04')),
+          ('OS-0588', 14, aba(0.6), 'Controle de ácaro', 'q2-RT', ('2026-09-30', '2026-10-04')),
+          ('OS-0589', 20, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')), ('OS-0590', 21, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')),
+          ('OS-0591', 22, teb, 'Fungicida para antracnose', 'q4', ('2026-09-30', '2026-10-05')), ('OS-0592', 24, teb, 'Fungicida para antracnose', 'q4', ('2026-10-01', '2026-10-05')),
+          ('OS-0593', 10, cal, 'Calagem', 'i1', ('2026-09-27', '2026-10-02')), ('OS-0594', 8, cal, 'Calagem', 'i1', ('2026-09-29', '2026-10-03'))]
     for oid, n, itens, atv, rec, jan in lg:
         if oid in est['ordens']: raise ValueError('ID da demonstração de frentes já ocupado: ' + oid)
         area = PIV[n]; tid = 'PV%02d' % n; talhao = 'Pivô %d' % n; liq = itens is not cal
