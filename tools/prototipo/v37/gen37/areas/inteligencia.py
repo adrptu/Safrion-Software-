@@ -88,7 +88,8 @@ def _int3_html():
            f'<div style="position: relative; width: 100%; height: 96px; border-bottom: 1px solid #E4E9E5; background: linear-gradient(#EEF1EE,#EEF1EE) center / 100% 1px no-repeat;"><span style="{H("b.fx")}"></span><span style="{H("b.bar")}"></span></div>'
            f'<span style="{H("b.lst")}">{H("b.m")}</span></div></sc-for></div></figure>')
     rot = f'<p style="margin: 0; font-size: 11.5px; color: {V.MUTED};">Demonstração: série sintética de 60 meses e IPCA sintético, não é cotação. O gráfico mostra o preço nominal; percentil, média e melhor mês são sem inflação.</p>'
-    return (f'<div class="i3" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;"><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">{chips}</div>'
+    # SEP-20261015 (b): a barra de produto e período é a barra da visão (grupo com aria-pressed) e abre o corpo: o título fica sem linha (ds_test A2c)
+    return (f'<div class="i3" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;"><div role="group" aria-label="Produto e período" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">{chips}</div>'
             f'<sc-if value="{H("i3_falta")}" hint-placeholder-val="false"><p role="status" style="margin: 0; font-size: 13px; color: {V.MUTED};">{H("i3_falta_t")}</p></sc-if>'
             f'<sc-if value="{H("i3_sem")}" hint-placeholder-val="false"><p role="status" style="margin: 0; font-size: 13px; color: {V.MUTED};">Sem série de preço para este produto.</p></sc-if>'
             f'<sc-if value="{H("i3_tem")}" hint-placeholder-val="true">{cab}<div class="i3-figs" style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px;">{graf}{saz}</div></sc-if>{rot}'

@@ -138,11 +138,12 @@ try:
     J("window.__cen.cenMudar(null,c=>({msg:''}))"); junta('OS')
     # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada (antes: subitens do menu lateral). Desde 14/10/2026 a tela de
     # entrada é o fluxo do processo (ui37.FLUXO37, mod_fluxo_test.py): o Agrofit abre o 1º bloco, antes de Planos agronômicos; o Painel fecha o último
+    # PAINEL-03 (18/10/2026): o Painel do Agrícola é a aba do painel único (PG.dc.html#mod=agr), não mais a PAGR
     J("(document.querySelector('a.volta37')||{click:()=>0}).click()"); hub=espera("location.pathname.endsWith('/MOD-AGR.dc.html') && document.readyState==='complete' && document.querySelectorAll('a.mod-cartao').length>0")
     m=json.loads(J(CARDS) or '[]'); junta('MOD-AGR')
     ix=lambda h: [x[0] for x in m].index(h) if h in [x[0] for x in m] else -1
     chk('1 O.S.: o fluxo do Agrícola começa pelo Agrofit, antes de Planos agronômicos (tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
-        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:1]==[['AG-07.dc.html','Agrofit']] and 0<ix('PA.dc.html') and ix('PAGR.dc.html')==len(m)-1
+        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:1]==[['AG-07.dc.html','Agrofit']] and 0<ix('PA.dc.html') and ix('PG.dc.html#mod=agr')==len(m)-1
         and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:3],esp,lk])
 
     # ---------- 2 · o link antigo da O.S. abre a lista filtrada pelo mesmo ingrediente ----------

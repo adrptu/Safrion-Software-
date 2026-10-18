@@ -1,0 +1,30 @@
+  ok  IV 1440: sem erro de JS
+  FALHA IV na tela de entrada do Comercial, que começa pelo Painel (PAINEL-01) (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS) · [{'cur': ['Comercial'], 'volta': ['MOD-COM.dc.html', '‹ Comercial']}, [['PCOM.dc.html', 'Painel'], ['VEN.dc.html', 'Contratos e pedidos'], ['EXPED.dc.html', 'Expedição'], ['IV.dc.html', 'Inteligência']], True, '', '']
+  ok  INTEL-02 IV + TAB-07: sem cartões acima da lista; "Vender agora 1" no filtro rápido e no selo do cabeçalho
+  ok  INTEL-02 IV: soja R$ 129,40/sc em alta, melhor mês set, "Vender agora"
+  FALHA INTEL-02 IV: milho em queda; o melhor mês depois do custo do dinheiro é nov (+8,0% na época, 5,6% líquido) · Milho em grão R$ 61,80/sc +1,3% −5,2% Queda sem a época: −4,3% fev pior: jul −5,7% normal R$ 65,54/sc Esperar até dez: +7,2% na época, 3,6% depois do custo do dinheiro
+  ok  INTEL-02 IV: mamão perecível vende na colheita (a época orienta o plano)
+  ok  INTEL-02 IV: feijão sem fonte de preço fica sem série (ausente ≠ zero)
+  ok  INTEL-02 IV painel da soja: 12 meses de sazonalidade em barras, últimos 12 meses e o rótulo de série sintética
+  ok  IV: os 3 indicadores (0 abaixo, 1 sem oferta: mamão, melhor líquido R$ 2,88/kg)
+  ok  IV safra comercializada: soja "Suspenso" (saca a conferir), nunca 0%
+  ok  IV safra comercializada: mamão "Sem previsão" com o déficit à vista
+  ok  IV preço × mercado: soja "Saca a conferir" (fora da média, não zero)
+  ok  IV painel da soja: motivo e um "Abrir venda" para cada uma das 4 vendas de saca a conferir
+  ok  IV painel do mamão: vendido sem previsão e o próximo passo
+  ok  IV recebimento líquido: o painel mostra a conta (preço − frete − custo do prazo)
+  ok  IC 1440: sem erro de JS
+  ok  IC na tela de entrada do Suprimentos (ícone Suprimentos marcado; "‹ Suprimentos" → cartão "Inteligência" abre a IC sem erro de JS)
+  FALHA INTEL-02 IC + TAB-07: sem cartões acima da lista; "Comprar agora 5" no filtro rápido (oráculo); a economia esperando o mês certo abre os indicadores, depois da lista, = oráculo R$ 37.353,87 (± R$ 1: o motor guarda 6 casas) · [0, ['todos 20', 'esperar 9', 'comprar até a necessidade 6', 'comprar agora 5', '', ''], 'economia esperando o mês certo r$ 23.103,65 9 insumo(s) mais baratos cotações acima da referência 0 nenhuma cotação 5% acima da referência economia pela melhor cotação r$ 41.368 contra a referência da safra ins
+  FALHA INTEL-02 IC: a recomendação de cada um dos 20 insumos = oráculo em Decimal (índice único do INTEL-03) · [20, [('Inoculante líquido', 'Comprar até a necessidade'), ('Acaricida D', 'Comprar até a necessidade'), ('Semente de soja 58 W', 'Comprar até a necessidade'), ('Semente de soja 62 X', 'Comprar até a necessidade')]]
+  FALHA INTEL-02 IC: semente 58 W "Comprar até a necessidade" (oráculo), até 05/10 (necessidade 15/10 − 10 dias de entrega) · ['Semente de soja 58 W Sementes R$ 9,50/kg +4,7% Estável sem a época: +0,4% abr mais caro: set 15/10 pedir até 05/10 Esperar até out (pedir até 05/10): 5,2% mais barato na época R$ 13.554,66', 'Comprar até a necessidade']
+  ok  INTEL-02 IC: glifosato com uso em 28/09 compra agora
+  ok  INTEL-02 IC painel: sazonalidade em 12 meses e a necessidade do Planejar safra
+  ok  IC: economia pela melhor cotação R$ 41.368 e R$ 1.277,99/ha (oráculo do inteligencia_unit C3/C4)
+  ok  IC painel do insumo: melhor cotação, validade de cada uma e o próximo passo
+  ok  IV.dc.html 390: sem erro de JS
+  ok  IV.dc.html 390: sem rolagem lateral da página
+  ok  IC.dc.html 390: sem erro de JS
+  ok  IC.dc.html 390: sem rolagem lateral da página
+RESULTADO: 23/28 ok · FALHAS: IV na tela de entrada do Comercial, que começa pelo Painel (PAINEL-01) (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS); INTEL-02 IV: milho em queda; o melhor mês depois do custo do dinheiro é nov (+8,0% na época, 5,6% líquido); INTEL-02 IC + TAB-07: sem cartões acima da lista; "Comprar agora 5" no filtro rápido (oráculo); a economia esperando o mês certo abre os indicadores, depois da lista, = oráculo R$ 37.353,87 (± R$ 1: o motor guarda 6 casas); INTEL-02 IC: a recomendação de cada um dos 20 insumos = oráculo em Decimal (índice único do INTEL-03); INTEL-02 IC: semente 58 W "Comprar até a necessidade" (oráculo), até 05/10 (necessidade 15/10 − 10 dias de entrega)
+rc=1

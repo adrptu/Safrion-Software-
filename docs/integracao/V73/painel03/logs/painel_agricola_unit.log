@@ -1,0 +1,84 @@
+OK Pivô19: 72.9t publicadas e 36.42t recebidas na S39
+OK Perene identifica semana em curso
+OK Recebido conserva unidade de produção
+OK Cultivo abre a origem exata
+OK Anual lê a previsão da safra
+OK Safra tem nome sem prefixo repetido
+OK Ausência de previsão não é zero
+OK Leitura não altera cenário
+OK Fonte ausente fica indisponível
+OK Previsão de outra semana não contamina S39
+OK Recebido futuro não vira acumulado da semana
+OK Café a apurar permanece explícito
+OK Café a apurar não ordena como zero medido
+OK Anual sem previsão publicada preserva nulo
+OK G2 anual ausente por último direção 0
+OK G2 último é o objeto sem previsão direção 0
+OK G2 café a apurar não usa 1200 do rótulo direção 0
+OK G2 anual ausente por último direção 1
+OK G2 último é o objeto sem previsão direção 1
+OK G2 café a apurar não usa 1200 do rótulo direção 1
+OK Mesma O.S. impedida e atrasada é contada uma vez
+OK Duas situações não duplicam a contagem
+OK Causa da origem e IDs recuperáveis
+OK Destino do grupo não duplica ordem em duas situações
+OK Foco distingue causa de responsável
+OK Impedimento tem vermelho do DS
+OK Sem mutação do retorno do domínio
+OK Ausente não significa sem pendência
+OK Vazio válido permite mensagem sem pendência
+OK Lista inválida não mostra zero
+OK Origem inválida não cria navegação
+OK Responsável ausente explícito
+OK Agrupa responsável sem duplicar OS em duas situações
+OK Destino leva exatamente o subconjunto por responsável
+OK Maior causa primeiro e barra proporcional
+OK Não soma as duas distribuições
+OK Gráfico ausente não vira zero
+OK Situação homogênea não repete contagem sob a barra
+OK Causa ausente não é inventada a partir do selo
+OK Referência vem da origem
+OK Referência ausente explícita
+OK Gráfico vazio preservado
+OK Atraso ausente não esconde impedimento conhecido
+OK Ambos ausentes não viram vazio
+OK Custo apresenta razões do domínio, sem dividir por passagens
+OK Conferido e provisório separados
+OK Mesmo par usa uma escala
+OK Custo leitura sem mutação
+OK Custo ausente não vira vazio
+OK Custo vazio válido
+OK Orçamento nulo não vira zero
+OK Zero parcial não se apresenta como total
+OK Cobertura e preço ausente visíveis
+OK Fora sem preço ainda aparece
+OK Razão inválida é indisponível
+OK Zero válido permanece zero
+OK Sem rateio listado sem somar ao grupo
+OK Execução enviada não soma sinal local
+OK Sinal local separado com consequência
+OK Percentual vem do domínio sem nova conta
+OK Destino e recuperação exatos
+OK Leitura de execução imutável
+OK 100% não encerra ordem em conferência
+OK Pendência de domínio preservada
+OK Sem área não vira zero ou barra
+OK Zero enviado legítimo
+OK Ausência e vazio distintos
+OK Origem ou estado inválidos recusados
+OK Não mascara ordem duplicada como dois trabalhos
+OK Percentual inválido não mostra barra
+OK Leitura e NC não viram área afetada
+OK Referência do domínio explícita
+OK Idade da vistoria não inventa hoje
+OK Leitura MIP não altera origem
+OK Presença não ganha percentual fictício
+OK Cancelada preserva estado e responsável
+OK MIP ausência não vira zero
+OK MIP vazio válido preservado
+OK MIP origem inválida recusada
+OK MIP não duplica mesma vistoria entre grupos
+OK MIP foco identifica vistoria
+RESULTADO 81/81
+
+rc=0

@@ -1,0 +1,33 @@
+OK    C1a hover no T4 (Pragas e doenças): cartão com nome e área, cultura e estádio, valor, estado em texto, data do dado e "Clique para detalhar"; role=tooltip; sem ação dentro
+OK    C1b o cartão fica dentro da janela e não cobre o talhão
+OK    C1c contorno realçado do talhão em duas cores (escuro e branco, por cima dos pixels) e cursor de mão
+OK    C2a sem espera programada: o cartão do T7 está visível no mesmo turno do pointerover (nenhum timer de abertura)
+OK    C2b tempos do evento ao quadro medidos (indicativo, SwiftShader): amostra com 24 hovers entre vizinhos
+OK    C3 o foco de teclado no T4 mostra o mesmo cartão do hover (mesmo texto)
+OK    C4a Esc dispensa o cartão e o foco fica no talhão (o painel não abre nem fecha nada)
+OK    C4b o ponteiro vai do talhão até o cartão e o cartão continua (hoverable, WCAG 1.4.13)
+OK    C4c sair do talhão e do cartão fecha o cartão
+OK    C1d hover no P5 (mapa real): cartão completo, sem ação, dentro da janela, sem cobrir o pivô; contorno realçado (pv-hov) e cursor de mão
+OK    C5 o cartão abre nas 9 camadas (P1 da Santa Rita), completo, sem ação e dentro da janela
+OK    K1a Satélite 06/09 (Santa Rita): P2 e T7 sob nuvem em hachura, nunca com a cor de um valor
+OK    K1b Irrigação › Balanço hídrico: o T7 estimado fica com a cor do valor e a etiqueta "≈ … estimado", não com a hachura (NC10)
+OK    K1c "não se aplica" (sem pendência) com contorno tracejado #6B776F, nunca só a cor do fundo (D14)
+OK    K1d mapa real: camada de hachura para nuvem e sem leitura (pv-hach)
+OK    K2a rótulos da Santa Rita: até 2 linhas na placa (valor e estado) + o número, placa branca a 90 %, texto opaco, sem opacity nem filtro no caminho; contraste ≥ 13,4:1 sobre qualquer fundo
+OK    K2b rótulos da Lagoa Grande: placa a 90 % com texto #15201A, até 3 linhas (só o número quando o pivô é pequeno na tela), contraste ≥ 13,4:1, sem opacity
+OK    L1a cada classe da legenda mostra contagem e área ("2 · 610 ha"); a soma das contagens é a dos 8 talhões
+OK    L1b passar o mouse em "atenção ou a liberar 4 · 525 ha" realça os 4 talhões dela (anel em duas cores em cada um)
+OK    L1c clicar na classe filtra: botão pressionado e os outros talhões esmaecem no mapa
+OK    L1d clicar de novo limpa o filtro (nenhum talhão esmaecido; botão solto)
+OK    L1e Satélite: no contraste Talhão a escala dos pixels não conta talhões (só sem cultura e nuvem); no Absoluto a soma é 8
+OK    L1f Solo: nos sextos de cada talhão a escala não conta talhões (só sem laudo); no Absoluto a soma é 8
+OK    S1a seleção na Santa Rita: contorno forte em duas cores (escuro 7 px + linha branca) e número em destaque (branco com contorno escuro)
+OK    S1b seleção no mapa real: contorno em duas cores (pv-sel escuro + pv-sel2 branco), rótulo em destaque (aria-pressed) e a câmera não se move
+OK    E1a 1440: sem erro de JavaScript
+OK    M1a 390: tocar o talhão não abre o cartão de hover (só escolhe e abre o painel)
+OK    M1b 390: o cartão do foco cabe inteiro na janela
+OK    E1b 390: sem erro de JavaScript
+MEDIDAS {"cartao_T4": {"on": true, "txt": "T4 · 204 ha Soja 58 W · 30 de 204 ha plantados (DAP 1–2) Nematoide-de-cisto 13 cistos/200 cm³ em controle vistoria de 15/09 · 0,9× o NC OS-0420 · em execução Clique para detalhar", "r": [581, 647, 881, 816.765625], "acoes": 0, "tal": "T4", "modo": "ponteiro", "livre": "1", "role": "tooltip", "vw": 1440, "vh": 900}, "tempo_ms": {"n": 24, "p50": 32.9, "p95": 273.6, "js_p50": 12.6, "js_p95": 23.2}, "cartao_P5": {"on": true, "txt": "P5 · 71 ha Mamão Formosa Tainung 1 · formação inicial OS-0507 impedida · bomba impedida ou conflito dado de 23/09 (hoje) OS-0507 · em execução Clique para detalhar", "r": [848, 406, 1148, 575.765625], "acoes": 0, "tal": "PV05", "modo": "ponteiro", "livre": "1", "role": "tooltip", "vw": 1440, "vh": 900}, "cartao_camadas": 9, "contraste_rotulo_min": 13.36, "contraste_rotulo_lg_min": 13.36}
+
+RESULTADO: 29 ok · 0 falha(s)
+rc=0
