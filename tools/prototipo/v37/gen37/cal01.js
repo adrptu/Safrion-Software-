@@ -185,7 +185,9 @@ function demPorLocal(m, tid, areaT, hoje){ const out={};
 // só avisa (cancelar pedido é decisão da Compra). Quantidades na unidade do insumo; tolerância de 0,01 (a mesma do complemento).
 // d: {liq, rup} da demanda (ou nada, se ela não pede o insumo); sent: o que a solicitação pede. Devolve {t, c, dif, pend, sol}.
 function demSolSit(d, sent, temSol, pedEmit){ const liq=Number(d&&d.liq)||0, rup=Number(d&&d.rup)||0, cond=Number(d&&d.cond)||0; sent=Number(sent)||0;
-  if(temSol&&sent>liq+0.01) return {t:'Acima da demanda',c:'red',dif:sent-liq,pend:!pedEmit,sol:true};
+  const parcial=!!(d&&d.cal&&d.cal.parcial);
+  if(parcial&&liq<=sent+0.01) return {t:'Data pendente',c:'yellow',dif:0,pend:false,sol:!!temSol};
+  if(!parcial&&temSol&&sent>liq+0.01) return {t:'Acima da demanda',c:'red',dif:sent-liq,pend:!pedEmit,sol:true};
   if(liq<=0.001&&cond>0.001) return {t:'Qualidade pendente',c:'yellow',dif:0,pend:false,sol:false,cond};   // PRD 65.4: falta condicionada, sem compra automática
   if(liq<=0.001&&rup>0.001) return {t:'Coberto pelo recebimento',c:'yellow',dif:0,pend:false,sol:false};
   if(liq<=0.001) return {t:'Coberto pelo estoque',c:'green',dif:0,pend:false,sol:false};
@@ -196,7 +198,7 @@ function demSolSit(d, sent, temSol, pedEmit){ const liq=Number(d&&d.liq)||0, rup
 // emitido nada baixa. itens {insumo: quantidade}; dm {insumo: {liq}}. Devolve {it, novos, menos} (novos e menos: nomes dos insumos).
 function demSolRevisar(itens, dm, pedEmit){ const it=Object.assign({},itens||{}); const novos=[], menos=[]; const L=(n)=>Number(((dm||{})[n]||{}).liq)||0;
   Object.keys(dm||{}).forEach(n=>{ if(L(n)>0.001&&L(n)>(Number(it[n])||0)+0.01){ novos.push(n); it[n]=L(n); } });
-  if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if((Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
+  if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if(!((dm||{})[n]&&dm[n].cal&&dm[n].cal.parcial)&&(Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
   return {it,novos,menos}; }
 // DEM-09 na Compra (revisão do CTL-4, achado 2) · insumos que a solicitação pede acima da demanda de agora, pela mesma regra do Planejar safra
 // (demSolSit), para a Compra avisar nas etapas 2, 4 e 5 — sem trava: quem atualiza a solicitação é o Planejar safra (dano evitado: aprovar a
