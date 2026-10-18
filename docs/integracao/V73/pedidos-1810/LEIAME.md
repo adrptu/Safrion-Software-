@@ -9,7 +9,9 @@
 
 | Arquivo | Conteúdo |
 |---|---|
-| `prompt-safrion-excelencia.md` | EX-01 a EX-53. Versão de 18/10, 17h15 UTC. Em relação à de 17h11, só muda a seção de dados a registrar (D1 a D13). |
+| `prompt-safrion-excelencia.md` | EX-01 a EX-57. Versão de 18/10, noite. Em relação à anterior, entram só o EX-56 e o EX-57 (resumos e lista de anexos). |
+| `prompt-safrion-varredura-final.md` | EX-56: varredura final e encerramento do protótipo. Tem portão: só começa quando todos os outros EX estiverem decididos, implantados, revisados e aceitos. |
+| `prompt-safrion-perenes-idade-ciclo.md` | EX-57: perenes com idade, fase e ciclo no plano agronômico. Gemini real obrigatório; parâmetros por cultura validados pelo RT. |
 | `prompt-safrion-painel-indicadores.md` | EX-53: catálogo de indicadores do Painel, regras, captura D1 a D13, fatias F1 a F5 e aceite. |
 | `prompt-safrion-ideias-jogos.md` | EX-52: oito ideias, J1 a J8. |
 | `prompt-safrion-entrada-acoes-revisao.md` | Revisão das entradas e ações. |

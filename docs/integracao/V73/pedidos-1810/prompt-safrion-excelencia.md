@@ -1,7 +1,7 @@
 PROJETO: Safrion (Do Talhão à O.S.)
 
 CONTEXTO
-Este arquivo reúne tudo o que foi definido na conversa: as diretrizes permanentes de UX, UI e design system (seção 0), os princípios de produto (Anexo A, P01–P66) e os achados e as funcionalidades novas para o protótipo (EX-01 a EX-55).
+Este arquivo reúne tudo o que foi definido na conversa: as diretrizes permanentes de UX, UI e design system (seção 0), os princípios de produto (Anexo A, P01–P66) e os achados e as funcionalidades novas para o protótipo (EX-01 a EX-57).
 ANEXOS QUE O PROPRIETÁRIO ENVIA JUNTO (leia antes de começar; cada prompt próprio prevalece sobre o resumo do seu EX):
 - prompt-safrion-raio-x-do-alvo.md e pragas-no-tempo.html (EX-42 e EX-43);
 - prompt-safrion-mapa-ux.md e anexo-mapa-analise.md (EX-44);
@@ -13,7 +13,9 @@ ANEXOS QUE O PROPRIETÁRIO ENVIA JUNTO (leia antes de começar; cada prompt pró
 - prompt-safrion-ideias-jogos.md (EX-52);
 - prompt-safrion-painel-indicadores.md (EX-53);
 - prompt-safrion-frentes-trabalho.md e frentes-trabalho-safrion.html (EX-54);
-- prompt-safrion-mapa-nas-telas.md (EX-55).
+- prompt-safrion-mapa-nas-telas.md (EX-55);
+- prompt-safrion-perenes-idade-ciclo.md (EX-57);
+- prompt-safrion-varredura-final.md (EX-56, última etapa do protótipo).
 Se algum faltar, peça ao proprietário; não reconstrua o conteúdo.
 
 Uma sessão do Claude, fora do repositório, analisou o protótipo publicado "Do Talhão à O.S." (https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm, versão 1792123204-c09d, 16/10/2026).
@@ -171,7 +173,7 @@ Por perfil e plataforma:
 - Segregação: quem estava com a custódia não confirma o próprio recebimento; quem aplica o lacre não confere.
 - Offline com recibo em três estados (no aparelho, enviado, conferido) e custódia em conta fechada.
 
-4. MELHORIAS PROPOSTAS (EX-01 a EX-55)
+4. MELHORIAS PROPOSTAS (EX-01 a EX-57)
 Os P-IDs remetem ao Anexo A (P01–P66). Os UX-IDs remetem à avaliação de 16/10. "Medido" quer dizer contado nos modais.
 
 Onda 0 · Riscos (corrigir primeiro)
@@ -705,6 +707,18 @@ EX-55 Visão Mapa dentro das telas do Agrícola (prompt-safrion-mapa-nas-telas.m
   - Um componente só, extraído do Mapa da fazenda, entra como visão "Mapa" no seletor de cada tela, com os filtros e números da lista, clique que abre o detalhe da própria tela, dica ao passar o mouse, teclado, seleção para as ações da tela (nunca aprovação em lote) e "Abrir no Mapa da fazenda" como secundária.
   - Com mapa: Planejar safra, Análises de solo, Planos agronômicos, Orçamento, Pragas e doenças, Ordens de serviço, Irrigação, Colheita, Recebimento e Custos. Sem mapa (sem decisão espacial): Agrofit, Beneficiamento, Estoque de produto e Painel, que ganham link de origem por talhão.
 
+EX-56 Varredura final, melhoria final e encerramento do protótipo (prompt-safrion-varredura-final.md). Pedido do proprietário de 18/10. É o último item do protótipo.
+  - Portão: só começa quando todos os outros itens EX (EX-01 a EX-55, EX-57 e os que surgirem antes) estiverem decididos e os adotados implantados, revisados e aceitos, com uma candidata completa identificada por versão, URL, fontes, diff e provas.
+  - É a auditoria integral do protocolo: Codex, Claude e Gemini reais na mesma candidata, com inventário comum medido pelos robôs (inventário e cliques, listas, passagens) e por um robô novo de jornadas por persona (cliques, toques, digitação, telas, idas e vindas), mais acessibilidade, desempenho e celular.
+  - Onze lentes de especialista como listas de verificação (agronomia, engenharia agrícola, manutenção, processos e produção, suprimentos e estoque, comercial, controladoria, regras e conformidade, design system e UX, campo, dados e integrações), referências mundiais por funcionalidade e um orçamento de esforço por tarefa (ex.: aprovar O.S. com produto em até 2 cliques; turno no app em até 2 toques por evento; nenhum valor digitado que o sistema já sabe).
+  - Placar por módulo contra as referências, achados S1 a S4, melhoria final implantada e medida antes × depois, candidata final publicada.
+  - Critérios para encerrar o protótipo: decisões e aceites completos, metas medidas atingidas, zero S1 e S2, teste moderado por persona, auditoria integral, PRD confrontado e aceite do proprietário. Depois, software real pela aplicação Next, por fatias tela → domínio → banco, com HML.
+
+EX-57 Perenes: idade, fase e ciclo no plano agronômico (prompt-safrion-perenes-idade-ciclo.md). Pergunta e pedido do proprietário de 18/10.
+  - Hoje (código do Planejar safra): o DAP conta sempre do plantio original, o que serve à formação; os planos de produção das perenes usam data com ano (café e mamão 2026/27), que precisa ser refeita a cada safra; plano por DAP numa perene antiga gera datas anos atrás e só recebe o aviso "antes do início da safra"; o cultivo não tem idade nem fase, a troca de implantação para produção é manual e, depois do DAP 270, o mamão fica sem atividade até alguém trocar o plano; não há gatilho por florada, poda, recepa, estádio, idade ou intervalo fixo.
+  - Modelo: cultivo perene com idade exibida, fase com histórico (formação, produção, renovação) e eventos do ciclo com data prevista e real; DAP só na formação e na renovação; na produção, gatilhos repetíveis (dia e mês sem ano, dias em relação a colheita, florada ou poda, início da safra, estádio confirmado em vistoria, intervalo fixo para produção contínua, idade em meses); mudança de fase proposta por evento ou idade e confirmada pela agrônoma; geração da safra pelos gatilhos da fase vigente, nunca pelo DAP da formação.
+  - Gemini real obrigatório e parâmetros por cultura validados pelo RT; migração do café C1 e dos pivôs de mamão do cenário; uma regra de data só para Planejar safra, O.S. e AG-02.
+
 EX-28 Insumo ligado ao registro do Agrofit (CD-06 → AG-07/AG-04; P36, P43):
   - o formulário do item ganha registro, concentração, ingrediente ativo, mecanismo de ação, carência e dose de bula (hoje não tem campo de registro);
   - seletor mostra registro e concentração (evita lançar 867 g/L como 806);
@@ -761,11 +775,11 @@ Em 17/10/2026 o proprietário delegou a decisão: "Deixa financeiro como vocês 
   - Classifique como Confirmado (cite arquivo ou tela), Refutado (diga o que a análise viu errado) ou Já resolvido.
   - Para cada item confirmado, decida: Adotar, Adaptar (diga como) ou Rejeitar (diga o motivo).
   - Os riscos da Onda 0 são reproduzidos primeiro.
-- Codex: envie a lista EX-01..EX-55 sem a sua classificação, pelo canal do protocolo. Peça que o Codex, de forma independente:
+- Codex: envie a lista EX-01..EX-57 sem a sua classificação, pelo canal do protocolo. Peça que o Codex, de forma independente:
   - classifique cada item;
   - aponte o que a análise errou ou deixou de fora, em especial em domínio e fluxo.
   Não simule o Codex.
-- Gemini real: só quando houver divergência material de domínio ou fluxo. EX-08, EX-10, EX-21, EX-32, EX-36, EX-38, EX-42, EX-43, EX-45, EX-51 (catálogo de eventos e quem recebe cada pendência) EX-52 (ciclo do talhão e modelo de cultura) EX-53 (margem projetada, ponto de equilíbrio, perdas e aproveitamento) e EX-54 (calda contínua com rateio, ordem e lavagem depois de herbicida, limites de clima) são os candidatos mais prováveis. Pacote mínimo, sem dados reais.
+- Gemini real: só quando houver divergência material de domínio ou fluxo. EX-08, EX-10, EX-21, EX-32, EX-36, EX-38, EX-42, EX-43, EX-45, EX-51 (catálogo de eventos e quem recebe cada pendência) EX-52 (ciclo do talhão e modelo de cultura) EX-53 (margem projetada, ponto de equilíbrio, perdas e aproveitamento) EX-54 (calda contínua com rateio, ordem e lavagem depois de herbicida, limites de clima) e EX-57 (fases, gatilhos e parâmetros das perenes; obrigatório) são os candidatos mais prováveis. Pacote mínimo, sem dados reais.
 - Divergência se resolve por fonte ou reprodução. O Codex decide o escopo conforme o protocolo e registra no checkpoint (só ele edita o checkpoint).
 
 7. CRITÉRIO PARA ENTRAR
@@ -791,6 +805,7 @@ Na dúvida, o item fica fora, com o motivo registrado.
   - acessibilidade por verificação automática, teclado e leitor de tela.
 - Para a Onda 0, cada correção ganha um teste de regressão: lote recusado para O.S. com produto; ação de risco exige motivo e alçada; medida não pré-preenchida; lista filtrada por contexto e organização; irrigação fora da tolerância não encerra; O.S., app, ficha e almoxarifado com o mesmo cálculo; recurso único sem dupla alocação; limpeza registrada depois de produto hormonal.
 - Siga a fase registrada no STATUS (protótipo ou transferência ao Next), sem evolução paralela.
+- O EX-56 fecha o protótipo: só começa depois de todos os outros itens decididos e implantados, e termina com o aceite do proprietário; depois vem o software real.
 - Revisão cruzada: quem revisa integra o PR do outro.
 - Publique incrementos operáveis no artefato existente, com versão, URL e mudança concreta.
 - O PRD só muda quando a decisão alterar um requisito, referenciando o design system e com revisão real.
@@ -804,7 +819,7 @@ Na dúvida, o item fica fora, com o motivo registrado.
 - Passar na frente de item prioritário ou interromper autoria ativa.
 
 10. ENTREGA (no canal registrado)
-- Tabela EX-01..EX-55 com: validação e evidência · decisão Claude · decisão Codex · decisão final · onda · ganho medido (antes → depois) · esforço · risco.
+- Tabela EX-01..EX-57 com: validação e evidência · decisão Claude · decisão Codex · decisão final · onda · ganho medido (antes → depois) · esforço · risco.
 - O que a análise errou ou deixou de fora, segundo o Codex, e como foi tratado.
 - Plano das ondas, com as fatias, a autoria e a revisão.
 - Decisões pendentes do proprietário (seção 5), cada uma com recomendação e impacto.

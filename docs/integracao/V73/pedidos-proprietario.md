@@ -45,6 +45,8 @@
 | 18/10 | Laudos georreferenciados, taxa variável com arquivo para máquinas e visão de todos os talhões × indicadores | **Especificado** (`docs/analise-solo/SOLO-GEO.md`): o mapa de calor atual usa pontos sintéticos; F1 = matriz mín/méd/máx e pontos com coordenada no laudo | — |
 | 18/10 | Visão macro e micro, sintética e analítica, em todas as funções do Mapa | **Especificado** (`docs/mapa/MAPA-VISOES.md`): Mapa · Resumo · Matriz + Talhão; Solo primeiro | — |
 | 18/10 | Ideias dos jogos e simuladores (EX-52) e prompt de excelência | **Recebido**: validação do Claude e pedido de classificação independente ao Codex | — |
+| 18/10 | Perenes: idade, fase e ciclo no plano agronômico (EX-57) | **Em desenho**: o Claude reproduz o comportamento atual no código e escreve a validação independente; Codex classifica sozinho; Gemini real obrigatório; o RT valida os parâmetros por cultura antes do código | — |
+| 18/10 | Varredura final e encerramento do protótipo (EX-56) | **Portão fechado** (`pedidos-1810/EX-56-portao.md`): começa quando todos os outros EX estiverem decididos, implantados e aceitos. O teste moderado com 3 a 5 pessoas por persona depende do proprietário convidar as pessoas | — |
 
 ## Por que quase nada da noite chegou ao artefato
 
