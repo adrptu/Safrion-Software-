@@ -450,7 +450,7 @@ function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.c
   const ownParts=(r,o,kid,L)=>{ leafParts(r,adj,kid);
     r.p.sit=[{k:'mut',t:''}]; r.s.sit=''; r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre=''; ocDcol(r,'desde',undefined); r.p.desde=[{k:'mut',t:'—'}]; r.s.desde=''; r.v.desde='';
     r.p.saf=[{k:'mut',t:'—'}]; r.s.saf=''; r.v.saf_='';
-    if(o){ ocDcol(r,'ate',o.classe==='semdata'?null:o.fim); r.v.fimpor=OC_ROT[o.classe]; r.p.fimpor=[{k:'txt',t:r.v.fimpor}]; r.s.fimpor=r.v.fimpor;
+    if(o){ ocDcol(r,'ate',o.classe==='semdata'?null:o.fim); r.v.fimpor=(o.plano&&o.classe==='semdata')?'Aguarda data do plano':OC_ROT[o.classe]; r.p.fimpor=[{k:'txt',t:r.v.fimpor}]; r.s.fimpor=r.v.fimpor;
       const pe=L&&(L.pend[o.id]||[]); const tv=L&&L.trav.some(x=>x[1]===o.id||x[2]===o.id);
       if(tv){ r.p.sit=[{k:'chip',t:'Sobreposição',c:'red',dica:ocMotivo(L,info)}]; r.s.sit='Sobreposição'; }
       else if(pe&&pe.length){ const d=pe.map(p=>ocPendCurta(ctx,o,p,byO)).join(' · '); r.p.sit=[{k:'chip',t:'A conferir',c:'yellow',dica:d}]; r.s.sit='A conferir'; }
@@ -459,7 +459,7 @@ function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.c
   const foraRow=(o)=>{ const pl=planById(o.plano); const r={id:'fora_'+o.id,fora:true,ro:true,v:{talhao:o.t,local:o.faixa,cult:o.cult,var:o.var,area:'',ver:'',meta:'',aj:'',tipo:o.tipo},s:{},p:{}};
     r.p.local=[{k:'mut',t:o.faixa}]; r.s.local=o.faixa; r.p.sit=[{k:'mut',t:''}]; r.s.sit=''; r.p.livre=[{k:'mut',t:'—'}]; r.p.desde=[{k:'mut',t:'—'}];
     r.p.area=[{k:'mut',t:ocHa(o.area)+' ha'}]; r.s.area=ocHa(o.area)+' ha'; r.p.cult=[{k:'mut',t:o.cult}]; r.s.cult=o.cult; r.p.var=[{k:'mut',t:o.var||'—'}]; r.s.var=o.var;
-    ocDcol(r,'ate',o.classe==='semdata'?null:o.fim,'mut'); r.v.fimpor=OC_ROT[o.classe]; r.p.fimpor=[{k:'mut',t:r.v.fimpor}]; r.s.fimpor=r.v.fimpor;
+    ocDcol(r,'ate',o.classe==='semdata'?null:o.fim,'mut'); r.v.fimpor=(o.plano&&o.classe==='semdata')?'Aguarda data do plano':OC_ROT[o.classe]; r.p.fimpor=[{k:'mut',t:r.v.fimpor}]; r.s.fimpor=r.v.fimpor;
     r.p.saf=[{k:'act',t:o.safnome+' ›',fn:'abrirsaf:'+o.saf+'|'+o.id,lk:true}]; r.s.saf=o.safnome;
     r.p.plano=[{k:'mut',t:pl?pl.nome:'sem plano'}]; r.s.plano=pl?pl.nome:''; r.p.ver=[{k:'mut',t:pl?'v'+pl.versao:'—'}]; r.s.ver=pl?'v'+pl.versao:'';
     ocDcol(r,'dt_plantio',o.plantio,'mut'); r.p.meta=[{k:'mut',t:'—'}]; r.s.meta=''; r.p.aj=[{k:'mut',t:'—'}]; r.s.aj=''; r.p.tipo=[{k:'mut',t:o.tipo}]; r.s.tipo=o.tipo; return r; };

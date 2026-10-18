@@ -53,3 +53,8 @@ saida.clear()
 assert len(OC.atividades(ctx,plantio,'P'))==2
 assert OC._datas_plano.cache_info().maxsize==2048
 print('OK cache ocupação: 20 consultas/1 lote, edição invalida, saída isolada, limite2048')
+
+o=OC.mk(ctx,dict(id='c',saf='S',faz='F',faixa='T',tipo='Talhão inteiro',area=1,cult='Teste',plantio='2026-10-01',plano='P'),dict(id='S',ini='2026-01-01',fim='2026-12-31'))
+assert o['fim'] is None and o['classe']=='semdata'
+assert OC.P(ctx,o)==OC.INF
+print('OK plano sem âncora não inventa fim nem liberação confirmada')

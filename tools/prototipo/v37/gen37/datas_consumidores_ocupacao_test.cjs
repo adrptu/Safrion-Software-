@@ -21,3 +21,14 @@ assert.equal(run("soloDataTexto(null,{g:{tipo:'DAP'}})"),'aguarda plantio');
 assert.equal(run("soloDataTexto(null,{g:{tipo:'DATA'}})"),'aguarda data válida');
 assert.equal(run("soloDataTexto('2026-11-01',{g:{tipo:'DAPC'}})"),'01/11/2026');
 console.log('4/4 rótulos de análise do solo preservam data ou explicam ausência');
+
+vm.runInContext("var o=ocMk(ctx,{id:'c',saf:'S',faz:'F',faixa:'T',tipo:'Talhão inteiro',area:1,cult:'Teste',plantio:'2026-10-01',plano:'P'},{id:'S',ini:'2026-01-01',fim:'2026-12-31'})",c);
+assert.equal(run('o.fim'),null);
+assert.equal(run('o.classe'),'semdata');
+assert.equal(run('ocP(ctx,o)'),100000000);
+console.log('3/3 plano sem âncora não inventa fim nem liberação confirmada');
+
+vm.runInContext("var known=ocMk(ctx,{id:'c',saf:'S',faz:'F',faixa:'T',tipo:'Talhão inteiro',area:1,cult:'Teste',plantio:'2026-10-01',plano:'P',colheita:'2026-11-01'},{id:'S',ini:'2026-01-01',fim:'2026-12-31'})",c);
+assert.equal(run('known.classe'),'plano');
+assert.equal(run('ocIso(known.fim)'),'2026-11-03');
+console.log('2/2 informar âncora restaura fim canônico do plano');

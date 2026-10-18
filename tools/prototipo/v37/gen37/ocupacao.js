@@ -44,7 +44,7 @@ function ocMk(ctx,c,s){ const folga=ctx.folga; let pid=c.plano||null;
   const classe=ctx.classe[o.cult]||'Anual';
   if(classe==='Perene'){ o.fim=OC_INF; o.classe='perene'; }
   else if(real!==null){ o.fim=real; o.classe='observado'; }
-  else if(pid){ o.fim=dfim; o.classe='plano'; }
+  else if(pid){ const incompleto=o.avisos.some(a=>a[0]==='ancora_ausente'); o.fim=incompleto?null:dfim; o.classe=incompleto?'semdata':'plano'; }
   else if(colh!==null){ o.fim=colh; o.classe='informada'; }
   else { const e=ocFimEstimado(ctx,o.cult,o.var,pl); if(e!==null){ o.fim=e; o.classe='estimado'; } else { o.fim=null; o.classe='semdata'; } }
   const cm=ctx.cicmin[o.cult];

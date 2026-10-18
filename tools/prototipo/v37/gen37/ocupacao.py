@@ -134,7 +134,9 @@ def mk(ctx, c, s):
     classe = ctx['classe'].get(o['cult'], 'Anual')
     if classe == 'Perene': o['fim'], o['classe'] = INF, 'perene'
     elif real is not None: o['fim'], o['classe'] = real, 'observado'
-    elif pid: o['fim'], o['classe'] = dfim, 'plano'
+    elif pid:
+        incompleto = any(a[0] == 'ancora_ausente' for a in o['avisos'])
+        o['fim'], o['classe'] = (None, 'semdata') if incompleto else (dfim, 'plano')
     elif colh is not None: o['fim'], o['classe'] = colh, 'informada'
     else:
         e = fim_estimado(ctx, o['cult'], o['var'], pl)
