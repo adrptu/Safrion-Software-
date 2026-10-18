@@ -1,0 +1,6 @@
+A1 contraexemplo inviavel Trabalho não termina na janela da O.S. [{"id":"A","ch":7,"ini":7,"fim":8,"esp":0,"pau":0},{"id":"B","ch":11,"ini":11,"fim":null,"esp":2,"pau":0}]
+E1 chega depois da janela inviavel Trabalho não termina na janela da O.S. [{"id":"A","ch":7,"ini":7,"fim":16,"esp":0,"pau":0},{"id":"B","ch":null,"ini":null,"fim":null,"esp":0,"pau":0}]
+E2 viagem atravessa a noite viavel Sequência cabe nas premissas temporais informadas [{"id":"A","ch":7,"ini":7,"fim":16.5,"esp":0,"pau":0},{"id":"B","ch":31.5,"ini":31.5,"fim":32.5,"esp":0,"pau":14}]
+E3 janela no dia seguinte (espera em turno + pausa noturna) viavel Sequência cabe nas premissas temporais informadas [{"id":"A","ch":7,"ini":7,"fim":8,"esp":0,"pau":0},{"id":"B","ch":34,"ini":34,"fim":35,"esp":11,"pau":14}]
+E4 viagem sem turno inviavel Sem turno até o fim da janela [{"id":"A","ch":7,"ini":7,"fim":17,"esp":0,"pau":0},{"id":"B","ch":null,"ini":null,"fim":null,"esp":0,"pau":0}]
+E5 km 0 e janela já aberta viavel Sequência cabe nas premissas temporais informadas [{"id":"A","ch":7,"ini":7,"fim":9,"esp":0,"pau":0},{"id":"B","ch":9,"ini":9,"fim":11,"esp":0,"pau":0}]

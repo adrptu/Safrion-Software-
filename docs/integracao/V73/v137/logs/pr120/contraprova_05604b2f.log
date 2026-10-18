@@ -1,0 +1,34 @@
+OK 3 operações de4h em8h: primeira que estoura é C
+OK janelas adjacentes sem interseção global são viáveis
+OK janela de1h expira antes da segunda operação
+OK virada de dia preserva data e fim exato
+OK deslocamento entre O.S. impede janela antes viável
+node:assert:150
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'inviavel'
+- 'viavel'
+
+    at /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr120r/k/velho/frentes_agenda_unit.js:32:10
+    at test (/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr120r/k/velho/frentes_agenda_unit.js:9:27)
+    at Object.<anonymous> (/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr120r/k/velho/frentes_agenda_unit.js:30:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'inviavel',
+  expected: 'viavel',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.22.0
