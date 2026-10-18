@@ -188,4 +188,4 @@ try:
     t.chk('nenhum erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
-
+sys.exit(0 if t.ok and all(t.ok) else 1)   # PR #72 (Codex): falha ou nenhuma verificação não sai verde

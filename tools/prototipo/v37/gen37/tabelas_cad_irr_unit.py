@@ -24,7 +24,7 @@ OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('OK    ' if cond else 'FALHA ') + n + ('' if cond else ' · ' + str(info)[:400]), flush=True)
 
-ESCOPO = {'CD-01': ['g_tal', 'g_amb', 'g_agua'], 'CD-01det': ['g_idt', 'g_parc'], 'CD-02': ['g_cv', 'g_rend'], 'CD-03': ['g_atv'], 'CD-04': ['g_pes'],
+ESCOPO = {'CD-01': ['g_tal', 'g_amb', 'g_agua'], 'CD-01det': ['g_idt', 'g_parc'], 'CD-02': ['g_cv'], 'CD-08': ['g_rend', 'g_op'], 'CD-03': ['g_atv'], 'CD-04': ['g_pes'],
           'CD-05': ['g_forn', 'g_cob'], 'CD-06': ['g_itm', 'g_loc'], 'CD-07': ['g_dim'], 'IR-01': ['g_set'], 'IR-02': ['g_ag'], 'IR-03': ['g_os'],
           'IR-03det': ['g_pas', 'g_trl'], 'IR-04': ['g_src', 'g_cap', 'g_des']}
 R_ROT = re.compile(r'\s·\s|\s/\s|\se\s', re.I)
@@ -189,7 +189,7 @@ def cap6(html):
     if 'function c6capCol(' in html: return func(html, 'c6capCol')
     i = html.find("const sl=GR('g_loc');"); j = html.find('v.c6l_ncol=sl.cols.length;', i)
     return 'function c6capCol(self){ const v={}; ' + html[i:j + 26] + ' return v.c6l_ncol; }' if i >= 0 and j > i else func(html, 'c6capCol')
-G2F = ('g2num', 'g2fmtn', 'g2unf', 'g2fmt', 'g2st', 'g2set', 'g2text', 'g2mem', 'g2fkeys', 'g2key', 'g2match', 'g2sort', 'g2qtok', 'g2qhas', 'g2qrows')
+G2F = ('g2num', 'g2fmtn', 'g2unf', 'g2fmt', 'g2st', 'g2set', 'g2text', 'g2mem', 'g2fkeys', 'g2ordk', 'g2key', 'g2match', 'g2sort', 'g2qtok', 'g2qhas', 'g2qrows')
 jsx = ("const G2KEEP={}; const C3=" + json.dumps(C3, ensure_ascii=False) + ";\n" + '\n'.join(func(h3, f) for f in G2F + ('capColDeps', 'c3capCol')) + '\n' + cap6(h6) + r"""
 const sp3={id:'g_atv',cols:[{k:'nome',l:'Máquina ou instalação'},{k:'est',l:'Situação'},{k:'classe',l:'Classe'},{k:'custo_h',l:'Custo R$/h',t:'num',a:'r',un:'R$/h'}],so:{}};
 const sp6={id:'g_loc',cols:[{k:'nome',l:'Local'},{k:'faz',l:'Fazenda'},{k:'tipo',l:'Tipo'},{k:'itens',l:'Itens com este local padrão',t:'num',a:'r'}],qf:{k:'tipo',todas:'Todos'},so:{}};
