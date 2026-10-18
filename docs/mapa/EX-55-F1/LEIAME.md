@@ -40,7 +40,9 @@ As três telas usam o mesmo componente (`mapa_emb.py` e `mapa_emb.js`) e as mesm
 
 Logs: `logs/contraprova_classe.log` e `logs/contraprova_rotulo.log`.
 
-**Mapa da fazenda sem mudança:** a entrada da Irrigação foi para uma fonte única (`irrigacao_estado.js · irrMapaEntrada`). A coleta A2 do IN-04 antes e depois do refactor tem 60 de 60 contextos idênticos (`A2_IN04_pacote.json`).
+**Mapa da fazenda (IN-04):**
+- A entrada da Irrigação foi para uma fonte única (`irrigacao_estado.js · irrMapaEntrada`) sem mudar a saída: a coleta A2 antes e depois desse passo tem 60 de 60 contextos idênticos (`A2_IN04_pacote.json`).
+- A camada O.S. muda de propósito: as O.S. do cenário passam a aparecer, com "sem prazo" quando não há janela. As diferenças estão em `A2_dif_ordens_do_cenario.txt`.
 
 ## Defeitos achados e corrigidos
 
