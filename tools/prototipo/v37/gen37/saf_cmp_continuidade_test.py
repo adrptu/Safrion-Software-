@@ -56,6 +56,8 @@ try:
     def etapa(i): J(f"({IR_ETAPA})({i})"); time.sleep(.5)   # a faixa só informa: anda pela área de ações (UX-ACAO-UNICA-20261003)
     def foto(nome): c.shot(os.path.join(OUT,f'q_saf-cmp_{nome}.png'))
     def ls(): return json.loads(J("localStorage.getItem('talhao-os-compras-v1')||'null'") or 'null')
+    # C-3/C-4 (PR #114): o andamento da Compra (proc) mora no cenário (compras.proc); as solicitações (sols) seguem no registro compartilhado
+    def proc_cen(): return json.loads(J("JSON.stringify(((Object.keys(localStorage).map(k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}).find(o=>o&&o.compras&&o.ordens)||{}).compras||{}).proc||null)") or 'null') or {}
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear()"); ir('SAF.dc.html')
     # ---------------- Planejar safra · Safrinha 2027 · etapa 4 (demanda de insumos) ----------------
     r=J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem botão'; b.click(); return b.innerText.trim();})()"""); time.sleep(.6)
@@ -120,9 +122,9 @@ try:
     k6b=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
     chk('19 SAF volta na demanda de insumos (etapa 4) da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas',cur().startswith('4 ') and 'Safrinha 2027' in J("document.body.innerText.slice(0,600)") and 'solicitação SOL-2027-02 · Em cotação · ' in k6b and 'de 13 respostas' in k6b,(cur(),k6b))
     foto('5_saf_volta')
-    nav('Abrir Compra de insumos ›','CMP.dc.html'); tr1=trail(); g=ls() or {}
+    nav('Abrir Compra de insumos ›','CMP.dc.html'); tr1=trail(); g=ls() or {}; g['proc']=proc_cen()
     chk('26 Compra → origem → Compra: convites e propostas da SOL-2027-02 continuam (trilha igual) e o registro guarda o estado',
-        '13 convites enviados' in tr1 and ' 0 propostas' not in tr1 and tr1==tr0 and (g.get('proc') or {}).get('S27SF',{}).get('estado','').startswith('Em cotação') and (g.get('sols') or {}).get('S27SF',{}).get('estado','').startswith('Em cotação'),
+        '13 convites enviados' in tr1 and ' 0 propostas' not in tr1 and tr1==tr0 and (g.get('proc') or {}).get('S27SF',{}).get('estado','').startswith('Em cotação') and (g.get('sols') or {}).get('S27SF',{}).get('id')=='SOL-2027-02',   # C-3/C-4: o estado mora só no proc do cenário (fonte única); a solicitação segue no registro
         {'antes':tr0,'depois':tr1,'proc':(g.get('proc') or {}).get('S27SF',{}).get('estado'),'sol':(g.get('sols') or {}).get('S27SF',{}).get('estado')})
     ir('SAF.dc.html'); px=rowtxt('Safrinha 2027')
     chk('20 SAF recarregada sem endereço: a Safrinha não volta a "enviar demanda" (registro mantido)','enviar demanda' not in px and 'Continuar' in px,px)

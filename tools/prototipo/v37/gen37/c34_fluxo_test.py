@@ -61,6 +61,11 @@ try:
     chk('C1 Compras pela tela: convites → Enviar à Direção → Registrar aprovação da Direção emite PC-101 a PC-104 e grava no cenário (compras.v1, aprovada)',
         (r, r1, r2) == ('ok', 'ok', 'ok') and 'emitidos PC-101 a PC-104' in t and st == [1, 'aprovada', ['PC-101', 'PC-102', 'PC-103', 'PC-104']], (r, r1, r2, t, st))
     chk('C2 a compra aprovada não volta para a chave antiga de Compras (fonte única: cenário)', leg is None, leg)
+    # o Planejar safra lê o andamento da Compra no cenário: "Pedidos emitidos" impede a redução de insumo já comprado (DEM-09)
+    ir('SAF.dc.html#saf=S2627&passo=demanda', w=1.8); k6 = J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]") or ''
+    chk('C16 Planejar safra (demanda de insumos da 2026/27) mostra a compra no estado gravado pela Compra: Pedidos emitidos · PC-101 a PC-104',
+        'Pedidos emitidos' in k6 and 'PC-101' in k6, k6)
+    ir('EST.dc.html', w=1.8)
     clk('Conferir NF 4533'); setv('fx_g_rec_conf', '20000'); setv('fx_g_rec_apto', '20000'); setv('fx_g_rec_quar', '0'); setv('fx_g_rec_val', '05/2027'); clk('Salvar', 'aside[role=dialog]')
     clk('Conferir NF 7731'); setv('fx_g_rec_conf', '1200'); setv('fx_g_rec_apto', '1200'); setv('fx_g_rec_quar', '0'); clk('Salvar', 'aside[role=dialog]')
     clk('Registrar recebimento'); ops = J("[...(document.querySelector('#fx_g_rec_ped')||{options:[]}).options].map(o=>o.value)") or []
