@@ -422,7 +422,7 @@ function combinarMotor(saida,fonte,rng){
  if(vm.runInContext("typeof rxCombinaSafras==='function'",combCtx)){
   for(const ps of pares.values()){assert(ps.length<=2&&new Set(ps.map(p=>p.safra)).size===ps.length,'combinação exige safras distintas, duas no máximo');
    for(const fator of fatores){const a=estadoFator(ps[0],fator),b=estadoFator(ps[1],fator);combCtx.A=a;combCtx.B=b;
-    const r=combinarEstados(a,b,()=>vm.runInContext('rxCombinaSafras(A,B)',combCtx));combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),origens:[a&&a.origem,b&&b.origem],evidencia:a&&b&&a.origem==='representante'&&b.origem==='representante'?'propria':[a,b].some(x=>x&&x.origem==='mate')?'herdada_grupo':'nao_atribuivel',...r});}
+    const r=combinarEstados(a,b,()=>vm.runInContext('rxCombinaSafras(A,B)',combCtx));combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),origens:[a&&a.origem,b&&b.origem],evidencia:['insuf','nao_selecionado','nao_avaliavel'].includes(r.level)?'nao_atribuivel':a&&b&&a.origem==='representante'&&b.origem==='representante'?'propria':[a,b].some(x=>x&&x.origem==='mate')?'herdada_grupo':'nao_atribuivel',...r});}
   }
  }
  return combinados;
