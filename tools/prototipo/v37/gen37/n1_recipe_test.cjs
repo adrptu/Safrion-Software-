@@ -25,7 +25,9 @@ for(const cmd of ['approve','release'])for(const mutation of ['same','dose','are
 // As portas do grupo devem conservar a recusa, sem recibo de item liberado.
 const groupSource=src.slice(src.indexOf('function cenGrupoAprovar('),src.indexOf('// efeito da liberação, sem o registro'));
 const cenLines=fs.readFileSync(__dirname+'/cenario.js','utf8').split('\n');
-const idem=cenLines.slice(305,310).join('\n');
+// o cenIdem pelo nome, não pela linha: o C-3/C-4 e o Q5 deslocaram o cenario.js (integrador, 18/10)
+const ci=cenLines.findIndex(l=>l.startsWith('function cenIdem('));
+const idem=cenLines.slice(ci,ci+5).join('\n');
 for(const cmd of ['approve','release']) {
  const o={id:'OS-0440',etapa:'A liberar',versao:'v1',area:2,ins:[{p:'Produto',un:'L',dose:3,tot:6}],osc:{ev:cmd==='release'?[{cmd:'CMD-42',v:'v1'}]:[],novo:{keys:['mip|V1|P1']}}};
  const c={ordens:{[o.id]:o},mip:{rec:{R:{id:'R',os:o.id,sit:'Receituário emitido',nome:'Produto',un:'L',dose:1,area:2}}},gruposExec:{G:{versao:1,ids:[o.id],escopos:{[o.id]:'scope'},origens:{[o.id]:'v1'},assinatura:'eq',historico:[]}}};

@@ -437,7 +437,9 @@ function PREVALS(self,v){ cmPre(self);
       const falt=p.itens.map(it=>faltaDe(st,it.nome,null)).filter(Boolean).sort()[0]||null; const av=avFalta(x,p.prev,falt);
       const r={id:p.id,v:{nome:p.id,val:p.valor,prev,obs:x.obs||''},s:{nome:p.id+' '+p.nome},p:{nome:[B(p.id),T(p.nome),BR(),MU(SX.sol.id+' · '+(one?p.itens[0].nome:p.itens.length+' insumos'))]}};
       const entrega=it=>{const e=cenCompSaldo(cenGet(),{id:p.id,linha:it.i,item:it.nome,un:it.un,qtd:it.ped});return {
-        v:{qtd:it.ped,rec:e.rec,quar:e.quar,ae:e.ae,val:it.tot},p:{qtd:[T(qt(it.ped,it.un))],rec:[T(qt(e.rec,it.un))],quar:[{k:'ico',c:'gray',curto:e.quar===null?'Não apurável':qt(e.quar,it.un),t:'Na conferência: '+qt(e.quarEntrada,it.un)+(e.quar===null?' · Lote compartilhado ou sem atribuição segura à linha; nenhum rateio aplicado.':'') }],ae:[B(qt(e.ae,it.un))]}};};
+        // nota antiga sem unidade ou linha que cabe em mais de uma linha do pedido: nada baixado, Recebido e A entregar não apuráveis (revisão do Codex 6249640248)
+        v:{qtd:it.ped,rec:e.amb.length?null:e.rec,quar:e.quar,ae:e.amb.length?null:e.ae,val:it.tot},p:{qtd:[T(qt(it.ped,it.un))],rec:[e.amb.length?NA(e.amb):T(qt(e.rec,it.un))],quar:[{k:'ico',c:'gray',curto:e.quar===null?'Não apurável':qt(e.quar,it.un),t:'Na conferência: '+qt(e.quarEntrada,it.un)+(e.quar===null?' · Lote compartilhado ou sem atribuição segura à linha; nenhum rateio aplicado.':'') }],ae:[e.amb.length?NA(e.amb):B(qt(e.ae,it.un))]}};};
+      const NA=nfs=>({k:'ico',c:'gray',curto:'Não apurável',t:'Nota '+nfs.join(', ')+' sem unidade ou linha cabe em mais de uma linha deste pedido: nada foi baixado. Confira a nota no Estoque.'});
       if(one){const z=entrega(p.itens[0]);Object.assign(r.v,z.v);Object.assign(r.p,z.p);}
       else r.kids=p.itens.map(it=>{const z=entrega(it);return {id:p.id+'_'+it.i,ro:true,dr:'entp_'+p.id,v:Object.assign({nome:it.nome},z.v),s:{nome:it.nome},p:Object.assign(z.p,{prev:[T('')],sit:[T('')],acao:[T('')]})};});
       r.p.sit=[x.conf?CH('Confirmado pelo fornecedor','green'):CH('Aguarda confirmação','blue')].concat(av); r.s.sit=(x.conf?'Confirmado':'Emitido')+(av.length?' '+av[0].t:'');

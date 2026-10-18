@@ -242,7 +242,7 @@ function erecs(c){ const mv={}; (c.movs||[]).forEach(m=>{ if(m.tipo==='recebimen
   Object.keys(mv).forEach(k=>{ if(!E2.recs.some(b=>b.id===k)) out.push(Object.assign({},mv[k],{ok:true,hoje:true})); }); return out; }
 function epedBase(lbl){const all=E2.pedidos.concat(cenCompLinhas(cenGet()));const exact=all.find(p=>p.label===lbl);if(exact)return exact;
   const matches=all.filter(p=>p.id===elotId(lbl));return matches.length===1?matches[0]:null;}
-function epeds(c){const RC=erecs(c);const base=E2.pedidos.map(p=>{const x=Object.assign({},p);RC.forEach(r=>{if(r.hoje&&cenCompCasa(r,p))x.a_entregar=Math.max(0,x.a_entregar-(Number(r.conf)||0));});return x;});
+function epeds(c){const RC=erecs(c);const base=E2.pedidos.map(p=>{const x=Object.assign({},p);RC.forEach(r=>{if(r.hoje&&cenCompCasa(r,p,E2.pedidos))x.a_entregar=Math.max(0,x.a_entregar-(Number(r.conf)||0));});return x;});
   return base.concat(cenCompLinhas(c).filter(p=>!base.some(b=>b.id===p.id&&b.item===p.item&&b.un===p.un)).map(p=>Object.assign({},p,{a_entregar:cenCompSaldo(c,p).ae})));}
 function efert(lbl){const p=epedBase(lbl);return !!(p&&E2.sem_validade.indexOf(p.grupo)>=0);}
 // contagens: registros de base + os gravados no cenário (c.estInv)

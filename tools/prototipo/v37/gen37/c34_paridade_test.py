@@ -38,3 +38,20 @@ c['lotes']={'A|kg':dict(prod='A',lote='kg',local='Sede',un='kg',fisico=20,quaren
 b2['locFaz']={'Sede':'F'}
 out=check(c,b2,'F');assert len(out['recebNaoApuravel'])==1 and not any(r['item']=='A' for r in out['recebDt'])
 print('PASS 6ª paridade: dois lotes em unidades distintas e recebimento parcial, previsão ambígua excluída.')
+# Q5 (revisão do Codex 6249640248; patch do integrador, Claude): nota antiga sem unidade ou linha só baixa a linha única do PC e item em que cabe.
+leg=dict(id='ANTIGA',nf='7001',ped='PC-X',item='A',apto=20,quar=0)
+c3=copy.deepcopy(empty);c3['movs']=[dict(tipo='recebimento-nf',estRec=leg)]
+um=[dict(ref='PC-X',item='A',un='kg',q=100,faz='F')]
+dois=[dict(ref='PC-X',item='A',un='kg',linha=1,q=100,faz='F'),dict(ref='PC-X',item='A',un='L',linha=2,q=50,faz='F')]
+mesmo=[dict(ref='PC-X',item='A',un='kg',linha=1,q=100,faz='F'),dict(ref='PC-X',item='A',un='kg',linha=2,q=50,faz='F')]
+out=check(c3,dict(b,rec=um),'F');assert [x['q'] for x in out['recebDt']]==[80] and not out['recebNaoApuravel'],out      # legado único continua abatendo
+c4=copy.deepcopy(c3);c4['movs'][0]['estRec']['un']='L'
+out=check(c4,dict(b,rec=um),'F');assert [x['q'] for x in out['recebDt']]==[100],out                                   # unidade divergente não abate
+out=check(c3,dict(b,rec=dois),'F')                                                                                      # contraexemplo do Codex: 100 kg e 50 L
+assert not out['recebDt'] and len(out['recebNaoApuravel'])==2 and all('7001' in x['motivo'] for x in out['recebNaoApuravel']),out
+c5=copy.deepcopy(c3);c5['movs'][0]['estRec']['un']='kg'
+out=check(c5,dict(b,rec=mesmo),'F');assert not out['recebDt'] and len(out['recebNaoApuravel'])==2,out                  # mesma unidade, sem linha: ambígua
+out=check(c5,dict(b,rec=dois),'F');assert [x['q'] for x in out['recebDt']]==[80,50] and not out['recebNaoApuravel'],out # unidade única entre as linhas: baixa só a sua
+c6=copy.deepcopy(c5);c6['movs'][0]['estRec']['linha']=2
+out=check(c6,dict(b,rec=mesmo),'F');assert [x['q'] for x in out['recebDt']]==[100,30],out                              # com linha: baixa só a sua
+print('PASS 6 paridades Q5: legado único abate, unidade divergente não, legado ambíguo (unidades distintas ou mesma unidade sem linha) fora do suprimento com aviso, unidade ou linha única baixa só a sua.')
