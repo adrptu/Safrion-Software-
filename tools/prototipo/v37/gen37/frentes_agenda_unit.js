@@ -44,6 +44,7 @@ test('dados ausentes e inválidos nunca presumem viabilidade', () => {
   }
   for(const campo of ['areaHa','rendimentoHaH']) assert.equal(frAgenda([{...os('A',1),[campo]:0}],p).status,'sem_conta');
   assert.equal(frAgenda([os('A',1,10,9)],p).status,'sem_conta');
+  assert.equal(frAgenda([os('A',1,10,10)],p).status,'sem_conta','janela de duração zero');
 });
 test('parâmetro explícito e fonte obrigatórios, sem padrão', () => {
   for(const q of [null,{}, {...p,velocidadeKmh:0},{...p,fonte:''},{...p,inicio:'08:00'}]) {
