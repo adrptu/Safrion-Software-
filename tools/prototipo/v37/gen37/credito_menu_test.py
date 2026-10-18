@@ -19,7 +19,10 @@ U = lambda x: f'http://127.0.0.1:{p}/{x}'
 BLOCOS = ['Solicitações e contratos', 'Acompanhamento do CRE-0102', 'Dossiê e consentimento', 'Documentos para crédito']
 FICHA = 'Ficha do grupo · Bens e avaliações'
 VISOES = [FICHA, BLOCOS[2], BLOCOS[0], BLOCOS[1]]
-CARTOES = [['Ficha do grupo', 'GE-08.dc.html#vis=ficha'], ['Dossiês', 'GE-08.dc.html#vis=dossie'], ['Pedidos e contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações e garantias', 'GE-08.dc.html#vis=liberacoes']]
+# PAINEL-03 (18/10/2026, proprietário: "um painel só que navega pelos módulos"): o 1º cartão, Painel, abre a aba Crédito do painel único (PG)
+CARTOES = [['Painel', 'PG.dc.html#mod=cre'], ['Ficha do grupo', 'GE-08.dc.html#vis=ficha'], ['Dossiês', 'GE-08.dc.html#vis=dossie'], ['Pedidos e contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações e garantias', 'GE-08.dc.html#vis=liberacoes']]
+VIS_DE = {c[1]: v for c, v in zip(CARTOES[1:], VISOES)}
+PG_CRE = "location.hash.indexOf('mod=cre')>=0&&[...document.querySelectorAll('[role=tab][aria-selected=true]')].some(t=>t.offsetParent&&/Crédito/.test(t.innerText))"
 def espera(cond, lim=8.0):
     # espera a condição observável (AGENTS §3.6), com limite explícito: sob carga, 1,2 s fixos não bastavam para a tela renderizar
     t0 = time.time()
@@ -45,11 +48,20 @@ try:
         for i, (nome, href) in enumerate(cards):
             c.goto(U('MOD-CRE.dc.html'), 1.0); espera("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).length>%d" % i)
             J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i)
+            VOL = "[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))"
+            if href.startswith('PG.'):
+                espera(PG_CRE + '&&' + VOL)
+                chk(f'C2 {w} Painel: abre a aba Crédito do painel único de gestão, com "‹ Crédito"', bool(J(PG_CRE)) and bool(J(VOL)), [J("location.href"), J(VOL)])
+                J("[...document.querySelectorAll('a')].find(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||'')).click()")
+                espera("location.pathname.endsWith('MOD-CRE.dc.html')&&document.activeElement&&document.activeElement.getAttribute('href')===%s" % json.dumps(href))
+                chk(f'C2F {w} {nome}: retorno preserva foco no cartão de origem', J("document.activeElement.getAttribute('href')") == href)
+                continue
+            vi = VIS_DE[href]
             # espera a parte do cartão e o "‹ Crédito" renderizarem (§3.6); o chk abaixo continua reprovando conteúdo errado
-            espera("location.href.indexOf(%s)>=0&&[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)&&[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))" % (json.dumps(href.split('#')[1]), json.dumps(VISOES[i])))
+            espera("location.href.indexOf(%s)>=0&&[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)&&[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))" % (json.dumps(href.split('#')[1]), json.dumps(vi)))
             vol = J("[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))")
-            chk(f'C2 {w} {nome}: só a parte do cartão ({VISOES[i]}), com indicadores pertinentes e "‹ Crédito"', blocos() == [VISOES[i]] and kpis() == (i != 0) and vol, [blocos(), kpis(), vol])
-            if i == 0:
+            chk(f'C2 {w} {nome}: só a parte do cartão ({vi}), com indicadores pertinentes e "‹ Crédito"', blocos() == [vi] and kpis() == (vi != FICHA) and vol, [blocos(), kpis(), vol])
+            if vi == FICHA:
                 docs = J("[...document.querySelectorAll('main a')].filter(a=>a.offsetParent&&/vis=documentos/.test(a.getAttribute('href')||'')) .map(a=>a.getAttribute('href'))")
                 chk(f'C2D {w}: documentos acessíveis pela ficha', bool(docs), docs)
             J("[...document.querySelectorAll('a')].find(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||'')).click()")

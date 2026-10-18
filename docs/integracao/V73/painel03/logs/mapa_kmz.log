@@ -1,0 +1,7 @@
+OK    K1 o campo de arquivo aceita .kmz e diz "KML, KMZ ou GeoJSON"
+OK    K2 o .kmz abre a revisão (o arquivo aparece como .kml), sem erro de leitura
+OK    K3 o polígono cai no pivô ("Novo contorno de …") e o ponto sem área explica por que não vira talhão
+OK    K4 .kmz sem .kml dentro mostra o motivo, sem travar a tela
+OK    K5 sem erro de JavaScript
+RESULTADO: 5 ok · 0 falhas
+rc=0

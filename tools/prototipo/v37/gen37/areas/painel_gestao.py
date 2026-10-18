@@ -309,12 +309,12 @@ def build():
     pane = lambda k, html: f'<sc-if value="{H("pg_"+k+"_on")}" hint-placeholder-val="{"true" if k == "pri" else "false"}"><div role="tabpanel" id="pg-pane-{k}" aria-labelledby="pg-tab-{k}" class="pg" tabindex="-1">{html}</div></sc-if>'
     alav = (f'<section class="pg-bloco" aria-label="Alavancas do resultado"><div class="pg-bh"><h2>Alavancas do resultado</h2>'
             f'<button type="button" class="pg-tip g2dica-i" aria-label="Como ler as alavancas" data-dica="Por cultivo: o custo realizado da área executada contra o previsto da mesma área (acima = pior) e quanto do orçado já foi; o preço médio vendido da cultura contra a referência de mercado (abaixo = pior). A margem prevista entra na próxima fatia.">ⓘ</button></div>'
-            f'<sc-if value="{H("pg_alav_vazio")}" hint-placeholder-val="false"><p class="pg-vazio">Sem custo por cultura no recorte.</p></sc-if>'
-            f'<div class="pg-rola"><table class="pg-tab"><thead><tr><th scope="col">Cultivo</th><th scope="col">Custo da execução</th><th scope="col">Preço médio vendido</th></tr></thead><tbody>'
+            # SEP-20261015 (b): a tabela abre o corpo do bloco (o cabeçalho dela separa sozinho); o aviso de vazio vem depois (ds_test A2c)
+            f'<div><div class="pg-rola g2caixa"><table class="pg-tab"><thead><tr><th scope="col">Cultivo</th><th scope="col">Custo da execução</th><th scope="col">Preço médio vendido</th></tr></thead><tbody>'
             f'<sc-for list="{H("pg_alav")}" as="a" hint-placeholder-count="3"><tr data-pg-alav="{H("a.id")}"><td><strong>{H("a.cult")}</strong><small>{H("a.ctx")}</small></td>'
             f'<td><a href="GE-03.dc.html" class="pg-chip" style="color: {H("a.cusbc")}; background: {H("a.cusbg")}; text-decoration: none;">{H("a.cus")}</a><small>{H("a.cons")}</small></td>'
             f'<td><a href="VEN.dc.html" class="pg-chip" style="color: {H("a.prebc")}; background: {H("a.prebg")}; text-decoration: none;">{H("a.pre")}</a><small>{H("a.prer")}</small></td></tr></sc-for>'
-            f'</tbody></table></div></section>')
+            f'</tbody></table></div><sc-if value="{H("pg_alav_vazio")}" hint-placeholder-val="false"><p class="pg-vazio">Sem custo por cultura no recorte.</p></sc-if></div></section>')
     sec = lambda t, chave, vazio, mais=False: (f'<section class="pg-bloco" aria-label="{E.esc(t)}"><div class="pg-bh"><h2>{E.esc(t)} · {H(chave+"_n")}</h2>'
             f'<button type="button" class="pg-tip g2dica-i" aria-label="Como a lista é ordenada" data-dica="Ordem: classe do dano (lei e segurança, lavoura, dinheiro e estoque, prazo e ativos); dentro dela, o maior impacto em R$, depois em ha, depois em dias; entre iguais, o mais antigo. O mesmo item não aparece duas vezes.">ⓘ</button></div>'
             + _lista(chave, vazio)
