@@ -77,6 +77,9 @@ for(const a of ac.alvos) for(const season of [1,2]) for(let seed=0;seed<20;seed+
   const c={quenteSeco:(d+season*3)%14<5,molhado:(d+season*3)%14>=9,ur:55+25*Math.sin((d+season*7)/9)};
   return {clima_observado:c,wk:a.wk[0]+(a.wk[1]-a.wk[0])*d/42,clima:a.clima(c),clima_sem:{qs:a.clima({...c,quenteSeco:false}),molh:a.clima({...c,molhado:false}),ur:a.clima({...c,ur:65})},falta:.2,n14:10,k14:15,imigracao:a.imm,chuva:c.molhado?12:0,quenteSeco:c.quenteSeco,ruido_obs:.88+rand()*.24,ruido_app:rand()};
  });
+ // A covariável placebo pertence ao mesmo mundo factual em todos os contrastes.
+ let placeboState=0x9e3779b9^(season*1000+seed);
+ dias.forEach(d=>{placeboState=(Math.imul(placeboState,1103515245)+12345)>>>0;d.covariavel_teste=placeboState/4294967296;});
  for(const fator of ['qs','molh','ur']) episodes.push({cenario:'alvos-v3-clima',safra:String(season),semente:seed,talhao:'T',alvo:a.id,fator,dias,observacoes:[1,8,15,22,29,36,42],x0:(a.x0[0]+a.x0[1])/2,cap:a.cap,nc:a.nc,fx:a.fx,politica:{produtos:a.prods,oleo1:true,repete:false,id_tamanho:1,cobertura:.8,app_qs:.78,app_chuva:.7,gatilho:.9,delay:2}});
 }
 const realPy=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\ne=json.load(sys.stdin);p=g.gerar(e)\nassert len(e)==480\nassert all(len(x['series'])==43 for x in p['entrada'])\nassert len({x['id'] for x in p['entrada']})==len(p['entrada'])\nfor x in p['entrada']:\n for d in x['series']:\n  assert set(d)=={'day','clima','chuva','falta_agua','n14','k14','covariavel_teste'}\n  assert set(d['clima'])=={'quenteSeco','molhado','ur'}\nassert not any(k in json.dumps(p['entrada']) for k in ('clima_sem', 'ruido_app', 'ruido_obs', 'delta', 'coeficiente'))\nfor c in p['oraculo']['classes_por_safra'].values():\n assert c['total']==72 and sum(c['contagens'].values())==72\n assert abs(sum(c['fracoes'].values())-1)<1e-12\n# Cochonilha não tem efeito de molhamento/UR no crescimento do v3.\nneg=[q for q in p['oraculo']['pares'] if q['ligado']['alvo']=='cochon' and q['intervencao'] in ('molh','ur') and 'resultado' in q]\nassert neg and all(q['resultado']['delta']==0 for q in neg)\nassert g.digest(p)==g.digest(g.gerar(e))\nprint(json.dumps(dict(episodios=len(e),pares=len(p['oraculo']['pares']),negativos_zero=len(neg),hash=g.digest(p),exclusoes=p['oraculo']['exclusoes_por_safra'],classes=p['oraculo']['classes_por_safra'])))`;
@@ -183,27 +186,6 @@ assert not g.eficacia_referencia(tarde,[c(10)],3,4)['pares']
 print('PASS resposta lenta fictícia: 0% na leitura precoce, 80% na tardia; futuro não antecipa resultado. Sem janela técnica aprovada.')`;
 const sp=cp.spawnSync('python3',['-B','-c',slowPy,__dirname],{encoding:'utf8',timeout:20000});assert.equal(sp.status,0,sp.stderr);console.log(sp.stdout.trim());
 
-// Exportação opcional: node raiox_unit.js fonte-v3.html --export-dir pasta-nova
-const exportIndex=process.argv.indexOf('--export-dir');
-if(exportIndex>=0) {
- const path=require('path'),crypto=require('crypto');
- const dir=process.argv[exportIndex+1];assert(dir,'Informe pasta nova para exportação');
- fs.mkdirSync(dir); // Recusa sobrescrever pacote anterior, mesmo parcialmente.
- const write=(name,body)=>fs.writeFileSync(path.join(dir,name),body,{flag:'wx'});
- const hash=body=>crypto.createHash('sha256').update(body).digest('hex');
- const origem=JSON.stringify([...episodes,...placeboEpisodes]);write('episodios.json',origem);
- const cli=cp.spawnSync('python3',['-B',path.join(__dirname,'raiox_gabarito.py'),path.join(dir,'episodios.json')],{encoding:'utf8',maxBuffer:32*1024*1024});
- assert.equal(cli.status,0,cli.stderr);
- const pacote=JSON.parse(cli.stdout), entrada=JSON.stringify(pacote.entrada),oraculo=JSON.stringify(pacote.oraculo);
- write('entrada.json',entrada);write('oraculo.json',oraculo);
- const manifest={estado:'rascunho_para_revisao',recuperacao_motor:'nao_executada',fonte_html_sha256:hash(html),contrato_hash:pacote.oraculo.contrato_hash,arquivos:{'episodios.json':hash(origem),'entrada.json':hash(entrada),'oraculo.json':hash(oraculo)},fontes:{'raiox_gabarito.py':hash(fs.readFileSync(path.join(__dirname,'raiox_gabarito.py'))),'raiox_unit.js':hash(fs.readFileSync(__filename))},reproduzir:'python3 -B raiox_gabarito.py episodios.json; comparar JSON canônico e entrada_hash',limites:['Dados sintéticos; não são recomendações agronômicas.','Limiar e referências climáticas aguardam revisão.','Intervenção climática restrita ao crescimento; eficácia preservada.','Sem avaliação de recuperação pelo motor.']};
- write('manifesto.json',JSON.stringify(manifest,null,2));
- const roundtrip=cp.spawnSync('python3',['-B','-c',`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\nfrom pathlib import Path\np=Path(sys.argv[2]);e=json.loads((p/'entrada.json').read_text());o=json.loads((p/'oraculo.json').read_text());assert g.digest(e)==o['entrada_hash'];print('PASS: entrada exportada vinculada ao oráculo')`,__dirname,dir],{encoding:'utf8'});
- assert.equal(roundtrip.status,0,roundtrip.stderr);console.log(roundtrip.stdout.trim());
- console.log('Pacote exportado: '+path.resolve(dir));
-}
-
-
 // Revisão Claude R1–R4: factual único, datas pareadas e versões coerentes.
 const revisao=String.raw`
 import sys,json,copy
@@ -231,3 +213,26 @@ assert len(g.selecionar_disponiveis([dict(r,versao=1,disponivel_em=3),dict(r,ver
 print('PASS: R1 factual único e conflito recusado; R2 datas; R4 ordem de versões no corte.')
 `;
 const rr=cp.spawnSync('python3',['-B','-c',revisao,__dirname],{encoding:'utf8',timeout:20000});assert.equal(rr.status,0,rr.stderr);console.log(rr.stdout.trim());
+
+// Exportação opcional: node raiox_unit.js fonte-v3.html --export-dir pasta-nova
+const exportIndex=process.argv.indexOf('--export-dir');
+if(exportIndex>=0) {
+ const path=require('path'),crypto=require('crypto');
+ const dir=process.argv[exportIndex+1];assert(dir,'Informe pasta nova para exportação');
+ fs.mkdirSync(dir); // Recusa sobrescrever pacote anterior, mesmo parcialmente.
+ const write=(name,body)=>fs.writeFileSync(path.join(dir,name),body,{flag:'wx'});
+ const hash=body=>crypto.createHash('sha256').update(body).digest('hex');
+ const origem=JSON.stringify([...episodes,...placeboEpisodes]);write('episodios.json',origem);
+ const cli=cp.spawnSync('python3',['-B',path.join(__dirname,'raiox_gabarito.py'),path.join(dir,'episodios.json')],{encoding:'utf8',maxBuffer:32*1024*1024});
+ assert.equal(cli.status,0,cli.stderr);
+ const pacote=JSON.parse(cli.stdout);assert.equal(pacote.entrada.length,160,'Um mundo factual por safra/semente/alvo, independente do fator');
+ const entrada=JSON.stringify(pacote.entrada),oraculo=JSON.stringify(pacote.oraculo);
+ write('entrada.json',entrada);write('oraculo.json',oraculo);
+ const manifest={estado:'rascunho_para_revisao',recuperacao_motor:'nao_executada',fonte_html_sha256:hash(html),contrato_hash:pacote.oraculo.contrato_hash,arquivos:{'episodios.json':hash(origem),'entrada.json':hash(entrada),'oraculo.json':hash(oraculo)},fontes:{'raiox_gabarito.py':hash(fs.readFileSync(path.join(__dirname,'raiox_gabarito.py'))),'raiox_unit.js':hash(fs.readFileSync(__filename))},reproduzir:'python3 -B raiox_gabarito.py episodios.json; comparar JSON canônico e entrada_hash',limites:['Dados sintéticos; não são recomendações agronômicas.','Limiar e referências climáticas aguardam revisão.','Intervenção climática restrita ao crescimento; eficácia preservada.','Sem avaliação de recuperação pelo motor.']};
+ write('manifesto.json',JSON.stringify(manifest,null,2));
+ const roundtrip=cp.spawnSync('python3',['-B','-c',`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\nfrom pathlib import Path\np=Path(sys.argv[2]);e=json.loads((p/'entrada.json').read_text());o=json.loads((p/'oraculo.json').read_text());assert g.digest(e)==o['entrada_hash'];print('PASS: entrada exportada vinculada ao oráculo')`,__dirname,dir],{encoding:'utf8'});
+ assert.equal(roundtrip.status,0,roundtrip.stderr);console.log(roundtrip.stdout.trim());
+ console.log('Pacote exportado: '+path.resolve(dir));
+}
+
+
