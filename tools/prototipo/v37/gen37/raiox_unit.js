@@ -81,3 +81,21 @@ for(const a of ac.alvos) for(const season of [1,2]) for(let seed=0;seed<20;seed+
 }
 const realPy=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\ne=json.load(sys.stdin);p=g.gerar(e)\nassert len(e)==480\n# Cochonilha não tem efeito de molhamento/UR no crescimento do v3.\nneg=[q for q in p['oraculo']['pares'] if q['ligado']['alvo']=='cochon' and q['intervencao'] in ('molh','ur') and 'resultado' in q]\nassert neg and all(q['resultado']['delta']==0 for q in neg)\nassert g.digest(p)==g.digest(g.gerar(e))\nprint(json.dumps(dict(episodios=len(e),pares=len(p['oraculo']['pares']),negativos_zero=len(neg),hash=g.digest(p),exclusoes=p['oraculo']['exclusoes_por_safra'])))`;
 const rp=cp.spawnSync('python3',['-B','-c',realPy,__dirname],{input:JSON.stringify(episodes),encoding:'utf8',maxBuffer:8*1024*1024});assert.equal(rp.status,0,rp.stderr);console.log('PASS alvos v3/clima: '+rp.stdout.trim());
+
+const invalidPy=`import sys;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+r=lambda start:[dict(delta=.3,semente=i,identificavel=True) for i in range(start,start+20)]
+for bad in [float('nan'),float('inf'),float('-inf'),True]:
+ q=r(0);q[0]['delta']=bad
+ try:g.classe(q);raise AssertionError('Delta inválido aceito')
+ except ValueError:pass
+for field,value in [('semente',True),('semente',-1),('identificavel',1)]:
+ q=r(0);q[0][field]=value
+ try:g.classe(q);raise AssertionError('Réplica inválida aceita')
+ except ValueError:pass
+p={'s1':{'ligado':r(0),'desligado':r(20)},'s2':{'ligado':r(0),'desligado':r(0)}}
+assert g.consolidar(p)['classe']=='ambiguo'
+assert not g.consolidar(p)['safras']['s1']['sementes_pareadas']
+try:g.gerar([{'qualquer':float('nan')}]);raise AssertionError('NaN aceito')
+except ValueError:pass
+print('PASS: 7 réplicas inválidas recusadas; sementes distintas não confirmam classe; NaN recusado antes do replay.')`;
+const ip=cp.spawnSync('python3',['-B','-c',invalidPy,__dirname],{encoding:'utf8'});assert.equal(ip.status,0,ip.stderr);console.log(ip.stdout.trim());

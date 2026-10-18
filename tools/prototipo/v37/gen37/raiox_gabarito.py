@@ -62,6 +62,12 @@ def contraste(par):
 
 
 def classe(replicas):
+    for r in replicas:
+        if (type(r['semente']) is not int or r['semente'] < 0 or
+                type(r['identificavel']) is not bool or
+                isinstance(r['delta'], bool) or not isinstance(r['delta'], (int, float)) or
+                not math.isfinite(r['delta'])):
+            raise ValueError('Réplica inválida: semente, identificabilidade ou delta')
     if len(replicas) < CONTRATO['k_min']:
         return {'classe': 'insuficiente'}
     if len({r['semente'] for r in replicas}) != len(replicas):
@@ -84,13 +90,15 @@ def consolidar(agendas):
         if set(por_agenda) != set(CONTRATO['agendas']):
             raise ValueError('Duas agendas de sensibilidade obrigatórias')
         cs = [classe(por_agenda[k]) for k in CONTRATO['agendas']]
+        sementes = [{r['semente'] for r in por_agenda[k]} for k in CONTRATO['agendas']]
+        pareamento = sementes[0] == sementes[1]
         if any(c['classe'] in ('insuficiente', 'nao_identificavel') for c in cs):
             estado = 'nao_identificavel' if any(c['classe']=='nao_identificavel' for c in cs) else 'insuficiente'
-        elif len({(c['classe'], c['sinal']) for c in cs}) != 1:
+        elif not pareamento or len({(c['classe'], c['sinal']) for c in cs}) != 1:
             estado = 'ambiguo'
         else:
             estado = cs[0]['classe']
-        saida[safra] = {'classe': estado, 'agendas': cs,
+        saida[safra] = {'classe': estado, 'agendas': cs, 'sementes_pareadas': pareamento,
                         'sinal': cs[0].get('sinal') if estado in ('forte', 'fraco') else None}
     estados = {(x['classe'], x['sinal']) for x in saida.values()}
     return {'contrato_hash': hash_contrato(), 'safras': saida,
@@ -200,8 +208,16 @@ def gerar(episodios):
     Recebe episódios com exógenos já sorteados; não calibra limiar nos resultados.
     Agrupa por cenário, talhão, alvo, fator e janela. Não mede recuperação.
     """
+    # Rejeita NaN/Infinity no pacote antes de calcular ou mascarar por clipping.
+    digest(episodios)
     entradas, pares, grupos, exclusoes, identidades = [], [], {}, {}, set()
     for ep in episodios:
+        if type(ep['semente']) is not int or ep['semente'] < 0:
+            raise ValueError('Semente inteira não negativa obrigatória')
+        for campo in ('x0', 'cap', 'nc'):
+            valor = ep[campo]
+            if isinstance(valor, bool) or not isinstance(valor, (int, float)) or valor <= 0:
+                raise ValueError('Grandeza positiva obrigatória: '+campo)
         chave_ep = tuple(ep[k] for k in ('cenario', 'safra', 'semente', 'talhao', 'alvo', 'fator'))
         if chave_ep in identidades:
             raise ValueError('Episódio duplicado')
