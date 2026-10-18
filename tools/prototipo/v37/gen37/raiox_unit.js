@@ -1,6 +1,8 @@
 // RX-0: paridade da transformação com rxRows real; não mede recuperação.
 const fs=require('fs'), vm=require('vm'), assert=require('assert'), cp=require('child_process');
 const html=fs.readFileSync(process.argv[2], 'utf8');
+const motorInput=process.argv.indexOf('--motor-input');
+if(motorInput>=0){executarMotorObservavel(process.argv[motorInput+1]);process.exit(0);}
 const ini=html.indexOf('function rxRows('), fim=html.indexOf('// controles:',ini);
 assert(ini>=0&&fim>ini,'fonte rxRows ausente');
 const ctx={Math,PIVOS:[{id:'T',stage:'adulta'}],PEST:{A:{T:{obs:[],apps:[]}}}};
@@ -199,6 +201,16 @@ a=g.gerar(eps)
 assert len(a['entrada'])==2
 assert all(e['agenda_referencia']=='ligado' for e in a['entrada'])
 assert len(a['oraculo']['pares'])==8
+antes=g.digest(eps)
+sust=g.aplicar_perfil_suporte(eps)
+assert g.digest(eps)==antes
+for antigo,novo in zip(eps,sust):
+ assert novo['x0']==.5*antigo['nc']
+ assert novo['politica']==antigo['politica'] and novo['fx']==antigo['fx']
+ for d0,d1 in zip(antigo['dias'],novo['dias']):
+  assert d1['imigracao']==.05*antigo['nc']
+  assert {k:v for k,v in d0.items() if k!='imigracao'}=={k:v for k,v in d1.items() if k!='imigracao'}
+print('PASS A4: perfil fixo, fonte imutável, política/clima/ruído/efeitos preservados.')
 pop=g.expandir_populacao(eps,8)
 assert len(pop)==32 and len({x['talhao'] for x in pop})==8
 assert all(x['semente']==0 for x in pop)
@@ -306,3 +318,34 @@ if(exportIndex>=0) {
 }
 
 
+
+// Diagnóstico isolado: motor original, adaptador explícito de covariáveis observadas.
+// Não reconstrói eventos de adubação nem certifica a integração da tela.
+function executarMotorObservavel(caminho) {
+ const crypto=require('crypto');
+ const trecho=(inicio,fim)=>{const a=html.indexOf(inicio),b=html.indexOf(fim,a);assert(a>=0&&b>a,'trecho motor ausente');return html.slice(a,b);};
+ const fonte=trecho('const impute =','// camada 3:');
+ const rng=trecho('function rngFor(', '// ---- clima diário');
+ const fatores=['qs','molh','ur','placebo'];
+ const saida=[];
+ for(const linha of fs.readFileSync(caminho,'utf8').trim().split('\n')) {
+  const entradas=JSON.parse(linha);assert(entradas.length);
+  const e=entradas[0];
+  assert(entradas.every(x=>x.safra===e.safra&&x.semente===e.semente&&x.alvo===e.alvo));
+  assert(new Set(entradas.map(x=>x.talhao)).size===entradas.length);
+  const by=Object.fromEntries(entradas.map(x=>[x.talhao,x]));
+  const W=[['janela observada',0,7],['anterior',7,14],['anterior longa',14,28]];
+  const c={Math,PIVOS:entradas.map(x=>({id:x.talhao,stage:'adulta'})),PEST:{[e.alvo]:Object.fromEntries(entradas.map(x=>[x.talhao,{obs:x.obs,apps:x.apps}]))},PRIOR:{},RXF:fatores.map(k=>({k,tipo:k==='placebo'?'Controle':'Clima',wins:W,dec:k==='ur'?0:2})),a:{id:e.alvo,nc:e.nc},D:Math.max(...entradas.flatMap(x=>x.obs.map(o=>o.day))),fval:(r,f,wi)=>{
+   const lo=W[wi][1],hi=W[wi][2],start=wi===0?r.d1:r.d2-hi;
+   const ds=by[r.pid].series.filter(x=>x.day>start&&x.day<=r.d2-lo);
+   if(!ds.length)return null;
+   const vals=ds.map(x=>f.k==='placebo'?x.covariavel_teste:f.k==='ur'?x.clima.ur:f.k==='qs'?Number(x.clima.quenteSeco):Number(x.clima.molhado));
+   assert(vals.every(Number.isFinite),'covariável ausente/não finita');
+   return vals.reduce((a,b)=>a+b,0)/vals.length*(f.k==='qs'||f.k==='molh'?7:1);
+  }};
+  vm.createContext(c);vm.runInContext(rng+fonte,c);
+  const r=vm.runInContext(`(()=>{const rows=rxRows(a,D);if(rows.length<8)return {janelas:rows.length,reps:[],estado:'insuf'};const M=rxFit(rows);if(!M)return {janelas:rows.length,reps:[],estado:'singular'};const R={a,D,rows,M};rxBoot(R,M);rxStable(R,M);rxLevels(R);return {janelas:rows.length,estado:'executado',reps:M.reps.map(q=>({fator:q.f.k,janela:q.wi,nHi:q.nHi,nLo:q.nLo,pivHi:q.pivHi,wkHi:q.wkHi,beta:q.beta,level:q.level,ci95:q.ci95,stable:q.stable,mates:q.mates.map(m=>m.f.k)}))};})()`,c);
+  saida.push({safra:e.safra,semente:e.semente,alvo:e.alvo,...r});
+ }
+ console.log(JSON.stringify({fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
+}

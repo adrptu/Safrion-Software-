@@ -146,6 +146,29 @@ def resumir_falsos_fortes(resultados, desenho):
     return saida
 
 
+PERFIL_SUPORTE = {
+    'versao': 1, 'nome': 'pressao_sustentada_sintetica',
+    'x0_nc': 0.5, 'imigracao_diaria_nc': 0.05,
+    'talhoes': 16, 'ajustes_permitidos': 0,
+    'regra': 'fixado antes do motor; falha de suporte permanece nao avaliavel',
+    'limite': 'cenario de QA, nao recomendacao nem representatividade agronomica',
+}
+
+
+def aplicar_perfil_suporte(episodios):
+    """Uma transformação pré-especificada; mantém política/efeitos/exógenos."""
+    import copy
+    saida = copy.deepcopy(episodios)
+    for ep in saida:
+        if type(ep['nc']) not in (int, float) or not math.isfinite(ep['nc']) or ep['nc'] <= 0:
+            raise ValueError('NC positivo finito obrigatório para perfil')
+        ep['cenario'] += '-pressao-sustentada-v1'
+        ep['x0'] = PERFIL_SUPORTE['x0_nc'] * ep['nc']
+        for dia in ep['dias']:
+            dia['imigracao'] = PERFIL_SUPORTE['imigracao_diaria_nc'] * ep['nc']
+    return saida
+
+
 def expandir_populacao(episodios, talhoes=16):
     """Exposições próprias com clima comum por réplica, sem criar eventos.
 
@@ -631,9 +654,27 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('episodios', help='JSON de episódios/exógenos pré-sorteados')
     parser.add_argument('--suporte-populacao', type=int, metavar='TALHOES', help='Só mede suporte por réplica, sem executar motor')
+    parser.add_argument('--entrada-motor', action='store_true', help='JSONL de populações por safra/semente/alvo; perfil sustentado fixo, sem motor')
     args = parser.parse_args()
     with open(args.episodios, encoding='utf8') as f:
         episodios = json.load(f)
+    if args.entrada_motor:
+        import sys
+        print(json.dumps({'perfil': PERFIL_SUPORTE, 'perfil_hash': digest(PERFIL_SUPORTE),
+                          'fonte_hash': digest(episodios), 'estado': 'pre_registro_antes_motor'}), file=sys.stderr)
+        grupos = {}
+        for e in episodios:
+            # Um fator conserva o mundo factual; não usar contrastes como novas observações.
+            if e['fator'] == 'qs':
+                grupos.setdefault((e['cenario'], e['semente'], e['alvo']), []).append(e)
+        if not grupos:
+            raise ValueError('Sem episódios factuais qs para preparar motor')
+        for grupo in grupos.values():
+            p = gerar(expandir_populacao(aplicar_perfil_suporte(grupo), PERFIL_SUPORTE['talhoes']))
+            for safra in sorted({e['safra'] for e in p['entrada']}):
+                entradas = [e for e in p['entrada'] if e['safra'] == safra]
+                print(json.dumps(entradas, ensure_ascii=False, allow_nan=False))
+        sys.exit(0)
     if args.suporte_populacao is not None:
         grupos = {}
         for e in episodios:
