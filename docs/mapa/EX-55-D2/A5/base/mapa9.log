@@ -6,18 +6,10 @@ OK    N2c Insumos (filtro das Ordens de serviço): faixa Produtos e Faltam, Per�
 OK    N3 Colheita e produtividade: Mostrar = Situação · Carência e destino; "Consultar em" só na carência; Pivô 23 "carência até 26/09" e faixa "Em carência"
 OK    N4 Solo (Santa Rita): 4 talhões sem laudo 0–20 ['T3', 'P1', 'P2', 'T7'] = "Sem laudo" em cinza #C9CFCB; nenhum como zero; painel e legenda dizem "Sem laudo"
 OK    N5 nenhuma função sumiu: as 11 camadas de antes são alcançáveis (9 na barra, Insumos e Carência como filtro); contexto "Insumos" e link #car:PV23 abrem a função nova; Integrado do Pivô 23 com Insumos e Carência e destino e o "Ver …" de cada um
-Traceback (most recent call last):
-  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/mapa9_test.py", line 150, in <module>
-    J(f"{IMP}.click()"); espera(f"(()=>{{try{{ const x={DLG}; return !!(x&&x[1].some(t=>t.split(' · ')[0]==='T3')); }}catch(e){{ return false; }}}})()", 30)   # espera a navegação e o formulário com o talhão
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/mapa9_test.py", line 43, in espera
-    if J(e): return True
-       ^^^^
-  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
-    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/comp_lib.py", line 47, in call
-    if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-RuntimeError: Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}
-rc=1
+OK    N7a Solo: ícone só com o desenho, dica e aria-label "Importar laudo de análise de solo", 32 × 32 px no mouse, o último das ferramentas no topo do mapa, à direita (junto de Selecionar área e Medir); ausente nas outras 8 funções
+OK    N7b ativar abre o mesmo "Registrar laudo" do AG-02 (importação do PDF), com Santa Rita e o talhão escolhido no mapa (T3)
+OK    N7c 390 px com toque: o ícone tem 44 × 44 px, segue nas ferramentas do topo do mapa e a página não rola de lado
+OK    N8b 390 px com toque: barra no alto, em uma linha, rolável dentro dela, 9 alvos de 44 px com o nome à vista; trocar para Custos a deixa à vista; página sem rolagem lateral
+OK    N6 sem erro de JS
+RESULTADO: 13 ok · 0 falhas
+rc=0

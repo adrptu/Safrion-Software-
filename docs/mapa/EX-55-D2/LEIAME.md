@@ -22,12 +22,14 @@ Base: `29d923c7`, o pai da candidata, com o render construído no próprio commi
 
 | Teste | Candidata `e23f9fc8` | Base `29d923c7` |
 |---|---|---|
-| `mapa9_test` | 13/13 | erro do CDP ("Inspected target navigated or closed") na 1ª rodada; reexecução em `A5/base` |
+| `mapa9_test` | 13/13 | 13/13 na reexecução única; a 1ª rodada caiu por erro do CDP ("Inspected target navigated or closed"), log em `A5/base/mapa9_rodada1_cdp.log` |
 | `mapa_filtros_test` | 7/7 | 7/7 |
-| `mapa_faixa_test` | 25/25 | ver `A5/base` |
-| `mapa_mux_f0_test` | 17/17 | ver `A5/base` |
-| `mapa_mux_f1_test` | 43/43 | ver `A5/base` |
-| `mapa_mux_f2_test` | 29/29 | ver `A5/base` |
+| `mapa_faixa_test` | 25/25 | 25/25 |
+| `mapa_mux_f0_test` | 17/17 | 17/17 |
+| `mapa_mux_f1_test` | 43/43 | 43/43 (o log do `fa90e7cb` tinha sido copiado antes do fim; trocado pelo completo) |
+| `mapa_mux_f2_test` | 29/29 | 29/29 |
+
+**Na composição** `claude/v44-v135-osagrupa`, depois do merge `64dfa20e`: `mapa9` 13/13, `mapa_filtros` 7/7, `mapa_mux_f1` 43/43.
 
 **Unidade (executada na composição):**
 - `node mapa_camadas_unit.js` → 1251 pass;

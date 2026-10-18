@@ -1,0 +1,23 @@
+OK    N1 barra: os nove nomes da DEC-2609-12, na ordem da decisão, com ícone e nome à vista e a dica "Mostrar … no mapa"
+OK    N8a 1440 px: a barra fica no alto do bloco, em uma linha, acima da faixa da camada e do mapa; o mapa começa na borda do bloco (nenhuma coluna de ícones ao lado da lateral dos módulos)
+OK    N2a Ordens de serviço: Mostrar = Fases · Avanço · Atrasos · Impedimentos · Insumos (Fases ao abrir); Fase como lista suspensa nas quatro visões das ordens
+OK    N2b cada visão pinta o mapa: Fases (fase da ordem), Avanço (ha feitos ÷ ha da ordem), Atrasos (prazo), Impedimentos (OS-0420 impedida em vermelho); T7 sem ordem
+OK    N2c Insumos (filtro das Ordens de serviço): faixa Produtos e Faltam, Período no lugar de Fase, legenda do estoque e painel do T4 com a seção Insumos
+OK    N3 Colheita e produtividade: Mostrar = Situação · Carência e destino; "Consultar em" só na carência; Pivô 23 "carência até 26/09" e faixa "Em carência"
+OK    N4 Solo (Santa Rita): 4 talhões sem laudo 0–20 ['T3', 'P1', 'P2', 'T7'] = "Sem laudo" em cinza #C9CFCB; nenhum como zero; painel e legenda dizem "Sem laudo"
+OK    N5 nenhuma função sumiu: as 11 camadas de antes são alcançáveis (9 na barra, Insumos e Carência como filtro); contexto "Insumos" e link #car:PV23 abrem a função nova; Integrado do Pivô 23 com Insumos e Carência e destino e o "Ver …" de cada um
+Traceback (most recent call last):
+  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/mapa9_test.py", line 150, in <module>
+    J(f"{IMP}.click()"); espera(f"(()=>{{try{{ const x={DLG}; return !!(x&&x[1].some(t=>t.split(' · ')[0]==='T3')); }}catch(e){{ return false; }}}})()", 30)   # espera a navegação e o formulário com o talhão
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/mapa9_test.py", line 43, in espera
+    if J(e): return True
+       ^^^^
+  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
+    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/ex55b/tools/prototipo/v37/gen37/comp_lib.py", line 47, in call
+    if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}
+rc=1
