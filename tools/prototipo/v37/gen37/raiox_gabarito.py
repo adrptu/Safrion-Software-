@@ -178,11 +178,11 @@ def resumir_motor_observavel(pacote, desenho):
             raise ValueError('Representante duplicado')
         for q in reps:
             lv = q['level']
-            if lv not in ('forte', 'moderada', 'fraca', 'nulo', 'insuf', 'grupo'):
+            if lv not in ('forte', 'moderada', 'fraca', 'nulo', 'insuf', 'grupo', 'confirmar'):
                 raise ValueError('Nível desconhecido')
             totais[lv] = totais.get(lv, 0) + 1
             grupos_placebo += 'placebo' in q.get('mates', [])
-        forte = any(q['fator'] == 'placebo' and q['level'] == 'forte' for q in reps)
+        forte = any(q['fator'] == 'placebo' and q['level'] in ('forte', 'grupo') for q in reps)
         linhas.append(dict(zip(campos, k), fator='placebo', classe='placebo',
                            motor='forte' if forte else ('insuf' if estado != 'executado' else 'fraco')))
     des = [dict(r, fator='placebo', classe='placebo') for r in desenho]

@@ -15,6 +15,8 @@ r=g.resumir_motor_observavel(p,d);assert all(x['gate']['estado']=='atende' for x
 p['resultados'][0]['reps']=[dict(fator='placebo',level='forte',mates=[])]
 p['resultados'][1]['reps']=[dict(fator='placebo',level='forte',mates=[])]
 r=g.resumir_motor_observavel(p,d);assert r['safras'][0]['eventos_nas_completas']==1 and r['representantes_por_nivel']['forte']==2
+p['resultados'][0]['reps'][0]['level']='grupo'
+r=g.resumir_motor_observavel(p,d);assert r['safras'][0]['eventos_nas_completas']==1
 p['resultados'][0]['reps']=[dict(fator='qs',level='grupo',mates=['placebo'])]
 r=g.resumir_motor_observavel(p,d);assert r['grupos_com_placebo_como_mate']==1
 p['resultados'].pop();r=g.resumir_motor_observavel(p,d);assert r['safras'][1]['gate']['estado']=='nao_avaliavel' and r['safras'][1]['wilson95'] is None
@@ -378,8 +380,17 @@ function executarMotorObservavel(caminho) {
    return vals.reduce((a,b)=>a+b,0)/vals.length*(f.k==='qs'||f.k==='molh'?7:1);
   }};
   vm.createContext(c);vm.runInContext(rng+fonte,c);
-  const r=vm.runInContext(`(()=>{const rows=rxRows(a,D);if(rows.length<8)return {janelas:rows.length,reps:[],estado:'insuf'};const M=rxFit(rows);if(!M)return {janelas:rows.length,reps:[],estado:'singular'};const R={a,D,rows,M};rxBoot(R,M);rxStable(R,M);rxLevels(R);return {janelas:rows.length,estado:'executado',reps:M.reps.map(q=>({fator:q.f.k,janela:q.wi,nHi:q.nHi,nLo:q.nLo,pivHi:q.pivHi,wkHi:q.wkHi,beta:q.beta,level:q.level,ci95:q.ci95,stable:q.stable,mates:q.mates.map(m=>m.f.k)}))};})()`,c);
+  const r=vm.runInContext(`(()=>{const rows=rxRows(a,D);if(rows.length<8)return {janelas:rows.length,reps:[],estado:'insuf'};const M=rxFit(rows);if(!M)return {janelas:rows.length,reps:[],estado:'singular'};const R={a,D,rows,M};rxBoot(R,M);rxStable(R,M);rxLevels(R);return {janelas:rows.length,estado:'executado',reps:M.reps.map(q=>({fator:q.f.k,janela:q.wi,nHi:q.nHi,nLo:q.nLo,pivHi:q.pivHi,wkHi:q.wkHi,wkLo:q.wkLo,candidatoSafra:!!q.candidatoSafra,beta:q.beta,level:q.level,ci95:q.ci95,stable:q.stable,mates:q.mates.map(m=>m.f.k)}))};})()`,c);
   saida.push({tipos:Object.fromEntries(c.RXF.map(f=>[f.k,f.tipo])),safra:e.safra,semente:e.semente,alvo:e.alvo,...r});
  }
- console.log(JSON.stringify({adaptador_sha256:crypto.createHash('sha256').update(valorObservado.toString()+tipoObservado.toString()).digest('hex'),fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
+ const combinados=[];
+ const pares=new Map();for(const r of saida){const k=JSON.stringify([r.semente,r.alvo]);if(!pares.has(k))pares.set(k,[]);pares.get(k).push(r);}
+ const combCtx={};vm.createContext(combCtx);vm.runInContext(rng+fonte,combCtx);
+ if(vm.runInContext("typeof rxCombinaSafras==='function'",combCtx)){
+  for(const ps of pares.values()){assert(ps.length<=2&&new Set(ps.map(p=>p.safra)).size===ps.length,'combinação exige safras distintas, duas no máximo');
+   for(const fator of fatores){const a=ps[0].reps.find(q=>q.fator===fator),b=ps[1]&&ps[1].reps.find(q=>q.fator===fator);combCtx.A=a;combCtx.B=b;
+    const r=vm.runInContext('rxCombinaSafras(A,B)',combCtx);combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),...r});}
+  }
+ }
+ console.log(JSON.stringify({adaptador_sha256:crypto.createHash('sha256').update(valorObservado.toString()+tipoObservado.toString()).digest('hex'),fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',combinados,limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
 }
