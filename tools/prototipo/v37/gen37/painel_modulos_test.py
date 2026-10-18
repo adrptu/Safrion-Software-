@@ -165,8 +165,12 @@ chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os
   const c2=cenClone(CEN0), vc=Object.values(MIP0.vis).find(v=>v.dec&&v.dec.os&&c2.ordens[v.dec.os]); c2.ordens[vc.dec.os].etapa='Canceladas';
   const M2=agrPainelRef(c2).mip;
   chk('mip: O.S. de controle cancelada devolve a decisão ao RT (sit cancelada em decidir)',[M2.decidir.some(x=>x.vis===vc.id&&x.sit==='cancelada'),M2.n.em_controle],[true,2]);
-  MIP_MEM=Object.assign(mipClone(MIP0),{vis:{X:{id:'X',tal:'??',prot:'??',data:'2026-09-01'}}});
-  chk('mip: vistoria com talhão ou protocolo fora do MIP = Sem dados',agrPainelRef(cenClone(CEN0)).mip,null); mipReset(); }
+  /* base verde 2 (18/10, Claude): desde o N-1/B-3 o MIP mora no cenário (mipEstado lê c.mip); a injeção pela cópia antiga (MIP_MEM) não chegava mais à leitura */
+  const cm=cenGet(); cm.mip=Object.assign(mipClone(MIP0),{vis:{X:{id:'X',tal:'??',prot:'??',data:'2026-09-01'}}});
+  chk('mip: vistoria com talhão ou protocolo fora do MIP = Sem dados',agrPainelRef(cenClone(CEN0)).mip,null);
+  cm.mip={v:0};   // MIP do cenário incompatível: mipGet devolve vazio e avisa (mipErro); o painel não pode dizer 0 a decidir
+  chk('mip: MIP ilegível no cenário = Sem dados, nunca zero',[agrPainelRef(cenClone(CEN0)).mip,!!mipErro()],[null,true]);
+  delete cm.mip; mipReset(); }
 console.log('RESULTADO '+n+'/'+n);
 '''
 

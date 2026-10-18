@@ -524,16 +524,20 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
     return {temCab:true, id:rw.id, tparts:t0.parts||[], ext, fs:fa, caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', toggle:t0.toggle||(()=>{}),
       lab:'Cartões · '+(rw.gk||g2cdNome(t0)), cards:[]}; };
   const secs=[]; let cur=null, at=null, lv0=0;
+  // a faixa da fazenda (SAF-FAZ-3, g2fgrp) é cabeçalho de seção como o grupo do Agrupar por: os talhões são cartões da grade, não itens
+  // espremidos dentro de um cartão de uma coluna (proprietário, 18/10/2026: "esse cartao esta com defeito, cortado e fora do padrão")
   rows.forEach(rw=>{ const L=rw.lvl||0;
-    if(rw.grp){ cur=head(rw); secs.push(cur); at=null; lv0=L+1; return; }
+    if(rw.grp||/\bg2fgrp\b/.test(rw.cls||'')){ cur=head(rw); secs.push(cur); at=null; lv0=L+1; return; }
     if(!cur){ cur={temCab:false, id:'', tparts:[], ext:[], fs:[], caretOk:false, lab:'Lista em cartões', cards:[]}; secs.push(cur); }
     if(L<=lv0||!at){ at=card(rw); cur.cards.push(at); } else at.kids.push(kid(rw,L-lv0-1)); });
   secs.forEach(s=>{ s.temCards=s.cards.length>0; });
   v[id+'_cdg']=secs;
   const tot=v[id+'_tot'], tt=Array.isArray(tot)?tot:[], tx=(i)=>String((tt[i]&&tt[i].t)||'').trim();
-  v[id+'_cdtot']=ix.map(i=>({l:lab(i), t:tx(i), cls:fcls(i)}));
-  v[id+'_cdtotx']=tt.map((t,i)=>i).filter(i=>i&&cols[i]&&tx(i)&&ix.indexOf(i)<0).map(i=>({l:cols[i].l, t:tx(i)}));   // total de coluna fora dos cartões: no título
-  v[id+'_cdtotHas']=ix.some(i=>tx(i))||v[id+'_cdtotx'].length>0; }
+  // o total fica numa linha só, ao lado de "Total", e só com as colunas que somam: a grade dos campos de cartão não se alinha a uma faixa
+  // inteira (os rótulos sem valor escapavam da faixa; 18/10/2026, mesma tela do proprietário)
+  v[id+'_cdtot']=[];
+  v[id+'_cdtotx']=tt.map((t,i)=>i).filter(i=>i&&cols[i]&&tx(i)).map(i=>({l:lab(i), t:tx(i)}));
+  v[id+'_cdtotHas']=v[id+'_cdtotx'].length>0; }
 function g2cdNome(t0){ return ((t0&&t0.parts)||[]).filter(p=>p&&!p.isIco&&!p.isBr).map(p=>String(p.t||'')).join(' ').replace(/\s+/g,' ').trim(); }
 // depois do EXTRAVALS (engine.ENGINE_JS2): modo de cada grade com seletor e, em Cartões, os cartões das linhas que a Tabela desenharia
 function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;

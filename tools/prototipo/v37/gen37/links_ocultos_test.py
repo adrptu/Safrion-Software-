@@ -114,7 +114,7 @@ RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste;
     |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')
     |p('PROD','CO-06')|p('MB-07','MB-03x-recibo')|p('MB-10','MB-03x-recibo')},   # colheita (06/10): a avaliação de carência e destino do lote vive na CO-06; MB-07 e MB-10 (no estado) levam aos envios do aparelho como as outras telas do app
  ('MB-01.dc.html','IN-01.dc.html'):'"voltar" do app',
- ('PAGR.dc.html','MB-06.dc.html'):'o painel agrícola carrega mip.js inteiro para ler a situação (mipSit); o elo do app de campo está só em '
+ ('PG.dc.html','MB-06.dc.html'):'o painel de gestão (PAINEL-03; antes PAGR) carrega mip.js inteiro para ler a situação (mipSit); o elo do app de campo está só em '
       'mipProx, que o painel não desenha: "Conferir vistoria" leva ao AG-01 (PAINEL-02 MIP, 14/10/2026)',
  **{x:'Crédito entrou no menu (proprietário, 14/10/2026: "crie o menu de crédito"): a GE-08 abre a origem de cada compromisso (conta a pagar GE-04, '
       'venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6). CRE-BANCO F1 (PR #90): '

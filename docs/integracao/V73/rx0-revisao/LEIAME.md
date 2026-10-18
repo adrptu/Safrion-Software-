@@ -8,3 +8,11 @@ O parecer está no PR #47, comentário 6250325658.
   - R2: o HT aceita um controle com datas diferentes;
   - R4: a versão publicada depois vence mesmo sendo menor.
 - Dados sintéticos; o motor não foi executado.
+
+## Reteste do head `8800c9e3` (18/10/2026)
+
+- `sonda_rx0_reteste.py` sobre o `raiox_gabarito.py` do head `8800c9e3`; saída em `sonda_rx0_8800c9e3.log`.
+- R1: só entradas factuais, uma por mundo, e o mundo com observação divergente é recusado.
+- R2: o controle com datas diferentes sai como `datas_nao_pareadas`.
+- R3: `nao_pareado`.
+- R4: a versão fora de ordem é recusada, e no corte anterior a versão ainda indisponível não muda nada.

@@ -30,7 +30,7 @@ R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 SHOT = not os.environ.get('RENDER_DIR')
 B1 = [('AG-07.dc.html', 'Agrofit'), ('AG-02.dc.html', 'Análises de solo'), ('PA.dc.html', 'Planos agronômicos'), ('SAF.dc.html', 'Planejar safra'), ('GE-02.dc.html', 'Orçamento')]
 B2 = [('AG-01.dc.html', 'Pragas e doenças'), ('OS.dc.html', 'Ordens de serviço'), ('IR-01.dc.html', 'Irrigação'), ('COLH.dc.html', 'Colheita')]
-B3 = [('CARGA.dc.html', 'Recebimento'), ('BEN.dc.html', 'Beneficiamento'), ('PROD.dc.html', 'Estoque de produto'), ('GE-03.dc.html', 'Custos'), ('PAGR.dc.html', 'Painel')]
+B3 = [('CARGA.dc.html', 'Recebimento'), ('BEN.dc.html', 'Beneficiamento'), ('PROD.dc.html', 'Estoque de produto'), ('GE-03.dc.html', 'Custos'), ('PG.dc.html#mod=agr', 'Painel')]   # PAINEL-03 (18/10): o Painel do Agrícola é a aba do painel único
 ESP = [B1, B2, B3]; ORDEM = [h for b in ESP for h, _ in b]
 MENU_AGR = [h for n, ic, its in ui37.MENU2 if n == 'Agrícola' for l, h in its]
 PROIBIDAS = r'\b(entrada|processamento|saída|saida|input|output|processing)\b'

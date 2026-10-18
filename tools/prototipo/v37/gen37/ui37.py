@@ -49,12 +49,13 @@ VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # 
 #   sem a faixa de telas (seria um 2º caminho para o mesmo cartão).
 BEN_PUBLICADO=True
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
+ ('Painel','grafico',[('Painel','PG.dc.html')]),   # PAINEL-03 (18/10/2026, proprietário: "um painel só que navega pelos módulos ... centralizar e unificar o painel de gestão de tudo que importa num só lugar"): o painel único abre em Prioridades; o "Painel" de cada módulo abre a aba dele (PG.dc.html#mod=…)
  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
- ('Agrícola','leaf',[('Painel','PAGR.dc.html'),('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento','CARGA.dc.html')]+([('Beneficiamento','BEN.dc.html')] if BEN_PUBLICADO else [])+[('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
- ('Manutenção','wrench',[('Painel','PMAN.dc.html'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
- ('Suprimentos','cart',[('Painel','PSUP.dc.html'),('Compras','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
- ('Comercial','Vendas',[('Painel','PCOM.dc.html'),('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
- ('Crédito','cash',[('Solicitações e contratos','GE-08.dc.html#vis=contratos'),('Liberações e garantias','GE-08.dc.html#vis=liberacoes'),('Dossiê e consentimento','GE-08.dc.html#vis=dossie'),('Documentos para crédito','GE-08.dc.html#vis=documentos')]),   # 14/10/2026 (proprietário: "crie o menu de crédito"; depois "coloque os submenus de crédito como os demais"): a GE-08 (PRD; DEMO-10) abre pela tela de entrada do Crédito, um cartão por visão (como a Manutenção); sem visão no endereço, a GE-08 mostra tudo (links de outras telas)
+ ('Agrícola','leaf',[('Painel','PG.dc.html#mod=agr'),('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento','CARGA.dc.html')]+([('Beneficiamento','BEN.dc.html')] if BEN_PUBLICADO else [])+[('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
+ ('Manutenção','wrench',[('Painel','PG.dc.html#mod=man'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
+ ('Suprimentos','cart',[('Painel','PG.dc.html#mod=sup'),('Compras','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
+ ('Comercial','Vendas',[('Painel','PG.dc.html#mod=com'),('Contratos e pedidos','VEN.dc.html'),('Oferta e compromissos','PCOM.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
+ ('Crédito','cash',[('Painel','PG.dc.html#mod=cre'),('Ficha do grupo','GE-08.dc.html#vis=ficha'),('Dossiês','GE-08.dc.html#vis=dossie'),('Pedidos e contratos','GE-08.dc.html#vis=contratos'),('Liberações e garantias','GE-08.dc.html#vis=liberacoes')]),   # 14/10/2026 (proprietário: "crie o menu de crédito"; depois "coloque os submenus de crédito como os demais"): a GE-08 (PRD; DEMO-10) abre pela tela de entrada do Crédito, um cartão por visão (como a Manutenção); sem visão no endereço, a GE-08 mostra tudo (links de outras telas)   # CRE F2 (52cfe856, Codex, 16/10): as 4 entradas são Ficha do grupo, Dossiês, Pedidos e contratos e Liberações e garantias; os documentos para crédito ficam na ficha ("Ver documentos") e no #vis=documentos. Menu e tela de entrada saem desta lista (base verde 2, 18/10)
  ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
 # 13/10/2026 (proprietário: "troque a posição do menu comercial com suprimentos. e manutenção logo abaixo de agrícola"): Agrícola ·
 #   Manutenção · Suprimentos · Comercial.
@@ -74,25 +75,25 @@ HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos'
 #   cada macro contexto"): sem setas; cartões alinhados no bloco; cada bloco com o título do macro contexto.
 FLUXO37={'Agrícola':[('Planejamento',['AG-07.dc.html','AG-02.dc.html','PA.dc.html','SAF.dc.html','GE-02.dc.html']),
                      ('Execução',['AG-01.dc.html','OS.dc.html','IR-01.dc.html','COLH.dc.html']),
-                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PAGR.dc.html'])],
+                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PG.dc.html#mod=agr'])],
          # DS-MAN (17/10/2026, proprietário: "Design system de manutenção ainda não está no padrão"): a entrada da Manutenção nos mesmos blocos do
          # Agrícola, na ordem do processo (14/10: "onde as coisas começam e terminam"): o cadastro do que se mantém, a execução e o resultado
          'Manutenção':[('Cadastro',['MA.dc.html#vis=ativos','MA.dc.html#vis=planos']),
                        ('Execução',['MA.dc.html#vis=semordem','MA.dc.html#vis=ordens']),
-                       ('Resultados',['PMAN.dc.html'])]}
-CURTO37={'PAGR.dc.html':('Painel','grafico'),'PMAN.dc.html':('Painel','grafico'),'PSUP.dc.html':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
+                       ('Resultados',['PG.dc.html#mod=man'])]}
+CURTO37={'PG.dc.html#mod=agr':('Painel','grafico'),'PG.dc.html#mod=man':('Painel','grafico'),'PG.dc.html#mod=sup':('Painel','grafico'),'PG.dc.html#mod=com':('Painel','grafico'),'PG.dc.html#mod=cre':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
  'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),
  'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'BEN.dc.html':('Beneficiamento','fabrica'),'PROD.dc.html':('Estoque de produto','armazem'),
- 'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
+ 'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Oferta e compromissos','scale'),'IV.dc.html':('Inteligência','trend'),
  'MA.dc.html#vis=semordem':('Sem ordem','clock'),'MA.dc.html#vis=ordens':('Ordens','wrench'),'MA.dc.html#vis=ativos':('Ativos','truck'),'MA.dc.html#vis=planos':('Planos','calendar'),
- 'GE-08.dc.html#vis=contratos':('Contratos','doc'),'GE-08.dc.html#vis=liberacoes':('Liberações','cash'),'GE-08.dc.html#vis=dossie':('Dossiê','pasta'),'GE-08.dc.html#vis=documentos':('Documentos','prancheta'),   # 16/10/2026: documentos para crédito saíram dos Cadastros
+ 'GE-08.dc.html#vis=ficha':('Ficha do grupo','prancheta'),'GE-08.dc.html#vis=dossie':('Dossiês','pasta'),'GE-08.dc.html#vis=contratos':('Pedidos e contratos','doc'),'GE-08.dc.html#vis=liberacoes':('Liberações e garantias','cash'),'GE-08.dc.html#vis=documentos':('Documentos','prancheta'),   # 16/10/2026: documentos para crédito saíram dos Cadastros
  'CMP.dc.html':('Compras','cart'),'EST.dc.html':('Estoque','box'),'IC.dc.html':('Inteligência','trend'),
  'CF-01.dc.html':('Usuários e alçadas','users'),'CF-04.dc.html':('Auditoria','historico'),'CF-03.dc.html':('Integrações','tomada'),'CF-05.dc.html':('Assinatura','card')}
 # outras pontas do protótipo (antes só no índice, que saiu em 13/10: o artefato abre direto no Mapa)
 OUTROS37=('Outros acessos','grid','MOD-OUT.dc.html',[('App de campo','MB-01.dc.html','celular'),('Portal do parceiro','PT-01.dc.html','users'),
                                                     ('Onboarding','ON-01.dc.html','check'),('Backoffice','BO-02.dc.html','escudo')])
-VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv})
+VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv if not _hv.startswith('PG.dc.html')})   # o painel único (PAINEL-03) é item próprio da barra: não volta a um módulo
 # CAB-1 (DS-MODULOS-2, 17/10/2026; proprietário: "aplicacao do design system padrao, referencia modulo agricola ainda nao foi para demais
 # modulos"): Onboarding e Backoffice abrem por "Outros acessos" e voltam por ele, com o mesmo "‹ Módulo" das telas do menu
 VOLTA37.update({'ON-01.dc.html':(OUTROS37[0],OUTROS37[2]),'BO-02.dc.html':(OUTROS37[0],OUTROS37[2])})
@@ -382,7 +383,7 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None,mf_ini='',mf_extra=''):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None,mf_ini='',mf_extra='',voltar_dyn=None):
     # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
@@ -442,6 +443,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
           f'border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-family: inherit; font-size: 15px; font-weight: 700; cursor: help; display: inline-flex; align-items: center; justify-content: center;">i</button>') if footer else ''
     voltar=f'<a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a>' if crumbs_extra else ''
     if not crumbs_extra and (fname in VOLTA37 or vmod): voltar=volta_pilula(*(VOLTA37.get(fname) or vmod))
+    if voltar_dyn: voltar=voltar_dyn   # PAINEL-03: a tela decide no navegador para onde volta (aba do módulo → tela de entrada dele)
     html=f'''<!doctype html>
 <html lang="pt-BR">
 <head>

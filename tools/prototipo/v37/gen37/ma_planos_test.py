@@ -17,7 +17,7 @@ try:
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
     mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^(MA|MOD-MAN)/.test(a.getAttribute('href')||'')).map(a=>[a.getAttribute('aria-label'),a.getAttribute('href'),a.getAttribute('aria-current'),a.innerText.trim()])")
     vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>[b.innerText.replace(/\\s*\\d+\\s*$/,'').trim(),b.getAttribute('aria-pressed')])")
-    m.ok(g[2][0] == ('Painel', 'PMAN.dc.html') and all(h.split('#')[0] == 'MA.dc.html' for _, h in g[2][1:]) and mn == [['Manutenção', 'MOD-MAN.dc.html', 'page', '']]   # v60: o ícone abre a tela de entrada; v65: o Painel (PMAN) é o 1º atalho
+    m.ok(g[2][0] == ('Painel', 'PG.dc.html#mod=man') and all(h.split('#')[0] == 'MA.dc.html' for _, h in g[2][1:]) and mn == [['Manutenção', 'MOD-MAN.dc.html', 'page', '']]   # v60: o ícone abre a tela de entrada; v65: o Painel (PMAN) é o 1º atalho
          and vs == [['Sem ordem', 'false'], ['Ordens', 'false'], ['Ativos', 'false'], ['Planos', 'true']] and m.hash() == '#vis=planos',
          'navegação: um ícone Manutenção → tela de entrada MOD-MAN (destacado, sem subitens); o seletor da tela traz Sem ordem · Ordens · Ativos · Planos e #vis=planos abre a visão Planos', [mn, vs, m.hash()])
     # 2 · visão Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida

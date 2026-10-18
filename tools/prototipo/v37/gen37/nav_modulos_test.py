@@ -90,7 +90,8 @@ try:
     cman = json.loads(J(CARDS) or '[]')
     # DS-MAN (17/10/2026): a entrada da Manutenção em blocos na ordem do processo (ui37.FLUXO37: Cadastro, Execução, Resultados), como a do Agrícola;
     # os mesmos 5 cartões, um por visão
-    MANC = {'PMAN.dc.html': 'Painel', 'MA.dc.html#vis=semordem': 'Sem ordem', 'MA.dc.html#vis=ordens': 'Ordens', 'MA.dc.html#vis=ativos': 'Ativos', 'MA.dc.html#vis=planos': 'Planos'}
+    MANC = {'PG.dc.html#mod=man': 'Painel',   # PAINEL-03 (18/10): o Painel da Manutenção é a aba do painel único
+            'MA.dc.html#vis=semordem': 'Sem ordem', 'MA.dc.html#vis=ordens': 'Ordens', 'MA.dc.html#vis=ativos': 'Ativos', 'MA.dc.html#vis=planos': 'Planos'}
     MANO = [h for _t, b in ui37.FLUXO37['Manutenção'] for h in b]
     chk('N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos), na ordem do fluxo',
         (dir_.get('Mapa') or '').endswith('/IN-04.dc.html') and (dir_.get('Manutenção') or '').endswith('/MOD-MAN.dc.html')

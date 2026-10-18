@@ -40,11 +40,21 @@ try:
     foco=lambda: J("(document.activeElement||{}).id||''") or ''
     def ir(f,w=1.4): col(); c.goto('about:blank',wait=.1); c.goto(B+f,wait=w)
     foto=lambda n: c.shot(os.path.join(OUT,f'q_ctl4l_{n}.png'))
-    def est_secao(i): ir('EST.dc.html',w=1.6); J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i-1}].click()"); time.sleep(.5)
+    def expandir():   # TAB-12 (17/10): as grades nascem recolhidas; o teste lê os lotes depois do "Expandir tudo", como a pessoa (base verde 2, 18/10)
+        for _ in range(4):
+            if not J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 0; b.click(); return 1;})()"): break
+            time.sleep(.3)
+    def est_secao(i): ir('EST.dc.html',w=1.6); J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i-1}].click()"); time.sleep(.5); expandir()
     def est_row(*ts):
-        r=J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.5); return r
-    def abrir_laudo(lote):   # "Liberar após inspeção" na linha do lote (Confira saldos), sem recarregar a página
-        r=J(f"(()=>{{const r=({FIND})([{json.dumps(lote)}]); if(!r) return 'sem linha'; const b=[...r.querySelectorAll('button')].find(b=>/Liberar após inspeção/.test(b.innerText)); if(!b) return 'sem botão'; b.click(); return 'ok';}})()"); time.sleep(.6); return r
+        q=f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"
+        r=J(q)
+        if r=='sem linha': expandir(); r=J(q)
+        time.sleep(.5); return r
+    def abrir_laudo(lote):   # "Liberar após inspeção" na linha do lote (Confira saldos; no ⋯ da linha desde a TAB-05), sem recarregar a página
+        q=f"(()=>{{const r=({FIND})([{json.dumps(lote)}]); if(!r) return 'sem linha'; const b=[...r.querySelectorAll('button')].find(b=>/Liberar após inspeção/.test(b.textContent)); if(!b) return 'sem botão'; b.click(); return 'ok';}})()"
+        r=J(q)
+        if r=='sem linha': expandir(); r=J(q)
+        time.sleep(.6); return r
     def devolver(q,obs):
         est_secao(3); e=est_row('REQ-035','Fungicida A'); setv('#fx_g_dev_qtd',str(q)); setv('#fx_g_dev_cond','Bloqueada para inspeção · vai para quarentena'); setv('#fx_g_dev_obs',obs)
         clk('Salvar','aside[role=dialog]',w=.8); return e,T()

@@ -207,9 +207,12 @@ function tmVals(self, v){ const st = self.state; const real = !!v.map_lg; v.tm_o
     ['nome', 'decl', 'motivo', 'geo'].forEach(k => { v['tm_he_' + k] = !!e[k]; v['tm_e_' + k] = e[k] || ''; });
     v.tm_st_nome = inp(e.nome); v.tm_st_decl = inp(e.decl); v.tm_st_mot = inp(e.motivo); v.tm_st_sel = inp(false);
     v.tm_salvar = () => tmSalvarDesenho(self); v.tm_redes = () => self.setState({ dw: Object.assign({}, self.state.dw, { etapa: 'desenho', err: {} }) }); v.tm_descartar = () => self.setState({ dw: null, g2toast: 'Desenho descartado.' }); }
-  if (imp){ v.tm_t = 'Importar talhões'; v.tm_sub = imp.arq ? (imp.arq + ' · ' + FAZ) : ('KML ou GeoJSON · ' + FAZ); v.tm_ierr = imp.err || ''; v.tm_hasierr = !!imp.err;
+  if (imp){ v.tm_t = 'Importar talhões'; v.tm_sub = imp.arq ? (imp.arq + ' · ' + FAZ) : ('KML, KMZ ou GeoJSON · ' + FAZ); v.tm_ierr = imp.err || ''; v.tm_hasierr = !!imp.err;
     v.tm_arq = (ev) => { const f = ev && ev.target && ev.target.files && ev.target.files[0]; if (!f) return; const rd = new FileReader();
-      rd.onload = () => tmLerArq(self, f.name, String(rd.result || '')); rd.onerror = () => self.setState({ imp: { etapa: 'arq', err: 'Não foi possível ler o arquivo. Tente de novo.' } }); rd.readAsText(f); };
+      const falha = (m) => self.setState({ imp: { etapa: 'arq', err: m || 'Não foi possível ler o arquivo. Tente de novo.' } }); rd.onerror = () => falha();
+      // MAPA-REAL F1 (18/10/2026): o .kmz do Google Earth abre direto (zip lido no navegador; o arquivo não sai do aparelho)
+      if (/\.kmz$/i.test(f.name)){ rd.onload = () => tgKmzTexto(rd.result).then(t => tmLerArq(self, f.name.replace(/\.kmz$/i, '.kml'), t)).catch(e => falha(e.message)); rd.readAsArrayBuffer(f); return; }
+      rd.onload = () => tmLerArq(self, f.name, String(rd.result || '')); rd.readAsText(f); };
     v.tm_outro = () => self.setState({ imp: { etapa: 'arq', err: '' } }); v.tm_importar = () => tmImportar(self);
     if (imp.rows){ const av = tmAvisosImp(imp.rows); const an = tmAneis(FAZ);
       const nomeDe = (id) => (an.find(o => o.id === id) || { nome: id }).nome;

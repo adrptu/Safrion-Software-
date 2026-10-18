@@ -11,8 +11,8 @@ proprietário de 16/10/2026, §1; confronto §7 e §8.1 itens 3 a 5; implantaç�
      valor com "≈ … estimado", nunca na hachura (NC10); "não se aplica" com contorno tracejado (D14)
   K2 rótulos: no máximo 3 linhas (número / valor / estado curto), sobre placa branca a 90 % com texto #15201A e nenhum opacity no caminho: contraste
      ≥ 13,4:1 sobre qualquer fundo (≥ 4,5:1); seleção e foco em duas cores (escuro e branco: ≥ 3:1 sobre qualquer preenchimento)
-  L1 legenda que trabalha: cada classe com contagem e área (a soma bate com os talhões); hover realça os talhões da classe; clique filtra o mapa e a
-     lista ("N de M"); clique de novo limpa; no Satélite com contraste Talhão e no Solo fora do Absoluto, a escala relativa não conta talhões
+  L1 legenda que trabalha: cada classe com contagem e área (a soma bate com os talhões); hover realça os talhões da classe; clique filtra o mapa
+     (a visão Lista saiu em 18/10); clique de novo limpa; no Satélite com contraste Talhão e no Solo fora do Absoluto, a escala relativa não conta talhões
   S1 seleção: contorno forte (7 px escuro + linha branca) e número em destaque; no mapa real, o clique não muda zoom nem centro
   M1 390 com toque: tocar não abre cartão (não atrapalha); o cartão do foco cabe na janela
   E1 sem erro de JavaScript
@@ -145,12 +145,11 @@ try:
     chk(f'L1b passar o mouse em "{cls[1] if cls else ""}" realça os {nc} talhões dela (anel em duas cores em cada um)', na == 2 * nc and nc > 0, [na, nc])
     J("(()=>{const e=document.querySelector('[data-mux-leg=\"%s\"]'); e&&e.click();})()" % cls[0]); time.sleep(.5)
     st = json.loads(J("JSON.stringify({p:(document.querySelector('[data-mux-leg=\"%s\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed'), op:[...document.querySelectorAll('svg[data-mux-grupo] [data-talhao]')].map(x=>x.getAttribute('fill-opacity'))})" % cls[0]) or '{}')
-    J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()"); time.sleep(.5)
-    nl = [J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length"), J("((document.querySelector('.mux-lista [role=status]')||{}).innerText||'')")]
-    chk('L1c clicar na classe filtra: botão pressionado, os outros talhões esmaecem no mapa e a Lista mostra só a classe ("N de 8")', st.get('p') == 'true' and st.get('op', []).count('0.25') == 8 - nc and nl[0] == nc and nl[1].startswith(f'{nc} de 8'), [st, nl])
+    # 18/10/2026 (proprietário): a visão Lista saiu do Mapa; o filtro da legenda se confere no mapa (os outros talhões esmaecem)
+    chk('L1c clicar na classe filtra: botão pressionado e os outros talhões esmaecem no mapa', st.get('p') == 'true' and st.get('op', []).count('0.25') == 8 - nc and nc > 0, st)
     J("(()=>{const e=document.querySelector('[data-mux-leg=\"%s\"]'); e&&e.click();})()" % cls[0]); time.sleep(.5)
-    nl2 = J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length"); p2 = J("(document.querySelector('[data-mux-leg=\"%s\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed')" % cls[0])
-    chk('L1d clicar de novo limpa o filtro (8 linhas; botão solto)', nl2 == 8 and p2 == 'false', [nl2, p2])
+    st2 = json.loads(J("JSON.stringify({p:(document.querySelector('[data-mux-leg=\"%s\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed'), op:[...document.querySelectorAll('svg[data-mux-grupo] [data-talhao]')].map(x=>x.getAttribute('fill-opacity'))})" % cls[0]) or '{}')
+    chk('L1d clicar de novo limpa o filtro (nenhum talhão esmaecido; botão solto)', st2.get('p') == 'false' and st2.get('op', []).count('0.25') == 0 and len(st2.get('op', [])) == 8, st2)
     # Satélite: com o contraste Talhão as cores são relativas a cada talhão; a escala dos pixels não conta talhões (antes: "Médio 20" na Lagoa
     # Grande com rótulos fraco, atenção e bom). Com o contraste Absoluto a classe do talhão é a da escala: a soma volta a ser 8
     camada(J, 'Satélite'); time.sleep(.4)

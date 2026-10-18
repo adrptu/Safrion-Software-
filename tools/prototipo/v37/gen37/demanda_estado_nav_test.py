@@ -72,9 +72,16 @@ try:
     def mapa(tal,faz='Santa Rita'):
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps({'mf_faz':faz,'lay':'Insumos','tsel':[],'flt':{'Insumos':{'per':'Safra toda'}}}))})"); ir('IN-04.dc.html',w=2.0)
         tap(tal); x=pan(tal); tap(tal); return x
-    def est_secao(i): ir('EST.dc.html',w=1.6); J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i-1}].click()"); time.sleep(.5)
+    def expandir():   # TAB-12 (17/10): as grades nascem recolhidas; o teste lê os lotes depois do "Expandir tudo", como a pessoa (base verde 2, 18/10)
+        for _ in range(4):
+            if not J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 0; b.click(); return 1;})()"): break
+            time.sleep(.3)
+    def est_secao(i): ir('EST.dc.html',w=1.6); J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i-1}].click()"); time.sleep(.5); expandir()
     def est_row(*ts):
-        r=J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.5); return r
+        q=f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"
+        r=J(q)
+        if r=='sem linha': expandir(); r=J(q)
+        time.sleep(.5); return r
     def os_painel(oid):
         ir('OS.dc.html',w=1.6)
         J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(oid)})); r&&r.click();}})()"); time.sleep(.6)

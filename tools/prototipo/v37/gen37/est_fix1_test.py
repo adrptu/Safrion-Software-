@@ -11,7 +11,9 @@ OVF = "[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).
 # botão/chip inteiro dentro da caixa da grade (linha que contém ts, elemento com texto t): true = à vista sem rolar; 'teclado' = ação
 # alcançável pelo foco; 'rolando' = selo inteiro ao rolar a grade (TABELAS-FOCO item 6: a grade rola dentro da caixa, a página não)
 INTEIRO = """((ts,t)=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(x=>r.innerText.indexOf(x)>=0)); if(!r) return 'sem linha';
-  const e=[...r.querySelectorAll('button,span')].find(x=>x.innerText.trim()===t); if(!e) return 'sem '+t; const sc=r.closest('[role=table]').parentElement;
+  let e=[...r.querySelectorAll('button,span,[role=menuitem]')].find(x=>x.textContent.trim()===t); if(!e) return 'sem '+t; const sc=r.closest('[role=table]').parentElement;
+  // TAB-05 (DS-MODULOS-2, 17/10): a ação da linha mora no ⋯ da própria linha; o que precisa estar inteiro (ou alcançável pelo teclado) é esse ⋯
+  if(e.closest('.g2mais-menu')) e=e.closest('.g2mais-w').querySelector('button.g2mais');
   const den=()=>{ const box=sc.getBoundingClientRect(), b=e.getBoundingClientRect(); return b.width>0&&b.left>=box.left-0.5&&b.right<=box.right+0.5; };
   sc.scrollLeft=0; if(den()) return true;   // à vista sem rolar a grade
   const f=e.closest('button'); if(f){ f.focus(); f.dispatchEvent(new FocusEvent('focusin',{bubbles:true})); return den()?'teclado':false; }   // ação: o foco do teclado traz inteira para a caixa (focusin despachado: sem janela ativa o Chrome não o dispara)
@@ -68,8 +70,9 @@ try:
     E.ok(d31 == '5.000 kg solicitado − 3.500 kg consumido − 500 kg em custódia', 'REQ-031 (em conferência): Detalhe mostra a conta do saldo (Entregue 5.000 kg inclui o que voltou; A entregar 1.000 kg)', d31)
     # 7 · Restaurar demonstração limpa o filtro de local
     E.etapa(4); E.clk('Câmara fria'); f0 = E.J("[...document.querySelectorAll('[role=row].g2kid')].length")
-    E.clk('Restaurar demonstração'); E.clk('Restaurar')
-    on = E.J("[...document.querySelectorAll('button[aria-pressed=true]')].map(b=>b.innerText)"); n = E.J("[...document.querySelectorAll('[role=row].g2kid')].length"); print('filtro:', f0, on, n)
+    E.clk('Restaurar demonstração'); E.clk('Restaurar'); E.expandir()   # TAB-12: a grade volta recolhida; conta os lotes com tudo aberto
+    # só os filtros com nome: o botão de visão "Tabela" (só ícone) também fica pressionado e não é filtro de local
+    on = E.J("[...document.querySelectorAll('button[aria-pressed=true]')].map(b=>b.innerText.trim()).filter(Boolean)"); n = E.J("[...document.querySelectorAll('[role=row].g2kid')].length"); print('filtro:', f0, on, n)
     E.ok(f0 == 2 and on == ['Todos os locais'] and n > f0,'Restaurar demonstração volta o filtro para "Todos os locais"', [f0, on, n])
     er = E.erros(); E.ok(not er, 'sem erro de script', er)
 finally:

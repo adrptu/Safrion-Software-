@@ -3,7 +3,7 @@
 // Os pivôs vêm de dados_lagoa_fonte (sintéticos fora do Mac). Uso (de gen37/): node talgeo_test.js
 const fs = require('fs'), path = require('path'), vm = require('vm'), { execFileSync } = require('child_process');
 const HERE = __dirname;
-vm.runInThisContext(fs.readFileSync(path.join(HERE, 'talgeo.js'), 'utf8') + '\nglobalThis.TG={tgAreaHa,tgCirculo,tgRaioDeHa,tgPerimetro,tgDentro,tgSobrepoeHa,tgAutoCruza,tgFechado,tgLerGeoJSON,tgLer,tgDestino,tgHaTexto,tgNome};');
+vm.runInThisContext(fs.readFileSync(path.join(HERE, 'talgeo.js'), 'utf8') + '\nglobalThis.TG={tgAreaHa,tgCirculo,tgRaioDeHa,tgPerimetro,tgDentro,tgSobrepoeHa,tgAutoCruza,tgFechado,tgLerGeoJSON,tgLer,tgDestino,tgHaTexto,tgNome,tgKmzTexto};');
 const DIR = execFileSync('python3', ['-c', 'import dados_lagoa_fonte as F; print(F.DIR)'], { cwd: HERE, encoding: 'utf8' }).trim();
 const GJ = JSON.parse(fs.readFileSync(path.join(DIR, 'lagoa_pivos.geojson'), 'utf8'));
 const PV = JSON.parse(fs.readFileSync(path.join(DIR, 'lagoa_s2_resumo.json'), 'utf8')).pivos;
@@ -40,5 +40,22 @@ chk('7 tgLerGeoJSON: 23 polígonos (ha ≈ declarado), ponto + area_ha = pivô d
 let kmz = ''; try { TG.tgLer('fazenda.kmz', ''); } catch (e) { kmz = e.message; }
 chk('8 tgDestino e KMZ: "Reserva legal" e "Outorga" → cadastro da fazenda; "Pivô 3" → talhão; .kmz recusado', TG.tgDestino({ ring: q5, nome: 'Reserva legal', pasta: '' }) === 'Cadastro da fazenda'
   && TG.tgDestino({ ring: q5, nome: 'Ponto', pasta: 'Outorga' }) === 'Cadastro da fazenda' && TG.tgDestino({ ring: q5, nome: 'Pivô 3', pasta: '' }) === 'Talhão' && /KMZ/.test(kmz), kmz);
-console.log('RESULTADO: ' + ok.filter(Boolean).length + '/' + ok.length);
-process.exit(ok.every(Boolean) ? 0 : 1);
+// 9 · MAPA-REAL F1 (18/10/2026): o .kmz do Google Earth (zip com doc.kml, deflate ou guardado) abre no navegador; zip sem .kml e lixo explicam
+const zlib = require('zlib');
+function zipDe(arquivos){ const partes = [], central = []; let off = 0;
+  arquivos.forEach(([nome, texto, guardado]) => { const nm = Buffer.from(nome), raw = Buffer.from(texto, 'utf8'), dados = guardado ? raw : zlib.deflateRawSync(raw), met = guardado ? 0 : 8;
+    const lh = Buffer.alloc(30); lh.writeUInt32LE(0x04034b50, 0); lh.writeUInt16LE(20, 4); lh.writeUInt16LE(met, 8); lh.writeUInt32LE(dados.length, 18); lh.writeUInt32LE(raw.length, 22); lh.writeUInt16LE(nm.length, 26);
+    const ch = Buffer.alloc(46); ch.writeUInt32LE(0x02014b50, 0); ch.writeUInt16LE(20, 4); ch.writeUInt16LE(20, 6); ch.writeUInt16LE(met, 10); ch.writeUInt32LE(dados.length, 20); ch.writeUInt32LE(raw.length, 24); ch.writeUInt16LE(nm.length, 28); ch.writeUInt32LE(off, 42);
+    partes.push(lh, nm, dados); central.push(ch, nm); off += 30 + nm.length + dados.length; });
+  const cd = Buffer.concat(central), eo = Buffer.alloc(22); eo.writeUInt32LE(0x06054b50, 0); eo.writeUInt16LE(arquivos.length, 8); eo.writeUInt16LE(arquivos.length, 10); eo.writeUInt32LE(cd.length, 12); eo.writeUInt32LE(off, 16);
+  const b = Buffer.concat(partes.concat([cd, eo])); return b.buffer.slice(b.byteOffset, b.byteOffset + b.length); }
+const KML = '<?xml version="1.0"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><Placemark><name>Talhão Teste</name><Polygon><outerBoundaryIs><LinearRing><coordinates>'
+  + q5.map(p => p[0] + ',' + p[1]).join(' ') + '</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark></Document></kml>';
+(async () => {
+  const t1 = await TG.tgKmzTexto(zipDe([['files/icone.png', 'x', true], ['doc.kml', KML]])), t2 = await TG.tgKmzTexto(zipDe([['outro.kml', KML, true]]));
+  let e1 = '', e2 = ''; try { await TG.tgKmzTexto(zipDe([['leia.txt', 'nada']])); } catch (e) { e1 = e.message; } try { await TG.tgKmzTexto(new Uint8Array([1, 2, 3, 4]).buffer); } catch (e) { e2 = e.message; }
+  let lido = []; try { lido = typeof DOMParser === 'function' ? TG.tgLer('fazenda.kml', t1) : []; } catch (e) { lido = [e.message]; }
+  chk('9 KMZ: o doc.kml compactado (deflate) e o guardado saem iguais ao KML; KMZ sem .kml e arquivo que não é zip explicam o que fazer', t1 === KML && t2 === KML && /não tem arquivo \.kml/.test(e1) && /KMZ ilegível/.test(e2), [t1 === KML, t2 === KML, e1, e2, lido.length]);
+  console.log('RESULTADO: ' + ok.filter(Boolean).length + '/' + ok.length);
+  process.exit(ok.every(Boolean) ? 0 : 1);
+})();

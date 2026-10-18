@@ -1,0 +1,167 @@
+MB-01
+  OK  sem buracos {{}} visíveis
+  OK  MB-01: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+  OK  MB-01: sem elo para tela oculta e fixa []
+MB-02
+  OK  sem buracos {{}} visíveis
+  OK  MB-02: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+  OK  MB-02: sem elo para tela oculta e fixa []
+MB-02det
+  OK  sem buracos {{}} visíveis
+  OK  MB-02det: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-03
+  OK  sem buracos {{}} visíveis
+  OK  MB-03: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-03x-recibo
+  OK  sem buracos {{}} visíveis
+  OK  MB-03x-recibo: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-04
+  OK  sem buracos {{}} visíveis
+  OK  MB-04: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-05
+  OK  sem buracos {{}} visíveis
+  OK  MB-05: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+  OK  MB-05: sem elo para tela oculta e fixa []
+MB-05det
+  OK  sem buracos {{}} visíveis
+  OK  MB-05det: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-06
+  OK  sem buracos {{}} visíveis
+  OK  MB-06: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-07
+  OK  sem buracos {{}} visíveis
+  OK  MB-07: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-08
+  OK  sem buracos {{}} visíveis
+  OK  MB-08: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-08x-recibo
+  OK  sem buracos {{}} visíveis
+  OK  MB-08x-recibo: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-09
+  OK  sem buracos {{}} visíveis
+  OK  MB-09: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-09det
+  OK  sem buracos {{}} visíveis
+  OK  MB-09det: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+MB-10
+  OK  sem buracos {{}} visíveis
+  OK  MB-10: conteúdo cabe na altura (excesso 0px)
+    folga 0
+  OK  sem estouro horizontal []
+  OK  ações secundárias com title []
+  OK  sem botão Editar
+v3.9 · MB-01 minha fila do cenário
+  OK  MB-01: fila só com ordens de Marcos liberadas/em execução
+  OK  MB-01: realizado, saldo e insumos a retirar/com você
+  OK  MB-01: alternador de sinal, contador e restaurar
+  OK  primário = passo mais urgente: Iniciar turno · OS-0421
+DEMO-11 · MB-02 pacote
+  OK  MB-02: OS-0421 do cenário e OS-0430 aguardando liberação
+  OK  ordem revogada e relato fora da autorização
+  OK  iniciar ordem revogada bloqueia com motivo
+DEMO-14 · MB-02 reconhecer
+  OK  aviso de revogação das fichas do saldo (sem selo de revisão da v3)
+  OK  reconhecer registra ciência
+  OK  botão Reconhecer some após ciência
+DEMO-11 · sem sinal → fila do aparelho → reenviar sem duplicar
+  OK  MB-03 sem turno: primário Iniciar turno
+  OK  ocorrência sem sinal fica no aparelho
+  OK  recibos: 1 pendente e histórico REC-7741
+  OK  reenviar sem sinal não duplica
+  OK  sinal volta: enviado uma vez com recibo REC-7742
+DEMO-05/15 · MB-08
+  OK  janela da volta inteira (14,5 h), início e andamento
+  OK  13,5 mm da OS-0422
+  OK  liberação LIB-2287
+  OK  execução da volta completa
+  OK  falta mostra o próximo ciclo
+Colheita · MB-07 contagem no estado
+  OK  MB-07: talhões de fruta em produção por um toque
+  OK  avança planta e soma a amostra
+  OK  Corrigir a última planta devolve a planta aos contadores
+Colheita · MB-10 aba Colheita e aba Motorista
+  OK  aba Colheita: OS-0505 com a CG-2108 a pesar; sem Balança e Recebedor
+  OK  primário da aba Colheita: Registrar carga · OS-0505
+  OK  motorista vê só a viagem
+  OK  primário do motorista
+  OK  nova previsão exibida
+Confirmações de detalhe
+  OK  MB-05det: Confirmar recebimento → DV-0912
+  OK  MB-05det: primário não repete a ação
+  OK  MB-09det: Concluir serviço → Em conferência
+  OK  MB-09det: primário não repete a ação
+  OK  MB-04: Registrar ocorrência → registrada
+  OK  MB-04: primário não repete a ação
+  OK  MB-01 sem erros JS []
+  OK  MB-02 sem erros JS []
+  OK  MB-02det sem erros JS []
+  OK  MB-03 sem erros JS []
+  OK  MB-03x-recibo sem erros JS []
+  OK  MB-04 sem erros JS []
+  OK  MB-05 sem erros JS []
+  OK  MB-05det sem erros JS []
+  OK  MB-06 sem erros JS []
+  OK  MB-07 sem erros JS []
+  OK  MB-08 sem erros JS []
+  OK  MB-08x-recibo sem erros JS []
+  OK  MB-09 sem erros JS []
+  OK  MB-09det sem erros JS []
+  OK  MB-10 sem erros JS []
+FALHAS: 0
+rc=0

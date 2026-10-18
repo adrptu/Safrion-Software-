@@ -8,7 +8,7 @@ from journeys import free
 R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=None; FAL=[]
-CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
+CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,[role=menuitem]')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 SETV="""((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem campo '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok';})"""
 ROWCLK="""((t)=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf(t)>=0); if(!r) return 'sem linha '+t; const s=r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span'); s.click(); return 'ok';})"""
 # linha-filha t dentro do grupo g (árvore): devolve o texto ou clica
@@ -24,11 +24,20 @@ try:
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
     def clk(t,root=None,w=.45): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(w); return r
     from comp_lib import IR_ETAPA
-    def ir_etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.45); return r   # a faixa só informa: anda pela área de ações
+    XP="(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 0; b.click(); return 1;})()"
+    def expandir():   # TAB-12 (17/10): árvores nascem recolhidas; o teste lê fornecedores e itens depois do "Expandir tudo", como a pessoa (base verde 2, 18/10)
+        for _ in range(4):
+            if not J(XP): break
+            time.sleep(.3)
+    def ir_etapa(n): r=J(f"({IR_ETAPA})({n})"); time.sleep(.45); expandir(); return r   # a faixa só informa: anda pela área de ações
     def setv(sel,val): r=J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
-    def row(t): r=J(f"({ROWCLK})({json.dumps(t)})"); time.sleep(.4); return r
-    def kid(g,t,click=False): r=J(f"({KID})({json.dumps(g)},{json.dumps(t)},{json.dumps(click)})"); time.sleep(.4 if click else 0); return r
-    def rowtxt(t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
+    def _de_novo(f):   # linha não achada: abre as árvores visíveis e procura de novo (TAB-12)
+        r=f()
+        if isinstance(r,str) and r.startswith('sem '): expandir(); r=f()
+        return r
+    def row(t): r=_de_novo(lambda: J(f"({ROWCLK})({json.dumps(t)})")); time.sleep(.4); return r
+    def kid(g,t,click=False): r=_de_novo(lambda: J(f"({KID})({json.dumps(g)},{json.dumps(t)},{json.dumps(click)})")); time.sleep(.4 if click else 0); return r
+    def rowtxt(t): return _de_novo(lambda: J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()"))
     def after(t,u): return J(f"(()=>{{const rows=[...document.querySelectorAll('[role=row]')]; const i=rows.findIndex(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); const k=rows.slice(i+1).find(r=>r.innerText.indexOf({json.dumps(u)})>=0); return k?k.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
     opts=lambda k: J(f"[...document.querySelectorAll('[id$=_{k}] option')].map(o=>o.value)")
     sub=lambda: J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const d=a.querySelector('h2').parentElement.nextElementSibling; return d?d.innerText:'';})()")
@@ -54,7 +63,8 @@ try:
     print('  abrir compra:', clk('Abrir compra'), T())
     chk('etapa 2 · demanda', cur().startswith('2 Confira a demanda'))
     # CTL-4 (demanda única): as O.S. entram na demanda (antes R$ 379.580,00 e MAP 62.500 kg); Fungicida A e Adjuvante saem da SOL; a Ureia da OS-0418 entra
-    b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 428.305,00' in b and '428.305,00' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
+    # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio na 2026/27 (+1 insumo, +R$ 178,50; base verde 2, 18/10)
+    b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 428.483,50' in b and '428.483,50' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
     clk('Expandir tudo'); b=body()
     chk('MAP 11-52 79.500 (500 kg da OS-0417 em custódia contam) e KCl coberto com quarentena', '79.500' in b and 'em quarentena não contam' in b)
     row('MAP 11-52'); a=aside(); chk('origem do insumo abre (consulta)', 'T1-A' in a and 'Ver no Planejar safra' in a, a[:80]); clk('Fechar','aside[role=dialog]')
@@ -67,7 +77,7 @@ try:
     # CTL-4 (DEM-01/02): a OS-0430 (chave c1|a1, T1-A) cobre a dessecação do T1-A e o uso entra pela ordem; o T2 segue pelo plano
     row('2,4-D 806'); a=aside(); chk('origem com data no início da linha', '25/09/2026 · T1-A · OS-0430 · Dessecação' in a and '28/09/2026 · T2 · Dessecação' in a, a[:300]); clk('Fechar','aside[role=dialog]')
     # etapa 3
-    clk('Solicitar cotações'); chk('etapa 3', cur().startswith('3 '))
+    clk('Solicitar cotações'); expandir(); chk('etapa 3', cur().startswith('3 '))
     b=body(); chk('Química Centro-Oeste desabilitada com motivo', 'Não homologado' in b and 'documentação fiscal pendente' in b)
     chk('link homologar CD-05', J("[...document.querySelectorAll('a')].some(a=>a.getAttribute('href')==='CD-05.dc.html')"))
     row('Química Centro-Oeste'); chk('não homologado não abre edição', not J("!!document.querySelector('aside[role=dialog]')") and 'não é homologado' in T(), T())
@@ -94,7 +104,7 @@ try:
     chk('aviso simulado', 'nenhuma mensagem real foi enviada' in T())
     time.sleep(6.5)
     b=body(); chk('respostas chegaram', 'Proposta recebida' in b and 'Sem resposta até agora' in b, J("document.body.innerText.match(/\\d+ de \\d+ convites responderam/)"))
-    print('  enviar de novo:', clk('Comparar propostas'))
+    print('  enviar de novo:', clk('Comparar propostas')); expandir()   # TAB-12: a comparação nasce recolhida
     # etapa 4
     chk('etapa 4', cur().startswith('4 '))
     b=body(); chk('menor custo total destacado', 'Menor custo total' in b and 'Escolhida' in b)
@@ -124,9 +134,10 @@ try:
     t=rowtxt('Nitrato de cálcio'); chk('Nitrato de cálcio: padrão Casa do Adubo (Fertisul chega depois)', 'Casa do Adubo' in t and 'Menor custo a tempo' in t, t)
     # CTL-4 (DEM-08): a Ureia da OS-0418 falta em 24/09 e nenhuma proposta chega antes: padrão = a que chega primeiro, sem justificativa obrigatória
     # (não há alternativa a tempo para justificar); o aviso "chega depois da falta" continua e o resumo conta a escolha atrasada
+    # OS-LOTE (6dfa09c1, 16/10): o Sulfato de magnésio das O.S. de demonstração também chega depois da falta: o resumo conta 2 (base verde 2, 18/10)
     t=rowtxt('Ureia 45%'); k4b=J("(document.body.innerText.match(/\\d+ propostas · custo total escolhido [^\\n]+/)||[''])[0]") or ''
-    chk('DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "1 escolha chega depois da falta" e nenhuma sem justificativa',
-        'Casa do Adubo' in t and 'Chega primeiro' in t and 'Chega depois da falta (24/09)' in t and 'Justificativa pendente' not in t and '1 escolha chega depois da falta' in k4b and 'sem justificativa' not in k4b, (t,k4b))
+    chk('DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "2 escolhas chegam depois da falta" (Ureia e Sulfato de magnésio) e nenhuma sem justificativa',
+        'Casa do Adubo' in t and 'Chega primeiro' in t and 'Chega depois da falta (24/09)' in t and 'Justificativa pendente' not in t and '2 escolhas chegam depois da falta' in k4b and 'Chega depois da falta' in rowtxt('Sulfato de magnésio') and 'sem justificativa' not in k4b, (t,k4b,rowtxt('Sulfato de magnésio')))
     # etapa 5 · Direção (total acima de 300 mil?) → depende da quantidade; primeiro volta MAP ao total
     row('MAP 11-52'); setv('#'+fid('ped'),'79500'); clk('Salvar','aside[role=dialog]')
     clk('Revisar aprovação'); chk('etapa 5', cur().startswith('5 '))
@@ -165,17 +176,20 @@ try:
     ir_etapa(2); b=body(); clk('Expandir tudo'); b=body(); chk('demanda mostra pedidos', 'Parcial · PC-101' in b and 'Pedido PC-' in b)
     t=rowtxt('Semente de soja 58 W'); chk('58 W passa a faltar em 15/10/2026 com o PC-090 reprogramado', '15/10/2026' in t and 'chega depois da falta' in t, t)
     clk('Trocar safra'); chk('safra mostra pedidos emitidos', 'Pedidos emitidos' in body())
-    # caminho Direção numa página nova (sem o andamento gravado: talhao-os-compras-v1 guarda a compra entre recargas)
-    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
+    # caminho Direção numa página nova, sem o andamento gravado. Desde o C-3/C-4 a compra mora no cenário: zerar só a chave antiga deixava a compra
+    # já aprovada e o botão da Direção não aparecia; a página nova começa do armazenamento vazio, como no c34_fluxo (base verde 2, 18/10)
+    J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
     clk('Abrir compra'); ir_etapa(3); clk('Enviar convites (simulado)'); time.sleep(6.5)
     clk('Comparar propostas'); clk('Revisar aprovação'); clk('Enviar à Direção')
-    chk('pendente: ações secundárias de devolução e recusa', 'Registrar devolução' in body() and 'Registrar recusa' in body())
+    # DS-MODULOS-2 (17/10): as ações secundárias moram no ⋯ do topo; o texto do menu fechado fica no textContent (base verde 2, 18/10)
+    tc=lambda: J("document.body.textContent")
+    chk('pendente: ações secundárias de devolução e recusa', 'Registrar devolução' in tc() and 'Registrar recusa' in tc())
     print('  registrar decisão:', clk('Registrar aprovação da Direção'), T())
     b=body(); chk('Direção aprova (simulado) e emite pedidos', 'Aprovada por Direção (simulado)' in b and 'Pedidos emitidos' in b)
-    chk('aprovada: sem devolução/recusa', 'Registrar devolução' not in b)
+    chk('aprovada: sem devolução/recusa', 'Registrar devolução' not in tc())
     c.shot('_probe/cmp_e5.png')
     # ---- compras-estoque-05 · convite adicional depois do envio · compras-estoque-02 · devolução e recusa da Direção ----
-    J("localStorage.removeItem('talhao-os-compras-v1')"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
+    J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{p}/CMP.dc.html'); time.sleep(.6)
     clk('Abrir compra'); ir_etapa(3)
     for f in ['Agro Norte','Santa Rita Insumos']:
         kid('Fungicidas',f,True); setv('#'+fid('conv'),'Não convidar'); clk('Salvar','aside[role=dialog]')

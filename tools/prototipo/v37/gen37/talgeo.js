@@ -76,8 +76,26 @@ function tgLerGeoJSON(texto){ let j; try{ j = JSON.parse(texto); }catch(e){ thro
       else out.push({ nome, pasta: '', tipo: 'Ponto', centro: pt, ring: null, ha: 0, decl: null }); return; }
     out.push({ nome, pasta: '', tipo: g.type || 'Sem geometria', ring: null, ha: 0, decl: null }); });
   return out; }
+// MAPA-REAL F1 (proprietário, 18/10/2026: "quero baixar uma fazenda real kml para fazer os testes"): o .kmz que o Google Earth exporta é um zip
+// com o doc.kml dentro. Abre no navegador (DecompressionStream 'deflate-raw'), sem biblioteca e sem rede: o arquivo não sai do aparelho.
+async function tgKmzTexto(buf){ const u = new Uint8Array(buf), dv = new DataView(u.buffer, u.byteOffset, u.byteLength); let e = -1;
+  for (let i = u.length - 22; i >= Math.max(0, u.length - 65557); i--){ if (dv.getUint32(i, true) === 0x06054b50){ e = i; break; } }
+  if (e < 0) throw new Error('KMZ ilegível: o arquivo não é um .kmz válido.');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true), alvo = null;
+  for (let k = 0; k < n && p + 46 <= u.length; k++){ if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const met = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const nome = new TextDecoder().decode(u.subarray(p + 46, p + 46 + nl));
+    if (/\.kml$/i.test(nome) && (!alvo || /(^|\/)doc\.kml$/i.test(nome))) alvo = { met, csz, off };
+    p += 46 + nl + xl + cl; }
+  if (!alvo) throw new Error('O KMZ não tem arquivo .kml dentro.');
+  if (dv.getUint32(alvo.off, true) !== 0x04034b50) throw new Error('KMZ ilegível: o arquivo não é um .kmz válido.');
+  const ini = alvo.off + 30 + dv.getUint16(alvo.off + 26, true) + dv.getUint16(alvo.off + 28, true), dados = u.subarray(ini, ini + alvo.csz);
+  if (alvo.met === 0) return new TextDecoder().decode(dados);
+  if (alvo.met !== 8) throw new Error('KMZ com compactação não suportada: abra no Google Earth e salve como .kml.');
+  if (typeof DecompressionStream !== 'function') throw new Error('Este navegador não abre KMZ: abra no Google Earth e salve como .kml.');
+  return await new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text(); }
 function tgLer(nomeArq, texto){ const n = String(nomeArq || '').toLowerCase();
-  if (/\.kmz$/.test(n)) throw new Error('KMZ é compactado: abra no Google Earth e salve como .kml.');
+  if (/\.kmz$/.test(n)) throw new Error('KMZ é compactado: o texto do .kml vem de tgKmzTexto (leitura assíncrona do arquivo).');
   if (/\.kml$/.test(n) || /^\s*</.test(texto)) return tgLerKML(texto);
   return tgLerGeoJSON(texto); }
 // o que a feição importada vira: talhão (polígono ou pivô) ou registro da fazenda (perímetro, reserva, APP, água)

@@ -76,8 +76,9 @@ try:
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear(); sessionStorage.clear()")
     # ================= normal (1440 px) =================
     saf(); t6=k6(); foto('1_saf_demanda')
-    chk('N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)',
-        t6.startswith('Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07'),t6)
+    # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio na 2026/27 (+1 insumo, +R$ 178,50; base verde 2, 18/10)
+    chk('N1 Planejar safra › etapa 4 (2026/27): R$ 428.483,50 · 15 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)',
+        t6.startswith('Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07'),t6)
     fa=[cel('Fungicida A',k) for k in ('Necessidade líquida','Situação')]; mp=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Falta em')]
     ur=[cel('Ureia 45%',k) for k in ('Necessidade líquida','Falta em','Situação')]; hd=J("[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim())") or []
     chk('N2 compra em dobro desfeita: Fungicida A "0,0 L · Coberto pelo estoque" (nunca 145,2 L); compra a menos desfeita: MAP "79.500 kg" em 18/10/2026 e Ureia da OS-0418 "1.140 kg" em 24/09/2026 · coluna "Antes de hoje sem O.S." (nunca "Já realizado")',
@@ -90,11 +91,11 @@ try:
     rowclick('MAP 11-52'); ms=memo(); fechar()
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); clk('Expandir tudo',w=.6); tot=J("[...document.querySelectorAll('.g2tot')].filter(x=>x.offsetParent).map(x=>x.innerText).join(' ')") or ''
     rowclick('MAP 11-52'); mc=memo(); fechar(); ur2=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''; foto('2_cmp_etapa2')
-    chk('N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)',
-        '428.305,00' in tot and '1.140' in ur2 and mc==ms and any('OS-0420' in l for l in ms) and any('OS-0431' in l for l in ms),(tot,ur2,ms[:4],mc[:4]))
+    chk('N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.483,50, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)',
+        '428.483,50' in tot and '1.140' in ur2 and mc==ms and any('OS-0420' in l for l in ms) and any('OS-0431' in l for l in ms),(tot,ur2,ms[:4],mc[:4]))
     mapa(); n0=nums(); f0=fonte(); tap('T4'); p4=pan('T4'); tap('T4'); tap('T1'); p1=pan('T1'); tap('T1'); foto('3_mapa_sr')
-    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
-        all(x in n0 for x in ('Produtos 19','Faltam 14','A receber 3','Estoque cobre 2'))   # rótulos curtos na faixa (o completo na dica), 13/10/2026 and 'MAP 11-52 · 17.500 kg' in p4 and 'Falta 79.500 kg' in p4
+    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 20 produtos · 15 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
+        all(x in n0 for x in ('Produtos 20','Faltam 15','A receber 3','Estoque cobre 2'))   # rótulos curtos na faixa (o completo na dica), 13/10/2026 and 'MAP 11-52 · 17.500 kg' in p4 and 'Falta 79.500 kg' in p4
         and 'Fungicida A' in p1 and 'Falta 145' not in p1 and 'Falta 130' not in p1
         and 'necessidade líquida da Safra 2026/27' in f0 and 'a mesma do Planejar safra e da Compra' in f0 and 'sem plano: O.S. abertas' not in f0,(n0,p4[:400],p1[:300]))
     mapa('Lagoa Grande',tsel=['PV13']); p13=pan1(); f13=fonte(); foto('4_mapa_lg')
@@ -108,10 +109,10 @@ try:
     # ================= a O.S. muda e a demanda acompanha (mesmo estado, sem redigitar) =================
     os_painel('OS-0418'); clk('Cancelar sem execução','aside[role=dialog]'); motivo('Fertirrigação adiada (teste CTL-4)'); clk('Confirmar cancelamento','aside[role=dialog]'); tc=T()
     saf(); t6b=k6(); u1=cel('Ureia 45%','Necessidade líquida'); foto('5_saf_os0418_cancelada')
-    chk('I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar',
-        'OS-0418 cancelada sem execução' in tc and u1=='0 kg' and t6b.startswith('Valor da necessidade líquida R$ 424.771,00 · 13 insumos a comprar'),(tc,u1,t6b))
+    chk('I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.949,50 · 14 insumos a comprar',
+        'OS-0418 cancelada sem execução' in tc and u1=='0 kg' and t6b.startswith('Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar'),(tc,u1,t6b))
     mapa(); n1=nums(); tap('P1'); pp=pan('P1'); tap('P1')
-    chk('I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia',all(x in n1 for x in ('Produtos 18','Faltam 13')) and 'Ureia' not in pp,(n1,pp[:300]))
+    chk('I2 Mapa › Insumos acompanha: 19 produtos · 14 faltam; P1 sem Ureia',all(x in n1 for x in ('Produtos 19','Faltam 14')) and 'Ureia' not in pp,(n1,pp[:300]))
     # ================= a SOL já enviada pede mais do que a demanda de agora (a O.S. saiu depois do envio): o Planejar safra mostra e atualiza =================
     prim=lambda: (J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(x=>x.offsetParent); return b?b.innerText.replace(/\\s+/g,' ').trim():'';})()") or '')
     saf(); ux=[cel('Ureia 45%',k) for k in ('Necessidade líquida','Situação','Solicitação')]; t6x=k6(); px=prim(); rowclick('Ureia 45%'); mu=memo(); fechar(); foto('5b_saf_acima')
@@ -123,20 +124,20 @@ try:
         'SOL-2026-07 atualizada' in tu1 and 'Ureia 45%' in tu1 and '1.140 kg' in tu1 and 'R$ 3.534,00' in tu1 and u3=='(sem linha)' and 'acima da demanda' not in t6y and py=='Abrir Compra de insumos ›',(tu1,u3,t6y,py))
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); clk('Expandir tudo',w=.6); tot2=J("[...document.querySelectorAll('.g2tot')].filter(x=>x.offsetParent).map(x=>x.innerText).join(' ')") or ''
     ur3=J("[...document.querySelectorAll('[role=row]')].some(r=>r.innerText.indexOf('Ureia 45%')>=0)"); foto('5c_cmp_sol_atualizada')
-    chk('U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.771,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia',
-        '424.771,00' in tot2 and not ur3,(tot2,ur3))
+    chk('U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.949,50 (o mesmo do Planejar safra) e nenhuma linha de Ureia',
+        '424.949,50' in tot2 and not ur3,(tot2,ur3))
     saf(); clk('Atualizar SOL-2026-07',w=.6); pz=prim()
     chk('U4 repetição: com a SOL já atualizada não há o que atualizar; a primária segue "Abrir Compra de insumos ›"',pz=='Abrir Compra de insumos ›',pz)
     # ================= repetição =================
     saf(); t6c=k6(); ir('SAF.dc.html#saf=S2627&passo=demanda',w=1.6); clk('Expandir tudo',w=.6); t6d=k6(); rowclick('Fungicida A'); fs2=memo(); fechar()
-    chk('P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.771,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente)',
-        t6c==t6y and t6d==t6y and t6y.startswith('Valor da necessidade líquida R$ 424.771,00') and fs2==fs,(t6c,t6d,fs2[:3]))
+    chk('P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.949,50) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente)',
+        t6c==t6y and t6d==t6y and t6y.startswith('Valor da necessidade líquida R$ 424.949,50') and fs2==fs,(t6c,t6d,fs2[:3]))
     os_painel('OS-0418'); temc=J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Cancelar sem execução')")
     r2=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.osc_cancelar(c,'OS-0418','de novo',['','',''],{k:'Ana'})); return r.erro||r.msg||''; })()") or ''
     saf(); t6e=k6()
     chk('P2 repetição: a OS-0418 cancelada não oferece cancelar de novo; o comando repetido é recusado e a demanda não muda',not temc and 'Só ordem sem realizado' in r2 and t6e==t6y,(temc,r2,t6e))
     os_painel('OS-0418'); J("window.__cen.cenReset()"); saf(); t6f=k6()
-    chk('P3 restaurar a demonstração volta aos números da semente (R$ 428.305,00 · 14 insumos)',t6f.startswith('Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar'),t6f)
+    chk('P3 restaurar a demonstração volta aos números da semente (R$ 428.483,50 · 15 insumos)',t6f.startswith('Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar'),t6f)
     # ================= revisão do CTL-4, achado 1 (S2): estoque, reservas e recebimentos do MESMO cenário das O.S. =================
     J("localStorage.removeItem('talhao-os-compras-v1')"); mapa(); tap('C1'); c0=pan('C1'); tap('C1')
     from est_lib import FIND
@@ -144,7 +145,7 @@ try:
     re_=J(f"(()=>{{const r=({FIND})(['REQ-040','NPK 20-05-20']); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.5)
     clk('Salvar','aside[role=dialog]',w=.8); te=T()
     saf(); t6v=k6(); nv=[cel('NPK 20-05-20',k) for k in ('Necessidade líquida','Estoque apto','Situação')]; pv=prim(); foto('10_saf_entrega_npk')
-    chk('V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 428.305,00 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)',
+    chk('V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 428.483,50 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)',
         re_=='ok' and 'entregues' in te and t6v==t6f and nv[0]=='14.800 kg' and nv[1]=='0 kg' and 'Acima' not in nv[2] and pv=='Abrir Compra de insumos ›',(re_,te,t6v,nv,pv))
     mapa(); tap('C1'); c1=pan('C1'); tap('C1')
     chk('V2 Mapa › Insumos depois da entrega: C1 continua "Falta 14.800 kg" (o mesmo de antes)','Falta 14.800 kg' in c0 and 'Falta 14.800 kg' in c1,(c0[:300],c1[:300]))
@@ -205,12 +206,12 @@ try:
     J("localStorage.clear(); sessionStorage.clear()")
     # ================= 390 px =================
     c.size(390,844); saf(); w1=pagw(); t390=k6(); u390=cel('Ureia 45%','Necessidade líquida'); rowclick('MAP 11-52'); m390=memo(); fechar(); foto('7_saf_390')
-    chk('M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.305,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop',
-        w1[0]<=w1[1]+1 and t390.startswith('Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar') and u390=='1.140 kg' and m390==ms,(w1,t390,u390,m390[:3]))
+    chk('M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.483,50 · 15 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop',
+        w1[0]<=w1[1]+1 and t390.startswith('Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar') and u390=='1.140 kg' and m390==ms,(w1,t390,u390,m390[:3]))
     mapa(); w2=pagw(); n390=nums(); tap('T4'); p390=pan('T4'); foto('8_mapa_390')
     chk('M2 390 px · Mapa › Insumos: sem rolagem horizontal; T4 "MAP 11-52 · 17.500 kg" e "Falta 79.500 kg"',w2[0]<=w2[1]+1 and 'MAP 11-52 · 17.500 kg' in p390 and 'Falta 79.500 kg' in p390,(w2,n390,p390[:300]))
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); w3=pagw(); b3=body(); foto('9_cmp_390')
-    chk('M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.305,00',w3[0]<=w3[1]+1 and '428.305,00' in b3,(w3,))
+    chk('M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.483,50',w3[0]<=w3[1]+1 and '428.483,50' in b3,(w3,))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Compra, Mapa, O.S.)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()

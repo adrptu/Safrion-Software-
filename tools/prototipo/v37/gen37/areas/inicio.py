@@ -1280,7 +1280,7 @@ function MAPVALS(self,v){
       self.setState({mipAlvos:cur,g2toast:cur.length?('Alvos: '+cur.join(', ')):'Alvos: todos'}); }))); }
   v.map_on=!semGeo; v.map_vazio=semGeo; v.aviso_bv=(faz==='Todas');
   // Lagoa Grande: mapa real (MapLibre GL + Sentinel-2) · Santa Rita (e Todas): desenho demonstrativo
-  v.map_lg=(FAZ==='Lagoa Grande')&&!semGeo; v.map_sr=!v.map_lg; v.has_full=!v.map_lg; v.lg_err=!!(v.map_lg&&LGI.erro); v.lg_errt=LGI.erro?('Mapa real indisponível: '+LGI.erro+'. A Lista continua com os talhões.'):'';
+  v.map_lg=(FAZ==='Lagoa Grande')&&!semGeo; v.map_sr=!v.map_lg; v.has_full=!v.map_lg; v.lg_err=!!(v.map_lg&&LGI.erro); v.lg_errt=LGI.erro?('Mapa real indisponível: '+LGI.erro+'.'):'';   // 18/10 (proprietário: "tire a opção de listas ... ficou confuso"): sem a visão Lista; "Ir para talhão" segue
   v.lg_tenta=()=>{ if(LGI.carregando) return; LGI.erro=''; LGI.el=null; LGI.map=null; self.setState({lgerr:'',lgtry:Date.now()}); };   // tenta de novo sem recarregar a página
   const cena0=M.sat[(l==='Satélite')?f.dt:M.lg.cenas[0].k]||{};
   // legenda: só o selo (sintético) ou a atribuição curta da imagem real; o resto da fonte fica na dica ⓘ da camada (proprietário, 13/10/2026: menos texto)
@@ -1292,22 +1292,17 @@ function MAPVALS(self,v){
   const lista=(a)=>a.length>1?a.slice(0,-1).join(', ')+' e '+a[a.length-1]:a.join('');
   v.hs_t=semGeo?'Boa Vista sem talhões desenhados':([imp.length?lista(imp)+(imp.length>1?' impedidas':' impedida'):'',nl0?nl0+' a liberar':''].filter(Boolean).join(' · ')||'Sem pendências');
   v.hs_st=chipSt(semGeo?'gray':(imp.length?'red':(nl0?'yellow':'green')));
-  // ===== MUX-F1: busca "Ir para talhão", visão Lista | Mapa ("Ver dados") e endereço =====
-  const emLista=!semGeo&&st.mvis==='lista'; v.mux_lista=emLista; v.mux_vmapa=emLista?'false':'true'; v.mux_vlista=emLista?'true':'false';
-  const sgS=(on)=>'font-family:inherit;font-size:12px;font-weight:700;padding:5px 11px;min-height:30px;border:0;border-radius:8px;cursor:pointer;white-space:nowrap;'+(on?'background:#1E7A4C;color:#FFFFFF;':'background:transparent;color:#15201A;');
-  v.mux_stm=sgS(!emLista); v.mux_stl=sgS(emLista); v.mux_amapa=()=>self.setState({mvis:'mapa'}); v.mux_alista=()=>{ muxCartaoFecha(); self.setState({mvis:'lista'}); };
-  v.mux_vis=emLista?' visibility: hidden;':''; v.mux_ctl=emLista?' display: none;':'';
+  // ===== MUX-F1: busca "Ir para talhão" e endereço. 18/10/2026 (proprietário: "No menu mapa, tire a opção de listas que foi adicionado dentro
+  //   do mapa, ficou confuso"): saiu a visão Lista ("Ver dados" Mapa | Lista); o talhão se acha pela busca, pelo teclado e pelo clique =====
   v.mux_tem=!semGeo; v.mux_opts=TIDS().map(t=>({v:rotT(t)}));
   const busca=(txt)=>{ const ls=TIDS().map(t=>({id:t,nome:rotT(t),apelidos:isLG(t)?[(M.lg.pivos.find(p=>p.id===t)||{}).nome||'']:[]})); const id=muxAcha(txt,ls);
     if(!id){ const m='Nenhum talhão "'+String(txt).trim()+'" na '+FAZ+'.'; self.setState({muxAviso:m,g2toast:m}); return false; }
-    const st0={muxAviso:''}; if(self.state.mvis==='lista') st0.mvis='mapa'; self.setState(st0);
+    self.setState({muxAviso:''});
     // buscar é pedido explícito: no mapa real, enquadra o pivô; o resto da câmera não se move
     if(isLG(id)){ const a=tmAneis('Lagoa Grande').find(o=>o.id===id); if(a) tmEnquadra(a.ring); } muxAbre(id,'busca'); return true; };
   v.mux_bk=(e)=>{ if(!e) return; if(e.key==='Enter'){ e.preventDefault(); const el=e.target; if(busca(el.value)) el.value=''; } };
   v.mux_bi=(e)=>{ const ne=e&&e.nativeEvent; if(ne&&ne.inputType==='insertReplacementText'&&TIDS().some(t=>rotT(t)===e.target.value)){ const el=e.target; if(busca(el.value)) el.value=''; } };   // escolha na lista de sugestões
   v.mux_hasmsg=!!st.muxAviso; v.mux_msg=st.muxAviso||'';
-  if(emLista){ const L=muxLista(self,l,f,sel); v.mux_rows=L.rows; v.mux_nm=L.n+' de '+L.total+' talhões'+(LF?' · '+(leg0.find(x=>x.key===LF)||{t:''}).t:'')+' · '+(M.nome[l]||l)+' · do mais grave ao melhor'; }
-  else { v.mux_rows=[]; v.mux_nm=''; }
   // endereço = estado (D17): fazenda, camada, talhão escolhido e data da cena; replaceState, sem encher o histórico; links de outra tela (#talhao=,
   // #desenhar=, #importar, #car:) são lidos antes (talmapa.js, carHash) e só então trocados
   if(self.__ctxOk){ const h=muxHashEscrever({faz:st.mf_faz||'Lagoa Grande',lay:l,t:sel.length===1?sel[0]:'',dt:l==='Satélite'?f.dt:''}); clearTimeout(MUX.hT);
@@ -1520,7 +1515,7 @@ function colhAc(t){ const L=colhLeit(t); const x=L.x; if(!x) return A('Abrir Pre
 # Desenho: docs/integracao/V73/MAPA-UX/ (pedido, confronto §7 e §8.2) e implantacao/LEIAME.md. API pequena para o SAF-MAPA extrair depois:
 #   puras (mapa_mux_unit.js): muxVizinho, muxNome, muxRank, muxOrdem, muxHashLer, muxHashEscrever, muxChave, muxAcha;
 #   no navegador: muxInfo (o que o talhão diz na camada), muxCartao* (cartão do hover e do foco), muxRealce (anéis), muxTecla (setas, Home/End,
-#   Enter, Esc, "/"), muxLista (visão Lista) e o estado no endereço (#faz=&lay=&t=&dt=). Os talhões são botões [data-talhao] dentro do grupo
+#   Enter, Esc, "/") e o estado no endereço (#faz=&lay=&t=&dt=). Os talhões são botões [data-talhao] dentro do grupo
 #   [data-mux-grupo] (SR: o SVG; LG: o contêiner dos marcadores do MapLibre).
 MAP_JS += r'''
 // <mux-puro> funções puras (sem DOM): testadas em mapa_mux_unit.js
@@ -1717,25 +1712,6 @@ function muxEstadoDoHash(o,s0){ const st={}; const faz=o.faz||(s0&&s0.mf_faz)||'
   if(o.t){ if(muxIdsFaz(fz).indexOf(o.t)>=0){ st.tsel=[o.t]; MUX.ativo[fz]=o.t; } else { st.tsel=[]; st.muxAviso='Talhão '+o.t+' não encontrado na '+fz+': nada foi selecionado.'; st.g2toast=st.muxAviso; } }
   else if(o.faz||o.lay) st.tsel=[];
   st.px=null; st.mpa=null; return st; }
-// ----- visão Lista ("Ver dados"): a mesma camada, os mesmos filtros, a mesma seleção e o mesmo painel; ordem pela gravidade; "N de M" -----
-function muxLinha(self,i,faz,on,outra){ const go=()=>{ if(faz!==FAZ){ self.setState({mf_faz:faz,tsel:[i.id],px:null,mpa:null}); return; } muxAbre(i.id,'lista'); };
-  const loc=()=>{ const st={mvis:'mapa',tsel:[i.id],px:null,mpa:null}; if(faz!==FAZ) st.mf_faz=faz; MUX.ativo[faz==='Lagoa Grande'?'Lagoa Grande':'Santa Rita']=i.id; self.setState(st);
-    // "Localizar no mapa" é pedido explícito: no mapa real, enquadra o pivô; o foco vai para o talhão
-    muxDepois(()=>{ const b=muxBotao(i.id); if(!b) return false; if(isLG(i.id)){ const a=tmAneis('Lagoa Grande').find(o=>o.id===i.id); if(a) tmEnquadra(a.ring); } muxFoca(i.id); return true; },60); };
-  const cc=i.c||{c:'none'}; const pl=cc.c==='sat'?[cc.hex,'#FFFFFF']:(M.lcop[cc.c]||M.lcop.none);
-  return {id:i.id,nome:i.nome+(outra?' · '+faz:''),ha:nfx(i.ha)+' ha',valor:i.valor,estado:i.estado||'—',data:i.data,on:on?'true':'false',go,loc,bt:true,sb:false,
-    dot:'width:12px;height:12px;border-radius:3px;flex-shrink:0;box-sizing:border-box;'+(cc.c==='cloud'?'background:repeating-linear-gradient(45deg,#C9CFCB 0 3px,#9E9E9E 3px 5px);':'background:'+pl[0]+';')+(cc.c==='none'?'border:1.5px dashed #6B776F;':'border:1px solid rgba(21,32,26,.18);'),
-    rot:'Abrir '+i.nome+' no painel', lrot:'Localizar '+i.nome+' no mapa'}; }
-function muxLista(self,l,f,sel){ const rows=[]; const FI=MUX.filtroIds;
-  const daqui=TIDS().filter(t=>inF(t)&&(!FI||FI.indexOf(t)>=0)).map(t=>MUX.info[t]).filter(Boolean);
-  muxOrdem(daqui.map(i=>Object.assign({},i,{c:i.c})),SEV).forEach(i=>rows.push(muxLinha(self,i,FAZ,sel.indexOf(i.id)>=0)));
-  let total=TIDS().length;
-  // "Todas": a lista traz as três fazendas; a Lagoa Grande lida com a própria fazenda (FAZ trocado só durante a leitura) e a Boa Vista sem geometria
-  if((self.state.mf_faz||'Lagoa Grande')==='Todas'){ const F0=FAZ; try{ FAZ='Lagoa Grande'; const lf=flt(self,l); const CL={}; M.lg.ids.forEach(t=>{ CL[t]=cls(l,lf,t); });
-      const inf=muxInfo(l,lf,M.lg.ids,CL,legend(self,l,lf,[]).map(x=>Object.assign({},x,{key:x.k?'c:'+x.k:(x.hx?'h:'+x.hx:''),nm:x.t})));
-      muxOrdem(M.lg.ids.filter(t=>inF(t)).map(t=>inf[t]),SEV).forEach(i=>rows.push(muxLinha(self,i,'Lagoa Grande',false,true))); total+=M.lg.ids.length; }catch(e){} finally{ FAZ=F0; }
-    (M.cad0.tal||[]).filter(t=>t.v.faz==='Boa Vista'&&t.v.sit!=='Inativo').forEach(t=>{ total++; rows.push({id:t.id,nome:t.v.t+' · Boa Vista',ha:nfx(Number(t.v.decl)||0)+' ha',valor:'sem geometria',estado:'—',data:'',bt:false,sb:true,on:'false',dot:'display:none;'}); }); }
-  return {rows,n:rows.filter(r=>r.bt||r.sb).length,total}; }
 '''
 
 # MUX-F2 (17/10/2026): rótulo dentro do talhão em até 3 linhas (número / valor com unidade / estado curto), o valor e o estado sobre uma placa
@@ -1858,8 +1834,8 @@ def _panel_html():
 _LUPA=('<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#65736A" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0;">'
        '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>')
 def _mux_barra():
-    """MUX-F1: no alto, à esquerda do mapa: a busca "Ir para talhão" ("/" foca; sugestões pelo nome) e "Ver dados" (Mapa | Lista, no mesmo bloco,
-    com os mesmos filtros, a mesma seleção e o mesmo painel). Os dois mudam a visão, não são comando: nenhum verde de primária (BOT-01/BOT-08)."""
+    """MUX-F1: no alto, à esquerda do mapa: a busca "Ir para talhão" ("/" foca; sugestões pelo nome). A visão Lista ("Ver dados")
+    saiu em 18/10/2026 (proprietário: "ficou confuso"). A busca muda a visão, não é comando: nenhum verde de primária (BOT-01/BOT-08)."""
     return (f'<sc-if value="{H("mux_tem")}" hint-placeholder-val="{T()}"><div class="mux-barra" style="position: absolute; left: 12px; top: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; z-index: 4; max-width: calc(100% - 24px);">'
       f'<div style="display: flex; align-items: center; gap: 6px; max-width: 100%;">'
       f'<label class="mux-busca" style="display: inline-flex; align-items: center; gap: 6px; height: 34px; box-sizing: border-box; padding: 0 7px 0 10px; border-radius: 10px; background: #FFFFFF; border: 1px solid {LINE}; box-shadow: 0 1px 3px rgba(21,32,26,.18); cursor: text; min-width: 0;">{_LUPA}'
@@ -1867,24 +1843,10 @@ def _mux_barra():
       f'style="border: 0; outline: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600; color: {INK}; width: 112px; min-width: 0; padding: 0;">'
       f'<kbd aria-hidden="true" title="Atalho: /" style="font-family: inherit; font-size: 11px; font-weight: 800; color: {MUTED}; border: 1px solid {LINE}; border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; line-height: 16px; background: #F4F6F3;">/</kbd></label>'
       f'<datalist id="mux-tal-lista"><sc-for list="{H("mux_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}"></option></sc-for></datalist>'
-      f'<span role="group" aria-label="Ver dados" class="mux-ver" style="display: inline-flex; gap: 2px; padding: 2px; border-radius: 10px; background: #FFFFFF; border: 1px solid {LINE}; box-shadow: 0 1px 3px rgba(21,32,26,.18); flex-shrink: 0;">'
-      f'<button type="button" aria-pressed="{H("mux_vmapa")}" onClick="{H("mux_amapa")}" style="{H("mux_stm")}">Mapa</button>'
-      f'<button type="button" aria-pressed="{H("mux_vlista")}" onClick="{H("mux_alista")}" style="{H("mux_stl")}">Lista</button></span></div>'
+      f'</div>'
       f'<sc-if value="{H("mux_hasmsg")}" hint-placeholder-val="{F()}"><div role="status" aria-live="polite" class="mux-msg" style="padding: 5px 10px; border-radius: 9px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">{H("mux_msg")}</div></sc-if>'
       f'</div></sc-if>')
-def _mux_lista():
-    """MUX-F1: visão Lista ("Ver dados", MAPUX-06, RF-WRK-004): uma linha por talhão com valor, estado em texto e data da camada ativa, do mais grave
-    ao melhor, com "N de M"; a linha abre o mesmo painel (SEL-02) e "Localizar no mapa" volta ao mapa com o talhão escolhido. Peça própria (o motor
-    de grade é estático): a migração para o componente comum fica para o SAF-MAPA (registrado no LEIAME da implantação)."""
-    return (f'<sc-if value="{H("mux_lista")}" hint-placeholder-val="{F()}"><section class="mux-lista" aria-label="Lista dos talhões" style="position: absolute; left: 0; right: 0; top: 52px; bottom: 0; overflow-y: auto; background: {SURF}; z-index: 2; padding: 2px 12px 110px; box-sizing: border-box;">'
-      f'<div role="status" style="font-size: 12px; font-weight: 700; color: {MUTED}; padding: 4px 2px 8px;">{H("mux_nm")}</div>'
-      f'<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("mux_rows")}" as="r" hint-placeholder-count="4"><li style="display: flex; align-items: stretch; gap: 6px; min-width: 0;">'
-      f'<sc-if value="{H("r.bt")}" hint-placeholder-val="{T()}"><button type="button" class="mux-linha" data-talhao-lista="{H("r.id")}" aria-pressed="{H("r.on")}" onClick="{H("r.go")}">'
-      f'<span style="{H("r.dot")}"></span><span class="mux-l-n">{H("r.nome")}<small>{H("r.ha")}</small></span><span class="mux-l-v">{H("r.valor")}</span><span class="mux-l-e">{H("r.estado")}</span><span class="mux-l-d">{H("r.data")}</span>{E.seta_ir()}</button>'
-      f'<button type="button" class="mux-loc" onClick="{H("r.loc")}" aria-label="{H("r.lrot")}" data-dica="Localizar no mapa">{icon("map",17,INK)}</button></sc-if>'
-      f'<sc-if value="{H("r.sb")}" hint-placeholder-val="{F()}"><div class="mux-linha mux-linha-sg"><span></span><span class="mux-l-n">{H("r.nome")}<small>{H("r.ha")}</small></span><span class="mux-l-v">{H("r.valor")}</span></div></sc-if>'
-      f'</li></sc-for></ul></section></sc-if>')
-# MUX: cartão do talhão (claro, como o do Raio-X), linhas da Lista e ajustes do celular; só no IN-04
+# MUX: cartão do talhão (claro, como o do Raio-X) e ajustes do celular; só no IN-04
 MUX_CSS=('.mux-cartao{position:fixed;z-index:2147483000;max-width:300px;box-sizing:border-box;padding:9px 12px 10px;border-radius:12px;background:#FFFFFF;color:#15201A;'
   'border:1px solid #E4E9E5;box-shadow:0 12px 28px -12px rgba(21,32,26,.45);font-family:Manrope,system-ui,sans-serif;font-size:12.5px;line-height:1.4;text-align:left;pointer-events:auto}'
   '.mux-cartao[hidden]{display:none}.mux-c-t{font-size:14px}.mux-c-t b{font-weight:800}.mux-c-s{color:#65736A;font-size:12px}'
@@ -1892,13 +1854,7 @@ MUX_CSS=('.mux-cartao{position:fixed;z-index:2147483000;max-width:300px;box-sizi
   '.mux-c-e{font-size:12px;font-weight:700;color:#3E4A43;background:#F4F6F3;border-radius:999px;padding:1px 8px}.mux-c-d{color:#65736A;font-size:12px}'
   '.mux-c-m{margin-top:4px;font-weight:700;font-size:12px}.mux-c-h{margin-top:6px;padding-top:6px;border-top:1px solid #E4E9E5;color:#65736A;font-size:11.5px;font-weight:600}'
   'svg[data-mux-escala=peq] .mux-placa{display:none}.mux-instr{font-size:11px;color:#65736A}[data-mux-leg],.mux-leg-it{pointer-events:auto}@media (hover:none) and (pointer:coarse){.mux-instr{display:none}}.mux-busca:focus-within{border-color:#1E7A4C!important;box-shadow:0 0 0 2px #E4F3E9,0 1px 3px rgba(21,32,26,.18)!important}'
-  '.mux-linha{display:grid;grid-template-columns:12px minmax(72px,.7fr) minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,.9fr) 16px;align-items:center;gap:4px 12px;flex:1 1 auto;min-width:0;'
-  'text-align:left;padding:9px 12px;border:1px solid #E4E9E5;border-radius:10px;background:#FFFFFF;font-family:inherit;font-size:12.5px;color:#15201A;cursor:pointer;min-height:44px;box-sizing:border-box}'
-  '.mux-linha[aria-pressed=true]{border-color:#1E7A4C;box-shadow:inset 0 0 0 1px #1E7A4C;background:#F4FAF6}.mux-linha-sg{cursor:default;color:#65736A}'
-  '.mux-l-n{font-weight:800;font-size:13.5px;min-width:0}.mux-l-n small{display:block;font-size:11.5px;font-weight:600;color:#65736A}.mux-l-v{font-weight:700;min-width:0;overflow-wrap:anywhere}'
-  '.mux-l-e{color:#3E4A43;min-width:0;overflow-wrap:anywhere}.mux-l-d{color:#65736A;font-size:12px;min-width:0}'
-  '.mux-loc{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;width:44px;min-height:44px;border:1px solid #E4E9E5;border-radius:10px;background:#FFFFFF;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;cursor:pointer;white-space:nowrap}'
-  '@container in04mapa (max-width: 700px){ .mux-linha{grid-template-columns:12px minmax(0,1fr) 16px} .mux-l-v,.mux-l-e,.mux-l-d{grid-column:2}'
+  '@container in04mapa (max-width: 700px){'
   ' .mapa-area .mux-modo,.mapa-area .mux-aviso{top:98px!important} .mux-busca input{width:104px!important}'
   # na tela estreita a legenda é uma linha só, que rola de lado: com a contagem e a área, quebrar em linhas cobria metade do mapa
   ' .mux-legenda{flex-wrap:nowrap!important;overflow-x:auto;pointer-events:auto!important;scrollbar-width:none;touch-action:pan-x} .mux-legenda::-webkit-scrollbar{display:none}'
@@ -1926,9 +1882,9 @@ def _mapcard(h,full=False):
           f'<span style="white-space: nowrap; font-size: 11.5px; color: {MUTED};">{H("n.k")} <b style="color: {INK}; font-size: 13.5px;">{H("n.val")}</b></span></sc-for></div>')
     tool=lambda ic,t,fn,st,tt: f'<button type="button" onClick="{H(fn)}" title="{tt}" aria-pressed="{H(st.replace("_st","_on"))}" style="{H(st)}">{icon(ic,15,INK)}{t}</button>'
     sq=lambda t,fn,lab: f'<button type="button" onClick="{H(fn)}" aria-label="{lab}" title="{lab}" style="width: 36px; height: 36px; border: 0; border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 4px rgba(21,32,26,.18); font-family: inherit; font-size: 18px; font-weight: 700; color: {INK}; cursor: pointer;">{t}</button>'
-    zoom=(f'<div role="group" aria-label="Zoom" style="position: absolute; right: 12px; top: 96px; display: flex; flex-direction: column; gap: 6px;{H("mux_ctl")}">'
+    zoom=(f'<div role="group" aria-label="Zoom" style="position: absolute; right: 12px; top: 96px; display: flex; flex-direction: column; gap: 6px;">'
           + sq('+','zin','Aproximar') + sq('−','zout','Afastar') + '</div>')
-    tools=(f'<div role="toolbar" aria-label="Ferramentas do mapa" style="position: absolute; right: 12px; top: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: calc(100% - 290px);{H("mux_ctl")}">'
+    tools=(f'<div role="toolbar" aria-label="Ferramentas do mapa" style="position: absolute; right: 12px; top: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: calc(100% - 290px);">'
            + tool('grid','Selecionar área','r_selm','r_selm_st','Selecionar vários talhões') + tool('trend','Medir','r_medir','r_medir_st','Medir área e perímetro')
            + f'<sc-if value="{H("tm_ok")}" hint-placeholder-val="{F()}">' + tool('map','Desenhar','r_des','r_des_st','Desenhar talhão: contorno de um talhão ou pivô')
            + tool('doc','Importar','r_imp','r_imp_st','Importar talhões de um arquivo KML (Google Earth) ou GeoJSON (QGIS)') + '</sc-if>'
@@ -1959,12 +1915,12 @@ def _mapcard(h,full=False):
       f'<div class="mapa-linha" style="flex-grow: 1; min-height: 0; display: flex;">'
       f'<sc-if value="{H("map_on")}" hint-placeholder-val="{T()}">'
       f'<div class="mapa-area" style="flex-grow: 1; min-width: 0; position: relative; background: #E3EADB; overflow: hidden;">'
-      f'<sc-if value="{H("map_sr")}" hint-placeholder-val="{T()}"><div style="{H("zst")}{H("mux_vis")};">{_mapsvg(defs=not full)}</div></sc-if>'
-      + ('' if full else f'<sc-if value="{H("map_lg")}" hint-placeholder-val="{F()}"><div id="mapa-real" aria-label="{("Mapa da Fazenda Lagoa Grande · "+_LGROT) if _LGROT else "Mapa real da Fazenda Lagoa Grande"}" style="position: absolute; inset: 0;{H("mux_vis")}"></div>'
+      f'<sc-if value="{H("map_sr")}" hint-placeholder-val="{T()}"><div style="{H("zst")};">{_mapsvg(defs=not full)}</div></sc-if>'
+      + ('' if full else f'<sc-if value="{H("map_lg")}" hint-placeholder-val="{F()}"><div id="mapa-real" aria-label="{("Mapa da Fazenda Lagoa Grande · "+_LGROT) if _LGROT else "Mapa real da Fazenda Lagoa Grande"}" style="position: absolute; inset: 0;"></div>'
          f'<sc-if value="{H("lg_err")}" hint-placeholder-val="{F()}"><div role="alert" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; max-width: min(360px, calc(100% - 24px)); box-sizing: border-box; padding: 10px 14px; border-radius: 10px; background: #fff; color: {RED}; font-size: 13px; font-weight: 700;">{H("lg_errt")}'
          f'<button type="button" onClick="{H("lg_tenta")}" style="{_MINI}">Tentar de novo</button></div></sc-if></sc-if>')
-      + ('' if full else _mux_lista()) + f'{tools}{zoom}{_tm_barra()}' + ('' if full else _mux_barra()) +
-      f'<sc-if value="{H("aviso_bv")}" hint-placeholder-val="{F()}"><span role="note" class="mux-aviso" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">Santa Rita no mapa · Lagoa Grande na Lista · Boa Vista sem geometria</span></sc-if>'
+      + f'{tools}{zoom}{_tm_barra()}' + ('' if full else _mux_barra()) +
+      f'<sc-if value="{H("aviso_bv")}" hint-placeholder-val="{F()}"><span role="note" class="mux-aviso" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">Santa Rita no mapa · Lagoa Grande: escolha a fazenda · Boa Vista sem geometria</span></sc-if>'
       # MUX-F2: legenda que trabalha (cada classe é um botão com contagem e área: realça no hover e no foco, filtra no clique) e as instruções do teclado
       f'<div class="mux-legenda" style="position: absolute; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 5px 9px; border-radius: 10px; background: rgba(255,255,255,.94); box-shadow: 0 1px 4px rgba(21,32,26,.14); font-size: 11.5px; color: {MUTED}; z-index: 3; pointer-events: none;">'
       f'<sc-for list="{H("leg")}" as="x" hint-placeholder-count="5"><sc-if value="{H("x.btn")}" hint-placeholder-val="{T()}"><button type="button" data-mux-leg="{H("x.key")}" aria-pressed="{H("x.on")}" aria-label="{H("x.rot")}" onClick="{H("x.go")}" style="{H("x.bst")}"><span style="{H("x.dot")}"></span>{H("x.t")}<b class="mux-qt" style="font-weight: 700; color: {INK};">{H("x.qt")}</b></button></sc-if>'
@@ -2005,7 +1961,7 @@ def _tm_painel():
     impa=(f'<sc-if value="{H("tm_impa")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 10px;">'
       f'<div style="font-size: 13px; line-height: 1.45;">KML do Google Earth ou GeoJSON do QGIS. Polígonos e pivôs (ponto com a área em ha) viram talhões; perímetro, reserva, APP e água ficam fora.</div>'
       f'<label style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; cursor: pointer; {BTN_ST(True,True)}">{icon("doc",15)}Escolher arquivo'
-      f'<input type="file" accept=".kml,.geojson,.json" aria-label="Arquivo KML ou GeoJSON" onChange="{H("tm_arq")}" style="position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden;"></label>'
+      f'<input type="file" accept=".kml,.kmz,.geojson,.json" aria-label="Arquivo KML, KMZ ou GeoJSON" onChange="{H("tm_arq")}" style="position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden;"></label>'
       f'<sc-if value="{H("tm_hasierr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("tm_ierr")}</div></sc-if></div></sc-if>')
     impr=(f'<sc-if value="{H("tm_impr")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 8px;">'
       f'<div role="status" style="font-size: 13px; font-weight: 700;">{H("tm_isum")}</div>'
@@ -2066,7 +2022,7 @@ function EXTRAVALS(self,v){ self.g2perfilFecha={mpa:null}; cenOuvir(self); irrOu
     # main rolava por dentro, cortando a última fileira de talhões); 400 px no mínimo para tela baixa
     # IN-04 no celular/tablet/zoom 200 % (pendência de componentes 03/10): a proposta comp_in04_proposta.css, validada por injeção no
     # componentes_test (8 e 31), passa a valer de fato; decide pela largura do main e do próprio mapa (container queries)
-    EXTRA.append('<style>'+MUX_CSS+'</style>')   # MUX: cartão do talhão, Lista e ajustes do celular
+    EXTRA.append('<style>'+MUX_CSS+'</style>')   # MUX: cartão do talhão e ajustes do celular
     EXTRA.append('<style>'+'main:has(>.mapa-corpo){container:in04/inline-size} .mapa-area{container:in04mapa/inline-size} @container in04 (min-width: 920px){ .mapa-corpo{flex:1 1 0!important;min-height:400px!important} } @container in04 (max-width: 760px){ .mapa-corpo [role=group]{flex-wrap:wrap} .mapa-faixa{flex-wrap:wrap!important;row-gap:6px!important} .mapa-flt{flex:1 1 0!important} .mapa-dir{flex:1 1 100%!important;justify-content:flex-start!important;overflow-x:auto;scrollbar-width:thin;margin-left:0!important;min-height:44px} .mapa-corpo .mapa-num{flex:0 0 auto!important;overflow:visible!important} .mapa-corpo .mapa-flt [role=group],.mapa-corpo .mapa-num{flex-wrap:nowrap} .mapa-flt>*{flex-shrink:0} } .mapa-dir>a,.mapa-dir>button{flex-shrink:0;white-space:nowrap} .mapa-flt [role=group] button{padding-left:8px!important;padding-right:8px!important} @container in04 (max-width: 919px){ .mapa-corpo{flex:1 0 auto!important} .mapa-linha{flex-direction:column} .mapa-area{min-height:max(62vh,280px)} .mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5} } @container in04mapa (max-width: 700px){ [role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin} [role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap} .mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box} .mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box} }'+'</style>')
     EXTRA.append(f'<sc-if value="{H("full")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Mapa em tela cheia" style="position: fixed; inset: 0; z-index: 55; background: {BG}; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column;">'
                  f'<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; overflow: hidden;">{_rail()}{_mapcard(None,full=True)}</div></div></sc-if>')

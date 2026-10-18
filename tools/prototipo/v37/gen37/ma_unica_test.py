@@ -28,8 +28,8 @@ try:
     lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^(MA|MOD-MAN)/.test(h||''))")
     vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>b.innerText.replace(/\\s*\\d+\\s*$/,'').trim())")
     li = re.findall(r'<a [^>]*href="((?:MA|MOD-MAN)[^"]*)"', ini)
-    # v65 (PAINEL-01, 14/10): o Painel de Manutenção (PMAN) é o primeiro atalho; os demais são as 4 visões da MA
-    m.ok(g[2][0] == ('Painel', 'PMAN.dc.html') and all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2][1:]) and lk == ['MOD-MAN.dc.html'] and mn == [['MOD-MAN.dc.html', 'Manutenção', 'page', '']]
+    # v65 (PAINEL-01, 14/10): o Painel de Manutenção é o primeiro atalho; os demais são as 4 visões da MA. PAINEL-03 (18/10): é a aba do painel único
+    m.ok(g[2][0] == ('Painel', 'PG.dc.html#mod=man') and all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2][1:]) and lk == ['MOD-MAN.dc.html'] and mn == [['MOD-MAN.dc.html', 'Manutenção', 'page', '']]
          and tog == 0 and vs == ['Sem ordem', 'Ordens', 'Ativos', 'Planos'] and li == ['MOD-MAN.dc.html'] and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx + ini),
          'AC-PCM-01 · menu: um só ícone Manutenção (destacado, sem subitens nem expandir) que abre a tela de entrada com os atalhos das 4 visões; as 4 visões no seletor da MA; nenhuma rota antiga; o início (Mapa) leva à Manutenção num toque', [lk, mn, tog, vs, li])
     # ---------- AC-PCM-02 · rotas antigas (com e sem âncora) e fora do canvas ----------

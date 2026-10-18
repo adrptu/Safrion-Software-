@@ -99,8 +99,9 @@ try:
     ir('CMP.dc.html#sol=SOL-2027-02&saf=S27SF',w=1.4)
     chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.094.947,10' in body(),(cur(),url()))
     etapa(1); sf=rowtxt('Safrinha 2027'); s7=rowtxt('Safra 2026/27')
-    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.305,00',
-        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.094.947,10','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 428.305,00' in s7,(sf,s7))
+    # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio (R$ 178,50) na 2026/27 (base verde 2, 18/10)
+    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.483,50',
+        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.094.947,10','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 428.483,50' in s7,(sf,s7))
     foto('4_cmp_etapa1')
     # cada safra guarda o próprio andamento: convites da 2026/27 não aparecem na Safrinha
     J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
@@ -109,7 +110,7 @@ try:
     etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
     etapa(3); k3b=J("(document.body.innerText.match(/\\d+ convites prontos[^\\n]+/)||[''])[0]"); ctx=J("(document.body.innerText.match(/Safrinha 2027 · SOL-2027-02/)||[''])[0]")
     chk('15 Safrinha não herda os convites da 2026/27 (convites prontos, nada enviado) e o endereço acompanha a safra',bool(k3a) and bool(k3b) and ctx and url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF',(k3a,k3b,url()))
-    clk('Enviar convites (simulado)'); time.sleep(3.5); etapa(4); k4=J("(document.body.innerText.match(/\\d+ propostas? · custo total[^\\n]+/)||[''])[0]")
+    clk('Enviar convites (simulado)'); time.sleep(3.5); etapa(4); clk('Expandir tudo'); k4=J("(document.body.innerText.match(/\\d+ propostas? · custo total[^\\n]+/)||[''])[0]")
     chk('16 cotação da SOL-2027-02 segue: convites enviados e propostas comparadas na etapa 4',cur().startswith('4 ') and bool(k4) and 'Semente de milho AG 8700' in body(),(cur(),k4))
     etapa(1); J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
     etapa(3); k3c=J("(document.body.innerText.match(/Convites simulados[^\\n]+/)||[''])[0]")

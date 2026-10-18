@@ -37,11 +37,17 @@ def oraculo_precos():
     recomendação e economia."""
     P = DI.precos(); MES = lambda m: int(m[5:7]) - 1
     media = lambda xs: sum(xs, D(0)) / len(xs)
+    IP = {m: D(v) for m, v in P['ipca'].items()}
     def saz(s):
+        # INTEL-03 (18/10): sem inflação (IPCA) e sem a tendência linear do histórico, como o bloco "Mercado e momento" (intZ)
+        ult = IP[s[-1]['m']]; real = [D(x['p']) * ult / IP[x['m']] for x in s]
+        mt = D(len(real) - 1) / 2; mp = media(real)
+        b_ = sum(((D(t) - mt) * (p - mp) for t, p in enumerate(real)), D(0)) / sum(((D(t) - mt) ** 2 for t in range(len(real))), D(0))
+        sem = [dict(m=x['m'], p=real[t] / (mp + b_ * (D(t) - mt))) for t, x in enumerate(s)]
         acc = [[] for _ in range(12)]
-        for w in range(len(s) // 12):
-            jan = s[len(s) - 12 * (w + 1): len(s) - 12 * w]; med = media([D(x['p']) for x in jan])
-            for x in jan: acc[MES(x['m'])].append(D(x['p']) / med)
+        for w in range(len(sem) // 12):
+            jan = sem[len(sem) - 12 * (w + 1): len(sem) - 12 * w]; med = media([x['p'] for x in jan])
+            for x in jan: acc[MES(x['m'])].append(x['p'] / med)
         return [media(a) for a in acc]
     def comum(s):
         idx = saz(s); m0 = MES(s[-1]['m']); ds = lambda x: D(x['p']) / idx[MES(x['m'])]
