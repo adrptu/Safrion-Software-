@@ -1,0 +1,126 @@
+Santa Rita alvos
+  pronto em 0.9 s
+Santa Rita OS|Fases|Todas
+  pronto em 0.6 s
+Santa Rita OS|Fases|A liberar
+  pronto em 0.7 s
+Santa Rita OS|Fases|Liberadas
+  pronto em 0.7 s
+Santa Rita OS|Fases|Em execução
+  pronto em 1.2 s
+Santa Rita OS|Fases|Em conferência
+  pronto em 1.5 s
+Santa Rita OS|Fases|Encerradas
+  pronto em 0.6 s
+Santa Rita OS|Avanço|Todas
+  pronto em 0.5 s
+Santa Rita OS|Avanço|A liberar
+  pronto em 0.7 s
+Santa Rita OS|Avanço|Liberadas
+  pronto em 0.5 s
+Santa Rita OS|Avanço|Em execução
+  pronto em 0.7 s
+Santa Rita OS|Avanço|Em conferência
+  pronto em 0.8 s
+Santa Rita OS|Avanço|Encerradas
+  pronto em 0.7 s
+Santa Rita OS|Atrasos|Todas
+  pronto em 1.2 s
+Santa Rita OS|Atrasos|A liberar
+  pronto em 0.8 s
+Santa Rita OS|Atrasos|Liberadas
+  pronto em 0.9 s
+Santa Rita OS|Atrasos|Em execução
+  pronto em 0.5 s
+Santa Rita OS|Atrasos|Em conferência
+  pronto em 0.8 s
+Santa Rita OS|Atrasos|Encerradas
+  pronto em 0.6 s
+Santa Rita OS|Impedimentos|Todas
+  pronto em 0.7 s
+Santa Rita OS|Impedimentos|A liberar
+  pronto em 0.8 s
+Santa Rita OS|Impedimentos|Liberadas
+  pronto em 0.8 s
+Santa Rita OS|Impedimentos|Em execução
+  pronto em 0.7 s
+Santa Rita OS|Impedimentos|Em conferência
+  pronto em 0.9 s
+Santa Rita OS|Impedimentos|Encerradas
+  pronto em 0.6 s
+Santa Rita MIP|7|sem alvo
+  pronto em 0.5 s
+Santa Rita MIP|7|com alvo
+  pronto em 0.6 s
+Santa Rita MIP|30|sem alvo
+  pronto em 1.1 s
+Santa Rita MIP|30|com alvo
+  pronto em 0.4 s
+Santa Rita IRR|Hoje
+  pronto em 0.6 s
+Santa Rita IRR|Balanço hídrico
+  pronto em 0.7 s
+Lagoa Grande alvos
+  pronto em 1.4 s
+Lagoa Grande OS|Fases|Todas
+  pronto em 0.7 s
+Lagoa Grande OS|Fases|A liberar
+  pronto em 0.9 s
+Lagoa Grande OS|Fases|Liberadas
+  pronto em 0.7 s
+Lagoa Grande OS|Fases|Em execução
+  pronto em 1.0 s
+Lagoa Grande OS|Fases|Em conferência
+  pronto em 0.5 s
+Lagoa Grande OS|Fases|Encerradas
+  pronto em 0.6 s
+Lagoa Grande OS|Avanço|Todas
+  pronto em 0.7 s
+Lagoa Grande OS|Avanço|A liberar
+  pronto em 0.6 s
+Lagoa Grande OS|Avanço|Liberadas
+  pronto em 0.6 s
+Lagoa Grande OS|Avanço|Em execução
+  pronto em 0.5 s
+Lagoa Grande OS|Avanço|Em conferência
+  pronto em 0.6 s
+Lagoa Grande OS|Avanço|Encerradas
+  pronto em 0.8 s
+Lagoa Grande OS|Atrasos|Todas
+  pronto em 0.7 s
+Lagoa Grande OS|Atrasos|A liberar
+  pronto em 0.8 s
+Lagoa Grande OS|Atrasos|Liberadas
+  pronto em 0.9 s
+Lagoa Grande OS|Atrasos|Em execução
+  pronto em 0.8 s
+Lagoa Grande OS|Atrasos|Em conferência
+  pronto em 0.6 s
+Lagoa Grande OS|Atrasos|Encerradas
+  pronto em 0.7 s
+Lagoa Grande OS|Impedimentos|Todas
+  pronto em 0.6 s
+Lagoa Grande OS|Impedimentos|A liberar
+  pronto em 0.6 s
+Lagoa Grande OS|Impedimentos|Liberadas
+  pronto em 0.7 s
+Lagoa Grande OS|Impedimentos|Em execução
+  pronto em 1.0 s
+Lagoa Grande OS|Impedimentos|Em conferência
+  pronto em 0.8 s
+Lagoa Grande OS|Impedimentos|Encerradas
+  pronto em 1.0 s
+Lagoa Grande MIP|7|sem alvo
+  pronto em 0.6 s
+Lagoa Grande MIP|7|com alvo
+  pronto em 0.6 s
+Lagoa Grande MIP|30|sem alvo
+  pronto em 0.6 s
+Lagoa Grande MIP|30|com alvo
+  pronto em 0.6 s
+Lagoa Grande IRR|Hoje
+  pronto em 0.8 s
+Lagoa Grande IRR|Balanço hídrico
+  pronto em 0.6 s
+contextos 60 · alvos {'Santa Rita': 'Antracnose', 'Lagoa Grande': 'Antracnose'} · saída /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex55_A2_b.json
+rc=0

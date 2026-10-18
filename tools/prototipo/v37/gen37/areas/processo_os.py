@@ -496,6 +496,25 @@ function cenGrupoAprovar(c,id,os,versao,esperada,ator,chave) {
     return {grupo:id,msg:r.msg,itens:[{os,estado:'Aprovada · aguarda liberação',cmd:'CMD-42',versao:o.versao}]};
   },{resultado:true});
 }
+// EX-32 v2 (proprietário, 18/10: "pode aprovar em lote as O.S sim"): aprovação em lote = um CMD-42 por O.S., cada uma pelo mesmo
+// cenGrupoAprovar (papel AL-02, versão e fatos da prévia, receituário, regra legal, dose zero), com chave própria por linha e resultado por
+// O.S. Aprovar não libera nem reserva: liberar continua sendo outra ação (CMD-06), mesmo para quem tem os dois papéis (PRD 41.3, APROV-09).
+// A O.S. cuja versão ou fatos mudaram depois da prévia fica fora, com o motivo (OSA-03); repetir a mesma intenção não grava de novo.
+function cenGrupoAprovarLote(c,id,selecionadas,versao,esperadas,ator,chave) {
+  cenExigeAlc(ator,'AL-02','Aprovar selecionadas do grupo (CMD-42)');
+  if(!chave||!Array.isArray(selecionadas)||!selecionadas.length||new Set(selecionadas).size!==selecionadas.length) throw new Error('Seleção explícita e intenção são obrigatórias.');
+  return cenIdem(c,chave,cenGrupoCanon(['CMD-42-lote',id,selecionadas,versao,esperadas,(g2pf(ator)||{}).k]),'Aprovação em lote',()=>{
+    const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||selecionadas.some(k=>!g.ids.includes(k))) throw new Error('Composição mudou: releia o grupo.');
+    const itens=selecionadas.map(os=>{
+      try{ const r=cenGrupoAprovar(c,id,os,versao,(esperadas||{})[os],ator,chave+'|'+os); const it=(r.itens||[])[0]||{};
+        return {os,estado:'Aprovada · aguarda liberação',cmd:'CMD-42',versao:it.versao||(c.ordens[os]||{}).versao,repetido:!!r.repetido}; }
+      catch(e){ const m=String(e.message||e); return /já está aprovada/.test(m)?{os,estado:'Já aprovada',motivo:m.replace(/: nada foi gravado de novo\.?$/,'')}:{os,estado:'Não aprovada',motivo:m}; }
+    });
+    c.gruposExec[id].historico.push({acao:'Aprovação em lote',versao,por:(g2pf(ator)||{}).t||String(ator),at:cenAgora(),itens:cenClone(itens)});
+    const n=itens.filter(x=>x.estado==='Aprovada · aguarda liberação').length;
+    return {msg:n+(n===1?' aprovada':' aprovadas')+' · '+(itens.length-n)+' fora; cada O.S. tem o próprio registro (CMD-42). Nada foi liberado.',grupo:id,itens};
+  },{resultado:true});
+}
 function cenGrupoLiberar(c,id,selecionadas,versao,esperadas,ator,chave) {
   cenExigeAlc(ator,'AL-01','Liberar selecionadas do grupo');
   if(!chave||!Array.isArray(selecionadas)||!selecionadas.length||new Set(selecionadas).size!==selecionadas.length) throw new Error('Seleção explícita e intenção são obrigatórias.');
@@ -1087,16 +1106,20 @@ function osGrupoVals(self,v,recorte){
   v.og_voltar=()=>put({previa:null,confirmacao:null,instrucao:null,erro:'',chave:key()});
   v.og_revisao=!!(st.previa||st.confirmacao);v.og_selecao=!v.og_revisao&&!st.modoPrograma;v.og_semcheckbox=!v.og_selecao;
   const selecionar=id=>{const ids=(self.state.og.ids||[]).slice(),i=ids.indexOf(id);if(i<0)ids.push(id);else ids.splice(i,1);put({ids,previa:null,confirmacao:null,erro:'',resultado:null,chave:key()})};
-  const ids=st.ids||[],lista=st.previa?st.previa.ids:(st.confirmacao&&st.confirmacao.tipo==='aprovar'?[st.confirmacao.os]:st.confirmacao&&st.confirmacao.tipo==='liberar'?st.confirmacao.ids:(g?g.ids:(st.candidatos||[])));
+  const ids=st.ids||[],lista=st.previa?st.previa.ids:(st.confirmacao&&st.confirmacao.tipo==='aprovar'?[st.confirmacao.os]:st.confirmacao&&(st.confirmacao.tipo==='liberar'||st.confirmacao.tipo==='aprovarLote')?st.confirmacao.ids:(g?g.ids:(st.candidatos||[])));
   const fatos=g?cenGrupoRealizado(c,g.id):[];
   let separavel=!!g&&permitido;try{if(g)cenGrupoSeparavel(c,g.ids)}catch(e){separavel=false}
   let libera=true;try{cenExigeAlc(pf,'AL-01','Liberar selecionadas')}catch(e){libera=false}
   v.og_pode_programar=separavel&&g.ids.every(id=>(c.ordens[id]||{}).loteFicha);
   let aprova=true;try{cenExigeAlc(pf,'AL-02','Aprovar origem')}catch(e){aprova=false}
   const revisaAprovacao=st.confirmacao&&st.confirmacao.tipo==='aprovar';
-  v.og_acao_permitida=revisaAprovacao?aprova:(!g||st.modoPrograma||(st.confirmacao&&st.confirmacao.tipo==='separar'))?permitido:libera;
+  // EX-32 v2: com O.S. sem aprovação e o papel AL-02, o próximo passo do grupo é aprovar (em lote, um CMD-42 por O.S.); depois, liberar
+  const revisaLote=st.confirmacao&&st.confirmacao.tipo==='aprovarLote';
+  const pendAprov=g?g.ids.filter(id=>{const o=c.ordens[id];return o&&o.etapa==='A liberar'&&!osAprovada(o,osVn(o.versao))&&!osSoAgua(o)}):[];
+  const selPend=ids.filter(id=>pendAprov.includes(id)),acaoAprovar=!!g&&!st.modoPrograma&&aprova&&(ids.length?selPend.length>0:pendAprov.length>0);
+  v.og_acao_permitida=(revisaAprovacao||revisaLote)?aprova:(!g||st.modoPrograma||(st.confirmacao&&st.confirmacao.tipo==='separar'))?permitido:(!v.og_revisao&&acaoAprovar)?aprova:libera;
   const aprovadas=g?g.ids.filter(id=>{const o=c.ordens[id];return o&&o.etapa==='A liberar'&&osAprovada(o,osVn(o.versao))&&!cenGrupoRecursos(c,[id]).length}):[];
-  v.og_acao_visivel=v.og_acao_permitida&&!(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length);
+  v.og_acao_visivel=v.og_acao_permitida&&!(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length&&!acaoAprovar);
   v.og_motivo_acao=v.og_acao_permitida?'':(!g||st.modoPrograma?'Agrupar e programar: '+g2alcQuem('AL-19'):'Liberar: '+g2alcQuem('AL-01')); 
   v.og_linhas=lista.map(id=>{const o=c.ordens[id],po=ords(self).find(x=>x.id===id);let motivo='';
     if(!o)motivo='Origem não encontrada · reabra o recorte';
@@ -1137,9 +1160,11 @@ function osGrupoVals(self,v,recorte){
   v.og_campos=[['maquina','Máquina','Máquina'],['implemento','Implemento','Implemento'],['operador','Operador','Pessoa','operador'],['caldeiro','Caldeiro','Pessoa','caldeiro']].filter(([k])=>k!=='caldeiro'||!((c.ordens[(g?g.ids:ids)[0]]||{}).loteFicha)||c.ordens[(g?g.ids:ids)[0]].loteFicha.tipo==='liquido').map(([k,l,t,cl])=>({k,l,val:st[k]||'',mudar:e=>put({[k]:e.target.value,previa:null,erro:'',chave:key()}),opcoes:[{v:'',t:'Escolha…'}].concat(Object.keys(AL0.nome).filter(r=>AL0.tipo[r]===t&&(!cl||AL0.classe[r]===cl)).map(r=>({v:r,t:AL0.nome[r]})))}));
   v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao&&(g?g.ids:ids).length>0&&(g?g.ids:ids).every(id=>(c.ordens[id]||{}).loteFicha);
   v.og_previa=()=>{try{if(!g||st.modoPrograma){const p=cenGrupoPrevia(c,g?g.ids:ids,pf,g?g.id:undefined,st.programar?{maquina:st.maquina,implemento:st.implemento,operador:st.operador,caldeiro:st.caldeiro,inicio:(st.inicio||'')+(st.fuso||fz0)}:null);put({previa:p,versaoGrupo:g?g.versao:null,erro:'',chave:key()})}
+    else if(acaoAprovar){const escolhidas=ids.length?selPend:pendAprov;cenExigeAlc(pf,'AL-02','Aprovar selecionadas');put({confirmacao:{tipo:'aprovarLote',ids:escolhidas.slice(),versao:g.versao,esperadas:Object.fromEntries(escolhidas.map(id=>[id,cenGrupoSnapshot(c,id)]))},erro:'',chave:key()})}
     else{const escolhidas=ids.length?ids:aprovadas;if(!escolhidas.length)throw Error('Aprove cada O.S. e confira os impedimentos antes de liberar.');cenExigeAlc(pf,'AL-01','Liberar selecionadas');put({confirmacao:{tipo:'liberar',ids:escolhidas.slice(),versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}}catch(e){put({erro:e.message})}};
   const p=st.previa,q=st.confirmacao;
-  v.og_resumo=revisaAprovacao?'Aprovar somente '+st.confirmacao.os+' na versão e dose exibidas. As demais origens permanecem como estão. Aprovar não libera nem reserva insumos.':p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
+  v.og_resumo=revisaAprovacao?'Aprovar somente '+st.confirmacao.os+' na versão e dose exibidas. As demais origens permanecem como estão. Aprovar não libera nem reserva insumos.':
+    revisaLote?'Aprovar '+q.ids.join(', ')+' nas versões e doses exibidas. Cada O.S. recebe o próprio registro (CMD-42), conferido de novo na hora; a que mudou depois desta prévia fica fora, com o motivo. Aprovar não libera nem reserva insumos: liberar é outra ação.':p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
     q?(q.tipo==='separar'?'Separar '+q.os+' do grupo. IDs, versões e demanda das origens permanecem.':'Liberar '+q.ids.join(', ')+'. Cada origem terá seu resultado; nenhuma aprovação será criada.'):g?'Aprove cada O.S. e confira os impedimentos antes de liberar.':v.og_mostra_sugestoes?'':'Confira as O.S. na ordem da rota e o agrupamento.';
   v.og_janela=p&&p.inicio?'Janela comum: '+hl(p.inicio,fz0)+' a '+hl(p.fim,fz0):'';
   v.og_produtos=p?p.produtos.map(x=>({t:x.p+' · '+nf(x.q)+' '+x.un+' ('+nf(x.dose)+' '+x.un+'/ha)'})):[];
@@ -1151,10 +1176,10 @@ function osGrupoVals(self,v,recorte){
   const programacao=p?p.programacao:g?Object.fromEntries(g.ids.map(id=>[id,(c.ordens[id]||{}).prog])):null;
   v.og_recursos=programacao?Object.keys(programacao).flatMap(id=>{const x=programacao[id];return x?(x.blocos||[]).map(b=>({os:id,recurso:AL0.nome[b.r]||b.r,papel:AL0.classe[b.r]||AL0.tipo[b.r]||'Recurso',janela:alDm(b.dia)+' '+alHh(b.ini)+'–'+alHh(b.fim)+' (UTC'+x.fuso+')'})):[]}):[];
   v.og_consequencia=p?(st.modoPrograma?'Confirmar atualiza apenas a programação operacional. Aprovação e liberação continuam separadas.':'Confirmar vincula as origens. Não aprova, libera ou reserva insumos. '+(p.programacao?'A programação dos recursos será registrada.':p.comum?'Recursos da alocação de cada O.S. preservados.':'Programação ainda pendente: escolher recursos e início no grupo.')) : '';
-  v.og_botao=revisaAprovacao?'Aprovar '+q.os+' · '+c.ordens[q.os].versao:v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar as '+q.ids.length+' aprovadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?(!ids.length&&aprovadas.length?'Conferir liberação das '+aprovadas.length+' aprovadas':'Conferir liberação'):'Conferir agrupamento';
-  v.og_acao=()=>{if(!v.og_acao_permitida)return;if(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length)return;if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
+  v.og_botao=revisaAprovacao?'Aprovar '+q.os+' · '+c.ordens[q.os].versao:revisaLote?'Aprovar as '+q.ids.length:(!v.og_revisao&&acaoAprovar)?'Conferir aprovação das '+(ids.length?selPend.length:pendAprov.length)+(ids.length?' selecionadas':' pendentes'):v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar as '+q.ids.length+' aprovadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?(!ids.length&&aprovadas.length?'Conferir liberação das '+aprovadas.length+' aprovadas':'Conferir liberação'):'Conferir agrupamento';
+  v.og_acao=()=>{if(!v.og_acao_permitida)return;if(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length&&!acaoAprovar)return;if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
     const atual=self.state.og||{};if(atual!==st)return;
-    const r=cenMudar(null,k=>p?(g?cenGrupoProgramar(k,g.id,st.versaoGrupo,p,pf,st.chave):cenGrupoCriar(k,p,pf,st.chave)):q.tipo==='aprovar'?cenGrupoAprovar(k,g.id,q.os,q.versao,q.esperada,pf,st.chave):q.tipo==='separar'?cenGrupoSeparar(k,g.id,q.os,q.versao,q.versoes,pf,st.chave):cenGrupoLiberar(k,g.id,q.ids,q.versao,q.versoes,pf,st.chave),{estrito:true});
+    const r=cenMudar(null,k=>p?(g?cenGrupoProgramar(k,g.id,st.versaoGrupo,p,pf,st.chave):cenGrupoCriar(k,p,pf,st.chave)):q.tipo==='aprovar'?cenGrupoAprovar(k,g.id,q.os,q.versao,q.esperada,pf,st.chave):q.tipo==='aprovarLote'?cenGrupoAprovarLote(k,g.id,q.ids,q.versao,q.esperadas,pf,st.chave):q.tipo==='separar'?cenGrupoSeparar(k,g.id,q.os,q.versao,q.versoes,pf,st.chave):cenGrupoLiberar(k,g.id,q.ids,q.versao,q.versoes,pf,st.chave),{estrito:true});
     if(r.erro){put({erro:r.erro});return}
     put({grupo:r.grupo,modoPrograma:false,previa:null,confirmacao:null,resultado:r,ids:[],erro:'',chave:key()});self.setState({cenrev:cenGet().rev});
   };
@@ -1220,7 +1245,10 @@ function osFrentesVals(self,v,recorte){
     v.ofr_porque=f.porque.join(' · ')+(f.herb?' · herbicida no fim':'');
     const g=[];if(f.km!==null&&f.kmSo!==null)g.push({v:frNum(f.km,1)+' km',t:'na frente × '+frNum(f.kmSo,1)+' km com cada O.S. sozinha (ida e volta da sede, linha reta)'});
     else if(f.km===null)g.push({v:'km',t:'sem medida: '+(G[f.faz]&&G[f.faz].tipo==='plano'?'o desenho desta fazenda não tem escala (importe o KML no cadastro de talhões)':'a sede não tem posição no mapa')});
-    if(f.cargas.porOS!==null)g.push({v:f.cargas.porOS+' cargas',t:'fechadas por O.S. (vale hoje)'+(f.cargas.continuas!==null&&f.cargas.continuas<f.cargas.porOS?'; com calda contínua seriam '+f.cargas.continuas+' (o rateio depende da decisão do RT)':'')});
+    // revisão do Codex 6254555893: com O.S. sem vazão ou tanque, o total é só das calculáveis e diz quais faltam; sem calda contínua
+    const falta=f.cargas.faltam||[],faltaTxt=falta.length?'falta vazão ou tanque em '+falta.join(', '):'';
+    if(f.cargas.porOS!==null)g.push({v:f.cargas.porOS+(f.cargas.porOS>1?' cargas':' carga'),t:(falta.length?'só das O.S. calculáveis ('+faltaTxt+'); ':'')+'fechadas por O.S. (vale hoje)'+(f.cargas.continuas!==null&&f.cargas.continuas<f.cargas.porOS?'; com calda contínua seriam '+f.cargas.continuas+' (o rateio depende da decisão do RT)':'')});
+    else if(falta.length)g.push({v:'cargas',t:'sem conta: '+faltaTxt});
     if(f.caldas>1)g.push({v:(f.caldas-1)+(f.caldas-1>1?' trocas':' troca'),t:f.fam==='Pulverização'?'de calda na sequência':'de regulagem na sequência'});
     v.ofr_ganho=g;
     v.ofr_rota=f.seq.map(r=>({ordem:String(r.ordem),talhao:r.talhao+(r.tkey?'':' (sem contorno)'),os:r.id,area:nf(r.area)+' ha',calda:frCaldaTxt(r)+(r.liquido&&r.vazao?' · '+nf(r.vazao)+' L/ha':''),

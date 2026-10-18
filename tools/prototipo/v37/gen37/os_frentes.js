@@ -64,27 +64,32 @@ function frOrdem(rows, geo){
   }
   return seq;
 }
-// cargas fechadas por O.S. (vale hoje) e as que a calda contínua daria (só com a decisão do RT sobre o rateio: EX-54 §7)
+// cargas fechadas por O.S. (vale hoje) e as que a calda contínua daria (só com a decisão do RT sobre o rateio: EX-54 §7).
+// Revisão do Codex 6254555893: O.S. líquida sem vazão ou sem tanque fica em `faltam` e não entra em conta nenhuma; com falta, o total
+// cobre só as calculáveis (a tela diz quais faltam) e a calda contínua não é calculada (sem ganho anunciado). Tanque ausente ou zero
+// nunca vira divisão (Infinity/NaN).
 function frCargas(seq){
-  const liq = seq.filter(r => r.liquido && r.vazao > 0 && r.tanque > 0);
-  if (!liq.length) return { porOS: null, continuas: null, tanque: null, todas: false };
+  const conta = r => r.liquido && r.vazao > 0 && r.tanque > 0;
+  const liq = seq.filter(conta), faltam = seq.filter(r => r.liquido && !conta(r)).map(r => r.id);
+  if (!liq.length) return { porOS: null, continuas: null, tanque: null, todas: false, faltam };
   const porOS = liq.reduce((s, r) => s + Math.ceil(r.area * r.vazao / r.tanque - 1e-9), 0);
-  let continuas = 0, i = 0;
-  while (i < seq.length){ let j = i, vol = 0; const T = seq[i].tanque;
-    while (j < seq.length && frMesma(seq[j], seq[i]) && seq[j].liquido && seq[j].vazao > 0 && seq[j].tanque === T) { vol += seq[j].area * seq[j].vazao; j++; }
-    if (j === i) { i++; continue; } continuas += Math.ceil(vol / T - 1e-9); i = j; }
-  return { porOS, continuas, tanque: liq[0].tanque, todas: liq.length === seq.length };
+  let continuas = null;
+  if (!faltam.length) { continuas = 0; let i = 0;
+    while (i < seq.length){ let j = i, vol = 0; const T = seq[i].tanque;
+      while (j < seq.length && frMesma(seq[j], seq[i]) && conta(seq[j]) && seq[j].tanque === T) { vol += seq[j].area * seq[j].vazao; j++; }
+      if (j === i) { i++; continue; } continuas += Math.ceil(vol / T - 1e-9); i = j; } }
+  return { porOS, continuas, tanque: liq[0].tanque, todas: liq.length === seq.length, faltam };
 }
 // trocas ao longo da sequência: calda (pulverização), semente ou adubo (plantio: limpeza da plantadeira), regulagem (a lanço); herbicida fecha com
-// tríplice lavagem registrada
+// tríplice lavagem como requisito pendente até o registro, nunca como fato presumido (Gemini EX-54 F2 × Codex 6254595591)
 function frTrocas(seq){
   const out = [];
   for (let i = 1; i < seq.length; i++){ const a = seq[i - 1], b = seq[i]; if (frMesma(a, b)) continue;
-    const t = b.fam === 'Pulverização' ? 'Troca de calda antes de ' + b.talhao + ': ' + frCaldaTxt(b) + (a.herb && !b.herb ? ' · tríplice lavagem registrada antes' : '')
+    const t = b.fam === 'Pulverização' ? 'Troca de calda antes de ' + b.talhao + ': ' + frCaldaTxt(b) + (a.herb && !b.herb ? ' · antes, registrar a tríplice lavagem do pulverizador (pendente até o registro)' : '')
       : b.fam === 'Plantio' ? 'Troca de semente ou adubo antes de ' + b.talhao + ': limpeza da plantadeira registrada (pureza)'
       : 'Nova regulagem antes de ' + b.talhao + ': ' + frCaldaTxt(b);
     out.push({ antes: i + 1, t }); }
-  if (seq.length && seq[seq.length - 1].herb) out.push({ antes: seq.length + 1, t: 'Fim com herbicida: tríplice lavagem registrada antes de voltar a cultura sensível' });
+  if (seq.length && seq[seq.length - 1].herb) out.push({ antes: seq.length + 1, t: 'Fim com herbicida: registrar a tríplice lavagem antes de voltar a cultura sensível (pendente até o registro)' });
   return out;
 }
 const FR_ORDEM_FAM = { 'Pulverização': 1, 'A lanço': 2, 'Plantio': 3, 'Colheita': 4, 'Tratos manuais': 5 };

@@ -1,0 +1,16 @@
+OK    F1 Colheita, Recebimento e Estoque de produto: Cultura na faixa; "Soja" deixa só linhas de soja (menos que antes); "Todas" volta tudo
+OK    F2 1440 Colheita: Café → só C1; P1 mantém exatamente suas folhas e exclui as demais
+Traceback (most recent call last):
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/_pr117_filtros_cultura_test.py", line 75, in <module>
+    antes = folhas_colheita(mobile)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/_pr117_filtros_cultura_test.py", line 47, in folhas_colheita
+    abriu = J("""(()=>{const g=document.querySelector('[data-g2cd="g_tal"]');
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Error: Cartões da Colheita não visíveis
+    at <anonymous>:2:52
+    at <anonymous>:4:57
+rc=1

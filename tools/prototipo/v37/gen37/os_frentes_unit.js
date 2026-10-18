@@ -30,7 +30,7 @@ ok('U4 herbicida sempre por último, mesmo com a janela que fecha antes, e a fre
   const G = [{ p: 'Glifosato 480', dose: 3, un: 'L' }, { p: 'Óleo mineral', dose: 0.5, un: 'L' }];
   const s = F.frOrdem([base('H', { ins: G, fim: '2026-10-12', herb: true, calda: 'g' }), base('A', { calda: 'a' }), base('B', { calda: 'a' })], geo);
   assert.deepEqual(s.map(x => x.id).slice(-1), ['H']);
-  const t = F.frTrocas(s); assert.match(t[t.length - 1].t, /tríplice lavagem/);
+  const t = F.frTrocas(s); assert.match(t[t.length - 1].t, /registrar a tríplice lavagem/); assert.match(t[t.length - 1].t, /pendente até o registro/); assert.doesNotMatch(t[t.length - 1].t, /lavagem registrada/);
   assert.equal(F.frHerb(base('X', { ins: G })), true); assert.equal(F.frHerb(base('X')), false);
 });
 ok('U5 período: janelas que se cruzam ou se seguem ficam juntas; a que começa depois de todas abre outra', () => {
@@ -47,7 +47,7 @@ ok('U6 ordem: a janela que fecha antes; no empate, segue a mesma calda e depois 
 });
 ok('U7 cargas: fechadas por O.S. hoje (10 + 15 + 5 ha a 100 L/ha, tanque 2.000 L = 3) e contínuas só como ganho a decidir (= 2)', () => {
   const r = F.osFrentes([base('A', { area: 10, fim: '2026-10-13' }), base('B', { area: 15 }), base('C', { area: 5 })], { tipo: 'lonlat', c: { A: geo.c.A, B: geo.c.B, C: geo.c.C } });
-  assert.deepEqual(r.frentes[0].cargas, { porOS: 3, continuas: 2, tanque: 2000, todas: true });
+  assert.deepEqual(r.frentes[0].cargas, { porOS: 3, continuas: 2, tanque: 2000, todas: true, faltam: [] });
 });
 ok('U8 plantio junta pela cultura (OS-0420 × OS-0431); troca de semente pede limpeza; a lanço com outra dose é nova regulagem', () => {
   const pl = { fam: 'Plantio', liquido: false, vazao: null, tanque: null, cultura: 'Soja' };
@@ -90,5 +90,18 @@ ok('U14 produto diferente não se mistura; família diferente nunca', () => {
 ok('U15 vazão ainda não definida não vira outra calda: entra na mesma, sem contar na carga até definir', () => {
   const r = F.osFrentes([base('A'), base('B'), base('C', { vazao: null, bloq: 'Definir vazão' })], geo);
   assert.equal(r.frentes[0].caldas, 1); assert.equal(r.frentes[0].trocas.length, 0); assert.equal(r.frentes[0].cargas.porOS, 2); assert.equal(r.frentes[0].porque[0], 'mesma calda');
+});
+ok('U16 (Codex 6254555893, S2) uma O.S. sem vazão: o total cobre só a calculável, diz qual falta e não calcula calda contínua', () => {
+  const r = F.osFrentes([base('A', { area: 10 }), base('B', { area: 10, vazao: null, bloq: 'Definir vazão' })], geo);
+  const c = r.frentes[0].cargas;
+  assert.equal(c.porOS, 1); assert.deepEqual(c.faltam, ['B']); assert.equal(c.continuas, null); assert.equal(c.todas, false);
+});
+ok('U17 (Codex 6254555893, S3) tanque ausente ou zero não vira Infinity/NaN nem ganho: falta explícita', () => {
+  for (const t of [null, 0, undefined]) {
+    const c = F.frCargas([Object.assign(base('A', { area: 10 }), { ordem: 1 }), Object.assign(base('B', { area: 10, tanque: t }), { ordem: 2 })]);
+    assert.ok(Number.isFinite(c.porOS)); assert.equal(c.continuas, null); assert.deepEqual(c.faltam, ['B']);
+  }
+  const s = F.frCargas([base('A', { tanque: null }), base('B', { tanque: null })]);
+  assert.deepEqual(s, { porOS: null, continuas: null, tanque: null, todas: false, faltam: ['A', 'B'] });
 });
 console.log('TOTAL ' + n + ' PASS');
