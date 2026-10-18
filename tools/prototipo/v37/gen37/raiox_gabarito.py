@@ -327,6 +327,38 @@ def selecionar_disponiveis(registros, corte, protocolo, unidade):
             'exclusoes': excluidos, 'corte': corte}
 
 
+def seguimento_nc(observacoes, aplicacao, nc, corte, outras_aplicacoes=()):
+    """Oráculo QA de intervalo/censura; observações já disponíveis no corte.
+
+    Não interpola o dia exato. A leitura do dia da nova aplicação é excluída
+    porque a ordem dentro do dia é desconhecida. Não estima sobrevivência.
+    """
+    digest([observacoes, aplicacao, nc, corte, outras_aplicacoes])
+    if not isinstance(nc, (int, float)) or isinstance(nc, bool) or nc <= 0:
+        raise ValueError('NC positivo obrigatório')
+    interferencia = min((d for d in outras_aplicacoes if aplicacao < d <= corte), default=None)
+    leituras = sorted((o for o in observacoes if aplicacao < o['day'] <= corte and
+                      (interferencia is None or o['day'] < interferencia)), key=lambda o: o['day'])
+    if len({o['day'] for o in leituras}) != len(leituras):
+        raise ValueError('Leituras duplicadas no mesmo dia')
+    ultima = None
+    for o in leituras:
+        if o.get('v') is None:
+            continue
+        if isinstance(o['v'], bool) or not isinstance(o['v'], (int, float)) or o['v'] < 0:
+            raise ValueError('Leitura inválida')
+        if o['v'] >= nc:
+            if ultima is None:
+                return {'estado': 'primeira_leitura_ja_acima', 'dia_leitura': o['day'], 'intervalo': None}
+            return {'estado': 'retorno_em_intervalo', 'intervalo': [ultima['day'], o['day']],
+                    'limites': 'aberto à esquerda, fechado à direita'}
+        ultima = o
+    return {'estado': 'censurado' if ultima else 'sem_leitura_valida',
+            'ultima_leitura': ultima['day'] if ultima else None,
+            'motivo': 'nova_aplicacao' if interferencia is not None else 'corte',
+            'interferencia': interferencia}
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)

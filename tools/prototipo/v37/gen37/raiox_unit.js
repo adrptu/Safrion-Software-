@@ -137,3 +137,16 @@ try:sel([base,base]);raise AssertionError('duplicada aceita')
 except ValueError:pass
 print('PASS: corte temporal, revisão retroativa, ausência/zero, previsão publicada, protocolo/unidade e versão duplicada.')`;
 const tp=cp.spawnSync('python3',['-B','-c',temporalPy,__dirname],{encoding:'utf8'});assert.equal(tp.status,0,tp.stderr);console.log(tp.stdout.trim());
+
+const followPy=`import sys;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+obs=[dict(day=3,v=99),dict(day=5,v=2),dict(day=9,v=8),dict(day=12,v=20)]
+r=g.seguimento_nc(obs,3,5,10)
+assert r['estado']=='retorno_em_intervalo' and r['intervalo']==[5,9]
+r=g.seguimento_nc(obs,3,5,10,[8]);assert r['estado']=='censurado' and r['ultima_leitura']==5 and r['motivo']=='nova_aplicacao'
+r=g.seguimento_nc(obs,3,5,10,[9]);assert r['estado']=='censurado' and r['ultima_leitura']==5
+r=g.seguimento_nc(obs,3,5,7);assert r['estado']=='censurado' and r['ultima_leitura']==5 and r['motivo']=='corte'
+r=g.seguimento_nc([dict(day=5,v=8)],3,5,10);assert r['estado']=='primeira_leitura_ja_acima' and r['intervalo'] is None
+r=g.seguimento_nc([dict(day=5,v=None)],3,5,10);assert r['estado']=='sem_leitura_valida'
+assert g.seguimento_nc(obs,3,5,10)==g.seguimento_nc(obs+[dict(day=20,v=999)],3,5,10)
+print('PASS: 7 contraprovas de intervalo, censura, primeira leitura acima, ausência e futuro.')`;
+const fp=cp.spawnSync('python3',['-B','-c',followPy,__dirname],{encoding:'utf8'});assert.equal(fp.status,0,fp.stderr);console.log(fp.stdout.trim());
