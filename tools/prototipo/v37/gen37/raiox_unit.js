@@ -167,6 +167,22 @@ const placeboFd=fs.openSync(placeboPath,'r');let pp;
 try {pp=cp.spawnSync('python3',['-B','-c',placeboPy,__dirname],{stdio:[placeboFd,'pipe','pipe'],encoding:'utf8',maxBuffer:16*1024*1024,timeout:20000});} finally {fs.closeSync(placeboFd);fs.rmSync(placeboTmp,{recursive:true});}
 assert.equal(pp.status,0,pp.stderr||String(pp.error));console.log('PASS placebo: '+pp.stdout.trim());
 
+// Resposta lenta fictícia: não representa produto comercial nem janela agronômica.
+const slowPy=`import sys;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+# Após aplicação no dia3, cenário explicitamente plantado sem redução atédia4;
+# só no dia10 a leitura cai de10 para2. Controle constante10.
+base=dict(id='T',antes=10,antes_dia=1,protocolo='fixture-lenta',unidade='contagem')
+cedo=dict(base,depois=10,depois_dia=4)
+tarde=dict(base,depois=2,depois_dia=10)
+c=lambda dia:dict(base,id='C',depois=10,depois_dia=dia)
+r1=g.eficacia_referencia(cedo,[c(4)],3,4)
+r2=g.eficacia_referencia(tarde,[c(10)],3,10)
+assert r1['pares'][0]['eficacia']==0
+assert abs(r2['pares'][0]['eficacia']-.8)<1e-12
+assert not g.eficacia_referencia(tarde,[c(10)],3,4)['pares']
+print('PASS resposta lenta fictícia: 0% na leitura precoce, 80% na tardia; futuro não antecipa resultado. Sem janela técnica aprovada.')`;
+const sp=cp.spawnSync('python3',['-B','-c',slowPy,__dirname],{encoding:'utf8',timeout:20000});assert.equal(sp.status,0,sp.stderr);console.log(sp.stdout.trim());
+
 // Exportação opcional: node raiox_unit.js fonte-v3.html --export-dir pasta-nova
 const exportIndex=process.argv.indexOf('--export-dir');
 if(exportIndex>=0) {
