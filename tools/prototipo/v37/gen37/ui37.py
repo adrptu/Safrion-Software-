@@ -68,13 +68,18 @@ HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos'
 # 14/10/2026 (proprietário: "faça um teste nesses sub menus como se fosse um fluxograma com setas de linhas curvas, separando em 3 fases/blocos
 #   (input, processamento, output, mas sem escrever isso, apenas para o modo de organizar o fluxo). Assim o usuario entende onde as coisas
 #   começam e terminam e a ordem correta do fluxo de processos"): a tela de entrada do módulo com fluxo mostra os cartões em blocos, na ordem
-#   do processo, ligados por setas curvas (areas/modulos.py), sem título de bloco. Teste só no Agrícola; os demais módulos seguem em grade.
+#   do processo, ligados por setas curvas (areas/modulos.py), sem título de bloco. Teste só no Agrícola; os demais módulos seguem em grade (desde 17/10, DS-MAN, também a Manutenção em blocos).
 #   Cada cartão do módulo aparece uma vez (o build confere); um href fora do menu (BEN_PUBLICADO=False) fica de fora.
 # 14/10/2026 (depois, proprietário: "Tire as setas, alinhe cada submenu no seu macro contexto e coloque titulos em cima dos blocos visuais de
 #   cada macro contexto"): sem setas; cartões alinhados no bloco; cada bloco com o título do macro contexto.
 FLUXO37={'Agrícola':[('Planejamento',['AG-07.dc.html','AG-02.dc.html','PA.dc.html','SAF.dc.html','GE-02.dc.html']),
                      ('Execução',['AG-01.dc.html','OS.dc.html','IR-01.dc.html','COLH.dc.html']),
-                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PAGR.dc.html'])]}
+                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PAGR.dc.html'])],
+         # DS-MAN (17/10/2026, proprietário: "Design system de manutenção ainda não está no padrão"): a entrada da Manutenção nos mesmos blocos do
+         # Agrícola, na ordem do processo (14/10: "onde as coisas começam e terminam"): o cadastro do que se mantém, a execução e o resultado
+         'Manutenção':[('Cadastro',['MA.dc.html#vis=ativos','MA.dc.html#vis=planos']),
+                       ('Execução',['MA.dc.html#vis=semordem','MA.dc.html#vis=ordens']),
+                       ('Resultados',['PMAN.dc.html'])]}
 CURTO37={'PAGR.dc.html':('Painel','grafico'),'PMAN.dc.html':('Painel','grafico'),'PSUP.dc.html':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
  'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),

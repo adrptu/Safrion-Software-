@@ -10,7 +10,7 @@ intuitivos para eliminar necessidade de textos longos. Mais minimalista e essenc
 O cartão (cartao) e o seu CSS também servem à tela Cadastros (areas/cad_inicio.py). Nada é gravado aqui.
 - Blocos por macro contexto (14/10/2026, proprietário: primeiro um teste com setas curvas em 3 blocos; depois "Tire as setas, alinhe cada
   submenu no seu macro contexto e coloque titulos em cima dos blocos visuais de cada macro contexto"): o módulo com blocos (ui37.FLUXO37,
-  só no Agrícola) mostra um painel por macro contexto (Planejamento, Execução, Resultados), com o título em cima e os cartões alinhados, na
+  Agrícola e, desde 17/10/2026 (DS-MAN), Manutenção) mostra um painel por macro contexto (Planejamento, Execução, Resultados), com o título em cima e os cartões alinhados, na
   ordem do processo (uma lista ordenada por bloco: a ordem do DOM e do Tab é a do processo). Computador: blocos lado a lado; até 640 px de
   largura (ou 560 px de altura, celular deitado): uma coluna, blocos empilhados."""
 import engine as E
@@ -111,10 +111,10 @@ def itens_do(nome):
 
 
 def _extra_do(nome):
-    """MA-VINCULO (16/10/2026, só Manutenção): aviso "N ativos sem plano" acima dos cartões, que abre Ativos já no filtro com a ação em lote."""
-    if nome != 'Manutenção': return {}
-    from areas.maquinas import hub_aviso
-    return hub_aviso()
+    """MA-VINCULO (16/10/2026) punha o aviso "N ativos sem plano" acima dos cartões da Manutenção. DS-MAN (17/10/2026): a entrada fica como a do
+    Agrícola, só os blocos, sem aviso solto; os ativos sem plano continuam à vista onde se resolve: Ativos (filtro rápido "Sem plano" e a primária
+    "Vincular a plano") e Planos (faixa "N ativos sem plano · Criar plano"). Nenhum módulo tem extra hoje."""
+    return {}
 
 
 def build():

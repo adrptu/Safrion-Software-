@@ -16,7 +16,7 @@ intuitivo, sem perde funcionalidade importante. Elimina qualquer coisa ambigua, 
 Saíram (inventário F01–F111, §4): a faixa "Telas da manutenção", as 3 etapas do PM, "Marcar pendentes como feitas", KPIs e selos fixos,
 Pareto, utilização, Agenda, Elegível, contingência fixa e os 3 "Restaurar demonstração" (agora 1×, no menu ⋯).
 """
-import json, os
+import json, os, re
 from engine import (grid,esc,icon,BTN_ST,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37
@@ -47,7 +47,9 @@ CSS=('.ma-vis-m{display:none}'
      '.ma-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;order:9}.ma-cards .ma-card{flex:0 0 auto!important;min-width:132px;padding:6px 10px!important}.ma-sem{order:9}'
      '.ma-top{gap:6px!important}.ma-top button{padding:4px 9px!important;font-size:12px!important}.ma-top .ma-lbl{font-size:0!important;gap:0!important}'
      '.g2caixa div[role=group]{flex-wrap:nowrap!important;overflow-x:auto}.g2caixa div[role=group]>button{flex:0 0 auto}.g2rola [role=row][data-rid]>[role=cell]{padding-top:6px!important;padding-bottom:6px!important}'
-     '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'
+     # DS-MAN (17/10/2026): no celular cada lista da Manutenção mostra só a 1ª linha da célula (identidade e selo); a 2ª linha (subtítulo) fica no
+     # detalhe. Antes só Ativos, e escondendo tudo depois da 1ª parte: com o ⚠ da situação na frente, o nome do ativo sumia
+     '.ma-blo [role=row][data-rid]>[role=cell] .g2pw>[style*="flex-basis: 100%"]~*{display:none!important}.ma-blo [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'
      # MA-VINCULO: no celular a ação do "Sem plano" fica à vista na célula Plano (o resto da célula continua no detalhe), com 44 px de alvo
      '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>a[href*="vincular="],.ma-gat [role=row][data-rid]>[role=cell] .g2pw>a[href*="novo=plano"]{display:inline-flex!important;align-items:center;min-height:44px}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
      '.ma-cards .ma-card>span:last-child{display:none}.ma-cards .ma-card>span:nth-child(2){font-size:18px!important}'
@@ -55,6 +57,10 @@ CSS=('.ma-vis-m{display:none}'
      # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
      # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
      '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
+     # DS-MAN (17/10/2026): o bloco da lista no celular sem a linha do título (a visão já está no título da tela e na lista Visão)
+     '.ma-blo>div:first-child{display:none!important}.ma-blo>div:last-child{padding:10px 8px 8px!important}'
+     # e a barra da lista numa linha que rola de lado (busca, filtros rápidos, Pendência, Ativos | Abastecimentos, Colunas), como a faixa Filtros
+     '.ma-blo .g2caixa>div:first-child{flex-wrap:nowrap!important;overflow-x:auto}.ma-blo .g2caixa>div:first-child>*{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
      '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}'
      # peças da OM no celular: a situação (chip) desce para a linha de baixo, inteira; sem chip por cima da coluna Aplicado
@@ -78,7 +84,13 @@ const MA_CH={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42
 const MA_PRIM=__PRIM__, MA_SEC=__SEC__;
 const MA_ETC={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
 const MA_VIS=[{k:'semordem',t:'Sem ordem'},{k:'ordens',t:'Ordens'},{k:'ativos',t:'Ativos'},{k:'planos',t:'Planos'}];
+const MA_VISTIT=__VISTIT__;   /* DS-MAN (17/10/2026): título de cada visão no cabeçalho = o nome do item do menu (ui37.MENU2, fonte única) */
 const MA_NAVST=__NAVST__;   /* menu Manutenção (13/10): estilo do subitem [inativo, ativo]; o destaque segue a visão aberta */
+/* DS-MAN: filtro rápido dentro do bloco com a contagem num selo, o mesmo desenho dos chips de fase da O.S. (referência do Agrícola) */
+function ma_chipF(on){ return 'display:inline-block;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #1E7A4C;background:#E4F3E9;color:#1E6B47;':'border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;'); }
+function ma_nst(on){ return 'display:inline-block;margin-left:2px;font-size:11.5px;font-weight:800;padding:0 7px;border-radius:999px;'+(on?'background:rgba(255,255,255,.65);color:inherit;':'background:#EEF1EE;color:#15201A;'); }
+/* TAB-14 (DS-MAN): selo curto na célula; o texto longo vai para a dica do selo (e para o leitor de tela, g2sr) */
+function ma_chd(t,c,d){ const x=ma_ch(t,c); if(d&&d!==t) x.dica=d; return x; }
 function ma_G(id){ return GRIDS.find(g=>g.id===id); }
 function ma_chipSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function ma_dotSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
@@ -139,7 +151,7 @@ function ma_proxOm(c,pf,id,lote){ if(lote&&lote.indexOf(id)>=0){ const n=lote.fi
 /* ---------- linhas das grades (a linha identifica, o painel resolve: nenhum botão de comando na linha; o ID é link) ---------- */
 function ma_selosAtv(c,a){ const s=[]; if(a.cond==='Bloqueado') s.push(ma_ch('Ativo bloqueado','red')); if(a.suspeita) s.push(ma_ch('Leitura a confirmar','yellow'));
   else if(manAntiga(c,a)) s.push(ma_ch('Leitura de '+manBr(a.leit.data),'yellow'));
-  Object.keys(c.prop||{}).forEach(k=>{ const pp=c.prop[k]; if(pp.sub===a.id) s.push(ma_ch('Substituto proposto · '+pp.os.join(' e ')+' · aguarda PCP','yellow')); }); return s; }
+  Object.keys(c.prop||{}).forEach(k=>{ const pp=c.prop[k]; if(pp.sub===a.id) s.push(ma_chd('Substituto proposto','yellow','Substituto proposto · '+pp.os.join(' e ')+' · aguarda PCP')); }); return s; }
 function ma_pecasTxt(c,s){ const fs=(s.pecas||[]).filter(x=>{ const it=c.itens[x.item]; return it&&(it.saldo-it.reservado)<x.qtd; });
   if(!(s.pecas||[]).length) return {t:'—',c:''}; if(!fs.length) return {t:'Com saldo',c:''}; const x=fs[0], it=c.itens[x.item]; return {t:'Falta '+manN(x.qtd-Math.max(0,it.saldo-it.reservado),1)+' '+it.un+' · '+it.nome,c:'red'}; }
 function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'?-1e9:(st.prazo==='30'?30:c.horiz);
@@ -149,18 +161,22 @@ function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'
     const pc=ma_pecasTxt(c,l.s); const prz=venc?manSitTxt(c,l.x):(l.x.sit==='Vence em breve'?'Em breve · janela abre '+(ini<=0?'hoje':'em '+Math.ceil(ini)+' d'):'Em dia · janela abre em '+Math.ceil(ini)+' d');
     const a=l.a; const k=l.vk+'#'+l.sid; const vid=l.pid+'|'+l.aid+'|'+l.sid;
     rows.push({id:'v:'+vid,k:'venc',tp:'Preventiva',key:k,venc:venc,devida:manDevida(l),v:{prazo:(venc?1000:2000)+ini,item:l.pid},s:{item:l.pid+' v'+l.p.versao+' vencimento',ativo:a.nome,oque:l.s.nome,prazo:prz,pecas:pc.t,prox:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'},
-      p:{item:[{k:'link',t:l.pid+' v'+l.p.versao,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
-         oque:[{k:'txt',t:l.s.nome},{k:'br',t:''},{k:'mut',t:manGatTxt(l.s)}],prazo:[ma_ch(prz,venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'))],pecas:pc.c?[ma_ch(pc.t,'red')]:[{k:'mut',t:pc.t}],
+      p:{item:[{k:'link',t:l.pid+' v'+l.p.versao,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome},{k:'br',t:''},{k:'mut',t:manLeitTxt(a)}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
+         oque:[{k:'txt',t:l.s.nome},{k:'br',t:''},{k:'mut',t:manGatTxt(l.s)}],prazo:[ma_chd(venc?'Vencida':(l.x.sit==='Vence em breve'?'Em breve':'Em dia'),venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'),prz)],
+         pecas:pc.c?[ma_chd('Falta peça','red',pc.t)]:[{k:'mut',t:pc.t}],
          prox:[{k:'txt',t:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'}]}}); });
   if(st.tipo!=='venc') SO.ach.forEach(q=>{ const a=c.ativos[q.aid];
     if(st.fgrupo&&a.grupo!==st.fgrupo) return; if(st.fplano) return; if(st.fcrit&&q.crit!==st.fcrit) return;
     const op=manAchOpcoes(c,q.id); const grave=q.crit==='Alta'||q.sug==='Bloqueado'; const prz=q.voltou?('Voltou da '+q.voltou):(q.crit+' · desde '+manBr(q.oc[0]||q.em));
     rows.push({id:'a:'+q.id,k:'achado',tp:q.origem==='Inspeção'?'Inspeção':'Corretiva',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome,oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
-      p:{item:[{k:'link',t:q.id,h:'#achado='+q.id},{k:'mut',t:'· '+q.origem.toLowerCase()}].concat(q.nova?[ma_ch('Nova','yellow')]:[]),ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)),
-         oque:[{k:'txt',t:q.comp+' · '+q.sint}].concat(q.oc.length>1?[{k:'mut',t:'· '+q.oc.length+' ocorrências'}]:[]),prazo:[ma_ch(prz,q.voltou?'yellow':(grave?'red':(q.crit==='Média'?'yellow':'gray')))],pecas:[{k:'mut',t:'—'}],
+      p:{item:[{k:'link',t:q.id,h:'#achado='+q.id},{k:'mut',t:'· '+q.origem.toLowerCase()}].concat(q.nova?[{k:'br',t:''},ma_ch('Nova','yellow')]:[]),ativo:[{k:'b',t:a.nome},{k:'br',t:''},{k:'mut',t:manLeitTxt(a)}].concat(ma_selosAtv(c,a)),
+         oque:[{k:'txt',t:q.comp},{k:'br',t:''},{k:'mut',t:q.sint+(q.oc.length>1?' · '+q.oc.length+' ocorrências':'')}],prazo:[ma_chd(q.voltou?('Voltou da '+q.voltou):q.crit,q.voltou?'yellow':(grave?'red':(q.crit==='Média'?'yellow':'gray')),prz)],pecas:[{k:'mut',t:'—'}],
          prox:[{k:'txt',t:op.prim?op.prim.t:'—'}].concat(q.sug!=='Apto'?[{k:'br',t:''},ma_ch('Sugere '+q.sug,q.sug==='Bloqueado'?'red':'yellow')]:[])}}); });
   rows.sort((x,y)=>x.v.prazo-y.v.prazo); return rows; }
-function ma_pendTxt(c,o){ const s=manSelos(c,o); if(!s.length) return null; const p=s[0]; return {t:p.t+(p.dono?' · '+p.dono:'')+(p.prazo?' · '+p.prazo:''),c:p.c,n:s.length-1}; }
+function ma_pendTxt(c,o){ const s=manSelos(c,o); if(!s.length) return null; const p=s[0]; return {t:p.t+(p.dono?' · '+p.dono:'')+(p.prazo?' · '+p.prazo:''),c:p.c,n:s.length-1,
+  curto:ma_pendCurto(p.t),todos:s.map(x=>ma_pendCurto(x.t)),dica:s.map(x=>x.t+(x.dono?' · '+x.dono:'')+(x.prazo?' · '+x.prazo:'')).join(' | ')}; }
+/* DS-MAN (TAB-14): o nome curto da pendência ("Conflito · OS-0420 28/09" → "Conflito"; "Compra SC-12 (simulado)" → "Compra (simulado)") */
+function ma_pendCurto(t){ t=String(t||''); if(/^Compra /.test(t)) return 'Compra (simulado)'; return t.split(' · ')[0]; }
 /* MAN-LIMPA-01: Tipo, Criticidade e Grupo da faixa Filtros nas ordens (as contagens dos chips de fase usam o mesmo recorte) */
 function ma_omFiltro(c,os,st){ return os.filter(o=>(!st.ftipo||o.tipo===st.ftipo)&&(!st.fcrit||o.crit===st.fcrit)&&(!st.fgrupo||(c.ativos[o.aid]||{}).grupo===st.fgrupo)); }
 /* filtro "Com conflito" em Ordens (F25/F26): conflito com a produção calculado sobre AL e registro do app a resolver */
@@ -168,10 +184,10 @@ function ma_temConf(c,o){ return !!(((o.etapa==='A liberar'||o.etapa==='Liberada
 function ma_linhaOm(c,o){ const a=c.ativos[o.aid]; const p=ma_pendTxt(c,o); const fin=o.etapa==='Encerradas'; const custo=fin?manCustoFinal(c,o):manCusto(c,o,'est');
   const tt=o.tipo==='Preventiva'?(o.serv+' · Preventiva · '+o.pid+' v'+o.ver):(o.tipo==='Corretiva'?((o.comp?o.comp:'Corretiva')+' · '+o.crit):'Pendência · '+o.serv);
   const ex=manExecSug(o); const real=o.exec&&o.exec.horas!==undefined?(' · '+manN(o.exec.horas,1)+' h real'):'';
-  return {id:o.id,v:{jan:o.janIso||'',custo,tempo:Number(o.tempo)||0,ord:(fin?'z'+String(9e13-manT(o.exec&&o.exec.data||o.janIso||'2000-01-01')).padStart(16,'0'):'a'+(o.janIso||'9')+({'Alta':0,'Média':1,'Baixa':2}[o.crit]||1))},
+  return {id:o.id,m:{pend:p?[...new Set(p.todos)].map(x=>({id:x,l:x})):[]},v:{jan:o.janIso||'',custo,tempo:Number(o.tempo)||0,ord:(fin?'z'+String(9e13-manT(o.exec&&o.exec.data||o.janIso||'2000-01-01')).padStart(16,'0'):'a'+(o.janIso||'9')+({'Alta':0,'Média':1,'Baixa':2}[o.crit]||1))},
     s:{om:o.id+' '+(a?a.nome:''),serv:tt,fase:o.etapa,pend:p?p.t:'',exe:o.executante||(ex?ex+' (sugerido)':'—'),tempo:(Number(o.tempo)>0?manN(o.tempo,1)+' h prev.':'sem tempo')+real,custo:manRS(custo)+(fin?'':' est.'),jan:o.jan||''},
     p:{om:[{k:'link',t:o.id,h:'#om='+o.id},{k:'br',t:''},{k:'mut',t:a?a.nome:''}],serv:[{k:'txt',t:o.serv},{k:'br',t:''},{k:'mut',t:o.tipo==='Preventiva'?('Preventiva · '+o.pid+' v'+o.ver):(o.tipo+' · '+o.crit)}],
-       jan:[{k:'txt',t:o.jan||'—'}],fase:[ma_ch(o.etapa,MA_ETC[o.etapa]||'gray')],pend:p?[ma_ch(p.t,p.c)].concat(p.n?[{k:'mut',t:'+'+p.n}]:[]):[{k:'mut',t:'—'}],
+       jan:[{k:'txt',t:o.jan||'—'}],fase:[ma_ch(o.etapa,MA_ETC[o.etapa]||'gray')],pend:p?[ma_chd(p.curto,p.c,p.dica)].concat(p.n?[{k:'mut',t:'+'+p.n}]:[]):[{k:'mut',t:'—'}],
        exe:o.executante?[{k:'txt',t:o.executante}]:(ex?[{k:'mut',t:ex+' (sugerido)'}]:[ma_ch('Falta: executante','red')]),tempo:[{k:'txt',t:Number(o.tempo)>0?manN(o.tempo,1)+' h prev.':'sem tempo'}].concat(real?[{k:'br',t:''},{k:'mut',t:real.slice(3)}]:[]),
        custo:[{k:'txt',t:manRS(custo)+(fin?'':' est.')}]}}; }
 function ma_prox(c,a){ const ls=manLinhas(c).filter(l=>l.aid===a.id&&l.s&&l.x.gats.length); const ord={'Vencida':0,'Vence em breve':1,'Em dia':2};
@@ -179,16 +195,19 @@ function ma_prox(c,a){ const ls=manLinhas(c).filter(l=>l.aid===a.id&&l.s&&l.x.ga
 function ma_linhaAtv(c,a,per){ const px=ma_prox(c,a); const abertas=Object.values(c.oms).filter(o=>o.aid===a.id&&manAberta(o)); const achs=Object.values(c.achados).filter(q=>q.aid===a.id&&q.estado==='Sem ordem');
   const cp=manCustoPeriodo(c,per,a.id); const cons=ma_consumo(c,a); const i=a.condInfo||{};
   const ab=abertas.map(o=>({k:'link',t:o.id+' · '+o.etapa,h:'#om='+o.id})).concat(achs.map(q=>({k:'link',t:q.id+' sem ordem',h:'#achado='+q.id})));
-  const abp=[]; ab.forEach((x,j)=>{ if(j) abp.push({k:'br',t:''}); abp.push(x); });
+  /* TAB-14 (DS-MAN): até 2 linhas; o que passar de 2 fica no "+N" (a lista inteira no detalhe do ativo, bloco Ordens e Achados) */
+  const abp=[]; ab.slice(0,2).forEach((x,j)=>{ if(j) abp.push({k:'br',t:''}); abp.push(x); }); if(ab.length>2) abp.push({k:'mut',t:'+'+(ab.length-2)});
   const pl=ma_plCel(c,a);
   const pend=[]; if(a.suspeita) pend.push('Leitura a confirmar'); if(pl.semp) pend.push('Sem plano'); if(achs.length) pend.push('Achado sem ordem');
   if(cons&&cons.desvio!==null&&Math.abs(cons.desvio)>=15) pend.push('Desvio de consumo'); if(px&&px.l.x.prev&&manDias(c.hoje,px.l.x.prev)<=30) pend.push('Vence em 30 d'); if(manRestricaoVencida(c,a)) pend.push('Restrição vencida');
   return {id:a.id,pend,semp:pl.semp,v:{custo:cp.enc,cond:{'Bloqueado':0,'Restrito':1,'Apto':2}[a.cond],prox:px?(px.l.x.prev?manT(px.l.x.prev)/864e5:9e9):9e9,leit:a.leit?a.leit.val:null},
     s:{ativo:a.nome+' '+a.modelo+' '+a.local+' '+a.grupo,plano:pl.s,cond:a.cond,leit:a.leit?manLeitTxt(a):'sem contador',prox:px?(px.l.s.nome+' '+px.l.x.sit):'—',ab:abertas.map(o=>o.id).join(' ')+' '+achs.map(q=>q.id).join(' '),cons:cons?cons.t:'— sem método',grupo:a.grupo},
-    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'mut',t:'· '+a.modelo+' · '+a.local}],plano:pl.p,cond:[ma_ch(a.cond+(a.cond==='Bloqueado'&&i.desde?' · desde '+manBr(i.desde):'')+(a.cond==='Restrito'&&i.ate?' · até '+manBr(i.ate):''),ma_cond(a))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
-       leit:a.leit?[{k:'txt',t:manLeitTxt(a)}].concat(a.suspeita?[ma_ch('a confirmar','yellow')]:(manAntiga(c,a)?[ma_ch('de '+manBr(a.leit.data),'yellow')]:[])):[{k:'mut',t:'sem contador'}],
-       prox:px?[ma_ch(px.l.x.sit,MAN_SITC[px.l.x.sit]||'gray'),{k:'txt',t:px.l.s.nome+' · '+manProxTxt(c,px.l.x)}].concat(px.n?[{k:'mut',t:'+'+px.n}]:[]):[{k:'mut',t:'—'}],   /* "Sem plano" fica na coluna Plano (MA-VINCULO) */
-       ab:abp.length?abp:[{k:'mut',t:'—'}],cons:cons?[{k:'txt',t:cons.t}].concat(cons.desvio!==null&&Math.abs(cons.desvio)>=15?[ma_ch((cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow')]:[]):[{k:'mut',t:'— sem método'}]}}; }
+    /* TAB-14 (DS-MAN, 17/10/2026): uma linha por registro, duas no máximo; o selo curto e o texto longo na dica (o modelo, o "desde", a data e o
+       serviço seguinte ficam no detalhe do ativo e na busca) */
+    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'br',t:''},{k:'mut',t:a.local}],plano:pl.p,cond:[ma_chd(a.cond,ma_cond(a),ma_condTxt(c,a)+(i.motivo?' · '+i.motivo:''))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
+       leit:a.leit?[{k:'txt',t:manLeitTxt(a)}].concat(a.suspeita?[{k:'br',t:''},ma_chd('A confirmar','yellow',manQ(a.suspeita.val,a.un)+' a confirmar')]:(manAntiga(c,a)?[{k:'br',t:''},ma_chd('Antiga','yellow','Leitura de '+manBr(a.leit.data)+': mais de '+(c.antiga||7)+' dias')]:[])):[{k:'mut',t:'sem contador'}],
+       prox:px?[ma_chd(px.l.x.sit==='Vence em breve'?'Em breve':px.l.x.sit,MAN_SITC[px.l.x.sit]||'gray',px.l.x.sit+': '+px.l.s.nome+' · '+manProxTxt(c,px.l.x)+(px.n?' · +'+px.n+(px.n>1?' serviços':' serviço'):'')),{k:'br',t:''},{k:'mut',t:px.l.s.nome+(px.n?' +'+px.n:'')}]:[{k:'mut',t:'—'}],   /* "Sem plano" fica na coluna Plano (MA-VINCULO) */
+       ab:abp.length?abp:[{k:'mut',t:'—'}],cons:cons?[{k:'txt',t:manConsTxt({lh:cons.lh,un:cons.un})}].concat(cons.desvio!==null&&Math.abs(cons.desvio)>=15?[ma_ch((cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow')]:[]):[{k:'mut',t:'— sem método'}]}}; }   /* o método (tanque cheio a tanque cheio) fica na dica do cabeçalho da coluna e no detalhe */
 /* MA-VINCULO (16/10): coluna Plano da visão Ativos. Cada plano do ativo (nada colapsado) com a situação; sem plano, a sugestão explícita
    ("Vincular ao PM-xx ›" abre o painel com ela escolhida) ou "Criar plano ›". Links, não botões: a linha identifica, o painel resolve. */
 function ma_plCel(c,a){ const pls=manPlanosDe(c,a.id); const semp=manAtvAtivo(a)&&!pls.some(manPlVale); const pp=[]; const st=[];
@@ -207,8 +226,10 @@ function ma_linhaAb(c,b){ const a=c.ativos[b.aid]||{nome:b.aid}; const lh=manLh(
        lh:lh?[{k:'txt',t:manConsTxt(lh)}]:[{k:'mut',t:'—'}],qual:[ma_ch(b.qual,qc)].concat(b.estorno?[{k:'mut',t:'· '+b.estorno}]:[])}}; }
 function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; const cand=pmCands(c,p).length; const si=pmSit(c,p); const sem=manLinhas(c,p.id).filter(l=>l.s&&manDevida(l)&&!l.om&&!l.dup).length;
   return {id:p.id,v:{},s:{nome:p.id+' '+p.nome,est:e[0],apl:manAplTxt(c,p),svs:manWork(p).map(s=>s.nome).join(', '),atv:nv+' vinculados de '+(nv+cand),sit:si.t+(sem?' · '+sem+' sem ordem':''),grupo:p.grupo},
-    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],grupo:[{k:'txt',t:p.grupo||'—'}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
-       atv:[{k:'txt',t:nv+(nv===1?' vinculado de ':' vinculados de ')+(nv+cand)}],sit:[ma_ch(si.t,si.c)].concat(sem?[{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[])}}; }
+    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'br',t:''},{k:'mut',t:p.nome}],grupo:[{k:'txt',t:p.grupo||'—'}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
+       atv:[{k:'txt',t:nv+(nv===1?' vinculado de ':' vinculados de ')+(nv+cand)}],
+       /* TAB-14 (DS-MAN): o selo diz a pior situação; a contagem inteira ("1 vence em breve · 1 em dia") vai para a dica */
+       sit:[ma_chd(/^Publique/.test(si.t)?'Não publicado':si.t.split(' · ')[0],si.c,si.t)].concat(sem?[{k:'br',t:''},{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[])}}; }
 /* ---------- Ver como (simulação) e menu ⋯ ---------- */
 /* sem a faixa "Ver como" (proprietário, 14/10): o perfil de quem age é o do avatar do menu lateral (g2perfil), lido a cada desenho */
 function ma_verComo(self,v){
@@ -287,14 +308,22 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
     else if(gid==='d_venc') ma_abrir(self,'venc',rid);
     else if(gid==='d_ach') ma_abrir(self,'achado',rid);
     else if(gid==='d_vinc'){ ma_pg(self,'ativo',rid.split('|')[1]); } };
-  /* seletor de visão: contador neutro do que espera quem vê; vermelho só para impedimento (§3.1) */
+  /* seletor de visão (ABA-02, DS-MAN 17/10/2026): o número da aba é o que pede ação naquela visão, só quando passa de zero, com a dica que diz o
+     que ele conta; é o mesmo número da lista aberta (Sem ordem, até 10 d) ou de um filtro rápido da visão (Ordens › Aguardam você; Ativos ›
+     Bloqueado). Planos sem número (rascunho é raro e aparece no Estado da lista). Antes: "Ordens 0" com 16 ordens e "Planos 0" com 10 planos.
+     Vermelho só para impedimento (§3.1) */
   const so=ma_linhasSemOrdem(self,c,{prazo:'10',tipo:''}); const espera=Object.values(c.oms).filter(o=>ma_espera(c,o,pf)).length;
-  const bloq=Object.values(c.ativos).filter(a=>a.cond==='Bloqueado').length; const npl=pmPlans(c).filter(p=>p.rasc||!p.versao).length;
-  const cont={semordem:[so.length,so.some(r=>r.crit)],ordens:[espera,false],ativos:[bloq,bloq>0],planos:[npl,false]};
+  const bloq=Object.values(c.ativos).filter(a=>a.cond==='Bloqueado').length;
+  const pl_=(n,um,muitos)=>n+' '+(n>1?muitos:um);
+  const cont={semordem:[so.length,so.some(r=>r.crit),pl_(so.length,'pendência vencida ou que vence em até 10 dias','pendências vencidas ou que vencem em até 10 dias')],
+    ordens:[espera,false,pl_(espera,'ordem aguarda você','ordens aguardam você')],ativos:[bloq,bloq>0,pl_(bloq,'ativo bloqueado','ativos bloqueados')],planos:[0,false,'']};
   v.vis=MA_VIS.map(x=>{ const on=lista&&vis===x.k; const n=cont[x.k][0]; const red=cont[x.k][1];
-    return {k:x.k,t:x.t,n:String(n),on:String(on),go:()=>ma_vis(self,x.k),st:'display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #1E7A4C;background:#E4F3E9;color:#1E6B47;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),
+    return {k:x.k,t:x.t,n:String(n),temN:n>0,dica:n>0?cont[x.k][2]:'',lab:n>0?(x.t+' · '+cont[x.k][2]):x.t,opt:n>0?(x.t+' · '+n):x.t,on:String(on),go:()=>ma_vis(self,x.k),st:'display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #1E7A4C;background:#E4F3E9;color:#1E6B47;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),
       nst:'font-size:11.5px;font-weight:800;padding:0 7px;border-radius:999px;'+(red?'background:#FDE8E6;color:#B42318;':'background:#EEF1EE;color:#15201A;')}; });
   v.vis_k=vis; v.vis_set=(e)=>ma_vis(self,e.target.value);
+  /* CAB-3 (DS-MAN): o cabeçalho diz a tela — trilha "Manutenção › <visão>" e o título da visão (no detalhe: "› <registro>"), como a O.S. */
+  const pgA=st.pg&&st.pg.k==='ativo'?c.ativos[st.pg.id]:null, pgP=st.pg&&st.pg.k==='plano'?c.planos[st.pg.id]:null;
+  v.ma_tit=pgP?MA_VISTIT.planos:(pgA?MA_VISTIT.ativos:MA_VISTIT[vis]); v.ma_tr_reg=pgA?pgA.nome:(pgP?(pgP.id+' · '+pgP.nome):''); v.ma_tr_det=!!v.ma_tr_reg; v.ma_tr_lista=!v.ma_tr_reg;
   /* selo do cabeçalho: só impedimentos, calculado */
   const conf=Object.values(c.oms).filter(o=>(o.etapa==='A liberar'||o.etapa==='Liberadas')&&manConflito(c,o)&&!o.conflitoAceito).length;
   const capp=manAppConfAbertos(c).length;   /* registros do app a resolver (S4) */
@@ -303,20 +332,27 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   /* MAN-LIMPA-01 (proprietário, 14/10/2026: "elimine os cards de manutenção, vamos focar os cards na área de gráficos e relatórios"): a tela de
      trabalho não tem cartões; os indicadores ficam no Painel de Manutenção. Os filtros seguem a faixa Filtros (funil), como na O.S. */
   const chs=(lst,cur,set)=>lst.map(([k,t])=>({t,on:String(cur===k),st:ma_pill(cur===k),go:()=>set(k)}));
-  v.so_prazo=chs([['venc','Vencidas'],['10','Até 10 d'],['30','Até 30 d']],st.prazo||'10',k=>self.setState({prazo:k}));
+  /* Sem ordem: prazo com a contagem de cada recorte (TAB-02), no recorte da faixa Filtros, dentro do bloco (DS-MAN) */
+  v.so_prazo=[['venc','Vencidas'],['10','Até 10 d'],['30','Até 30 d']].map(([k,t])=>{ const on=(st.prazo||'10')===k; const r=ma_linhasSemOrdem(self,c,Object.assign({},st,{prazo:k,tipo:''})); const n=(st.ftipo?r.filter(x=>x.tp===st.ftipo):r).length;
+    return {t,n:String(n),temN:true,dica:'',on:String(on),st:ma_chipF(on),nst:ma_nst(on),go:()=>self.setState({prazo:k})}; });
   const grupos=[]; c.ordem.forEach(id=>{ const g=(c.ativos[id]||{}).grupo; if(g&&grupos.indexOf(g)<0) grupos.push(g); });
   v.f_grupos=[{v:'',t:'Todos os grupos'}].concat(grupos.map(g=>({v:g,t:g}))); v.f_grupo=st.fgrupo||''; v.f_setgrupo=(e)=>self.setState({fgrupo:e.target.value});
   const TIPOS={semordem:['Preventiva','Corretiva','Inspeção'],ordens:['Preventiva','Corretiva']}; const vv=st.vis||'semordem';
   v.f_tipos=[{v:'',t:'Todos os tipos'}].concat((TIPOS[vv]||[]).map(x=>({v:x,t:x}))); v.f_tipo=st.ftipo||''; v.f_settipo=(e)=>self.setState({ftipo:e.target.value});
-  v.flt_tipo=!!TIPOS[vv]; v.flt_crit=!!TIPOS[vv]; v.flt_pend=vv==='ativos'&&(st.amodo||'ativos')==='ativos';   /* cada visão mostra só os filtros que valem para ela */
+  v.flt_tipo=!!TIPOS[vv]; v.flt_crit=!!TIPOS[vv];   /* cada visão mostra só os filtros que valem para ela; a Pendência dos ativos fica na barra da lista (DS-MAN) */
   v.f_crits=[{v:'',t:'Toda criticidade'},{v:'Alta',t:'Alta'},{v:'Média',t:'Média'},{v:'Baixa',t:'Baixa'}]; v.f_crit=st.fcrit||''; v.f_setcrit=(e)=>self.setState({fcrit:e.target.value});
   /* Ordens: chips Todas + 5 fases (a única contagem de fase, no recorte da faixa Filtros); rotina; Lista | Kanban em ícones */
   const os=Object.values(c.oms).filter(o=>o.etapa!=='Canceladas'); const ab=os.filter(o=>manAberta(o)); const osB=ma_omFiltro(c,os,st);
-  v.fchips=[{t:'Todas',n:String(osB.length),on:String(!st.fase),go:()=>self.setState({fase:''}),st:ma_pill(!st.fase)}].concat(MAN_FASES.map(f=>({t:f,n:String(osB.filter(o=>o.etapa===f).length),on:String(st.fase===f),st:ma_pill(st.fase===f),go:()=>self.setState({fase:st.fase===f?'':f})})));
+  v.fchips=[{t:'Todas',n:String(osB.length),temN:true,dica:'',on:String(!st.fase),go:()=>self.setState({fase:''}),st:ma_chipF(!st.fase),nst:ma_nst(!st.fase)}].concat(MAN_FASES.map(f=>({t:f,n:String(osB.filter(o=>o.etapa===f).length),temN:true,dica:'',on:String(st.fase===f),st:ma_chipF(st.fase===f),nst:ma_nst(st.fase===f),go:()=>self.setState({fase:st.fase===f?'':f})})));
   const nVoce=os.filter(o=>ma_espera(c,o,pf)).length; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
-  v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
-    {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})},
-    {t:'Espera por peça · '+ab.filter(o=>manFalta(c,o).length).length,on:String(st.rot==='peca'),st:ma_pill(st.rot==='peca'),go:()=>self.setState({rot:st.rot==='peca'?'':'peca'})}];
+  /* DS-MAN (17/10/2026): no bloco ficam as fases e 2 recortes de ação (Aguardam você, Com conflito). "Esta semana" (com a carga por dia) e
+     "Espera por peça" passam ao ⋯ do bloco; ligados, aparecem como recorte ativo ao lado dos outros e saem com um toque. A Pendência também
+     filtra por pendência pela coluna (Falta peça, Conflito…) */
+  const rot=(k,t,n,dica)=>({t,n:n===null?'':String(n),temN:n!==null,dica:dica||'',on:String(st.rot===k),st:ma_chipF(st.rot===k),nst:ma_nst(st.rot===k),go:()=>self.setState({rot:st.rot===k?'':k})});
+  v.rotinas=[rot('voce','Aguardam você',nVoce,'Ordens em que o próximo passo é seu'),rot('conf','Com conflito',os.filter(o=>ma_temConf(c,o)).length,'Conflito com a produção ou registro do app a resolver')]
+    .concat(st.rot==='semana'?[rot('semana','Esta semana',null,'Ordens abertas com janela até domingo; a carga por dia aparece acima da lista')]:[])
+    .concat(st.rot==='peca'?[rot('peca','Espera por peça',ab.filter(o=>manFalta(c,o).length).length,'Ordens abertas com peça em falta')]:[]);
+  v.om_semana_go=()=>self.setState({rot:'semana'}); v.om_peca_go=()=>self.setState({rot:'peca'});
   /* DS VIS-05 (15/10/2026: "toda lista tem Tabela e Cartões"): Lista | Cartões | Kanban; Cartões é a mesma grade g_om em cartões (g2lib.g2modosFim) */
   v.om_lista=['lista','cartoes'].indexOf(st.omodo||'lista')>=0; v.om_kanban=st.omodo==='kanban'; self.g2modoExterno=(gid)=>(gid==='g_om'&&self.state.omodo==='cartoes')?'cartoes':'tabela';
   v.om_modos=[['lista','Lista','v_lista'],['cartoes','Cartões','v_cartoes'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ca:k==='cartoes',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
@@ -332,8 +368,8 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   /* Ativos: Ativos | Abastecimentos; custo da coluna no mês corrente (o período e os indicadores ficam no Painel) */
   /* (o período ficou só no cálculo do custo do mês da coluna) */
   v.at_ativos=(st.amodo||'ativos')==='ativos'; v.at_abast=st.amodo==='abast';
-  v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_pill((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));
-  /* MA-VINCULO: filtro rápido "Sem plano" na barra da grade (TAB-01; o mesmo estado da Pendência da faixa Filtros) */
+  v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_chipF((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));   /* DS-MAN: escolha dentro do bloco */
+  /* MA-VINCULO: filtro rápido "Sem plano" na barra da grade (TAB-01; o mesmo estado da lista Pendência, ao lado dele desde a DS-MAN) */
   { const nsp=manSemPlano(c).filter(a=>!st.fgrupo||a.grupo===st.fgrupo).length; const onS=st.fpend==='Sem plano';
     v.at_semp_tem=nsp>0||onS; v.at_semp_n=String(nsp); v.at_semp_on=String(onS); v.at_semp_lab=onS?'Mostrar todos os ativos':'Mostrar só os ativos sem plano';
     v.at_semp_st='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,0px);box-sizing:border-box;'+(onS?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
@@ -359,7 +395,8 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
     const ids=(self.__at||[]).filter(r=>r.semp&&g2match(r,spA,stA)&&(!stA.qv||!qc||g2qhas(r,qc,spA.qf,stA.qv))).map(r=>r.id);   /* MA-VINCULO: o que a grade mostra */
     if(ids.length){ t='Vincular a plano'; dis=manPode(c,pf,'plano'); fn=()=>vlAbrir(self,{aids:ids}); }
     sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
-  v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=(panAberto||dis)?MA_SEC:MA_PRIM;
+  /* CAB-4 (DS-MAN): a primária fica verde; indisponível para o perfil, é a peça comum acao_motivo (aria-disabled, dica e o motivo junto do botão) */
+  v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=panAberto?MA_SEC:MA_PRIM;
   v.hs_vis=!!sec&&!t; v.hs_menu=!!sec&&!!t; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }   /* MAIS-01: com a primária à vista, a secundária vai para o ⋯ */
 '''
 
@@ -1062,53 +1099,86 @@ def _cabecalho():
     return f'<span style="position: relative; display: inline-flex;">{E.mais("Manutenção",itens)}{conf}</span>'
 
 def _prim_cab():
+    """Ações do cabeçalho (MAIS-02 e BOT-01): a secundária só aparece quando a visão não tem primária; a primária da visão é verde. Para o perfil
+    sem o papel (ou sem nada a fazer no filtro), a primária fica indisponível pela peça comum engine.acao_motivo: aria-disabled, dica e o motivo
+    junto do botão (PRD DS-06 e 74.5.0, VIS-04), como em Assinatura, Backoffice e Compras. DS-MAN (17/10/2026): sai o texto solto ao lado do
+    botão cinza ("Ação do Otávio (responsável de manutenção)" em 3 linhas)."""
+    prim=(f'<button type="button" class="ma-hb" aria-disabled="{H("hp_dis")}" data-dica="{H("hp_why")}" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>')
     return (IF('hs_vis',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
-            + IF('hp_tem',f'<button type="button" class="ma-hb" disabled="{H("hp_dis")}" title="{H("hp_why")}" aria-describedby="ma-hp-why" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>'
-                 + IF('hp_dis',f'<span id="ma-hp-why" style="font-size: 12px; font-weight: 700; color: {MUTED}; max-width: 160px;">{H("hp_why")}</span>')))
+            + IF('hp_tem',E.acao_motivo(prim,H('hp_dis'),H('hp_why'))))
+
+# DS-MAN (proprietário, 17/10/2026, 23h: "Design system de manutenção ainda não está no padrão"; referência: Agrícola › Ordem de Serviço):
+# - a fileira das visões (Sem ordem · Ordens · Ativos · Planos) é a única acima do bloco (a Manutenção é uma tela só, pedido de 05/10);
+# - cada lista mora num bloco com título (processo_os.bloco, o mesmo do "Ordens por fase"), com os filtros rápidos dentro dele;
+# - Ativos | Abastecimentos é uma escolha dentro do bloco (antes uma 2ª fileira solta);
+# - em Ordens: as fases e 2 recortes de ação; "Esta semana" e "Espera por peça" no ⋯ do bloco (ligados, viram recorte ativo);
+# - a Pendência dos ativos passa da faixa do topo para a barra da lista (TAB-01: filtro da lista fica com a lista; a faixa fica com Tipo,
+#   Criticidade e Grupo, que valem para a tela). Fazenda não entra: ativo e ordem não têm fazenda no dado (só o local).
+# TAB-14: w = largura máxima do conteúdo da célula (g2pw), escolhida para cada célula caber em 2 linhas e a grade inteira (todas as colunas) caber
+# sem rolagem lateral a 1280 px (ds_man_test L1 a L4; ma_correcoes_om_test 8).
+def _blo(html):
+    """o bloco da O.S. (processo_os.bloco) com a classe ma-blo: no celular o título do bloco sai (a visão já está no título da tela e na lista
+    Visão) e a lista sobe: ≥ 5 linhas acima da dobra a 390 px (AC-PCM-22)"""
+    assert html.startswith('<section style='), 'bloco sem <section>'
+    return html.replace('<section style=','<section class="ma-blo" style=',1)
 
 def _visoes():
+    from areas.processo_os import _kanban, bloco
     G=lambda cols,gid,**k: grid(cols,[],edit=dict(m='pick'),gid=gid,total=k.pop('total',False),**k)
-    g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo · leitura',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
-            dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
-    g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
-            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
-    semp=IF('at_semp_tem',f'<button type="button" data-filtro-tela="pendencia" aria-pressed="{H("at_semp_on")}" title="{H("at_semp_lab")}" onClick="{H("at_semp_go")}" style="{H("at_semp_st")}">Sem plano <span style="opacity: .75;">{H("at_semp_n")}</span></button>')
-    g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='plano',l='Plano',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
-            dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
-           qf=dict(k='cond',l='condição'),busca_extra=semp)
-    g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
-            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
-    g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='grupo',l='Grupo de máquina',w=130),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
-    flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
-    semordem=(flt(_chips('so_prazo','Prazo pelo início da janela')) + g_so)
-    semana=IF('semana',f'<div role="note" aria-label="Esta semana" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
-              f'<div style="{SECT}">Esta semana · por dia · capacidade da oficina não calculável (sem P10)</div>'
-              + FOR('sem_dias','d',f'<div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.8px;"><b style="min-width: 90px;">{H("d.t")}</b><span>{H("d.oms")}</span><span style="color: {MUTED};">{H("d.hh")}</span></div>',3) + '</div>')
-    from areas.processo_os import _kanban
-    modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
-           + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
-                 + IF('x.li',icon('v_lista',16),True) + IF('x.ca',icon('v_cartoes',16)) + IF('x.ka',icon('v_kanban',16)) + '</button>',3) + '</div></div>')
-    ordens=(flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
-                  + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
-                  _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',modos)
-            + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
-    ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{_chips("at_modos","Modo")}</div>'
-            + IF('at_ativos',f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
-    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: {BG}; border-radius: 12px;">'
-               f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
-               + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
-            + g_pl)
-    sel=(f'<div class="ma-vis" role="group" aria-label="Visão" style="display: flex; flex-wrap: wrap; gap: 6px;">'
-         + FOR('vis','x',f'<button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}<span style="{H("x.nst")}">{H("x.n")}</span></button>',4) + '</div>'
-         f'<label class="ma-vis-m" style="align-items: center; gap: 8px; {LBL}">Visão<select aria-label="Visão" value="{H("vis_k")}" onChange="{H("vis_set")}" style="{INP} font-weight: 700;">'
-         + FOR('vis','x',f'<option value="{H("x.k")}">{H("x.t")} · {H("x.n")}</option>',4) + '</select></label>')
+    g_so=G([dict(k='item',l='Item',w=170),dict(k='ativo',l='Ativo · leitura',w=215),dict(k='oque',l='O que',w=230),dict(k='prazo',l='Prazo',t='num',w=110),
+            dict(k='pecas',l='Peças',w=110),dict(k='prox',l='A fazer',w=230,pq='situacao')],'g_so')   # "Próximo passo" quebrava o cabeçalho
+    g_om=G([dict(k='om',l='Ordem · ativo',w=180),dict(k='serv',l='Serviço · tipo',w=210),dict(k='jan',l='Janela',t='date',w=80),dict(k='fase',l='Fase',w=130),
+            dict(k='pend',l='Pendência',w=130,multi=True),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=70),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
     L_=ui37.MF_LBL.format(MUTED=MUTED); S_=ui37.MF_SEL.format(LINE=LINE,SURF=SURF,INK=INK)
     fsel=lambda rot,val,setfn,lst: (f'<label style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(val)}" onChange="{H(setfn)}" style="{S_}">'
                                     + FOR(lst,'o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
+    semp=IF('at_semp_tem',f'<button type="button" data-filtro-tela="pendencia" aria-pressed="{H("at_semp_on")}" title="{H("at_semp_lab")}" onClick="{H("at_semp_go")}" style="{H("at_semp_st")}">Sem plano <span style="opacity: .75;">{H("at_semp_n")}</span></button>')
+    modo_at=(f'<div role="group" aria-label="Mostrar" style="display: flex; gap: 6px;">'
+             + FOR('at_modos','x',f'<button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}</button>',2) + '</div>')
+    g_at=G([dict(k='ativo',l='Ativo · local',w=175),dict(k='plano',l='Plano',w=150),dict(k='cond',l='Condição',w=110),dict(k='leit',l='Leitura',t='num',w=105),dict(k='prox',l='Próxima',t='num',w=115,pq='quando'),
+            dict(k='ab',l='Em aberto',w=140),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=100),dict(k='cons',l='Consumo',w=95,ajuda='Consumo do último abastecimento de tanque cheio a tanque cheio (L/h); o selo mostra o desvio da referência do ativo.')],'g_at',total=True,
+           qf=dict(k='cond',l='condição'),busca_extra=semp+fsel('Pendência','f_pend','f_setpend','f_pends'),tools=modo_at)
+    g_ab=G([dict(k='id',l='Lançamento',w=130),dict(k='ativo',l='Ativo',w=170),dict(k='tq',l='Tanque/lote',w=130),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
+            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=150),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=135)],'g_ab',qf=dict(k='qual',l='qualidade'),tools=modo_at)
+    g_pl=G([dict(k='nome',l='Plano',w=230),dict(k='grupo',l='Grupo',w=110),dict(k='est',l='Estado',w=110),dict(k='apl',l='Aplica-se a',w=190),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=115),dict(k='sit',l='Situação',w=140)],'g_pl')
+    linha=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
+    chipsN=lambda lst,lab,n,pre='x': (f'<div role="group" aria-label="{lab}" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">'
+                                       + FOR(lst,pre,f'<button type="button" aria-pressed="{H(pre+".on")}" data-dica="{H(pre+".dica")}" onClick="{H(pre+".go")}" style="{H(pre+".st")}">{H(pre+".t")} '
+                                             + IF(pre+'.temN',f'<span style="{H(pre+".nst")}">{H(pre+".n")}</span>',True) + '</button>',n) + '</div>')
+    # ---- Sem ordem ----
+    semordem=_blo(bloco('Pendências por prazo','',linha(chipsN('so_prazo','Prazo pelo início da janela',3)) + g_so))
+    # ---- Ordens ----
+    semana=IF('semana',f'<div role="note" aria-label="Esta semana" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: {BG};">'
+              f'<div style="{SECT}">Esta semana · por dia · capacidade da oficina não calculável (sem P10)</div>'
+              + FOR('sem_dias','d',f'<div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.8px;"><b style="min-width: 90px;">{H("d.t")}</b><span>{H("d.oms")}</span><span style="color: {MUTED};">{H("d.hh")}</span></div>',3) + '</div>')
+    modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
+           + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
+                 + IF('x.li',icon('v_lista',16),True) + IF('x.ca',icon('v_cartoes',16)) + IF('x.ka',icon('v_kanban',16)) + '</button>',3) + '</div></div>')
+    mais_om=E.mais('Ordens por fase',[('Ver carga desta semana',H('om_semana_go')),('Ver ordens que esperam peça',H('om_peca_go'))])
+    ordens=_blo(bloco('Ordens por fase','',
+                      linha(chipsN('fchips','Filtrar por fase',6,'fc'),chipsN('rotinas','Rotina',2),'<span style="flex-grow: 1;"></span>',mais_om,modos)
+                      + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban())))
+    # ---- Ativos | Abastecimentos: a escolha fica na barra da lista, dentro do bloco ----
+    # a classe ma-gat (desenho da linha no celular) vai na própria caixa da grade: a caixa abre o corpo do bloco e o título fica sem linha (SEP-20261015 b)
+    g_at=g_at.replace('<div class="g2caixa"','<div class="g2caixa ma-gat"',1)
+    ativos=(IF('at_ativos',_blo(bloco('Ativos por condição','',g_at)),True) + IF('at_abast',_blo(bloco('Abastecimentos por qualidade','',g_ab))))
+    # ---- Planos ----
+    planos=_blo(bloco('Planos e cobertura','',
+                 # faixa com fundo logo abaixo do título: a borda neutra (que some dentro do bloco, SEP_CSS) diz ao separador que não precisa de linha
+                 IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: {BG}; border: 1px solid {LINE}; border-radius: 12px;">'
+                    f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
+                    + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
+                 + g_pl))
+    # ---- fileira das visões (a única acima do bloco) e faixa Filtros ----
+    sel=(f'<div class="ma-vis" role="group" aria-label="Visão" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+         + FOR('vis','x',f'<button type="button" aria-pressed="{H("x.on")}" aria-label="{H("x.lab")}" data-dica="{H("x.dica")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}'
+               + IF('x.temN',f'<span style="{H("x.nst")}">{H("x.n")}</span>') + '</button>',4) + '</div>'
+         f'<label class="ma-vis-m" style="align-items: center; gap: 8px; {LBL}">Visão<select aria-label="Visão" value="{H("vis_k")}" onChange="{H("vis_set")}" style="{INP} font-weight: 700;">'
+         + FOR('vis','x',f'<option value="{H("x.k")}">{H("x.opt")}</option>',4) + '</select></label>')
     faixa=ui37.faixa_filtros(IF('flt_tipo',fsel('Tipo','f_tipo','f_settipo','f_tipos'),True) + IF('flt_crit',fsel('Criticidade','f_crit','f_setcrit','f_crits'),True)
-                             + fsel('Grupo','f_grupo','f_setgrupo','f_grupos') + IF('flt_pend',fsel('Pendência','f_pend','f_setpend','f_pends')))
+                             + fsel('Grupo','f_grupo','f_setgrupo','f_grupos'))
     col=lambda x: f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">{x}</div>'
-    return (IF('lista',col(sel + f'<div class="ma-fx">{faixa}</div>' + IF('v_semordem',col(semordem),True) + IF('v_ordens',col(ordens)) + IF('v_ativos',col(ativos)) + IF('v_planos',col(planos))),True))
+    return (IF('lista',col(sel + f'<div class="ma-fx">{faixa}</div>' + IF('v_semordem',semordem,True) + IF('v_ordens',ordens) + IF('v_ativos',ativos) + IF('v_planos',planos)),True))
 
 def _cas(lst):
     """Conflitos do app (S4): o registro feito sem sinal que encontrou a ordem mudada; Otávio aplica ou descarta com motivo."""
@@ -1468,15 +1538,6 @@ def _paineis_plano():
     return _aside('sv',sv_body,w=560)+_aside('np',np_body,w=520)+_aside('vl',vl_body,w=720,dyn=True)+_aside('dv',dv_body,w=480,dyn=True)
 
 # =====================================================================================
-def hub_aviso():
-    """Entrada do módulo (MOD-MAN): "N ativos sem plano de manutenção · Vincular ›" pela regra comum (DM.JS_VINC_BASE) sobre o cenário gravado."""
-    js=DM.hub_semplano_js()+('function modExtra(self,v){ let n=0; try{ n=manSemPlano(manHubEstado()).length; }catch(e){ n=0; } v.man_semp=n>0; '
-                            "v.man_semp_t=n+(n>1?' ativos sem plano de manutenção':' ativo sem plano de manutenção'); }\n")
-    topo=IF('man_semp',f'<a class="mod-aviso" href="MA.dc.html#vis=ativos&pend=semplano" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; '
-                       f'padding: 8px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 14px; font-weight: 800; text-decoration: none;">'
-                       f'<span aria-hidden="true">⚠</span><span>{H("man_semp_t")}</span><span style="text-decoration: underline; text-underline-offset: 3px;">Vincular ›</span></a>')
-    return dict(topo=topo,js=js)
-
 def _redirect(fname,destino):
     """página antiga = só redirecionamento (fora do canvas e do Índice): leva a âncora antiga (#OM-0234, #PM-01, #novo:a14) ao endereço novo"""
     js=("(function(){var h=decodeURIComponent((location.hash||'').slice(1)),d='"+destino+"';"
@@ -1493,17 +1554,34 @@ def _status_dyn(fname,hole):
     assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>'))
 
+# título de cada visão = nome do item do menu da Manutenção (ui37.MENU2, fonte única), pela âncora #vis=
+VIS_TIT={h.split('#vis=')[1]:l for n,_i,its in ui37.MENU2 if n=='Manutenção' for l,h in its if '#vis=' in h}
+
+def _titulo_dyn(fname):
+    """CAB-3 (DS-MAN, 17/10/2026): o título não repete o "‹ Manutenção" — diz a visão aberta ("Ordens de manutenção"…) e a trilha diz
+    "Manutenção › <visão>" (no detalhe, "› <registro>"), como "Agrícola › Ordem de Serviço". A casca escreve o título fixo da tela (o <title> da
+    aba continua "Manutenção"); aqui o <h1> e a trilha vazia passam a ler a visão do estado da tela."""
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
+    h1=re.search(r'(<h1 style="[^"]*">)Manutenção(</h1>)',s); assert h1 and s.count(h1.group(0))==1, 'título do cabeçalho não encontrado em '+fname
+    s=s.replace(h1.group(0),h1.group(1)+H('ma_tit')+h1.group(2))
+    vazio='<div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;"><span></span>'
+    assert s.count(vazio)==1, 'trilha do cabeçalho não encontrada em '+fname
+    sep=f' <span style="color: {MUTED};">›</span> '
+    tr=(f'<span style="color: {MUTED};">Manutenção</span>{sep}' + IF('ma_tr_lista',f'<span>{H("ma_tit")}</span>',True)
+        + IF('ma_tr_det',f'<span style="color: {MUTED};">{H("ma_tit")}</span>{sep}<span>{H("ma_tr_reg")}</span>'))
+    open(p,'w',encoding='utf-8').write(s.replace(vazio,vazio[:-len('<span></span>')]+'<span>'+tr+'</span>'))
+
 def ma():
     E._reset_screen(FNAME)
     EXTRA.append('<style>'+CSS+PM_CSS+'</style>')
     corpo=_visoes()+_pag_ativo()+_pag_plano()
     EXTRA.append(_painel()); EXTRA.append(_paineis_plano())
-    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
+    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__VISTIT__',json.dumps(VIS_TIT,ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
     HEIGHTS37[FNAME]=1000
     # 14/10/2026 (proprietário: "tire das telas ver como simulação"): sem a faixa "Ver como"; quem age é o perfil do avatar do menu lateral (a
     # mesma fonte, g2perfil). O menu ⋯ (Restaurar demonstração) vai para o fim dos comandos do cabeçalho, sem uma linha só para ele.
     shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab()+_cabecalho(),search=False)
-    _status_dyn(FNAME,'st_ma')
+    _status_dyn(FNAME,'st_ma'); _titulo_dyn(FNAME)
     for f,d in REDIRECIONA.items(): _redirect(f,d)
     return FNAME
 
