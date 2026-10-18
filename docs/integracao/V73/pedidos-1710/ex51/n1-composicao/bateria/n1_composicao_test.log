@@ -1,0 +1,8 @@
+OK    C1 cópia antiga ilegível: a leitura não derruba a tela, mostra o aviso e nenhuma vistoria; gravar segue recusado e a cópia fica igual
+OK    C2 armazenamento bloqueado: a leitura mostra a semente sem erro
+OK    C3 migração única: depois de migrar, recomeçar o cenário (Restaurar demonstração em outra tela) volta à semente, não à cópia antiga
+OK    C4 Restaurar demonstração com a cópia antiga ilegível: grava a semente e preserva a cópia sem alteração
+OK    C5 abrir uma tela de Pragas e doenças migra a cópia antiga uma vez (mipOuvir), sem gravar de novo na segunda tela
+OK    C6 abrir com a cópia antiga ilegível não grava nada e mantém o aviso
+OK    C7 sem cópia antiga: abrir não grava (a primeira gravação real leva a semente ao cenário)
+RESULTADO: 7 ok · 0 falhas

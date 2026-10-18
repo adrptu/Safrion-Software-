@@ -902,7 +902,8 @@ v.mb_podeConc=!done&&!edit&&R.col>0&&vv.est!=='concluida'; v.mb_concT='Concluir 
 v.mb_outras=ab.filter(x=>x.id!==vid&&x.faz===vv.faz).slice(0,4).map(x=>{ const t2=mipT(x), p2=mipP(x), r2=mipRes(x,sm); return {h:'MB-06.dc.html#'+x.id,t:x.id+' · '+t2.rot+' · '+p2.alvo,s:(x.est==='programada'?mipBr(x.data):r2.col+'/'+r2.tot),tt:'Abrir a vistoria '+x.id}; });
 v.mb_temOutras=v.mb_outras.length>0;"""
     global JS_BASE
-    _jb=JS_BASE; JS_BASE=DM.js_prefixo()+_jb
+    # N-1 (composição Claude): o MIP grava no cenário das O.S. (mipTransacao); sem cenario.js a coleta no app seria recusada
+    _jb=JS_BASE; JS_BASE=cenario.js_prefixo()+DM.js_prefixo()+_jb
     try:
         emit('MB-06','Vistoria por pontos','',None,'Registrar e ir ao ponto',corpo,H_=940,back='MB-01.dc.html',primary_href='MB-06.dc.html',js=js,dyn_status=True,dyn_head='Vistoria por pontos',
              prim=[('mb_ed','b',H('mb_edt'),'mb_corr'),('mb_mid','b',H('mb_nxt'),'mb_reg'),('mb_last','b','Registrar e concluir coleta','mb_regfim'),('mb_done','a','Voltar ao início','MB-01.dc.html')])

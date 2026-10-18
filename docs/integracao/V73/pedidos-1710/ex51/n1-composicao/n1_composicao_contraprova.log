@@ -1,0 +1,8 @@
+FALHA C1 cópia antiga ilegível: a leitura não derruba a tela, mostra o aviso e nenhuma vistoria; gravar segue recusado e a cópia fica igual: mipGet lançou: Dados antigos de Pragas e doenças ilegíveis. Preserve os dados e recupere a cópia antes de gravar.
+FALHA C2 armazenamento bloqueado: a leitura mostra a semente sem erro: mipGet lançou: SecurityError
+FALHA C3 migração única: depois de migrar, recomeçar o cenário (Restaurar demonstração em outra tela) volta à semente, não à cópia antiga: a cópia antiga voltou depois de recomeçar o cenário
+FALHA C4 Restaurar demonstração com a cópia antiga ilegível: grava a semente e preserva a cópia sem alteração: restaurar recusou: Dados antigos de Pragas e doenças ilegíveis. Preserve os dados e recupere a cópia antes de gravar.
+FALHA C5 abrir uma tela de Pragas e doenças migra a cópia antiga uma vez (mipOuvir), sem gravar de novo na segunda tela: não migrou ao abrir
+FALHA C6 abrir com a cópia antiga ilegível não grava nada e mantém o aviso: Dados antigos de Pragas e doenças ilegíveis. Preserve os dados e recupere a cópia antes de gravar.
+OK    C7 sem cópia antiga: abrir não grava (a primeira gravação real leva a semente ao cenário)
+RESULTADO: 1 ok · 6 falhas

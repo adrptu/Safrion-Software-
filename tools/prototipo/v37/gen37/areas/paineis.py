@@ -46,7 +46,7 @@ JS = r'''
 // julgada: conta em n.sem_prazo. Sem hoje válido = null. Custos: etapa seguinte (null).
 // causa estruturada da impedida (Codex 6166235821: agrupar sem ler o texto do selo): vem dos campos da projeção da O.S. —
 // libErr (o Estoque segura a liberação: saldo, lote ou insumo) e bloq (máquina, implemento ou equipamento do registro ou da Manutenção)
-function agrCausa(o){ if(o.libErr) return 'Insumo no Estoque'; if(o.bloq) return 'Máquina ou equipamento'; return 'Outro impedimento'; }
+function agrCausa(o){ if(o.receita) return 'Receituário divergente'; if(o.libErr) return 'Insumo no Estoque'; if(o.bloq) return 'Máquina ou equipamento'; return 'Outro impedimento'; }
 /* PAINEL-02 · execução (contrato desta função; apresentação no painel_agricola.py): O.S. agrícolas Em execução e Em conferência do recorte,
    da mesma projeção da tela O.S.; área em ha (prevista = a da O.S., já com o ajuste da liberação; realizada = apontada e enviada; sinal =
    apontada no aparelho, ainda sem envio, fora do realizado); pendencia = o texto do domínio que segura o apontamento ou o encerramento. */
