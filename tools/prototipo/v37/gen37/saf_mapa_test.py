@@ -10,7 +10,10 @@ talhões…" (EDL-01, safra_lote.js): mesma seleção, mesma aplicação com as 
   M6  Esc limpa a seleção antes de fechar; Enter num talhão com foco marca o talhão (teclado)
   M7  salvar e reabrir (F5): os 3 talhões mostram a cultura gravada, sem marca de alterado
   M8  390 px sem rolagem horizontal da página; nenhum erro de JavaScript
-Contraprova: o render da v133 reprova M1 (não existe "Planejar no mapa").
+  M9  seleção parcial (Codex 6252809331, S2): T1-A marcada na Tabela (T1-B não) e um talhão inteiro → no Mapa o T1 aparece "em parte"
+      (aria-pressed=mixed, "Em parte · 1 de 2"), a contagem diz "(1 em parte)" com a área só das linhas marcadas, a lista diz qual parcela;
+      "Aplicar" a Meta muda exatamente as 2 linhas anunciadas e a T1-B fica como estava
+Contraprova: o render da v133 reprova M1 (não existe "Planejar no mapa"); o da v134 (e0c47a00) reprova M9.
 Uso (de gen37/): env CHROME_BIN=… SAFRION_DADOS=sintetico [RENDER_DIR=…] python3 -B saf_mapa_test.py"""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -114,6 +117,31 @@ try:
     chk(f'M7 com a variedade ({vari}) e salvar: ao reabrir, os que mudaram mostram {cult} e os recusados seguem como estavam, sem marca de alterado',
         ok2 and vari and salvarT.startswith('Salvar alterações (') and all(any(cult in z for z in lab7[t]) for t in mudou) and all(not any(cult in z for z in lab7[t]) for t in recus) and mud7 == ['0'] * len(alvo), [vari, salvarT, lab7, mud7])
     e1 = J("window.__e") or []
+    # ---------- M9 ----------
+    c.goto(U('Main.dc.html'), .3); J("localStorage.clear()"); acts9, ok9 = abrir_mapa()
+    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Tabela'); b&&b.click();})()"); time.sleep(.5); J(LIB)
+    labs = J("[...document.querySelectorAll('#sl-painel input[type=checkbox]')].map(i=>i.getAttribute('aria-label')||'')") or []
+    par = sorted(x[7:] for x in labs if re.match(r'^Marcar T1-[A-Z]$', x)); inteiro = next((x[7:] for x in labs if re.match(r'^Marcar T[2-9]$', x)), '')
+    pa, pb = (par + ['', ''])[:2]
+    META = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>x.getAttribute('aria-label')==='Meta de '+rot); return i?i.value:null;})"
+    AREA = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>x.getAttribute('aria-label')==='Área de '+rot); return i?Number(String(i.value).replace(/\\./g,'').replace(',','.')):null;})"
+    m0 = {r: J(f"{META}({json.dumps(r)})") for r in (pa, pb, inteiro)}; a9 = {r: J(f"{AREA}({json.dumps(r)})") for r in (pa, inteiro)}
+    for r in (pa, inteiro): J("(()=>{const i=[...document.querySelectorAll('#sl-painel input[type=checkbox]')].find(i=>i.getAttribute('aria-label')==='Marcar '+%s); i&&i.click();})()" % json.dumps(r)); time.sleep(.3)
+    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Mapa'); b&&b.click();})()"); time.sleep(.6); J(LIB)
+    t1 = next((x for x in (J("TS()") or []) if x['t'] == 'T1'), {}); cont9 = J("TXT('.sm-cont')"); lst9 = J("TXT('.sm-pn')"); apT9 = J("N((document.getElementById('sm-aplicar')||{}).innerText||'')")
+    ha9 = sum(v for v in a9.values() if v); ha_txt = ('%.2f' % ha9).rstrip('0').rstrip('.').replace('.', ',')
+    novo = '71' if m0.get(pa) != '71' else '72'
+    J(f"SEL('Meta para os talhões marcados',{json.dumps(novo)})"); time.sleep(.3)
+    J("(()=>{const b=document.getElementById('sm-aplicar'); b&&b.click();})()"); time.sleep(.6); J(LIB)
+    st9 = ' '.join(J("[...PN().querySelectorAll('[role=status]')].map(x=>N(x.innerText))") or [])
+    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Tabela'); b&&b.click();})()"); time.sleep(.5); J(LIB)
+    m1 = {r: J(f"{META}({json.dumps(r)})") for r in (pa, pb, inteiro)}
+    chk('M9 seleção parcial da Tabela no Mapa: T1 "em parte" (mixed, 1 de 2), contagem "(1 em parte)" com a área só das linhas marcadas e a parcela na lista; "Aplicar" muda só as 2 linhas anunciadas',
+        ok9 and pa and pb and inteiro and t1.get('sel') == 'mixed' and any('Em parte · 1 de 2' in z for z in t1.get('l', [])) and '(1 em parte)' in cont9 and cont9.startswith('2 talhões')
+        and ha_txt in cont9 and ('em parte: ' + pa) in lst9 and '(1 em parte)' in apT9 and 'de 2 linhas' in st9
+        and m1.get(pa) == novo and m1.get(inteiro) == novo and m1.get(pb) == m0.get(pb),
+        [pa, pb, inteiro, t1, cont9, ha_txt, apT9, st9[:200], m0, m1, lst9[:300]])
+    e1 = e1 + (J("window.__e") or [])
     # ---------- M8 ----------
     c.aparelho(390, 844, toque=True); acts3, ok3 = abrir_mapa()
     sw = J("[document.documentElement.scrollWidth, innerWidth]"); e2 = J("window.__e") or []

@@ -100,13 +100,13 @@ function irrApsSetor(s, sid) {
 function irrCreditos(s, sid, ate) {
   // parcial com 0 m³ (avanço pequeno que a telemetria arredonda a 0) ainda conta a área coberta da ordem; a lâmina vem só de quem tem volume (PRE-REV U1)
   const x = s.setores[sid]; const aps = irrApsSetor(s, sid).filter(a => (ate === undefined || a.q < ate) && irrApCob(a) > 0 && (a.vol > 0 || irrApParc(a, x.ha)));
-  let gov = 0, ultCheia = -1e9; const grp = {}; let faixa = null;
-  aps.forEach(a => { if (!irrApParc(a, x.ha)) { gov += irrApNet(a); ultCheia = Math.max(ultCheia, a.q); return; }
+  let gov = 0, ultCheia = -1e9; const grp = {}; let faixa = null; const ev = [];
+  aps.forEach(a => { if (!irrApParc(a, x.ha)) { gov += irrApNet(a); ev.push({ q: a.q, net: irrApNet(a) }); ultCheia = Math.max(ultCheia, a.q); return; }
     const g = grp[a.os] || (grp[a.os] = { cob: 0, net: 1e9, q: a.q }); g.cob += irrApCob(a); if (a.vol > 0) g.net = Math.min(g.net, irrApNet(a)); g.q = Math.max(g.q, a.q); });
-  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob >= x.ha - 1e-6) { gov += g.net; ultCheia = Math.max(ultCheia, g.q); } });
+  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob >= x.ha - 1e-6) { gov += g.net; ev.push({ q: g.q, net: g.net }); ultCheia = Math.max(ultCheia, g.q); } });
   // faixa pendente: a parcial mais recente que nenhuma volta completa cobriu depois
   Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob < x.ha - 1e-6 && g.q > ultCheia && (!faixa || g.q > faixa.q)) faixa = { os: k, q: g.q, cob: g.cob, net: g.net }; });
-  return { gov, faixa, aps };
+  return { gov, faixa, aps, ev };
 }
 function irrBase(b) { return b.d0 + b.etc - b.pef; }
 // ---------- água no solo (AGUA-SOLO-IRR, proprietário 18/10/2026: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do
@@ -137,8 +137,24 @@ function irrAgua(s, sid) {
 // gatilho: o limiar do setor, ou a AFD quando ela é menor (a cultura entraria em estresse antes do limiar)
 function irrGatilho(s, sid) { const x = s.setores[sid]; if (!x || x.limiar === null || x.limiar === undefined) return null; const a = irrAgua(s, sid);
   if (a && a.afd !== undefined && a.afd < x.limiar - 1e-9) return { v: a.afd, por: 'afd', a }; return { v: x.limiar, por: 'limiar', a }; }
-function irrTetoCad(s, sid, d) { const a = irrAgua(s, sid); return (a && a.cad !== null && d > a.cad) ? a.cad : d; }
-function irrDef(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; return irrTetoCad(s, sid, Math.max(0, irrBase(x.bal) - irrCreditos(s, sid).gov)); }
+// balanço com CAD, dia a dia na ordem do tempo (FAO-56, eq. 85–86: Dr,i = Dr,i−1 − P − I + ETc, com 0 ≤ Dr ≤ CAD em cada dia). O teto aplicado só
+// no fim, depois dos créditos, escondia o déficit acima da CAD e pedia água depois de repor o déficit mostrado (Codex 6252809331, S2). Dias de
+// ETc: os b.dias antes de hoje; chuva efetiva no dia dela; irrigação no dia em que foi aplicada (antes do início do balanço, no primeiro dia).
+// Sem CAD calculável: null, e vale o balanço de antes (sem passo diário).
+function irrBalDias(s, sid, cr, extra) {
+  const x = s.setores[sid], b = x && x.bal; if (!b) return null; const a = irrAgua(s, sid); if (!a || a.cad === null || a.cad === undefined) return null;
+  const cad = a.cad, k1 = -(b.dias || 0), etcd = b.dias ? b.etc / b.dias : 0, ev = cr.ev.concat(extra || []), kEv = q => Math.max(k1, irrDiaN(q));
+  let kEnd = -1; ev.forEach(e => { kEnd = Math.max(kEnd, kEv(e.q)); });
+  let D = Math.min(cad, Math.max(0, b.d0)); const fim = {}; const teto = []; if (b.d0 > cad + 1e-9) teto.push(k1);
+  for (let k = k1; k <= kEnd; k++) {
+    let v = D + (k <= -1 ? etcd : 0) - (b.pef && k <= -1 && irrDdmm(k) === '20/09' ? b.pef : 0);
+    ev.forEach(e => { if (kEv(e.q) === k) v -= e.net; });
+    if (v > cad + 1e-9) teto.push(k); D = Math.min(cad, Math.max(0, v)); fim[k] = D;
+  }
+  return { d: D, fim, cad, teto };
+}
+function irrDef(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; const cr = irrCreditos(s, sid); const bd = irrBalDias(s, sid, cr);
+  return bd ? bd.d : Math.max(0, irrBase(x.bal) - cr.gov); }
 // texto do painel do setor: a medição usada, CAD, AFD, déficit em % da CAD e o gatilho (AGUA-SOLO-IRR)
 function irrAguaTxt(s,k,d){ if(d===undefined) d=irrDef(s,k); const x=s.setores[k]; const a=irrAgua(s,k); const G=irrGatilho(s,k); const lim=x.limiar;
   const gat=G?' · gatilho '+irrN(G.v,1)+' mm ('+(G.por==='afd'?'AFD do solo, menor que o limiar de '+irrN(lim,1)+' mm':'limiar do setor')+')':'';
@@ -151,7 +167,8 @@ function irrAguaTxt(s,k,d){ if(d===undefined) d=irrDef(s,k); const x=s.setores[k
 function irrCadTxt(F,k,x){ const s=irrGet(); return s.setores[k]?irrAguaTxt(s,k):''; }
 // faixa coberta por passagem parcial (ainda sem o resto da volta): área e déficit dela
 function irrFaixaCob(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; const cr = irrCreditos(s, sid); if (!cr.faixa) return null;
-  return { os: cr.faixa.os, cob: cr.faixa.cob, d: irrTetoCad(s, sid, Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net)) }; }
+  const bd = irrBalDias(s, sid, cr, [{ q: cr.faixa.q, net: cr.faixa.net }]);
+  return { os: cr.faixa.os, cob: cr.faixa.cob, d: bd ? bd.d : Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net) }; }
 function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 2, 0) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
 function irrCobO(o) { return o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial').reduce((q, p) => Math.max(q, p.cob || 0), 0); }
 function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 2, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
@@ -194,12 +211,13 @@ function irrNec(s, sid) {
 function irrSerie(s, sid) {
   const x = s.setores[sid]; const b = x && x.bal; if (!b) return [];
   const so = irrSonda(s, x); const estDesde = (so && so.st !== 'Ativa' && so.desde !== undefined) ? irrDiaN(so.desde) : 99;
-  const out = []; const etcd = b.etc / b.dias; const k0 = irrDiaN(b.ini); let nd = 0, chuva = 0;
+  const out = []; const etcd = b.etc / b.dias; const k0 = irrDiaN(b.ini); let nd = 0, chuva = 0; const bd = irrBalDias(s, sid, irrCreditos(s, sid));
   for (let k = -7; k <= -1; k++) {
     if (k < k0) { out.push({ k, t: irrDdmm(k), v: null, est: false }); continue; }
     nd++; if (b.pef && irrDdmm(k) === '20/09') chuva = b.pef;
-    const d = b.d0 + etcd * nd - chuva - irrCreditos(s, sid, (k + 1) * 1440).gov;
-    out.push({ k, t: irrDdmm(k), v: irrTetoCad(s, sid, Math.max(0, d)), est: k > estDesde });
+    // com CAD, o mesmo balanço dia a dia do déficit de hoje (série e necessidade coerentes); sem CAD, a conta de antes
+    const v = bd ? (bd.fim[k] !== undefined ? bd.fim[k] : Math.min(bd.cad, Math.max(0, b.d0))) : Math.max(0, b.d0 + etcd * nd - chuva - irrCreditos(s, sid, (k + 1) * 1440).gov);
+    out.push({ k, t: irrDdmm(k), v, est: k > estDesde });
   }
   return out;
 }

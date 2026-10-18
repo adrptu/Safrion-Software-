@@ -1,0 +1,8 @@
+OK   U1 contraexemplo do Codex: B cria b, a tela antiga A renomeia a; b continua no cadastro (e não fica inativo na Manutenção)
+OK   U2 duas edições do mesmo ativo: a segunda é recusada com o motivo; o salvo fica e o rascunho de A continua
+OK   U3 campo calculado na tela (capacidade, conjuntos) não conta como mudança: a renomeação da outra tela fica
+OK   U4 excluído na outra tela e sem mudança aqui: sai daqui também; excluído aqui e mudado lá: recusa
+OK   U5 primeira gravação (cadastro vazio, semente): A e B abrem da semente; B renomeia, A cria c; nada se perde
+OK   U6 sem outra tela: grava normal e repetir não regrava (mesmo comportamento de antes)
+RESULTADO: 6/6 ok
+rc=0

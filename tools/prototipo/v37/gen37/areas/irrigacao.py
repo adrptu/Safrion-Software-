@@ -257,6 +257,8 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
       o2.push(F.demo?('Memória (demonstrativa): déficit 0 na reposição de '+irrDdmm(irrDiaN(b.repos))+' + ETc de '+b.dias+(b.dias>1?' dias':' dia')+' (ETo 5,5 × Kc '+irrN(x.kc,2)+') = '+irrN(si.d,1)+' mm')
         :('Memória: déficit em 15/09 '+irrN(b.d0,1)+' + ETc 7 dias '+irrN(b.etc,1)+' − chuva efetiva '+irrN(b.pef,1)+' − irrigação líquida '+irrN(net,1)+' = '+(si.est?'≈':'')+irrN(si.d,1)+' mm'));
       if(!F.demo) o2.push('Chuva efetiva: '+b.chuva+' · ETc = ET₀ Penman-Monteith (Estação Santa Rita) × Kc do estádio');
+      // com CAD a conta é dia a dia (irrBalDias): a soma acima pode não fechar no déficit; a linha diz por quê (Codex 6252809331)
+      const bd=irrBalDias(s,k,irrCreditos(s,k)); if(bd&&!si.est&&Math.abs(Math.max(0,b.d0+b.etc-b.pef-net)-si.d)>0.05) o2.push('Com a CAD de '+irrN(bd.cad,1)+' mm a conta é dia a dia: o déficit não passa da CAD e a água acima da capacidade de campo drena (FAO-56)');
       const se=irrSerie(s,k).filter(z=>z.v!==null); if(se.length) o2.push('Déficit no fim do dia: '+se.map(z=>z.t+' '+(z.est?'≈':'')+irrN(z.v,1)).join(' · ')+' · hoje '+(si.est?'≈':'')+irrN(si.d,1));
       if(si.faixa) o2.push('Passagem parcial · '+si.faixa);
       irrApsSetor(s,k).slice().sort((p,q)=>q.q-p.q).forEach(a=>{ const pc=irrApParc(a,x.ha); o2.push('Aplicado · '+irrDdmm(irrDiaN(a.q))+' · '+a.os+' · '+a.txt+' · '+irrN(a.vol)+' m³ em '+irrN(irrApCob(a),pc?1:0)+' ha = '+irrMm(irrApBr(a))+' mm brutos'+(pc?' na faixa':'')+' × '+a.ef+' % = '+irrMm(irrApNet(a))+' mm líquidos'+(pc?' · fora do déficit do pivô':'')+(a.prov?' · provisório':'')); }); }
