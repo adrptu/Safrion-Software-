@@ -359,6 +359,45 @@ def seguimento_nc(observacoes, aplicacao, nc, corte, outras_aplicacoes=()):
             'interferencia': interferencia}
 
 
+def eficacia_referencia(tratado, controles, aplicacao, corte):
+    """HT clássico de QA, sem epsilon/fallback; pares já disponíveis até D.
+
+    Cada par declara pré/pós/datas/unidade/protocolo e interferência. Não
+    procura controles nem prova comparabilidade agronômica ou causalidade.
+    """
+    digest([tratado, controles, aplicacao, corte])
+    def motivo(p):
+        if not p.get('unidade') or not p.get('protocolo'):
+            return 'contexto_ausente'
+        if not p['antes_dia'] < aplicacao < p['depois_dia'] <= corte:
+            return 'datas_inelegiveis'
+        if p.get('interferencia', False):
+            return 'aplicacao_interferente'
+        for campo in ('antes', 'depois'):
+            v = p.get(campo)
+            if v is None:
+                return 'valor_ausente'
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
+                raise ValueError('Contagem inválida')
+        return None
+    falha = motivo(tratado)
+    if falha or tratado['antes'] == 0:
+        return {'estado': 'sem_comparacao_valida', 'motivo': falha or 'denominador_zero', 'pares': []}
+    validos, excluidos = [], []
+    for c in controles:
+        falha = motivo(c)
+        if c.get('unidade') != tratado.get('unidade') or c.get('protocolo') != tratado.get('protocolo'):
+            falha = 'protocolo_ou_unidade_incompativel'
+        if falha is None and (c['antes'] == 0 or c['depois'] == 0):
+            falha = 'denominador_zero'
+        if falha:
+            excluidos.append({'id': c['id'], 'motivo': falha})
+            continue
+        validos.append({'controle': c['id'], 'eficacia': 1-(tratado['depois']/tratado['antes'])*(c['antes']/c['depois'])})
+    return {'estado': 'comparacoes_calculadas' if validos else 'sem_comparacao_valida',
+            'pares': validos, 'exclusoes': excluidos}
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
