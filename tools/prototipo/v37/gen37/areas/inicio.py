@@ -693,11 +693,8 @@ function lgSync(self){ const m=LGI.map; if(!m||!LGI.pronto) return; const st=sel
   m.getSource('pxs').setData({type:'FeatureCollection',features:feats});
   tmSync(self); }
 
-const SEV=['red','orange','yellow','cloud','lime','ok','good','navy','blue','purple','gray','none'];
-const PZC={'atrasada':'red','vence hoje':'orange','até 3 dias':'yellow','no prazo':'ok','irrigando hoje':'blue','encerrada':'gray'};
 const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
 const CCH={red:'red',orange:'orange',yellow:'yellow',cloud:'gray',lime:'green',ok:'green',good:'green',navy:'blue',blue:'blue',purple:'blue',gray:'gray',none:'gray'};
-function worstC(cs){ let b='none',bi=99; cs.forEach(c=>{ const i=SEV.indexOf(c); if(i>=0&&i<bi){ bi=i; b=c; } }); return b; }
 function lay(self){ const l=self.state.lay||'Integrado'; return M.lays.indexOf(l)>=0?l:'Integrado'; }
 function flt(self,l){ const gs=fopts(l); const d={}; gs.forEach(g=>{ d[g.k]=g.o[0]; }); const s=Object.assign(d,((self.state.flt||{})[l])||{});
   gs.forEach(g=>{ if(g.o.indexOf(s[g.k])<0) s[g.k]=g.o[0]; });   // opção de outra fazenda (ex.: cena) volta à primeira desta
@@ -756,7 +753,6 @@ function integ(t){ const x=M.integ[t];
   return [x[0],lb]; }
 // camada Irrigação: o mesmo estado das telas IR-01..IR-04 (situação, déficit, ordens e próximo passo)
 // lâmina recomendada e percentímetro (irrPerc, irrigacao_estado.js: a mesma conta da programação da Irrigação + a ficha do pivô)
-function irrRecTxt(x){ const r=x&&x.rec; if(!r||!(r.br>0.05)) return ''; return (r.np>1?r.np+'× '+nfx(r.pct?r.lamP:r.por,1):nfx(r.pct?r.lamP:r.por,1))+' mm'+(r.pct?' a '+r.pct+' %':''); }
 function irrRecKv(xi){ const r=xi.rec; const kv=[]; if(!r) return kv;
   if(xi.etcd) kv.push({l:'Necessidade da cultura',t:'ETc ≈ '+nfx(xi.etcd,1)+' mm/dia'+(xi.kc?' (ETo '+nfx(xi.etcd/xi.kc,1)+' mm/dia × Kc '+nfx(xi.kc,2)+')':'')});
   if(!(r.br>0.05)){ kv.push({l:'Lâmina recomendada',t:'sem reposição: déficit zerado'}); return kv; }
@@ -820,17 +816,11 @@ function cusReal(t){ return cusTalhao(M,t,OSN.filter(osSaf)); }
 // Várias ordens no talhão: o rótulo conta as ordens por fase (nunca uma fase única para a área); a cor é a da fase mais atrás no ciclo entre
 // as abertas. Cores das fases: PLA-DS01 (A liberar e Encerradas em cinza, sempre com o nome). Avanço: área apontada ÷ área das ordens abertas,
 // sem pintar parte do polígono (não há geometria executada). Vermelho só para impedimento real (selo vermelho da ordem).
-const FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
-const FASEC={'A liberar':'gray','Liberadas':'blue','Em execução':'ok','Em conferência':'yellow','Encerradas':'gray'};
-const FASE1={'Liberadas':'Liberada','Encerradas':'Encerrada'};
-function osAb(os){ return os.filter(o=>o.fase!=='Encerradas'&&o.fase!=='Canceladas'); }   // abertas: sem Encerradas nem Canceladas (Codex 6216014054: cancelada não entra no Avanço nem nos números)
-function osSemAb(os){ return os.length&&os.every(o=>o.fase==='Canceladas')?'cancelada':'encerrada'; }   // rótulo quando não há ordem aberta
-function osImp(o){ return o.selos.some(s=>s[1]==='red'); }
 function osCls(t,f){return mcOS(ordsOf(t,f.fase),f);}
 function osLegend(l,f){return mcOSLeg(f).map(x=>Lc(l,x.k,x.t));}
-function osStrip(f,ordF){ const N=(k,val,d)=>({k,val,d:d||''}); const os=ordF.filter(o=>f.fase==='Todas'||o.fase===f.fase); const ab=osAb(os);
+function osStrip(f,ordF){ const N=(k,val,d)=>({k,val,d:d||''}); const os=ordF.filter(o=>f.fase==='Todas'||o.fase===f.fase); const ab=mc_osAb(os);
   if(f.ver==='Atrasos') return [N('Ordens',os.length),N('Atrasadas',os.filter(o=>o.pz==='atrasada').length),N('Vencem hoje',os.filter(o=>o.pz==='vence hoje').length),N('Saldo',nfx(os.reduce((a,o)=>a+(o.saldo||0),0))+' ha','Saldo a executar')];
-  if(f.ver==='Impedimentos') return [N('Ordens',os.length),N('Impedidas',ab.filter(osImp).length,'Ordens abertas impedidas ou em conflito'),N('Pendências',ab.filter(o=>!osImp(o)&&o.selos.length).length,'Ordens abertas com pendência')];
+  if(f.ver==='Impedimentos') return [N('Ordens',os.length),N('Impedidas',ab.filter(mc_osImp).length,'Ordens abertas impedidas ou em conflito'),N('Pendências',ab.filter(o=>!mc_osImp(o)&&o.selos.length).length,'Ordens abertas com pendência')];
   if(f.ver==='Avanço'){ const xs=ab.filter(o=>o.area>0); const a=xs.reduce((s,o)=>s+o.area,0), r=xs.reduce((s,o)=>s+Math.min(o.rz||0,o.area),0);
     return [N('Ordens',os.length),N('Feito',nfx(r,r%1?1:0)+' ha','Área apontada nas ordens abertas'),N('Avanço',a?nfx(r/a*100,0)+' %':'—','Área apontada ÷ área das ordens abertas')]; }
   return [N('Ordens',os.length)].concat(['A liberar','Em execução','Em conferência'].map(x=>N(x,os.filter(o=>o.fase===x).length))); }   // até quatro números (DS-49)
@@ -863,7 +853,7 @@ function cls0(l,f,t){
   if(l==='Irrigação') return mcIrr(M.irr[t],f.ver);
   if(isIns(l,f)){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
     if(!its.length) return semPlanoOf(t)?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
-    const c=worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
+    const c=mc_worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
     return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(c==='yellow'?'aguardando pedido':'estoque cobre')}; }
   if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
@@ -954,7 +944,7 @@ function criarVis(self,ts,extra,pt){ const sat=lay(self)==='Satélite'; const ms
     return {msg:msgs.join(' · ')+(n?' · aparece no AG-01 e no app.':' · nenhuma vistoria duplicada.')}; });
   self.setState(Object.assign({miprev:Date.now(),g2toast:r.msg||r.erro||''},extra||{})); }
 // ---- O.S. do talhão: cartões selecionáveis e o próximo passo da escolhida (osProx e comandos osc_* do núcleo da O.S.) ----
-function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return SEV.indexOf(PZC[x?x.pz:'no prazo']); };
+function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return mc_SEV.indexOf(mc_PZC[x?x.pz:'no prazo']); };
   return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; const al=x=>x.etapa==='A liberar'?0:1; return (fa-fb)||(sv(a.id)-sv(b.id))||(al(a)-al(b)); }); }   /* empate de prazo: a decisão do agrônomo (A liberar) vem antes, como no rótulo do talhão (G1 do CTL-1: OS-0424 no T1-B) */
 function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
   return {aprovar:'Aprovar '+o.id+' (versão '+vn+'): ao confirmar, '+g2ator(g2perfil(),g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera.',
@@ -995,7 +985,7 @@ function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb
   return N; }
 function osCard(self,t,o,mo,on){ const s=o.area?(nf(o.realizado||0)+'/'+nf(o.area)+' ha'+((o.realizado>0&&o.saldo>0)?' · saldo '+nf(o.saldo)+' ha':'')):(o.lam||'');
   const sub=[s,'janela '+o.janela,o.resp].filter(Boolean).join(' · ')+(mo&&mo.tal.length>1?' · O.S. de '+mo.tal.join(' + '):'');
-  return {t:o.id+' · '+o.tipo,sub,ch:[CH(o.etapa,FCOR[o.etapa]||'gray')].concat((o.selos||[]).map(x=>CH(x.t,x.c||'yellow'))).concat(mo?[CH(mo.pz,CCH[PZC[mo.pz]])]:[]),
+  return {t:o.id+' · '+o.tipo,sub,ch:[CH(o.etapa,FCOR[o.etapa]||'gray')].concat((o.selos||[]).map(x=>CH(x.t,x.c||'yellow'))).concat(mo?[CH(mo.pz,CCH[mc_PZC[mo.pz]])]:[]),
     on:on?'true':'false',go:()=>{ const s2=Object.assign({},self.state.osel||{}); s2[t]=o.id; self.setState({osel:s2,mpa:null}); },
     st:'display:flex;flex-direction:column;gap:5px;text-align:left;width:100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;cursor:pointer;font-family:inherit;color:#15201A;'+(on?'border:2px solid #1E7A4C;background:#F4FAF6;':'border:1px solid #E4E9E5;background:#FFFFFF;')}; }
 // seções do painel: uma funcionalidade por vez (a da barra), sempre aberta; sum é a linha de resumo usada no Integrado
@@ -1501,7 +1491,7 @@ function muxVizinho(centros,i,tecla){ const d={ArrowRight:[1,0],ArrowLeft:[-1,0]
   return melhor; }
 // ordem natural do nome: P2 antes de P10
 function muxNome(a,b){ return String(a).localeCompare(String(b),'pt-BR',{numeric:true,sensitivity:'base'}); }
-// gravidade na camada: a ordem SEV das cores (a pior primeiro); classes de índice (satélite e solo) entre "atenção" e "nuvem", da pior para a melhor
+// gravidade na camada: a ordem mc_SEV das cores (a pior primeiro); classes de índice (satélite e solo) entre "atenção" e "nuvem", da pior para a melhor
 function muxRank(c,sev){ if(!c) return 99; if(c.c==='sat') return 2+0.5*(typeof c.rk==='number'?c.rk:(typeof c.k==='number'?c.k/5:0.5)); const i=(sev||[]).indexOf(c.c); return i<0?50:i; }
 function muxOrdem(rows,sev){ return rows.slice().sort((a,b)=>(muxRank(a.c,sev)-muxRank(b.c,sev))||muxNome(a.nome,b.nome)); }
 // endereço: #faz=LG&lay=sat&t=PV05&dt=25-09 ↔ {faz:'Lagoa Grande', lay:'Satélite', t:'PV05', dt:'25/09'}; chave ou valor desconhecido fica fora
@@ -1553,7 +1543,7 @@ function muxLer(l,f,t,c,leg){ const r={valor:c.l||'—',estado:'',data:'dado de 
     else if(l==='Irrigação'){ r.data='balanço de '+muxDt(M.hoje)+' (hoje)'; if(c.est) r.estado=(r.estado?r.estado+' · ':'')+'≈ estimado'; }
   }catch(er){}
   const os=ordsOf(t,'Todas').filter(o=>['Encerradas','Canceladas'].indexOf(o.fase)<0); const ex=os.find(o=>o.fase==='Em execução')||os[0];
-  if(ex) r.manejo=ex.id+' · '+(FASE1[ex.fase]||ex.fase).toLowerCase()+(os.length>1?' · +'+(os.length-1)+(os.length>2?' ordens':' ordem'):'');
+  if(ex) r.manejo=ex.id+' · '+(mc_FASE1[ex.fase]||ex.fase).toLowerCase()+(os.length>1?' · +'+(os.length-1)+(os.length>2?' ordens':' ordem'):'');
   return r; }
 // o que o talhão diz na camada ativa: alimenta o cartão, o nome acessível, o rótulo, a legenda e a lista
 function muxInfo(l,f,ts,CL,leg){ const out={};

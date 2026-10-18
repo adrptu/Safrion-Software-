@@ -63,6 +63,8 @@ def main():
         shutil.copyfile(HERE / 'mapa_camadas_unit.js', td / 'mapa_camadas_unit.js')
         if (HERE / 'inicio.base.py').exists():
             shutil.copyfile(HERE / 'inicio.base.py', td / 'inicio.base.py')
+        candidate = HERE / 'inicio.py' if (HERE / 'inicio.py').exists() else HERE / 'areas/inicio.py'
+        shutil.copyfile(candidate, td / 'inicio.py')
         assert "x.d<5?'ok'" in source
         (td / 'mapa_camadas.js').write_text(source.replace("x.d<5?'ok'", "x.d<6?'ok'", 1), encoding='utf-8')
         result = subprocess.run([NODE, str(td / 'mapa_camadas_unit.js')], capture_output=True, text=True)

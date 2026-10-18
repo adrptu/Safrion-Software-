@@ -46,4 +46,17 @@ for(const rec of [null,{br:0.05},{br:1,np:1,por:3},{br:1,np:2,por:2}])for(const 
  const x={d:12,c:'yellow',l:'déficit',rec,est};same(pure.mcIrr(x,'Balanço hídrico'),old.originalIrr(x,'Balanço hídrico'));
 }
 assert(!('M' in pure)&&!('window' in pure)&&!('document' in pure));
+// S4: a faixa e o mapa compartilham impedimentos/ordens abertas.
+const candPath=fs.existsSync(__dirname+'/inicio.py')?__dirname+'/inicio.py':__dirname+'/areas/inicio.py';
+const cand=fs.readFileSync(candPath,'utf8');
+const strip=s=>s.slice(s.indexOf('function osStrip('),s.indexOf('function osFonte('));
+vm.runInContext(strip(base),old);
+vm.runInContext('function nfx(n,d){return mc_nfx(n,d);}',pure);
+vm.runInContext(strip(cand),pure);
+for(const os of sets)for(const fase of ['Todas',...phases])for(const ver of ['Fases','Avanço','Atrasos','Impedimentos'])same(pure.osStrip({fase,ver},os),old.osStrip({fase,ver},os));
+// Contraprova: ignorar selos vermelhos precisa quebrar a paridade da faixa.
+const bad={};vm.createContext(bad);vm.runInContext(fs.readFileSync(__dirname+'/mapa_camadas.js','utf8')+'\nfunction nfx(n,d){return mc_nfx(n,d);}',bad);
+vm.runInContext(strip(cand),bad);vm.runInContext('mc_osImp=function(){return false;}',bad);
+const blocked=[ord('Liberadas',{selos:[['Impedida','red']]})];
+assert.notEqual(JSON.stringify(bad.osStrip({fase:'Todas',ver:'Impedimentos'},blocked)),JSON.stringify(old.osStrip({fase:'Todas',ver:'Impedimentos'},blocked)));
 console.log(JSON.stringify({pass:count,scope:'VM e paridade de funções com fixtures; não substitui render LG/SR nem A5'}));
