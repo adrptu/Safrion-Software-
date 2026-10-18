@@ -1,15 +1,11 @@
 'use strict';
 
-/** Agenda sequencial estimada, sem mutação, aprovação ou liberação de O.S.
- * Instantes: milissegundos Unix inteiros; o adaptador resolve data e fuso.
- * sequencia: [{id, areaHa, rendimentoHaH, janelaInicio, janelaFim, kmAnterior}].
- * parametros: {inicio, velocidadeKmh, fonte}. Não há velocidade padrão.
- * kmAnterior inclui o primeiro trecho (zero explícito se já estiver no local).
- * Cada duração é arredondada para cima em 1 ms. Espera pela janela é permitida;
- * operação é contínua, sem divisão em turnos, pausas ou reordenação automática.
- * Não inclui troca de calda nem lavagem. Espera compõe o tempo decorrido da
- * jornada, que não tem limite próprio nesta estimativa (somente as janelas).
- * Viável significa apenas caber nestas premissas temporais, não autorização.
+/** Agenda sequencial estimada; não aprova, libera ou altera O.S.
+ * Instantes absolutos em ms. O adaptador resolve o fuso da fazenda.
+ * parametros.turnos: [[inicio,fim],...], obrigatórios, ordenados e sem sobreposição.
+ * Deslocamento e operação consomem somente turno ∩ janela da O.S.; podem pausar.
+ * Durações arredondadas para cima em 1 ms. Sem lavagem, troca de calda ou clima.
+ * fim:null indica trabalho incompleto; não projeta término fora da janela.
  */
 function frAgenda(sequencia, parametros) {
   const linhas = [];
@@ -17,14 +13,23 @@ function frAgenda(sequencia, parametros) {
   const instante = n => Number.isSafeInteger(n) && Math.abs(n) <= 8640000000000000;
   const p = parametros || {};
   const premissas = {inicio: p.inicio, velocidadeKmh: p.velocidadeKmh, fonte: p.fonte,
-    incluiTrocaCaldaLavagem: false, incluiPausas: false, limiteJornadaMs: null,
-    esperaIntegraJornada: true};
+    turnos: Array.isArray(p.turnos) ? p.turnos.map(t=>Array.isArray(t)?t.slice():t) : null,
+    incluiTrocaCaldaLavagem: false, incluiPausas: true, esperaIntegraJornada: true};
   const resultado = (status, id, motivo) => ({status, id, motivo, linhas, premissas});
   const sem = (id, motivo) => resultado('sem_conta', id, motivo);
   if (!Array.isArray(sequencia) || !sequencia.length) return sem(null, 'Sequência ausente ou vazia');
   if (!instante(p.inicio)) return sem(null, 'Informe o início da jornada como instante absoluto');
   if (!positivo(p.velocidadeKmh) || typeof p.fonte !== 'string' || !p.fonte.trim()) {
     return sem(null, 'Informe velocidade de deslocamento em km/h e sua fonte');
+  }
+  if (!Array.isArray(p.turnos) || !p.turnos.length) return sem(null, 'Informe os turnos da jornada');
+  let fimAnterior = null;
+  for (const t of p.turnos) {
+    if (!Array.isArray(t) || t.length !== 2 || !instante(t[0]) || !instante(t[1]) ||
+        t[1] <= t[0] || (fimAnterior !== null && t[0] < fimAnterior)) {
+      return sem(null, 'Turnos inválidos: use intervalos ordenados, não vazios e sem sobreposição');
+    }
+    fimAnterior = t[1];
   }
   const ids = new Set();
   for (const o of sequencia) {
@@ -46,18 +51,37 @@ function frAgenda(sequencia, parametros) {
     }
     const operacaoMs = Math.ceil(o.areaHa / o.rendimentoHaH * 3600000);
     const deslocamentoMs = Math.ceil(o.kmAnterior / p.velocidadeKmh * 3600000);
-    const chegada = anterior + deslocamentoMs;
-    const inicio = Math.max(chegada, o.janelaInicio);
-    const fim = inicio + operacaoMs;
     if (!Number.isSafeInteger(operacaoMs) || operacaoMs <= 0 ||
-        !Number.isSafeInteger(deslocamentoMs) || !instante(chegada) || !instante(fim)) {
+        !Number.isSafeInteger(deslocamentoMs) || deslocamentoMs < 0 ||
+        !instante(anterior + deslocamentoMs + operacaoMs)) {
       return sem(o.id, 'Duração ou horário fora do intervalo calculável');
     }
-    const cabe = fim <= o.janelaFim;
-    linhas.push({id: o.id, inicio, fim, chegada, esperaMs: inicio - chegada,
-      operacaoMs, deslocamentoMs, janelaFim: o.janelaFim, status: cabe ? 'cabe' : 'inviavel'});
-    if (!cabe) return resultado('inviavel', o.id,
-      'Termina ' + new Date(fim).toISOString() + ', janela fecha ' + new Date(o.janelaFim).toISOString());
+    // Espera pela janela dentro de turno; o restante do tempo parado é pausa.
+    const abertura = Math.max(anterior, o.janelaInicio);
+    const esperaMs = p.turnos.reduce((s,t)=>s+Math.max(0,Math.min(t[1],abertura)-Math.max(t[0],anterior)),0);
+    let cursor = abertura, pausaMs = abertura - anterior - esperaMs;
+    let viagem = deslocamentoMs, trabalho = operacaoMs;
+    let chegada = null, inicio = null, fim = null;
+    for (const t of p.turnos) {
+      const a = Math.max(cursor, t[0], o.janelaInicio), b = Math.min(t[1], o.janelaFim);
+      if (a >= b) continue;
+      pausaMs += a - cursor; cursor = a;
+      const deslocar = Math.min(viagem, b - cursor);
+      viagem -= deslocar; cursor += deslocar;
+      if (!viagem && chegada === null) chegada = cursor;
+      if (!viagem && cursor < b) {
+        if (inicio === null) inicio = cursor;
+        const operar = Math.min(trabalho, b - cursor);
+        trabalho -= operar; cursor += operar;
+      }
+      if (!trabalho) { fim = cursor; break; }
+    }
+    const cabe = trabalho === 0;
+    linhas.push({id:o.id, chegada, inicio, fim, esperaMs, pausaMs, operacaoMs, deslocamentoMs,
+      operacaoExecutadaMs:operacaoMs-trabalho, deslocamentoExecutadoMs:deslocamentoMs-viagem,
+      janelaFim:o.janelaFim, status:cabe?'cabe':'inviavel'});
+    if (!cabe) return resultado('inviavel',o.id,
+      p.turnos[p.turnos.length-1][1] < o.janelaFim ? 'Sem turno até o fim da janela' : 'Trabalho não termina na janela da O.S.');
     anterior = fim;
   }
   return resultado('viavel', null, 'Sequência cabe nas premissas temporais informadas');
