@@ -44,3 +44,25 @@ console.log('PASS: 5 limites de aplicação e inversão de sinal entre safras; '
 const batch = "import sys,random,math,json,pathlib,copy\nsys.path.insert(0,sys.argv[1])\nimport raiox_gabarito as g\neps=[]\nfor season in (1,2):\n for seed in range(20):\n  rng=random.Random(1000*season+seed)\n  dias=[dict(wk=1.03,clima=1+.01*math.sin((d+season*4)/6),falta=.2,n14=10+math.sin((d+season*5)/7),k14=20,imigracao=.01,chuva=12 if (d+season)%13==0 else 0,ruido_obs=.88+rng.random()*.24,eff=.6+rng.random()*.1) for d in range(43)]\n  for scenario in ('zero','ausente','positivo'):\n   ds=copy.deepcopy(dias)\n   if scenario=='ausente':\n    for d in ds:d['n14']=6.4\n   eps.append(dict(cenario=scenario,safra=str(season),semente=seed,talhao='T',alvo='sintetico',fator='n',dias=ds,observacoes=[1,8,15,22,29,36,42],nc=1,x0=2,cap=1000,fx={'def':0,'n':0 if scenario=='zero' else .03,'k':0,'lav':1},politica={'delay':2,'gatilho':8,'resid':3}))\na=g.gerar(eps);b=g.gerar(eps)\nassert g.digest(a)==g.digest(b)\nassert len(a['entrada'])==240\nassert all(c['resultado']['classe']!='forte' for c in a['oraculo']['classes'] if c['chave'][0]!='positivo')\nassert any(c['resultado']['classe']=='forte' for c in a['oraculo']['classes'] if c['chave'][0]=='positivo')\nassert all(p['resultado']['delta']==0 for p in a['oraculo']['pares'] if p['cenario'] in ('zero','ausente') and 'resultado' in p)\nassert all('resultado' not in e and 'intervencao' not in e for e in a['entrada'])\nprint(json.dumps({'episodios':len(eps),'entradas':len(a['entrada']),'pares':len(a['oraculo']['pares']),'hash_repeticao':g.digest(a),'classes':[(x['chave'][0],x['chave'][-2:],x['resultado']['classe']) for x in a['oraculo']['classes']],'exclusoes':a['oraculo']['exclusoes_por_safra']},ensure_ascii=False))";
 const bp=cp.spawnSync("python3",["-B","-c",batch,__dirname],{encoding:"utf8"});
 assert.equal(bp.status,0,bp.stderr);console.log(bp.stdout.trim());
+
+// Comparação com simulatePest original: mesmo ruído constante, rotação e repetição.
+const simStart=html.indexOf('function simulatePest('),simEnd=html.indexOf('// ---- água e adubação ----',simStart);
+assert(simStart>=0&&simEnd>simStart);
+for(const repete of [false,true]) {
+ const days=70,prods=[{c:'Óleo mineral',g:'O',base:.5,res:2},{c:'A',g:'A',base:.6,res:4},{c:'B',g:'B',base:.7,res:5}];
+ const weather=Array.from({length:days+1},(_,d)=>({quenteSeco:d%5===0}));
+ const rain=Array.from({length:days+1},(_,d)=>d%13===0?12:0);
+ const prof={press:1,oleo1:true,repete,eq:'E',off:0,falha:[],gatilho:2,delay:2};
+ const target={id:'A',fx:{def:0,n:.03,k:0,lav:.8},x0:[2,2],wk:[1.03,1.03],clima:()=>1,cap:1000,imm:.01,nc:1,prods};
+ const sim={Math,rngFor:()=>()=>.5,PROF:{T:prof},HOT:{A:[]},WATER:{T:{suff:.95}},NUT:{T:{n14:Array(days+1).fill(10),k14:Array(days+1).fill(20)}},EQ:{E:{cov:.8}},CLIMA:weather,RAINMM:rain,APP_FX:{qs:.8,chuva:.7},DAYS:days,avOf:()=>0};
+ vm.createContext(sim);vm.runInContext(html.slice(simStart,simEnd),sim);sim.p={id:'T',stage:'adulta'};sim.a=target;
+ const original=vm.runInContext('simulatePest(p,a)',sim);
+ const ep={x0:2,cap:1000,nc:1,fx:target.fx,observacoes:original.obs.map(o=>o.day),dias:weather.map((w,d)=>({wk:1.03,clima:1,falta:0,n14:10,k14:20,imigracao:.01,chuva:rain[d],quenteSeco:w.quenteSeco,ruido_obs:1,ruido_app:.5})),politica:{produtos:prods,oleo1:true,repete,id_tamanho:1,cobertura:.8,app_qs:.8,app_chuva:.7,gatilho:2,delay:2}};
+ const pySim=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\ne=json.load(sys.stdin)\na=g.agenda_observada(e['x0'],e['dias'],e['cap'],e['fx'],e['observacoes'],e['nc'],e['politica'])\nr=g.replay(e['x0'],e['dias'],a,e['cap'],e['fx'])\nprint(json.dumps(dict(apps=a,obs=[dict(day=d,v=r[d]['v']) for d in e['observacoes']])))`;
+ const result=cp.spawnSync('python3',['-B','-c',pySim,__dirname],{input:JSON.stringify(ep),encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);const actual=JSON.parse(result.stdout);
+ assert(actual.apps.length>=3,'fixture sem aplicações suficientes');
+ assert.deepEqual(actual.apps.map(a=>[a.day,a.produto,a.rep,a.consec]),Array.from(original.apps,a=>[a.day,a.prod.c,a.rep,a.consec]));
+ actual.obs.forEach((o,i)=>assert(Math.abs(o.v-original.obs[i].v)<1e-10,`observação ${i}: ${o.v} vs ${original.obs[i].v}`));
+ console.log(`PASS simulatePest real: repete=${repete}, ${actual.apps.length} aplicações, ${actual.obs.length} observações.`);
+}

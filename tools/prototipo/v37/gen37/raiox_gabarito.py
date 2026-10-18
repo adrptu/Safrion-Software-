@@ -142,22 +142,47 @@ def digest(valor):
 
 
 def agenda_observada(x0, dias, cap, fx, observacoes, nc, politica, desligar=None):
-    """Política sintética explícita; não substitui rotação de produtos do v3.
+    """Agenda adaptativa observada; depois é congelada nos dois braços.
 
-    O ruído/eficácia são indexados por dia antes da decisão, evitando deslocar
-    a sequência aleatória quando a intervenção muda o número de aplicações.
+    Com produtos/cobertura usa a escolha, resistência e eficácia do v3.
+    O ruído de aplicação é pré-sorteado por dia. Sem produtos, conserva a
+    política simplificada apenas para controles sintéticos explícitos.
     """
     agenda, ultimo, pendente = [], -99, None
+    grupo, consecutivos, contagem = None, 0, {}
     for dia in range(len(dias)):
         if pendente == dia:
-            agenda.append({'day': dia, 'eff': dias[dia]['eff'],
-                           'resid': politica['resid']})
+            if 'produtos' in politica:
+                produtos, n = politica['produtos'], len(agenda)
+                oleos = [p for p in produtos if p['c'] == 'Óleo mineral']
+                if politica.get('oleo1') and n == 0 and oleos:
+                    produto = oleos[0]
+                elif politica.get('repete'):
+                    produto = next((p for p in produtos if p['c'] != 'Óleo mineral'), produtos[0])
+                else:
+                    candidatos = [p for p in produtos if p['c'] != 'Óleo mineral' and p['g'] != grupo]
+                    produto = candidatos[(n + politica['id_tamanho']) % len(candidatos)] if candidatos else produtos[0]
+                repeticoes = contagem.get(produto['g'], 0)
+                consecutivos = consecutivos+1 if produto['g'] == grupo else 0
+                resistencia = .7**consecutivos if consecutivos > 0 else .93**repeticoes
+                chuva_depois = dias[dia]['chuva'] + (dias[dia+1]['chuva'] if dia+1 < len(dias) else 0) >= 5
+                cov = politica['cobertura']
+                eff = min(.95, produto['base']*cov*resistencia *
+                          (politica['app_qs'] if dias[dia].get('quenteSeco', False) else 1) *
+                          (politica['app_chuva'] if chuva_depois else 1) *
+                          (.9 + dias[dia]['ruido_app']*.18))
+                resid = math.floor(produto['res']*(.7+.3*cov)+.5)
+                contagem[produto['g']] = repeticoes+1
+                grupo = produto['g']
+                agenda.append({'day': dia, 'eff': eff, 'resid': resid, 'produto': produto['c'],
+                               'grupo': grupo, 'rep': repeticoes+1, 'consec': consecutivos})
+            else:
+                agenda.append({'day': dia, 'eff': dias[dia]['eff'], 'resid': politica['resid']})
             ultimo, pendente = dia, None
         if dia in observacoes:
             valor = replay(x0, dias[:dia+1], agenda, cap, fx, desligar)[-1]['v']
             if valor >= nc*politica['gatilho'] and dia-ultimo > 9 and pendente is None:
                 proximo = min(len(dias)-1, dia+politica['delay'])
-                # Agenda no próprio dia já passado não seria executada no v3.
                 if proximo > dia:
                     pendente = proximo
     return agenda
