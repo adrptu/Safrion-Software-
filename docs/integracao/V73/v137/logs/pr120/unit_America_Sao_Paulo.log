@@ -1,0 +1,22 @@
+OK 3 operações de4h em8h: primeira que estoura é C
+OK janelas adjacentes sem interseção global são viáveis
+OK janela de1h expira antes da segunda operação
+OK virada de dia preserva data e fim exato
+OK deslocamento entre O.S. impede janela antes viável
+OK viagem chega antes da janela e espera no destino
+OK dados ausentes e inválidos nunca presumem viabilidade
+OK parâmetro explícito e fonte obrigatórios, sem padrão
+OK sem dado intermediário não calcula sucessor nem oculta prefixo
+OK entrada vazia e IDs ausentes/duplicados
+OK não altera ordem, dados ou parâmetros congelados
+OK precisão de1ms conservadora e fronteira inclusiva
+OK overflow não vira horário viável ou exceção
+OK 20h em turnos07–17 termina17h no segundo dia; janela1dia não cabe
+OK deslocamento interrompido não consome madrugada
+OK turnos obrigatórios, válidos, ordenados e não sobrepostos
+OK espera pela abertura separada da pausa fora do turno
+OK fim exato do turno aceito;1ms extra exige outro turno
+OK viagem termina na borda; operação inicia somente no próximo turno
+OK A1: termina A08h, viaja até09h e opera B10–12h
+OK viagem incompleta sem turno tem motivo próprio e não inicia operação
+21 cenários passaram
