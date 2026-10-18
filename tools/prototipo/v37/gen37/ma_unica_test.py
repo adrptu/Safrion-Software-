@@ -97,7 +97,8 @@ try:
     ab = {}
     for k in ('Otávio', 'Zé', 'Ana'):
         m.ir('', perfil=k, limpa=True); ab[k] = J("location.hash")
-    m.ir('vis=semordem', perfil='Zé'); zg = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>/^Gerar/.test(b.innerText.trim())); return b?b.disabled:'sem';})()")
+    # DS-MAN (17/10/2026): a primária indisponível do cabeçalho é a peça comum acao_motivo (aria-disabled + dica + motivo junto), não disabled
+    m.ir('vis=semordem', perfil='Zé'); zg = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>/^Gerar/.test(b.innerText.trim())); return b?(b.disabled||b.getAttribute('aria-disabled')==='true'):'sem';})()")
     m.ir('ativo=a11', perfil='Zé'); m.bloco('Situação'); zc = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>/^Mudar condição/.test(b.innerText.trim())); return b?b.disabled:'sem';})()")
     m.ir('ativo=a01', perfil='Zé'); m.bloco('Situação'); zt = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>/^Mudar condição/.test(b.innerText.trim())); return b?b.disabled:'sem';})()")
     s0 = J(CEN); m.ir('vis=ordens', perfil='Ana'); m.ir('vis=ordens', perfil='Otávio'); s1 = J(CEN)
@@ -143,7 +144,7 @@ try:
     m.ir('om=OM-0234'); m.bloco('Custo e tempos'); cu = m.pan()
     m.ok(all(v == [True, True, True] for v in gr.values()) and 'CUSTO R$/H DA OFICINA' in cu.upper(), 'AC-PCM-21 · as 5 grades com busca, filtro e ordenação; "Custo R$/h da oficina" no painel', gr)
     # ---------- fluxo principal a 1440 px: gerar e liberar (normal, recusa, repetição) ----------
-    m.ir('vis=semordem', perfil='Ana', limpa=True); r = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>/^Gerar/.test(b.innerText.trim())); return b?[b.disabled,b.getAttribute('title')||'']:null;})()")
+    m.ir('vis=semordem', perfil='Ana', limpa=True); r = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>/^Gerar/.test(b.innerText.trim())); return b?[b.disabled||b.getAttribute('aria-disabled')==='true',b.getAttribute('data-dica')||b.getAttribute('title')||'']:null;})()")
     m.ok(r and r[0] is True and 'Otávio' in (r[1] or '') + (m.body()), 'fluxo · recusa: Ana vê "Gerar" desabilitado com o motivo (Ação do Otávio)', r)
     m.ir('vis=semordem', perfil='Otávio'); n0 = m.man("Object.keys(m.oms).length")
     J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>/^Gerar/.test(b.innerText.trim())); b.click(); b.click();})()"); time.sleep(.6)

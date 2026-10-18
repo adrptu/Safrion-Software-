@@ -89,7 +89,7 @@ def parte_A():
         foto(m, 'A1_entrada_1440.png')
         if av: J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6)
         else: m.ir('vis=ativos&pend=semplano')
-        espera(m, "document.querySelectorAll('[role=row][data-rid]').length>0"); rows = m.linhas(0); ch = chip(m); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled}:null;})()")
+        espera(m, "document.querySelectorAll('[role=row][data-rid]').length>0"); rows = m.linhas(0); ch = chip(m); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled||b.getAttribute('aria-disabled')==='true'}:null;})()")
         ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and ch and ch['on'] == 'true' and 'pend=semplano' in (m.hash() or '') and hp and not hp['dis'],
            'A1 · um toque: Ativos com o filtro rápido "Sem plano" ligado (4 linhas) e a primária "Vincular a plano" no cabeçalho', [rows, ch, m.hash(), hp])
         foto(m, 'A1_ativos_sem_plano_1440.png')
@@ -166,7 +166,7 @@ def parte_A():
         m.J("(()=>{const b=document.querySelector('#vl-painel button[aria-label=Fechar]'); if(b) b.click();})()"); time.sleep(.4); m.clk('Descartar alterações', PAN); time.sleep(.3)
         ok(not aberto(m), 'A4 · fechar com alteração pede confirmação e descarta')
         # A5 · permissão: Zé vê o motivo e a primária desligada (mesma regra do plano)
-        m.ir('vis=ativos&pend=semplano', perfil='Zé'); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled,t:b.title}:null;})()")
+        m.ir('vis=ativos&pend=semplano', perfil='Zé'); hp = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Vincular a plano'); return b?{dis:b.disabled||b.getAttribute('aria-disabled')==='true',t:b.getAttribute('data-dica')||b.title}:null;})()")
         abre_link(m, 'a09'); botao(m, 'Contar de agora'); pr = prim(m)
         ok(hp and hp['dis'] and 'Ação do Otávio' in hp['t'] and pr.get('dis') and 'Ação do Otávio' in pr.get('why', ''), 'A5 · Zé: "Vincular a plano" e "Vincular ao PM-08" desligados com o motivo (Ação do Otávio)', [hp, pr])
         m.ir('plano=PM-07', perfil='Zé'); bz = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Vincular ativos'); return b?b.disabled:'sem';})()")

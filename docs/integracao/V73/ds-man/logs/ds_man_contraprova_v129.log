@@ -1,0 +1,82 @@
+  ok  R1 referência O.S.: trilha "Agrícola › Ordem de Serviço", título ≠ módulo, sem texto solto, uma primária
+  ok  R2 referência O.S.: células com até 2 linhas e cabeçalho numa linha a 1440 px
+  FALHA C1 semordem: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": ["Ação do Otávio (responsável de manutenção)"], "prims": [], "vistos": ["Gerar 3 ordens preventivas"], "ind": [{"t": "Gerar 3 ordens preventivas", "dica": "", "mot": ""}]}
+  FALHA C2 semordem: trilha "Manutenção › Manutenção" · ""
+  FALHA C3 semordem: nenhum texto solto no cabeçalho além de título, selo e ações · ["Ação do Otávio (responsável de manutenção)"]
+  ok  C4 semordem: no máximo uma primária verde à vista e selo de estado ao lado do título
+  FALHA C5 semordem: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo) · [{"t": "Gerar 3 ordens preventivas", "dica": "", "mot": ""}]
+  FALHA A1 semordem: uma fileira de escolha fora do bloco (as abas das visões) · [3, ["Visão", "Prazo pelo início da janela", "Visão da lista: tabela ou cartões"]]
+  FALHA B1 semordem: a lista dentro de um bloco com título ('') · ""
+  FALHA B2 semordem: filtros rápidos dentro do bloco · ["Vencidas", "Até 10 d", "Até 30 d"]
+  FALHA L1 semordem: células com no máximo 2 linhas a 1440 px · [{"gid": "g_so", "rid": "a:SM-0150", "col": "ATIVO · LEITURA ⇅", "linhas": 3, "t": "Colhedora Axial-Flow 7250 · 2.150 h · 22/09"}]
+  FALHA L2 semordem: cabeçalhos de coluna numa linha · [{"gid": "g_so", "col": "PRÓXIMO PASSO ⇅", "linhas": 2}]
+  FALHA C1 ordens: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": [], "prims": [], "vistos": [], "ind": []}
+  FALHA C2 ordens: trilha "Manutenção › Manutenção" · ""
+  ok  C3 ordens: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 ordens: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 ordens: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  FALHA A1 ordens: uma fileira de escolha fora do bloco (as abas das visões) · [3, ["Visão", "Filtrar por fase", "Rotina", "Visão das ordens"]]
+  FALHA B1 ordens: a lista dentro de um bloco com título ('') · ""
+  FALHA B2 ordens: filtros rápidos dentro do bloco · ["Todas 16", "A liberar 1", "Liberadas 1", "Em execução 1", "Em conferência 1", "Encerradas 12", "Aguardam você · 0", "Esta semana", "Com conflito · 1", "Espera por peça · 0"]
+  ok  B3 ordens: fases + no máximo 2 recortes de ação no bloco
+  FALHA L1 ordens: células com no máximo 2 linhas a 1440 px · [{"gid": "g_om", "rid": "OM-0228", "col": "SERVIÇO · TIPO ⇅", "linhas": 3, "t": "Inspeção corretiva · pressão baixa Corretiva · Alta"}, {"gid": "g_om", "rid": "OM-0233", "col": "ORDEM · ATIVO ⇅", "linhas": 4, "t": "Ativo bloqueado · Zé OM-0233 Trator T1"}, {"gid": "g_om", "rid": "OM-0233", "col": "SERVIÇO · TIPO ⇅", "linhas": 3, "t": "Corretiva · pressão hidráulica Corretiva · Alta"}, {"gid": "g_om", "rid": "OM-0234", "col": "ORDEM · ATIVO ⇅", "linhas": 5, "t": "Conflito · OS-0420 28/09 · Otávio · 28/09 OM-0234 Trator 02"}, {"gid": "g_om", "rid": "OM-0221", "col": "ORDEM · ATIVO ⇅", "linhas": 
+  ok  L2 ordens: cabeçalhos de coluna numa linha
+  FALHA C1 ativos: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": ["Ação do Otávio (responsável de manutenção)"], "prims": [], "vistos": ["Vincular a plano"], "ind": [{"t": "Vincular a plano", "dica": "", "mot": ""}]}
+  FALHA C2 ativos: trilha "Manutenção › Manutenção" · ""
+  FALHA C3 ativos: nenhum texto solto no cabeçalho além de título, selo e ações · ["Ação do Otávio (responsável de manutenção)"]
+  ok  C4 ativos: no máximo uma primária verde à vista e selo de estado ao lado do título
+  FALHA C5 ativos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo) · [{"t": "Vincular a plano", "dica": "", "mot": ""}]
+  FALHA A1 ativos: uma fileira de escolha fora do bloco (as abas das visões) · [4, ["Visão", "Modo", "Filtro rápido por condição", "Visão da lista: tabela ou cartões"]]
+  FALHA B1 ativos: a lista dentro de um bloco com título ('') · ""
+  FALHA B2 ativos: filtros rápidos dentro do bloco · ["Ativos", "Abastecimentos", "Sem plano 4", "Todas 16", "Apto 14", "Bloqueado 1", "Restrito 1"]
+  FALHA L1 ativos: células com no máximo 2 linhas a 1440 px · [{"gid": "g_at", "rid": "a01", "col": "ATIVO · LOCAL ⇅", "linhas": 4, "t": "Bloqueado · desde 22/09 Trator T1 · JD 6M 155 · Oficina Sede"}, {"gid": "g_at", "rid": "a01", "col": "PRÓXIMA MANUTENÇÃO ⇅", "linhas": 3, "t": "Em dia Revisão 250 h · 4.450 h ≈ 08/10"}, {"gid": "g_at", "rid": "a11", "col": "ATIVO · LOCAL ⇅", "linhas": 4, "t": "Bomba do Pivô 2 · pivô central fixo · 8 torres · motobomba + hidrômetr"}, {"gid": "g_at", "rid": "a11", "col": "PRÓXIMA MANUTENÇÃO ⇅", "linhas": 3, "t": "Vence em breve Preventiva mensal · 01/10"}, {"gid": "g_at", "rid": "a03", "col": "PRÓXIMA MANUTENÇÃO ⇅", "lin
+  FALHA L2 ativos: cabeçalhos de coluna numa linha · [{"gid": "g_at", "col": "PRÓXIMA MANUTENÇÃO ⇅", "linhas": 2}]
+  FALHA C1 abast: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": [], "prims": ["Registrar abastecimento"], "vistos": ["Registrar abastecimento"], "ind": []}
+  FALHA C2 abast: trilha "Manutenção › Manutenção" · ""
+  ok  C3 abast: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 abast: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 abast: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  FALHA A1 abast: uma fileira de escolha fora do bloco (as abas das visões) · [4, ["Visão", "Modo", "Filtro rápido por qualidade", "Visão da lista: tabela ou cartões"]]
+  FALHA B1 abast: a lista dentro de um bloco com título ('') · ""
+  FALHA B2 abast: filtros rápidos dentro do bloco · ["Ativos", "Abastecimentos", "Todas 8", "Confirmada 6", "Estornado 1", "Estorno 1"]
+  ok  L1 abast: células com no máximo 2 linhas a 1440 px
+  FALHA L2 abast: cabeçalhos de coluna numa linha · [{"gid": "g_ab", "col": "LANÇAMENTO · OPERADOR ⇅", "linhas": 2}]
+  FALHA C1 planos: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": ["Ação do Otávio (responsável de manutenção)"], "prims": [], "vistos": ["Criar plano"], "ind": [{"t": "Criar plano", "dica": "", "mot": ""}]}
+  FALHA C2 planos: trilha "Manutenção › Manutenção" · ""
+  FALHA C3 planos: nenhum texto solto no cabeçalho além de título, selo e ações · ["Ação do Otávio (responsável de manutenção)"]
+  ok  C4 planos: no máximo uma primária verde à vista e selo de estado ao lado do título
+  FALHA C5 planos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo) · [{"t": "Criar plano", "dica": "", "mot": ""}]
+  FALHA A1 planos: uma fileira de escolha fora do bloco (as abas das visões) · [2, ["Visão", "Visão da lista: tabela ou cartões"]]
+  FALHA B1 planos: a lista dentro de um bloco com título ('') · ""
+  ok  B2 planos: filtros rápidos dentro do bloco
+  FALHA L1 planos: células com no máximo 2 linhas a 1440 px · [{"gid": "g_pl", "rid": "PM-03", "col": "PLANO ⇅", "linhas": 3, "t": "PM-03 · Tratores John Deere · revisões"}, {"gid": "g_pl", "rid": "PM-03", "col": "APLICA-SE A ⇅", "linhas": 3, "t": "Todos dos modelos JD 6M 155 e JD 5078E (2 ativos)"}, {"gid": "g_pl", "rid": "PM-04", "col": "PLANO ⇅", "linhas": 3, "t": "PM-04 · Pulverizador Uniport 3030 · revisões"}, {"gid": "g_pl", "rid": "PM-05", "col": "PLANO ⇅", "linhas": 3, "t": "PM-05 · Plantadeira · revisão pré-plantio"}, {"gid": "g_pl", "rid": "PM-06", "col": "PLANO ⇅", "linhas": 3, "t": "PM-06 · Colhedora Case IH 7250 · revisões"}, {"gid": "g_pl",
+  ok  L2 planos: cabeçalhos de coluna numa linha
+  FALHA C1 ativo: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": [], "prims": [], "vistos": [], "ind": []}
+  FALHA C2 ativo: trilha "Manutenção › Manutenção" › registro · ""
+  ok  C3 ativo: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 ativo: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 ativo: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  FALHA C1 plano: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção" · {"trilha": "", "h1": "Manutenção", "volta": "Manutenção", "selo": "1 ativo bloqueado · 1 conflito", "soltos": [], "prims": [], "vistos": [], "ind": []}
+  FALHA C2 plano: trilha "Manutenção › Manutenção" › registro · ""
+  ok  C3 plano: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 plano: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 plano: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  FALHA C6 títulos diferentes por visão (o título diz a tela) · {"semordem": "Manutenção", "ordens": "Manutenção", "ativos": "Manutenção", "abast": "Manutenção", "planos": "Manutenção", "ativo": "Manutenção", "plano": "Manutenção"}
+  FALHA A2 Ana · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão [] · [{"t": "Sem ordem", "n": 6, "dica": "", "lab": "", "on": true}, 6, []]
+  FALHA A2 Ana · Ordens 0: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ordens", "n": 0, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Ana · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ativos", "n": 1, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Ana · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão [] · [{"t": "Planos", "n": 0, "dica": "", "lab": "", "on": false}, 10, []]
+  FALHA A2 Otávio · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão [] · [{"t": "Sem ordem", "n": 6, "dica": "", "lab": "", "on": true}, 6, []]
+  FALHA A2 Otávio · Ordens 2: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ordens", "n": 2, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Otávio · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ativos", "n": 1, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Otávio · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão [] · [{"t": "Planos", "n": 0, "dica": "", "lab": "", "on": false}, 10, []]
+  FALHA A2 Zé · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão [] · [{"t": "Sem ordem", "n": 6, "dica": "", "lab": "", "on": true}, 6, []]
+  FALHA A2 Zé · Ordens 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ordens", "n": 1, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Zé · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão [] · [{"t": "Ativos", "n": 1, "dica": "", "lab": "", "on": false}, 16, []]
+  FALHA A2 Zé · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão [] · [{"t": "Planos", "n": 0, "dica": "", "lab": "", "on": false}, 10, []]
+  FALHA E1 MOD-MAN: cartões em blocos com título (como o MOD-AGR) · []
+  FALHA E2 MOD-MAN: sem aviso solto acima dos cartões · ["⚠ 4 ativos sem plano de manutenção Vincular ›"]
+  ok  E3 MOD-MAN: os mesmos 5 destinos (Painel e as 4 visões)
+  ok  E4 referência MOD-AGR: blocos com título e sem aviso solto (a régua é a da tela aprovada)
+  ok  Z sem erro de JS
+RESULTADO: 25 ok · 56 falhas · FALHAS: C1 semordem: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 semordem: trilha "Manutenção › Manutenção"; C3 semordem: nenhum texto solto no cabeçalho além de título, selo e ações; C5 semordem: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo); A1 semordem: uma fileira de escolha fora do bloco (as abas das visões); B1 semordem: a lista dentro de um bloco com título (''); B2 semordem: filtros rápidos dentro do bloco; L1 semordem: células com no máximo 2 linhas a 1440 px; L2 semordem: cabeçalhos de coluna numa linha; C1 ordens: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 ordens: trilha "Manutenção › Manutenção"; A1 ordens: uma fileira de escolha fora do bloco (as abas das visões); B1 ordens: a lista dentro de um bloco com título (''); B2 ordens: filtros rápidos dentro do bloco; L1 ordens: células com no máximo 2 linhas a 1440 px; C1 ativos: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 ativos: trilha "Manutenção › Manutenção"; C3 ativos: nenhum texto solto no cabeçalho além de título, selo e ações; C5 ativos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo); A1 ativos: uma fileira de escolha fora do bloco (as abas das visões); B1 ativos: a lista dentro de um bloco com título (''); B2 ativos: filtros rápidos dentro do bloco; L1 ativos: células com no máximo 2 linhas a 1440 px; L2 ativos: cabeçalhos de coluna numa linha; C1 abast: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 abast: trilha "Manutenção › Manutenção"; A1 abast: uma fileira de escolha fora do bloco (as abas das visões); B1 abast: a lista dentro de um bloco com título (''); B2 abast: filtros rápidos dentro do bloco; L2 abast: cabeçalhos de coluna numa linha; C1 planos: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 planos: trilha "Manutenção › Manutenção"; C3 planos: nenhum texto solto no cabeçalho além de título, selo e ações; C5 planos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo); A1 planos: uma fileira de escolha fora do bloco (as abas das visões); B1 planos: a lista dentro de um bloco com título (''); L1 planos: células com no máximo 2 linhas a 1440 px; C1 ativo: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 ativo: trilha "Manutenção › Manutenção" › registro; C1 plano: título da visão ('Manutenção') ≠ nome do módulo do "‹ Manutenção"; C2 plano: trilha "Manutenção › Manutenção" › registro; C6 títulos diferentes por visão (o título diz a tela); A2 Ana · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão []; A2 Ana · Ordens 0: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Ana · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Ana · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão []; A2 Otávio · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão []; A2 Otávio · Ordens 2: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Otávio · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Otávio · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão []; A2 Zé · Sem ordem 6: número > 0, com dica, igual à lista (6) ou a um filtro rápido da visão []; A2 Zé · Ordens 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Zé · Ativos 1: número > 0, com dica, igual à lista (16) ou a um filtro rápido da visão []; A2 Zé · Planos 0: número > 0, com dica, igual à lista (10) ou a um filtro rápido da visão []; E1 MOD-MAN: cartões em blocos com título (como o MOD-AGR); E2 MOD-MAN: sem aviso solto acima dos cartões

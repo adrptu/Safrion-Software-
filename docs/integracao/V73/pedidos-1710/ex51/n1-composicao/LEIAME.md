@@ -49,7 +49,7 @@
 - 31 testes; resumo em `bateria/resumo.txt` e os brutos em `bateria/`.
 - Todos verdes, exceto dois vermelhos já presentes na base v129 (`5466c6d0`):
   - `textos_soltos` 266/267: oráculo obsoleto do CA-01det. O Codex trocou o rodapé por um texto honesto em `d3435d04` (PAINEL-FIXO-1). Oráculo corrigido nesta entrega: 267/267 (`bateria/textos_soltos_test_pos.log`).
-  - `mbtest` MB-02 "conteúdo cabe na altura": excesso de 1142 px, igual na base v129 (`../../../artefato-v130/mbtest_base_v129.log`).
+  - `mbtest` MB-02 "conteúdo cabe na altura": excesso de 1142 px. O `MB-02.dc.html` é igual byte a byte ao da v129, e o render da v128 também reprova (`../../../artefato-v130/mbtest_render_v128.log`).
 - Base verde (`claude/v44-v73-base-verde-1710`, só testes): `aprova_quem_decide` 103/103 e `config_unit` 226/226 nesta composição.
 
 ## Pendente

@@ -3,7 +3,8 @@
 manutenção, vamos focar os cards na área de gráficos e relatórios · telas principais mais clean"). Confere no navegador, com oráculo dos dados (manGet):
   L1 nenhuma visão da Manutenção (Sem ordem, Ordens, Ativos, Planos) tem cartão de indicador, em 1440 e 390 px
   L2 cada visão tem a faixa Filtros do padrão (grupo "Filtros" com o funil), só com os filtros que valem para ela:
-     Sem ordem e Ordens: Tipo, Criticidade, Grupo · Ativos: Grupo, Pendência · Planos: Grupo
+     Sem ordem e Ordens: Tipo, Criticidade, Grupo · Ativos: Grupo · Planos: Grupo; a Pendência dos ativos (estado da lista) fica na barra da
+     lista, ao lado do filtro rápido "Sem plano" (DS-MAN, 17/10/2026, pela TAB-01 de 15/10: a faixa do topo fica com o que vale para a tela)
   L3 Sem ordem · Tipo: Preventiva mostra só vencimentos de plano; Inspeção só achados de inspeção sem ordem; Corretiva só relatos e alertas sem ordem
   L4 Ordens · Tipo Corretiva + Criticidade Alta: as linhas são exatamente as ordens desse recorte, e o chip "Todas" conta o mesmo número
   L5 Grupo filtra também em Ativos e Planos (antes o seletor não tinha efeito nessas visões)
@@ -33,7 +34,9 @@ def setf(rot, val):
     time.sleep(.5); return r
 def vis(v): c.goto(U('MA.dc.html#vis=' + v), 1.6)
 ESPERA = {'semordem': ['Filtrar por tipo', 'Filtrar por criticidade', 'Filtrar por grupo'], 'ordens': ['Filtrar por tipo', 'Filtrar por criticidade', 'Filtrar por grupo'],
-          'ativos': ['Filtrar por grupo', 'Filtrar por pendência'], 'planos': ['Filtrar por grupo']}
+          'ativos': ['Filtrar por grupo'], 'planos': ['Filtrar por grupo']}
+# DS-MAN: a lista Pendência dos ativos mora na barra da lista (dentro da caixa da grade), não mais na faixa do topo
+PEND = "[...document.querySelectorAll('select[aria-label=\"Filtrar por pendência\"]')].filter(s=>s.getClientRects().length).map(s=>!!s.closest('.g2caixa')&&!s.closest('.mf-tela'))"
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     cartoes, faixas = {}, {}
@@ -41,11 +44,13 @@ try:
         c.aparelho(w, h, 2 if m else 1, m); c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear(); 1")
         for v in ESPERA:
             vis(v); cartoes[f'{v}@{w}'] = J(CARDS); faixas[f'{v}@{w}'] = J(FAIXA)
+            if v == 'ativos': faixas[f'pendência na barra da lista@{w}'] = J(PEND)
     chk('L1 nenhuma visão da Manutenção tem cartão de indicador (1440 e 390 px)', all(n == 0 for n in cartoes.values()), cartoes)
     # 15/10/2026 (proprietário; TAB-01 em docs/design-system/padroes-1510.md): Prazo, Fase e Rotina voltaram para a área da visão, ao lado
     # da busca; a faixa fica só com o contexto, igual a 1440 e a 390 px (revê a FIL-02 da manhã)
     E390 = ESPERA
-    chk('L2 faixa Filtros com o funil em cada visão, só com os filtros dela', all(faixas[f'{v}@1440'] == [ESPERA[v]] and faixas[f'{v}@390'] == [E390[v]] for v in ESPERA), faixas)
+    chk('L2 faixa Filtros com o funil em cada visão, só com os filtros dela; a Pendência dos ativos na barra da lista', all(faixas[f'{v}@1440'] == [ESPERA[v]] and faixas[f'{v}@390'] == [E390[v]] for v in ESPERA)
+        and all(faixas[f'pendência na barra da lista@{w}'] == [True] for w in (1440, 390)), faixas)
     c.aparelho(1440, 900, 1, False)
     # L3 · Sem ordem por tipo (oráculo: achados sem ordem por origem; vencimentos com o prefixo v:)
     vis('semordem')

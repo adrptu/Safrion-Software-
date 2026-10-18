@@ -88,9 +88,13 @@ try:
         if nome in ('Mapa', 'Manutenção'):
             c.goto(U('OS.dc.html'), 1.0); J(f"[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>a.getAttribute('aria-label')=={json.dumps(nome)}).click()"); time.sleep(1.2); dir_[nome] = J("location.pathname")
     cman = json.loads(J(CARDS) or '[]')
-    chk('N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos)',
+    # DS-MAN (17/10/2026): a entrada da Manutenção em blocos na ordem do processo (ui37.FLUXO37: Cadastro, Execução, Resultados), como a do Agrícola;
+    # os mesmos 5 cartões, um por visão
+    MANC = {'PMAN.dc.html': 'Painel', 'MA.dc.html#vis=semordem': 'Sem ordem', 'MA.dc.html#vis=ordens': 'Ordens', 'MA.dc.html#vis=ativos': 'Ativos', 'MA.dc.html#vis=planos': 'Planos'}
+    MANO = [h for _t, b in ui37.FLUXO37['Manutenção'] for h in b]
+    chk('N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos), na ordem do fluxo',
         (dir_.get('Mapa') or '').endswith('/IN-04.dc.html') and (dir_.get('Manutenção') or '').endswith('/MOD-MAN.dc.html')
-        and [x[:2] for x in cman] == [['PMAN.dc.html', 'Painel'], ['MA.dc.html#vis=semordem', 'Sem ordem'], ['MA.dc.html#vis=ordens', 'Ordens'], ['MA.dc.html#vis=ativos', 'Ativos'], ['MA.dc.html#vis=planos', 'Planos']], [dir_, cman])
+        and sorted(MANO) == sorted(MANC) and [x[:2] for x in cman] == [[h, MANC[h]] for h in MANO], [dir_, cman])
     c.goto(U(ui37.OUTROS37[2]), 1.0); cs = json.loads(J(CARDS) or '[]')
     chk('N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice', [x[0] for x in cs] == [h for n, h, i in ui37.OUTROS37[3]] and all(x[2] for x in cs), cs)
     # N5 índice fora

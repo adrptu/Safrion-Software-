@@ -1,0 +1,344 @@
+{
+ "semordem": {
+  "cabecalho": [
+   "Gerar # ordens preventivas",
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Registrar achado",
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "A FAZER ⇅",
+   "ATIVO · LEITURA ⇅",
+   "Agrupar por ▾",
+   "Ativos #",
+   "Até # d #",
+   "Cartões",
+   "Colunas +#",
+   "Filtrar A fazer",
+   "Filtrar Ativo · leitura",
+   "Filtrar Item",
+   "Filtrar O que",
+   "Filtrar Prazo",
+   "ITEM ⇅",
+   "O QUE ⇅",
+   "Ordens #",
+   "PRAZO ⇅",
+   "Planos",
+   "Sem ordem #",
+   "Tabela",
+   "Vencidas #"
+  ],
+  "menus": [],
+  "listas": [
+   "Filtrar por criticidade: Toda criticidade | Alta | Média | Baixa",
+   "Filtrar por grupo: Todos os grupos | Tratores | Pulverizadores | Plantadeiras | Implementos | Colhedoras | Beneficiamento | Irrigação | Armazenagem | Veículos",
+   "Filtrar por tipo: Todos os tipos | Preventiva | Corretiva | Inspeção"
+  ],
+  "linhas": [
+   "INSP-#",
+   "NC-#",
+   "PM-# v#",
+   "SM-#"
+  ]
+ },
+ "ordens": {
+  "cabecalho": [
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "A liberar #",
+   "Agrupar por ▾",
+   "Aguardam você #",
+   "Ativos #",
+   "Cartões",
+   "Colunas +#",
+   "Com conflito #",
+   "EXECUTANTE ⇅",
+   "Em conferência #",
+   "Em execução #",
+   "Encerradas #",
+   "FASE ⇅",
+   "Filtrar Executante",
+   "Filtrar Fase",
+   "Filtrar Janela",
+   "Filtrar Ordem · ativo",
+   "Filtrar Serviço · tipo",
+   "JANELA ⇅",
+   "Kanban",
+   "Liberadas #",
+   "Lista",
+   "ORDEM · ATIVO ⇅",
+   "Ordens #",
+   "Planos",
+   "SERVIÇO · TIPO ⇅",
+   "Sem ordem #",
+   "Todas #",
+   "⋯"
+  ],
+  "menus": [
+   "Ver carga desta semana",
+   "Ver ordens que esperam peça"
+  ],
+  "listas": [
+   "Filtrar por criticidade: Toda criticidade | Alta | Média | Baixa",
+   "Filtrar por grupo: Todos os grupos | Tratores | Pulverizadores | Plantadeiras | Implementos | Colhedoras | Beneficiamento | Irrigação | Armazenagem | Veículos",
+   "Filtrar por tipo: Todos os tipos | Preventiva | Corretiva"
+  ],
+  "linhas": [
+   "OM-#"
+  ]
+ },
+ "ativos": {
+  "cabecalho": [
+   "Vincular a plano",
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Registrar achado",
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "ATIVO · LOCAL ⇅",
+   "Abastecimentos",
+   "Agrupar por ▾",
+   "Apto #",
+   "Ativos",
+   "Ativos #",
+   "Bloqueado #",
+   "Cartões",
+   "Colunas +#",
+   "EM ABERTO ⇅",
+   "Filtrar Ativo · local",
+   "Filtrar Em aberto",
+   "Filtrar Leitura",
+   "Filtrar Plano",
+   "Filtrar Próxima",
+   "LEITURA ⇅",
+   "Ordens #",
+   "PLANO ⇅",
+   "PRÓXIMA ⇅",
+   "Planos",
+   "Restrito #",
+   "Sem ordem #",
+   "Sem plano #",
+   "Tabela",
+   "Todas #"
+  ],
+  "menus": [],
+  "listas": [
+   "Filtrar por grupo: Todos os grupos | Tratores | Pulverizadores | Plantadeiras | Implementos | Colhedoras | Beneficiamento | Irrigação | Armazenagem | Veículos",
+   "Filtrar por pendência: Toda pendência | Leitura a confirmar | Sem plano | Achado sem ordem | Desvio de consumo | Vence em 30 d | Restrição vencida"
+  ],
+  "linhas": [
+   "Bomba do Pivô #",
+   "Colhedora Axial-Flow #",
+   "Comboio CB-#",
+   "Criar plano ›",
+   "Distribuidor # t",
+   "Esqueletadeira",
+   "Gotejo T#",
+   "INSP-# sem ordem",
+   "Máquina TSI",
+   "NC-# sem ordem",
+   "OM-# · A liberar",
+   "OM-# · Em conferência",
+   "OM-# · Em execução",
+   "OM-# · Liberadas",
+   "PM-#",
+   "Packing linha #",
+   "Plantadeira # linhas",
+   "Pulverizador PJ-#",
+   "SM-# sem ordem",
+   "Silo #",
+   "Trator #",
+   "Trator T#",
+   "Vincular ao PM-# ›"
+  ]
+ },
+ "abast": {
+  "cabecalho": [
+   "Registrar abastecimento",
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "ATIVO ⇅",
+   "Abastecimentos",
+   "Agrupar por ▾",
+   "Ativos",
+   "Ativos #",
+   "CONSUMO ⇅",
+   "Cartões",
+   "Colunas +#",
+   "Confirmada #",
+   "DATA · LEITURA ⇅",
+   "Estornado #",
+   "Estorno #",
+   "Filtrar Ativo",
+   "Filtrar Consumo",
+   "Filtrar Data · leitura",
+   "Filtrar Lançamento",
+   "Filtrar Volume",
+   "LANÇAMENTO ⇅",
+   "Ordens #",
+   "Planos",
+   "Sem ordem #",
+   "Tabela",
+   "Todas #",
+   "VOLUME ⇅"
+  ],
+  "menus": [],
+  "listas": [
+   "Filtrar por grupo: Todos os grupos | Tratores | Pulverizadores | Plantadeiras | Implementos | Colhedoras | Beneficiamento | Irrigação | Armazenagem | Veículos"
+  ],
+  "linhas": [
+   "AB-#",
+   "ES-#"
+  ]
+ },
+ "planos": {
+  "cabecalho": [
+   "Criar plano",
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "APLICA-SE A ⇅",
+   "ATIVOS ⇅",
+   "Agrupar por ▾",
+   "Ativos #",
+   "Cartões",
+   "Colunas +#",
+   "Distribuidor # t · Criar plano",
+   "Esqueletadeira · Criar plano",
+   "Filtrar Aplica-se a",
+   "Filtrar Ativos",
+   "Filtrar Plano",
+   "Filtrar Serviços",
+   "Gotejo T# · Criar plano",
+   "Máquina TSI · Criar plano",
+   "Ordens #",
+   "PLANO ⇅",
+   "Planos",
+   "SERVIÇOS ⇅",
+   "Sem ordem #",
+   "Tabela"
+  ],
+  "menus": [],
+  "listas": [
+   "Filtrar por grupo: Todos os grupos | Tratores | Pulverizadores | Plantadeiras | Implementos | Colhedoras | Beneficiamento | Irrigação | Armazenagem | Veículos"
+  ],
+  "linhas": [
+   "PM-#"
+  ]
+ },
+ "ativo": {
+  "cabecalho": [
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "Abrir no CD-# ›",
+   "Achados · nenhum sem ordem",
+   "Custo e desempenho · R$ # · set/#",
+   "Leituras e abastecimentos · # h · #/#",
+   "O que vence · # devido(s) de #",
+   "Ordens · # abertas · # encerradas",
+   "PM-# ›",
+   "Registrar abastecimento",
+   "Registrar achado",
+   "Registrar leitura",
+   "Situação · Bloqueado · desde #/# · tratada pela OM-#",
+   "Ver agenda em O.S. › Recursos ›",
+   "‹ Ativos"
+  ],
+  "menus": [],
+  "listas": [],
+  "linhas": []
+ },
+ "plano": {
+  "cabecalho": [
+   "‹ Manutenção",
+   "⋯"
+  ],
+  "menu_cabecalho": [
+   "Restaurar demonstração"
+  ],
+  "tela": [
+   "ATIVO ⇅",
+   "Abrir checklist e peças de Revisão # h",
+   "BASE DE CONTAGEM ⇅",
+   "Cartões",
+   "Editar plano",
+   "Filtrar Ativo",
+   "Filtrar Base de contagem",
+   "Filtrar Ordem",
+   "Filtrar Próximo vencimento",
+   "Filtrar Situação",
+   "Incluir serviço",
+   "ORDEM ⇅",
+   "PRÓXIMO VENCIMENTO ⇅",
+   "Revisão # h",
+   "SITUAÇÃO ⇅",
+   "Tabela",
+   "Versões",
+   "‹ Planos",
+   "⋯ Inativar plano"
+  ],
+  "menus": [],
+  "listas": [],
+  "linhas": [
+   "OM-# · A liberar",
+   "Trator #",
+   "⋯",
+   "⋯ Desvincular"
+  ]
+ },
+ "MOD-MAN.dc.html": {
+  "cabecalho": [],
+  "menu_cabecalho": [],
+  "tela": [
+   "Ativos",
+   "Ordens",
+   "Painel",
+   "Planos",
+   "Sem ordem"
+  ],
+  "menus": [],
+  "listas": [],
+  "linhas": []
+ },
+ "PMAN.dc.html": {
+  "cabecalho": [
+   "Tratar pendências",
+   "‹ Manutenção"
+  ],
+  "menu_cabecalho": [],
+  "tela": [
+   "Consultar ativos",
+   "Consultar ordens",
+   "Consultar planos",
+   "ⓘ"
+  ],
+  "menus": [],
+  "listas": [],
+  "linhas": []
+ }
+}

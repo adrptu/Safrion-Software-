@@ -3,7 +3,9 @@
 // Contraprova: MIP_JS=<mip.js anterior> node n1_composicao_test.cjs deve reprovar C1, C3 e C5.
 const fs=require('fs'),vm=require('vm');
 const mip=fs.readFileSync(process.env.MIP_JS||__dirname+'/mip.js','utf8').split('// ---------- datas (iso')[0];
-const cen=fs.readFileSync(__dirname+'/cenario.js','utf8').split('\n').slice(5,44).join('\n');
+const CJ=fs.readFileSync(__dirname+'/cenario.js','utf8').split('\n');
+// trecho de persistência (linhas 6 a 44) + a marca de migração de Compras que o cenReset chama desde o C-3/C-4 (PR #114)
+const cen=CJ.slice(5,44).join('\n')+'\n'+CJ.filter(l=>/^const CEN_COMP_ANTIGA=|^function cenCompMarcar\(/.test(l)).join('\n');
 const LEG='talhao-os-mip-v1', CEN='talhao-os-cenario-v1', MARCA=LEG+':migrado';
 function env(mode={}){
   const seed={v:1,rev:0,vis:{S1:{id:'S1'}},dia:{},rec:{},seq:{dia:1,rec:1,ra:1},apl:[]};

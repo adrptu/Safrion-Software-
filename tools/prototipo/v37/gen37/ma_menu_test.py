@@ -8,7 +8,7 @@ Corrida da v57: com o painel da OM aberto ao lado, a troca de visão logo após 
 é repetida pelo seletor e pelo endereço #vis= e precisa valer e ficar. Uso: python3 ma_menu_test.py (lê _render)."""
 import sys, json, re, time
 from ma_lib import MA
-from ui37 import INICIO37, HUB37
+from ui37 import INICIO37, HUB37, FLUXO37
 HUB = HUB37['Manutenção']
 
 m = MA(1440, 900); J = m.J
@@ -70,8 +70,12 @@ try:
     J("window.__antes=1"); r = m.clk('Manutenção', 'nav[aria-label=Menu]', w=0)
     foi = ini and espera(lambda: J(f"!window.__antes&&location.pathname.split('/').pop()==='{HUB}'&&document.readyState==='complete'&&document.querySelectorAll('a.mod-cartao').length===5"), 10)
     cs = json.loads(J(CARDS) or '[]'); cur = [x[0] for x in json.loads(J(NAV) or '[]') if x[3] == 'page']
-    m.ok(r == 'ok' and foi and cs == [['PMAN.dc.html', 'Painel', True]] + [['MA.dc.html#vis=' + v, t, True] for v, t in zip(VIS, TIT)] and cur == ['Manutenção'],
-         f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com o Painel e os 4 cartões (ícone e nome curto: Sem ordem · Ordens · Ativos · Planos), ícone destacado', [r, foi, cs, cur])
+    # DS-MAN (17/10/2026): a entrada da Manutenção em blocos como a do Agrícola (ui37.FLUXO37), na ordem do processo: Cadastro (Ativos, Planos),
+    # Execução (Sem ordem, Ordens), Resultados (Painel). Antes, a ordem do menu (Painel primeiro); os 5 cartões são os mesmos
+    esp = {'PMAN.dc.html': 'Painel'}; esp.update({'MA.dc.html#vis=' + v: t for v, t in zip(VIS, TIT)})
+    ordem = [h for _t, b in FLUXO37['Manutenção'] for h in b]
+    m.ok(r == 'ok' and foi and cs == [[h, esp[h], True] for h in ordem] and sorted(ordem) == sorted(esp) and cur == ['Manutenção'],
+         f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com o Painel e os 4 cartões (ícone e nome curto), nos blocos do processo, ícone destacado', [r, foi, cs, cur])
     # o cartão "Ordens" abre a MA na visão Ordens; "‹ Manutenção" volta à tela de entrada com o foco no cartão aberto
     J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens').click()")
     foi = espera(lambda: J("location.pathname.split('/').pop()==='MA.dc.html'&&document.readyState==='complete'"), 10) and espera(lambda: mostra('ordens'), 10)

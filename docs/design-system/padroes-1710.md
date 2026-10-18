@@ -137,3 +137,21 @@ Pedido do proprietário de 16/10/2026, cobrado em 17/10, transformado em padrão
 | **Regra** | <ul><li>`#faz=&lay=&t=&dt=` guarda fazenda, camada, talhão e data da cena; recarregar, voltar e o link compartilhado abrem o mesmo mapa.</li><li>Na Lagoa Grande, a câmera é guardada na sessão (voltar sem reenquadrar).</li><li>`#talhao=ID` troca a fazenda; ID inexistente avisa e não escolhe outro talhão.</li></ul> |
 | **Dano evitado** | Voltar de outra tela e perder camada, data, seleção e zoom. |
 | **Teste** | `mapa_mux_f1_test.py` F1-8, `mapa_mux_f0_test.py` F0-2 e `mapa_mux_unit.js` H |
+
+## Manutenção no padrão do Agrícola (DS-MAN): padrões de 17/10/2026, 23h
+
+> "Design system de manutenção ainda não está no padrão"
+
+A medição por regra (`ds_modulos.py`) dava 0 desvio para a Manutenção; a comparação por captura com a O.S. do Agrícola (referência aprovada do cabeçalho e do bloco "Ordens por fase") mostrava os desvios abaixo. Cada um virou regra com medida em `tools/prototipo/v37/gen37/ds_man_test.py` (a O.S. e o MOD-AGR passam nas mesmas medidas: a régua é a da tela aprovada). Contraprova: o render da v129 (5466c6d) reprova. Relatório: `docs/integracao/V73/ds-man/LEIAME.md`.
+
+| ID | Regra | Dano evitado | Teste |
+|---|---|---|---|
+| CAB-3 | **O título diz a tela.** Com "‹ Módulo" ao lado, o título nunca repete o nome do módulo: é a visão aberta (o nome do item do menu, `ui37.MENU2`) e a trilha diz "Módulo › Visão" (no detalhe, "› registro"). | Título que repete o botão de voltar e não diz onde a pessoa está. | `ds_man_test.py` C1, C2, C6 |
+| CAB-4 | **Cabeçalho só com título, selo e ações.** Ação indisponível para o perfil é a peça comum `engine.acao_motivo` (aria-disabled, dica e o motivo junto do botão, PRD DS-06 e 74.5.0), nunca texto solto ao lado de um botão cinza. | Frase de 3 linhas no topo; primária que parece secundária. | `ds_man_test.py` C3, C4, C5, C7 |
+| ABA-01 | **Uma fileira de abas acima do bloco.** Escolha de lista dentro da visão (Ativos \| Abastecimentos) fica dentro do bloco, na barra da lista. | Duas fileiras de abas soltas, sem dizer qual manda na outra. | `ds_man_test.py` A1 |
+| ABA-02 | **Número da aba = o que pede ação.** Só aparece maior que zero, com a dica que diz o que conta, e é o mesmo da lista aberta ou do filtro rápido que ele conta. | "Ordens 0" com 16 ordens na lista; "Planos 0" com 10 planos. | `ds_man_test.py` A2 |
+| BLO-01 | **Lista num bloco com título** (`processo_os.bloco`, o do "Ordens por fase"), com os filtros rápidos dentro dele; no máximo 2 recortes de ação ao lado das fases; o resto no ⋯ do bloco ou no filtro da coluna. No celular o título do bloco sai e a barra da lista é uma linha que rola de lado. | Lista solta e 11 chips na mesma fileira. | `ds_man_test.py` B1, B2, B3; `ma_unica_test.py` AC-PCM-22 |
+| TAB-14 | **Uma linha por registro, duas no máximo, a 1440 px**, inclusive com todas as colunas à vista; cabeçalho de coluna numa linha (rótulo curto). Selo curto ("Vencida", "Conflito", "Falta peça") com o texto longo na dica do selo; o subtítulo na 2ª linha, que no celular fica no detalhe. | Linhas de 3 a 5 linhas; selo com frase inteira; cabeçalho quebrado. | `ds_man_test.py` L1 a L4 |
+| ENT-01 | **Tela de entrada do módulo em blocos com título**, na ordem do processo (como o MOD-AGR). Acima dos blocos, no máximo uma linha de pendência que se resolve em um toque (Manutenção: "N ativos sem plano · Vincular ›", MA-VINCULO de 16/10), só quando há pendência; nenhum outro aviso solto. | Entrada com cara diferente do Agrícola; aviso que repete o que a tela de trabalho já mostra; atalho de um toque perdido. | `ds_man_test.py` E1 a E4; `ma_vinculo_test.py` A1, B1 |
+
+O Painel (PMAN) já usa a peça dos painéis (`pn-card`, a mesma do PSUP e do PAGR): sem mudança.
