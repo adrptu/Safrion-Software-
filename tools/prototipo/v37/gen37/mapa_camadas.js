@@ -54,6 +54,6 @@ function mcIrr(x,ver){ if(!x) return {c:'none',l:''};
       if(x.est) return {c:cd,est:true,l:'≈ '+mc_nfx(x.d,1)+' mm · estimado'+(rt?' → '+rt:'')};
       return {c:cd,l:'déficit '+mc_nfx(x.d,1)+' mm'+(rt?' → '+rt:'')}; }
     return {c:x.c==='cloud'?'ok':x.c,est:x.c==='cloud',l:x.l}; }
-function mcIrrLeg(ver){ const ETQ={t:'≈ = estimado por ET (sonda sem dado ou suspeita)',st:'display:inline-flex;align-items:center;font-weight:700;white-space:nowrap;',dot:'display:none;'};   // NC10: etiqueta de origem, não classe de cor
+function mcIrrLeg(ver){ const ETQ={k:null,t:'≈ = estimado por ET (sonda sem dado ou suspeita)'};   // NC10: etiqueta de origem, não classe de cor
     return ver==='Balanço hídrico'?[mcLegenda('ok','déficit < 5 mm'),mcLegenda('yellow','5–10 mm'),mcLegenda('orange','10–15 mm'),mcLegenda('red','≥ 15 mm'),mcLegenda('gray','sequeiro ou preparo'),ETQ]
     :[mcLegenda('blue','irrigando'),mcLegenda('lime','programada'),mcLegenda('yellow','pendente: janela, conferência ou liberação'),mcLegenda('red','impedida ou conflito'),mcLegenda('ok','sem necessidade hoje'),mcLegenda('gray','sequeiro ou preparo'),ETQ]; }

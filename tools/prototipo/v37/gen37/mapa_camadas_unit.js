@@ -20,5 +20,30 @@ same(pure.mcMIP([],ctx),{c:'gray',l:'sem vistoria em 7 dias'});
 for(const atras of [1,2])same(pure.mcMIP([],{...ctx,atras}),{c:'gray',l:'vistoria atrasada '+atras+(atras===1?' dia':' dias')});
 const v={alvo:'Ácaro',S:{mc:'red',t:'Acima do NC'}};
 same(pure.mcMIP([v,v],ctx),{c:'red',l:'Ácaro · acima do NC · +1'});
+
+const ma=base.indexOf("  if(l==='MIP/MID'){ const vs=mipOf(t,f.per);"),mb=base.indexOf('  // NC10',ma);
+vm.runInContext('function originalMIP(vs,ctx){const l="MIP/MID",f={per:""},t="T",ALV=ctx.alvos===null?null:["alvo"],MIPD={prots:{T:ctx.alvos&&ctx.alvos.length?["p"]:[]},prot:{p:{alvo:"alvo"}}};function mipOf(){return vs;}function mipSemProt(){return ctx.semProt;}function alvTxt(){return ctx.alvTxt;}function mipPer(){return ctx.dias;}function mipRitmo(){return {atras:ctx.atras};}function mipGet(){return {};}function mipP(v){return {alvo:v.alvo};}function mipMin(t){return t.charAt(0).toLowerCase()+t.slice(1);}'+base.slice(ma,mb)+'}',old);
+for(const dias of [7,30])for(const alvos of [null,[],['alvo']])for(const semProt of [false,true])for(const atras of [0,1,2])for(const n of [0,1,2]){
+ const ctx={dias,alvos,semProt,atras,alvTxt:'Ácaro'};
+ const vs=Array.from({length:n},()=>({alvo:'Ácaro',v:{alvo:'Ácaro'},S:{mc:'red',t:'Acima do NC'}}));
+ same(pure.mcMIP(vs,ctx),old.originalMIP(vs,ctx));
+}
+// A3: o contrato recebe somente a ordem visível, sem contar a oculta.
+const visible=ord('Liberadas',{id:'VISIVEL',pz:'no prazo'}),hidden=ord('Liberadas',{id:'OCULTA',pz:'atrasada'});
+same(pure.mcOS([visible],{fase:'Todas',ver:'Atrasos'}),{c:'ok',l:'VISIVEL · no prazo'});
+assert.notEqual(pure.mcOS([visible,hidden],{fase:'Todas',ver:'Atrasos'}).l,pure.mcOS([visible],{fase:'Todas',ver:'Atrasos'}).l);
+
+for(const ver of ['Hoje','Balanço hídrico']){
+ const leg=pure.mcIrrLeg(ver);assert(leg.length>=6);assert.equal(leg[leg.length-1].k,null);
+ for(const x of leg)assert.deepEqual(Object.keys(x).sort(),['k','t']);
+}
+for(const x of pure.mcMIPLeg())assert.deepEqual(Object.keys(x).sort(),['k','t']);
+// Diferenciar ausência, preparo e origem estimada sem alterar sua classe.
+same(pure.mcIrr(undefined,'Hoje'),{c:'none',l:''});
+same(pure.mcIrr({d:null,c:'gray',l:'sequeiro'},'Balanço hídrico'),{c:'gray',l:'sequeiro'});
+same(pure.mcIrr({d:10,c:'cloud',l:'sem necessidade · ≈ estimado'},'Hoje'),{c:'ok',est:true,l:'sem necessidade · ≈ estimado'});
+for(const rec of [null,{br:0.05},{br:1,np:1,por:3},{br:1,np:2,por:2}])for(const est of [true,false]){
+ const x={d:12,c:'yellow',l:'déficit',rec,est};same(pure.mcIrr(x,'Balanço hídrico'),old.originalIrr(x,'Balanço hídrico'));
+}
 assert(!('M' in pure)&&!('window' in pure)&&!('document' in pure));
 console.log(JSON.stringify({pass:count,scope:'VM e paridade de funções com fixtures; não substitui render LG/SR nem A5'}));
