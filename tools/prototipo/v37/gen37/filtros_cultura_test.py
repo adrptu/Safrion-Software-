@@ -41,6 +41,16 @@ def so_da(rows, cu):   # linha de outra cultura = contém o nome de outra cultur
 def folhas_colheita(mobile):
     if not mobile:
         return Grade(J).dicts(so_folhas=True)
+    # Controle público confirmado no DOM pelo revisor (6254915626).
+    abriu = J("""(()=>{const bs=[...document.querySelectorAll('button.g2xtog')]
+      .filter(b=>/Expandir tudo/.test(b.innerText)&&b.getClientRects().length);
+      if(bs.length>1) throw Error('Expandir tudo ambíguo');
+      if(!bs.length) return false; bs[0].click(); return true;})()""")
+    if abriu:
+        limite = time.monotonic() + 5
+        while not J("[...document.querySelectorAll('.pr-cards button[role=listitem]')].some(r=>r.getClientRects().length)"):
+            if time.monotonic() >= limite: raise AssertionError('Colheita não mostrou folhas após Expandir tudo')
+            time.sleep(.05)
     # Produção tem cartões próprios (.pr-card), não cartões da grade G2.
     # Ler somente folhas visíveis; ausência de cartões mantém F2 vermelho.
     return J("""(()=>{
