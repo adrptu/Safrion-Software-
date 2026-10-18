@@ -124,7 +124,7 @@ try:
     par = sorted(x[7:] for x in labs if re.match(r'^Marcar T1-[A-Z]$', x)); inteiro = next((x[7:] for x in labs if re.match(r'^Marcar T[2-9]$', x)), '')
     pa, pb = (par + ['', ''])[:2]
     META = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>x.getAttribute('aria-label')==='Meta de '+rot); return i?i.value:null;})"
-    AREA = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>x.getAttribute('aria-label')==='Área de '+rot); return i?Number(String(i.value).replace(/\\./g,'').replace(',','.')):null;})"
+    AREA = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>{const l=x.getAttribute('aria-label')||''; return l==='Área de '+rot||l.startsWith('Área de '+rot+' (');}); return i?Number(String(i.value).replace(/\\./g,'').replace(',','.')):null;})"
     m0 = {r: J(f"{META}({json.dumps(r)})") for r in (pa, pb, inteiro)}; a9 = {r: J(f"{AREA}({json.dumps(r)})") for r in (pa, inteiro)}
     for r in (pa, inteiro): J("(()=>{const i=[...document.querySelectorAll('#sl-painel input[type=checkbox]')].find(i=>i.getAttribute('aria-label')==='Marcar '+%s); i&&i.click();})()" % json.dumps(r)); time.sleep(.3)
     J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Mapa'); b&&b.click();})()"); time.sleep(.6); J(LIB)

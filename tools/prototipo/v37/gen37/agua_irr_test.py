@@ -5,7 +5,8 @@ campo do solo para os calculos, deficit e recomendações de irrigação"), no C
   W2 coluna "No balanço": AGS-003 em uso no Pivô 2 com AFD e gatilho; AGS-004 sem PMP diz que vale o limiar
   W3 painel do setor P2: CAD 45 mm, AFD 24,8 mm (f 0,55 da FAO-56), déficit em % da CAD e gatilho do limiar
   W4 medição nova do Pivô 19 com CAD 3 mm: AFD 1,5 mm vira o gatilho e o setor passa de "Sem necessidade" a "A programar"
-  W5 medição nova do P1 com CAD 6 mm: o déficit para na CAD (8,4 → 6,0 mm), a lâmina líquida também, e o texto diz que acabou a água disponível
+  W5 medição nova do P1 com CAD 6 mm: o balanço passa a ser dia a dia com o teto da CAD (FAO-56, eq. 85–86; Codex 6252809331): 8,4 → 4,5 mm,
+     o mesmo do oráculo diário independente abaixo (a chuva de 20/09 cai depois que o solo chegou na CAD), e a lâmina líquida também
   W6 PMP ≥ CC é recusado junto ao campo, sem gravar
   W7 fração f do setor: 0,10 no P2 faz a AFD (4,5 mm) virar o gatilho; vazio volta à referência da cultura
   W8 F5: a medição e o efeito ficam; "Registrar medição de água no solo" do setor abre o formulário com fazenda e talhão
@@ -104,8 +105,15 @@ try:
     ir('IR-01.dc.html', 'Santa Rita'); setor('P1'); d0 = J("FV('defT')") or ''; n0 = J("FV('necT')") or ''; fecha()
     medir('Santa Rita', 'P1', '20', '18')
     ir('IR-01.dc.html', 'Santa Rita'); setor('P1'); d1 = J("FV('defT')") or ''; n1 = J("FV('necT')") or ''; a5 = J("FV('aguaT')") or ''; fecha()
-    chk('W5 P1 com CAD 6 mm: déficit 8,4 → 6,0 mm, líquida 6,0 mm e "sem água disponível às raízes"',
-        d0.lstrip('≈').startswith('8,4 mm') and d1.lstrip('≈').startswith('6,0 mm') and 'líquida 6,0 mm' in n1 and 'déficit 6,0 mm = 100 % da CAD (sem água disponível às raízes)' in a5, [d0, n0, d1, n1, a5])
+    # oráculo independente (balanço diário FAO-56 com 0 ≤ Dr ≤ CAD), da semente do P1: d0, ETc dos 7 dias, chuva efetiva em 20/09 (dia −3) e as voltas
+    import dados_irrigacao as DI
+    b = DI.seed()['setores']['P1']; ha = b['ha']; b = b['bal']; et = b['etc'] / b['dias']; D = min(6.0, max(0.0, b['d0']))
+    for k in range(-b['dias'], 0):
+        v = D + et - (b['pef'] if k == -3 else 0) - sum(a['vol'] / (10 * ha) * a['ef'] / 100 for a in b['ap'] if max(-b['dias'], a['q'] // 1440) == k)
+        D = min(6.0, max(0.0, v))
+    esp = ('%.1f' % D).replace('.', ',')
+    chk(f'W5 P1 com CAD 6 mm: déficit 8,4 → {esp} mm (balanço diário com teto da CAD, oráculo independente), líquida {esp} mm e a % da CAD no painel',
+        d0.lstrip('≈').startswith('8,4 mm') and d1.lstrip('≈').startswith(esp + ' mm') and f'líquida {esp} mm' in n1 and f'déficit {esp} mm = ' in a5 and '% da CAD' in a5, [esp, d0, n0, d1, n1, a5])
     # ---------- W6 · recusa ----------
     J("ADD('Água no solo')"); espera("!!document.querySelector('aside[role=dialog]')", 4); time.sleep(.3)
     J("SETV('faz','Santa Rita')"); time.sleep(.4)
@@ -124,8 +132,8 @@ try:
     ir('IR-01.dc.html', 'Santa Rita'); setor('P1'); d8 = J("FV('defT')") or ''
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>N(b.innerText)==='Registrar medição de água no solo'); b&&b.click();})()"); time.sleep(.6)
     pre = [J("FV('faz')"), J("FV('talv')"), J("(document.querySelector('aside[role=dialog] h2')||{}).innerText||''")]; fecha()
-    chk('W8 F5: o déficit do P1 segue 6,0 mm; "Registrar medição de água no solo" abre o formulário com Santa Rita e P1',
-        d8.lstrip('≈').startswith('6,0 mm') and pre[0] == 'Santa Rita' and pre[1] == 'P1' and 'Registrar medição de água no solo' in pre[2], [d8, pre])
+    chk(f'W8 F5: o déficit do P1 segue {esp} mm; "Registrar medição de água no solo" abre o formulário com Santa Rita e P1',
+        d8.lstrip('≈').startswith(esp + ' mm') and pre[0] == 'Santa Rita' and pre[1] == 'P1' and 'Registrar medição de água no solo' in pre[2], [d8, pre])
     e1 = J("window.__e") or []
     # ---------- W9 · celular ----------
     c.aparelho(390, 844, toque=True); ir('IR-01.dc.html')

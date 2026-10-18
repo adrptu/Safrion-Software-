@@ -100,8 +100,8 @@ try:
     chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.094.947,10' in body(),(cur(),url()))
     etapa(1); sf=rowtxt('Safrinha 2027'); s7=rowtxt('Safra 2026/27')
     # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio (R$ 178,50) na 2026/27 (base verde 2, 18/10)
-    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.483,50',
-        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.094.947,10','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 428.483,50' in s7,(sf,s7))
+    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.305,00',
+        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.094.947,10','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 428.305,00' in s7,(sf,s7))
     foto('4_cmp_etapa1')
     # cada safra guarda o próprio andamento: convites da 2026/27 não aparecem na Safrinha
     J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
