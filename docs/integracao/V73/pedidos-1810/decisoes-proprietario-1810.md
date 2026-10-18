@@ -15,3 +15,17 @@
 | EX-50 · portal do parceiro, onboarding e backoffice | "portal do parceiro, onbording e backoffice façam da melhor forma." | **Delegado aos agentes.** O ponto de partida são as respostas de 17/10 (`pedidos-1710/decisoes-proprietario.md`): portal mínimo fora do menu (cotação por convite e XML da NF-e, com login próprio), implantação assistida e backoffice como ferramenta separada. Claude e Codex revisam e o Codex registra |
 
 **Ponto a confirmar com o proprietário:** se "liberada em lote" quis dizer também *aprovar* em lote, isso muda uma regra fixa do PRD (aprovação agronômica individual). Até ele dizer, vale a leitura acima.
+
+## Confirmação do proprietário (18/10/2026, noite): aprovação em lote
+
+**Literal:** "pode aprovar em lote as O.S sim"
+
+**Efeito:** substitui a decisão de 16/10 ("Aprovação em lote: fora, de propósito") e muda a regra fixa "Toda O.S. agrícola tem aprovação agronômica individual" (AGENTS §4; PRD 41 e 73.9). O texto da regra no AGENTS.md e no PRD é atualizado pelo Codex, com esta decisão como fonte. O Claude não edita o AGENTS.md.
+
+**Como fica (desenho do Claude, que o Codex revisa):**
+- **Quem aprova:** só quem tem o papel de decisão agronômica (CTL-3) aprova em lote. Os outros perfis veem o botão desligado, com o motivo.
+- **Antes de confirmar, uma prévia** com cada O.S.: produto, dose, alvo, talhão e alertas.
+- **Travas legais por O.S.** (registro, cultura × alvo, dose de bula, carência, receituário): a O.S. barrada sai do lote com o motivo e quem resolve. **O lote nunca passa por cima de trava.**
+- **Um registro de aprovação por O.S.** (CMD-42: quem, quando, versão, chave de idempotência própria) e o resultado por linha (P23). O rastro fica igual ao da aprovação uma a uma.
+- **Aprovar não libera:** a liberação (CMD-06) continua sendo a ação seguinte, que também pode ser em lote.
+- **EX-32:** muda de "tirar o lote" para "lote com papel, prévia, travas por O.S. e resultado por linha". Os testes de regressão provam que a O.S. com trava não é aprovada no lote e que cada O.S. ganha o seu registro.
