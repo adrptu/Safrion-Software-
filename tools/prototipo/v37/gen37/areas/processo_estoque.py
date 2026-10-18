@@ -314,7 +314,8 @@ function estRecIdentidadeErro(c,d){
   const mesmas=notas.filter(r=>num(r.nf)&&num(r.nf)===num(d.nf));
   const outro=mesmas.find(r=>p&&r.ped&&elotId(r.ped)!==p.id);
   if(outro) return 'Esta nota já está vinculada ao '+elotId(outro.ped)+'. Mantenha o pedido de origem; nada foi gravado.';
-  const origem=notas.find(r=>r.id===d.id)||mesmas.find(r=>p&&r.item===p.item&&r.un===p.un&&(p.linha==null||r.linha==null||String(r.linha)===String(p.linha)))||mesmas[0];
+  // Nota com vários itens do mesmo pedido (C-3/C-4, revisão do Claude): outra linha do mesmo PC é linha nova da nota, não "item diferente"
+  const origem=notas.find(r=>r.id===d.id)||mesmas.find(r=>p&&r.item===p.item&&r.un===p.un&&(p.linha==null||r.linha==null||String(r.linha)===String(p.linha)))||(p&&p.linha!=null?null:mesmas[0]);
   if(!p) return (d.ped||(origem&&origem.ped))?'Escolha um pedido válido para conferir a nota. Nada foi gravado.':'';
   const nf=origem||d, fornecedor=nf.forn||(origem&&epedBase(origem.ped)||{}).forn;
   const dif=[];
@@ -407,7 +408,7 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
   if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),u)+': indique a divergência.';
   if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,u)+' a entregar): registre como sobra.';
   if(((!isNaN(quar)&&quar>0)||(d.div&&d.div!=='Sem divergência'))&&!String(d.obs||'').trim()) e.obs='Informe o motivo da quarentena ou da divergência.';
-  const nfn=String(d.nf||'').replace(/\D/g,''); if(nfn){ const dup=erecs(C).find(r=>r.id!==fm.rid&&String(r.nf||'').replace(/\D/g,'')===nfn); if(dup) e.nf=dup.nf+' já foi lançada: documento duplicado não cria segunda entrada.'; }
+  const nfn=String(d.nf||'').replace(/\D/g,''); if(nfn){ const dup=erecs(C).find(r=>r.id!==fm.rid&&String(r.nf||'').replace(/\D/g,'')===nfn&&(!pick||pick.linha==null||(elotId(r.pedido||r.ped)===pick.id&&String(r.linha)===String(pick.linha)))); if(dup) e.nf=dup.nf+' já foi lançada'+(pick&&pick.linha!=null?' nesta linha do '+pick.id:'')+': documento duplicado não cria segunda entrada.'; }   /* nota com vários itens: a duplicidade é por nota + linha do pedido (C-3/C-4) */
   const lt=String(d.lote||'').trim(); const outro=Object.values(C.lotes).find(l=>l.lote===lt&&p&&l.prod!==p.item); if(outro) e.lote='O lote '+lt+' é de '+outro.prod+'. Use outro código de lote.';
   if(!efert(d.ped)){ const vv=String(d.val||'').trim();
     if(!vv) e.val='Informe a validade do lote (mês/ano, ex.: 06/2027).';
