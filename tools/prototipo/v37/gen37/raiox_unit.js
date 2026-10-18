@@ -218,6 +218,12 @@ except ValueError:pass
 bad=copy.deepcopy(a['entrada']);bad[0]['apps']=[dict(day=float('nan'))]
 try:g.medir_suporte(bad);raise AssertionError('aplicação malformada aceita')
 except ValueError:pass
+bad=copy.deepcopy(a['entrada']);bad[0]['obs'][0]['v']=float('nan')
+try:g.medir_suporte(bad);raise AssertionError('NaN aceito')
+except ValueError as err:assert 'Suporte exige' in str(err)
+bad=copy.deepcopy(a['entrada'][:1]);bad[0]['obs']=[dict(day=1,v=0),dict(day=3,v=1)];bad[0]['apps']=[dict(day=2)]
+r=g.medir_suporte(bad)[0]
+assert r['excluidas']==1 and r['exclusoes_por_motivo']==dict(abaixo_nc=1,intervalo=1,aplicacao=1)
 print('PASS A2: dado malformado recusado antes das exclusões; observação isolada e aplicação incluídas.')
 assert g.digest(pop)==g.digest(g.expandir_populacao(eps,8))
 # A1: cada gatilho contém o mesmo conjunto de exposições, em todos os dias.

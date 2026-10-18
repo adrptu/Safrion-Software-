@@ -359,7 +359,6 @@ def medir_suporte(entradas):
     """Condições necessárias por réplica; não testa limiar/colinearidade do motor."""
     # Dado malformado não é exclusão agronômica. Validar também observações
     # isoladas e aplicações fora das janelas antes de contar qualquer suporte.
-    digest(entradas)
     for e in entradas:
         valores = [e['nc']] + [x[k] for x in e['obs'] for k in ('day', 'v')] + [x['day'] for x in e['apps']]
         if any(type(x) not in (int, float) or not math.isfinite(x) for x in valores):
@@ -368,12 +367,23 @@ def medir_suporte(entradas):
             raise ValueError('Suporte exige NC positivo e observações não negativas')
         if any(a['day'] >= b['day'] for a,b in zip(e['obs'], e['obs'][1:])):
             raise ValueError('Suporte exige observações em ordem estritamente crescente')
+    digest(entradas)
     grupos = {}
     for e in entradas:
         chave = tuple(e[k] for k in ('cenario', 'safra', 'semente', 'alvo'))
-        g = grupos.setdefault(chave, {'janelas': 0, 'excluidas': 0, 'talhoes': set(), 'semanas': set()})
+        g = grupos.setdefault(chave, {'janelas': 0, 'excluidas': 0, 'talhoes': set(), 'semanas': set(),
+            'motivos': {'abaixo_nc': 0, 'intervalo': 0, 'aplicacao': 0}})
         apps = [a['day'] for a in e['apps']]
         for a,b in zip(e['obs'], e['obs'][1:]):
+            # Motivos podem coexistir; excluidas conta a janela uma única vez.
+            motivos = []
+            if a['v'] < .1*e['nc']: motivos.append('abaixo_nc')
+            if not 5 <= b['day']-a['day'] <= 10: motivos.append('intervalo')
+            if any(a['day']-10 < d <= b['day'] for d in apps): motivos.append('aplicacao')
+            if motivos:
+                g['excluidas'] += 1
+                for m in motivos: g['motivos'][m] += 1
+                continue
             try:
                 crescimento(a['v'], b['v'], e['nc'], a['day'], b['day'], e['obs'][-1]['day'], apps)
             except ValueError:
@@ -385,7 +395,7 @@ def medir_suporte(entradas):
     saida = []
     for chave,g in sorted(grupos.items()):
         saida.append(dict(zip(('cenario','safra','semente','alvo'),chave),
-                          janelas=g['janelas'], excluidas=g['excluidas'],
+                          janelas=g['janelas'], excluidas=g['excluidas'], exclusoes_por_motivo=g['motivos'],
                           talhoes=len(g['talhoes']), semanas=len(g['semanas']),
                           necessario=(g['janelas'] >= 80 and len(g['talhoes']) >= 3 and len(g['semanas']) >= 5),
                           suporte_alto_baixo='nao_avaliado', recuperacao_motor='nao_executada'))
