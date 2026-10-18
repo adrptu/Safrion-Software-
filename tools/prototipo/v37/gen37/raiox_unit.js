@@ -1,8 +1,15 @@
 // RX-0: paridade da transformação com rxRows real; não mede recuperação.
 const fs=require('fs'), vm=require('vm'), assert=require('assert'), cp=require('child_process');
 const html=fs.readFileSync(process.argv[2], 'utf8');
+const recomb=process.argv.indexOf('--recombinar');
+if(recomb>=0){const p=JSON.parse(fs.readFileSync(process.argv[recomb+1],'utf8'));assert.equal(p.fonte_sha256,require('crypto').createHash('sha256').update(html).digest('hex'),'fonte diverge da execução congelada');const i=html.indexOf('const impute ='),j=html.indexOf('// camada 3:',i),r=html.indexOf('function rngFor('),t=html.indexOf('// ---- clima diário',r);assert(i>=0&&j>i&&r>=0&&t>r);p.combinados=combinarMotor(p.resultados,html.slice(i,j),html.slice(r,t));p.combinacao_contrato='C2.1-6253661375';console.log(JSON.stringify(p));process.exit(0);}
 const motorInput=process.argv.indexOf('--motor-input');
 if(motorInput>=0){executarMotorObservavel(process.argv[motorInput+1]);process.exit(0);}
+assert.equal(estadoFator(undefined,'x'),undefined);
+assert.equal(estadoFator({estado:'singular',reps:[]},'x').level,'insuf');
+assert.equal(estadoFator({estado:'executado',reps:[]},'x').origem,'nao_selecionado');
+const mate=estadoFator({estado:'executado',reps:[{fator:'qs',level:'grupo',beta:2,candidatoSafra:true,mates:['placebo']}]},'placebo');assert.equal(mate.level,'grupo');assert.equal(mate.candidatoSafra,false);assert.equal(mate.origem,'mate');
+console.log('PASS C2.1: população ausente, singular, não selecionado e mate sem candidatura');
 const estrutura=[{series:[{day:0,covariavel_teste:.2,clima:{ur:50}}]},{series:[{day:0,covariavel_teste:.2,clima:{ur:60}}]}];
 assert.equal(tipoObservado(estrutura,'placebo'),'Clima');assert.equal(tipoObservado(estrutura,'ur'),'Controle');
 assert.throws(()=>tipoObservado([estrutura[0]],'placebo'));
@@ -383,14 +390,31 @@ function executarMotorObservavel(caminho) {
   const r=vm.runInContext(`(()=>{const rows=rxRows(a,D);if(rows.length<8)return {janelas:rows.length,reps:[],estado:'insuf'};const M=rxFit(rows);if(!M)return {janelas:rows.length,reps:[],estado:'singular'};const R={a,D,rows,M};rxBoot(R,M);rxStable(R,M);rxLevels(R);return {janelas:rows.length,estado:'executado',reps:M.reps.map(q=>({fator:q.f.k,janela:q.wi,nHi:q.nHi,nLo:q.nLo,pivHi:q.pivHi,wkHi:q.wkHi,wkLo:q.wkLo,candidatoSafra:!!q.candidatoSafra,beta:q.beta,level:q.level,ci95:q.ci95,stable:q.stable,mates:q.mates.map(m=>m.f.k)}))};})()`,c);
   saida.push({tipos:Object.fromEntries(c.RXF.map(f=>[f.k,f.tipo])),safra:e.safra,semente:e.semente,alvo:e.alvo,...r});
  }
- const combinados=[];
+ const combinados=combinarMotor(saida,fonte,rng);
+ console.log(JSON.stringify({adaptador_sha256:crypto.createHash('sha256').update(valorObservado.toString()+tipoObservado.toString()).digest('hex'),fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',combinados,limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
+}
+
+
+// C2.1 (Claude6253661375): ausência no modelo não significa população ausente.
+// 'nulo' aqui descreve seleção do modelo, não prova efeito causal zero.
+function estadoFator(p,fator){
+ if(!p)return undefined;
+ if(p.estado==='insuf'||p.estado==='singular')return {level:'insuf',beta:0,origem:p.estado};
+ assert(p.estado==='executado','estado desconhecido');
+ const q=p.reps.find(q=>q.fator===fator);if(q)return {...q,origem:'representante'};
+ const r=p.reps.find(q=>q.mates.includes(fator));
+ if(r)return {level:r.level,beta:r.beta,candidatoSafra:false,origem:'mate',representante:r.fator};
+ return {level:'nulo',beta:0,origem:'nao_selecionado'};
+}
+function combinarMotor(saida,fonte,rng){
+ const fatores=['qs','molh','ur','placebo']; const combinados=[];
  const pares=new Map();for(const r of saida){const k=JSON.stringify([r.semente,r.alvo]);if(!pares.has(k))pares.set(k,[]);pares.get(k).push(r);}
  const combCtx={};vm.createContext(combCtx);vm.runInContext(rng+fonte,combCtx);
  if(vm.runInContext("typeof rxCombinaSafras==='function'",combCtx)){
   for(const ps of pares.values()){assert(ps.length<=2&&new Set(ps.map(p=>p.safra)).size===ps.length,'combinação exige safras distintas, duas no máximo');
-   for(const fator of fatores){const a=ps[0].reps.find(q=>q.fator===fator),b=ps[1]&&ps[1].reps.find(q=>q.fator===fator);combCtx.A=a;combCtx.B=b;
-    const r=vm.runInContext('rxCombinaSafras(A,B)',combCtx);combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),...r});}
+   for(const fator of fatores){const a=estadoFator(ps[0],fator),b=estadoFator(ps[1],fator);combCtx.A=a;combCtx.B=b;
+    const r=vm.runInContext('rxCombinaSafras(A,B)',combCtx);combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),origens:[a&&a.origem,b&&b.origem],...r});}
   }
  }
- console.log(JSON.stringify({adaptador_sha256:crypto.createHash('sha256').update(valorObservado.toString()+tipoObservado.toString()).digest('hex'),fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',combinados,limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
+ return combinados;
 }
