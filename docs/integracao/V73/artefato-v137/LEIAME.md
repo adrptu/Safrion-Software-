@@ -8,7 +8,11 @@
   - `AG-01.dc.html`: visão Mapa em Pragas e doenças.
   - `IR-01.dc.html`: visão Mapa em Irrigação.
   - `SAF.dc.html`: a 2ª linha do rótulo do mapa aparece.
-  - `IN-04.dc.html`: mesma saída (coleta A2 60/60). O código da Irrigação passou a vir de uma fonte única.
+  - `IN-04.dc.html`: na camada O.S., as O.S. do cenário (as 16 de demonstração e as emitidas no protótipo) passam a aparecer. Elas usam a mesma fonte da visão Mapa da O.S. (`os_mapa.js`):
+    - O.S. sem janela fica "sem prazo", e a legenda de Atrasos diz "sem ordem ou sem prazo";
+    - selo cinza não conta como pendência.
+    - As diferenças estão em `docs/mapa/EX-55-F1/A2_dif_ordens_do_cenario.txt`.
+    - A camada Irrigação passou a vir de uma fonte única (`irrMapaEntrada`), sem mudar a saída: coleta A2 com 60/60 contextos idênticos antes e depois desse passo.
   - `IN-03.dc.html`, `IR-02.dc.html`, `IR-03.dc.html`, `IR-03det.dc.html` e `IR-04.dc.html`: carregam o mesmo código da Irrigação (`irrigacao_estado.js`).
 
 ## Como conferir
