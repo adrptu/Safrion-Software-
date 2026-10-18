@@ -25,7 +25,8 @@ try:
     chk('1 Aprovações sem O.S.: 4 decisões (inventário, Diesel, orçamento e acesso) · 4 pendentes · 1 vence hoje',
         len(rs)==4 and not any(r.startswith('OS-0') for r in rs) and '4 pendentes · 1 vence hoje' in head() and J("document.documentElement.scrollHeight")<=HOV.get('IN-02.dc.html',900), [rs,head(),J("document.documentElement.scrollHeight")])
     # 2 · a O.S. não passa por revisão: a OS-0418 abre A liberar, já impedida pelo Estoque (Ureia 45 % sem lote), sem selo nem recibo do agrônomo
-    ir('OS.dc.html'); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0418')); r&&r.click();})()"); time.sleep(.4)
+    # v135: a linha começa pelo selo de impedimento ("Falta insumo OS-0418 …"); acha a linha pelo ID, não pelo começo do texto
+    ir('OS.dc.html'); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.split(/\\s+/).indexOf('OS-0418')>=0); r&&r.click();})()"); time.sleep(.4)
     po=J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     chk('2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"',
         'Liberar bloqueado: sem lote de Ureia 45%' in po and not any(x in po for x in ('Aguardando agrônomo','Aprovada pelo agrônomo','AP-2201','Revisar versão')), po[:400])
@@ -44,4 +45,5 @@ finally:
     try:
         if c: c.close()
     finally: srv.terminate()
-print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(1 if FAIL else 0)   # v135: a falha não fica mais escondida atrás de rc=0

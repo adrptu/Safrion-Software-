@@ -76,8 +76,12 @@ try:
             if not v or v[0] != hub or v[1] != '‹ ' + nome or v[2] < 36: voltas.append([h, v])
     chk(f'N2 {len(ui37.HUB37)} telas de entrada ({", ".join(ui37.HUB37)}): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título', not ruins, ruins[:2])
     chk('N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada', not voltas, voltas[:4])
-    c.goto(U('MOD-AGR.dc.html'), 1.0); J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens de serviço').click()"); time.sleep(1.2)
-    p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()"); time.sleep(1.0); p2 = J("location.pathname")
+    # v135: espera a condição (a tela abriu; voltou e o foco chegou ao cartão), não 1 s fixo: com a máquina ocupada a volta passou de 1 s
+    # (sonda: 0,1 s livre, até 1,08 s em carga); limite 6 s, acima do 2 s que o modVolta espera pelo cartão
+    c.goto(U('MOD-AGR.dc.html'), 1.0); espera("document.querySelectorAll('a.mod-cartao').length>0")
+    J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens de serviço').click()"); espera("location.pathname.endsWith('/OS.dc.html')&&!!document.querySelector('a.volta37')", 6.0)
+    p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()")
+    espera("location.pathname.endsWith('/MOD-AGR.dc.html')&&(document.activeElement&&document.activeElement.getAttribute('href'))==='OS.dc.html'", 6.0); p2 = J("location.pathname")
     fo = J("(document.activeElement&&document.activeElement.getAttribute('href'))||''")
     chk('N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta)', (p1 or '').endswith('/OS.dc.html') and (p2 or '').endswith('/MOD-AGR.dc.html') and fo == 'OS.dc.html', [p1, p2, fo])
     # item de lista: role="listitem" na grade ou <li> nativo da lista ordenada do fluxo (14/10/2026: <ol role="list"> por bloco, sem role redundante no <li>)

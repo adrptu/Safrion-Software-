@@ -157,7 +157,10 @@ try:
         chk('AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador', 'gestor · Ana' in l and 'Editável: papel' in l and 'Liberador do domínio' not in J("document.body.innerText"), l)
         # ---------- AL-01 → PCP (vale na hora; R13 na O.S.) ----------
         abre(1, 'AL-01 · Liberar'); d = dlg()
-        chk('painel da AL-01: definição, ordens afetadas (10 em A liberar: 6 + as 4 origens de demonstração OS-0590…0593 do OS-LOTE) e versões; com o painel aberto, nenhuma primária fora dele', 'ordens e registros afetados agora (10)' in d.lower() and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [d[-500:], prims()])
+        # v135 (EX-54): a semente das frentes troca as 4 origens OS-0590…0593 do OS-LOTE por 16 O.S. A liberar com selo "Demonstração" (OS-0584…0599);
+        # elas seguem a alçada como qualquer O.S. (só ficam fora da demanda de compra): 6 + 16 = 22
+        naf = (re.search(r'afetados agora \((\d+)\)', d.lower()) or [None, None])[1]
+        chk('painel da AL-01: definição, ordens afetadas (22 em A liberar: 6 + as 16 de demonstração OS-0584…0599 das Frentes) e versões; com o painel aberto, nenhuma primária fora dele', naf == '22' and all(('OS-%04d' % i) in d for i in range(584, 600)) and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [naf, d[-500:], prims()])
         TI = "(()=>{const g=[...document.querySelectorAll('aside[role=dialog] [role=radiogroup]')].find(x=>x.getClientRects().length&&/Papel que decide/.test(x.getAttribute('aria-label')||''));return g?[...g.querySelectorAll('[role=radio]')].filter(b=>b.tabIndex===0).map(b=>b.innerText.trim()):null;})()"
         ti0 = J(TI)
         chk('rádios de papel com um só ponto de Tab (roving tabindex; achado do app 6227866897): só a opção marcada tem tabIndex 0', ti0 is not None and len(ti0) == 1 and 'vigente' in ti0[0], ti0)

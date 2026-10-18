@@ -1,0 +1,8 @@
+OK    1 Aprovações sem O.S.: 4 decisões (inventário, Diesel, orçamento e acesso) · 4 pendentes · 1 vence hoje 
+FALHA 2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão" 
+OK    3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida" 
+OK    4 Meu dia: "Receber devolução" → EST.dc.html 
+OK    5 Agenda: REQ-031 "Receber devolução" → EST.dc.html 
+
+4 ok · 1 falhas ['2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"']
+rc=0

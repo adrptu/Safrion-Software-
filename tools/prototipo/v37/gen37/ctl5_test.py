@@ -130,9 +130,12 @@ try:
         pr and bool(alvo) and b0 == {'dis': True} and 'Preparar receituário' not in f0 and 'Receituário emitido' not in f0 and 'Emitir receituário' not in f0
         and not J("!!document.querySelector('aside[aria-label=\"Preparar receituário agronômico\"]')") and 'Escolha a cultura e o alvo' in pa0, [pr, alvo, b0, pa0])
     sv(f'{FX} select[aria-label="Cultura do uso"]', str(alvo.get('MA'))); sv(f'{FX} select[aria-label="Alvo do uso"]', str(alvo.get('a')))
-    op = [o[0] for o in OPTS('Ordem A liberar') if o[0]]; ov = J(f"document.querySelector('{FX} select[aria-label=\"Ordem A liberar\"]').value")
-    chk('E2.2 cultura Mamão × antracnose: "Ordem A liberar" oferece só a ordem de pulverização de mamão (OS-0501, já escolhida); Calagem (OS-0502) e Sexagem (OS-0511) não (revisão S3-1)',
-        op == ['OS-0501'] and ov == 'OS-0501', [OPTS('Ordem A liberar'), ov])
+    # v135 (EX-54): a semente das Frentes põe 9 pulverizações A liberar de mamão na Lagoa Grande (OS-0584…0592, selo "Demonstração"); elas também
+    # são candidatas, então nada vem escolhido e a agrônoma escolhe a OS-0501. As calagens da semente (OS-0593/0594) seguem fora, como a OS-0502
+    DEMO_LG = ['OS-%04d' % i for i in range(584, 593)]
+    op = [o[0] for o in OPTS('Ordem A liberar') if o[0]]; sv(f'{FX} select[aria-label="Ordem A liberar"]', 'OS-0501'); ov = J(f"document.querySelector('{FX} select[aria-label=\"Ordem A liberar\"]').value")
+    chk('E2.2 cultura Mamão × antracnose: "Ordem A liberar" oferece só ordens de pulverização de mamão (OS-0501 e as 9 de demonstração das Frentes, escolhida a OS-0501); Calagem (OS-0502, OS-0593/0594) e Sexagem (OS-0511) não (revisão S3-1)',
+        op == ['OS-0501'] + DEMO_LG and ov == 'OS-0501' and not {'OS-0502', 'OS-0511', 'OS-0593', 'OS-0594'} & set(op), [OPTS('Ordem A liberar'), ov])
     pa1 = PASSO(); b1 = BTN('Usar na O.S.')
     chk('E2.3 escolhida a OS-0501: "Usar na O.S." ligado; o texto diz o próximo passo (Ajustar antes de liberar, a agrônoma informa a dose, a O.S. confere e grava; a consulta não emite receituário)',
         b1 == {'dis': False} and 'Abre a OS-0501 em Ajustar antes de liberar com Tebuconazol 200 EC incluído' in pa1 and 'Esta consulta não emite receituário' in pa1, [b1, pa1])
@@ -183,8 +186,8 @@ try:
     goto('AG-07.dc.html', 1.5); ag_pronto(); J(f"location.hash='#reg-{alvo.get('reg')}'"); time.sleep(.9)
     sv(f'{FX} select[aria-label="Cultura do uso"]', str(alvo.get('MA'))); sv(f'{FX} select[aria-label="Alvo do uso"]', str(alvo.get('a')))
     op2 = [o[0] for o in OPTS('Ordem A liberar') if o[0]]
-    chk('E2.9 de volta ao AG-07: a OS-0501 (liberada) saiu; não sobra ordem de pulverização A liberar em mamão e o texto diz de onde a ordem nasce',
-        op2 == [] and 'Nenhuma ordem de pulverização A liberar em mamão' in PASSO() and BTN('Usar na O.S.') == {'dis': True}, [op2, PASSO()])
+    chk('E2.9 de volta ao AG-07: a OS-0501 (liberada) saiu; sobram só as 9 de demonstração das Frentes e "Usar na O.S." fica desligado até escolher a ordem',
+        op2 == DEMO_LG and BTN('Usar na O.S.') == {'dis': True}, [op2, PASSO()])
     # sem o papel: Caio (PCP) segue o link → nada é incluído, a mensagem nomeia quem decide
     J("localStorage.setItem('safrion.perfilDemo','Caio')")
     goto('OS.dc.html#OS-0430:usar=Fungicida%20A|Soja|ferrugem-asi%C3%A1tica', 1.6); t7 = TOAST(); e7 = J("window.__cen.cenGet().ordens['OS-0430']") or {}
@@ -237,6 +240,7 @@ try:
     limpa()   # cenário de volta ao início: a OS-0501 está A liberar de novo (o E2.13 usa a ordem de pulverização do mamão)
     c.size(390, 844); goto('AG-07.dc.html', 1.5); ag_pronto(); J(f"location.hash='#reg-{alvo.get('reg')}'"); time.sleep(.9)
     sv(f'{FX} select[aria-label="Cultura do uso"]', str(alvo.get('MA'))); sv(f'{FX} select[aria-label="Alvo do uso"]', str(alvo.get('a')))
+    sv(f'{FX} select[aria-label="Ordem A liberar"]', 'OS-0501')   # v135: há também as 9 de demonstração das Frentes
     geo = J(f"""(()=>{{const a=document.querySelector('{FX}'); const b=[...a.querySelectorAll('button')].find(x=>x.innerText.trim()==='Usar na O.S.'); const r=b.getBoundingClientRect(), q=a.getBoundingClientRect();
       const s=a.querySelector('select[aria-label="Ordem A liberar"]').getBoundingClientRect(); return [Math.round(r.right),Math.round(q.right),Math.round(s.right),a.scrollWidth,a.clientWidth];}})()""") or [9, 0, 9, 9, 0]
     chk(f'E2.12 390 px: ficha do AG-07 sem rolagem lateral; "Ordem A liberar" e "Usar na O.S." cabem ({geo})', geo[0] <= geo[1] and geo[2] <= geo[1] and geo[3] <= geo[4] and LARG()[0] <= LARG()[1], [geo, LARG()])

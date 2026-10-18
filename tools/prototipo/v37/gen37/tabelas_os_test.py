@@ -89,13 +89,13 @@ try:
     chk('TF01 faixa "Filtros": Talhão visível em Todos, com Sem talhão e os mesmos talhões do filtro da coluna (que mostra a contagem por valor)',
         vis_t and tal() == 'Todos' and op[:1] == ['Todos'] and 'Sem talhão' in op and bool(cv) and all(x.split()[-1].isdigit() for x in cv)
         and sorted('(vazio)' if o == 'Sem talhão' else o for o in op[1:]) == sorted(x.rsplit(' ', 1)[0] for x in cv), (vis_t, tal(), op, cv))
-    escolhe('P1'); chk('TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418)', sorted(ids()) == ['OS-0417', 'OS-0418'], ids()); todos()
+    escolhe('P1'); chk('TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418 e a OS-0597 da demonstração das Frentes)', sorted(ids()) == ['OS-0417', 'OS-0418', 'OS-0597'], ids()); todos()   # v135: semente EX-54 na Santa Rita
     escolhe('T1'); r = ids(); cm = col_marcados()
     chk('TF01 T1 na faixa filtra na hora e não seleciona T1-A (OS-0430) nem "Trator T1" (OS-0431): só OS-0421; o filtro da coluna Talhão fica com T1',
         r == ['OS-0421'] and tal() == 'T1' and cm == ['T1'], (r, tal(), cm))
     col_tal(['T1', 'T2']); r = ids()
-    chk('TF01 T1 ou T2 pelo filtro da coluna: OS-0421 (T1+T2) aparece uma vez, com OS-0431; a faixa mostra "2 talhões"',
-        sorted(r) == ['OS-0421', 'OS-0431'] and r.count('OS-0421') == 1 and tal() == '2 talhões', (r, tal()))
+    chk('TF01 T1 ou T2 pelo filtro da coluna: OS-0421 (T1+T2) aparece uma vez, com OS-0431 e a OS-0599 (KCl em T2, demonstração das Frentes); a faixa mostra "2 talhões"',
+        sorted(r) == ['OS-0421', 'OS-0431', 'OS-0599'] and r.count('OS-0421') == 1 and tal() == '2 talhões', (r, tal()))
     escolhe('Sem talhão'); cm = col_marcados()
     chk('TF01 Sem talhão: OB-0104 com Local Armazém Sede; na coluna, "(vazio)"', ids() == ['OB-0104'] and cel_col('Local') == ['Armazém Sede'] and cm == ['(vazio)'], (ids(), cel_col('Local'), cm))
     todos(); cm = col_marcados()
@@ -130,7 +130,7 @@ try:
         bool(n_pv) and tal() == 'Todos' and cm is None and any('saiu do filtro' in x for x in m) and J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value") == 'Santa Rita' and ids() == todas, (fz, pv, n_pv, tal(), cm, m))
     # ---------------- TF02 ----------------
     col_tal(['T1', 'T2']); busca('Plantio'); r = ids()
-    chk('TF02 Talhão (T1 ou T2) E busca "Plantio": só OS-0431', r == ['OS-0431'], r)
+    chk('TF02 Talhão (T1 ou T2) E busca "Plantio": OS-0431 e a OS-0599 ("KCl a lanço antes do plantio", demonstração)', sorted(r) == ['OS-0431', 'OS-0599'], r)
     busca(''); fase('Em execução'); r1 = ids()
     aba('Kanban'); k = kanban(); kn = notas()
     chk('TF02 Kanban com o mesmo recorte (talhão + fase) e nota do recorte', sorted(k) == sorted(r1) and any('talhão' in x.lower() for x in kn), (r1, k, kn))
@@ -179,7 +179,7 @@ try:
     chk('TF06 contador da grade no agrupado conta O.S. distintas (10 de 10), não grupos (9)', cont == f'{dist} de {len(todas)}', cont)
     shot('tf06-1440-agrupado')
     col_tal(['T1', 'T2']); g2 = J(GRP) or {}; tot = next((x for x in notas() if TOT.match(x)), '')
-    chk('TF06 com T1 ou T2: só grupos T1 e T2; total 2 O.S. · 452 ha (350 + 102, cada O.S. uma vez)', list(g2) == ['T1', 'T2'] and tot.startswith('2 O.S. · 452 ha · '), (g2, tot))
+    chk('TF06 com T1 ou T2: só grupos T1 e T2; total 3 O.S. · 750 ha (350 + 102 + 298 da OS-0599, cada O.S. uma vez)', list(g2) == ['T1', 'T2'] and tot.startswith('3 O.S. · 750 ha · '), (g2, tot))
     J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).find(r=>/^OS-0421/.test(r.innerText.trim())).querySelector('[role=cell]').click()"); time.sleep(.5)
     chk('TF06 clicar na O.S. dentro do grupo abre o detalhe da própria O.S.', (J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or '').startswith('OS-0421'))
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
@@ -206,11 +206,11 @@ try:
     cm = col_marcados()
     chk('TF04 390 px: o filtro da coluna Talhão fica com o T1 escolhido na faixa', cm == ['T1'], cm)
     col_tal(['T1', 'T2']); r = ids()
-    chk('TF04 390 px: dois talhões pelo filtro da coluna (T1 ou T2) mostram "2 talhões" na faixa', sorted(r) == ['OS-0421', 'OS-0431'] and tal() == '2 talhões', (r, tal()))
+    chk('TF04 390 px: dois talhões pelo filtro da coluna (T1 ou T2) mostram "2 talhões" na faixa', sorted(r) == ['OS-0421', 'OS-0431', 'OS-0599'] and tal() == '2 talhões', (r, tal()))
     J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent)[0].focus()"); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.5)
     det = J("!!document.querySelector('aside[role=dialog]')"); shot('tf04-390-detalhe')
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.4)
-    chk('TF04 Enter na linha abre o detalhe; fechar volta com o recorte', det and sorted(ids()) == ['OS-0421', 'OS-0431'] and tal() == '2 talhões', (det, ids(), tal()))
+    chk('TF04 Enter na linha abre o detalhe; fechar volta com o recorte', det and sorted(ids()) == ['OS-0421', 'OS-0431', 'OS-0599'] and tal() == '2 talhões', (det, ids(), tal()))
     todos(); cm = col_marcados()
     chk('TF04 390 px: "Todos" na faixa limpa o Talhão (linhas do contexto, na ordem gravada no TF03, e filtro da coluna sem marca)', sorted(ids()) == sorted(todas) and tal() == 'Todos' and cm is None, (len(ids()), tal(), cm))
     chk('sem erro de script (390)', not J("window.__e"), J("window.__e"))

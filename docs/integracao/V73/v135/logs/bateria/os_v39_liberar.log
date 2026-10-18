@@ -1,0 +1,22 @@
+  OK  nova ordem de colheita nasce sem insumos
+  OK  confirmação diz que não há insumo a reservar
+  OK  CTL-1/CTL-3: confirmação diz que confirmar é aprovar esta versão (agrônoma) e liberar (gestora)
+  OK  CTL-1: sem insumos grava CMD-42 "sem insumos" e CMD-06 sem reserva, e a Origem mostra os dois
+  OK  CTL-1/CTL-3: aviso termina na aprovação e na liberação (sem segundo próximo passo)
+  OK  toast sem requisição vazia
+  OK  cenário: nenhuma requisição vazia
+  OK  situação atual sem reserva que não houve
+  OK  título sem repetir operação e atividade
+  OK  insumos do plano com dose e total da ordem
+  OK  atividade preenchida pelo plano
+  OK  confirmação lista a reserva por lote
+  OK  requisição nova com três dígitos: REQ-041
+  OK  CTL-1/CTL-3: aviso termina em "v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora)."
+  OK  CTL-1: Origem com CMD-42 (área e doses) e CMD-06 (REQ-041 reservada)
+  OK  reserva no lote e situação do insumo com REQ-041
+  OK  sequência contínua: OS-0430 recebe REQ-042
+  OK  colheita da soja no T1 com aplicação de fungicida pendente: liberar segue bloqueado pela carência
+  OK  CTL-1: recusa pela carência não grava CMD-42 nem CMD-06
+  OK  sem erro JS
+RESULTADO: 20/20 ok
+rc=0
