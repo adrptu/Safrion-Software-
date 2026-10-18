@@ -33,3 +33,16 @@ assert 'X' not in s['acima'] and s['acima']['Y']['dif']==2
 assert s['revisao']=={'it':{'X':100,'Y':3,'Z':8},'novos':['Z'],'menos':['Y']},s
 assert s['resolvida']['it']=={'X':3} and s['resolvida']['menos']==['X']
 print('OK: data pendente preserva solicitação; falta datada e redução após resolução preservadas')
+
+# Demanda de outra safra torna a projeção parcial sem inflar a solicitação atual.
+# Ao resolver sua data, a disputa pelo estoque compartilhado segue a cronologia.
+externa=[dict(dt=None,q=7,tipo='dem',own=False,chave='outra'),
+         dict(dt='2026-11-02',q=3,tipo='dem',own=True,chave='atual')]
+for data,liquida,parcial in [(None,0,True),('2026-11-01',3,False),('2026-11-03',0,False)]:
+    externa[0]['dt']=data
+    js=json.loads(subprocess.check_output([node,'-e',code,json.dumps(externa)],text=True))['r']
+    py=D.cal01(5,externa,hoje='2026-10-01',viavel='2026-10-08')
+    for k,v in py.items(): assert js[k]==v,(data,k,js[k],v)
+    assert (js['bruta'],js['liq'],js['parcial'])==(3,liquida,parcial),(data,js)
+    assert js['semData']==0
+print('OK: outra safra sem data não infla solicitação; resolução antes/depois disputa estoque pela cronologia; paridade JS/Python')
