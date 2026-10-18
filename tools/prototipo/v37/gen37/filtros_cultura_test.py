@@ -17,6 +17,7 @@ Uso: python3 filtros_cultura_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir, troca_visao
+from tabelas_lib import Grade
 import dados_mip as DM
 
 OK, FAIL = [], []
@@ -46,13 +47,20 @@ try:
         res[pg] = (o, len(r0), len(r1), ruins[:2], len(r2))
     chk('F1 Colheita, Recebimento e Estoque de produto: Cultura na faixa; "Soja" deixa só linhas de soja (menos que antes); "Todas" volta tudo',
         all(v[0] and v[0][0] == 'Todas' and 'Soja' in v[0] and v[2] < v[1] and not v[3] and v[4] == v[1] for v in res.values()), res)
-    limpa(); c.goto(U('COLH.dc.html'), 1.4)
-    t0 = opts('Filtrar por talhão'); sel('Filtrar por cultura', 'Café'); t1 = opts('Filtrar por talhão')
-    sel('Filtrar por cultura', 'Todas'); sel('Filtrar por talhão', 'T2'); r = json.loads(J(ROWS) or '[]')
-    # folha = linha sem a seta de abrir/recolher (TAB-11: a seta é o botão .g2car com aria-expanded; antes, o texto começava com ▾/▸)
-    folhas = json.loads(J(ROWS.replace("!r.classList.contains('g2tot'))", "!r.classList.contains('g2tot')&&!r.querySelector('button.g2car[aria-expanded]'))")) or '[]')
-    chk('F2 Colheita: o Talhão segue a Cultura (Café → só C1) e "T2" deixa só linhas do T2', t0[:1] == ['Todos'] and len(t0) > 3 and t1 == ['Todos', 'C1'] and folhas and all('T2' in x for x in folhas),
-        [t0[:6], t1, folhas[:3]])
+    # base-verde3: T2 não está em produção; P1 existe no catálogo atual. TAB-12 nasce recolhido.
+    for largura, mobile in ((1440, False), (390, True)):
+        c.aparelho(largura, 844 if mobile else 900, 2 if mobile else 1, mobile)
+        limpa(); c.goto(U('COLH.dc.html'), 1.4)
+        t0 = opts('Filtrar por talhão'); sel('Filtrar por cultura', 'Café'); t1 = opts('Filtrar por talhão')
+        sel('Filtrar por cultura', 'Todas'); g = Grade(J)
+        antes = g.dicts(so_folhas=True)
+        esperadas = [x for x in antes if x.get('Talhão · variedade', '').split(' ')[0] == 'P1']
+        sel('Filtrar por talhão', 'P1'); depois = g.dicts(so_folhas=True)
+        chk(f'F2 {largura} Colheita: Café → só C1; P1 mantém exatamente suas folhas e exclui as demais',
+            t0[:1] == ['Todos'] and 'P1' in t0 and len(t0) > 3 and t1 == ['Todos', 'C1']
+            and esperadas and len(esperadas) < len(antes) and depois == esperadas,
+            [t0, t1, esperadas, depois])
+    c.aparelho(1440, 900, 1, False)
     # F3 · O.S.: total do agrupado e aviso do talhão que sai do filtro
     limpa(); c.goto(U('OS.dc.html'), 1.4); ag = troca_visao(J, 'agrupada'); time.sleep(.8)   # VISOES-2: Tabela + "Agrupar por" Talhão
     gt = J("(()=>{const n=[...document.querySelectorAll('[role=note]')].find(x=>/O\\.S\\. · .* ha · a O\\.S\\. de vários talhões aparece em cada um e conta uma vez no total/.test(x.innerText)&&x.getClientRects().length); return n?n.innerText.trim():'';})()") or ''
@@ -112,3 +120,4 @@ finally:
     srv.terminate()
 print(f'RESULTADO: {len(OK)} ok · {len(FAIL)} falhas')
 sys.exit(1 if FAIL else 0)
+
