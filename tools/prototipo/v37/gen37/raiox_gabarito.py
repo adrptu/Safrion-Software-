@@ -49,6 +49,78 @@ ENSAIO = {
 }
 
 
+def intervalo_wilson(eventos, total):
+    """Intervalo bilateral de 95%; não valida independência das réplicas."""
+    if type(eventos) is not int or type(total) is not int or not 0 <= eventos <= total:
+        raise ValueError('Contagens inteiras exigidas: 0 <= eventos <= total')
+    if total == 0:
+        return None
+    z = 1.959963984540054
+    p = eventos / total
+    den = 1 + z * z / total
+    centro = (p + z * z / (2 * total)) / den
+    margem = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / den
+    return {'inferior': max(0.0, centro - margem),
+            'superior': min(1.0, centro + margem), 'confianca': 0.95}
+
+
+def resumir_falsos_fortes(resultados, desenho):
+    """Resumo descritivo A3: desenho prévio explícito, não inferido dos resultados.
+
+    Cada linha identifica safra/semente/alvo/fator/classe esperada. Uma semente
+    com qualquer falso forte é um evento. Sem todas as células planejadas não
+    se calcula intervalo nem aceite. 'insuf' é resultado observado, não ausência.
+    Não executa o motor nem comprova independência das sementes fornecidas.
+    """
+    campos = ('safra', 'semente', 'alvo', 'fator', 'classe')
+    classes = {'placebo', 'fraco', 'nao_identificavel', 'nao_pareado'}
+    def chave(r):
+        k = tuple(r.get(c) for c in campos)
+        if any(type(v) not in (str, int) or v == '' for v in k) or k[-1] not in classes:
+            raise ValueError('Identidade/classe inválida no desenho ou resultado')
+        return k
+    esperado = {}
+    for r in desenho:
+        k = chave(r)
+        if k in esperado:
+            raise ValueError('Célula duplicada no desenho')
+        esperado[k] = r
+    if not esperado:
+        raise ValueError('Desenho prévio vazio')
+    observado = {}
+    for r in resultados:
+        k = chave(r)
+        if k not in esperado or k in observado:
+            raise ValueError('Resultado fora do desenho ou duplicado')
+        if r.get('motor') not in ('forte', 'fraco', 'insuf'):
+            raise ValueError('Classe do motor inválida')
+        observado[k] = r['motor']
+    grupos = {}
+    for k in esperado:
+        grupos.setdefault(k[0], {}).setdefault(k[1], []).append(k)
+    saida = []
+    for safra, sementes in grupos.items():
+        # Mesmas células por semente: impede mudar o risco por réplica.
+        perfis = [frozenset(k[2:] for k in ks) for ks in sementes.values()]
+        if any(p != perfis[0] for p in perfis):
+            raise ValueError('Sementes da safra têm desenhos diferentes')
+        ks = [k for celulas in sementes.values() for k in celulas]
+        faltantes = [dict(zip(campos, k)) for k in ks if k not in observado]
+        completos = [cs for cs in sementes.values() if all(k in observado for k in cs)]
+        eventos = sum(any(observado[k] == 'forte' for k in cs) for cs in completos)
+        n = len(sementes)
+        saida.append({'safra': safra, 'sementes_planejadas': n,
+                      'sementes_completas': len(completos),
+                      'eventos_nas_completas': eventos, 'faltantes': faltantes,
+                      'insuf_celulas': sum(observado.get(k) == 'insuf' for k in ks),
+                      'proporcao': None if faltantes else eventos / n,
+                      'wilson95': None if faltantes else intervalo_wilson(eventos, n),
+                      'estado': 'nao_avaliavel' if faltantes else 'descritivo_para_revisao',
+                      'recuperacao_motor': 'nao_certificada',
+                      'independencia': 'exige verificacao do desenho; nao demonstrada pela contagem'})
+    return saida
+
+
 def expandir_populacao(episodios, talhoes=16):
     """Exposições próprias com clima comum por réplica, sem criar eventos.
 

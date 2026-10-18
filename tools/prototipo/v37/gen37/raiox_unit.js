@@ -233,6 +233,27 @@ for tamanho in (8,16,20):
  for d in range(9):
   blocos=[sorted((p['dias'][d]['n14'],p['dias'][d]['k14']) for p in pp if p['politica']['gatilho']==gt) for gt in gates]
   assert all(b==blocos[0] for b in blocos)
+# A3: quatro alvos da mesma semente não multiplicam o denominador.
+assert g.intervalo_wilson(0,0) is None
+assert abs(g.intervalo_wilson(0,20)['superior']-.161125158)<1e-8
+assert g.intervalo_wilson(0,80)['superior']<.05
+assert g.intervalo_wilson(16,20)['inferior']<.6<g.intervalo_wilson(17,20)['inferior']
+des=[dict(safra=sf,semente=i,alvo=a,fator='chuva',classe='placebo') for sf in ('seca','chuva') for i in range(20) for a in ('a','b','c','d')]
+res=[dict(x,motor='insuf') for x in des]
+r=g.resumir_falsos_fortes(res,des)
+assert len(r)==2 and all(x['sementes_planejadas']==20 and x['insuf_celulas']==80 and x['wilson95']['superior']>.16 for x in r)
+res[0]['motor']=res[1]['motor']='forte'
+r=g.resumir_falsos_fortes(res,des)
+assert r[0]['eventos_nas_completas']==1 and r[0]['proporcao']==.05 and r[1]['eventos_nas_completas']==0
+r=g.resumir_falsos_fortes(res[:-1],des)
+assert r[1]['estado']=='nao_avaliavel' and r[1]['wilson95'] is None and r[1]['sementes_completas']==19
+for rr,dd in [(res+[res[0]],des),(res,des+[des[0]]),(res[1:],des[1:]),([dict(res[0],motor='desconhecido')],des)]:
+ try:g.resumir_falsos_fortes(rr,dd);raise AssertionError('desenho/resultado inválido aceito')
+ except ValueError:pass
+for e,n in [(True,20),(0,-1),(2,1),(0,20.0)]:
+ try:g.intervalo_wilson(e,n);raise AssertionError('contagem inválida aceita')
+ except ValueError:pass
+print('PASS A3: Wilson, semente como unidade, safras separadas, ausências e desenho desigual recusados.')
 assert g.ENSAIO['denominador_min']==20 and g.ENSAIO['versao']==2
 print('PASS A1/A3: cruzamento balanceado em 8/16/20 talhões; mínimo de 20 sementes por estrato, sem pooling.')
 try:g.expandir_populacao(eps,2);raise AssertionError('população insuficiente aceita')
