@@ -1,6 +1,8 @@
 """Paridade EX57 F0a contra funções extraídas das seis fontes originais.
 
 Uso: NODE_BINARY=node python datas_atividade_test.py --base /checkout/gen37
+Histórico: --base /checkout --git 68a0fe90 (git show, sem alterar checkout).
+Impacto: --cenario /checkout/gen37 --impacto /tmp/impacto.json
 Base do contrato: 68a0fe90cec749353bf42f37751b4005413a3098.
 Não importa os geradores (evita efeitos colaterais); AST/VM executam as funções
 originais. Aceita também os snapshots *.base.* para reprodução local.
@@ -23,6 +25,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 from datas_atividade import calcular_lote
@@ -37,11 +40,11 @@ HASHES = {
 }
 
 
-def ler(base, nome):
+def ler(base, nome, git_ref=None):
     p = base / nome
     if not p.exists():
         p = base / (Path(nome).stem + '.base' + Path(nome).suffix)
-    raw = p.read_bytes()
+    raw = subprocess.run(['git','-C',str(base),'show',git_ref+':tools/prototipo/v37/gen37/'+nome],capture_output=True,check=True,timeout=30).stdout if git_ref else p.read_bytes()
     def blob(b):
         return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\0' + b).hexdigest()
     if blob(raw) != HASHES[nome] and raw.endswith(b'\n') and blob(raw[:-1]) == HASHES[nome]:
@@ -103,12 +106,15 @@ def casos():
                         for variante in ['safra','solo','ocupacao_js','ocupacao_py','dados2','inicio']:
                             out.append(dict(atividade=dict(nome='Teste',op='Adubação',g=dict(tipo=tipo,dias=dias,data='2027-02-28')),
                                             cultivo=dict(plantio=plantio,colheita=colheita,plano='p'),contexto=dict(variante=variante,plano=plano)))
+    for v in ['safra','solo','ocupacao_js','ocupacao_py','dados2','inicio']:
+        out.append(dict(atividade=dict(nome='Teste',op='Adubação',g=dict(tipo='DAPC',dias=2)),cultivo=dict(plantio='2026-01-01',colheita=None,plano='p'),contexto=dict(variante=v,plano={'atividades':[{'nome':'Colheita 1','op':'Colheita 1','g':{'tipo':'DAP','dias':30}},{'nome':'Colheita 2','op':'Colheita 2','g':{'tipo':'DATA','data':'2026-12-01'}}]})))
     return out
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--base',type=Path,default=Path(__file__).parent);args=parser.parse_args()
-    fontes={n:ler(args.base,n) for n in HASHES}
+    parser=argparse.ArgumentParser();parser.add_argument('--base',type=Path,default=Path(__file__).parent);parser.add_argument('--git',dest='git_ref');parser.add_argument('--cenario',type=Path);parser.add_argument('--impacto',type=Path);args=parser.parse_args()
+    if args.git_ref and not re.fullmatch(r'[0-9a-fA-F]{7,40}',args.git_ref): parser.error('--git exige SHA de commit (7–40 hex)')
+    fontes={n:ler(args.base,n,args.git_ref) for n in HASHES}
     inicio=funcoes_py(fontes['areas/inicio.py'],['_iso','_data_atv'],dict(_dt=dt))
     dados=funcoes_py(fontes['dados2.py'],['data_atividade'],dict(_dt=dt,ddate=dt.date.fromisoformat))
     ocu=funcoes_py(fontes['ocupacao.py'],['dia','_colheita_plano','atividades'],dict(_dt=dt,_EPOCH=dt.date(1970,1,1)))
@@ -155,7 +161,75 @@ def main():
             try: conferir_python(json.loads(p.stdout),'mutante')
             except AssertionError: detectado=True
         assert detectado,('mutação não detectada',antigo)
+    testar_canonica()
+    if args.cenario:
+        assert args.impacto, '--impacto requerido com --cenario'
+        impacto(args.cenario,args.impacto)
     print('PASS:',total,'comparações originais; adaptador',len(saida),'; origens; imutabilidade; 3 mutantes detectados')
+
+
+
+def testar_canonica():
+    def e(tipo, col=None, plano=None, data=None, plantio='2024-02-28', dias=1):
+        return dict(atividade={'g':dict(tipo=tipo,dias=dias,data=data)},cultivo=dict(plantio=plantio,colheita=col),contexto=dict(variante='canonica',plano=plano or {'atividades':[]}))
+    dap={'atividades':[{'op':'Colheita','g':{'tipo':'DAP','dias':2}}]}
+    data={'atividades':[{'op':'Colheita','g':{'tipo':'DATA','data':'2024-03-10'}}]}
+    duas={'atividades':dap['atividades']+data['atividades']}
+    entradas=[e('DAP'),e('DAP',dias=-1),e('DAPC'),e('DANC'),e('DATA'),e('DATA',data='2026-01-01'),e('DAPC',plano=dap),e('DAPC',plano=data),e('DANC',plano=data),e('DAPC',col='2024-03-20',plano=dap),e('DAPC',plano=duas),e('DAPC',plano=data,plantio=None),e('DAPC',plano=dap,plantio=None),e('DAP',plantio=None),e('DESCONHECIDO')]
+    esperado=[('2024-02-29','plantio'),('2024-02-27','plantio'),(None,'ancora_ausente'),(None,'ancora_ausente'),(None,'data_ausente'),('2026-01-01','data_fixa'),('2024-03-02','colheita_plano_dap'),('2024-03-11','colheita_plano_data'),('2024-03-09','colheita_plano_data'),('2024-03-21','colheita_informada'),('2024-03-02','colheita_plano_dap'),('2024-03-11','colheita_plano_data'),(None,'ancora_ausente'),(None,'ancora_ausente'),(None,'gatilho_desconhecido')]
+    anterior=os.environ.get('TZ')
+    try:
+        for zona in ['UTC','America/Sao_Paulo','Pacific/Kiritimati']:
+            os.environ['TZ']=zona
+            out=calcular_lote(entradas)
+            assert [(r['data'],r['origem']) for r in out]==esperado,(zona,out)
+    finally:
+        if anterior is None:os.environ.pop('TZ',None)
+        else:os.environ['TZ']=anterior
+    print('canonica: 45 regressões PASS (C3, divergências 2/4, primeira Colheita, sem data)')
+
+
+def impacto(cenario, destino):
+    """Cenário sintético do repositório, nunca dados de cliente. Não gera O.S.
+
+    --cenario aponta gen37 da base; importa dados2 com dependências locais.
+    Relatório JSON contém todas as alterações (inclusive impacto zero por variante).
+    Fora do recorte de safra não é filtrado nem corrigido nesta fatia.
+    """
+    import sys
+    import importlib.util
+    import collections
+    sys.path.insert(0,str(cenario.resolve()))
+    try:
+        spec=importlib.util.spec_from_file_location('_cenario_ex57',cenario/'dados2.py')
+        mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+    finally:sys.path.pop(0)
+    entradas=[]; chaves=[]
+    for safra,cultivos in mod.CULTIVOS.items():
+        for c in cultivos:
+            pl=mod.PLANO.get(c.get('plano'))
+            if not pl:continue
+            for a in pl['atividades']:
+                for variante in ['safra','solo','ocupacao_js','ocupacao_py','dados2','inicio']:
+                    base=dict(atividade=a,cultivo=c,contexto=dict(variante=variante,plano=pl))
+                    nova=copy.deepcopy(base);nova['contexto']['variante']='canonica'
+                    entradas.extend([base,nova]);chaves.append(dict(safra=safra,cultivo=c['id'],plano=pl['id'],atividade=a.get('id',a.get('nome')),variante=variante))
+    rel=dict(fontes_sha256={n:hashlib.sha256((cenario/n).read_bytes()).hexdigest() for n in ['dados2.py','dados_lagoa_safra.py']},comparacoes_por_fuso=len(chaves),fusos={})
+    anterior=os.environ.get('TZ')
+    try:
+        for zona in ['UTC','America/Sao_Paulo','Pacific/Kiritimati']:
+            os.environ['TZ']=zona;out=calcular_lote(entradas);mudancas=[];cont=collections.Counter()
+            for i,chave in enumerate(chaves):
+                ant,novo=out[2*i:2*i+2]
+                if ant['data']==novo['data']:continue
+                ref='C3' if novo['origem']=='ancora_ausente' or ant['origem']=='sem_ancora' else ('divergencia_2' if chave['variante']=='dados2' else 'divergencia_4')
+                mudancas.append(dict(chave,antes=ant,depois=novo,referencia=ref));cont[chave['variante']]+=1
+            rel['fusos'][zona]=dict(contagem={v:cont[v] for v in ['safra','solo','ocupacao_js','ocupacao_py','dados2','inicio']},mudancas=mudancas)
+    finally:
+        if anterior is None:os.environ.pop('TZ',None)
+        else:os.environ['TZ']=anterior
+    destino.write_text(json.dumps(rel,ensure_ascii=False,indent=2)+'\n')
+    print('impacto:',rel['comparacoes_por_fuso'],'por fuso', {z:r['contagem'] for z,r in rel['fusos'].items()})
 
 
 if __name__=='__main__':main()
