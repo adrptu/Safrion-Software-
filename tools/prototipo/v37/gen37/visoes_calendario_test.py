@@ -11,7 +11,7 @@ sem início, na faixa "Sem data"; o clique abre o mesmo painel; programar fica n
   K9 teclado (CAL-C961-FOCO-01, revisão Codex de 13/10): Enter no cartão abre o painel com o foco dentro dele; Esc fecha e o foco volta ao
      cartão (1440 e 390 px)
 Uso: python3 visoes_calendario_test.py (lê _render ou RENDER_DIR)."""
-import os, sys, json, time, datetime as dt
+import os, re, sys, json, time, datetime as dt
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir, troca_visao
 
@@ -23,17 +23,36 @@ R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 p, srv = servir(R); c = Chrome(); J = c.js
 U = lambda pg: f'http://127.0.0.1:{p}/{pg}'
 SEG, DOM = dt.date(2026, 9, 21), dt.date(2026, 9, 27)
-CAL = """JSON.stringify((()=>{ const g=document.querySelector('.oscal'); if(!g||!g.getClientRects().length) return null;
-  const dias=[...g.querySelectorAll('.oscal-dia')].map(d=>({t:d.getAttribute('aria-label'), vis:d.getClientRects().length>0, ids:[...d.querySelectorAll('.oscal-o')].map(b=>(b.getAttribute('aria-label')||'').replace(/^Abrir /,'').split(' · ')[0])}));
+# VISOES-2 V2-1 (14/10): a ordem de vários dias fica uma vez na faixa (.oscal.oscal-faixa, grid-column a / span n) e conta em cada dia que
+# ela cobre; a grade dos dias é o outro .oscal (só as ordens visíveis contam: a célula guarda uma cópia compacta para o celular).
+# O teste lia o primeiro .oscal (a faixa) e achava 0 dias (oráculo obsoleto desde 14/10)
+CAL = """JSON.stringify((()=>{ const gs=[...document.querySelectorAll('.oscal')].filter(x=>x.getClientRects().length); const g=gs.find(x=>x.querySelector('.oscal-dia')); if(!g) return null;
+  const idDe=b=>(b.getAttribute('aria-label')||'').replace(/^Abrir /,'').split(' · ')[0], fx=gs.find(x=>x.classList.contains('oscal-faixa'));
+  const multi=fx?[...fx.querySelectorAll('.oscal-o')].map(b=>{ const m=/grid-column:\s*(\d+)\s*\/\s*span\s*(\d+)/.exec(b.getAttribute('style')||''); return {id:idDe(b),a:m?+m[1]:0,n:m?+m[2]:0}; }):[];
+  const dias=[...g.querySelectorAll('.oscal-dia')].map((d,i)=>({t:d.getAttribute('aria-label'), vis:d.getClientRects().length>0, ids:[...d.querySelectorAll('.oscal-o')].filter(b=>b.getClientRects().length).map(idDe).concat(multi.filter(o=>i+1>=o.a&&i+1<o.a+o.n).map(o=>o.id))}));
   const tit=[...document.querySelectorAll('b[aria-live]')].map(b=>b.innerText).find(Boolean)||''; return {dias,tit,drag:document.querySelectorAll('.oscal [draggable=true]').length}; })())"""
+# Colunas essenciais: Início e Fim saíram da vista padrão e ficam no seletor "Colunas". O oráculo liga as duas pelo mesmo seletor que o
+# usuário usa e lê as linhas VISÍVEIS da Tabela (mesmo recorte)
 LISTA = """JSON.stringify((()=>{ const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return null;
   const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').trim().toUpperCase());
   const iI=hs.findIndex(h=>h.startsWith('INÍCIO')), iF=hs.findIndex(h=>h.startsWith('FIM')), iS=hs.findIndex(h=>h.startsWith('FASE'));
   return [...t.querySelectorAll('[role=row][data-rid]')].map(r=>{ const cs=[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.trim()); return [r.getAttribute('data-rid'),cs[iI],cs[iF],cs[iS]]; }); })())"""
-def iso(br):
-    try: d, m, a = br.split('/'); return dt.date(int(a), int(m), int(d))
+def colunas(*rots):
+    J("(()=>{const b=document.querySelector('[data-g2cvb=g_os]'); if(b&&b.getAttribute('aria-expanded')!=='true') b.click();})()"); time.sleep(.45)
+    for rot in rots:
+        J("(()=>{const l=[...document.querySelectorAll('[data-g2cv=g_os] label')].find(x=>x.innerText.trim()===%s); const i=l&&l.querySelector('input'); if(i&&!i.checked) i.click();})()" % json.dumps(rot)); time.sleep(.45)
+    J("(()=>{const b=document.querySelector('[data-g2cvb=g_os]'); if(b&&b.getAttribute('aria-expanded')==='true') b.click();})()"); time.sleep(.3)
+def iso(br):   # aceita 2026-09-21, 20260921 e 21/09/2026
+    br = str(br or '').strip()
+    try:
+        if re.match(r'^\d{4}-\d{2}-\d{2}', br): return dt.date(int(br[:4]), int(br[5:7]), int(br[8:10]))
+        if re.match(r'^\d{8}$', br): return dt.date(int(br[:4]), int(br[4:6]), int(br[6:8]))
+        d, m, a = br.split('/'); return dt.date(int(a), int(m), int(d))
     except Exception: return None
 def oraculo():
+    # DRILL-RECOLHIDO (v129, 17/10): a Tabela abre recolhida; o oráculo expande tudo antes de ler as linhas das O.S.
+    J("(()=>{const b=[...document.querySelectorAll('.g2xtog')].find(x=>x.offsetParent&&/Expandir tudo/.test(x.innerText||'')); if(b) b.click();})()"); time.sleep(.6)
+    colunas('Início', 'Fim')
     ls = json.loads(J(LISTA) or 'null') or []; esp = {}
     for rid, ini, fim, fase in ls:
         a = iso(ini)

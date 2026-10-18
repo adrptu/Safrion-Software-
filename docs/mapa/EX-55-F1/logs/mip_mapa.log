@@ -1,0 +1,17 @@
+OK    P1 paridade com o Mapa da fazenda: 62 talhões × período nas 2 fazendas, classe e rótulo iguais
+OK    P2a chip "Acima do NC": pinta só os talhões em vermelho no IN-04; os outros ficam neutros e fora do Tab
+OK    P2b Cultura "Feijão": só os talhões de feijão da Santa Rita no mapa
+OK    P3a clique em T2 (uma vistoria) abre VIS-017
+OK    P3b clique em P1 (várias) abre a lista curta com 3 vistorias e o Fechar
+OK    P3c item da lista curta abre VIS-013
+OK    P3d clique em T1 (sem vistoria no período) abre "Programar vistoria" no talhão
+OK    P4a a dica tem talhão, situação, contagem e o que o Enter faz
+OK    P4b Enter no talhão T2 abre VIS-017
+OK    P5 ?view=mapa abre a visão Mapa e recarregar mantém
+OK    P6a Santa Rita: selo "posição esquemática"; legenda com contagem
+OK    P6b Lagoa Grande: "sem cultura" em hachura e contado na legenda
+OK    P7 "Abrir no Mapa da fazenda" leva #faz=SR&lay=pragas e grava o período (30 dias) no contexto do Mapa
+OK    P8a 390 px: sem rolagem lateral
+OK    P8b 390 px: talhões do recorte com alvo de toque ≥ 44 px
+OK    P8c nenhum erro de script
+RESULTADO: 16/16

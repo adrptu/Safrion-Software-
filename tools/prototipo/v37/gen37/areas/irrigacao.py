@@ -175,6 +175,51 @@ function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{
 '''+CAPCOL_JS
 
 # =====================================================================================
+def _irr_mapa_view():
+    import mapa_emb as ME
+    return (f'<section aria-label="Mapa dos setores" data-irr-mapa="1">'
+            + ME.html('irm', 'Talhões irrigados no mapa: Enter ou toque abre o setor').replace(f'href="{H("irm_in04")}"', f'href="{H("irm_in04")}" onClick="{H("irm_in04go")}"')
+            + '</section>')
+
+
+def _irr_mapa_js():
+    """Camada Irrigação do Mapa da fazenda (mapa_camadas.js · mcIrr) e componente do mapa embutido (mapa_emb); a entrada de cada setor é
+    irrigacao_estado.js · irrMapaEntrada (a mesma do IN-04)."""
+    import mapa_emb as ME, os as _os
+    base = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    ler = lambda n: open(_os.path.join(base, n), encoding='utf-8').read() + '\n'
+    return ler('mapa_camadas.js') + ler('mapa_emb.js') + ME.js('irm') + r"""
+// EX-55 F1 · visão Mapa da Irrigação: a camada Irrigação do Mapa da fazenda (mcIrr) com a entrada de cada setor de irrigacao_estado.js
+// (irrMapaEntrada, a mesma do IN-04), sobre as linhas visíveis da lista de setores (fazenda, situação, busca e filtros). Talhão sem setor
+// no recorte fica neutro. Clique, toque ou Enter abre o setor (o mesmo formulário da linha); o mapa não programa nem libera nada.
+const IRM_VERS=['Hoje','Balanço hídrico'];
+function irMapaVals(self,v){
+  const s=irrGet(),st=self.state.irm||{},put=p=>self.setState({irm:Object.assign({},self.state.irm||{},p)});
+  const ver=IRM_VERS.indexOf(st.ver)>=0?st.ver:IRM_VERS[0];
+  v.irm_vers=IRM_VERS.map(k=>({t:k,on:String(k===ver),go:()=>put({ver:k})}));
+  const sp=IRG('g_set'); meRecorte(self,v,'irm',sp,'g_set'); const vis=meVisiveis(self,sp,'g_set');
+  const nomeF=k=>(s.faz[k]||{}).nome||k,fazGeo=Object.keys(ME_IRM.geo),fk=irrFazK(self);
+  const setDe=fz=>Object.keys(s.setores).filter(k=>nomeF(s.setores[k].faz)===fz&&vis.has(String(k)));
+  let faz;
+  if(fk&&ME_IRM.geo[nomeF(fk)]){ faz=nomeF(fk); v.irm_temFazs=false; v.irm_fazs=[]; }
+  else { faz=fazGeo.indexOf(st.faz)>=0?st.faz:fazGeo.slice().sort((a,b)=>setDe(b).length-setDe(a).length)[0]; v.irm_temFazs=true;
+    v.irm_fazs=fazGeo.map(fz=>({t:fz+' · '+setDe(fz).length,on:String(fz===faz),go:()=>put({faz:fz})})); }
+  const geoT=new Set(ME_IRM.idx.filter(x=>x.faz===faz).map(x=>x.t)),porT={},sem=[];
+  setDe(faz).forEach(k=>{ const x=s.setores[k],t=irrTal(x,k); if(!geoT.has(t)){ sem.push(k); return; }
+    const cl=mcIrr(irrMapaEntrada(s,k,''),ver);
+    porT[t]={c:cl.c,l2:cl.l,al:t+' · '+cl.l+' · setor '+x.nome+' · Enter abre o setor',go:()=>g2open(self,sp,k,null)}; });
+  meVals(v,'irm',ME_IRM,ME_IRM.geo[faz]?faz:'',porT,{foraTxt:'sem setor no recorte',leg:mcIrrLeg(ver)});
+  v.irm_temSem=sem.length>0; v.irm_sem=sem.map(k=>({t:s.setores[k].nome,go:()=>g2open(self,sp,k,null)}));
+  const nT=Object.keys(porT).length;
+  v.irm_cont=(ME_IRM.geo[faz]?nT+(nT===1?' setor':' setores')+' no mapa':'Sem desenho dos talhões de '+faz)+(sem.length?' · '+sem.length+' sem contorno':'');
+  const fkk={'Lagoa Grande':'LG','Santa Rita':'SR','Boa Vista':'BV'}[faz]||'TODAS';
+  v.irm_in04='IN-04.dc.html#faz='+fkk+'&lay=irr';
+  v.irm_in04go=()=>{ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:faz,lay:'Irrigação',flt:{'Irrigação':{ver}}})); }catch(e){} };
+  v.irm_temCurta=false; v.irm_curta=[]; v.irm_curtaT=''; v.irm_curtaX=()=>{};
+}
+"""
+
+
 def ir01():
     fname='IR-01.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
     # uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, 09/10): estado e próximo passo logo depois do setor, para ficarem
@@ -191,7 +236,7 @@ def ir01():
                            dict(k='fdep',l='Fração de depleção (f)',t='num',min=0.1,max=0.9,help='Parte da CAD que a cultura usa sem estresse. Vazio = a referência da cultura (FAO-56, Tabela 22).'),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
-               gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
+               gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'),cartoes='externo')   # EX-55: Cartões entra no seletor de visões
     # Água no solo (AGUA-SOLO-IRR, proprietário 18/10/2026: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do solo
     # para os calculos, deficit e recomendações de irrigação"): a grade saiu de Agrícola › Análises de solo; o comando (soloMedir) e o estado
     # (c.solo.agua) são os mesmos. A coluna "No balanço" diz qual setor usa a medição, com a AFD e o gatilho que ela dá.
@@ -237,7 +282,7 @@ function irAgRows(self,s,fz){ const c=cenGet(); const ms=(IRR_SOLO0.agua||[]).co
 const RK={'Impedida':1,'A conferir':2,'A programar':3,'A liberar':3,'Irrigando':4,'Programada':5,'Sem necessidade':6,'Sem irrigação':7};
 function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
   irrHashOuvir(self,(h)=>{ if(h==='agua'){ let n=0; const vai=()=>{ const e=document.getElementById('ir-agua'); if(e) e.scrollIntoView({block:'start'}); else if(n++<8) setTimeout(vai,120); }; setTimeout(vai,0); return; }   // link do AG-02 (AGUA-SOLO-IRR)
-    if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
+    if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} return; }   /* mantém o ?view (EX-55: IR-01 tem seletor de visões) */
     const sid=h.split(':')[0]; const x=irrGet().setores[sid]; if(!x) return; irrFazDe(self,x.faz);
     // #P2:ficha abre a ficha do pivô do setor (sub-detalhe; fechar volta ao setor); setor sem ficha abre só o setor
     const fid=h.split(':')[1]==='ficha'?fpvDe(sid):'';
@@ -294,6 +339,7 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
   v.hs_t=imp||pen?[imp?imp+(imp>1?' impedidos':' impedido'):'',pen?pen+(pen>1?' pendentes':' pendente'):''].filter(Boolean).join(' · '):'Sem pendências'; v.hs_st=chipSt(imp?'red':(pen?'yellow':'green'));
   v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem setor irrigado cadastrado.'; }
 function EXTRAVALS(self,v){ irrVista(self,'g_set');
+  g2visaoTenta(self,'g_set','mapa',()=>irMapaVals(self,v));   /* EX-55 F1: a falha desta visão não derruba a Tabela */
   self.g2after=(gid,rows,r)=>{
     if(gid==='g_agua'&&r){ g2set(self,'g_agua',{rows:null}); const ch=self.__agK||('AGS-'+Date.now()); self.__agK=null;
       const res=cenMudar(null,cc=>soloMedir(cc,irAgDados(r.v),ch,g2perfil().k)); irrSoloInval();
@@ -321,8 +367,12 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
     return out; }; }
 """
     EXTRA.append(FP.painel())   # gaveta "Ficha do pivô" (o mesmo componente do CD-03)
+    # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Tabela | Cartões | Mapa dos setores; o seletor fica acima da lista
+    bar,panes=E.visoes('g_set','irr',{'lista':g_set,'cartoes':'lista','mapa':_irr_mapa_view()},rotulo='Visão dos setores')
+    set_vis=f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;"><div style="display: flex; justify-content: flex-end;">{bar}</div>{panes}</div>'
+    EXTRAJS[0]+=_irr_mapa_js()
     corpo=(vazio('vazio','vazioT','Cadastrar setores','CD-03.dc.html')
-           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',g_set)+'</sc-if>'
+           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',set_vis)+'</sc-if>'
            + '<div id="ir-agua">'+section('Água no solo','','',g_agua)+'</div>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
           f'<sc-if value="{H("prim_has")}" hint-placeholder-val="{T()}"><a href="{H("prim_h")}" style="{BTN_ST(True)} text-decoration: none;">{H("prim_t")}</a></sc-if>')

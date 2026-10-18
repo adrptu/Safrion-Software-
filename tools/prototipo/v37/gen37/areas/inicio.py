@@ -123,51 +123,11 @@ FILT={
 }
 # Análises de solo (15/10/2026): laudo, camada, indicador e contraste; Laudo e Indicador vêm dos laudos da fazenda (soloFopts)
 FILT['Análises de solo']=[('lau','Laudo',['Mais recente']),('prof','Camada',['0–20 cm','20–40 cm']),('ind','Indicador',['V %']),('ctr','Contraste',['Talhão','Fazenda','Absoluto'])]
-# ordens no mapa = dados.ORDENS (menos OB-0104, do armazém). Tipo, selo, janela, responsável e link de detalhe vêm do registro
-# canônico; fase, realizado, saldo e custódia vêm do cenário compartilhado no navegador (cenGet), com o registro como semente.
-# Aqui ficam só os campos do mapa: talhões da geometria, complemento do realizado, prazo e a próxima ação da ordem
-# (rótulo, destino, tipo: 'lib' = liberação pelo agrônomo, com ajuste opcional (o primário é o "Liberar para execução" do núcleo
-# da O.S.; o rótulo daqui é o ajuste) · 'op' = pendência operacional, que no painel só aparece com o próximo passo impedido;
-# condição: 'ag' = só enquanto a ordem está a liberar pelo agrônomo no cenário, 'cust' = só com custódia).
-_ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, ação
- ('OS-0421',['T1','T2'],'','no prazo',None),
- ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA.dc.html#om=OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
- ('OS-0419',['P2'],'lâmina 10,81 mm','irrigando hoje',None),
- ('OS-0424',['T1'],'T1-B','até 3 dias',None),
- ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
- ('OS-0418',['P1'],'Ureia 12 kg/ha','vence hoje',('Ajustar antes de liberar','OS.dc.html#OS-0418','lib','ag')),
- ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html','op','cust')),
- ('OS-0415',['T3'],'','encerrada',None),
- ('OS-0423',['T7'],'estimativa por ET','vence hoje',('Resolver conflito','IR-03det.dc.html#OS-0423:conflito','op',None)),
- ('OS-0425',['C1'],'','no prazo',None),
- ('OS-0430',['T1'],'T1-A','até 3 dias',('Ajustar antes de liberar','OS.dc.html#OS-0430','lib','ag')),
- ('OS-0431',['T2'],'','até 3 dias',None),
-]
+# ordens no mapa: fonte única em mapa_ordens.py (EX-55 F1), lida também pelo mapa embutido da O.S.
+import mapa_ordens as _MO
 import dados_lagoa_safra as DLS
-_ORD_MAPA+=[tuple(x) for x in DLS.ORD_MAPA]   # Lagoa Grande: ordens nos pivôs (ids PVxx do mapa)
-# irrigação só com água: sem agrônomo e sem "política" — o selo é a pendência operacional, com o dono dela (igual a IR-02/IR-03)
-IRR_OS={'OS-0419':dict(tipo='Irrigação · água',selos=[]),
-        'OS-0422':dict(tipo='Irrigação · água',selos=[['Janela a definir','yellow']],dono='João'),
-        'OS-0423':dict(tipo='Irrigação · água por gotejo',selos=[['Conflito · parada da B3','red']],dono='Caio · PCP')}
-def _selo_cor(t):
-    if t.startswith('Impedida') or t.startswith('Falta máquina') or t.startswith('Conflito'): return 'red'
-    return 'yellow'
-def _ord_mapa():
-    out=[]
-    for oid,tal,suf,pz,act in _ORD_MAPA:
-        o=D.ORDEM[oid]; ts=([o['selo']] if o['selo'] else [])+list(o.get('selos_extra') or [])
-        real=f"{nfb(o.get('realizado') or 0)}/{nfb(o.get('area') or 0)} ha"+(f" · saldo {nfb(o['saldo'])} ha" if o.get('realizado') and o.get('saldo') else '')+(f' · {suf}' if suf else '')
-        d=dict(id=oid,tal=tal,tipo=o['tipo'],fase=o['etapa'],selos=[[t,_selo_cor(t)] for t in ts],area=o.get('area') or 0,rz=o.get('realizado') or 0,suf=suf,
-               jan=o['janela'],real=real,saldo=o['saldo'] or 0,resp=o['resp'],pz=pz,h=o['detalhe'] or 'OS.dc.html',saf=o.get('saf') or '2026/27')
-        if oid in IRR_OS: d.update(IRR_OS[oid])
-        if act: d['act']=dict(t=act[0],h=act[1],k=act[2],c=act[3])
-        out.append(d)
-    assert {x['id'] for x in out}=={o['id'] for o in D.ORDENS+D.ORDENS_LG if o['id'].startswith('OS-')}, 'mapa fora do registro de ordens'
-    assert not any('política' in json.dumps(x,ensure_ascii=False) for x in out), 'irrigação só com água não usa política/agrônomo'
-    assert not any((x.get('act') or {}).get('k')=='dec' for x in out), "O.S. sem revisão: a ação do agrônomo no mapa é 'lib' (liberar)"
-    assert not any(s in json.dumps(out) for s in ('IN-02det','IN-02x-os0420')), 'telas de decisão de O.S. não são mais geradas: use OS.dc.html#OS-xxxx'
-    return out
-ORD=_ord_mapa()
+_ORD_MAPA=_MO.ORD_MAPA; IRR_OS=_MO.IRR_OS
+ORD=_MO.ordens()
 # {OS-xxxx} no rótulo = realizado atual da ordem (cenário) · {?OS-xxxx texto} = texto só enquanto a ordem está a liberar pelo agrônomo.
 # Talhão sem condição pior ganha amarelo ("atenção ou a liberar") enquanto uma ordem dele está a liberar pelo agrônomo (mesma contagem do cabeçalho).
 INTEG={'T1':['ok','OS-0421 · {OS-0421}'],'T2':['red','OS-0431 impedida · Trator T1'],'T4':['red','OS-0420 impedida'],'T3':['gray','OS-0415 encerrada'],
@@ -218,7 +178,7 @@ def _proxima():
 # os cinco índices de satélite, insumos (necessidade × estoque/pedido da fazenda) e custos (previsto × realizado provisório × conferido).
 # Solo e Colheita voltaram à barra (13/10, 14/10 e DEC-0910-36 de 16/10), lendo as fontes únicas (AG-02 e Previsão e colheita).
 import datetime as _dt
-HOJE=_dt.date(2026,9,23)
+HOJE=_MO.HOJE   # o mesmo "hoje" das ordens do mapa (mapa_ordens.py)
 def _iso(s): y,m,d=map(int,s.split('-')); return _dt.date(y,m,d)
 def _br(d): return d.strftime('%d/%m/%Y')
 def _em(d): n=(d-HOJE).days; return 'hoje' if n==0 else (f'em {n} dia'+('s' if n!=1 else '') if n>0 else f'há {-n} dia'+('s' if n!=-1 else ''))
@@ -700,45 +660,22 @@ function flt(self,l){ const gs=fopts(l); const d={}; gs.forEach(g=>{ d[g.k]=g.o[
   gs.forEach(g=>{ if(g.o.indexOf(s[g.k])<0) s[g.k]=g.o[0]; });   // opção de outra fazenda (ex.: cena) volta à primeira desta
   return s; }
 // irrigação só com água é do módulo Irrigação (IR-03): fica fora da camada O.S. e das contagens de ordens; aparece na camada Irrigação
-function irrAgua(o){ return /^Irrigação/.test(o.tipo||''); }
-function ordsOf(t,fase){ return M.ord.filter(o=>!irrAgua(o) && osSaf(o) && o.tal.indexOf(t)>=0 && (!fase||fase==='Todas'||o.fase===fase)); }
+// irrigação só com água: mc_irrAgua (os_mapa.js). O nome irrAgua é do irrigacao_estado.js (água no solo do setor): declarar outro aqui
+// sobrescrevia aquele e desligava o balanço com CAD na camada Irrigação do Mapa (EX-55 F1, achado do integrador)
+function ordsOf(t,fase){ return M.ord.filter(o=>!mc_irrAgua(o) && osSaf(o) && o.tal.indexOf(t)>=0 && (!fase||fase==='Todas'||o.fase===fase)); }
 function satVal(dt,t,ix){ if(M.semcult[t]) return null; const s=M.sat[dt]; const x=s.v[t]; if(x===undefined) return null; if(x==='cloud') return 'cloud'; return x[IDXN.indexOf(ix)]; }
 function satPrev(dt,t,ix){ const ds=Object.keys(M.sat); const i=ds.indexOf(dt); for(let j=i+1;j<ds.length;j++){ const v=satVal(ds[j],t,ix); if(typeof v==='number') return [ds[j],v]; } return null; }
 function money(n){ return 'R$ '+nfx(n,0); }
 function mil(n){ return Math.abs(n)>=100000?('R$ '+nfx(n/1000,0)+' mil'):money(n); }
 // ---- ordens do mapa = registro + cenário compartilhado (fase, realizado, saldo e custódia iguais às telas O.S., Estoque e App) ----
 const ORD0=M.ord;
-function mapSc(it){ const m=/saco (\d+) kg/.exec(it.emb||''); return (m&&it.un==='kg')?nfx(it.custodia/Number(m[1]),0)+' sc':nfx(it.custodia,it.custodia%1?1:0)+' '+it.un; }
 let MAPC=null;  // cenário lido nesta renderização (liberações do agrônomo)
 let OSN=[];     // ordens do núcleo da O.S. (as mesmas da tela Ordem de Serviço), lidas a cada renderização
-// liberação pelo agrônomo: pendente = ordem A liberar no cenário (a ação 'lib' só existe em ordem com produto); liberada, sai da contagem
-function inPendLib(c,id){ const co=c&&c.ordens?c.ordens[id]:null; return !!co&&co.etapa==='A liberar'; }
-function mapItVis(co,it){ if(typeof CEN_BAIXA_NO_SINAL!=='undefined') return it;
-  const q=Math.min((co.ap||[]).filter(a=>a.sinc===false).reduce((s,a)=>s+(Number((a.cons||{})[it.prod])||0),0),it.consumido||0);
-  return q>1e-9?Object.assign({},it,{consumido:it.consumido-q,custodia:it.custodia+q}):it; }
-function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
-  return ORD0.map(o=>{ const co=c&&c.ordens?c.ordens[o.id]:null; const x=Object.assign({},o,{selos:o.selos.slice()});
-    let cust=[];
-    if(co&&co.selos) x.selos=co.selos.map(s=>[s.t,s.c||'yellow']);
-    if(co){ x.fase=co.etapa; x.saldo=co.saldo||0; const area=co.area||o.area; x.rz=co.realizado||0; x.area=area;
-      let real=nfx(co.realizado||0,(co.realizado||0)%1?1:0)+'/'+nfx(area)+' ha'; if(co.realizado>0&&co.saldo>0) real+=' · saldo '+nfx(co.saldo,co.saldo%1?1:0)+' ha';
-      if(o.suf) real+=' · '+o.suf;
-      const r=co.req&&c.reqs?c.reqs[co.req]:null; cust=r?r.itens.map(i=>mapItVis(co,i)).filter(i=>i.custodia>0.001):[];
-      if(cust.length) real+=' · '+cust.map(mapSc).join(' + ')+' em custódia';
-      if((co.ap||[]).some(a=>a.sinc===false)) real+=' · apontamento aguardando sinal';
-      x.real=real;
-      if(!cust.length) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])); }
-    let bq='';
-    if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
-      if(/^Carga a pesar/.test(bq)){ if(!x.selos.some(s=>s[0]==='Carga a pesar')) x.selos=x.selos.concat([['Carga a pesar','yellow']]); }   /* colheita (R-18): não é sobra em custódia */
-      else if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
-      else if(bq){ const t=/^Sobra em custódia/.test(bq)?'Sobras a receber':(/^Consumo em conferência/.test(bq)?'Consumo em conferência':(/duplicidade/.test(bq)?'Apontamento em conferência':''));   /* o selo do bloqueio que existe; a divergência de dose já vem do cenário (revisão DOM achado 3) */
-        if(t&&!x.selos.some(s=>s[0]===t)) x.selos=x.selos.concat([[t,'yellow']]); } }
-    if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
-    if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';
-    const a=o.act; x.act=(!a||(a.c==='ag'&&!inPendLib(c,o.id))||(a.c==='cust'&&co&&!cust.length))?null:a;
-    if(bq&&!/sinal/.test(bq)&&cust.length&&!x.act) x.act={t:'Receber sobras',h:'EST.dc.html',k:'op',c:'cust'};
-    return x; }); }
+// EX-55 F1: as ordens do mapa vêm de os_mapa.js (mcOrdsCen e mcOrdsBase), a mesma fonte do mapa embutido da O.S.; o registro (ORD0)
+// ganha as O.S. do cenário que ele não tinha (demonstração e emitidas no protótipo), com o prazo pela janela contra M.hoje_iso
+function inPendLib(c,id){ return mc_inPendLib(c,id); }
+function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c; let pj=[]; try{ pj=(c&&osProjecao(c))||[]; }catch(e){ pj=[]; }
+  return mcOrdsCen(c,mcOrdsBase(ORD0,pj,M.hoje_iso)); }
 function realCurto(id){ const o=M.ord.find(x=>x.id===id); return o?o.real.split(' · ')[0]:''; }
 // irrigação no Integrado: conflito (vermelho) e pendência de água (amarelo) vêm do estado da irrigação, não de texto fixo
 function irrInteg(t,b){ const xi=(M.irr||{})[t]; if(!xi||!xi.top||!xi.top.agua) return null;
@@ -762,9 +699,9 @@ function irrRecKv(xi){ const r=xi.rec; const kv=[]; if(!r) return kv;
     {l:r.demo?'Ficha demonstrativa (sintética)':'Ficha do pivô',t:nfx(r.l100,2)+' mm e volta de '+nfx(r.v100,1)+' h a 100 % · lâmina = lâmina a 100 % × 100 ÷ percentímetro'});
   else kv.push({l:'Velocidade do pivô',t:'sem ficha do pivô: registre a ficha para calcular o percentímetro'});
   return kv; }
+// a entrada de cada talhão vem de irrMapaEntrada (irrigacao_estado.js): a mesma da visão Mapa da Irrigação (EX-55 F1)
 function irrMapa(){ let s=null; try{ s=irrGet(); }catch(e){ s=null; } const out={};
-  M.tids.concat(M.lg.ids).forEach(t=>{ const x=s&&s.setores[t]; if(!x){ out[t]={c:'gray',l:isLG(t)?'preparo · sem rega':'sequeiro',d:null,est:false,hoje:'',ac:null,ords:[]}; return; }
-    const si=irrSituacao(s,t); const rp=si.d!==null?irrPerc(s,t):null; out[t]={rec:rp,kc:x.kc||null,etcd:x.bal?x.bal.etc/x.bal.dias:null,tipo:x.tipo,ef:x.efic,lmax:x.lmax,c:si.c,l:si.l,d:si.d,est:si.est,hoje:si.hoje,ac:si.acao,fon:si.fon,limt:si.limt,lam:si.lam,eq:si.eq,ult:si.ult,faixa:si.faixa||'',ords:si.ords||[],top:si.top?{sit:si.top.sit,agua:!!(si.top.o&&!si.top.o.fert)}:null}; });
+  M.tids.concat(M.lg.ids).forEach(t=>{ out[t]=irrMapaEntrada(s,t,isLG(t)?'preparo · sem rega':'sequeiro'); });
   return out; }
 // ---- satélite: classe absoluta do índice ou contraste esticado (P2–P98) da fazenda ou do talhão; pixels dentro do polígono ----
 function kOf(v,L){ let k=0; while(k<5&&v>=L[k]) k++; return k; }
@@ -820,7 +757,7 @@ function osCls(t,f){return mcOS(ordsOf(t,f.fase),f);}
 function osLegend(l,f){return mcOSLeg(f).map(x=>Lc(l,x.k,x.t));}
 function osStrip(f,ordF){ const N=(k,val,d)=>({k,val,d:d||''}); const os=ordF.filter(o=>f.fase==='Todas'||o.fase===f.fase); const ab=mc_osAb(os);
   if(f.ver==='Atrasos') return [N('Ordens',os.length),N('Atrasadas',os.filter(o=>o.pz==='atrasada').length),N('Vencem hoje',os.filter(o=>o.pz==='vence hoje').length),N('Saldo',nfx(os.reduce((a,o)=>a+(o.saldo||0),0))+' ha','Saldo a executar')];
-  if(f.ver==='Impedimentos') return [N('Ordens',os.length),N('Impedidas',ab.filter(mc_osImp).length,'Ordens abertas impedidas ou em conflito'),N('Pendências',ab.filter(o=>!mc_osImp(o)&&o.selos.length).length,'Ordens abertas com pendência')];
+  if(f.ver==='Impedimentos') return [N('Ordens',os.length),N('Impedidas',ab.filter(mc_osImp).length,'Ordens abertas impedidas ou em conflito'),N('Pendências',ab.filter(o=>!mc_osImp(o)&&mc_osPend(o).length).length,'Ordens abertas com pendência')];
   if(f.ver==='Avanço'){ const xs=ab.filter(o=>o.area>0); const a=xs.reduce((s,o)=>s+o.area,0), r=xs.reduce((s,o)=>s+Math.min(o.rz||0,o.area),0);
     return [N('Ordens',os.length),N('Feito',nfx(r,r%1?1:0)+' ha','Área apontada nas ordens abertas'),N('Avanço',a?nfx(r/a*100,0)+' %':'—','Área apontada ÷ área das ordens abertas')]; }
   return [N('Ordens',os.length)].concat(['A liberar','Em execução','Em conferência'].map(x=>N(x,os.filter(o=>o.fase===x).length))); }   // até quatro números (DS-49)
@@ -895,7 +832,7 @@ function fonte(l,f){
   if(isIns(l,f)){ const F=M.dem.faz[safK()]; if(!F) return 'safra '+SAF+' encerrada: sem necessidade a comprar'; return 'necessidade líquida da '+(F?F.nomes[F.saf]:'safra')+' (plano sem O.S. + O.S. abertas pelo que falta tirar do almoxarifado): a mesma do Planejar safra e da Compra · estoque apto e pedidos da fazenda, não divididos por talhão'; }
   if(l==='Custos') return 'previsto = dose × preço + operação (rendimento da safra) · realizado provisório dos apontamentos aceitos · conferido à parte';
   return ''; }
-function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS().filter(inF); const ordF=M.ord.filter(o=>!irrAgua(o)&&osSaf(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
+function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS().filter(inF); const ordF=M.ord.filter(o=>!mc_irrAgua(o)&&osSaf(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
   if(isCar(l,f)) return carStrip(f);   // MAPA-CARENCIA-LMR-20261003
   if(l===OS_L&&!isIns(l,f)) return osStrip(f,ordF);
   if(l===SOLO_L) return soloStrip(f);
@@ -1057,7 +994,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=la
     const IS=(()=>{ try{ return irrGet(); }catch(e){ return null; } })();
     const items=(xi.ords||[]).map(o=>{ const et=irrEtapa(IS,o); return {t:o.id+' · Irrigação · '+(o.fert?'v2 com produto':'água'),sub:'Janela '+irrJanO(o)+' · '+irrMm(o.lam)+' mm'+(o.passadas.length>1?' em '+o.passadas.length+' passadas':''),
         ch:[CH(et,FCOR[et]||'gray')].concat(irrSelos(IS,o).filter(z=>!z.mut).map(z=>CH(z.t,z.c))),acts:[A('Abrir ordem',{h:'IR-03det.dc.html#'+o.id,ic:'doc',tt:'Ordem de irrigação (módulo Irrigação)'})]}; })
-      .concat(M.ord.filter(o=>o.tal.indexOf(t)>=0&&/irriga/i.test(o.tipo)&&!irrAgua(o)&&o.fase!=='Encerradas').map(o=>({t:o.id+' · '+o.tipo,sub:'Janela '+o.jan+' · '+o.real,
+      .concat(M.ord.filter(o=>o.tal.indexOf(t)>=0&&/irriga/i.test(o.tipo)&&!mc_irrAgua(o)&&o.fase!=='Encerradas').map(o=>({t:o.id+' · '+o.tipo,sub:'Janela '+o.jan+' · '+o.real,
       ch:[CH(o.fase,FCOR[o.fase])].concat(o.selos.map(x=>CH(x[0],x[1]))),acts:[A('Abrir ordem',{h:'OS.dc.html#'+o.id,ic:'doc',tt:'Ordem de Serviço'})]})));
     const hdst='border-left:4px solid '+((M.lcop[xi.c]||M.lcop.none)[0])+';background:#F7F9F7;border-radius:8px;padding:7px 10px;display:flex;flex-direction:column;gap:2px;';
     P.secs.push(SEC(self,l,'irr','Irrigação',xi.l||'sem irrigação',{hd:xi.hoje||'',hdc:'Hoje',hdst,kv:xi.d!==null?kv:[],note:xi.d!==null?'':(isLG(t)?'Pivô em preparo de área: sem rega até o plantio.':'Talhão de sequeiro: sem irrigação.'),items,
@@ -1109,7 +1046,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=la
 function panelArea(self,l,f,sel){ const ha=sel.reduce((a,t)=>a+M.tal[t].ha,0); const vs={}; sel.forEach(t=>{ const id=mapVisAb(t,l==='Satélite'); if(id) vs[t]=id; });
   const P={title:'Área selecionada · '+sel.length+' talhões',sub:sel.map(rotT).join(' + ')+' · '+nfx(ha)+' ha',ch:[],os:[],hasOs:false,nx:null,hasNx:false,secs:[],acts:[]};
   P.secs.push(SEC(self,'','are','Talhões',sel.length+' talhões · '+nfx(ha)+' ha',{items:sel.map(t=>{ const c=cls(l,f,t); return {t:rotT(t)+' · '+muxSemPivo(lavOf(t).sum),sub:nfx(M.tal[t].ha)+' ha',ch:[c.c==='sat'?CHs(c.l,c.solo?soloChipSt(c.hex):satChipSt(f.idx,c.ka)):CH(c.l,CCH[c.c]||'gray')].concat(vs[t]?[CH(vs[t],'green')]:[]),acts:[]}; })}));
-  const os=M.ord.filter(o=>!irrAgua(o)&&o.tal.some(t=>sel.indexOf(t)>=0)); if(l===OS_L&&!isIns(l,f)) P.secs.push(SEC(self,'','aos','Ordens na área · '+os.length,os.map(o=>o.id).join(', ')||'nenhuma',{items:os.map(o=>({t:o.id+' · '+o.tipo,sub:'Janela '+o.jan+' · '+o.real,ch:[CH(o.fase,FCOR[o.fase])].concat(o.selos.map(s=>CH(s[0],s[1]))),acts:[A('Abrir ordem',{h:'OS.dc.html#'+o.id,ic:'doc'})]}))}));
+  const os=M.ord.filter(o=>!mc_irrAgua(o)&&o.tal.some(t=>sel.indexOf(t)>=0)); if(l===OS_L&&!isIns(l,f)) P.secs.push(SEC(self,'','aos','Ordens na área · '+os.length,os.map(o=>o.id).join(', ')||'nenhuma',{items:os.map(o=>({t:o.id+' · '+o.tipo,sub:'Janela '+o.jan+' · '+o.real,ch:[CH(o.fase,FCOR[o.fase])].concat(o.selos.map(s=>CH(s[0],s[1]))),acts:[A('Abrir ordem',{h:'OS.dc.html#'+o.id,ic:'doc'})]}))}));
   P.acts=((l==='Satélite'||l==='MIP/MID')?[A('Programar vistoria nas áreas',{fn:()=>criarVis(self,sel),ic:'alert',tt:'Programar uma vistoria por talhão: '+sel.map(rotT).join(', ')})]:[]).concat([A('Limpar seleção',{fn:()=>self.setState({tsel:[]}),ic:'map'})]); return P; }
 function svgPt(e){ try{ const el=e&&(e.currentTarget||e.target); const svg=el&&el.ownerSVGElement; if(!svg||!svg.getScreenCTM) return null; const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
   const q=p.matrixTransform(svg.getScreenCTM().inverse()); return [q.x,q.y]; }catch(x){ return null; } }
@@ -1975,7 +1912,7 @@ def build_in04(HCARD=742):
     osd=dict(ords=_ordens_os())   # as mesmas ordens da tela O.S. (o Mapa usa o núcleo dela: próximo passo, impedimentos e comandos)
     import dados_mip
     import dados_solo as DSO   # Análises de solo: a mesma semente (SOLO0) do AG-02; regras em solo.js (no prefixo do cenário)
-    EXTRAJS[0]=(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','mapa_camadas.js'),encoding='utf-8').read()+'\n'+pref+DI.js_prefixo()+dados_mip.js_prefixo()+DSO.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO+_CUS.JS
+    EXTRAJS[0]=(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','mapa_camadas.js'),encoding='utf-8').read()+'\n'+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','os_mapa.js'),encoding='utf-8').read()+'\n'+pref+DI.js_prefixo()+dados_mip.js_prefixo()+DSO.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO+_CUS.JS
                 +'const M = '+json.dumps(MDATA,ensure_ascii=False).replace('</','<\\/')+';\n'+MAP_JS
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talgeo.js'),encoding='utf-8').read()+'\n'
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talmapa.js'),encoding='utf-8').read()+r'''

@@ -717,6 +717,15 @@ function irrSitOrdem(s, o, p, et) {
   if (et === 'Em execução') return { c: irrPausada(o) ? 'yellow' : 'blue', sit: 'Irrigando', l: (irrPausada(o) ? 'pausada · ' : 'irrigando · ') + o.id };
   const q = irrIni(o); return { c: 'lime', sit: 'Programada', l: 'programada · ' + (q === null ? o.id : irrQuando((irrPassProx(o) || {}).ini || q)) };
 }
+// EX-55 F1 · entrada do talhão na camada Irrigação do Mapa (mapa_camadas.js · mcIrr): fonte única do Mapa da fazenda (IN-04, irrMapa) e da
+// visão Mapa da Irrigação (IR-01). Talhão sem setor: cinza, com o rótulo que a tela dá (sequeiro, ou preparo sem rega na Lagoa Grande).
+function irrMapaEntrada(s, t, semSetor) {
+  const x = s && s.setores[t]; if (!x) return { c: 'gray', l: semSetor, d: null, est: false, hoje: '', ac: null, ords: [] };
+  const si = irrSituacao(s, t); const rp = si.d !== null ? irrPerc(s, t) : null;
+  return { rec: rp, kc: x.kc || null, etcd: x.bal ? x.bal.etc / x.bal.dias : null, tipo: x.tipo, ef: x.efic, lmax: x.lmax, c: si.c, l: si.l, d: si.d, est: si.est, hoje: si.hoje,
+    ac: si.acao, fon: si.fon, limt: si.limt, lam: si.lam, eq: si.eq, ult: si.ult, faixa: si.faixa || '', ords: si.ords || [],
+    top: si.top ? { sit: si.top.sit, agua: !!(si.top.o && !si.top.o.fert) } : null };
+}
 // situação do setor (mapa, IR-01 e faixa): c = cor da camada do mapa · l = rótulo · acao = [verbo, destino] · dono = de quem é o passo
 function irrSituacao(s, sid) {
   const x = s.setores[sid]; const F = s.faz[x.faz];

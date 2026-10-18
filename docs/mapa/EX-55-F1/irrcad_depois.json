@@ -1,0 +1,324 @@
+{
+ "Lagoa Grande": {
+  "assinatura": 2,
+  "setores": {
+   "P1": {
+    "cad": 39,
+    "comCAD": true,
+    "def": 8.399999999999995,
+    "mapa": 8.399999999999995
+   },
+   "P2": {
+    "cad": 45,
+    "comCAD": true,
+    "def": 11.200000000000001,
+    "mapa": 11.200000000000001
+   },
+   "PV01": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.1,
+    "mapa": 6.1
+   },
+   "PV02": {
+    "cad": null,
+    "comCAD": false,
+    "def": 9.8,
+    "mapa": 9.8
+   },
+   "PV03": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.4,
+    "mapa": 7.4
+   },
+   "PV04": {
+    "cad": null,
+    "comCAD": false,
+    "def": 4.8,
+    "mapa": 4.8
+   },
+   "PV05": {
+    "cad": null,
+    "comCAD": false,
+    "def": 13.2,
+    "mapa": 13.2
+   },
+   "PV06": {
+    "cad": null,
+    "comCAD": false,
+    "def": 3.2,
+    "mapa": 3.2
+   },
+   "PV07": {
+    "cad": null,
+    "comCAD": false,
+    "def": 5.6,
+    "mapa": 5.6
+   },
+   "PV08": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.4,
+    "mapa": 6.4
+   },
+   "PV09": {
+    "cad": null,
+    "comCAD": false,
+    "def": 10.6,
+    "mapa": 10.6
+   },
+   "PV10": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.9,
+    "mapa": 7.9
+   },
+   "PV11": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV12": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV13": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV14": {
+    "cad": null,
+    "comCAD": false,
+    "def": 2.9,
+    "mapa": 2.9
+   },
+   "PV15": {
+    "cad": null,
+    "comCAD": false,
+    "def": 4.1,
+    "mapa": 4.1
+   },
+   "PV17": {
+    "cad": null,
+    "comCAD": false,
+    "def": 8.2,
+    "mapa": 8.2
+   },
+   "PV18": {
+    "cad": null,
+    "comCAD": false,
+    "def": 11.4,
+    "mapa": 11.4
+   },
+   "PV19": {
+    "cad": null,
+    "comCAD": false,
+    "def": 2.4,
+    "mapa": 2.4
+   },
+   "PV20": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.7,
+    "mapa": 7.7
+   },
+   "PV21": {
+    "cad": null,
+    "comCAD": false,
+    "def": 8.8,
+    "mapa": 8.8
+   },
+   "PV22": {
+    "cad": null,
+    "comCAD": false,
+    "def": 5.3,
+    "mapa": 5.3
+   },
+   "PV23": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.9,
+    "mapa": 6.9
+   },
+   "PV24": {
+    "cad": null,
+    "comCAD": false,
+    "def": 9.4,
+    "mapa": 9.4
+   },
+   "T7": {
+    "cad": 56,
+    "comCAD": true,
+    "def": 10.000000000000005,
+    "mapa": 10.000000000000005
+   }
+  }
+ },
+ "Santa Rita": {
+  "assinatura": 2,
+  "setores": {
+   "P1": {
+    "cad": 39,
+    "comCAD": true,
+    "def": 8.399999999999995,
+    "mapa": 8.399999999999995
+   },
+   "P2": {
+    "cad": 45,
+    "comCAD": true,
+    "def": 11.200000000000001,
+    "mapa": 11.200000000000001
+   },
+   "PV01": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.1,
+    "mapa": 6.1
+   },
+   "PV02": {
+    "cad": null,
+    "comCAD": false,
+    "def": 9.8,
+    "mapa": 9.8
+   },
+   "PV03": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.4,
+    "mapa": 7.4
+   },
+   "PV04": {
+    "cad": null,
+    "comCAD": false,
+    "def": 4.8,
+    "mapa": 4.8
+   },
+   "PV05": {
+    "cad": null,
+    "comCAD": false,
+    "def": 13.2,
+    "mapa": 13.2
+   },
+   "PV06": {
+    "cad": null,
+    "comCAD": false,
+    "def": 3.2,
+    "mapa": 3.2
+   },
+   "PV07": {
+    "cad": null,
+    "comCAD": false,
+    "def": 5.6,
+    "mapa": 5.6
+   },
+   "PV08": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.4,
+    "mapa": 6.4
+   },
+   "PV09": {
+    "cad": null,
+    "comCAD": false,
+    "def": 10.6,
+    "mapa": 10.6
+   },
+   "PV10": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.9,
+    "mapa": 7.9
+   },
+   "PV11": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV12": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV13": {
+    "cad": null,
+    "comCAD": false,
+    "def": null,
+    "mapa": null
+   },
+   "PV14": {
+    "cad": null,
+    "comCAD": false,
+    "def": 2.9,
+    "mapa": 2.9
+   },
+   "PV15": {
+    "cad": null,
+    "comCAD": false,
+    "def": 4.1,
+    "mapa": 4.1
+   },
+   "PV17": {
+    "cad": null,
+    "comCAD": false,
+    "def": 8.2,
+    "mapa": 8.2
+   },
+   "PV18": {
+    "cad": null,
+    "comCAD": false,
+    "def": 11.4,
+    "mapa": 11.4
+   },
+   "PV19": {
+    "cad": null,
+    "comCAD": false,
+    "def": 2.4,
+    "mapa": 2.4
+   },
+   "PV20": {
+    "cad": null,
+    "comCAD": false,
+    "def": 7.7,
+    "mapa": 7.7
+   },
+   "PV21": {
+    "cad": null,
+    "comCAD": false,
+    "def": 8.8,
+    "mapa": 8.8
+   },
+   "PV22": {
+    "cad": null,
+    "comCAD": false,
+    "def": 5.3,
+    "mapa": 5.3
+   },
+   "PV23": {
+    "cad": null,
+    "comCAD": false,
+    "def": 6.9,
+    "mapa": 6.9
+   },
+   "PV24": {
+    "cad": null,
+    "comCAD": false,
+    "def": 9.4,
+    "mapa": 9.4
+   },
+   "T7": {
+    "cad": 56,
+    "comCAD": true,
+    "def": 10.000000000000005,
+    "mapa": 10.000000000000005
+   }
+  }
+ }
+}

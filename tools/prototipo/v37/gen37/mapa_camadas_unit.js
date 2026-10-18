@@ -7,10 +7,12 @@ vm.runInContext(['const FASES','const FASEC','const FASE1','const PZC','const SE
 const a=base.indexOf("  if(l==='Irrigação'){ const x=M.irr[t];"),b=base.indexOf('\n  if(isIns(l,f))',a);
 vm.runInContext('function originalIrr(x,ver){const l="Irrigação",f={ver},t="T",M={irr:{T:x}};'+base.slice(a,b)+'}',old);
 let count=0;const same=(a,b)=>{assert.deepStrictEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));count++;};
+// EX-55 F1 (integrador, Claude): única diferença intencional da legenda: em Atrasos, "sem ordem" vira "sem ordem ou sem prazo" (O.S. do cenário sem janela)
+const legEsperada=(l,f)=>f.ver==='Atrasos'?JSON.parse(JSON.stringify(l)).map(x=>x.k==='none'?Object.assign(x,{t:'sem ordem ou sem prazo'}):x):l;
 const phases=['A liberar','Liberadas','Em execução','Em conferência','Encerradas','Canceladas'];
 const ord=(fase,extra={})=>({id:'OS-1',fase,pz:'no prazo',area:10,rz:3,selos:[],...extra});
 const sets=[[],...phases.map(f=>[ord(f)]),[ord('Liberadas'),ord('Em execução',{id:'OS-2',pz:'atrasada'})],[ord('Liberadas',{selos:[['Impedida','red']]})],[ord('Liberadas',{selos:[['Pendência','yellow']]})],[ord('Liberadas',{area:0})],[ord('Liberadas',{rz:0})],[ord('Liberadas',{rz:12})]];
-for(const os of sets)for(const fase of ['Todas',...phases])for(const ver of ['Fases','Avanço','Atrasos','Impedimentos']){old.ORD=os;const f={fase,ver};same(pure.mcOS(os,f),old.osCls('T',f));same(pure.mcOSLeg(f),old.osLegend('O.S.',f));}
+for(const os of sets)for(const fase of ['Todas',...phases])for(const ver of ['Fases','Avanço','Atrasos','Impedimentos']){old.ORD=os;const f={fase,ver};same(pure.mcOS(os,f),old.osCls('T',f));same(pure.mcOSLeg(f),legEsperada(old.osLegend('O.S.',f),f));}
 for(const x of [null,{d:null,c:'gray',l:'sem leitura'},...[0,4.99,5,9.99,10,14.99,15].flatMap(d=>[false,true].map(est=>({d,est,c:est?'cloud':'yellow',l:'estado',rec:{br:5,np:2,lamP:2,por:3,pct:40}})))])for(const ver of ['Hoje','Balanço hídrico'])same(pure.mcIrr(x,ver),old.originalIrr(x,ver));
 const ctx={semProt:false,alvos:null,alvTxt:'Ácaro',atras:0,dias:7};
 same(pure.mcMIP([],{...ctx,semProt:true}),{c:'none',l:'sem cultura'});
@@ -28,6 +30,11 @@ for(const dias of [7,30])for(const alvos of [null,[],['alvo']])for(const semProt
  const vs=Array.from({length:n},()=>({alvo:'Ácaro',v:{alvo:'Ácaro'},S:{mc:'red',t:'Acima do NC'}}));
  same(pure.mcMIP(vs,ctx),old.originalMIP(vs,ctx));
 }
+// EX-55 F1 (integrador, Claude): O.S. do cenário sem janela fica "sem prazo" (nunca "no prazo"); selo cinza é informativo, não pendência
+same(pure.mcOS([ord('A liberar',{pz:'sem prazo'})],{fase:'Todas',ver:'Atrasos'}),{c:'none',l:'OS-1 · sem prazo'});
+same(pure.mcOS([ord('A liberar',{pz:'sem prazo'}),ord('A liberar',{id:'OS-2',pz:'atrasada'})],{fase:'Todas',ver:'Atrasos'}),{c:'red',l:'OS-2 · atrasada · +1'});
+same(pure.mcOS([ord('A liberar',{selos:[['Demonstração','gray']]})],{fase:'Todas',ver:'Impedimentos'}),{c:'ok',l:'sem impedimento'});
+same(pure.mcOS([ord('A liberar',{selos:[['Demonstração','gray'],['Janela a definir','yellow']]})],{fase:'Todas',ver:'Impedimentos'}),{c:'yellow',l:'OS-1 · janela a definir'});
 // A3: o contrato recebe somente a ordem visível, sem contar a oculta.
 const visible=ord('Liberadas',{id:'VISIVEL',pz:'no prazo'}),hidden=ord('Liberadas',{id:'OCULTA',pz:'atrasada'});
 same(pure.mcOS([visible],{fase:'Todas',ver:'Atrasos'}),{c:'ok',l:'VISIVEL · no prazo'});

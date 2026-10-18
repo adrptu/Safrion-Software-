@@ -78,6 +78,9 @@ function smVals(self,v){ const sl=self.state.sl; const lins=self.__slLin||[];
     v[P+'_al']=x.t+' · '+nfa(R.area)+' ha · '+R.rotC+(R.rotP?' · '+R.rotP:'')+(S.ro?' · '+(S.ro.motivoRo||''):'')+(S.mud?' · alterado, não salvo':'')+(errT[x.t]?' · a corrigir: '+errT[x.t].join('; '):'')+(R.sel?' · marcado':(R.parc?' · marcado '+R.parT+'; tocar marca o talhão inteiro':''));
     const tog=()=>{ if(S.ro||!ks.length){ smSet(self,{info:x.t+': '+((S.ro&&S.ro.motivoRo)||'não pode ser planejado nesta safra.')}); return; } smMarcar(self,ks,!R.sel); };
     v[P+'_go']=tog; v[P+'_key']=(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); tog(); } }; });
+  // 2ª linha do rótulo numa camada HTML sobre o desenho: texto ligado dentro de <text> não aparece (o motor o envolve em <span>; EX-55 F1)
+  Object.keys(SM_FK).forEach(f=>{ v['sm_lbl_'+SM_FK[f]]=f!==sl.faz?[]:SM_IDX.filter(x=>x.faz===f&&v['smt'+x.i+'_l2']).map(x=>{ const P='smt'+x.i;
+    return {k:x.t,t:v[P+'_l2'],st:'left:'+x.px+'%;top:'+x.py+'%;color:'+v[P+'_tc']+';text-shadow:0 0 3px '+(v[P+'_tc']==='#FFFFFF'?'rgba(0,0,0,.55)':'rgba(255,255,255,.95)')+';'}; }); });
   // talhões sem contorno no mapa (B1 da Boa Vista, talhão novo do cadastro): selecionáveis aqui
   const comGeo=new Set(SM_IDX.filter(x=>x.faz===sl.faz).map(x=>x.t));
   v.sm_sem=Object.keys(resumo).filter(t=>!comGeo.has(t)).map(t=>{ const R=resumo[t]; const ks=R.S.eds.map(l=>l.k);

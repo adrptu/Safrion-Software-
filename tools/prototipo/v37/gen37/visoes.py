@@ -12,7 +12,7 @@ NOME = {'lista': 'tabela',   # VISOES-2 §2: Lista e Tabela agrupada são uma vi
          'agrupada': 'tabela agrupada', 'kanban': 'kanban', 'calendario': 'calendário', 'timeline': 'linha do tempo',
         'mapa': 'mapa', 'carga': 'carga por recurso', 'frentes': 'frentes de trabalho', 'matriz': 'matriz', 'arvore': 'árvore', 'galeria': 'galeria'}
 # ícones Lucide 1.45.0 (ISC; LICENSES/lucide-ISC.txt) convertidos para o icon() do engine; só entram os que alguma tela usa
-ICONE = {'lista': 'v_agrupada', 'cartoes': 'v_cartoes', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga', 'frentes': 'v_frentes'}
+ICONE = {'lista': 'v_agrupada', 'cartoes': 'v_cartoes', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga', 'frentes': 'v_frentes', 'mapa': 'map'}
 # Modo de ver a listagem (proprietário, 15/10/2026: "Coloque modos de visão em todas telas... tem que ter opção tabela e 'Cartões'"):
 # Tabela | Cartões no fim da barra de toda grade de listagem do menu (engine.grid, com colunas essenciais ou "Agrupar por") e nas Atividades
 # do plano (PA). Os cartões leem as mesmas linhas da Tabela (busca, filtro rápido, filtros, Agrupar por com descer e trilha, Colunas).
@@ -56,6 +56,30 @@ def menu_nome(k):
 
 # ---- registro por entidade: visão ativa → {atributo: fonte}; corte → motivo ----
 REGISTRO = {
+    # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Pragas e doenças (AG-01) com Tabela, Cartões e Mapa
+    'mip': {
+        'ativas': {
+            'lista': {},
+            'cartoes': {},   # DS VIS-05: as linhas da Tabela em cartões
+            'mapa': {'geometria': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04); classe de mapa_camadas.js mcMIP e vistorias de mip.js mipDoTal'},
+        },
+        'cortes': {
+            'kanban': 'As etapas da vistoria já são a coluna Situação e os chips de situação (uma solução por problema, AGENTS §3.4).',
+            'calendario': 'A data da vistoria é um dia só; a próxima vistoria do talhão sai do "Programar vistoria" (DESENHO 1.4).',
+        },
+    },
+    # EX-55 F1: Irrigação (IR-01, setores) com Tabela, Cartões e Mapa
+    'irr': {
+        'ativas': {
+            'lista': {},
+            'cartoes': {},   # DS VIS-05: as linhas da Tabela em cartões
+            'mapa': {'geometria': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04); classe de mapa_camadas.js mcIrr e entrada de irrigacao_estado.js irrMapaEntrada'},
+        },
+        'cortes': {
+            'carga': 'A agenda dos pivôs e do gotejo é a Programação (IR-02), que já mostra setor × dia (uma solução por problema, AGENTS §3.4).',
+            'kanban': 'A situação do setor já é a coluna Situação e o filtro rápido (DESENHO 1.4).',
+        },
+    },
     'os': {
         'ativas': {
             'lista': {},
@@ -68,11 +92,13 @@ REGISTRO = {
             # EX-54 (proprietário, 18/10/2026): frentes de trabalho, a visão ao lado da Carga por recurso (prompt-safrion-frentes-trabalho.md)
             'frentes': {'familia': 'implemento da alocação ou da ficha técnica, senão a operação (os_frentes.js frFamilia)',
                         'rota': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04)'},
+            # EX-55 F1 (proprietário, 18/10/2026: "visão mapa dentro do próprio submenu/tela… ordem de serviço"): reabre a DEC-2609-09, que
+            # mantinha o mapa das ordens só no IN-04 "até pedido do proprietário". É a camada O.S. do Mapa da fazenda sobre as linhas visíveis da lista
+            'mapa': {'geometria': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04); classes de mapa_camadas.js mcOS e ordens de os_mapa.js'},
         },
         'cortes': {
             'agrupada': 'Fundida na Tabela (VISOES-2 §2, pedido do proprietário de 14/10): agrupar é o "Agrupar por" da Tabela, com descer e trilha; ?view=agrupada abre a Tabela agrupada por Onde.',
             'timeline': 'Repete o Calendário e a Carga (uma solução por problema, AGENTS §3.4; DESENHO 1.4).',
-            'mapa': 'DEC-2609-09 mantida: o mapa das ordens fica no IN-04; reabrir só por pedido do proprietário (DESENHO 1.4).',
             'matriz': 'Nenhuma matriz decide algo na O.S. (DESENHO 1.1).',
             'arvore': 'A Lista já é a forma da O.S.; o talhão é vínculo multivalorado, não pai (DESENHO 1.1).',
             'galeria': 'Sem imagem como informação principal (DESENHO 1.4).',

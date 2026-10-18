@@ -1,0 +1,10 @@
+OK    K1 visão Calendário no seletor ("Ver em calendário", ícone) abre na semana de hoje do cenário, 21/09 a 27/09/2026, com 7 dias
+OK    K2 as ordens da semana = as da Lista (mesmo recorte) com janela que cruza a semana, cada uma em cada dia da janela (oráculo pela Lista)
+OK    K3 › vai à semana seguinte, ‹ volta, e "Hoje" retorna à semana do cenário
+OK    K6 o clique no cartão abre o painel da ordem; nenhum cartão arrastável
+OK    K4/K5 Cultura Café: a semana de hoje fica sem ordem e o estado diz isso, com o atalho para a próxima semana com ordem (15/10: só a OS-0425)
+OK    K7 390 px: agenda só com os dias que têm ordem (semana de 15/10, Café: só quinta 15/10), coluna única, sem rolagem lateral
+OK    K9 teclado: Enter no cartão abre o painel com o foco dentro; Esc fecha e o foco volta ao mesmo cartão (1440 e 390 px)
+OK    K8 sem erro de JS
+RESULTADO: 8 ok · 0 falhas
+rc=0

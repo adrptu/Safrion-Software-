@@ -3,10 +3,11 @@
 const mc_FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
 const mc_FASEC={'A liberar':'gray','Liberadas':'blue','Em execução':'ok','Em conferência':'yellow','Encerradas':'gray'};
 const mc_FASE1={'Liberadas':'Liberada','Encerradas':'Encerrada'};
-const mc_PZC={'atrasada':'red','vence hoje':'orange','até 3 dias':'yellow','no prazo':'ok','irrigando hoje':'blue','encerrada':'gray'};
+const mc_PZC={'atrasada':'red','vence hoje':'orange','até 3 dias':'yellow','no prazo':'ok','irrigando hoje':'blue','encerrada':'gray','sem prazo':'none'};   // EX-55 F1 (integrador): O.S. do cenário sem janela = "sem prazo", nunca "no prazo"
 const mc_SEV=['red','orange','yellow','cloud','lime','ok','good','navy','blue','purple','gray','none'];
 function mc_osAb(os){ return os.filter(o=>o.fase!=='Encerradas'&&o.fase!=='Canceladas'); }   // abertas: sem Encerradas nem Canceladas (Codex 6216014054: cancelada não entra no Avanço nem nos números)
 function mc_osImp(o){ return o.selos.some(s=>s[1]==='red'); }
+function mc_osPend(o){ return o.selos.filter(s=>s[1]!=='red'&&s[1]!=='gray'); }   // EX-55 F1 (integrador): selo cinza é informativo (ex.: "Demonstração"), não pendência
 function mc_osSemAb(os){ return os.length&&os.every(o=>o.fase==='Canceladas')?'cancelada':'encerrada'; }   // rótulo quando não há ordem aberta
 function mc_worstC(cs){ let b='none',bi=99; cs.forEach(c=>{ const i=mc_SEV.indexOf(c); if(i>=0&&i<bi){ bi=i; b=c; } }); return b; }
 function mc_nfx(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
@@ -14,9 +15,9 @@ function mcOS(os,f){ if(!os.length) return {c:'none',l:'sem ordem'+(f.fase==='To
   const mais=(n)=>n>1?' · +'+(n-1):'';
   if(f.ver==='Atrasos'){ const c=mc_worstC(os.map(o=>mc_PZC[o.pz])); const o=os.find(x=>mc_PZC[x.pz]===c); return {c,l:o.id+' · '+o.pz+mais(os.length)}; }
   const ab=mc_osAb(os);
-  if(f.ver==='Impedimentos'){ if(!ab.length) return {c:'none',l:mc_osSemAb(os)}; const im=ab.filter(mc_osImp), pe=ab.filter(o=>!mc_osImp(o)&&o.selos.length);
+  if(f.ver==='Impedimentos'){ if(!ab.length) return {c:'none',l:mc_osSemAb(os)}; const im=ab.filter(mc_osImp), pe=ab.filter(o=>!mc_osImp(o)&&mc_osPend(o).length);
     if(im.length) return {c:'red',l:im[0].id+' · '+im[0].selos.find(s=>s[1]==='red')[0].toLowerCase()+mais(im.length)};
-    if(pe.length) return {c:'yellow',l:pe[0].id+' · '+pe[0].selos[0][0].toLowerCase()+mais(pe.length)};
+    if(pe.length) return {c:'yellow',l:pe[0].id+' · '+mc_osPend(pe[0])[0][0].toLowerCase()+mais(pe.length)};
     return {c:'ok',l:'sem impedimento'}; }
   if(f.ver==='Avanço'){ const xs=ab.filter(o=>o.area>0); if(!xs.length) return {c:'none',l:ab.length?'sem área a executar':mc_osSemAb(os)};
     const a=xs.reduce((s,o)=>s+o.area,0), r=xs.reduce((s,o)=>s+Math.min(o.rz||0,o.area),0), p=r/a*100;
@@ -26,7 +27,7 @@ function mcOS(os,f){ if(!os.length) return {c:'none',l:'sem ordem'+(f.fase==='To
   return {c:mc_FASEC[f0]||'gray',l:os.length===1?os[0].id+' · '+nm(os[0].fase,1):fs.map(x=>n[x]+' '+nm(x,n[x])).join(' · ')}; }
 
 function mcOSLeg(f){
-  if(f.ver==='Atrasos') return [mcLegenda('red','atrasada'),mcLegenda('orange','vence hoje'),mcLegenda('yellow','até 3 dias'),mcLegenda('ok','no prazo'),mcLegenda('gray','encerrada'),mcLegenda('none','sem ordem')];
+  if(f.ver==='Atrasos') return [mcLegenda('red','atrasada'),mcLegenda('orange','vence hoje'),mcLegenda('yellow','até 3 dias'),mcLegenda('ok','no prazo'),mcLegenda('gray','encerrada'),mcLegenda('none','sem ordem ou sem prazo')];
   if(f.ver==='Impedimentos') return [mcLegenda('red','impedida ou conflito'),mcLegenda('yellow','pendência com dono'),mcLegenda('ok','sem impedimento'),mcLegenda('none','sem ordem aberta')];
   if(f.ver==='Avanço') return [mcLegenda('gray','não iniciada'),mcLegenda('lime','em andamento'),mcLegenda('good','área toda feita'),mcLegenda('none','sem ordem aberta')];
   return [mcLegenda('gray','a liberar · encerradas'),mcLegenda('blue','liberadas'),mcLegenda('ok','em execução'),mcLegenda('yellow','em conferência'),mcLegenda('none','sem ordem')]; }
