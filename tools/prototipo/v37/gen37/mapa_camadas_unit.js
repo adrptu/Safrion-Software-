@@ -1,0 +1,24 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const pure={};vm.createContext(pure);vm.runInContext(fs.readFileSync(__dirname+'/mapa_camadas.js','utf8'),pure);
+const base=fs.existsSync(__dirname+'/inicio.base.py')?fs.readFileSync(__dirname+'/inicio.base.py','utf8'):require('child_process').execFileSync('git',['show','29d923c754ceaf2843ab6f1fb3d3ac7817afba07:tools/prototipo/v37/gen37/areas/inicio.py'],{encoding:'utf8'});
+const line=t=>{const i=base.indexOf(t);assert(i>=0,t);return base.slice(i,base.indexOf('\n',i));};
+const old={};vm.createContext(old);
+vm.runInContext(['const FASES','const FASEC','const FASE1','const PZC','const SEV','function osAb','function osImp','function osSemAb','function worstC','function nfx','function irrRecTxt'].map(line).join('\n')+'\n'+base.slice(base.indexOf('function osCls('),base.indexOf('function osStrip('))+'\nfunction ordsOf(){return ORD;}\nfunction Lc(l,k,t){return {k,t};}',old);
+const a=base.indexOf("  if(l==='Irrigação'){ const x=M.irr[t];"),b=base.indexOf('\n  if(isIns(l,f))',a);
+vm.runInContext('function originalIrr(x,ver){const l="Irrigação",f={ver},t="T",M={irr:{T:x}};'+base.slice(a,b)+'}',old);
+let count=0;const same=(a,b)=>{assert.deepStrictEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));count++;};
+const phases=['A liberar','Liberadas','Em execução','Em conferência','Encerradas','Canceladas'];
+const ord=(fase,extra={})=>({id:'OS-1',fase,pz:'no prazo',area:10,rz:3,selos:[],...extra});
+const sets=[[],...phases.map(f=>[ord(f)]),[ord('Liberadas'),ord('Em execução',{id:'OS-2',pz:'atrasada'})],[ord('Liberadas',{selos:[['Impedida','red']]})],[ord('Liberadas',{selos:[['Pendência','yellow']]})],[ord('Liberadas',{area:0})],[ord('Liberadas',{rz:0})],[ord('Liberadas',{rz:12})]];
+for(const os of sets)for(const fase of ['Todas',...phases])for(const ver of ['Fases','Avanço','Atrasos','Impedimentos']){old.ORD=os;const f={fase,ver};same(pure.mcOS(os,f),old.osCls('T',f));same(pure.mcOSLeg(f),old.osLegend('O.S.',f));}
+for(const x of [null,{d:null,c:'gray',l:'sem leitura'},...[0,4.99,5,9.99,10,14.99,15].flatMap(d=>[false,true].map(est=>({d,est,c:est?'cloud':'yellow',l:'estado',rec:{br:5,np:2,lamP:2,por:3,pct:40}})))])for(const ver of ['Hoje','Balanço hídrico'])same(pure.mcIrr(x,ver),old.originalIrr(x,ver));
+const ctx={semProt:false,alvos:null,alvTxt:'Ácaro',atras:0,dias:7};
+same(pure.mcMIP([],{...ctx,semProt:true}),{c:'none',l:'sem cultura'});
+same(pure.mcMIP([],{...ctx,alvos:[]}),{c:'none',l:'sem Ácaro no protocolo'});
+same(pure.mcMIP([],{...ctx,alvos:['Ácaro'],dias:30}),{c:'gray',l:'sem vistoria de Ácaro em 30 dias'});
+same(pure.mcMIP([],ctx),{c:'gray',l:'sem vistoria em 7 dias'});
+for(const atras of [1,2])same(pure.mcMIP([],{...ctx,atras}),{c:'gray',l:'vistoria atrasada '+atras+(atras===1?' dia':' dias')});
+const v={alvo:'Ácaro',S:{mc:'red',t:'Acima do NC'}};
+same(pure.mcMIP([v,v],ctx),{c:'red',l:'Ácaro · acima do NC · +1'});
+assert(!('M' in pure)&&!('window' in pure)&&!('document' in pure));
+console.log(JSON.stringify({pass:count,scope:'VM e paridade de funções com fixtures; não substitui render LG/SR nem A5'}));
