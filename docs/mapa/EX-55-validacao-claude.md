@@ -41,7 +41,7 @@ Pedido do proprietário (18/10/2026) e prompt: `docs/integracao/V73/pedidos-1810
   - O "Mostrar · Frentes" do Mapa da O.S. desenha a rota da frente escolhida com o mesmo componente.
 - **D5 · Seleção nunca aprova.** As ações de seleção são as que a tela já tem para vários talhões.
   - A O.S. não ganha "criar O.S. nos selecionados" na F1: a emissão vem do plano, e "criar a partir do mapa" é a F2.
-  - Nada de aprovação em lote, por decisão fixa.
+  - A aprovação em lote existe desde 18/10 (EX-32 v2, no grupo da O.S.), mas não sai do mapa: o mapa só abre o detalhe da tela.
 
 ## 3. Tela por tela (decisão do Claude)
 
@@ -109,3 +109,29 @@ Pedido do proprietário (18/10/2026) e prompt: `docs/integracao/V73/pedidos-1810
 - adaptadores por tela: `os_mapa.js`, `mip_mapa.js`, `irr_mapa.js` e o atual `safra_mapa.js`, que vira adaptador.
 
 Autoria Claude; o Codex revisa.
+
+## 7. F1: O.S., Pragas e doenças e Irrigação (implantada, 18/10/2026)
+
+- **Fonte única das ordens do mapa.** As ordens saem do IN-04 para `mapa_ordens.py` (registro do mapa, sem mudança) e `os_mapa.js` (`mcOrdsCen`, o antigo `mapOrdsCen`). O IN-04 e a visão Mapa da O.S. usam as duas.
+- **O.S. do cenário no Mapa.** As 16 de demonstração e as emitidas no protótipo não apareciam no IN-04, e a lista da O.S. as mostrava. Agora entram nos dois mapas, com o prazo calculado pela janela contra o "hoje" da demonstração. Sem janela, a O.S. fica "sem prazo", nunca "no prazo".
+- **Regra (integrador, em `mapa_camadas.js`):** selo cinza (ex.: "Demonstração") é informativo e não conta como pendência em Impedimentos.
+- **Defeito encontrado e corrigido (S2 latente):** o IN-04 declarava a sua própria `irrAgua(o)`, que substituía a `irrAgua(s, sid)` do `irrigacao_estado.js`. Por isso a camada Irrigação do Mapa nunca usava o balanço com CAD (0 de 26 setores), ao contrário do IR-01. Agora 3 de 26 setores usam o balanço com CAD (P1, P2, T7). Na semente, o déficit não passa a CAD, e os números não mudam.
+- **Componente único:** `mapa_emb.py` (desenho) e `mapa_emb.js` (preenchimento).
+  - A 2ª linha do rótulo fica numa camada HTML. O motor envolve texto ligado em `<span>`, que o SVG não desenha.
+  - O mesmo defeito existia no mapa do Planejar safra (SAF-MAPA, S3 publicado): o "Em parte · k de n", a cultura e o "sem plano" não apareciam na tela, só no `aria-label`. Corrigido já com a mesma camada HTML (`sm_lbl_*`), sem esperar a migração; a sonda mede a 2ª linha com tamanho desenhado em todos os talhões.
+- **DEC-2609-09 reaberta pelo proprietário.** Ela mantinha o mapa das ordens só no IN-04 "até pedido do proprietário". O pedido do EX-55 (18/10/2026) cita a ordem de serviço; a fonte fica no registro das visões (`visoes.py`) e no oráculo.
+- **Recorte visível (defeito encontrado e corrigido, S3).** A busca fica na Tabela. Mapa e Frentes usam o mesmo recorte, mas não o mostravam (Kanban, Calendário e Carga mostram, VISOES-2 §8): a busca ficava escondida. As duas visões passam a mostrar os chips removíveis e o "Limpar filtros" (M2c a M2e).
+- **Safra: regra diferente entre o IN-04 e a lista.** O IN-04, na safra atual, mostra também as O.S. de safras anteriores (`osSaf`); a lista da O.S. filtra a safra exata. O mapa da O.S. segue a lista (aceite 3: o mapa pinta as linhas visíveis). A paridade M1 compara com Safra "Todas" na O.S., que tem o mesmo conjunto de ordens. Fica para o Codex decidir se o IN-04 deve filtrar a safra exata.
+- **Tab:** segue a ordem de leitura do desenho (de cima para baixo e da esquerda para a direita), e não a ordem da lista, porque a ordem do SVG é fixa no build. Fica registrado como desvio do aceite §4.4.
+- **Pragas e doenças (AG-01): Tabela | Cartões | Mapa.**
+  - Camada MIP do Mapa da fazenda (`mcMIP`) com as vistorias de `mip.js` (`mipDoTal`, a mesma fonte do IN-04), em "Últimos 7 dias" ou "Últimos 30 dias".
+  - Recorte: fazenda, cultura e talhão da faixa, chip de situação, busca e filtros da Tabela.
+  - Talhão do recorte sem vistoria no período fica cinza ("sem vistoria em N dias" ou "vistoria atrasada"); o toque abre "Programar vistoria" já no talhão. "Sem cultura" fica em hachura e conta na legenda.
+  - Uma vistoria: o toque a abre. Várias: lista curta.
+- **Irrigação (IR-01): Tabela | Cartões | Mapa dos setores.**
+  - Camada Irrigação (`mcIrr`) em "Hoje" ou "Balanço hídrico". A entrada de cada talhão saiu do IN-04 (`irrMapa`) para `irrigacao_estado.js` (`irrMapaEntrada`): uma fonte para o IN-04 e a IR-01.
+  - Talhão sem setor fica neutro; o toque no setor abre o mesmo formulário da linha.
+- **Recorte visível no mapa (componente):** a busca, o filtro rápido e os filtros de coluna da Tabela aparecem em chips removíveis, com "Limpar filtros". Na O.S., a faixa de recorte que o Kanban, o Calendário e a Carga já tinham passou a valer também no Mapa e nas Frentes.
+- **Defeito corrigido (S3):** a IR-01 apagava o `?view` ao tratar `#faz=` (achado pelo B4 do `visoes_unit`).
+- **Teste obsoleto corrigido:** o `visoes_calendario_test` lia o primeiro `.oscal`, que desde 14/10 é a faixa das ordens de vários dias, e achava 0 dias. Falhava igual na base (`29d923c7`). Agora lê a grade dos dias e conta a ordem da faixa em cada dia que ela cobre.
+- **Falta na F1:** a migração do Planejar safra e a do mapa das Frentes para o componente único. O rótulo invisível do Planejar safra já foi corrigido.

@@ -47,13 +47,15 @@ def p1():
     if not temV: return ['visoes.py ausente']
     f = []
     # DS VIS-05 (padroes-1510, 15/10/2026: "toda lista tem Tabela e Cartões"): Cartões entra logo depois da Tabela
-    if V.validas('os') != ['lista', 'cartoes', 'kanban', 'calendario', 'carga', 'frentes']: f.append(('validas', V.validas('os')))   # EX-54: Frentes no fim
+    # EX-55 F1 (proprietário, 18/10/2026): o Mapa entra na ordem fixa (visoes.ORDEM), entre o Calendário e a Carga
+    if V.validas('os') != ['lista', 'cartoes', 'kanban', 'calendario', 'mapa', 'carga', 'frentes']: f.append(('validas', V.validas('os')))   # EX-54: Frentes no fim
     if 'Fundida na Tabela' not in V.REGISTRO['os']['cortes'].get('agrupada', ''): f.append('agrupada sem o motivo da fusão (VISOES-2)')
     for k, at in V.REGISTRO['os']['ativas'].items():
         if not all(str(at.get(a) or '').strip() for a in V.EXIGE[k]): f.append(('sem fonte', k))
     for k, m in V.REGISTRO['os']['cortes'].items():
         if not str(m).strip(): f.append(('corte sem motivo', k))
-    if 'DEC-2609-09' not in V.REGISTRO['os']['cortes'].get('mapa', ''): f.append('O.S. sem Mapa: DEC-2609-09 mantida')
+    # a DEC-2609-09 previa reabrir o mapa das ordens só por pedido do proprietário: o EX-55 (18/10/2026) é esse pedido; a fonte fica registrada
+    if 'mapa' in V.REGISTRO['os']['cortes'] or 'geo_talhoes' not in V.REGISTRO['os']['ativas'].get('mapa', {}).get('geometria', ''): f.append('O.S. › Mapa sem a geometria do IN-04 (EX-55)')
     if V.ORDEM[0] != 'lista': f.append('Lista não é a primeira')
     return f
 f1 = p1(); chk('P1 validas(os) = lista (Tabela), cartoes (DS VIS-05), kanban, calendario, carga, frentes (EX-54); a Tabela agrupada foi fundida na Tabela (VISOES-2), com motivo; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)', not f1, f1)
@@ -93,7 +95,7 @@ f3 = p3(); chk('P3 painel para visão não sustentada, painel faltando ou apelid
 
 # 3 · componente
 def barra_os():
-    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'cartoes': 'lista', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'carga': '<i>C</i>', 'frentes': '<i>F</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
+    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'cartoes': 'lista', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'mapa': '<i>M</i>', 'carga': '<i>C</i>', 'frentes': '<i>F</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
 def checa_barra(b, val):
     f = []
     if 'role="toolbar"' not in b or 'aria-label="Visão das ordens"' not in b: f.append('toolbar com rótulo')
@@ -113,7 +115,7 @@ if temV and temE:
     b, corpo = barra_os(); fb = checa_barra(b, V.validas('os'))
     chk('C0 barra: role=toolbar "Visão das ordens", 6 botões data-visao na ordem fixa (EX-54: Frentes no fim), aria-label "Ver em …", aria-pressed e tabIndex do estado, só ícone aria-hidden, sem title, "mais" (6 visões), sem verde cheio', not fb, fb)
     chk('C0b corpo: estado da visão (role=status) e um painel por grupo (Tabela e Cartões no mesmo painel), sem invólucro em volta do painel',
-        'role="status" data-visoes-estado="g_c"' in corpo and corpo.count('<i>L</i>') == 1 and corpo.count('{{g_c_vp_') == 5 and '{{g_c_vp_agrupada}}' not in corpo and 'display: contents' not in corpo, corpo[:300])
+        'role="status" data-visoes-estado="g_c"' in corpo and corpo.count('<i>L</i>') == 1 and corpo.count('{{g_c_vp_') == 6 and '{{g_c_vp_agrupada}}' not in corpo and 'display: contents' not in corpo, corpo[:300])
     css = E.VISOES_CSS
     chk('C0c CSS: 32 px no computador; 44 px e ícone 20 px com ponteiro grosso OU até 640 px; até 640 px só as 3 primeiras e o "mais"; no G2_CSS de toda tela',
         'width:32px;height:32px' in css and '@media (pointer:coarse),(max-width:640px){.g2visoes>button{width:44px;height:44px}.g2visoes>button svg{width:20px;height:20px}}' in css
@@ -174,7 +176,12 @@ if os.path.isdir(P):
     pags = {f: open(os.path.join(P, f), encoding='utf-8').read() for f in os.listdir(P) if f.endswith('.dc.html')}
     com = sorted(f for f, s in pags.items() if 'data-visoes=' in s)
     s = pags.get('OS.dc.html', '')
-    chk('B1 só a O.S. tem o seletor nesta fatia, com as 6 visões (Tabela, Cartões pela DS VIS-05, Kanban, Calendário, Carga, Frentes pelo EX-54; VISOES-2 fundiu a agrupada); G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista cartoes kanban calendario carga frentes"' in s and 'const G2_VISOES = {"g_os"' in s, com)
+    # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Pragas e doenças (AG-01) e Irrigação (IR-01) ganham Tabela | Cartões | Mapa
+    chk('B1 o seletor está na O.S. (7 visões: Tabela, Cartões pela DS VIS-05, Kanban, Calendário, Mapa pelo EX-55, Carga, Frentes pelo EX-54; VISOES-2 fundiu a agrupada), '
+        'em Pragas e doenças e na Irrigação (Tabela, Cartões e Mapa, EX-55); G2_VISOES vai em cada página',
+        com == ['AG-01.dc.html', 'IR-01.dc.html', 'OS.dc.html'] and 'data-visoes="lista cartoes kanban calendario mapa carga frentes"' in s and 'const G2_VISOES = {"g_os"' in s
+        and 'data-visoes="lista cartoes mapa"' in pags.get('AG-01.dc.html', '') and 'const G2_VISOES = {"g_vis"' in pags.get('AG-01.dc.html', '')
+        and 'data-visoes="lista cartoes mapa"' in pags.get('IR-01.dc.html', '') and 'const G2_VISOES = {"g_set"' in pags.get('IR-01.dc.html', ''), com)
     chk('B1b o nível Talhão do "Agrupar por" da O.S. declara a coluna de filtro (fc = tal): o filtro de Talhão limita os grupos', '"niv": ["Fazenda", "Talhão"], "fc": ["", "tal"]' in s)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)

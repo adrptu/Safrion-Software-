@@ -85,7 +85,9 @@ def mapa_dados():
     for faz, g in geo.items():
         for t, _ha in tal.get(faz, []):
             if t in g['t']:
-                idx.append(dict(i=len(idx), faz=faz, t=t))
+                T = g['t'][t]; vb = g['vb']; fs = max(12.0, min(24.0, T['w'] / 5.5))
+                # posição da 2ª linha em % do desenho: ela vai numa camada HTML (o motor envolve texto ligado em <span>, que o SVG não desenha)
+                idx.append(dict(i=len(idx), faz=faz, t=t, px=round((T['lx'] - vb[0]) / vb[2] * 100, 2), py=round((T['ly'] + fs * 0.3 - vb[1]) / vb[3] * 100, 2)))
     fk = {f: 'f%d' % i for i, f in enumerate(geo)}
     return geo, idx, fk
 
@@ -111,11 +113,12 @@ def _mapa_html():
                     f'<title>{H(P + "_al")}</title>'
                     f'<path d="{T["d"]}" fill="{H(P + "_fill")}" stroke="{H(P + "_stk")}" stroke-width="{H(P + "_sw")}" stroke-dasharray="{H(P + "_dash")}" vector-effect="non-scaling-stroke"></path>'
                     f'<text x="{T["lx"]}" y="{T["ly"] - fs * 0.25:.1f}" text-anchor="middle" font-size="{fs:.0f}" font-weight="800" fill="{H(P + "_tc")}" stroke="{H(P + "_th")}" stroke-width="3" paint-order="stroke" pointer-events="none">{esc(x["t"])}</text>'
-                    f'<text x="{T["lx"]}" y="{T["ly"] + fs * 0.85:.1f}" text-anchor="middle" font-size="{fs * 0.72:.0f}" font-weight="600" fill="{H(P + "_tc")}" stroke="{H(P + "_th")}" stroke-width="3" paint-order="stroke" pointer-events="none">{H(P + "_l2")}</text>'
                     f'<circle cx="{T["lx"] + fs * 1.6:.1f}" cy="{T["ly"] - fs * 0.9:.1f}" r="{fs * 0.32:.1f}" fill="#8A5A00" opacity="{H(P + "_mud")}" pointer-events="none"></circle></g>')
         vb = ' '.join(str(n) for n in g['vb'])
-        svgs += (f'<sc-if value="{H("sm_f_" + fk[faz])}" hint-placeholder-val="{F()}"><svg class="sm-svg" viewBox="{vb}" preserveAspectRatio="xMidYMid meet" role="group" '
-                 f'aria-label="Talhões da {esc(faz)} no mapa: toque ou Enter marca o talhão">{els}</svg></sc-if>')
+        W, Hh = g['vb'][2], g['vb'][3]
+        svgs += (f'<sc-if value="{H("sm_f_" + fk[faz])}" hint-placeholder-val="{F()}"><div class="sm-box" style="aspect-ratio: {W:.0f} / {Hh:.0f}; max-width: min(100%, calc(64vh * {W / Hh:.4f}));"><svg class="sm-svg" viewBox="{vb}" preserveAspectRatio="xMidYMid meet" role="group" '
+                 f'aria-label="Talhões da {esc(faz)} no mapa: toque ou Enter marca o talhão">{els}</svg>'
+                 f'<sc-for list="{H("sm_lbl_" + fk[faz])}" as="q" hint-placeholder-count="0"><span class="sm-l2" aria-hidden="true" data-t="{H("q.k")}" style="{H("q.st")}">{H("q.t")}</span></sc-for></div></sc-if>')
     sem = (f'<sc-if value="{H("sm_temSem")}" hint-placeholder-val="{F()}"><div class="sm-sem"><span class="sm-rot">Sem contorno no mapa</span>'
            f'<div style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("sm_sem")}" as="s" hint-placeholder-count="1"><button type="button" aria-pressed="{H("s.on")}" aria-label="{H("s.al")}" onClick="{H("s.go")}" style="{H("s.st")}"><b>{H("s.t")}</b> · {H("s.sub")}</button></sc-for>'
            f'<a href="{H("sm_desenhar")}" class="sl-lk" style="align-self: center;">Desenhar no Mapa ›</a></div></div></sc-if>')
@@ -153,7 +156,8 @@ MAPA_CSS = ('<style>'
             '.sm-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start;min-width:0}'
             '.sm-esq{display:flex;flex-direction:column;gap:10px;min-width:0}'
             f'.sm-tela{{background:#EEF3EC;border:1px solid {LINE};border-radius:12px;padding:8px;min-width:0}}'
-            '.sm-svg{display:block;width:100%;height:auto;max-height:64vh}'
+            '.sm-box{position:relative;width:100%;margin:0 auto}.sm-svg{display:block;width:100%;height:100%}'
+            '.sm-l2{position:absolute;transform:translate(-50%,0);max-width:24%;font-size:12px;line-height:1.25;font-weight:600;text-align:center;pointer-events:none;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}'
             '.sm-t{cursor:pointer;outline:none}.sm-t:focus-visible path{stroke:#15201A!important;stroke-width:5!important}'
             '@media (hover:hover){.sm-t:hover path{filter:brightness(.93)}}'
             '.sm-barra{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;min-width:0}'

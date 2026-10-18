@@ -1269,6 +1269,39 @@ function osFrentesVals(self,v,recorte){
   v.ofr_fora=fl.map(x=>({t:x.m+' ('+x.ids.length+'): '+x.ids.join(', ')}));v.ofr_fora_t='Fora das frentes ('+fl.reduce((s2,x)=>s2+x.ids.length,0)+')';
 }
 
+// EX-55 F1 · visão Mapa da O.S.: a camada O.S. do Mapa da fazenda (mcOS, mapa_camadas.js) sobre as linhas visíveis da lista (o mesmo recorte de
+// fazenda, safra, cultura, talhão e busca). As ordens vêm da fonte do IN-04 (os_mapa.js); um talhão com duas O.S., uma filtrada fora, pinta
+// só pela visível. Clique, toque ou Enter abre a O.S. (várias no talhão: lista curta). Irrigação só com água fica no mapa da Irrigação.
+function osMapaVals(self,v,recR){
+  const st=self.state.om||{},c=cenGet(); let pj=[]; try{ pj=osProjecao(c)||[]; }catch(e){ pj=[]; }
+  const vis=new Set((recR||[]).map(r=>r.id)),ordV=mcOrdsCen(c,mcOrdsBase(MC_ORD0,pj,MC_HOJE)).filter(o=>vis.has(o.id));
+  const irr=ordV.filter(mc_irrAgua),ords=ordV.filter(o=>!mc_irrAgua(o));
+  const VERS=['Fases','Avanço','Atrasos','Impedimentos'],ver=VERS.indexOf(st.ver)>=0?st.ver:'Fases',f={ver,fase:'Todas'};
+  const put=p=>self.setState({om:Object.assign({},self.state.om||{},p)});
+  v.om_vers=VERS.map(k=>({t:k,on:String(k===ver),go:()=>put({ver:k,curta:null})}));
+  const fazGeo=Object.keys(ME_OM.geo),geoDe=fz=>new Set(ME_OM.idx.filter(x=>x.faz===fz).map(x=>x.t));
+  const noFaz=fz=>{ const g=geoDe(fz); return ords.filter(o=>o.tal.some(t=>g.has(mc_idGeo(t)))); };
+  const mf=mfFaz(self); let faz;
+  if(mf!=='Todas'){ faz=mf; v.om_temFazs=false; v.om_fazs=[]; }
+  else { faz=fazGeo.indexOf(st.faz)>=0?st.faz:fazGeo.slice().sort((a,b)=>noFaz(b).length-noFaz(a).length)[0]; v.om_temFazs=true;
+    v.om_fazs=fazGeo.map(fz=>({t:fz+' · '+noFaz(fz).length,on:String(fz===faz),go:()=>put({faz:fz,curta:null})})); }
+  const g=geoDe(faz),porT={},doTal=t=>ords.filter(o=>o.tal.map(mc_idGeo).indexOf(t)>=0);
+  g.forEach(t=>{ const os=doTal(t); if(!os.length) return; const cl=mcOS(os,f);
+    porT[t]={c:cl.c,l2:cl.l,al:t+' · '+cl.l+' · '+os.length+' O.S. · '+(os.length>1?'Enter abre a lista do talhão':'Enter abre '+os[0].id),
+      go:()=>{ if(os.length===1){ self.setState({pan:os[0].id,pa:null}); return; } put({curta:t}); }}; });
+  meVals(v,'om',ME_OM,ME_OM.geo[faz]?faz:'',porT,{foraTxt:'sem O.S. no recorte',leg:mcOSLeg(f)});
+  const todosGeo=new Set(ME_OM.idx.map(x=>x.t)),semGeo=ords.filter(o=>!o.tal.some(t=>todosGeo.has(mc_idGeo(t))));
+  v.om_temSem=semGeo.length>0; v.om_sem=semGeo.map(o=>({t:o.id+' · '+(o.tal.join(', ')||'sem talhão'),go:()=>self.setState({pan:o.id,pa:null})}));
+  const nT=Object.keys(porT).length,nO=noFaz(faz).length;
+  v.om_cont=(ME_OM.geo[faz]?nT+(nT===1?' talhão':' talhões')+' · '+nO+' O.S. no mapa':'Sem desenho dos talhões de '+faz)+(semGeo.length?' · '+semGeo.length+' sem contorno':'')+(irr.length?' · '+irr.length+' de irrigação só com água (mapa da Irrigação)':'');
+  const fk={'Lagoa Grande':'LG','Santa Rita':'SR','Boa Vista':'BV'}[faz]||'TODAS';
+  v.om_in04='IN-04.dc.html#faz='+fk+'&lay=os';
+  v.om_in04go=()=>{ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:faz,lay:'O.S./prazos',flt:{'O.S./prazos':{ver,fase:'Todas'}}})); }catch(e){} };
+  const ct=st.curta&&porT[st.curta]?st.curta:null,lc=ct?doTal(ct):[];
+  v.om_temCurta=!!ct; v.om_curtaT=ct?ct+' · '+lc.length+' O.S.':''; v.om_curtaX=()=>put({curta:null});
+  v.om_curta=lc.map(o=>({t:o.id+' · '+(o.tipo||'')+' · '+o.fase,go:()=>{ put({curta:null}); self.setState({pan:o.id,pa:null}); }}));
+}
+
 // AGR-02: recolher é estado visual local; não altera filtros, seleção nem o agrupamento da coleção (não há trilha desde a AGR-02).
 function osKbRaia(self,dim,path,nome,n,cols,nivel){
   const key=JSON.stringify([g2perfil().k,mfFaz(self),mfSaf(self),dim,path||[],nome]);
@@ -1367,6 +1400,7 @@ function EXTRAVALS(self,v){
   const escD=[mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self)].concat(mfSaf(self)==='Todas'?[]:['safra '+mfSaf(self)]).join(' · ');
   osGrupoVals(self,v,recR);
   g2visaoTenta(self,'g_os','frentes',()=>osFrentesVals(self,v,recR));   /* EX-54: a falha desta visão não derruba a Lista */
+  g2visaoTenta(self,'g_os','mapa',()=>osMapaVals(self,v,recR));   /* EX-55 F1: idem */
   const rDesc=escD+(filtrando?' no recorte':'');
   const extOk=(id)=>{ const x=RC_EXT[id]; return !!x&&!filtrando&&(mfFaz(self)==='Todas'||mfFaz(self)===x[0])&&(mfSaf(self)==='Todas'||mfSaf(self)===x[1]); };
   v.rc_nota='A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de '+rDesc+'; conflitos, manutenção e uso continuam da semana inteira.';
@@ -1961,7 +1995,8 @@ def build():
               ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
                   dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
-    # VISOES-2 §8 ponto 3: o recorte ativo em chips removíveis (trilha, filtros de coluna, busca) e "Limpar filtros", em toda forma
+    # VISOES-2 §8 ponto 3: o recorte ativo em chips removíveis (trilha, filtros de coluna, busca) e "Limpar filtros", em toda forma (Frentes e Mapa
+    # também: as duas leem o mesmo recorte da Tabela; sem os chips, a busca ficaria escondida, EX-55 F1)
     rchip=(f'<span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">{H("rc.t")}'
            f'<button type="button" aria-label="{H("rc.lab")}" title="{H("rc.lab")}" onClick="{H("rc.rm")}" style="width: 28px; height: 28px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; border-radius: 999px;">×</button></span>')
     # V2-RAIAS-TOQUE-01 (Codex 6170116165): no toque, × do chip e "Limpar filtros" com 44 px, em toda forma que mostra o recorte
@@ -1976,7 +2011,7 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab(),'frentes':_frentes_view()},rotulo='Visão das ordens')
+    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab(),'frentes':kb_nota+_frentes_view(),'mapa':kb_nota+_mapa_os_view()},rotulo='Visão das ordens')
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>'
             # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): no Kanban o mesmo "Agrupar por" da Tabela (as raias seguem o grupo)
@@ -2000,6 +2035,7 @@ def build():
     rc_ext={o['id']:[o['faz'],o['saf']] for o in D.ORDENS if o['id'] in {a['os'] for a in AL.ALOC if a['sit']!='manutenção'} and o['id'] not in {x['id'] for x in ordens}}
     _g,_idx,_js=_fr_geo()
     FRJS='const OS_GEO = '+json.dumps(_js,ensure_ascii=False)+';\nconst OG_IDX = '+json.dumps(_idx,ensure_ascii=False)+';\n'+open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'os_frentes.js'),encoding='utf-8').read()+'\n'
+    FRJS+=_mapa_os_js()
     EXTRAJS[0]=FRJS+cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_EXT = '+json.dumps(rc_ext,ensure_ascii=False)+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+'const RC_LAM = '+json.dumps(sorted(LAM))+';\nconst RC_COR = '+json.dumps(dict(bg=BG,reds=REDS,yels=YELS,accs=ACCS,acc=ACC))+';\n'+RC_JS+JS_NUCLEO+JS
     prim=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Nova ordem</button>'
     HEIGHTS37[fname]=1000
@@ -2142,6 +2178,22 @@ def _fr_mapa():
               f'<svg class="fr-svg" viewBox="{" ".join(str(n) for n in vb)}" role="img" aria-label="{H("ofr_mapa_al")}">{els}{rota}{bad}</svg>'
               f'<sc-for list="{H("ofr_marcas_f%d"%fi)}" as="m" hint-placeholder-count="0"><span class="fr-n" aria-hidden="true" style="{H("m.st")}">{H("m.n")}</span></sc-for></div></sc-if>')
     return out
+
+# EX-55 F1 · visão Mapa da O.S.: o desenho único (mapa_emb.py) com a camada O.S. do Mapa da fazenda; o clique abre a O.S.
+def _mapa_os_view():
+    import mapa_emb as ME
+    return (f'<section aria-label="Mapa das ordens" data-os-mapa="1">'
+            + ME.html('om', 'Talhões com O.S. no mapa: Enter ou toque abre a O.S.').replace(f'href="{H("om_in04")}"', f'href="{H("om_in04")}" onClick="{H("om_in04go")}"')
+            + '</section>')
+
+
+def _mapa_os_js():
+    import mapa_emb as ME, mapa_ordens as MO
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ler = lambda n: open(os.path.join(base, n), encoding='utf-8').read() + '\n'
+    return (ler('mapa_camadas.js') + ler('os_mapa.js') + ler('mapa_emb.js') + ME.js('om')
+            + 'const MC_ORD0 = ' + json.dumps(MO.ordens(), ensure_ascii=False) + ';\nconst MC_HOJE = ' + json.dumps(MO.HOJE.isoformat()) + ';\n')
+
 
 # EX-54 · visão Frentes da Ordem de Serviço: frentes sugeridas à esquerda; mapa com a rota numerada, porquê, ganho, sequência e trocas à direita
 def _frentes_view():

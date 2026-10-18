@@ -758,6 +758,45 @@ function agPv(self,v){ const pv=self.state.pv; v.pv_open=!!pv; const fecha=()=>{
     const r=mipMudar(null,s2=>mipNovaVis(s2,cur.tal,cur.prot,cur.data,cur.resp,'ag01'));
     if(r.erro){ const m=/^(VIS-\d+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
     agSetHash(r.id); self.setState(Object.assign({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)},agInclui(self,{tal:cur.tal}))); agFoco(); }; }
+// EX-55 F1 · visão Mapa de Pragas e doenças: a camada MIP do Mapa da fazenda (mcMIP, mapa_camadas.js) com as vistorias de mip.js (mipDoTal, a
+// mesma fonte do IN-04) no período, sobre o recorte da lista (fazenda, cultura, talhão, situação, busca e filtros da Tabela). Talhão do recorte sem vistoria no período fica
+// cinza ("sem vistoria em N dias" ou "vistoria atrasada"), como no IN-04; fora do recorte, neutro. Clique, toque ou Enter abre a vistoria (várias:
+// lista curta); sem vistoria no período, abre "Programar vistoria" do talhão. O mapa não decide nem registra nada.
+const MI_PERS=['Últimos 7 dias','Últimos 30 dias'];
+function mipMapaVals(self,v){
+  const s=mipGet(),c=agC(),st=self.state.mi||{},sk=self.state.ag_sit||'';
+  const put=p=>self.setState({mi:Object.assign({},self.state.mi||{},p)});
+  const per=MI_PERS.indexOf(st.per)>=0?st.per:MI_PERS[0],dias=per==='Últimos 30 dias'?30:7;
+  v.mi_vers=MI_PERS.map(k=>({t:k,on:String(k===per),go:()=>put({per:k,curta:null})}));
+  const f=agFaz(self),cu=self.state.mf_cult||'Todas',tl=self.state.mf_tal||'';
+  const noRec=k=>{ const t=MIPD.tal[k]||{}; return (f==='Todas'||t.faz===f)&&(cu==='Todas'||t.cultura===cu)&&(!tl||k===tl); };
+  const fazGeo=Object.keys(ME_MI.geo),talsDe=fz=>Object.keys(MIPD.tal).filter(k=>MIPD.tal[k].faz===fz&&noRec(k));
+  const sp=GRIDS.find(g=>g.id==='g_vis'),grade=meRecorte(self,v,'mi',sp,'g_vis'),vis=grade?meVisiveis(self,sp,'g_vis'):null;   // busca e filtros da Tabela
+  const filtra=!!sk||grade,doTal=k=>mipDoTal(s,k,dias,c).filter(x=>(!sk||x.S.k===sk)&&(!vis||vis.has(String(x.v.id))));
+  let faz;
+  if(f!=='Todas'&&ME_MI.geo[f]){ faz=f; v.mi_temFazs=false; v.mi_fazs=[]; }
+  else { faz=fazGeo.indexOf(st.faz)>=0?st.faz:fazGeo[0]; v.mi_temFazs=true; v.mi_fazs=fazGeo.map(fz=>({t:fz,on:String(fz===faz),go:()=>put({faz:fz,curta:null})})); }
+  const porT={},vsDe={},ks=talsDe(faz),geoT=new Set(ME_MI.idx.map(x=>x.t));
+  let nV=0;
+  ks.forEach(k=>{ const vs=doTal(k); if(filtra&&!vs.length) return; const prot=(MIPD.prots[k]||[]).length>0;
+    const cl=mcMIP(vs.map(x=>Object.assign({},x,{alvo:mipP(x.v).alvo})),{semProt:!prot,alvos:null,alvTxt:'',atras:mipRitmo(s,k).atras,dias});
+    const t=mc_idGeo(k),rot=(MIPD.tal[k]||{}).rot||k; vsDe[t]=vs; nV+=vs.length;
+    const acao=vs.length===1?'Enter abre '+vs[0].v.id:(vs.length>1?'Enter abre a lista do talhão':(prot?'Enter programa a vistoria':'sem protocolo de vistoria'));
+    porT[t]={c:cl.c,l2:cl.l,al:rot+' · '+cl.l+' · '+vs.length+(vs.length===1?' vistoria':' vistorias')+' no período · '+acao,
+      go:()=>{ if(vs.length===1){ agOpen(self,vs[0].v.id); return; } if(vs.length>1){ put({curta:t}); return; }
+        if(prot) agPvOpen(self,k); else self.setState({g2toast:rot+' sem cultura: sem protocolo de vistoria.'}); }}; });
+  meVals(v,'mi',ME_MI,ME_MI.geo[faz]?faz:'',porT,{foraTxt:filtra?'sem vistoria no recorte':'fora do filtro',leg:mcMIPLeg()});
+  const sem=ks.filter(k=>!geoT.has(mc_idGeo(k)));
+  v.mi_temSem=sem.length>0; v.mi_sem=sem.map(k=>({t:(MIPD.tal[k]||{}).rot||k,go:()=>agPvOpen(self,k)}));
+  const nT=Object.keys(porT).length;
+  v.mi_cont=(ME_MI.geo[faz]?nT+(nT===1?' talhão':' talhões')+' · '+nV+(nV===1?' vistoria':' vistorias')+' no mapa':'Sem desenho dos talhões de '+faz)+(sem.length?' · '+sem.length+' sem contorno':'');
+  const fk={'Lagoa Grande':'LG','Santa Rita':'SR','Boa Vista':'BV'}[faz]||'TODAS';
+  v.mi_in04='IN-04.dc.html#faz='+fk+'&lay=pragas';
+  v.mi_in04go=()=>{ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:faz,lay:'MIP/MID',flt:{'MIP/MID':{per}}})); }catch(e){} };
+  const ct=st.curta&&porT[st.curta]?st.curta:null,lc=ct?vsDe[ct]:[];
+  v.mi_temCurta=!!ct; v.mi_curtaT=ct?ct+' · '+lc.length+' vistorias':''; v.mi_curtaX=()=>put({curta:null});
+  v.mi_curta=lc.map(x=>({t:x.v.id+' · '+mipP(x.v).alvo+' · '+x.S.t,go:()=>{ put({curta:null}); agOpen(self,x.v.id); }}));
+}
 function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); agIni(self); v.mf_faz=agFaz(self); agFazSalvar(self); agTopo(self,v);
   const sp=GRIDS.find(g=>g.id==='g_vis'); sp.rows=agRows(self,v); }   // TAB-12 (17/10/2026): os grupos nascem recolhidos (sem abertura padrão)
 function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=agFaz(self);
@@ -766,6 +805,7 @@ function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=ag
   v.ag_grp=st.ag_grp||''; v.ag_grpOn=!!st.ag_grp; v.ag_setgrp=(e)=>{ self.setState({ag_grp:e.target.value}); g2set(self,'g_vis',{x:null}); };
   v.pv_new=()=>agPvOpen(self);
   agPanel(self,v); agPv(self,v);
+  g2visaoTenta(self,'g_vis','mapa',()=>mipMapaVals(self,v));   /* EX-55 F1: a falha desta visão não derruba a Tabela */
   // selo do cabeçalho: acima do NC sem decisão e focos a confirmar no recorte da faixa (fazenda, cultura e talhão)
   const vs=Object.values(s.vis).filter(x=>agRec(self,x)).map(x=>mipSit(s,x,c).k);
   const na=vs.filter(k=>k==='acima').length, nf=vs.filter(k=>k==='foco').length, ns=vs.filter(k=>k==='sinc'||k==='incompleta').length;
@@ -792,6 +832,21 @@ def _menu_mip():
     for f in ('AG-03.dc.html','AG-03det.dc.html','AG-04.dc.html','AG-04det.dc.html'): ui37.MENU_OF.setdefault(f,'AG-01.dc.html')
     ui37.MACRO.setdefault('AG-01.dc.html',dict(faz='filtro',cult='filtro',tal='filtro'))   # 13/10: Cultura e Talhão (vistoria é por talhão e cultura)
 
+def _mip_mapa_view():
+    import mapa_emb as ME
+    return (f'<section aria-label="Mapa das vistorias" data-mip-mapa="1">'
+            + ME.html('mi', 'Talhões no mapa: Enter ou toque abre a vistoria do talhão').replace(f'href="{H("mi_in04")}"', f'href="{H("mi_in04")}" onClick="{H("mi_in04go")}"')
+            + '</section>')
+
+
+def _mip_mapa_js():
+    """Camada MIP do Mapa da fazenda (mapa_camadas.js · mcMIP), contornos e componente do mapa embutido (mapa_emb), chave do talhão (os_mapa.js · mc_idGeo)."""
+    import mapa_emb as ME, os as _os
+    base = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    ler = lambda n: open(_os.path.join(base, n), encoding='utf-8').read() + '\n'
+    return ler('mapa_camadas.js') + ler('os_mapa.js') + ler('mapa_emb.js') + ME.js('mi')
+
+
 def ag01():
     import cenario, dados_mip as DM
     DM.verificar()
@@ -803,16 +858,20 @@ def ag01():
     grp=(f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar'
          f'<select aria-label="Agrupar vistorias por" value="{H("ag_grp")}" onChange="{H("ag_setgrp")}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK};">'
          + ''.join(f'<option value="{k}">{t}</option>' for k,t in (('','Nenhum'),('tal','Talhão'),('alvo','Alvo'),('sit','Situação'),('faz','Fazenda'))) + '</select></label>')
-    g=grid(cols,[],edit=dict(m='pick',leafOnly=True),tree=True,gid='g_vis',total=False,tools=grp)
+    g=grid(cols,[],edit=dict(m='pick',leafOnly=True),tree=True,gid='g_vis',total=False,tools=grp,cartoes='externo')   # EX-55: Cartões entra no seletor de visões
     # filtro rápido por situação, na ordem de gravidade (acima do NC primeiro), com a contagem do recorte da faixa
     chips=(f'<div role="group" aria-label="Filtrar por situação" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("ag_chips")}" as="q" hint-placeholder-count="5">'
            f'<button type="button" aria-pressed="{H("q.on")}" onClick="{H("q.go")}" style="{H("q.st")}">{H("q.t")} <span style="opacity: .75;">{H("q.n")}</span></button></sc-for></div>')
     # N-1: dados de Pragas e doenças ilegíveis: o aviso diz o que houve e a saída (restaurar); escondido no estado normal
     ileg=(f'<sc-if value="{H("ag_ileg")}" hint-placeholder-val="{F_()}"><div role="alert" style="{_BOX_RED} display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap;">'
           f'<span style="flex: 1 1 260px;">{H("ag_ilegT")}</span><button type="button" onClick="{H("rs_ok")}" style="{BTN_ST(False)}">Restaurar demonstração</button></div></sc-if>')
-    corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{ileg}{chips}{g}</div>'+_ag01_restaurar())
+    # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Tabela | Cartões | Mapa; o seletor fica na linha dos chips de situação
+    bar,panes=E.visoes('g_vis','mip',{'lista':g,'cartoes':'lista','mapa':_mip_mapa_view()},rotulo='Visão das vistorias')
+    linha=(f'<div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0;">{chips}</div>'
+           f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
+    corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{ileg}{linha}{panes}</div>'+_ag01_restaurar())
     EXTRA.append(_ag01_painel()); EXTRA.append(_ag01_programar())
-    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01+_mip_mapa_js()
     prim=f'<button type="button" onClick="{H("pv_new")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px;">{icon("calendar",15)}Programar vistoria</button>'
     HEIGHTS37[fname]=1000
     shell37('AG-01','Pragas e doenças',corpo,fname=fname,status=(H('ag_st'),'red'),primary_html=prim,search=False)

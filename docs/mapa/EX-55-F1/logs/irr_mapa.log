@@ -1,0 +1,13 @@
+OK    I1 paridade com o Mapa da fazenda: 52 talhões com setor × "Mostrar" nas 2 fazendas, classe e rótulo iguais; sem setor fica neutro
+OK    I2a busca "Gotejo" na Tabela: só o T7 no mapa, com o chip da busca visível no Mapa
+OK    I2b o × do chip limpa a busca no próprio Mapa: volta aos 3 setores da Santa Rita
+OK    I4a a dica tem talhão, situação, setor e o que o Enter faz
+OK    I3 tocar no T7 abre o formulário do setor Gotejo T7
+OK    I4b Enter no P1 abre o formulário do setor Pivô 1
+OK    I5 ?view=mapa abre a visão Mapa e recarregar mantém
+OK    I6 selo "posição esquemática" só na Santa Rita; legenda com contagem
+OK    I7 "Abrir no Mapa da fazenda" leva #faz=SR&lay=irr e grava o "Mostrar" (Balanço hídrico) no contexto do Mapa
+OK    I8a 390 px: sem rolagem lateral
+OK    I8b 390 px: talhões do recorte com alvo de toque ≥ 44 px
+OK    I8c nenhum erro de script
+RESULTADO: 12/12

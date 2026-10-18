@@ -1,0 +1,288 @@
+== Lagoa Grande|OS|Atrasos|A liberar
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+   -  {"c": "none", "id": "PV02", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV04", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem na fase"}
+   +  {"c": "ok", "id": "PV02", "l": "OS-0584 · no prazo"}
+   +  {"c": "ok", "id": "PV04", "l": "OS-0585 · no prazo"}
+   +  {"c": "ok", "id": "PV08", "l": "OS-0594 · no prazo"}
+   +  {"c": "ok", "id": "PV09", "l": "OS-0586 · no prazo"}
+   +  {"c": "ok", "id": "PV10", "l": "OS-0593 · no prazo"}
+   +  {"c": "ok", "id": "PV14", "l": "OS-0588 · no prazo"}
+   +  {"c": "ok", "id": "PV17", "l": "OS-0587 · no prazo"}
+   +  {"c": "ok", "id": "PV20", "l": "OS-0589 · no prazo"}
+   +  {"c": "ok", "id": "PV21", "l": "OS-0590 · no prazo"}
+   +  {"c": "ok", "id": "PV22", "l": "OS-0591 · no prazo"}
+   +  {"c": "ok", "id": "PV24", "l": "OS-0592 · no prazo"}
+== Lagoa Grande|OS|Atrasos|Em conferência
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Lagoa Grande|OS|Atrasos|Em execução
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Lagoa Grande|OS|Atrasos|Encerradas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Lagoa Grande|OS|Atrasos|Liberadas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Lagoa Grande|OS|Atrasos|Todas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+   -  {"c": "none", "id": "PV02", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem"}
+   -  {"c": "yellow", "id": "PV04", "l": "OS-0506 · até 3 dias"}
+   +  {"c": "ok", "id": "PV02", "l": "OS-0584 · no prazo"}
+   +  {"c": "ok", "id": "PV08", "l": "OS-0594 · no prazo"}
+   +  {"c": "ok", "id": "PV09", "l": "OS-0586 · no prazo"}
+   +  {"c": "ok", "id": "PV10", "l": "OS-0593 · no prazo"}
+   +  {"c": "ok", "id": "PV14", "l": "OS-0588 · no prazo"}
+   +  {"c": "ok", "id": "PV17", "l": "OS-0587 · no prazo"}
+   +  {"c": "ok", "id": "PV20", "l": "OS-0589 · no prazo"}
+   +  {"c": "ok", "id": "PV21", "l": "OS-0590 · no prazo"}
+   +  {"c": "ok", "id": "PV22", "l": "OS-0591 · no prazo"}
+   +  {"c": "ok", "id": "PV24", "l": "OS-0592 · no prazo"}
+   +  {"c": "yellow", "id": "PV04", "l": "OS-0506 · até 3 dias · +1"}
+== Lagoa Grande|OS|Avanço|A liberar
+   -  {"c": "none", "id": "PV02", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV04", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem na fase"}
+   +  {"c": "gray", "id": "PV02", "l": "0/38 ha · 0 %"}
+   +  {"c": "gray", "id": "PV04", "l": "0/73 ha · 0 %"}
+   +  {"c": "gray", "id": "PV08", "l": "0/51 ha · 0 %"}
+   +  {"c": "gray", "id": "PV09", "l": "0/75 ha · 0 %"}
+   +  {"c": "gray", "id": "PV10", "l": "0/30 ha · 0 %"}
+   +  {"c": "gray", "id": "PV14", "l": "0/63 ha · 0 %"}
+   +  {"c": "gray", "id": "PV17", "l": "0/33 ha · 0 %"}
+   +  {"c": "gray", "id": "PV20", "l": "0/77 ha · 0 %"}
+   +  {"c": "gray", "id": "PV21", "l": "0/81 ha · 0 %"}
+   +  {"c": "gray", "id": "PV22", "l": "0/62 ha · 0 %"}
+   +  {"c": "gray", "id": "PV24", "l": "0/34 ha · 0 %"}
+== Lagoa Grande|OS|Avanço|Todas
+   -  {"c": "lime", "id": "PV04", "l": "36/73 ha · 49 %"}
+   -  {"c": "none", "id": "PV02", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem"}
+   +  {"c": "gray", "id": "PV02", "l": "0/38 ha · 0 %"}
+   +  {"c": "gray", "id": "PV08", "l": "0/51 ha · 0 %"}
+   +  {"c": "gray", "id": "PV09", "l": "0/75 ha · 0 %"}
+   +  {"c": "gray", "id": "PV10", "l": "0/30 ha · 0 %"}
+   +  {"c": "gray", "id": "PV14", "l": "0/63 ha · 0 %"}
+   +  {"c": "gray", "id": "PV17", "l": "0/33 ha · 0 %"}
+   +  {"c": "gray", "id": "PV20", "l": "0/77 ha · 0 %"}
+   +  {"c": "gray", "id": "PV21", "l": "0/81 ha · 0 %"}
+   +  {"c": "gray", "id": "PV22", "l": "0/62 ha · 0 %"}
+   +  {"c": "gray", "id": "PV24", "l": "0/34 ha · 0 %"}
+   +  {"c": "lime", "id": "PV04", "l": "36/146 ha · 25 % · 2 ordens"}
+== Lagoa Grande|OS|Fases|A liberar
+   -  {"c": "none", "id": "PV02", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV04", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem na fase"}
+   +  {"c": "gray", "id": "PV02", "l": "OS-0584 · a liberar"}
+   +  {"c": "gray", "id": "PV04", "l": "OS-0585 · a liberar"}
+   +  {"c": "gray", "id": "PV08", "l": "OS-0594 · a liberar"}
+   +  {"c": "gray", "id": "PV09", "l": "OS-0586 · a liberar"}
+   +  {"c": "gray", "id": "PV10", "l": "OS-0593 · a liberar"}
+   +  {"c": "gray", "id": "PV14", "l": "OS-0588 · a liberar"}
+   +  {"c": "gray", "id": "PV17", "l": "OS-0587 · a liberar"}
+   +  {"c": "gray", "id": "PV20", "l": "OS-0589 · a liberar"}
+   +  {"c": "gray", "id": "PV21", "l": "OS-0590 · a liberar"}
+   +  {"c": "gray", "id": "PV22", "l": "OS-0591 · a liberar"}
+   +  {"c": "gray", "id": "PV24", "l": "OS-0592 · a liberar"}
+== Lagoa Grande|OS|Fases|Todas
+   -  {"c": "none", "id": "PV02", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem"}
+   -  {"c": "ok", "id": "PV04", "l": "OS-0506 · em execução"}
+   +  {"c": "gray", "id": "PV02", "l": "OS-0584 · a liberar"}
+   +  {"c": "gray", "id": "PV04", "l": "1 a liberar · 1 em execução"}
+   +  {"c": "gray", "id": "PV08", "l": "OS-0594 · a liberar"}
+   +  {"c": "gray", "id": "PV09", "l": "OS-0586 · a liberar"}
+   +  {"c": "gray", "id": "PV10", "l": "OS-0593 · a liberar"}
+   +  {"c": "gray", "id": "PV14", "l": "OS-0588 · a liberar"}
+   +  {"c": "gray", "id": "PV17", "l": "OS-0587 · a liberar"}
+   +  {"c": "gray", "id": "PV20", "l": "OS-0589 · a liberar"}
+   +  {"c": "gray", "id": "PV21", "l": "OS-0590 · a liberar"}
+   +  {"c": "gray", "id": "PV22", "l": "OS-0591 · a liberar"}
+   +  {"c": "gray", "id": "PV24", "l": "OS-0592 · a liberar"}
+== Lagoa Grande|OS|Impedimentos|A liberar
+   -  {"c": "none", "id": "PV02", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV04", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem na fase"}
+   +  {"c": "yellow", "id": "PV02", "l": "OS-0584 · demonstração"}
+   +  {"c": "yellow", "id": "PV04", "l": "OS-0585 · demonstração"}
+   +  {"c": "yellow", "id": "PV08", "l": "OS-0594 · demonstração"}
+   +  {"c": "yellow", "id": "PV09", "l": "OS-0586 · demonstração"}
+   +  {"c": "yellow", "id": "PV10", "l": "OS-0593 · demonstração"}
+   +  {"c": "yellow", "id": "PV14", "l": "OS-0588 · demonstração"}
+   +  {"c": "yellow", "id": "PV17", "l": "OS-0587 · demonstração"}
+   +  {"c": "yellow", "id": "PV20", "l": "OS-0589 · demonstração"}
+   +  {"c": "yellow", "id": "PV21", "l": "OS-0590 · demonstração"}
+   +  {"c": "yellow", "id": "PV22", "l": "OS-0591 · demonstração"}
+   +  {"c": "yellow", "id": "PV24", "l": "OS-0592 · demonstração"}
+== Lagoa Grande|OS|Impedimentos|Todas
+   -  {"c": "none", "id": "PV02", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV08", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV09", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV10", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV14", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV17", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV20", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV21", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV22", "l": "sem ordem"}
+   -  {"c": "none", "id": "PV24", "l": "sem ordem"}
+   -  {"c": "yellow", "id": "PV04", "l": "OS-0506 · parcial · turno 1 de 2"}
+   +  {"c": "yellow", "id": "PV02", "l": "OS-0584 · demonstração"}
+   +  {"c": "yellow", "id": "PV04", "l": "OS-0506 · parcial · turno 1 de 2 · +1"}
+   +  {"c": "yellow", "id": "PV08", "l": "OS-0594 · demonstração"}
+   +  {"c": "yellow", "id": "PV09", "l": "OS-0586 · demonstração"}
+   +  {"c": "yellow", "id": "PV10", "l": "OS-0593 · demonstração"}
+   +  {"c": "yellow", "id": "PV14", "l": "OS-0588 · demonstração"}
+   +  {"c": "yellow", "id": "PV17", "l": "OS-0587 · demonstração"}
+   +  {"c": "yellow", "id": "PV20", "l": "OS-0589 · demonstração"}
+   +  {"c": "yellow", "id": "PV21", "l": "OS-0590 · demonstração"}
+   +  {"c": "yellow", "id": "PV22", "l": "OS-0591 · demonstração"}
+   +  {"c": "yellow", "id": "PV24", "l": "OS-0592 · demonstração"}
+== Santa Rita|OS|Atrasos|A liberar
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+   -  {"c": "none", "id": "P2", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "T3", "l": "sem ordem na fase"}
+   -  {"c": "orange", "id": "P1", "l": "OS-0418 · vence hoje"}
+   -  {"c": "yellow", "id": "T1", "l": "OS-0430 · até 3 dias"}
+   -  {"c": "yellow", "id": "T2", "l": "OS-0431 · até 3 dias"}
+   +  {"c": "ok", "id": "P2", "l": "OS-0598 · no prazo"}
+   +  {"c": "ok", "id": "T3", "l": "OS-0596 · no prazo"}
+   +  {"c": "orange", "id": "P1", "l": "OS-0418 · vence hoje · +1"}
+   +  {"c": "yellow", "id": "T1", "l": "OS-0430 · até 3 dias · +1"}
+   +  {"c": "yellow", "id": "T2", "l": "OS-0431 · até 3 dias · +1"}
+== Santa Rita|OS|Atrasos|Em conferência
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Santa Rita|OS|Atrasos|Em execução
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Santa Rita|OS|Atrasos|Encerradas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Santa Rita|OS|Atrasos|Liberadas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+== Santa Rita|OS|Atrasos|Todas
+   legenda : [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem"}] → [{"k": "red", "t": "atrasada"}, {"k": "orange", "t": "vence hoje"}, {"k": "yellow", "t": "até 3 dias"}, {"k": "ok", "t": "no prazo"}, {"k": "gray", "t": "encerrada"}, {"k": "none", "t": "sem ordem ou 
+   -  {"c": "gray", "id": "T3", "l": "OS-0415 · encerrada"}
+   -  {"c": "none", "id": "P2", "l": "sem ordem"}
+   -  {"c": "orange", "id": "P1", "l": "OS-0418 · vence hoje · +1"}
+   -  {"c": "yellow", "id": "T1", "l": "OS-0424 · até 3 dias · +2"}
+   -  {"c": "yellow", "id": "T2", "l": "OS-0431 · até 3 dias · +1"}
+   +  {"c": "ok", "id": "P2", "l": "OS-0598 · no prazo"}
+   +  {"c": "ok", "id": "T3", "l": "OS-0596 · no prazo · +1"}
+   +  {"c": "orange", "id": "P1", "l": "OS-0418 · vence hoje · +2"}
+   +  {"c": "yellow", "id": "T1", "l": "OS-0424 · até 3 dias · +3"}
+   +  {"c": "yellow", "id": "T2", "l": "OS-0431 · até 3 dias · +2"}
+== Santa Rita|OS|Avanço|A liberar
+   -  {"c": "gray", "id": "P1", "l": "0/95 ha · 0 %"}
+   -  {"c": "gray", "id": "T1", "l": "0/160 ha · 0 %"}
+   -  {"c": "gray", "id": "T2", "l": "0/102 ha · 0 %"}
+   -  {"c": "none", "id": "P2", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "T3", "l": "sem ordem na fase"}
+   +  {"c": "gray", "id": "P1", "l": "0/190 ha · 0 % · 2 ordens"}
+   +  {"c": "gray", "id": "P2", "l": "0/80 ha · 0 %"}
+   +  {"c": "gray", "id": "T1", "l": "0/312 ha · 0 % · 2 ordens"}
+   +  {"c": "gray", "id": "T2", "l": "0/400 ha · 0 % · 2 ordens"}
+   +  {"c": "gray", "id": "T3", "l": "0/96 ha · 0 %"}
+== Santa Rita|OS|Avanço|Todas
+   -  {"c": "lime", "id": "P1", "l": "95/190 ha · 50 % · 2 ordens"}
+   -  {"c": "lime", "id": "T1", "l": "190/638 ha · 30 % · 3 ordens"}
+   -  {"c": "lime", "id": "T2", "l": "190/452 ha · 42 % · 2 ordens"}
+   -  {"c": "none", "id": "P2", "l": "sem ordem"}
+   -  {"c": "none", "id": "T3", "l": "encerrada"}
+   +  {"c": "gray", "id": "P2", "l": "0/80 ha · 0 %"}
+   +  {"c": "gray", "id": "T3", "l": "0/96 ha · 0 %"}
+   +  {"c": "lime", "id": "P1", "l": "95/285 ha · 33 % · 3 ordens"}
+   +  {"c": "lime", "id": "T1", "l": "190/790 ha · 24 % · 4 ordens"}
+   +  {"c": "lime", "id": "T2", "l": "190/750 ha · 25 % · 3 ordens"}
+== Santa Rita|OS|Fases|A liberar
+   -  {"c": "gray", "id": "P1", "l": "OS-0418 · a liberar"}
+   -  {"c": "gray", "id": "T1", "l": "OS-0430 · a liberar"}
+   -  {"c": "gray", "id": "T2", "l": "OS-0431 · a liberar"}
+   -  {"c": "none", "id": "P2", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "T3", "l": "sem ordem na fase"}
+   +  {"c": "gray", "id": "P1", "l": "2 a liberar"}
+   +  {"c": "gray", "id": "P2", "l": "OS-0598 · a liberar"}
+   +  {"c": "gray", "id": "T1", "l": "2 a liberar"}
+   +  {"c": "gray", "id": "T2", "l": "2 a liberar"}
+   +  {"c": "gray", "id": "T3", "l": "OS-0596 · a liberar"}
+== Santa Rita|OS|Fases|Todas
+   -  {"c": "gray", "id": "P1", "l": "1 a liberar · 1 em conferência"}
+   -  {"c": "gray", "id": "T1", "l": "1 a liberar · 1 liberada · 1 em execução"}
+   -  {"c": "gray", "id": "T2", "l": "1 a liberar · 1 em execução"}
+   -  {"c": "gray", "id": "T3", "l": "OS-0415 · encerrada"}
+   -  {"c": "none", "id": "P2", "l": "sem ordem"}
+   +  {"c": "gray", "id": "P1", "l": "2 a liberar · 1 em conferência"}
+   +  {"c": "gray", "id": "P2", "l": "OS-0598 · a liberar"}
+   +  {"c": "gray", "id": "T1", "l": "2 a liberar · 1 liberada · 1 em execução"}
+   +  {"c": "gray", "id": "T2", "l": "2 a liberar · 1 em execução"}
+   +  {"c": "gray", "id": "T3", "l": "1 a liberar · 1 encerrada"}
+== Santa Rita|OS|Impedimentos|A liberar
+   -  {"c": "none", "id": "P2", "l": "sem ordem na fase"}
+   -  {"c": "none", "id": "T3", "l": "sem ordem na fase"}
+   -  {"c": "ok", "id": "P1", "l": "sem impedimento"}
+   -  {"c": "ok", "id": "T1", "l": "sem impedimento"}
+   +  {"c": "yellow", "id": "P1", "l": "OS-0597 · demonstração"}
+   +  {"c": "yellow", "id": "P2", "l": "OS-0598 · demonstração"}
+   +  {"c": "yellow", "id": "T1", "l": "OS-0595 · demonstração"}
+   +  {"c": "yellow", "id": "T3", "l": "OS-0596 · demonstração"}
+== Santa Rita|OS|Impedimentos|Todas
+   -  {"c": "none", "id": "P2", "l": "sem ordem"}
+   -  {"c": "none", "id": "T3", "l": "encerrada"}
+   -  {"c": "yellow", "id": "P1", "l": "OS-0417 · sobras a receber"}
+   -  {"c": "yellow", "id": "T1", "l": "OS-0421 · parcial · dia 4 de 7"}
+   +  {"c": "yellow", "id": "P1", "l": "OS-0417 · sobras a receber · +1"}
+   +  {"c": "yellow", "id": "P2", "l": "OS-0598 · demonstração"}
+   +  {"c": "yellow", "id": "T1", "l": "OS-0421 · parcial · dia 4 de 7 · +1"}
+   +  {"c": "yellow", "id": "T3", "l": "OS-0596 · demonstração"}

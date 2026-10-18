@@ -52,7 +52,8 @@ ok('U7 cargas: fechadas por O.S. hoje (10 + 15 + 5 ha a 100 L/ha, tanque 2.000 L
 ok('U8 plantio junta pela cultura (OS-0420 × OS-0431); troca de semente pede limpeza; a lanço com outra dose é nova regulagem', () => {
   const pl = { fam: 'Plantio', liquido: false, vazao: null, tanque: null, cultura: 'Soja' };
   const r = F.osFrentes([base('A', Object.assign({ ins: [{ p: 'Semente de soja 58 W', dose: 52, un: 'kg' }] }, pl)), base('B', Object.assign({ ins: [{ p: 'Semente de soja 62 X', dose: 50, un: 'kg' }] }, pl))], geo);
-  assert.equal(r.frentes.length, 1); assert.match(r.frentes[0].trocas[0].t, /limpeza da plantadeira/);
+  assert.equal(r.frentes.length, 1); assert.match(r.frentes[0].trocas[0].t, /registrar a limpeza da plantadeira/); assert.match(r.frentes[0].trocas[0].t, /pendente até o registro/);
+  assert.doesNotMatch(r.frentes[0].trocas[0].t, /limpeza da plantadeira registrada/);   // Codex 6254716163: requisito pendente, nunca fato presumido
   const ln = { fam: 'A lanço', liquido: false, vazao: null, tanque: null };
   const q = F.osFrentes([base('A', Object.assign({ ins: [{ p: 'KCl 60%', dose: 150, un: 'kg' }] }, ln)), base('B', Object.assign({ ins: [{ p: 'KCl 60%', dose: 120, un: 'kg' }] }, ln))], geo);
   assert.equal(q.frentes.length, 1); assert.match(q.frentes[0].trocas[0].t, /^Nova regulagem/); assert.equal(q.frentes[0].cargas.porOS, null);

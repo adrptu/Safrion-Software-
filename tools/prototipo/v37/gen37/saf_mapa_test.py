@@ -30,7 +30,9 @@ LIB = r"""
 window.N=s=>(s||'').replace(/\s+/g,' ').trim();
 window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };
 window.PN=()=>document.getElementById('sl-painel');
-window.TS=()=>[...(PN()||document).querySelectorAll('.sm-svg .sm-t')].filter(g=>VIS(g)).map(g=>({t:g.getAttribute('data-t'),sel:g.getAttribute('aria-pressed'),l:[...g.querySelectorAll('text')].map(x=>N(x.textContent)),mud:(g.querySelector('circle')||{getAttribute:()=>'0'}).getAttribute('opacity')}));
+// EX-55 F1: a 2ª linha do rótulo vem da camada HTML ligada ao talhão (data-t) e só conta desenhada (largura > 0); o texto ligado dentro
+// do <text> não aparecia na tela (o motor o envolve em <span>), e o teste o lia mesmo assim
+window.TS=()=>[...(PN()||document).querySelectorAll('.sm-svg .sm-t')].filter(g=>VIS(g)).map(g=>({t:g.getAttribute('data-t'),sel:g.getAttribute('aria-pressed'),l:[...g.querySelectorAll('text')].map(x=>N(x.textContent)).concat([...(PN()||document).querySelectorAll('.sm-l2')].filter(x=>x.getAttribute('data-t')===g.getAttribute('data-t')&&x.getBoundingClientRect().width>0).map(x=>N(x.textContent))),mud:(g.querySelector('circle')||{getAttribute:()=>'0'}).getAttribute('opacity')}));
 window.TAP=t=>{ const g=[...(PN()||document).querySelectorAll('.sm-svg .sm-t')].find(g=>g.getAttribute('data-t')===t&&VIS(g)); if(!g) return 'sem '+t; g.dispatchEvent(new MouseEvent('click',{bubbles:true})); return 'ok'; };
 window.TXT=s=>N(((PN()||document).querySelector(s)||{}).innerText||'');
 window.BT=t=>{ const b=[...(PN()||document).querySelectorAll('button')].filter(VIS).find(b=>N(b.innerText)===t||N(b.innerText).startsWith(t)); if(!b) return 'sem '+t; b.click(); return 'ok'; };

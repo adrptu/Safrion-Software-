@@ -16,7 +16,7 @@ function frCalda(r){ return frCaldaP(r) + (r.liquido && r.vazao > 0 ? ' @' + r.v
 function frMesma(a, b){ return !!a && !!b && frCaldaP(a) === frCaldaP(b) && (!(a.vazao > 0) || !(b.vazao > 0) || a.vazao === b.vazao); }
 function frCaldaTxt(r){ return (r.ins || []).slice().sort((a, b) => a.p.localeCompare(b.p)).map(i => i.p + ' ' + frNum(i.dose) + ' ' + i.un + '/ha').join(' + ') || 'sem insumo'; }
 // compatibilidade dentro da família (prompt EX-54 §3): pulverização e a lanço pelos produtos ativos (adjuvante e dose não separam: viram troca de
-// calda ou nova regulagem); plantio e demais pela cultura (cultivar ou adubo diferente vira troca com limpeza registrada)
+// calda ou nova regulagem); plantio e demais pela cultura (cultivar ou adubo diferente vira troca com a limpeza da plantadeira a registrar)
 function frCompat(r){
   if (r.fam === 'Pulverização' || r.fam === 'A lanço') return (r.ins || []).map(i => i.p).filter(p => !FR_ADJ.test(p)).sort().join(' + ') || r.atv || '';
   return r.cultura || '';
@@ -81,12 +81,12 @@ function frCargas(seq){
   return { porOS, continuas, tanque: liq[0].tanque, todas: liq.length === seq.length, faltam };
 }
 // trocas ao longo da sequência: calda (pulverização), semente ou adubo (plantio: limpeza da plantadeira), regulagem (a lanço); herbicida fecha com
-// tríplice lavagem como requisito pendente até o registro, nunca como fato presumido (Gemini EX-54 F2 × Codex 6254595591)
+// tríplice lavagem. Lavagem e limpeza são requisitos pendentes até o registro, nunca fato presumido (Gemini EX-54 F2 × Codex 6254595591 e 6254716163)
 function frTrocas(seq){
   const out = [];
   for (let i = 1; i < seq.length; i++){ const a = seq[i - 1], b = seq[i]; if (frMesma(a, b)) continue;
     const t = b.fam === 'Pulverização' ? 'Troca de calda antes de ' + b.talhao + ': ' + frCaldaTxt(b) + (a.herb && !b.herb ? ' · antes, registrar a tríplice lavagem do pulverizador (pendente até o registro)' : '')
-      : b.fam === 'Plantio' ? 'Troca de semente ou adubo antes de ' + b.talhao + ': limpeza da plantadeira registrada (pureza)'
+      : b.fam === 'Plantio' ? 'Troca de semente ou adubo antes de ' + b.talhao + ': registrar a limpeza da plantadeira (pureza; pendente até o registro)'
       : 'Nova regulagem antes de ' + b.talhao + ': ' + frCaldaTxt(b);
     out.push({ antes: i + 1, t }); }
   if (seq.length && seq[seq.length - 1].herb) out.push({ antes: seq.length + 1, t: 'Fim com herbicida: registrar a tríplice lavagem antes de voltar a cultura sensível (pendente até o registro)' });

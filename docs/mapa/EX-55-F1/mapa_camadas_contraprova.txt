@@ -1,0 +1,6 @@
+{"pass":1255,"scope":"VM e paridade de funções com fixtures; não substitui render LG/SR nem A5"}
+original rc=0
+  throw new AssertionError(obj);
+mutante 1 (selo cinza volta a ser pendência) rc=1
+TypeError: Cannot read properties of undefined (reading 'id')
+mutante 2 (sem a classe sem prazo) rc=1

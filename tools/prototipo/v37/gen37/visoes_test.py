@@ -176,9 +176,10 @@ def modo_comp():
         # VISOES-2 (14/10): Lista e Tabela agrupada viraram a Tabela (agrupar é o "Agrupar por" da grade)
         # DS VIS-05 (padroes-1510, 15/10/2026: "toda lista tem Tabela e Cartões"): Cartões entra logo depois da Tabela (5 visões)
         # EX-54 (18/10/2026): Frentes de trabalho entra no fim da ordem fixa (visoes.ORDEM), 6 visões
-        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 6 botões data-visao (lista = Tabela, cartoes, kanban, calendario, carga, frentes), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
-            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista cartoes kanban calendario carga frentes' and ks == ['lista', 'cartoes', 'kanban', 'calendario', 'carga', 'frentes']
-            and labs == ['Ver em tabela', 'Ver em cartões', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso', 'Ver em frentes de trabalho'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
+        # EX-55 F1 (18/10/2026): Mapa entra entre o Calendário e a Carga (ordem fixa visoes.ORDEM), 7 visões
+        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 7 botões data-visao (lista = Tabela, cartoes, kanban, calendario, mapa, carga, frentes), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
+            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista cartoes kanban calendario mapa carga frentes' and ks == ['lista', 'cartoes', 'kanban', 'calendario', 'mapa', 'carga', 'frentes']
+            and labs == ['Ver em tabela', 'Ver em cartões', 'Ver em kanban', 'Ver em calendário', 'Ver em mapa', 'Ver em carga por recurso', 'Ver em frentes de trabalho'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
             and b['esq'] >= chips - 1, b)
         # C2
         f = J(CHK_C); at = [x for x in b['bs'] if x['p'] == 'true'] if b else []
@@ -201,10 +202,11 @@ def modo_comp():
         chk('C3 Tab para uma vez na barra (entra na ativa e sai com o próximo Tab); ← → com volta, Home/End, ↑ ↓ não movem; seta não ativa (Lista segue ativa, sem ?view); Enter e Espaço ativam e o foco fica no botão; Shift+Tab volta à mesma parada',
             # DS VIS-05: com o Cartões depois da Tabela, Home + → leva ao Cartões e o → seguinte ao Kanban (5 botões)
             # EX-54: End vai à última (frentes); ↑ ↓ não movem
-            f1 == 'lista' and f2 not in ('lista', 'cartoes', 'kanban', 'calendario', 'carga', 'frentes', 'mais') and f3 == 'lista'
-            and seq == ['cartoes', 'kanban', 'calendario', 'carga', 'calendario', 'lista', 'frentes', 'frentes', 'frentes'] and sem_ativar
+            # EX-55 F1: o quarto → chega ao Mapa (entre Calendário e Carga)
+            f1 == 'lista' and f2 not in ('lista', 'cartoes', 'kanban', 'calendario', 'mapa', 'carga', 'frentes', 'mais') and f3 == 'lista'
+            and seq == ['cartoes', 'kanban', 'calendario', 'mapa', 'calendario', 'lista', 'frentes', 'frentes', 'frentes'] and sem_ativar
             and e1[0] == 'cartoes' and e1[1] == 'cartoes' and 'view=cartoes' in e1[2] and e2[0] == 'kanban' and e2[1] == 'kanban' and 'view=kanban' in e2[2]
-            and fora_ not in ('lista', 'cartoes', 'kanban', 'calendario', 'carga', 'frentes') and volta == 'kanban', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
+            and fora_ not in ('lista', 'cartoes', 'kanban', 'calendario', 'mapa', 'carga', 'frentes') and volta == 'kanban', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
     passo('C3', _c3)
     def _c4():
         # C4 dica (g2dica da DS): no foco de teclado na hora; Esc fecha sem tirar o foco; sem aria-describedby repetindo o nome; hover de 300 ms
