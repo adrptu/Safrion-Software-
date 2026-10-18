@@ -31,7 +31,8 @@ As três telas usam o mesmo componente (`mapa_emb.py` e `mapa_emb.js`) e as mesm
 | `saf_mapa_test` | 10/10 | A 2ª linha do rótulo é lida só quando está desenhada |
 | `visoes_test`, `visoes_unit_test`, `visoes_perfil_test` | 9/9, 25/25, 13/13 | Seletor de visões na O.S., Pragas e doenças e Irrigação |
 | `visoes_calendario_test`, `os_frentes_test`, `paginas_scan_test` | 8/8, 18/18, 5/5 (146 páginas) | Calendário e Frentes depois das correções; nenhuma página com erro |
-| `mapa9`, `mapa_mux_f1`, `mapa_mux_f2`, `mapa_filtros`, `map_irrig_filtro` | 13/13, 43/43, 29/29, 7/7, verde | O Mapa da fazenda segue igual |
+| `mapa9`, `mapa_mux_f1`, `mapa_mux_f2`, `mapa_filtros` | 13/13, 43/43, 29/29, 7/7 | O Mapa da fazenda segue igual |
+| `map_irrig_filtro` | **14/15** (corrigido: estava registrado como "verde") | A verificação 15 falhava, e o processo saiu com 0 por falta de proteção de saída. Era oráculo desatualizado, corrigido na v138 (`docs/integracao/V73/v138/LEIAME.md`) |
 | Unidade: `mapa_camadas_unit.js`, `os_frentes_unit.js`, `mip_unit_test`, `agua_irr_unit.js`, `irr_onda0_test` | 1255, 17/17, 34/34, 7/7, 28/28 | Regras das camadas, Frentes, MIP e irrigação |
 
 **Contraprova da paridade** (`contraprova_m1.sh`): duas mutações na regra, só na página da O.S. O M1 reprova nas duas:

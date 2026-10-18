@@ -1,0 +1,6782 @@
+{
+"Lagoa Grande|IRR|Balanço hídrico": {
+"alvos": null,
+"camada": "Irrigação",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"ver": "Balanço hídrico"
+},
+"legenda": [
+{
+"k": "ok",
+"t": "déficit < 5 mm"
+},
+{
+"k": "yellow",
+"t": "5–10 mm"
+},
+{
+"k": "orange",
+"t": "10–15 mm"
+},
+{
+"k": "red",
+"t": "≥ 15 mm"
+},
+{
+"k": "gray",
+"t": "sequeiro ou preparo"
+},
+{
+"k": null,
+"t": "≈ = estimado por ET (sonda sem dado ou suspeita)"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "PV01",
+"l": "déficit 6,1 mm → 7,3 mm a 62 %"
+},
+{
+"c": "yellow",
+"id": "PV02",
+"l": "déficit 9,8 mm → 2× 5,8 mm a 88 %"
+},
+{
+"c": "yellow",
+"id": "PV03",
+"l": "déficit 7,4 mm → 2× 7,0 mm a 100 %"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "déficit 4,8 mm → 7,1 mm a 100 %"
+},
+{
+"c": "orange",
+"id": "PV05",
+"l": "déficit 13,2 mm → 2× 7,8 mm a 90 %"
+},
+{
+"c": "ok",
+"id": "PV06",
+"l": "déficit 3,2 mm → 6,5 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV07",
+"l": "déficit 5,6 mm → 6,6 mm a 99 %"
+},
+{
+"c": "yellow",
+"id": "PV08",
+"l": "déficit 6,4 mm → 7,5 mm a 78 %"
+},
+{
+"c": "orange",
+"id": "PV09",
+"l": "déficit 10,6 mm → 2× 7,2 mm a 100 %"
+},
+{
+"c": "yellow",
+"est": true,
+"id": "PV10",
+"l": "≈ 7,9 mm · estimado → 2× 4,7 mm a 98 %"
+},
+{
+"c": "gray",
+"id": "PV11",
+"l": "preparo · sem rega"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "preparo · sem rega"
+},
+{
+"c": "gray",
+"id": "PV13",
+"l": "preparo · sem rega"
+},
+{
+"c": "ok",
+"id": "PV14",
+"l": "déficit 2,9 mm → 6,6 mm a 100 %"
+},
+{
+"c": "ok",
+"id": "PV15",
+"l": "déficit 4,1 mm → 5,0 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV17",
+"l": "déficit 8,2 mm → 2× 4,8 mm a 100 %"
+},
+{
+"c": "orange",
+"id": "PV18",
+"l": "déficit 11,4 mm → 2× 6,7 mm a 86 %"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "déficit 2,4 mm → 7,2 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV20",
+"l": "déficit 7,7 mm → 2× 7,3 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV21",
+"l": "déficit 8,8 mm → 2× 7,5 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV22",
+"l": "déficit 5,3 mm → 6,6 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV23",
+"l": "déficit 6,9 mm → 2× 6,7 mm a 100 %"
+},
+{
+"c": "yellow",
+"id": "PV24",
+"l": "déficit 9,4 mm → 2× 5,5 mm a 88 %"
+}
+]
+},
+"Lagoa Grande|IRR|Hoje": {
+"alvos": null,
+"camada": "Irrigação",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"ver": "Hoje"
+},
+"legenda": [
+{
+"k": "blue",
+"t": "irrigando"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "yellow",
+"t": "pendente: janela, conferência ou liberação"
+},
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "ok",
+"t": "sem necessidade hoje"
+},
+{
+"k": "gray",
+"t": "sequeiro ou preparo"
+},
+{
+"k": null,
+"t": "≈ = estimado por ET (sonda sem dado ou suspeita)"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"est": false,
+"id": "PV01",
+"l": "sem necessidade hoje"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV02",
+"l": "programada · hoje 21:00"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV03",
+"l": "sem necessidade hoje"
+},
+{
+"c": "blue",
+"est": false,
+"id": "PV04",
+"l": "fertirrigação · OS-0506"
+},
+{
+"c": "red",
+"est": false,
+"id": "PV05",
+"l": "bomba parada · OS-0507"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV06",
+"l": "sem necessidade hoje"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV07",
+"l": "sem necessidade hoje"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV08",
+"l": "programada · amanhã 21:00"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV09",
+"l": "programada · 25/09 21:00"
+},
+{
+"c": "ok",
+"est": true,
+"id": "PV10",
+"l": "sem necessidade · ≈ estimado"
+},
+{
+"c": "gray",
+"est": false,
+"id": "PV11",
+"l": "preparo · sem rega"
+},
+{
+"c": "gray",
+"est": false,
+"id": "PV12",
+"l": "preparo · sem rega"
+},
+{
+"c": "gray",
+"est": false,
+"id": "PV13",
+"l": "preparo · sem rega"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV14",
+"l": "sem necessidade hoje"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV15",
+"l": "sem necessidade hoje"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV17",
+"l": "sem necessidade hoje"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV18",
+"l": "programada · amanhã 21:00"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV19",
+"l": "sem necessidade hoje"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV20",
+"l": "sem necessidade hoje"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV21",
+"l": "programada · 27/09 21:00"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV22",
+"l": "sem necessidade hoje"
+},
+{
+"c": "ok",
+"est": false,
+"id": "PV23",
+"l": "sem necessidade hoje"
+},
+{
+"c": "lime",
+"est": false,
+"id": "PV24",
+"l": "programada · hoje 21:00"
+}
+]
+},
+"Lagoa Grande|MIP|30|com alvo": {
+"alvos": [
+"Antracnose"
+],
+"camada": "MIP/MID",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"per": "Últimos 30 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "PV01",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV03",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV04",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV05",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV07",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem cultura"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV18",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "Antracnose · encerrada"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "blue",
+"id": "PV23",
+"l": "Antracnose · em controle"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "sem vistoria de antracnose em 30 dias"
+}
+]
+},
+"Lagoa Grande|MIP|30|sem alvo": {
+"alvos": null,
+"camada": "MIP/MID",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"per": "Últimos 30 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "PV01",
+"l": "Mosca-branca · encerrada"
+},
+{
+"c": "yellow",
+"id": "PV02",
+"l": "Mosca-branca · perto do NC"
+},
+{
+"c": "gray",
+"id": "PV03",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "Ácaro-rajado · abaixo do NC"
+},
+{
+"c": "gray",
+"id": "PV05",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "blue",
+"id": "PV06",
+"l": "Ácaro-rajado · em controle"
+},
+{
+"c": "gray",
+"id": "PV07",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "orange",
+"id": "PV09",
+"l": "Meleira (virose) · foco"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem cultura"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "Ácaro-rajado · vistoria atrasada"
+},
+{
+"c": "ok",
+"id": "PV18",
+"l": "Cochonilha · encerrada"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "Antracnose · encerrada"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "orange",
+"id": "PV22",
+"l": "Mancha-anelar (PRSV) · foco"
+},
+{
+"c": "blue",
+"id": "PV23",
+"l": "Antracnose · em controle"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "sem vistoria em 30 dias"
+}
+]
+},
+"Lagoa Grande|MIP|7|com alvo": {
+"alvos": [
+"Antracnose"
+],
+"camada": "MIP/MID",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"per": "Últimos 7 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "PV01",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV03",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV04",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV05",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV07",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem cultura"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV18",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "Antracnose · encerrada"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "blue",
+"id": "PV23",
+"l": "Antracnose · em controle"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "sem vistoria de antracnose em 7 dias"
+}
+]
+},
+"Lagoa Grande|MIP|7|sem alvo": {
+"alvos": null,
+"camada": "MIP/MID",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"per": "Últimos 7 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "PV01",
+"l": "Mosca-branca · encerrada"
+},
+{
+"c": "yellow",
+"id": "PV02",
+"l": "Mosca-branca · perto do NC"
+},
+{
+"c": "gray",
+"id": "PV03",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "Ácaro-rajado · abaixo do NC"
+},
+{
+"c": "gray",
+"id": "PV05",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "blue",
+"id": "PV06",
+"l": "Ácaro-rajado · em controle"
+},
+{
+"c": "gray",
+"id": "PV07",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "orange",
+"id": "PV09",
+"l": "Meleira (virose) · foco"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem cultura"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem cultura"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "Ácaro-rajado · vistoria atrasada"
+},
+{
+"c": "ok",
+"id": "PV18",
+"l": "Cochonilha · encerrada"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "Antracnose · encerrada"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "orange",
+"id": "PV22",
+"l": "Mancha-anelar (PRSV) · foco"
+},
+{
+"c": "blue",
+"id": "PV23",
+"l": "Antracnose · em controle"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "sem vistoria em 7 dias"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV02",
+"l": "OS-0584 · no prazo"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "OS-0585 · no prazo"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV08",
+"l": "OS-0594 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV09",
+"l": "OS-0586 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV10",
+"l": "OS-0593 · no prazo"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "orange",
+"id": "PV12",
+"l": "OS-0502 · vence hoje"
+},
+{
+"c": "yellow",
+"id": "PV13",
+"l": "OS-0501 · até 3 dias"
+},
+{
+"c": "ok",
+"id": "PV14",
+"l": "OS-0588 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV15",
+"l": "OS-0511 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV17",
+"l": "OS-0587 · no prazo"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV20",
+"l": "OS-0589 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV21",
+"l": "OS-0590 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV22",
+"l": "OS-0591 · no prazo"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV24",
+"l": "OS-0592 · no prazo"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "orange",
+"id": "PV23",
+"l": "OS-0508 · vence hoje"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV04",
+"l": "OS-0506 · até 3 dias"
+},
+{
+"c": "red",
+"id": "PV05",
+"l": "OS-0507 · atrasada"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV19",
+"l": "OS-0505 · até 3 dias"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "OS-0510 · encerrada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "OS-0509 · encerrada"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV06",
+"l": "OS-0504 · até 3 dias"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV11",
+"l": "OS-0503 · no prazo"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Atrasos|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "PV02",
+"l": "OS-0584 · no prazo"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem"
+},
+{
+"c": "yellow",
+"id": "PV04",
+"l": "OS-0506 · até 3 dias · +1"
+},
+{
+"c": "red",
+"id": "PV05",
+"l": "OS-0507 · atrasada"
+},
+{
+"c": "yellow",
+"id": "PV06",
+"l": "OS-0504 · até 3 dias · +1"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "PV08",
+"l": "OS-0594 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV09",
+"l": "OS-0586 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV10",
+"l": "OS-0593 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV11",
+"l": "OS-0503 · no prazo"
+},
+{
+"c": "orange",
+"id": "PV12",
+"l": "OS-0502 · vence hoje · +1"
+},
+{
+"c": "yellow",
+"id": "PV13",
+"l": "OS-0501 · até 3 dias"
+},
+{
+"c": "ok",
+"id": "PV14",
+"l": "OS-0588 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV15",
+"l": "OS-0511 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV17",
+"l": "OS-0587 · no prazo"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem"
+},
+{
+"c": "yellow",
+"id": "PV19",
+"l": "OS-0505 · até 3 dias"
+},
+{
+"c": "ok",
+"id": "PV20",
+"l": "OS-0589 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV21",
+"l": "OS-0590 · no prazo"
+},
+{
+"c": "ok",
+"id": "PV22",
+"l": "OS-0591 · no prazo"
+},
+{
+"c": "orange",
+"id": "PV23",
+"l": "OS-0508 · vence hoje"
+},
+{
+"c": "ok",
+"id": "PV24",
+"l": "OS-0592 · no prazo"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "0/38 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV04",
+"l": "0/73 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "0/51 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "0/75 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "0/30 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "0/48 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV13",
+"l": "0/49 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "0/63 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "0/36 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "0/33 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "0/77 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "0/81 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "0/62 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "0/34 ha · 0 %"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "good",
+"id": "PV23",
+"l": "64,0/64 ha · 100 %"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "lime",
+"id": "PV04",
+"l": "36/73 ha · 49 %"
+},
+{
+"c": "lime",
+"id": "PV05",
+"l": "25,4/71 ha · 36 %"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "lime",
+"id": "PV19",
+"l": "50/75 ha · 67 %"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "encerrada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "encerrada"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "0/63 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV11",
+"l": "0/50 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Avanço|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "0/38 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem"
+},
+{
+"c": "lime",
+"id": "PV04",
+"l": "36/146 ha · 25 % · 2 ordens"
+},
+{
+"c": "lime",
+"id": "PV05",
+"l": "25,4/71 ha · 36 %"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "0/63 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "0/51 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "0/75 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "0/30 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV11",
+"l": "0/50 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "0/48 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV13",
+"l": "0/49 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "0/63 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "0/36 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "0/33 ha · 0 %"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem"
+},
+{
+"c": "lime",
+"id": "PV19",
+"l": "50/75 ha · 67 %"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "0/77 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "0/81 ha · 0 %"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "0/62 ha · 0 %"
+},
+{
+"c": "good",
+"id": "PV23",
+"l": "64,0/64 ha · 100 %"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "0/34 ha · 0 %"
+}
+]
+},
+"Lagoa Grande|OS|Fases|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "OS-0584 · a liberar"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV04",
+"l": "OS-0585 · a liberar"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "OS-0594 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "OS-0586 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "OS-0593 · a liberar"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "OS-0502 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV13",
+"l": "OS-0501 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "OS-0588 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "OS-0511 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "OS-0587 · a liberar"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "OS-0589 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "OS-0590 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "OS-0591 · a liberar"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "OS-0592 · a liberar"
+}
+]
+},
+"Lagoa Grande|OS|Fases|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV23",
+"l": "OS-0508 · em conferência"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Fases|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "OS-0506 · em execução"
+},
+{
+"c": "ok",
+"id": "PV05",
+"l": "OS-0507 · em execução"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "OS-0505 · em execução"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Fases|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV06",
+"l": "OS-0510 · encerrada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "OS-0509 · encerrada"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Fases|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "blue",
+"id": "PV06",
+"l": "OS-0504 · liberada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "blue",
+"id": "PV11",
+"l": "OS-0503 · liberada"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Fases|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "PV02",
+"l": "OS-0584 · a liberar"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "PV04",
+"l": "1 a liberar · 1 em execução"
+},
+{
+"c": "ok",
+"id": "PV05",
+"l": "OS-0507 · em execução"
+},
+{
+"c": "blue",
+"id": "PV06",
+"l": "1 liberada · 1 encerrada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "PV08",
+"l": "OS-0594 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV09",
+"l": "OS-0586 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV10",
+"l": "OS-0593 · a liberar"
+},
+{
+"c": "blue",
+"id": "PV11",
+"l": "OS-0503 · liberada"
+},
+{
+"c": "gray",
+"id": "PV12",
+"l": "1 a liberar · 1 encerrada"
+},
+{
+"c": "gray",
+"id": "PV13",
+"l": "OS-0501 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV14",
+"l": "OS-0588 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV15",
+"l": "OS-0511 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV17",
+"l": "OS-0587 · a liberar"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "PV19",
+"l": "OS-0505 · em execução"
+},
+{
+"c": "gray",
+"id": "PV20",
+"l": "OS-0589 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV21",
+"l": "OS-0590 · a liberar"
+},
+{
+"c": "gray",
+"id": "PV22",
+"l": "OS-0591 · a liberar"
+},
+{
+"c": "yellow",
+"id": "PV23",
+"l": "OS-0508 · em conferência"
+},
+{
+"c": "gray",
+"id": "PV24",
+"l": "OS-0592 · a liberar"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV02",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV04",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV08",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV09",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV10",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV12",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV13",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV14",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV15",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV17",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV20",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV21",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV22",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV24",
+"l": "sem impedimento"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV23",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV04",
+"l": "OS-0506 · parcial · turno 1 de 2"
+},
+{
+"c": "red",
+"id": "PV05",
+"l": "OS-0507 · impedida · bomba em manutenção"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "PV19",
+"l": "OS-0505 · parcial · dia 2 de 3"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV06",
+"l": "encerrada"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV11",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "encerrada"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV02",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV04",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV05",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV06",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV08",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV09",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV10",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "PV11",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV12",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV13",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV14",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV15",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV17",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV19",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV20",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV21",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV22",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV23",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "PV24",
+"l": "sem ordem na fase"
+}
+]
+},
+"Lagoa Grande|OS|Impedimentos|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Lagoa Grande",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "PV01",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "PV02",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV03",
+"l": "sem ordem"
+},
+{
+"c": "yellow",
+"id": "PV04",
+"l": "OS-0506 · parcial · turno 1 de 2"
+},
+{
+"c": "red",
+"id": "PV05",
+"l": "OS-0507 · impedida · bomba em manutenção"
+},
+{
+"c": "ok",
+"id": "PV06",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV07",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "PV08",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV09",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV10",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV11",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV12",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV13",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV14",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV15",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV17",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "PV18",
+"l": "sem ordem"
+},
+{
+"c": "yellow",
+"id": "PV19",
+"l": "OS-0505 · parcial · dia 2 de 3"
+},
+{
+"c": "ok",
+"id": "PV20",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV21",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV22",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV23",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "PV24",
+"l": "sem impedimento"
+}
+]
+},
+"Santa Rita|IRR|Balanço hídrico": {
+"alvos": null,
+"camada": "Irrigação",
+"fazenda": "Santa Rita",
+"filtros": {
+"ver": "Balanço hídrico"
+},
+"legenda": [
+{
+"k": "ok",
+"t": "déficit < 5 mm"
+},
+{
+"k": "yellow",
+"t": "5–10 mm"
+},
+{
+"k": "orange",
+"t": "10–15 mm"
+},
+{
+"k": "red",
+"t": "≥ 15 mm"
+},
+{
+"k": "gray",
+"t": "sequeiro ou preparo"
+},
+{
+"k": null,
+"t": "≈ = estimado por ET (sonda sem dado ou suspeita)"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "sequeiro"
+},
+{
+"c": "gray",
+"id": "T2",
+"l": "sequeiro"
+},
+{
+"c": "yellow",
+"est": true,
+"id": "P1",
+"l": "≈ 8,4 mm · estimado → 9,3 mm"
+},
+{
+"c": "orange",
+"id": "P2",
+"l": "déficit 11,2 mm → 2× 6,7 mm a 100 %"
+},
+{
+"c": "gray",
+"id": "T4",
+"l": "sequeiro"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "sequeiro"
+},
+{
+"c": "orange",
+"est": true,
+"id": "T7",
+"l": "≈ 10,0 mm · estimado → 2× 5,3 mm"
+},
+{
+"c": "gray",
+"id": "C1",
+"l": "sequeiro"
+}
+]
+},
+"Santa Rita|IRR|Hoje": {
+"alvos": null,
+"camada": "Irrigação",
+"fazenda": "Santa Rita",
+"filtros": {
+"ver": "Hoje"
+},
+"legenda": [
+{
+"k": "blue",
+"t": "irrigando"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "yellow",
+"t": "pendente: janela, conferência ou liberação"
+},
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "ok",
+"t": "sem necessidade hoje"
+},
+{
+"k": "gray",
+"t": "sequeiro ou preparo"
+},
+{
+"k": null,
+"t": "≈ = estimado por ET (sonda sem dado ou suspeita)"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"est": false,
+"id": "T1",
+"l": "sequeiro"
+},
+{
+"c": "gray",
+"est": false,
+"id": "T2",
+"l": "sequeiro"
+},
+{
+"c": "red",
+"est": false,
+"id": "P1",
+"l": "falta insumo · OS-0418"
+},
+{
+"c": "yellow",
+"est": false,
+"id": "P2",
+"l": "conferir medição · OS-0394"
+},
+{
+"c": "gray",
+"est": false,
+"id": "T4",
+"l": "sequeiro"
+},
+{
+"c": "gray",
+"est": false,
+"id": "T3",
+"l": "sequeiro"
+},
+{
+"c": "red",
+"est": false,
+"id": "T7",
+"l": "conflito · parada da B3"
+},
+{
+"c": "gray",
+"est": false,
+"id": "C1",
+"l": "sequeiro"
+}
+]
+},
+"Santa Rita|MIP|30|com alvo": {
+"alvos": [
+"Antracnose"
+],
+"camada": "MIP/MID",
+"fazenda": "Santa Rita",
+"filtros": {
+"per": "Últimos 30 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "gray",
+"id": "T7",
+"l": "sem vistoria de antracnose em 30 dias"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem antracnose no protocolo"
+}
+]
+},
+"Santa Rita|MIP|30|sem alvo": {
+"alvos": null,
+"camada": "MIP/MID",
+"fazenda": "Santa Rita",
+"filtros": {
+"per": "Últimos 30 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "lime",
+"id": "T2",
+"l": "Daninhas pré-plantio · programada"
+},
+{
+"c": "red",
+"id": "P1",
+"l": "Mosca-branca · acima do NC · +2"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "Lagarta-do-cartucho · abaixo do NC · +1"
+},
+{
+"c": "blue",
+"id": "T4",
+"l": "Nematoide-de-cisto · em controle"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "sem vistoria em 30 dias"
+},
+{
+"c": "yellow",
+"id": "T7",
+"l": "Ácaro-rajado · perto do NC"
+},
+{
+"c": "yellow",
+"id": "C1",
+"l": "Mancha-de-phoma · sincronizar"
+}
+]
+},
+"Santa Rita|MIP|7|com alvo": {
+"alvos": [
+"Antracnose"
+],
+"camada": "MIP/MID",
+"fazenda": "Santa Rita",
+"filtros": {
+"per": "Últimos 7 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem antracnose no protocolo"
+},
+{
+"c": "gray",
+"id": "T7",
+"l": "sem vistoria de antracnose em 7 dias"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem antracnose no protocolo"
+}
+]
+},
+"Santa Rita|MIP|7|sem alvo": {
+"alvos": null,
+"camada": "MIP/MID",
+"fazenda": "Santa Rita",
+"filtros": {
+"per": "Últimos 7 dias"
+},
+"legenda": [
+{
+"k": "red",
+"t": "acima do NC"
+},
+{
+"k": "orange",
+"t": "foco"
+},
+{
+"k": "yellow",
+"t": "perto do NC ou coleta pendente"
+},
+{
+"k": "blue",
+"t": "em controle"
+},
+{
+"k": "lime",
+"t": "programada"
+},
+{
+"k": "ok",
+"t": "abaixo do NC"
+},
+{
+"k": "gray",
+"t": "vistoria atrasada ou sem vistoria no período"
+},
+{
+"k": "none",
+"t": "sem cultura"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "lime",
+"id": "T2",
+"l": "Daninhas pré-plantio · programada"
+},
+{
+"c": "red",
+"id": "P1",
+"l": "Mosca-branca · acima do NC · +2"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "Lagarta-do-cartucho · abaixo do NC"
+},
+{
+"c": "blue",
+"id": "T4",
+"l": "Nematoide-de-cisto · em controle"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "sem vistoria em 7 dias"
+},
+{
+"c": "yellow",
+"id": "T7",
+"l": "Ácaro-rajado · perto do NC"
+},
+{
+"c": "yellow",
+"id": "C1",
+"l": "Mancha-de-phoma · sincronizar"
+}
+]
+},
+"Santa Rita|OS|Atrasos|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "T1",
+"l": "OS-0430 · até 3 dias · +1"
+},
+{
+"c": "yellow",
+"id": "T2",
+"l": "OS-0431 · até 3 dias · +1"
+},
+{
+"c": "orange",
+"id": "P1",
+"l": "OS-0418 · vence hoje · +1"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "OS-0598 · no prazo"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "T3",
+"l": "OS-0596 · no prazo"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Atrasos|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "P1",
+"l": "OS-0417 · até 3 dias"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Atrasos|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "T1",
+"l": "OS-0421 · no prazo"
+},
+{
+"c": "ok",
+"id": "T2",
+"l": "OS-0421 · no prazo"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "red",
+"id": "T4",
+"l": "OS-0420 · atrasada"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Atrasos|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Atrasos|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "T1",
+"l": "OS-0424 · até 3 dias"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "C1",
+"l": "OS-0425 · no prazo"
+}
+]
+},
+"Santa Rita|OS|Atrasos|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Atrasos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "atrasada"
+},
+{
+"k": "orange",
+"t": "vence hoje"
+},
+{
+"k": "yellow",
+"t": "até 3 dias"
+},
+{
+"k": "ok",
+"t": "no prazo"
+},
+{
+"k": "gray",
+"t": "encerrada"
+},
+{
+"k": "none",
+"t": "sem ordem ou sem prazo"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "T1",
+"l": "OS-0424 · até 3 dias · +3"
+},
+{
+"c": "yellow",
+"id": "T2",
+"l": "OS-0431 · até 3 dias · +2"
+},
+{
+"c": "orange",
+"id": "P1",
+"l": "OS-0418 · vence hoje · +2"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "OS-0598 · no prazo"
+},
+{
+"c": "red",
+"id": "T4",
+"l": "OS-0420 · atrasada"
+},
+{
+"c": "ok",
+"id": "T3",
+"l": "OS-0596 · no prazo"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem"
+},
+{
+"c": "ok",
+"id": "C1",
+"l": "OS-0425 · no prazo"
+}
+]
+},
+"Santa Rita|OS|Avanço|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "0/312 ha · 0 % · 2 ordens"
+},
+{
+"c": "gray",
+"id": "T2",
+"l": "0/400 ha · 0 % · 2 ordens"
+},
+{
+"c": "gray",
+"id": "P1",
+"l": "0/190 ha · 0 % · 2 ordens"
+},
+{
+"c": "gray",
+"id": "P2",
+"l": "0/80 ha · 0 %"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "0/96 ha · 0 %"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Avanço|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "good",
+"id": "P1",
+"l": "95/95 ha · 100 %"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Avanço|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "lime",
+"id": "T1",
+"l": "190/350 ha · 54 %"
+},
+{
+"c": "lime",
+"id": "T2",
+"l": "190/350 ha · 54 %"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "lime",
+"id": "T4",
+"l": "30/100 ha · 30 %"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Avanço|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Avanço|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "0/128 ha · 0 %"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "C1",
+"l": "0/38 ha · 0 %"
+}
+]
+},
+"Santa Rita|OS|Avanço|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Avanço"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "não iniciada"
+},
+{
+"k": "lime",
+"t": "em andamento"
+},
+{
+"k": "good",
+"t": "área toda feita"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "lime",
+"id": "T1",
+"l": "190/790 ha · 24 % · 4 ordens"
+},
+{
+"c": "lime",
+"id": "T2",
+"l": "190/750 ha · 25 % · 3 ordens"
+},
+{
+"c": "lime",
+"id": "P1",
+"l": "95/285 ha · 33 % · 3 ordens"
+},
+{
+"c": "gray",
+"id": "P2",
+"l": "0/80 ha · 0 %"
+},
+{
+"c": "lime",
+"id": "T4",
+"l": "30/100 ha · 30 %"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "0/96 ha · 0 %"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem"
+},
+{
+"c": "gray",
+"id": "C1",
+"l": "0/38 ha · 0 %"
+}
+]
+},
+"Santa Rita|OS|Fases|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "2 a liberar"
+},
+{
+"c": "gray",
+"id": "T2",
+"l": "2 a liberar"
+},
+{
+"c": "gray",
+"id": "P1",
+"l": "2 a liberar"
+},
+{
+"c": "gray",
+"id": "P2",
+"l": "OS-0598 · a liberar"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "OS-0596 · a liberar"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Fases|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "P1",
+"l": "OS-0417 · em conferência"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Fases|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "T1",
+"l": "OS-0421 · em execução"
+},
+{
+"c": "ok",
+"id": "T2",
+"l": "OS-0421 · em execução"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "T4",
+"l": "OS-0420 · em execução"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Fases|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Fases|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "blue",
+"id": "T1",
+"l": "OS-0424 · liberada"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "blue",
+"id": "C1",
+"l": "OS-0425 · liberada"
+}
+]
+},
+"Santa Rita|OS|Fases|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Fases"
+},
+"legenda": [
+{
+"k": "gray",
+"t": "a liberar · encerradas"
+},
+{
+"k": "blue",
+"t": "liberadas"
+},
+{
+"k": "ok",
+"t": "em execução"
+},
+{
+"k": "yellow",
+"t": "em conferência"
+},
+{
+"k": "none",
+"t": "sem ordem"
+}
+],
+"linhas": [
+{
+"c": "gray",
+"id": "T1",
+"l": "2 a liberar · 1 liberada · 1 em execução"
+},
+{
+"c": "gray",
+"id": "T2",
+"l": "2 a liberar · 1 em execução"
+},
+{
+"c": "gray",
+"id": "P1",
+"l": "2 a liberar · 1 em conferência"
+},
+{
+"c": "gray",
+"id": "P2",
+"l": "OS-0598 · a liberar"
+},
+{
+"c": "ok",
+"id": "T4",
+"l": "OS-0420 · em execução"
+},
+{
+"c": "gray",
+"id": "T3",
+"l": "OS-0596 · a liberar"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem"
+},
+{
+"c": "blue",
+"id": "C1",
+"l": "OS-0425 · liberada"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|A liberar": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "A liberar",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "T1",
+"l": "sem impedimento"
+},
+{
+"c": "red",
+"id": "T2",
+"l": "OS-0431 · falta máquina · trator t1 bloqueado"
+},
+{
+"c": "ok",
+"id": "P1",
+"l": "sem impedimento"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "ok",
+"id": "T3",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|Em conferência": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em conferência",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "P1",
+"l": "OS-0417 · sobras a receber"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|Em execução": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Em execução",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "T1",
+"l": "OS-0421 · parcial · dia 4 de 7"
+},
+{
+"c": "yellow",
+"id": "T2",
+"l": "OS-0421 · parcial · dia 4 de 7"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "red",
+"id": "T4",
+"l": "OS-0420 · impedida · ativo bloqueado"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|Encerradas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Encerradas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "none",
+"id": "T1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "C1",
+"l": "sem ordem na fase"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|Liberadas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Liberadas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "ok",
+"id": "T1",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "T2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P1",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "P2",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T4",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T3",
+"l": "sem ordem na fase"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem na fase"
+},
+{
+"c": "yellow",
+"id": "C1",
+"l": "OS-0425 · entrega sem saldo suficiente"
+}
+]
+},
+"Santa Rita|OS|Impedimentos|Todas": {
+"alvos": null,
+"camada": "O.S./prazos",
+"fazenda": "Santa Rita",
+"filtros": {
+"fase": "Todas",
+"per": "Próximos 30 dias",
+"ver": "Impedimentos"
+},
+"legenda": [
+{
+"k": "red",
+"t": "impedida ou conflito"
+},
+{
+"k": "yellow",
+"t": "pendência com dono"
+},
+{
+"k": "ok",
+"t": "sem impedimento"
+},
+{
+"k": "none",
+"t": "sem ordem aberta"
+}
+],
+"linhas": [
+{
+"c": "yellow",
+"id": "T1",
+"l": "OS-0421 · parcial · dia 4 de 7"
+},
+{
+"c": "red",
+"id": "T2",
+"l": "OS-0431 · falta máquina · trator t1 bloqueado"
+},
+{
+"c": "yellow",
+"id": "P1",
+"l": "OS-0417 · sobras a receber"
+},
+{
+"c": "ok",
+"id": "P2",
+"l": "sem impedimento"
+},
+{
+"c": "red",
+"id": "T4",
+"l": "OS-0420 · impedida · ativo bloqueado"
+},
+{
+"c": "ok",
+"id": "T3",
+"l": "sem impedimento"
+},
+{
+"c": "none",
+"id": "T7",
+"l": "sem ordem"
+},
+{
+"c": "yellow",
+"id": "C1",
+"l": "OS-0425 · entrega sem saldo suficiente"
+}
+]
+}
+}

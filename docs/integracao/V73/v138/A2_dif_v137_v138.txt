@@ -1,0 +1,6 @@
+Santa Rita|OS|Atrasos|Encerradas · T3: OS-0415 · encerrada → sem ordem na fase
+Santa Rita|OS|Atrasos|Todas · T3: OS-0596 · no prazo · +1 → OS-0596 · no prazo
+Santa Rita|OS|Avanço|Encerradas · T3: encerrada → sem ordem na fase
+Santa Rita|OS|Fases|Encerradas · T3: OS-0415 · encerrada → sem ordem na fase
+Santa Rita|OS|Fases|Todas · T3: 1 a liberar · 1 encerrada → OS-0596 · a liberar
+Santa Rita|OS|Impedimentos|Encerradas · T3: encerrada → sem ordem na fase

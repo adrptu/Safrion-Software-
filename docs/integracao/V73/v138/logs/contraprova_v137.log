@@ -1,0 +1,21 @@
+FALHA M1 paridade com o Mapa da fazenda: 124 talhões × "Mostrar" nas 2 fazendas, classe e rótulo iguais · [('Santa Rita', 'Fases', 'T3', {'c': 'gray', 'id': 'T3', 'l': '1 a liberar · 1 encerrada'}, {'t': 'T3', 'c': 'gray', 'al': 'T3 · OS-0596 · a liberar · 1 O.S. · Enter abre OS-0596', 'tab': '0'}), ('Santa Rita', 'Atrasos', 'T3', {'c': 'ok', 'id': 'T3', 'l': 'OS-0596 · no prazo · +1'}, {'t': 'T3', 'c': 'ok', 'al': 'T3 · OS-0596 · no prazo · 1 O.S. · Enter abre OS-0596', 'tab': '0'})]
+OK    M6 Santa Rita: selo "posição esquemática" e legenda com contagem
+OK    M3a clique em P2 (uma O.S.) abre OS-0598
+OK    M3b clique em T1 (4 O.S.) abre a lista curta com as 4 e o Fechar
+OK    M3c item da lista curta abre OS-0421
+OK    M4a talhão fora do recorte sai do Tab (tabindex -1); os do recorte ficam (0)
+OK    M4b a dica tem talhão, situação, contagem e o que o Enter faz
+OK    M4c Enter no talhão P2 abre OS-0598
+OK    M2 busca "OS-0421": só T1 e T2 pintados, e o T1 (com outras O.S. fora do recorte) pinta só pela OS-0421
+OK    M2b contador do recorte: "2 talhões · 1 O.S. no mapa"
+OK    M2c o Mapa mostra o recorte: chip "Busca: “OS-0421”" visível (a busca não fica escondida)
+OK    M2d as Frentes mostram o mesmo recorte (mesmo chip da busca)
+OK    M2e o × do chip limpa a busca no próprio Mapa: o recorte volta à fazenda inteira e o chip some
+OK    M8 Impedimentos: nenhum talhão em amarelo por "demonstração" (selo cinza é informativo)
+OK    M7 "Abrir no Mapa da fazenda" leva #faz=SR&lay=os e grava o "Mostrar" (Impedimentos) no contexto do Mapa
+OK    M5 ?view=mapa abre a visão Mapa e recarregar mantém
+OK    M6b Lagoa Grande (projeção em lon/lat): sem o selo esquemático
+OK    M9a 390 px: sem rolagem lateral
+OK    M9b 390 px: talhões do recorte com alvo de toque ≥ 44 px
+OK    M9c nenhum erro de script
+RESULTADO: 19/20

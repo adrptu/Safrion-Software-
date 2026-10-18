@@ -490,8 +490,9 @@ function lavOf(t){ if(safCur()) return M.lav[t]; return ((M.lavS[safK()]||{})[t]
 const PREV0={fonte:'',tot:0,ins:0,op:0,base:0,orig:'',pend:[],lin:[]};
 function prevOf(t){ return safCur()?M.prev[t]:(((M.prevS[safK()]||{})[t])||PREV0); }
 function semPlanoOf(t){ return safCur()?!!M.semplano[t]:!!((M.semplanoS[safK()]||{})[t]); }
-// na safra corrente vale o que está no campo agora (todas as ordens e cultivos em produção, como antes do filtro); outra safra: só as dela
-function osSaf(o){ return safCur()||(o.saf||'2026/27')===SAF; }
+// cultivos: na safra corrente vale o que está no campo agora (lavOf/cultsDe); O.S.: só as da safra escolhida, como a lista da O.S.
+// (PRD 8.4: lista, Kanban e mapa mostram o mesmo conjunto; decisão do Codex 6255851566 no EX-55, sem mistura silenciosa de safras)
+function osSaf(o){ return (o.saf||'2026/27')===SAF; }
 function alvOk(v){ return !ALV||ALV.indexOf((mipP(v)||{}).alvo)>=0; }
 function alvTxt(){ return ALV.length===1?ALV[0].toLowerCase():ALV.length+' alvos'; }
 function alvosFaz(){ const s={}; const ts=TIDS(); ts.forEach(t=>(MIPD.prots[t]||[]).forEach(p=>{ const a=(MIPD.prot[p]||{}).alvo; if(a) s[a]=1; }));
