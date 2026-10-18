@@ -233,7 +233,12 @@ def gerar(episodios):
             trajetorias = {braco: replay(ep['x0'], dias, agenda, ep['cap'], ep['fx'],
                             fator if braco=='desligado' else None) for braco in CONTRATO['agendas']}
             entrada = {k: ep[k] for k in ('cenario', 'safra', 'semente', 'talhao', 'alvo', 'nc')}
-            entrada.update(agenda_referencia=referencia,
+            entrada.update(id=digest([chave_ep, referencia]),
+                           series=[{'day': d, 'clima': q.get('clima_observado'),
+                                    'chuva': q['chuva'], 'falta_agua': q['falta'],
+                                    'n14': q['n14'], 'k14': q['k14']} for d, q in enumerate(dias)],
+                           proveniencia='gerador sintético RX-0; sem dados reais',
+                           agenda_referencia=referencia,
                            obs=[{'day': d, 'v': trajetorias[referencia][d]['v']} for d in obs],
                            apps=[{'day': a['day']} for a in agenda])
             entradas.append(entrada)
