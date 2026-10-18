@@ -1,12 +1,12 @@
-# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 17/10, 22h50 UTC
+# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 18/10, 00h20 UTC
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v129 (versão 133, `1792275554-f410`).
+**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v130 (versão 134, `1792281471-f538`).
 
 **Conferência do artefato (executada):**
-- 148 páginas enviadas em 3 lotes (versões 131 a 133); os arquivos de apoio são iguais aos da v128;
-- 4 páginas lidas de volta e conferidas por sha256 (`artefato-v129/LEIAME.md`);
-- origem: `ac10d029`, integrada na composição.
+- v130: 11 páginas que mudaram enviadas num lote (versão 134); as outras 137 e os arquivos de apoio são iguais aos da v129;
+- 4 páginas lidas de volta e conferidas por sha256 (`artefato-v130/LEIAME.md`);
+- origem: `6e027f79` (N-1/B-3), integrada na composição com a base verde.
 
 | Quando | Pedido | Situação | Onde conferir no artefato |
 |---|---|---|---|
@@ -25,6 +25,7 @@
 | 17/10 08:40 | Agrupar por fazenda também com uma só | **Publicado na v129** (artefato versão 133): o Planejar safra agrupa por fazenda mesmo com uma só, recolhida ao abrir | Planejar safra › Talhões e cultivos |
 | 17/10 (manhã) | Cartões e tabelas com drill down recolhido por padrão | **Publicado na v129**: tabelas e cartões abrem recolhidos; busca e endereço de um registro abrem só o caminho dele; Expandir/Recolher tudo | Qualquer tabela com seta (O.S., Estoque, Produção, Qualidade) |
 | 17/10 09:00 | Design system do Agrícola nos demais módulos; "⋯" no topo das telas | **Publicado na v128** (artefato versão 130): desvios do padrão 175 → 13 nas 148 telas; no topo, só a ação principal e o ⋯; as ações da linha no ⋯; telas fora do menu com "‹ Módulo" e Fazenda/Safra na faixa "Trabalhando em"; sem cartões de resumo soltos sobre as listas. Os 13 que restam estão em telas da frente aberta do Codex (CA-02, GE-*) ou na ficha impressa | Qualquer módulo: Compras, Estoque, Manutenção, Comercial |
+| 17/10 (noite) | Manutenção ainda fora do padrão do Agrícola | **Em andamento** (DS-MAN): cabeçalho, abas, bloco, filtros, linhas e tela de entrada da Manutenção no padrão do Agrícola, com verificação automática; entra na próxima versão publicada | Manutenção |
 | 17/10 09:18 | Hover e UX dentro do mapa | **Publicado na v129** (MAPA-UX F1): realce e dica no hover do talhão, clique abre o painel do talhão | Mapa |
 | 17/10 09:40 | Cartões da O.S. fora do padrão | **Publicado na v128**: cartões compactos em grade (4 por fileira a 1440), selo da fase no título, até 4 campos; também no Agrupar por e a 390 px | Ordens de serviço › Cartões |
 | 17/10 09:42 | Seta de drill down só onde há detalhamento | **Publicado na v129**: a seta só aparece em linha com filhos | Qualquer tabela |
@@ -32,6 +33,7 @@
 | 17/10 10:35 | Agrupar O.S.: mostrar insumos e datas de cada O.S./talhão logo ao abrir, para conferir e agrupar | **Publicado e integrado** (v121): insumos e datas visíveis ao abrir | O.S. › "Agrupar operações compatíveis" |
 | 17/10 10:40 | EX-49: padrão único para listas, cartões, pai e filho, botões e ⋯ com ícone | **Combinado com o Codex:** Claude implanta no motor logo depois do DRILL; medida pelo robô v4 antes e depois | — |
 | 17/10 10:40 | EX-50: telas ocultas, levar o que tem valor e excluir o resto | **Decisões tomadas** (exclusão aceita; financeiro no ERP; portal mínimo; implantação assistida). Classificação dos 123 IDs versionada (`ex50-classificacao-codex.md`). **SU-01 publicado na v122** (PR #106 do Codex em `2249b84`): a falta da OM-0234 vem da manutenção viva e o rolamento e a COT-113 fictícios saíram. **SU-02 publicado na v123** (PR #107 em `c31d9c4`): propor, aprovar e publicar política com recibo, sem tocar na vigente até publicar; selo do cabeçalho pelo estado. **SU-08 publicado na v125** (PR #108 em `df887d9`): perda vira ajuste pendente e só baixa o saldo na aprovação AL-09; transferência e estorno genérico só em prévia, sem efeito fictício. **CA-02 publicado na v126** (PR #109 em `7c5723a`): a fila vem dos apontamentos reais, conferir e divergência usam a conferência diária oficial (AL-12) sem mexer em área, horas ou consumo, e o botão principal abre o próximo a revisar. **LO-02det publicado na v127** (PR #110 em `687d5a7`): a conferência lê a carga programada oficial (RM), a pesagem confirma a saída com baixa única do estoque (só Ana ou Rui), e saem as etapas, a viagem e o frete fictícios do T2. Telas com contrato de Suprimentos e Logística concluídas. Próximo: levar Aprovações e Meu dia para o Mapa, depois das frentes de design e do Mapa; exclusão só depois de migrar as funções e os links | Logística › Expedição: programe a carga do PV-030 e abra Conferir carga |
+| 17/10 17:58 | EX-51 fluxo conectado: unir Claude e Codex e implantar da melhor forma | **N-1/B-3 publicado na v130** (versão 134): a decisão do AG-01 emite o receituário com autor, chave e versão; O.S. com receituário divergente mostra o selo e não aprova nem libera até reemitir; a coleta do MB-06 grava. **C-3/C-4 em revisão** (PR #114 do Codex: compra aprovada → recebimento por linha → etapa 6 por linha); o teste de navegador do Claude achou um S2 (nota fiscal com vários itens do mesmo pedido não entrava), corrigido com patch de integrador; entra na v131. F1 a F5 seguem depois | Pragas e doenças › decisão; Ordens de serviço (selo "Receituário divergente") |
 
 ## Por que quase nada da noite chegou ao artefato
 
@@ -41,7 +43,7 @@ A partir de 17/10, a regra muda. No protótipo, a implantação começa logo, co
 
 ## Ordem de implantação a partir de agora
 
-- **Claude:** MAPA-UX (publicado na v129) → N-1/B-3 do EX-51 (composição do PR #113 em curso) → MAPA-FROTA F1 (máquinas no mapa) → SAF-MAPA (planejar safra no mapa) → MAPA-MIP-PROD (correlação) → PA-OPER F1.
+- **Claude:** N-1/B-3 do EX-51 (publicado na v130) → C-3/C-4 (PR #114, v131) → DS-MAN (Manutenção no padrão) → EX-51 F1 → MAPA-FROTA F1 (máquinas no mapa) → SAF-MAPA (planejar safra no mapa) → MAPA-MIP-PROD (correlação) → PA-OPER F1.
 - **Proposto ao Codex:** RESOLVE-1-CLIQUE e RAIOX-ALVO RX-0.
 
 O artefato é republicado a cada frente integrada. Esta tabela é atualizada na mesma entrega.
