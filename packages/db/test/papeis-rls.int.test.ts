@@ -44,8 +44,8 @@ describe('papel da aplicação e RLS (ENG-025; aceite técnico da F1)', () => {
         ORDER BY 1`,
     );
     // 12 da F0-b + identity_link e session (0003) + access_request e identity_link_event (0005) +
-    // vinculo_pedido_recibo (0006)
-    expect(r.rows.length).toBe(17);
+    // vinculo_pedido_recibo (0006) + counterparty, receipt_document, receipt_line e receipt_occurrence (0007)
+    expect(r.rows.length).toBe(21);
     expect(r.rows.filter((l) => !l.rls || !l.force)).toEqual([]);
   });
 

@@ -20,6 +20,7 @@ export {
 } from './cadastros.js';
 export { VERSAO_CANONICA, canonizar, hashCanonico } from './canonico.js';
 export {
+  consultarIntencao,
   executarComando,
   type ContextoEfeito,
   type Efeito,
@@ -56,11 +57,27 @@ export {
   saldoDoLote,
   type LinhaExtrato,
   type LoteResumo,
+  type OrigemDocumento,
   type NovoMovimento,
   type PedidoMovimento,
   type SaldoTexto,
 } from './estoque.js';
 export { PASTA_MIGRACOES, aplicarMigracoes, type ResultadoMigracao } from './migrar.js';
+export {
+  COMANDO_RECEBER_DOCUMENTO,
+  documento,
+  documentoPorOrigem,
+  listarDocumentos,
+  opcoesDoRecebimento,
+  receberDocumento,
+  type DocumentoDetalhe,
+  type DocumentoResumo,
+  type LinhaDoDocumento,
+  type OcorrenciaDoDocumento,
+  type OpcoesRecebimento,
+  type ProdutoDoRecebimento,
+  type Referencia,
+} from './recebimento.js';
 export { respostaDeErro } from './resposta.js';
 export { ErroPapeis, provisionarPapeis } from './papeis.js';
 export {

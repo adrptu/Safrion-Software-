@@ -4,7 +4,15 @@ import { describe, expect, it } from 'vitest';
 
 import { desfechoDaResposta, pedidoDeEntrada, SEM_CONEXAO, validarEntrada } from '../src/estoque/entrada';
 import { estadoDoLote, palavraDaSituacao } from '../src/estoque/estado';
-import { linhaDoLote, linhaDoMovimento, linhaDoProduto, unidadesDoLote } from '../src/estoque/lista';
+import {
+  contextoDoLote,
+  linhaDoLote,
+  nomeDoLote,
+  linhaDoMovimento,
+  linhaDoProduto,
+  unidadesDoLote,
+} from '../src/estoque/lista';
+import { formatarData } from '../src/formato/data';
 
 const LOTE = '0b8c6a52-1f0e-4c7a-9d51-3f2d7e6b9a10';
 const LOCAL = '5d2f0a4e-8c1b-4e3a-b7f6-9a0c1d2e3f40';
@@ -186,6 +194,7 @@ describe('linhas das listas', () => {
   const lote: LoteResumo = {
     id: LOTE,
     codigo: 'DEMO-001',
+    granel: null,
     produtoId: 'p',
     produto: 'Herbicida fictício',
     validade: '2027-06-30',
@@ -217,6 +226,19 @@ describe('linhas das listas', () => {
     });
   });
 
+  it('lote sem validade: "Não se aplica", valor vazio (fim da ordenação) e o resto da linha igual', () => {
+    const sem = linhaDoLote({ ...lote, validade: null });
+    expect(sem.celulas['validade']).toEqual({ texto: 'Não se aplica', valor: '' });
+    expect({ ...sem.celulas, validade: undefined }).toEqual({
+      ...linhaDoLote(lote).celulas,
+      validade: undefined,
+    });
+    expect(contextoDoLote({ produto: 'Diesel', validade: null })).toBe('Diesel · validade não se aplica');
+    expect(contextoDoLote(lote)).toBe('Herbicida fictício · validade 30/06/2027');
+    // O formatador geral não ganha tolerância a null: quem sabe que não há validade decide o texto.
+    expect(() => formatarData(null as unknown as string)).toThrow();
+  });
+
   it('produto e movimento', () => {
     expect(linhaDoProduto({ id: 'p1', nome: 'Adubo', unidade: 'sc60', lotes: 3 }).celulas).toEqual({
       produto: { texto: 'Adubo', valor: 'Adubo' },
@@ -237,6 +259,7 @@ describe('linhas das listas', () => {
       originalQuantity: '2500',
       originalUnit: 'mL',
       recordedAt: '2026-09-28T14:05:00.000Z',
+      origem: null,
     };
     const locais = new Map([[LOCAL, 'Almoxarifado central']]);
     expect(linhaDoMovimento(base, locais)).toEqual({
@@ -247,6 +270,7 @@ describe('linhas das listas', () => {
         movimento: { texto: 'Entrada · Em inspeção', valor: 'Entrada · Em inspeção' },
         quantidade: { texto: '2,5 L (2.500 mL)', valor: '2.5', unidade: 'L' },
         local: { texto: 'Almoxarifado central', valor: 'Almoxarifado central' },
+        origem: { texto: 'Entrada manual', valor: 'Entrada manual' },
       },
     });
     const mudanca = linhaDoMovimento(
@@ -276,6 +300,37 @@ describe('linhas das listas', () => {
     );
     expect(estorno.celulas['movimento']?.texto).toBe('Estorno');
     expect(estorno.celulas['quantidade']).toEqual({ texto: '—', valor: '' });
+    // Movimento de um recebimento: a origem nomeia documento e linha, e a linha abre o documento.
+    const doc = '6c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f';
+    const recebido = linhaDoMovimento(
+      { ...base, origem: { documentoId: doc, tipo: 'nfe', serie: '1', numero: '7001', linha: 2 } },
+      locais,
+    );
+    expect(recebido.href).toBe(`/estoque/recebimentos/${doc}`);
+    expect(recebido.celulas['origem']).toEqual({
+      texto: 'NF 1/7001 · linha 2',
+      valor: 'NF 1/7001 · linha 2',
+    });
+  });
+
+  it('lote do granel aparece pelo documento e pelo emitente, nunca pelo código interno', () => {
+    const doc = '6c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e4f';
+    const granel = {
+      ...lote,
+      codigo: `DOC:${doc}`,
+      granel: {
+        documentoId: doc,
+        tipo: 'nfe' as const,
+        serie: '',
+        numero: '88',
+        emitente: 'Fornecedor Teste Ltda',
+      },
+    };
+    expect(nomeDoLote(granel)).toBe('Granel · NF 88 · Fornecedor Teste Ltda');
+    expect(linhaDoLote(granel).celulas['lote']?.texto).toBe('Granel · NF 88 · Fornecedor Teste Ltda');
+    expect(JSON.stringify(linhaDoLote(granel).celulas)).not.toContain('DOC:');
+    // Fabricante com código parecido continua com o próprio código.
+    expect(nomeDoLote({ codigo: `DOC:${doc}`, granel: null })).toBe(`DOC:${doc}`);
   });
 
   it('unidades do lote: a base primeiro, só da mesma dimensão', () => {

@@ -2,6 +2,7 @@ import { criarRegistrador, type Registrador } from '@safrion/contracts';
 import {
   criarConectorGoogle,
   ErroConexao,
+  LIMITE_CONEXAO_MS,
   prepararConexao,
   type Conexao,
   type PrepararConexao,
@@ -48,8 +49,14 @@ function lerAmbiente() {
 function montar(base: ReturnType<typeof lerAmbiente>, extra: Conexao['extra']): Dependencias {
   const { url, origem, versao, commit, registrador } = base;
   // Pool pequeno por instância (plano R-006, passo 11). Erro de conexão ociosa não derruba o processo nem vai ao log
-  // com mensagem do driver: só o código.
-  const banco = new pg.Pool({ connectionString: url, max: 3, ...extra });
+  // com mensagem do driver: só o código. Prazo por aquisição igual ao da HML em todos os ambientes, e não prazo HTTP
+  // total (contrato CMD-15 §9.2); o conector da HML repete o mesmo valor no `extra`.
+  const banco = new pg.Pool({
+    connectionString: url,
+    max: 3,
+    connectionTimeoutMillis: LIMITE_CONEXAO_MS,
+    ...extra,
+  });
   banco.on('error', (erro: Error & { code?: unknown }) => {
     registrador.registrar('erro', 'banco.conexao_ociosa', 'sem-correlacao', {
       codigo: typeof erro.code === 'string' && /^[0-9A-Z]{5}$/.test(erro.code) ? erro.code : undefined,

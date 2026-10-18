@@ -13,6 +13,8 @@ export const ERROS = {
   ORGANIZACAO_INVALIDA: { classe: 'acesso', status: 401 },
   SEM_PERMISSAO: { classe: 'acesso', status: 403 },
   NAO_ENCONTRADO: { classe: 'acesso', status: 404 },
+  // Consulta por chave sem recibo visível: ainda não localizado, nunca "não recebido" (contrato CMD-15 §6.2).
+  RECIBO_NAO_LOCALIZADO: { classe: 'acesso', status: 404 },
   IDEMPOTENCY_KEY_REUSED: { classe: 'conflito', status: 409 },
   IDEMPOTENCY_IN_PROGRESS: { classe: 'conflito', status: 409 },
   FALHA_TRANSITORIA: { classe: 'infraestrutura', status: 503 },

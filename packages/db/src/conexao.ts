@@ -67,9 +67,9 @@ const POLITICA_CONECTOR: Politica = { tentativas: 4, primeiraEspera: 1_000, teto
 // 120 s. Somadas às do conector, 167 s, dentro da sonda de inicialização da web (18 × 10 s = 180 s, R-006).
 const POLITICA_BANCO: Politica = { tentativas: 6, primeiraEspera: 2_000, teto: 30_000, prazo: 10_000 };
 // Sem limite, um pacote perdido na VPC prende a abertura da conexão por minutos. No pg.Pool, o mesmo valor limita também
-// a espera por uma conexão livre: na HML, a requisição que espera mais de 10 s por uma vaga do pool falha, em vez de
-// esperar sem fim como em desenvolvimento e na CI (ADR 0006).
-const LIMITE_CONEXAO_MS = 10_000;
+// a espera por uma conexão livre, por aquisição (não é prazo HTTP total): a requisição que espera mais de 10 s por uma
+// vaga do pool falha com erro legível (ADR 0006; contrato CMD-15 §9.2). A web aplica o mesmo valor em todos os ambientes.
+export const LIMITE_CONEXAO_MS = 10_000;
 // Encerrar a sonda com o Terminate do protocolo tem este limite; depois, o transporte é destruído de qualquer jeito.
 const LIMITE_ENCERRAR_MS = 1_000;
 

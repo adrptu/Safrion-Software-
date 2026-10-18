@@ -12,11 +12,12 @@ export {
   type Perfil,
   type ProdutoResumo,
 } from './cadastros.js';
-export { executarComando, type Intencao, type Recibo } from './comando.js';
+export { consultarIntencao, executarComando, type Efeito, type Intencao, type Recibo } from './comando.js';
 // Conexão por IP privado na subida do servidor (instrumentation.ts), só com SAFRION_CLOUDSQL_INSTANCIA.
 export { criarConectorGoogle } from './conector-google.js';
 export {
   ErroConexao,
+  LIMITE_CONEXAO_MS,
   prepararConexao,
   type Conector,
   type Conexao,
@@ -31,8 +32,25 @@ export {
   saldoDoLote,
   type LinhaExtrato,
   type LoteResumo,
+  type OrigemDocumento,
   type SaldoTexto,
 } from './estoque.js';
+// Documento de entrada (contrato CMD-15 §6.1 e §6.2): o comando e a leitura.
+export {
+  COMANDO_RECEBER_DOCUMENTO,
+  documento,
+  documentoPorOrigem,
+  listarDocumentos,
+  opcoesDoRecebimento,
+  receberDocumento,
+  type DocumentoDetalhe,
+  type DocumentoResumo,
+  type LinhaDoDocumento,
+  type OcorrenciaDoDocumento,
+  type OpcoesRecebimento,
+  type ProdutoDoRecebimento,
+  type Referencia,
+} from './recebimento.js';
 export { respostaDeErro } from './resposta.js';
 export { emOrganizacao, ehUuid } from './sessao.js';
 export {

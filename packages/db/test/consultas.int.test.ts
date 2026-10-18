@@ -67,6 +67,7 @@ describe('listarLotes', () => {
     expect(doA).toEqual({
       id: a.lote,
       codigo: 'F26-A',
+      granel: null,
       produtoId: a.produto,
       produto: 'Herbicida',
       validade: '2027-06-30',
@@ -110,6 +111,55 @@ describe('listarLotes', () => {
     });
     const deB = await emOrganizacao(amb.app, b.org, (c) => listarLotes(c, HOJE));
     expect(deB.map((l) => [l.codigo, l.saldo.fisico])).toEqual([['F26-B', '7.000000']]);
+  });
+});
+
+describe('lote sem validade (RN-032, migração 0007)', () => {
+  it('lista, detalha e soma o saldo sem data fictícia e sem vencer; extrato e lote datado seguem iguais', async () => {
+    // Organização própria para não mudar as contagens das outras leituras deste arquivo.
+    const c = await semear(amb.app, 'C');
+    const semValidade = randomUUID();
+    await emOrganizacao(amb.app, c.org, (q) =>
+      q.query(
+        `INSERT INTO app.lot (id, organization_id, product_id, code, expiry_date, expiry_applies, base_unit)
+         VALUES ($1, $2, $3, 'C-GRANEL', NULL, false, 'L')`,
+        [semValidade, c.org, c.produto],
+      ),
+    );
+    await mover(amb.app, { ...c, lote: semValidade }, 'c-5', 0, {
+      tipo: 'entrada',
+      quantidade: '4',
+      unidade: 'L',
+      situacao: 'liberado_livre',
+    });
+    const lotes = await emOrganizacao(amb.app, c.org, (q) => listarLotes(q, HOJE));
+    expect(lotes.map((l) => [l.codigo, l.validade])).toEqual([
+      ['C-GRANEL', null],
+      ['F26-C', '2027-06-30'],
+    ]);
+    const [lote] = await emOrganizacao(amb.app, c.org, (q) =>
+      listarLotes(q, '2099-12-31', { lote: semValidade }),
+    );
+    expect(lote).toMatchObject({
+      validade: null,
+      movimentos: 1,
+      saldo: {
+        version: 1,
+        fisico: '4.000000',
+        utilizavel: '4.000000',
+        vencido: '0.000000',
+        loteVencido: false,
+      },
+    });
+    // O lote datado da mesma organização continua vencendo depois da data.
+    const [datado] = await emOrganizacao(amb.app, c.org, (q) =>
+      listarLotes(q, '2027-07-01', { lote: c.lote }),
+    );
+    expect(datado).toMatchObject({ validade: '2027-06-30', saldo: { loteVencido: true } });
+    const extrato = await emOrganizacao(amb.app, c.org, (q) => extratoDoLote(q, semValidade));
+    expect(extrato.map((m) => [m.lotVersion, m.kind, m.situacao, m.baseQuantity])).toEqual([
+      [1, 'entrada', 'liberado_livre', '4'],
+    ]);
   });
 });
 

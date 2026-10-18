@@ -21,3 +21,4 @@ export {
 } from './erros.js';
 export { criarRegistrador, type NivelLog, type Registrador } from './log.js';
 export { EsquemaDecimalTexto, EsquemaQuantidade, EsquemaSituacao, EsquemaUnidade } from './quantidade.js';
+export { EsquemaDadosRecebimento, canonizarRecebimento, type DadosRecebimento } from './recebimento.js';

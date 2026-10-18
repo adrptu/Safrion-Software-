@@ -84,7 +84,8 @@ export function conteudoDoMovimento(pedido: PedidoMovimento): Record<string, unk
 interface LinhaLote {
   id: string;
   code: string;
-  expiry_date: string;
+  /** NULL quando a validade não se aplica ao lote (migração 0007, RN-032). */
+  expiry_date: string | null;
   base_unit: string;
   version: string;
 }
@@ -298,13 +299,26 @@ function saldoEmTexto(l: LinhaLote, estado: EstadoLote, hoje: string): SaldoText
   };
 }
 
+/** Documento de entrada de onde veio o lote interno ou o movimento: a tela monta "NF 1/7001" a partir daqui. */
+export interface OrigemDocumento {
+  readonly documentoId: string;
+  readonly tipo: 'nfe' | 'outro';
+  readonly serie: string;
+  readonly numero: string;
+}
+
 export interface LoteResumo {
   readonly id: string;
   readonly codigo: string;
+  /**
+   * Lote interno por documento (granel): o documento e o emitente, para a tela dar um nome legível e nunca mostrar
+   * DOC:<uuid>. Lote de fabricante é null, mesmo com código parecido (contrato CMD-15 §7.1).
+   */
+  readonly granel: (OrigemDocumento & { readonly emitente: string }) | null;
   readonly produtoId: string;
   readonly produto: string;
-  /** Data civil AAAA-MM-DD. */
-  readonly validade: string;
+  /** Data civil AAAA-MM-DD; null quando a validade não se aplica (nunca data fictícia, RN-032). */
+  readonly validade: string | null;
   readonly unidade: string;
   /** Movimentos registrados em todos os locais: zero é lote ainda sem entrada. */
   readonly movimentos: number;
@@ -314,11 +328,25 @@ export interface LoteResumo {
 interface LinhaLoteProduto extends LinhaLote {
   product_id: string;
   product_name: string;
+  granel_documento: string | null;
+  granel_tipo: 'nfe' | 'outro' | null;
+  granel_serie: string | null;
+  granel_numero: string | null;
+  granel_emitente: string | null;
 }
 
 const SELECT_LOTES = `SELECT l.id, l.code, l.expiry_date::text AS expiry_date, l.base_unit, l.version, l.product_id,
-    p.name AS product_name
+    p.name AS product_name, g.id AS granel_documento, g.doc_type AS granel_tipo, g.series AS granel_serie,
+    g.number AS granel_numero, g.issuer_name AS granel_emitente
   FROM app.lot l JOIN app.product p ON p.organization_id = l.organization_id AND p.id = l.product_id
+  -- Só o lote interno ganha a origem; o de fabricante nunca, mesmo com código DOC: (contrato CMD-15 §7.1).
+  LEFT JOIN LATERAL (
+    SELECT d.id, d.doc_type, d.series, d.number, e.name AS issuer_name
+      FROM app.receipt_line x
+      JOIN app.receipt_document d ON d.organization_id = x.organization_id AND d.id = x.document_id
+      JOIN app.counterparty e ON e.organization_id = d.organization_id AND e.id = d.issuer_id
+     WHERE l.kind = 'agrupamento_interno' AND x.organization_id = l.organization_id AND x.lot_id = l.id
+     ORDER BY x.line_number LIMIT 1) g ON true
   WHERE ($1::uuid IS NULL OR l.id = $1) AND ($2::uuid IS NULL OR l.product_id = $2)
   ORDER BY p.name, l.code, l.id`;
 const SELECT_MOVIMENTOS_DOS_LOTES = `SELECT lot_id, ${COLUNAS_MOVIMENTO}
@@ -358,6 +386,20 @@ export async function listarLotes(
     return {
       id: l.id,
       codigo: l.code,
+      granel:
+        l.granel_documento !== null &&
+        l.granel_tipo !== null &&
+        l.granel_serie !== null &&
+        l.granel_numero !== null &&
+        l.granel_emitente !== null
+          ? {
+              documentoId: l.granel_documento,
+              tipo: l.granel_tipo,
+              serie: l.granel_serie,
+              numero: l.granel_numero,
+              emitente: l.granel_emitente,
+            }
+          : null,
       produtoId: l.product_id,
       produto: l.product_name,
       validade: l.expiry_date,
@@ -383,7 +425,27 @@ export interface LinhaExtrato {
   readonly originalQuantity: string | null;
   readonly originalUnit: string | null;
   readonly recordedAt: string;
+  /** Documento e linha do recebimento que gerou o movimento; null na entrada manual (estoque.registrar-entrada). */
+  readonly origem: (OrigemDocumento & { readonly linha: number }) | null;
 }
+
+interface LinhaMovimentoComOrigem extends LinhaMovimento {
+  documento_id: string | null;
+  doc_type: 'nfe' | 'outro' | null;
+  series: string | null;
+  number: string | null;
+  line_number: number | null;
+}
+
+const SELECT_EXTRATO = `SELECT m.id, m.kind, m.situation, m.from_situation, m.to_situation, m.reverses_id,
+    m.base_quantity::text AS base_quantity, m.base_unit, m.original_quantity::text AS original_quantity,
+    m.original_unit, m.lot_version, m.recorded_at, m.location_id, d.id AS documento_id, d.doc_type, d.series,
+    d.number, x.line_number
+  FROM app.stock_movement m
+  LEFT JOIN app.receipt_line x ON x.organization_id = m.organization_id AND x.id = m.receipt_line_id
+  LEFT JOIN app.receipt_document d ON d.organization_id = x.organization_id AND d.id = x.document_id
+  WHERE m.lot_id = $1 AND ($2::uuid IS NULL OR m.location_id = $2)
+  ORDER BY m.lot_version, m.intent_item`;
 
 /** Extrato imutável do lote, na ordem das versões: de um local, ou de todos quando o local não é informado. */
 export async function extratoDoLote(
@@ -392,7 +454,7 @@ export async function extratoDoLote(
   local?: string,
 ): Promise<LinhaExtrato[]> {
   if (!ehUuid(lotId) || (local !== undefined && !ehUuid(local))) return [];
-  const r = await cliente.query<LinhaMovimento>(SELECT_MOVIMENTOS, [lotId, local ?? null]);
+  const r = await cliente.query<LinhaMovimentoComOrigem>(SELECT_EXTRATO, [lotId, local ?? null]);
   return r.rows.map((m) => ({
     movementId: m.id,
     locationId: m.location_id,
@@ -407,5 +469,19 @@ export async function extratoDoLote(
     originalQuantity: m.original_quantity,
     originalUnit: m.original_unit,
     recordedAt: m.recorded_at.toISOString(),
+    origem:
+      m.documento_id !== null &&
+      m.doc_type !== null &&
+      m.series !== null &&
+      m.number !== null &&
+      m.line_number !== null
+        ? {
+            documentoId: m.documento_id,
+            tipo: m.doc_type,
+            serie: m.series,
+            numero: m.number,
+            linha: m.line_number,
+          }
+        : null,
   }));
 }

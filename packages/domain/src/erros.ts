@@ -12,7 +12,13 @@ export type CodigoErroDominio =
   | 'LOTE_INVALIDO'
   | 'MOVIMENTO_CONFLITANTE'
   | 'ESTORNO_INVALIDO'
-  | 'DATA_INVALIDA';
+  | 'DATA_INVALIDA'
+  // Recebimento por documento (CMD-15)
+  | 'VALIDADE_OBRIGATORIA'
+  | 'VALIDADE_NAO_SE_APLICA'
+  | 'VALIDADE_DIFERENTE_DO_LOTE'
+  | 'RECEBIMENTO_INVALIDO'
+  | 'LOTE_INTERNO_INVALIDO';
 
 export class ErroDominio extends Error {
   constructor(

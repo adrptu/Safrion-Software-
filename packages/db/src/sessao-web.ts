@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import type { ClientBase, Pool } from 'pg';
 
-import { ehUuid } from './sessao.js';
+import { ehUuid, emprestarConexao, ouvirConexao } from './sessao.js';
 
 /**
  * Sessão da web e login em duas etapas (ADR 0004 rev. 2, §3 e §5; migração 0003). Cada função é uma chamada a uma função
@@ -163,20 +163,44 @@ export interface SessaoResolvida {
   readonly expiraEm: Date;
 }
 
-/** Sessão válida com vínculo vivo, ou null. Não fixa organização na conexão: isso é de emOrganizacao, depois. */
+const ehPool = (banco: Banco): banco is Pool => 'idleCount' in banco && 'waitingCount' in banco;
+
+interface LinhaSessao {
+  readonly user_id: string;
+  readonly organization_id: string;
+  readonly role_code: string;
+  readonly expira_em: Date;
+}
+const RESOLVER_SESSAO = 'SELECT user_id, organization_id, role_code, expira_em FROM app.resolver_sessao($1)';
+
+/**
+ * Sessão válida com vínculo vivo, ou null. Não fixa organização na conexão: isso é de emOrganizacao, depois. Com pool,
+ * a aquisição tem prazo legível (contrato CMD-15 §9.2) e a devolução segue a do pool.query, com o erro da consulta;
+ * cliente já emprestado ou em transação é usado como veio, sem readquirir, liberar nem capturar erro de consulta.
+ */
 export async function resolverSessao(
   banco: Banco,
   token: string | undefined,
 ): Promise<SessaoResolvida | null> {
   const hash = hashDoToken(token);
   if (!hash) return null;
-  const r = await banco.query<{
-    user_id: string;
-    organization_id: string;
-    role_code: string;
-    expira_em: Date;
-  }>('SELECT user_id, organization_id, role_code, expira_em FROM app.resolver_sessao($1)', [hash]);
-  const l = r.rows[0];
+  let linhas: LinhaSessao[];
+  if (ehPool(banco)) {
+    const cliente = await emprestarConexao(banco, 'leitura');
+    const conexao = ouvirConexao(cliente);
+    let falha: Error | undefined;
+    try {
+      linhas = (await cliente.query<LinhaSessao>(RESOLVER_SESSAO, [hash])).rows;
+    } catch (erro) {
+      falha = erro instanceof Error ? erro : new Error(String(erro));
+      throw erro;
+    } finally {
+      conexao.soltar(falha);
+    }
+  } else {
+    linhas = (await banco.query<LinhaSessao>(RESOLVER_SESSAO, [hash])).rows;
+  }
+  const l = linhas[0];
   return l
     ? { usuarioId: l.user_id, organizationId: l.organization_id, papel: l.role_code, expiraEm: l.expira_em }
     : null;
