@@ -1220,7 +1220,10 @@ function osFrentesVals(self,v,recorte){
     v.ofr_porque=f.porque.join(' · ')+(f.herb?' · herbicida no fim':'');
     const g=[];if(f.km!==null&&f.kmSo!==null)g.push({v:frNum(f.km,1)+' km',t:'na frente × '+frNum(f.kmSo,1)+' km com cada O.S. sozinha (ida e volta da sede, linha reta)'});
     else if(f.km===null)g.push({v:'km',t:'sem medida: '+(G[f.faz]&&G[f.faz].tipo==='plano'?'o desenho desta fazenda não tem escala (importe o KML no cadastro de talhões)':'a sede não tem posição no mapa')});
-    if(f.cargas.porOS!==null)g.push({v:f.cargas.porOS+' cargas',t:'fechadas por O.S. (vale hoje)'+(f.cargas.continuas!==null&&f.cargas.continuas<f.cargas.porOS?'; com calda contínua seriam '+f.cargas.continuas+' (o rateio depende da decisão do RT)':'')});
+    // revisão do Codex 6254555893: com O.S. sem vazão ou tanque, o total é só das calculáveis e diz quais faltam; sem calda contínua
+    const falta=f.cargas.faltam||[],faltaTxt=falta.length?'falta vazão ou tanque em '+falta.join(', '):'';
+    if(f.cargas.porOS!==null)g.push({v:f.cargas.porOS+(f.cargas.porOS>1?' cargas':' carga'),t:(falta.length?'só das O.S. calculáveis ('+faltaTxt+'); ':'')+'fechadas por O.S. (vale hoje)'+(f.cargas.continuas!==null&&f.cargas.continuas<f.cargas.porOS?'; com calda contínua seriam '+f.cargas.continuas+' (o rateio depende da decisão do RT)':'')});
+    else if(falta.length)g.push({v:'cargas',t:'sem conta: '+faltaTxt});
     if(f.caldas>1)g.push({v:(f.caldas-1)+(f.caldas-1>1?' trocas':' troca'),t:f.fam==='Pulverização'?'de calda na sequência':'de regulagem na sequência'});
     v.ofr_ganho=g;
     v.ofr_rota=f.seq.map(r=>({ordem:String(r.ordem),talhao:r.talhao+(r.tkey?'':' (sem contorno)'),os:r.id,area:nf(r.area)+' ha',calda:frCaldaTxt(r)+(r.liquido&&r.vazao?' · '+nf(r.vazao)+' L/ha':''),
