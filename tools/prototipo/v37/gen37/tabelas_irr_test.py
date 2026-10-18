@@ -64,8 +64,6 @@ def por_grupo(g, col):
 
 def fchips():
     return J("[...document.querySelectorAll('button[aria-label=\"Remover filtro\"]')].filter(b=>b.offsetParent).map(b=>b.parentElement.innerText.replace(/\\s*×\\s*$/,'').trim())") or []
-def conta():
-    return J("([...document.querySelectorAll('main span')].filter(s=>s.offsetParent&&/^\\d+ de \\d+$/.test(s.innerText.trim())).map(s=>s.innerText.trim()))[0]||''") or ''
 def ctx02(tam, tec):
     """TABR-CTX-02 no IR-01: "Todas" no topo, coluna Fazenda = Santa Rita (↓), Situação Impedida ou Programada e busca "Pivô" → Lagoa Grande no topo
     (a coluna sai) → "Todas".
@@ -81,19 +79,24 @@ def ctx02(tam, tec):
           i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.4)
     bval = lambda: J("(([...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"],input[aria-label=\"Buscar nesta tela\"]')].find(x=>x.offsetParent))||{}).value") or ''
     abre('IR-01.dc.html'); fazenda('Todas'); limpa(J); g = Grade(J, 0)
-    SIT = ('Impedida', 'Programada'); busca('Pivô'); prep = [g.filtra('Situação', list(SIT)), g.filtra('Fazenda', ['Santa Rita']), g.ordena('Fazenda', desc=True)]
+    base = g.dicts()
+    SIT = ('Impedida', 'Programada')
+    # O contador removido não é contrato: comparar o recorte exato evita perder/duplicar setores.
+    esperadas = [r for r in base if r.get('Situação') in SIT and 'Pivô' in r.get('Setor', '')]
+    chave = lambda r: (r.get('Fazenda'), r.get('Setor'), r.get('Situação'))
+    busca('Pivô'); prep = [g.filtra('Situação', list(SIT)), g.filtra('Fazenda', ['Santa Rita']), g.ordena('Fazenda', desc=True)]
     d0, c0 = g.dicts(), fchips(); cs = [x for x in c0 if x.startswith('Situação: ')]
     chk(f'{m} IR-01 Todas: busca "Pivô" + Situação Impedida ou Programada + Fazenda = Santa Rita (↓) → só setores da Santa Rita, com os dois chips',
         all(prep) and d0 and {r.get('Fazenda') for r in d0} == {'Santa Rita'} and len(cs) == 1 and sorted(c0) == ['Fazenda: Santa Rita'] + cs, (prep, [(r.get('Setor'), r.get('Fazenda')) for r in d0], c0))
-    ok1 = topo('Lagoa Grande', 'ArrowDown'); d1, c1, l1, n1 = g.dicts(), fchips(), g.labels(), conta()
+    ok1 = topo('Lagoa Grande', 'ArrowDown'); d1, c1, l1 = g.dicts(), fchips(), g.labels()
     chk(f'{m} IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande'
         + ('; o foco fica no seletor' if tec else ''),
         ok1 and c1 == cs and 'Fazenda' not in l1 and d1 and all(r.get('Situação') in SIT and 'Pivô' in r.get('Setor', '') for r in d1)
-        and n1 == f'{len(d1)} de 23' and bval() == 'Pivô' and alinhada(g) == 0, (ok1, c1, l1[:3], n1, [r.get('Setor') for r in d1], bval()))
-    ok2 = topo('Todas', 'ArrowUp'); d2, c2, l2, n2 = g.dicts(), fchips(), g.labels(), conta()
+        and sorted((r.get('Setor'), r.get('Situação')) for r in d1) == sorted((r.get('Setor'), r.get('Situação')) for r in esperadas if r.get('Fazenda') == 'Lagoa Grande') and bval() == 'Pivô' and alinhada(g) == 0, (ok1, c1, l1[:3], [r.get('Setor') for r in d1], bval()))
+    ok2 = topo('Todas', 'ArrowUp'); d2, c2, l2 = g.dicts(), fchips(), g.labels()
     chk(f'{m} IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam',
         ok2 and c2 == cs and l2[:3] == ['Setor', 'Fazenda', 'Situação'] and {r.get('Fazenda') for r in d2} == {'Santa Rita', 'Lagoa Grande'} and all(r.get('Situação') in SIT for r in d2)
-        and n2 == f'{len(d2)} de 26' and bval() == 'Pivô' and alinhada(g) == 0, (ok2, c2, l2[:3], n2, sorted({r.get('Fazenda') for r in d2})))
+        and sorted(map(chave, d2)) == sorted(map(chave, esperadas)) and bval() == 'Pivô' and alinhada(g) == 0, (ok2, c2, l2[:3], sorted({r.get('Fazenda') for r in d2})))
     shot(f'ctx02-ir01-{tam.split()[0]}-{"teclado" if tec else "clique"}')
     busca(''); limpa(J); fazenda('Santa Rita')
 
@@ -321,4 +324,5 @@ finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
 sys.exit(1 if FAIL else 0)
+
 
