@@ -1300,8 +1300,10 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
         if e['tipo']!='dem': continue
         if e.get('chave'): ks.add(e['chave'])
         ks.update(e.get('chaves') or [])
-    real=0.0; nreal=0; E0=[]
+    real=0.0; nreal=0; E0=[]; pendentes=[]
     for i,e in enumerate(evs):
+        if e['tipo']=='dem' and not e.get('dt'):
+            pendentes.append(dict(e)); continue
         if e['tipo']=='dem' and hoje and e['dt'] and e['dt']<hoje:
             if e.get('own'): real+=float(e['q']); nreal+=1
             continue
@@ -1310,7 +1312,8 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
     pri=lambda e: {'rec':0,'via':1,'res':2}.get(e['tipo'],3)
     E=[e for _,e in sorted(E0,key=lambda x:(x[1]['dt'],pri(x[1]),x[1].get('ord',0) or 0,x[0]))]
     ult=max([e['dt'] for e in E if e['tipo']=='dem' and e.get('own')] or [''])
-    saldo=float(fis); bruta=rec=liq=tot=antes=rup=rup_via=0.0; falta=falta_tot=cob=None; bk=[]
+    sem_data=sum(float(e['q']) for e in pendentes if e.get('own'))
+    saldo=float(fis); bruta=sem_data; rec=liq=tot=antes=rup=rup_via=0.0; falta=falta_tot=cob=None; bk=[]
     deficit=lambda: max(0.0,seg-saldo)
     for e in E:
         q=float(e['q'])
@@ -1341,7 +1344,7 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
         if (nec>1e-9 or rp>1e-9) and not falta_tot: falta_tot=e['dt']
     tarde=sum(float(e['q']) for e in E if e['tipo']=='rec' and falta and e['dt']>falta)
     return dict(fis=float(fis),bruta=bruta,rec=rec,liq=liq,tot=tot,falta=falta,faltaTot=falta_tot,antes=antes,tarde=tarde,saldo=saldo,
-                real=real,nreal=nreal,rup=rup,rupRec=max(0.0,rup-rup_via),cob=cob)
+                semData=sem_data,parcial=bool(pendentes),pendentes=pendentes,real=real,nreal=nreal,rup=rup,rupRec=max(0.0,rup-rup_via),cob=cob)
 def checa_reservas():
     """Reservas da demanda (est_dem, nas duas fazendas) fecham com o reservado dos lotes da semente por insumo."""
     rs=[r for f in EST_FAZ for r in est_dem(None,f)['reservas']]; lt=_seed()['lotes'].values()
