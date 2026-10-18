@@ -93,3 +93,31 @@
 - A paridade entre parcela e coorte não é presumida. **Aceite da F1:** o mesmo ciclo mantém o ID depois de vincular a 2027/28 e depois de um replantio parcial.
 
 **Gemini:** o pacote leva as 7 perguntas do §4 mais estes limites: identidade persistente, preservação de obrigações e custos reais e correção explícita das cópias. É uma consulta só.
+
+## 7. Parecer do Gemini real (6254228563) e crítica do Claude à triagem do Codex
+
+Consulta única Pro/HIGH, payload SHA256 `14e1a0a1…4dafd9f`, sem fonte agronômica consultada. Nada abaixo é validado: percentuais de replantio, custo de graus-dia e limiares ficam de fora até ter fonte e RT.
+
+| # | Gemini | Codex | Claude | Como fica no contrato |
+|---|---|---|---|---|
+| G1 | Dividir a parcela a cada replantio fragmenta o polígono | Adaptar: replantio disperso sem divisão | **Concordo, com dois modos** | **Corrige o §6.** Replantio em **bloco** (parte contígua): "Dividir" + novo `ciclo` com `substitui`, como antes. Replantio **disperso** (falhas): novo `ciclo` com `substitui`, sem dividir a parcela nem mudar a área, com cobertura em **plantas** e precisão declarada (contada ou estimada). A O.S. do talhão cobre todos os ciclos da parcela; a atividade própria da coorte dispersa usa plantas como base. A conta continua a regra única (`cenQtd`, dose × base); hoje a O.S. só tem área como base, e a base em plantas entra na F3 |
+| G2 | Âncora sem evento = data nula, nunca plantio | Já previsto (C3) | Concordo | Sem mudança |
+| G2b | Sem evento real, a tarefa fica sem data | Rejeitar exigir data real | **Concordo com o Codex** | Três estados: prevista (com origem), confirmada, âncora ausente. A prevista sustenta a demanda de compra e o calendário; sem ela a fazenda compra tarde |
+| G3 | Idade cronológica × idade do ciclo | Adotar, sem reset automático | Concordo | Já é o C1 ("tempo desde"). No CE1, a recepa só **propõe** a fase Renovação |
+| Q2/Q7 | Fase de manejo decide imobilizado × despesa; custo de formação vira ativo biológico | Rejeitar prescrição contábil | **Concordo e separo os conceitos** | A fase decide **o plano**, nada contábil. A classificação contábil é do proprietário e do contador, fora do Safrion. A fase vigente na data de execução sai do histórico de fase. Separar custo de formação e de produção fica para o EX-53 e o financeiro, que voltam a isso no confronto deles |
+| Q1/CE3 | Uva com 2 ciclos no ano; cana com socas | Adaptar | **Sem entidade nova** | O ciclo produtivo é a sequência entre eventos com ordinal (poda k → colheita k), já presente no ID da ocorrência (§6.1). Teste sintético: uva com duas podas na mesma safra gera duas sequências com IDs distintos, e nada bloqueia a segunda. Plano por número da soca (cana) fica de fora até a cana entrar no escopo |
+| CE5 | Banana: cortar a planta-mãe não encerra a coorte | — | Adotar como teste | A colheita é evento; só a erradicação ou a renovação total encerram o `ciclo` |
+| Q4 | Floradas: ID + tipo + ordinal; a "principal" é marcada pelo RT | Não citado | **Adotar** | A atividade do plano aponta tipo de evento + seletor (principal, ordinal n ou cada um). Teste: reprogramar a florada 1 não move o que está ligado à florada 2 |
+| Q5 | Produção contínua por calendário ou intervalo | Opção, não regra universal | Concordo | Intervalo com início e fim é um dos tipos do F2; o RT escolhe por cultura |
+| Q6 | Nunca inferir produção pela 1ª colheita | — | **Já é proposta (C12)** | O gatilho de entrada em produção (1ª colheita, idade ou produtividade) é parâmetro por cultura e cultivar, validado pelo RT. No cenário, MAMAO-IMP fica com a 1ª colheita como exemplo de proposta |
+| CE4 | Evento antecipado não altera a O.S. em silêncio | — | Já é o C7 | A ocorrência sem O.S. recalcula e mostra a origem; a O.S. existente recebe proposta com prévia |
+| Mapa | Cor da coorte predominante + hachura se mistura significativa | Mostrar múltiplas coortes em texto; critério a validar | **Sem limiar** | Cor da coorte com maior cobertura e marca "misto" sempre que houver mais de um ciclo na parcela, com o texto "Produção · 7a8m + replantio 4% · 1a2m" na dica e no `aria-label`. Sem limiar não há critério a validar, e a minoria nunca some. Fica na camada Estádio, sem camada nova |
+| a11y | `aria-describedby` obrigatório para a origem da data | Técnica possível | Concordo com o Codex | A origem é texto visível ao lado da data ("15 dias após a florada de 12/09/2027"); o leitor de tela já a lê |
+| UX | Conciliação no próprio detalhe, sem menu novo | — | Adotar | Já é a regra master-detail |
+| Bissexto | Decisão administrativa do RT | — | **Decisão técnica** | O editor de plano não aceita 29/02 como dia e mês recorrente e pede 28/02 ou 01/03. DAP e intervalos contam dias corridos. Nada vai ao RT |
+| GD | Graus-dia como extensão futura | — | Concordo | Fora do escopo: exige dado climático contínuo, e integração com custo é do proprietário |
+| N+1 | Calcular idade e fase em lote | — | Nota do software real | Um serviço de domínio (ENG-011) devolve o lote; o protótipo já calcula no cliente |
+
+**O que muda no contrato:** só o G1 (replantio disperso) e o seletor de florada (Q4). O resto já estava coberto ou fica de fora com motivo.
+
+**Continua valendo:** o RT valida os parâmetros por cultura antes de virarem regra, e a F0a pode entrar quando abrir uma frente (§3.6). As F1 a F4 esperam o RT.
