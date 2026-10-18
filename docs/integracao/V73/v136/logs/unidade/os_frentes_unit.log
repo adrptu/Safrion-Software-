@@ -1,0 +1,19 @@
+PASS U1 calda: outra ordem e 1.000 mL/ha = 1 L/ha são a mesma; kg ≠ L
+PASS U2 mesmo produto com outra dose entra na mesma frente como nova calda, com a troca escrita
+PASS U3 adjuvante diferente não separa (OS-0421 × OS-0424): mesma frente com troca de calda
+PASS U4 herbicida sempre por último, mesmo com a janela que fecha antes, e a frente fecha com tríplice lavagem
+PASS U5 período: janelas que se cruzam ou se seguem ficam juntas; a que começa depois de todas abre outra
+PASS U6 ordem: a janela que fecha antes; no empate, segue a mesma calda e depois o mais perto
+PASS U7 cargas: fechadas por O.S. hoje (10 + 15 + 5 ha a 100 L/ha, tanque 2.000 L = 3) e contínuas só como ganho a decidir (= 2)
+PASS U8 plantio junta pela cultura (OS-0420 × OS-0431); troca de semente pede limpeza; a lanço com outra dose é nova regulagem
+PASS U9 ganho em km contra cada O.S. sozinha (ida e volta da sede), com oráculo independente
+PASS U10 família pelo implemento antes da operação; fertirrigação vai pelo pivô (sem frente)
+PASS U11 a frente separa liberadas (executa) e pendentes (quem decide), sem mudar nada
+PASS U12 desenho sem escala (plano): ordena pela proximidade, sem km
+PASS U13 produtos somados na unidade canônica (mL vira L), pela área de cada O.S.
+PASS U14 produto diferente não se mistura; família diferente nunca
+PASS U15 vazão ainda não definida não vira outra calda: entra na mesma, sem contar na carga até definir
+PASS U16 (Codex 6254555893, S2) uma O.S. sem vazão: o total cobre só a calculável, diz qual falta e não calcula calda contínua
+PASS U17 (Codex 6254555893, S3) tanque ausente ou zero não vira Infinity/NaN nem ganho: falta explícita
+TOTAL 17 PASS
+rc=0

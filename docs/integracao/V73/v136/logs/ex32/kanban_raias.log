@@ -1,0 +1,11 @@
+OK abre todas as raias e expõe estado expandido
+OK recolher T2 mantém filtros, trilha, cenário e cartões das outras raias
+OK dois cliques no mesmo callback alternam o estado atual, sem fechamento obsoleto
+OK mudar visão e voltar conserva raia e seleção
+OK filtro esconde raia; limpar filtro recupera sua expansão anterior
+OK mesmo grupo em outra fazenda não herda recolhimento
+OK troca de perfil não herda recolhimento e volta restaura o próprio estado
+OK sem agrupamento volta ao quadro único sem descartar estado das raias
+OK OS de dois talhões continua rastreável nas duas raias
+RESULTADO 9/9
+rc=0

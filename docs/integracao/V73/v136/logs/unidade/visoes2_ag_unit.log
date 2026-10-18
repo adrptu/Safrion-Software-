@@ -1,0 +1,11 @@
+OK  A1 "Safra 2026/27" ida → endereço → leitura idêntica (2 níveis, não 3)
+OK  A1b caminho real (g2agLer com o endereço gravado): a trilha "Safra 2026/27 › Março de 2027" volta igual
+OK  A2 "%", "&", "+", acento e várias "/" voltam iguais; theme preservado
+OK  A3 sem trilha: lista vazia; ag sem trilha não grava "trilha="
+OK  A4 filtro Talhão = T1: só o grupo T1 (OS-1, área 10); T2 não reaparece
+OK  A5 filtro T1 + T2: grupos T1 (OS-1) e T2 (OS-1, OS-2), sem T3
+OK  A6 sem filtro: T1, T2 e T3 com a O.S. de dois talhões nos dois
+OK  A7 AGR-02: trilha antiga (Lagoa › T1) ignorada sob o filtro T1 (mesmos grupos de sem trilha) e a O.S. de dois talhões inteira no grupo T1
+OK  A8 O.S. sem talhão (lista vazia) entra no grupo "Sem talhão"; Σ das O.S. distintas dos grupos = total
+TOTAL 9 · OK 9 · FALHAS 0
+rc=0

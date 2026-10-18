@@ -1,0 +1,9 @@
+original: 13 cenários passaram rc 0
+DETECTADO  | const cabe = fim <= o.janelaFim; -> const cabe = fim < o.janelaFim;
+DETECTADO  | const inicio = Math.max(chegada, o.janelaInicio); -> const inicio = chegada;
+DETECTADO  | const chegada = anterior + deslocamentoMs; -> const chegada = anterior;
+DETECTADO  | anterior = fim; -> anterior = inicio;
+DETECTADO  | o.janelaFim <= o.janelaInicio -> o.janelaFim < o.janelaInicio
+DETECTADO  | o.kmAnterior < 0 -> o.kmAnterior < -1
+DETECTADO  | esperaMs: inicio - chegada -> esperaMs: 0
+DETECTADO  | if (!cabe) return resultado('inviavel', o.id, -> if (false) return resultado('inviavel', o.id,
