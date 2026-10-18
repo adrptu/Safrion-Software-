@@ -263,11 +263,22 @@ def gerar(episodios):
     classificados = []
     for chave, safras in sorted(grupos.items()):
         classificados.append({'chave': chave, 'resultado': consolidar(safras)})
+    classes_por_safra = {}
+    for item in classificados:
+        for safra, resultado in item['resultado']['safras'].items():
+            c = classes_por_safra.setdefault(safra, {'total': 0, 'contagens': {}})
+            estado = resultado['classe']
+            c['total'] += 1
+            c['contagens'][estado] = c['contagens'].get(estado, 0)+1
+    for c in classes_por_safra.values():
+        c['denominador'] = 'grupos cenário/talhão/alvo/fator/janela, consolidados entre agendas'
+        c['fracoes'] = {estado: c['contagens'].get(estado, 0)/c['total']
+                        for estado in ('forte', 'fraco', 'ambiguo', 'nao_identificavel', 'insuficiente')}
     for c in exclusoes.values():
         c['fracao_excluida'] = (c['inelegivel']+c['clipping'])/c['total'] if c['total'] else None
     return {'entrada': entradas, 'oraculo': {'contrato': CONTRATO, 'contrato_hash': hash_contrato(),
             'entrada_hash': digest(entradas), 'pares': pares, 'classes': classificados,
-            'exclusoes_por_safra': exclusoes, 'recuperacao_motor': 'nao_executada'}}
+            'exclusoes_por_safra': exclusoes, 'classes_por_safra': classes_por_safra, 'recuperacao_motor': 'nao_executada'}}
 
 
 if __name__ == '__main__':
