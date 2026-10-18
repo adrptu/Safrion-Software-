@@ -3,6 +3,11 @@ const fs=require('fs'), vm=require('vm'), assert=require('assert'), cp=require('
 const html=fs.readFileSync(process.argv[2], 'utf8');
 const motorInput=process.argv.indexOf('--motor-input');
 if(motorInput>=0){executarMotorObservavel(process.argv[motorInput+1]);process.exit(0);}
+const estrutura=[{series:[{day:0,covariavel_teste:.2,clima:{ur:50}}]},{series:[{day:0,covariavel_teste:.2,clima:{ur:60}}]}];
+assert.equal(tipoObservado(estrutura,'placebo'),'Clima');assert.equal(tipoObservado(estrutura,'ur'),'Controle');
+assert.throws(()=>tipoObservado([estrutura[0]],'placebo'));
+assert.throws(()=>tipoObservado([estrutura[0],{series:[{day:1,covariavel_teste:.2}]}],'placebo'));
+console.log('PASS C1: tempo comum, variação espacial e recusa de calendário incompleto');
 const ini=html.indexOf('function rxRows('), fim=html.indexOf('// controles:',ini);
 assert(ini>=0&&fim>ini,'fonte rxRows ausente');
 const ctx={Math,PIVOS:[{id:'T',stage:'adulta'}],PEST:{A:{T:{obs:[],apps:[]}}}};
@@ -319,6 +324,20 @@ if(exportIndex>=0) {
 
 
 
+// C1: classificar pela estrutura observada, sem usar nome, sinal esperado ou resultado do ajuste.
+function valorObservado(d,k){ return k==='placebo'?d.covariavel_teste:k==='ur'?d.clima.ur:k==='qs'?Number(d.clima.quenteSeco):Number(d.clima.molhado); }
+function tipoObservado(entradas,k){
+ assert(entradas.length>=2,'classificação estrutural exige pelo menos dois talhões');
+ const base=new Map(entradas[0].series.map(d=>[d.day,valorObservado(d,k)]));
+ assert(base.size===entradas[0].series.length&&base.size>0,'dias vazios/duplicados');
+ let comum=true;
+ for(const e of entradas){ const dias=new Set(); assert(e.series.length===base.size,'calendários incompatíveis');
+  for(const d of e.series){ const v=valorObservado(d,k); assert(base.has(d.day)&&!dias.has(d.day)&&Number.isFinite(v),'dia/covariável inválidos');dias.add(d.day);if(v!==base.get(d.day))comum=false; }
+ }
+ return comum?'Clima':'Controle';
+}
+
+
 // Diagnóstico isolado: motor original, adaptador explícito de covariáveis observadas.
 // Não reconstrói eventos de adubação nem certifica a integração da tela.
 function executarMotorObservavel(caminho) {
@@ -335,17 +354,17 @@ function executarMotorObservavel(caminho) {
   assert(new Set(entradas.map(x=>x.talhao)).size===entradas.length);
   const by=Object.fromEntries(entradas.map(x=>[x.talhao,x]));
   const W=[['janela observada',0,7],['anterior',7,14],['anterior longa',14,28]];
-  const c={Math,PIVOS:entradas.map(x=>({id:x.talhao,stage:'adulta'})),PEST:{[e.alvo]:Object.fromEntries(entradas.map(x=>[x.talhao,{obs:x.obs,apps:x.apps}]))},PRIOR:{},RXF:fatores.map(k=>({k,tipo:k==='placebo'?'Controle':'Clima',wins:W,dec:k==='ur'?0:2})),a:{id:e.alvo,nc:e.nc},D:Math.max(...entradas.flatMap(x=>x.obs.map(o=>o.day))),fval:(r,f,wi)=>{
+  const c={Math,PIVOS:entradas.map(x=>({id:x.talhao,stage:'adulta'})),PEST:{[e.alvo]:Object.fromEntries(entradas.map(x=>[x.talhao,{obs:x.obs,apps:x.apps}]))},PRIOR:{},RXF:fatores.map(k=>({k,tipo:tipoObservado(entradas,k),wins:W,dec:k==='ur'?0:2})),a:{id:e.alvo,nc:e.nc},D:Math.max(...entradas.flatMap(x=>x.obs.map(o=>o.day))),fval:(r,f,wi)=>{
    const lo=W[wi][1],hi=W[wi][2],start=wi===0?r.d1:r.d2-hi;
    const ds=by[r.pid].series.filter(x=>x.day>start&&x.day<=r.d2-lo);
    if(!ds.length)return null;
-   const vals=ds.map(x=>f.k==='placebo'?x.covariavel_teste:f.k==='ur'?x.clima.ur:f.k==='qs'?Number(x.clima.quenteSeco):Number(x.clima.molhado));
+   const vals=ds.map(x=>valorObservado(x,f.k));
    assert(vals.every(Number.isFinite),'covariável ausente/não finita');
    return vals.reduce((a,b)=>a+b,0)/vals.length*(f.k==='qs'||f.k==='molh'?7:1);
   }};
   vm.createContext(c);vm.runInContext(rng+fonte,c);
   const r=vm.runInContext(`(()=>{const rows=rxRows(a,D);if(rows.length<8)return {janelas:rows.length,reps:[],estado:'insuf'};const M=rxFit(rows);if(!M)return {janelas:rows.length,reps:[],estado:'singular'};const R={a,D,rows,M};rxBoot(R,M);rxStable(R,M);rxLevels(R);return {janelas:rows.length,estado:'executado',reps:M.reps.map(q=>({fator:q.f.k,janela:q.wi,nHi:q.nHi,nLo:q.nLo,pivHi:q.pivHi,wkHi:q.wkHi,beta:q.beta,level:q.level,ci95:q.ci95,stable:q.stable,mates:q.mates.map(m=>m.f.k)}))};})()`,c);
-  saida.push({safra:e.safra,semente:e.semente,alvo:e.alvo,...r});
+  saida.push({tipos:Object.fromEntries(c.RXF.map(f=>[f.k,f.tipo])),safra:e.safra,semente:e.semente,alvo:e.alvo,...r});
  }
- console.log(JSON.stringify({fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
+ console.log(JSON.stringify({adaptador_sha256:crypto.createHash('sha256').update(valorObservado.toString()+tipoObservado.toString()).digest('hex'),fonte_sha256:crypto.createHash('sha256').update(html).digest('hex'),entrada_sha256:crypto.createHash('sha256').update(fs.readFileSync(caminho)).digest('hex'),escopo:'rxRows/rxFit/rxBoot/rxStable/rxLevels originais; adaptador qs/molh/ur/placebo; PRIOR vazio para não usar sinal esperado',limitacoes:['diagnostico parcial; sem certificado de recuperação','nutrientes não convertidos em eventos','não representa rxGet/UI completos'],resultados:saida}));
 }
