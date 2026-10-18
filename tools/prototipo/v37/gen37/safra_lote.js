@@ -187,9 +187,10 @@ function slColar(self,l0k,col,txt){ const D=slDados(self); if(!D) return; const 
   const r=slColarBloco(dados,sl.vals,Math.max(0,l0),col,M,slCtx(self,sl.saf));
   const info='Colados '+r.dim[0]+' × '+r.dim[1]+': '+r.n+(r.n===1?' célula':' células')+(r.recusas.length?'; '+slRecusasTxt(r.recusas):'')+'. Nada foi salvo ainda.';
   const er=slSemErro(sl.err,r.feitos); self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false,err:er,gerr:Object.keys(er).length?sl.gerr:''})}); }
-function slAplicar(self){ const D=slDados(self); if(!D) return; const {sl,dados}=D; const n0=dados.filter(l=>sl.sel[l.k]).length;
+// selO (visão Mapa): o conjunto anunciado no painel; sem ele, as linhas marcadas (sl.sel)
+function slAplicar(self,selO){ const D=slDados(self); if(!D) return; const {sl,dados}=D; const SEL=selO||sl.sel; const n0=dados.filter(l=>SEL[l.k]).length;
   if(!n0){ self.setState({sl:Object.assign({},sl,{info:'Marque as linhas que vão receber os valores.'})}); return; }
-  const r=slAplicarSel(dados,sl.vals,sl.sel,sl.ap||{},slCtx(self,sl.saf));
+  const r=slAplicarSel(dados,sl.vals,SEL,sl.ap||{},slCtx(self,sl.saf));
   if(!r.cols.length){ self.setState({sl:Object.assign({},sl,{info:'Preencha ao menos um campo da faixa "Aplicar aos marcados".'})}); return; }
   const info='Aplicado em '+r.n+(r.n===1?' célula':' células')+' de '+n0+(n0===1?' linha':' linhas')+(r.recusas.length?'; '+slRecusasTxt(r.recusas):'')+'. Nada foi salvo ainda.';
   const er=slSemErro(sl.err,r.feitos); self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false,err:er,gerr:Object.keys(er).length?sl.gerr:''})}); }

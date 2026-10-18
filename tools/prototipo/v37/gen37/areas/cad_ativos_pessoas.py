@@ -285,10 +285,28 @@ CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[
 CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-08.dc.html'; }},
   cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Operações e rendimentos; troque o conjunto lá antes':'')];
 /* ATIVO-UNICO (proprietário, 18/10: "Tem cadastro de ativos no módulo manutenção e cadastros"): o CD-03 é a fonte única da identidade do ativo
-   (nome, classe, modelo, local, capacidade, situação). Grava na chave dos cadastros (CAD_LS 'ativos'); a Manutenção lê a mesma chave na hora */
-function c3atvIni(self){ if(self.__atvLido) return; self.__atvLido=1; const L=cadLsLer('ativos'); if(!Array.isArray(L)||!L.length) return;
-  const all=Object.assign({},self.state.g2||{}); all.g_atv=Object.assign({},all.g_atv||{},{rows:L.map(a=>({id:a.id,v:Object.assign({},a.v),s:{},p:{}}))}); self.state.g2=all; }
-function c3grava(self){ return cadLsGrava(self,{ativos:RW(self,'g_atv').map(r=>({id:r.id,v:Object.assign({},r.v)}))}); }
+   (nome, classe, modelo, local, capacidade, situação). Grava na chave dos cadastros (CAD_LS 'ativos'); a Manutenção lê a mesma chave na hora.
+   Gravação com a versão lida (Codex 6252809331, S2): a tela guarda o que leu (__atvDisco) e a lista de partida (__atvBase). Se outra tela gravou
+   depois, a gravação junta por id só o que mudou aqui (nos campos do formulário; os calculados na tela não contam): o ativo criado ou mudado na
+   outra tela fica; o mesmo ativo mudado nas duas é recusado com o motivo, e o rascunho continua. Último gravador não apaga nem inativa ninguém. */
+function c3lista(self){ return RW(self,'g_atv').map(r=>({id:r.id,v:Object.assign({},r.v)})); }
+function c3poe(self,L){ const all=Object.assign({},self.state.g2||{}); all.g_atv=Object.assign({},all.g_atv||{},{rows:L.map(a=>({id:a.id,v:Object.assign({},a.v),s:{},p:{}}))}); self.state.g2=all; }
+function c3atvIni(self){ if(self.__atvLido) return; self.__atvLido=1; const L=cadLsLer('ativos'); const tem=Array.isArray(L)&&L.length;
+  self.__atvDisco=tem?JSON.stringify(L):null; if(tem) c3poe(self,L); self.__atvBase=c3lista(self); }
+function c3junta(base,loc,disco){ const ks=(GR('g_atv').edit.fields||[]).map(f=>f.k); const J=a=>a?JSON.stringify(ks.map(k=>{ const x=a.v[k]; return x===undefined||x===null?'':String(x); })):null;
+  const by=xs=>{ const o={}; xs.forEach(a=>{ o[a.id]=a; }); return o; }; const B=by(base),L=by(loc),D=by(disco); const conf=[], poe={}, tira={};
+  Array.from(new Set(Object.keys(B).concat(Object.keys(L)))).forEach(id=>{ const b=J(B[id]),l=J(L[id]),d=J(D[id]); if(l===b) return;
+    if(d!==b&&d!==l){ conf.push(((L[id]||B[id]||D[id]).v||{}).nome||id); return; }
+    if(l===null) tira[id]=1; else poe[id]=L[id]; });
+  const lista=disco.filter(a=>!tira[a.id]).map(a=>poe[a.id]||a); loc.forEach(a=>{ if(poe[a.id]&&!D[a.id]) lista.push(a); });
+  return {lista,conf}; }
+function c3grava(self){ const loc=c3lista(self); const D=cadLsLer('ativos'); const dj=Array.isArray(D)&&D.length?JSON.stringify(D):null;
+  if(dj===(self.__atvDisco===undefined?null:self.__atvDisco)){ const e=cadLsGrava(self,{ativos:loc}); if(!e){ self.__atvDisco=JSON.stringify(loc); self.__atvBase=loc; } return e; }
+  const m=c3junta(self.__atvBase||loc,loc,D||self.__atvBase||loc);
+  if(m.conf.length) return 'outra tela alterou '+m.conf.join(', ')+' depois que esta abriu. Seu rascunho continua aqui: recarregue a página para ver o que foi salvo e refaça a alteração.';
+  const e=cadLsGrava(self,{ativos:m.lista}); if(e) return e; self.__atvDisco=JSON.stringify(m.lista); self.__atvBase=m.lista;
+  if(JSON.stringify(m.lista)!==JSON.stringify(loc)){ c3poe(self,m.lista); setTimeout(()=>{ try{ self.setState({g2:Object.assign({},self.state.g2)}); }catch(x){} },0); }
+  return ''; }
 function PREVALS(self,v){ cadActsIni(self); c3atvIni(self); fpvVals(self,v);
   /* ATIVO-UNICO: CD-03.dc.html#maq=<id> (vindo da Manutenção, "Editar cadastro ›") abre a ficha do ativo; abrir não grava */
   if(!self.__maqHash){ self.__maqHash=1; try{ const m=/[#&]maq=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; const r=id?g2find(RW(self,'g_atv'),id):null;

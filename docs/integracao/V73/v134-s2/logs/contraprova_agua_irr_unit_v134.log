@@ -1,0 +1,10 @@
+# contraprova: irrigacao_estado.js de e0c47a00 (v134), teste novo
+FALHA C1 contraexemplo do Codex: d0 8,4 com CAD 6 mostra 6; aplicar os 6 mm líquidos zera (antes ficava 2,4) :: depois: 2.4000000000000004 ≠ 0
+FALHA C2 a necessidade exibida, aplicada, zera o déficit (lâmina líquida = déficit mostrado) :: depois de aplicar a necessidade: 6 ≠ 0
+FALHA C3 ETc depois da aplicação não se perde: aplicação no dia −5, ETc 1 mm/dia, CAD 6 (oráculo diário) :: hoje: 6 ≠ 5
+FALHA C4 série e déficit de hoje coerentes: cada fim de dia igual ao oráculo e o último dia = hoje sem aplicação hoje :: dia -4: 6 ≠ 3
+FALHA C5 parcial zera só a faixa: déficit do pivô fica; a faixa coberta vai a 0 :: faixa: 2.4000000000000004 ≠ 0
+OK   C6 sem CAD calculável: o balanço de antes (8,4 − 6 = 2,4), sem passo diário
+FALHA C7 água acima da CAD drena: d0 2, aplicação de 6 mm no dia −6 e 7 mm de ETc em 7 dias dão 5 (oráculo), não 3 :: hoje: 3 ≠ 5
+RESULTADO: 1/7 ok
+rc=1
