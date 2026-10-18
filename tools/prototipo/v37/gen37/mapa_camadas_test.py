@@ -6,6 +6,48 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import sys
+
+# Executar somente em páginas isoladas do ensaio, após aplicar o contexto real.
+# O coletor lê classes e legendas do render corrente; não muda filtros/dados.
+SNAPSHOT_JS = r'''JSON.stringify((()=>{
+ const self=MUX.self;if(!self)throw Error('mapa ainda não inicializado');
+ const l=lay(self),f=flt(self,l),ids=TIDS();
+ if(!ids.length)throw Error('inventário de talhões vazio');
+ return {fazenda:FAZ,camada:l,filtros:f,alvos:ALV,
+  linhas:ids.map(id=>({id,...cls(l,f,id)})),
+  legenda:legend(self,l,f,[]).map(x=>({k:x.k===undefined?null:x.k,t:x.t}))};
+})())'''
+
+
+def comparar(base, candidata):
+    """Cada pacote contém 60 casos nomeados e seus snapshots, sem omissões."""
+    fases = ['Todas', 'A liberar', 'Liberadas', 'Em execução', 'Em conferência', 'Encerradas']
+    casos = ['OS|'+v+'|'+f for v in ['Fases', 'Avanço', 'Atrasos', 'Impedimentos'] for f in fases]
+    casos += ['MIP|'+d+'|'+a for d in ['7', '30'] for a in ['sem alvo', 'com alvo']]
+    casos += ['IRR|Hoje', 'IRR|Balanço hídrico']
+    esperados = {faz+'|'+c for faz in ['Santa Rita', 'Lagoa Grande'] for c in casos}
+    for pacote in [base, candidata]:
+        assert set(pacote) == esperados, 'inventário incompleto ou casos inesperados'
+        por_fazenda = {}
+        for chave, snap in pacote.items():
+            faz = chave.split('|', 1)[0]
+            assert snap['fazenda'] == faz, 'contexto de fazenda incorreto'
+            modo = chave.split('|')[1:]
+            f = snap['filtros']
+            if modo[0] == 'OS':
+                assert snap['camada'] == 'O.S./prazos' and f['ver'] == modo[1] and f['fase'] == modo[2], 'visão ou fase incorreta'
+            elif modo[0] == 'MIP':
+                assert snap['camada'] == 'MIP/MID' and f['per'] == 'Últimos '+modo[1]+' dias', 'período incorreto'
+                assert (bool(snap['alvos']) if modo[2] == 'com alvo' else snap['alvos'] is None), 'filtro de alvo incorreto'
+            else:
+                assert snap['camada'] == 'Irrigação' and f['ver'] == modo[1], 'visão de irrigação incorreta'
+            ids = [r['id'] for r in snap['linhas']]
+            assert ids and len(ids) == len(set(ids)), 'talhões ausentes ou duplicados'
+            assert set(ids) == por_fazenda.setdefault(faz, set(ids)), 'inventário varia entre casos'
+            assert snap['legenda'], 'legenda ausente'
+    assert base == candidata, 'classes, rótulos, inventário, contexto ou legendas divergentes'
+    return len(esperados)
 
 HERE = Path(__file__).resolve().parent
 NODE = os.environ.get('NODE', 'node')
@@ -30,4 +72,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 2 and sys.argv[1] == '--coletor':
+        print(SNAPSHOT_JS)
+    elif len(sys.argv) == 4 and sys.argv[1] == '--comparar':
+        print('PASS paridade de', comparar(json.loads(Path(sys.argv[2]).read_text()), json.loads(Path(sys.argv[3]).read_text())), 'contextos capturados')
+    else:
+        main()
