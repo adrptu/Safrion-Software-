@@ -23,7 +23,7 @@ const INT3_MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'j
 const INT3_COR = { 'Bom momento para vender': 'green', 'Bom momento para comprar': 'green', 'Neutro': 'gray', 'Abaixo do normal': 'yellow', 'Acima do normal': 'yellow' };
 function int3MesAno(m) { return INT_MESES[intMes(m)] + '/' + String(m).slice(2, 4); }
 function int3Vals(self, v, lado) { const venda = lado === 'venda', st = self.state;
-  const L = (venda ? INTP.vendas.map(x => ({ k: x.prod, un: x.un, serie: x.serie })) : INTP.compras.map(x => ({ k: x.nome, un: x.un, serie: x.serie }))).filter(x => x.serie && x.serie.length);
+  const L = (venda ? INTP.vendas.map(x => ({ k: x.prod, un: x.un, serie: x.serie, perecivel: !!x.perecivel })) : INTP.compras.map(x => ({ k: x.nome, un: x.un, serie: x.serie, lim: x.lim || null }))).filter(x => x.serie && x.serie.length);
   const k = L.some(x => x.k === st.i3_prod) ? st.i3_prod : (L[0] || {}).k, n = INT3_PER.indexOf(st.i3_n) >= 0 ? st.i3_n : 36;
   v.i3_curto = L.length <= 6; v.i3_longo = !v.i3_curto;
   v.i3_prods = L.map(x => ({ t: x.k, on: String(x.k === k), st: prPill(x.k === k), go: () => self.setState({ i3_prod: x.k }) }));
@@ -44,11 +44,16 @@ function int3Vals(self, v, lado) { const venda = lado === 'venda', st = self.sta
   v.i3_l2 = R.ev === 'Sem padrão'
     ? (R.N === 1 ? (venda ? 'Maior' : 'Menor') + ' preço do período em ' + mes + '. Um ano só é exemplo, não padrão: escolha 24 meses ou mais.'
                  : 'Sem padrão: a época muda o preço em menos de 3% no período (' + mes + ' ' + (venda ? 'acima' : 'abaixo') + ' em ' + gan + ').')
-    : 'Melhor mês para ' + (venda ? 'vender' : 'comprar') + ' em média: ' + mes + ' (' + gan + (venda ? ' acima' : ' abaixo') + ' da média do ano) · acerto ' + R.acerto + ' de ' + R.N + ' anos · evidência ' + R.ev;
+    : 'Melhor mês para ' + (venda ? 'vender' : 'comprar') + ' em média: ' + mes + ' (' + gan + (venda ? ' acima' : ' abaixo') + ' da média do ano) · padrão observado em ' + R.N + ' anos · acerto retrospectivo ' + R.acerto + ' de ' + R.N + ' (nos mesmos anos: descreve, não prevê)';
+  // revisão do Codex 6252555281: o histórico não vira "esperar" quando o produto é perecível ou a necessidade vem antes do melhor mês
+  if (R.ev !== 'Sem padrão' && venda && x.perecivel) v.i3_l2 += ' · produto perecível: não se guarda para esperar o melhor mês; vende-se na colheita.';
+  if (R.ev !== 'Sem padrão' && !venda && x.lim) { const ym = String(R.hoje.m).slice(0, 7), a = Number(ym.slice(0, 4)), m0 = Number(ym.slice(5, 7)) - 1;
+    const ano = R.melhor >= m0 ? a : a + 1, ini = ano + '-' + String(R.melhor + 1).padStart(2, '0') + '-01';
+    if (ini > x.lim) v.i3_l2 += ' · a necessidade vem antes: pedir até ' + x.lim.slice(8, 10) + '/' + x.lim.slice(5, 7) + ', sem esperar ' + mes + '.'; }
   v.i3_ev = R.ev; v.i3_tem_selo = !!R.selo; v.i3_selo = R.selo || ''; const sc = PRK[INT3_COR[R.selo] || 'gray']; v.i3_selo_st = 'color:' + sc[0] + ';background:' + sc[1] + ';';
   v.i3_dica = 'Percentil: posição do preço de agora entre os ' + n + ' meses (0 = o mais baixo, 100 = o mais alto), sem inflação (IPCA). Selo: só com padrão (24 meses ou mais e a época mudando o preço em 3% ou mais); '
     + (venda ? 'percentil ' + INT3_ALTO + ' ou mais = bom momento para vender; ' + INT3_BAIXO + ' ou menos = abaixo do normal.' : 'percentil ' + INT3_BAIXO + ' ou menos = bom momento para comprar; ' + INT3_ALTO + ' ou mais = acima do normal.')
-    + ' Evidência: Forte com 3 anos ou mais, acerto em todos menos um e amplitude de 3% ou mais. Histórico não é previsão.';
+    + ' Padrão observado: o melhor mês e o acerto saem dos mesmos anos (acerto retrospectivo), então descrevem o passado e não medem previsão. Histórico não é previsão.';
   const dev = k2 => Number(prSub(k2, 1)), M = Math.max(0.0001, ...R.z.min.concat(R.z.max).map(z => Math.abs(dev(z))));
   const Y = d => 50 - d / M * 44;
   v.i3_barras = R.z.idx.map((z, i) => { const y = Y(dev(z)), y0 = Math.min(y, 50), h = Math.max(1, Math.abs(y - 50)), ya = Y(dev(R.z.max[i])), yb = Y(dev(R.z.min[i])), best = i === R.melhor;

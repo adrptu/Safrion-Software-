@@ -45,9 +45,11 @@ try:
             chk(f'A1b {W} {pg}: 12, 24 e 48 meses mudam o gráfico (pontos = meses), o percentil e o N de anos (1, 2, 4)', n_ok and '1 ano' in anos[0] and '2 anos' in anos[1] and '4 anos' in anos[2]
                 and len({res[t]['l1'] for t in res} | {r36['l1']}) >= 2, [anos, [res[t]['l1'] for t in res]])
             chk(f'A5 {W} {pg}: 12 meses não mostra selo e diz que um ano é exemplo, não padrão', res['12 meses']['selo'] == '' and 'não padrão' in res['12 meses']['l2'], res['12 meses'])
-            chk(f'A1c {W} {pg}: com 48 meses, a leitura diz o melhor mês para {lado}, o acerto em N anos e a força da evidência (ou "Sem padrão")',
-                ('Melhor mês para ' + lado in res['48 meses']['l2'] and 'acerto' in res['48 meses']['l2'] and 'de 4 anos' in res['48 meses']['l2']) or 'Sem padrão' in res['48 meses']['l2'], res['48 meses']['l2'])
-            chk(f'A7a {W} {pg}: a dica ⓘ traz a regra do percentil, do selo e da evidência', 'Percentil' in r36['dica'] and 'Evidência' in r36['dica'] and 'não é previsão' in r36['dica'], r36['dica'][:200])
+            # revisão do Codex 6252555281: rótulo descritivo ("padrão observado em N anos", acerto retrospectivo), sem "Forte"/"Fraca"
+            chk(f'A1c {W} {pg}: com 48 meses, a leitura diz o melhor mês para {lado}, "padrão observado em 4 anos" e o acerto retrospectivo, sem rótulo de força (ou "Sem padrão")',
+                ('Melhor mês para ' + lado in res['48 meses']['l2'] and 'padrão observado em 4 anos' in res['48 meses']['l2'] and 'acerto retrospectivo' in res['48 meses']['l2']
+                 and 'Forte' not in res['48 meses']['l2'] and 'Fraca' not in res['48 meses']['l2']) or 'Sem padrão' in res['48 meses']['l2'], res['48 meses']['l2'])
+            chk(f'A7a {W} {pg}: a dica ⓘ traz a regra do percentil, do selo e do padrão observado (acerto retrospectivo, não previsão)', 'Percentil' in r36['dica'] and 'acerto retrospectivo' in r36['dica'] and 'não é previsão' in r36['dica'], r36['dica'][:200])
             d = json.loads(J("""JSON.stringify({sw:document.documentElement.scrollWidth, vw:innerWidth, vaza:[...document.querySelectorAll('.i3 *')].filter(e=>{const r=e.getBoundingClientRect(); const m=document.querySelector('.i3').getBoundingClientRect(); return r.width>0&&r.right>m.right+1;}).length,
               alvos:[...document.querySelectorAll('.i3 button')].filter(b=>b.getBoundingClientRect().height>0).every(b=>b.getBoundingClientRect().height>=36)})""") or '{}')
             chk(f'A7b {W} {pg}: nada vaza (página nem bloco) e os toques de produto e período têm 36 px ou mais', d.get('sw', 9e9) <= d.get('vw', 0) and d.get('vaza') == 0 and d.get('alvos'), d)
@@ -69,6 +71,11 @@ try:
             chk(f'A7d {W} {pg}: sem erro de JavaScript', not ee, ee[:3])
             if W == 1440 and os.environ.get('I3_SHOTS'):
                 periodo('36 meses'); c.shot(os.path.join(os.environ['I3_SHOTS'], f'intel03_{pg[:2]}_{W}.png'))
+    # revisão do Codex 6252555281: produto perecível não vira "esperar o melhor mês"
+    c.aparelho(1440, 900); c.goto(f'http://127.0.0.1:{port}/Main.dc.html', .3); J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{port}/IV.dc.html', 1.4)
+    J("(()=>{const b=[...document.querySelectorAll('.i3 button')].find(x=>/^Mamão/.test(x.innerText.trim())); b&&b.click();})()"); time.sleep(.6); periodo('48 meses'); rp = le()
+    chk('A9 IV · Mamão (perecível) em 48 meses: a leitura diz que não se guarda para esperar o melhor mês (ou "Sem padrão")',
+        bool(rp) and ('produto perecível' in rp['l2'] or 'Sem padrão' in rp['l2'] or 'não padrão' in rp['l2']), rp and rp['l2'])
 finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {OK} ok · {FAIL} falhas')

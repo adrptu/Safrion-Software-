@@ -20,8 +20,8 @@ try:
           'Bloqueado' in r and 'OM-0233' in fx and 'retorno previsto 24/09' in fx and href=='OS.dc.html', [r,fx,href])
     t.clk('A resolver'); time.sleep(.2); n1=conta(); vis=[x for x in ('Trator T1','Máquina TSI','Bomba do Pivô 2','Trator 02') if t.rowtxt(0,x)]
     t.clk('Limpar filtros'); n2=conta()
-    t.chk('filtro rápido "A resolver" (no bloco) filtra as exceções (T1, TSI vencida, bomba a aferir) e "Limpar filtros" volta às 15',
-          n1=='3' and vis==['Trator T1','Máquina TSI','Bomba do Pivô 2'] and n2=='15', [n1,vis,n2])
+    t.chk('filtro rápido "A resolver" (no bloco) filtra as exceções (T1, TSI vencida, bomba a aferir) e "Limpar filtros" volta às 16 (ATIVO-UNICO, 18/10: o Comboio CB-01 entrou no cadastro)',
+          n1=='3' and vis==['Trator T1','Máquina TSI','Bomba do Pivô 2'] and n2=='16', [n1,vis,n2])
     t.openrow(0,'Trator T1'); L=t.labels(); orig=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
     # 16/10/2026 (formulário só com o essencial): "Responsável técnico" (só leitura, da Manutenção) saiu do cadastro; segue na Manutenção
     t.chk('formulário do T1: condição técnica só leitura, vinda da Manutenção (OM-0233), classe fixa, origem "Ver ordens afetadas", sem "Valor do ativo" e sem "Responsável técnico"',

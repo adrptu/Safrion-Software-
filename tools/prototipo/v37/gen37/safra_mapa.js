@@ -30,7 +30,7 @@ function smMarcar(self,ks,on){ const cur=self.state.sl; if(!cur) return; const s
 function smVals(self,v){ const sl=self.state.sl; const lins=self.__slLin||[];
   const vista=sl.vista==='mapa'?'mapa':'tabela'; v.sl_vTab=vista==='tabela'; v.sl_vMapa=vista==='mapa';
   v.sl_vistas=[['tabela','Tabela'],['mapa','Mapa']].map(([k,t])=>({t,on:String(vista===k),al:'Ver em '+t.toLowerCase(),go:()=>smSet(self,{vista:k,info:''}),
-    st:'min-height:36px;padding:0 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid '+(vista===k?'#1E7A4C;background:#E4F3E9;color:#1E7A4C;':'#E4E9E5;background:#FFFFFF;color:#15201A;')}));
+    st:'padding:0 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid '+(vista===k?'#1E7A4C;background:#E4F3E9;color:#1E7A4C;':'#E4E9E5;background:#FFFFFF;color:#15201A;')}));
   const G=SM_GEO[sl.faz]||null; v.sm_temGeo=!!G;
   Object.keys(SM_GEO).forEach(f=>{ v['sm_f_'+SM_FK[f]]=v.sl_vMapa&&f===sl.faz; });
   if(!v.sl_vMapa){ return; }
@@ -81,7 +81,7 @@ function smVals(self,v){ const sl=self.state.sl; const lins=self.__slLin||[];
   // legenda: classe, cor e área
   v.sm_leg=Object.values(leg).sort((a,b)=>a.ord-b.ord).map(x=>({t:x.t,ha:nfa(r2(x.ha))+' ha',st:'display:inline-block;width:14px;height:14px;border-radius:4px;flex-shrink:0;border:1px '+(x.c==='#FFFFFF'?'dashed #8A968E':'solid rgba(0,0,0,.12)')+';background:'+x.c+';'}));
   v.sm_cores=[['cult','Cultura'],['plano','Plano'],['plantio','Plantio'],['sit','Situação']].map(([k,t])=>({t,on:String(cor===k),go:()=>smSet(self,{cor:k}),
-    st:'min-height:36px;padding:0 12px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border:1px solid '+(cor===k?'#1E7A4C;background:#E4F3E9;color:#1E7A4C;':'#E4E9E5;background:#FFFFFF;color:#15201A;')}));
+    st:'padding:0 12px;border-radius:999px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;border:1px solid '+(cor===k?'#1E7A4C;background:#E4F3E9;color:#1E7A4C;':'#E4E9E5;background:#FFFFFF;color:#15201A;')}));
   // atalhos de seleção (um toque); Esc limpa a seleção antes de fechar o painel
   const todosT=Object.keys(resumo).filter(t=>!resumo[t].S.ro&&resumo[t].S.eds.length);
   const marcarSo=(ts)=>{ const s={}; ts.forEach(t=>resumo[t].S.eds.forEach(l=>{ s[l.k]=true; })); smSet(self,{sel:s,info:''}); };

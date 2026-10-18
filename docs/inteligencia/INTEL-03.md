@@ -117,3 +117,19 @@ Correção: a lista da INTEL-02 (recomendação, "espere até", economia esperan
 2. A decomposição pela ordem bolsa → câmbio → base é aceitável, ou prefere a média das duas ordens (Shapley), para não depender da ordem?
 3. Na compra de fertilizante, a referência deve ser o FOB em US$ × câmbio (paridade de importação) em vez do preço local? Isso muda o "por que mudou".
 4. Algum caso em que o selo induziria a uma decisão errada: perecível, produto com contrato a termo já fechado ou praça sem série?
+
+## Revisão do Codex sobre a v133 (6252555281) · tratada na v134
+
+- **Rótulo descritivo:**
+  - "evidência Forte/Fraca" saiu da tela. A leitura diz "padrão observado em N anos · acerto retrospectivo k de N (nos mesmos anos: descreve, não prevê)".
+  - O melhor mês e o acerto saem dos mesmos anos. Por isso não medem capacidade preditiva.
+  - Medir acerto preditivo pede ano de avaliação separado antes de escolher o mês. Fica para a F2, se ganhar decisão.
+- **O histórico não vira "esperar":**
+  - produto perecível (Mamão): "não se guarda para esperar o melhor mês; vende-se na colheita";
+  - compra cujo último dia para pedir (`lim` = necessidade − prazo) vem antes do melhor mês: "a necessidade vem antes: pedir até dd/mm, sem esperar <mês>".
+  - Quantidade já contratada ainda não entra: o protótipo não tem o contratado por produto nesta tela. Volta quando o painel ler os contratos do VEN.
+- **Físico × FOB:** as séries do protótipo são de preço na fazenda (sintéticas, rotuladas). Nada na tela chama FOB × câmbio de preço local. A decomposição bolsa → câmbio → base entra só na F2, como identidade contábil com a ordem declarada, sem atribuição causal.
+- **Prova:**
+  - `intel03_nav_test` A1c e A7a ajustados ao rótulo novo;
+  - A9 novo (perecível);
+  - o caso de necessidade antes do melhor mês foi conferido na leitura da tela. Ainda não tem oráculo próprio no teste.

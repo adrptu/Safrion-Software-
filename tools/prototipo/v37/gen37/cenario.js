@@ -268,7 +268,8 @@ function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; con
     return {id:r.ref,item:r.item,un:r.un||(unidades.length===1?unidades[0]:null),linha:r.linha};};
   (b.rec || []).forEach(r => { if (r.faz !== faz) return; const p=linhaDe(r);
     if(!p.un){recebNaoApuravel.push(Object.assign({},r,{motivo:'Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.'}));return;}
-    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&cenCompOutra(e,p,linhas));
+    // cada outra previsão do mesmo PC e item é outra ocorrência, mesmo sem linha ou com a mesma chave: nota que cabe em duas não baixa nenhuma (Codex 6250436415)
+    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&linhas.some(q=>cenCompCabe(e,q)));
     if(amb.length){recebNaoApuravel.push(Object.assign({},r,{motivo:'Nota '+amb.map(e=>e.nf||e.id).join(', ')+' sem unidade ou linha cabe em mais de uma linha do '+r.ref+': previsão fora do suprimento. Confira a nota no Estoque.'}));return;}
     const baixa=recebidos.filter(e=>cenCompCabe(e,p)).reduce((a,e)=>a+(Number(e.apto==null&&e.quar==null?e.conf:((Number(e.apto)||0)+(Number(e.quar)||0)))||0),0);
     const q=Math.max(0,r.q-baixa); if(q>1e-9)recebDt.push(Object.assign({},r,{q})); });

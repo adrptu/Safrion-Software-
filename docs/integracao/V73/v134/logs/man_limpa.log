@@ -1,0 +1,11 @@
+OK    L1 nenhuma visão da Manutenção tem cartão de indicador (1440 e 390 px)
+OK    L2 faixa Filtros com o funil em cada visão, só com os filtros dela; a Pendência dos ativos na barra da lista
+OK    L3 Sem ordem · Tipo: Preventiva só vencimentos; Inspeção só achados de inspeção; Corretiva só relatos e alertas
+OK    L4 Ordens · Corretiva + Alta: linhas = ordens do recorte; o chip Todas conta o mesmo
+OK    L5 Grupo filtra também em Ativos e Planos
+OK    L6 Lista, Cartões e Kanban em ícones com nome; o ícone Kanban abre o quadro
+OK    L8 Abastecimentos: o Grupo filtra pelo ativo do lançamento; limpar restaura; o grupo continua ao voltar a Ativos
+OK    L9 "Pendências sem ordem": cartão do Painel = linhas da visão Sem ordem = manSemOrdem
+OK    L7 sem erro de JS
+RESULTADO: 9 ok · 0 falhas
+rc=0

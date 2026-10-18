@@ -1,0 +1,50 @@
+OK    A1 Safra 2026/27 (uma fazenda): "Editar talhões ›" na faixa da fazenda (a tabela agrupa por fazenda também com uma só, 17/10) e não no título do bloco
+OK    A2 abre "Editar talhões da Santa Rita" com uma linha por talhão (T1 com as parcelas recuadas embaixo), resumo da área e selo "Tudo salvo"; Salvar com contador 0
+OK    A3 no computador o foco já está na 1ª célula editável (área de T1-A) com o número selecionado (digitar substitui)
+OK    B1 foco no número seleciona o conteúdo (INP-04): "70" substitui 62 em T3; Enter desce para a meta de T4 já selecionada; "68"; ↑ volta para T3
+OK    B2 Tab anda para a coluna seguinte (variedade → plantio de T3), Shift+Tab volta; ↓ desce na mesma coluna (também na célula travada, que só se lê)
+OK    B3 células alteradas destacadas (borda âmbar) e contador "Salvar alterações (2)"; selo "2 alterações não salvas"
+OK    B4 meta com teclado decimal, sem corretor e sem autocompletar; unidade à vista ao lado (sc/ha; mamão t/ha/ano)
+OK    E2 T2 com a OS-0421 em execução: cultura, variedade e plano travados na célula com o motivo; meta e plantio editáveis; Situação "Bloqueado · OS-0421" com o link OS-0421 ›
+OK    C1 Aplicar aos 4 marcados (cultura Milho e plano Milho safrinha): T3, P1 e P2 recebem; T4 recusa os dois pela OS-0420 e o resumo diz quantos e por quê
+OK    C2 trocar a cultura limpa a variedade que era da soja (62 X, 58 W): nada fica com variedade de outra cultura
+OK    C3 salvar com variedade vazia: recusa atômica nas células (Variedade: Informe a variedade), nada gravado, o digitado fica
+OK    C4 variedade aplicada aos marcados; T4 recusa (OS-0420)
+OK    C5 (revisão do app do Codex, #98 P2) a variedade aplicada aos marcados apaga o erro "Informe a variedade" dessas linhas e a mensagem geral da recusa
+OK    C6 (revisão do app do Codex, #98 P2) na faixa, trocar Soja por Milho tira do campo Variedade a cultivar de soja (58 W)
+OK    D1 colar 3 × 2 a partir do plantio de T3: datas dd/mm (o ano da safra) e vírgula decimal; "Colados 3 × 2: 6 células"; nada salvo
+OK    D2 colar com recusas: T4 (OS-0420) recusa cultura e variedade; "Trigo" fora do cadastro recusado; o resto colado
+OK    D3 colar um plano de outra cultura (Feijão pivô em T3 de milho): recusado com o motivo; o plano fica
+OK    D4 colar área acima do talhão na parcela: recusada (acima dos 312 ha do talhão)
+OK    E1 T1-A com 200 ha (T1-B 152): Salvar recusa com a conta do Dividir ("As parcelas somam 352 ha; o talhão tem 312 ha"), nada gravado, o rascunho fica
+OK    F1 salvar: um aviso de sucesso com as alterações; o painel fecha; os cultivos mudaram (T3, P1, P2 milho; T1-A 150 ha; metas e plantios colados)
+OK    F2 demanda recalculada pela mesma conta: Atrazina 500 (só no plano do milho) passa a ter demanda; Glifosato (só no da soja de T1/T2) não cresce
+OK    F3 a tabela mostra os valores novos (T3 e P2 com milho e Milho safrinha)
+OK    F4 reabrir mostra o salvo (T3 milho, meta 181) e o resumo com 1.155 ha planejados (T1-A 150)
+OK    G1 Esc com alteração pede confirmação ("Há alterações não salvas"); Continuar editando fica; Descartar fecha sem gravar
+OK    G2 conflito: outra aba liberou a OS-0430 (T1-A) depois de abrir; Salvar recusa com o motivo, nada gravado, o rascunho fica
+OK    G3 reaberto, T1-A passa a travar cultura, variedade e plano pela OS-0430 (a fase vem do cenário compartilhado)
+OK    G4 falha no meio da gravação: "Não foi possível salvar (falha simulada)", nada gravado, painel aberto com o rascunho
+OK    G5 repetir depois grava uma vez (P2 meta 79)
+OK    G6 "Dividir T1" na linha: com alteração pergunta antes; descartado, abre o painel Dividir existente
+OK    G7 sem erro de JavaScript até aqui
+OK    G8 Safrinha 2027: perenes de outra safra (T7 mamão e C1 café) só leitura, com o motivo; talhões livres com a área livre calculada (não digitada)
+OK    F5 duas linhas livres marcadas recebem os 5 campos de uma vez; Salvar alterações (10)
+OK    F6 duplo clique no Salvar: grava uma vez (2 cultivos novos, T3 e T4, não 4)
+OK    F7 o resumo da fazenda muda (planejados e livres) e as linhas planejadas passam a cultivo
+OK    A4 com Santa Rita e Lagoa Grande: cada faixa de fazenda tem "Editar talhões ›" (e o título do bloco não repete a ação)
+OK    A5 a da Lagoa Grande abre "Editar talhões da Lagoa Grande" na sub-safra dela, com os 23 pivôs; ocupados pelo mamão de outra safra só leitura, com o motivo
+OK    A6 salvar pela faixa da Santa Rita atualiza a faixa da fazenda (1.155 ha · 8 de 8)
+OK    A7 no modo Cartões a faixa de cada fazenda continua com "Editar talhões ›"
+OK    A8 e abre o mesmo painel pelos Cartões
+OK    I1 formulário do motor: o campo numérico (Meta) recebe o foco com o número selecionado e sem corretor (INP-04, INP-07 no g2lib, todas as telas)
+OK    H1 390 px: "Editar talhões ›" da faixa com 44 px; painel sem rolagem de lado (página e painel), cabeçalho de colunas trocado por rótulos em cada campo, foco não abre o teclado
+OK    H2 390 px: todo campo, lista, botão e caixa de marcar com alvo de 44 px ou mais
+OK    H3 390 px: barra de salvar fixa à vista no meio da lista; faixa "Aplicar" sem campos até marcar uma linha
+OK    H4 390 px: marcada uma linha, a faixa mostra os campos (cultura, variedade, plantio, meta e plano)
+OK    H5 390 px: editar e salvar pelo celular
+     (medido) 390 px, faixa da fazenda: link 'Editar talhões ›' 44 px de altura; ⋯ [32, 32] px
+OK    H7 390 px com duas fazendas: "Editar talhões ›" à vista na faixa e também no ⋯ da faixa ("Editar talhões da Lagoa Grande"), que abre o painel da fazenda
+OK    H6 sem erro de JavaScript
+RESULTADO: OK 47/47
+rc=0

@@ -1,0 +1,10 @@
+OK    U1 Comboio CB-01 no CD-03: classe Veículo, carga 6.000 L e hodômetro de 48.200 km (só leitura, da Manutenção)
+OK    U2 "Trator 09" cadastrado no CD-03 aparece na Manutenção › Ativos com "Sem plano", sem condição nem leitura inventadas
+OK    U3 renomear no CD-03 ("Trator 09 Ruivo") muda o nome na Manutenção
+OK    U4 inativar no CD-03 deixa o ativo inativo na Manutenção ("Ativo inativo", fora de Sem plano)
+OK    U5 Manutenção › ativo › "Editar cadastro ›" (CD-03.dc.html#maq=<id>) abre o formulário daquele ativo no CD-03
+OK    U6 a entrada da Manutenção abre com o bloco "Planejamento" (Ativos, Planos), sem "Cadastro"
+OK    U7 F5: "Trator 09 Ruivo" segue no CD-03 e na Manutenção; nenhum erro de JavaScript
+RESULTADO: 7/7 ok
+rc=0
+rc=0
