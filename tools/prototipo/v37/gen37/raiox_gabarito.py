@@ -23,6 +23,58 @@ CONTRATO = {
 }
 
 
+
+# Pré-especificação anterior ao primeiro ensaio do motor. Não reduz o gate
+# de 100% de direção nas fixtures determinísticas ao agregado de séries.
+ENSAIO = {
+    'versao': 1,
+    'unidade_replica': 'semente; talhoes agrupados dentro de cada replica',
+    'comparacao': 'classe e sinal; nunca magnitude beta versus delta',
+    'por_safra': True,
+    'limites': {'direcao_fixture_deterministica': 1.0,
+                'direcao_series_fortes': 0.80, 'forte_placebo_max': 0.05,
+                'forte_fraco_max': 0.05, 'forte_nao_identificavel_max': 0.0,
+                'forte_nao_pareado_max': 0.0},
+    'insuf': 'contar separadamente; sem denominador avaliavel nao ha aceite',
+    'ambiguo': 'sem expectativa de sinal; reportar separadamente',
+    'suporte': {'talhoes_min': 3, 'alto_min': 40, 'baixo_min': 40, 'semanas_min': 5},
+    'ausentes': 'nao avaliavel; sem imputacao; n14/k14 nao sao eventos',
+    'estado': 'pre_especificado; ensaio nao executado',
+}
+
+
+def expandir_populacao(episodios, talhoes=16):
+    """Exposições próprias com clima comum por réplica, sem criar eventos.
+
+    Mantém o catálogo, o clima, o ruído e a duração de cada fonte. Varia
+    n14/k14 e o gatilho de agenda por talhão, não apenas o ruído. Não garante
+    suporte após exclusões; o avaliador precisa conferi-lo antes do aceite.
+    A identidade fonte deve ser única por cenário/safra/semente/alvo/fator.
+    """
+    import copy
+    if type(talhoes) is not int or talhoes < 3:
+        raise ValueError('População exige pelo menos três talhões')
+    vistos, saida = set(), []
+    for ep in episodios:
+        chave = tuple(ep[k] for k in ('cenario','safra','semente','alvo','fator'))
+        if chave in vistos:
+            raise ValueError('Mais de um talhão fonte na mesma população')
+        vistos.add(chave)
+        for i in range(talhoes):
+            novo = copy.deepcopy(ep)
+            novo['cenario'] = ep['cenario']+'-populacao-v1'
+            novo['talhao'] = ep['talhao']+'-P'+str(i+1).zfill(2)
+            for d, dia in enumerate(novo['dias']):
+                # Oscilação defasada e amplitude próprias, sem consultar o alvo
+                # ou os resultados do oráculo para escolher exposições.
+                fase = 2*math.pi*i/talhoes
+                dia['n14'] = 6.4 + 3*(1+math.sin(d/7+fase))
+                dia['k14'] = 10 + 8*(1+math.cos(d/9+fase))
+            novo['politica']['gatilho'] = ep['politica']['gatilho']*(0.8+0.4*i/(talhoes-1))
+            saida.append(novo)
+    return saida
+
+
 def hash_contrato():
     return hashlib.sha256(json.dumps(CONTRATO, sort_keys=True,
                                      separators=(',', ':')).encode()).hexdigest()

@@ -199,6 +199,18 @@ a=g.gerar(eps)
 assert len(a['entrada'])==2
 assert all(e['agenda_referencia']=='ligado' for e in a['entrada'])
 assert len(a['oraculo']['pares'])==8
+pop=g.expandir_populacao(eps,3)
+assert len(pop)==12 and len({x['talhao'] for x in pop})==3
+assert all(x['semente']==0 for x in pop)
+assert len({g.digest(x['dias']) for x in pop[:3]})==3
+assert all([d['clima'] for d in x['dias']]==[d['clima'] for d in eps[0]['dias']] for x in pop[:3])
+assert len({x['politica']['gatilho'] for x in pop[:3]})==3
+assert len(g.gerar(pop)['entrada'])==6
+assert g.digest(pop)==g.digest(g.expandir_populacao(eps,3))
+try:g.expandir_populacao(eps,2);raise AssertionError('população insuficiente aceita')
+except ValueError:pass
+print('PASS população: clima comum, exposições/agenda próprias, sementes preservadas, factual único, repetição determinística.')
+
 bad=copy.deepcopy(eps);bad[1]['x0']=3
 try:g.gerar(bad);raise AssertionError('mundo conflitante aceito')
 except ValueError as e:assert 'Mundo factual conflitante' in str(e)
