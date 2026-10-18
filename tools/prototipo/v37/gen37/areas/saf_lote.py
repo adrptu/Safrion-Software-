@@ -121,7 +121,7 @@ def _mapa_html():
            f'<a href="{H("sm_desenhar")}" class="sl-lk" style="align-self: center;">Desenhar no Mapa ›</a></div></div></sc-if>')
     leg = (f'<div class="sm-leg" role="list" aria-label="Legenda"><sc-for list="{H("sm_leg")}" as="g" hint-placeholder-count="3"><span role="listitem" class="sm-li"><i style="{H("g.st")}"></i>{H("g.t")} <b>{H("g.ha")}</b></span></sc-for></div>')
     barra = (f'<div class="sm-barra"><div role="group" aria-label="Colorir por" class="sm-grp"><span class="sm-rot">Colorir por</span>'
-             f'<sc-for list="{H("sm_cores")}" as="c" hint-placeholder-count="4"><button type="button" aria-pressed="{H("c.on")}" onClick="{H("c.go")}" style="{H("c.st")}">{H("c.t")}</button></sc-for></div>'
+             f'<sc-for list="{H("sm_cores")}" as="c" hint-placeholder-count="4"><button type="button" class="sm-bt" aria-pressed="{H("c.on")}" onClick="{H("c.go")}" style="{H("c.st")}">{H("c.t")}</button></sc-for></div>'
              f'<div class="sm-grp" aria-label="Marcar" role="toolbar"><span class="sm-rot">Marcar</span><sc-for list="{H("sm_atalhos")}" as="a" hint-placeholder-count="4"><button type="button" class="sm-at" aria-label="{H("a.al")}" onClick="{H("a.go")}">{H("a.t")}</button></sc-for></div>'
              f'<span role="status" class="sm-cont">{H("sm_cont")}</span></div>')
     campo = lambda rot, html: f'<label class="sm-c"><span class="sm-rot">{rot}</span>{html}</label>'
@@ -161,6 +161,8 @@ MAPA_CSS = ('<style>'
             f'.sm-rot{{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:{MUTED}}}'
             f'.sm-at{{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid {LINE};background:#FFFFFF;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}}'
             '.sm-cont{font-size:13px;font-weight:700;margin-left:auto}'
+            # alvo de toque: 36 px no mouse, 44 px no toque ou a 600 px ou menos (saf_lote_test H2)
+            '.sm-bt{min-height:36px}@media (max-width:600px),(pointer:coarse){.sm-bt,.sm-at{min-height:44px}}'
             '.sm-err{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:10px;background:#FDE8E6;border:1px solid #F3B8B1;color:#7A1C12;font-size:13px}'
             '.sm-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px}'
             '.sm-li{display:inline-flex;align-items:center;gap:6px}'
@@ -196,7 +198,7 @@ def painel():
             f'<div style="display: flex; gap: 10px; align-items: flex-start;"><div style="flex-grow: 1; min-width: 0;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px;">{H("sl_titulo")}</h2>'
             f'<div style="font-size: 12.5px; color: {MUTED};">{H("sl_sub")}</div></div>'
             # SAF-MAPA (18/10): a mesma edição em Tabela ou Mapa (um estado só: seleção, rascunho e gravação)
-            f'<div role="group" aria-label="Visão" style="display: flex; gap: 6px; flex-shrink: 0;"><sc-for list="{H("sl_vistas")}" as="w" hint-placeholder-count="2"><button type="button" aria-pressed="{H("w.on")}" aria-label="{H("w.al")}" onClick="{H("w.go")}" style="{H("w.st")}">{H("w.t")}</button></sc-for></div>'
+            f'<div role="group" aria-label="Visão" style="display: flex; gap: 6px; flex-shrink: 0;"><sc-for list="{H("sl_vistas")}" as="w" hint-placeholder-count="2"><button type="button" class="sm-bt" aria-pressed="{H("w.on")}" aria-label="{H("w.al")}" onClick="{H("w.go")}" style="{H("w.st")}">{H("w.t")}</button></sc-for></div>'
             f'<button type="button" aria-label="Fechar" onClick="{H("sl_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 12px; border-radius: 10px; background: {BG}; font-size: 13px;"><b>{H("sl_n")}</b><span style="color: {MUTED};">{H("sl_resumo")}</span><span role="status" id="sl-selo" style="{H("sl_selost")}">{H("sl_selo")}</span></div>'
             f'<sc-if value="{H("sl_hasg")}" hint-placeholder-val="{F()}"><div role="alert" id="sl-gerr" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("sl_gerr")}</div></sc-if>'

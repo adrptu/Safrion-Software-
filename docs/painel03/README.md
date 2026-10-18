@@ -144,3 +144,15 @@ A régua serve a todos até haver meta por indicador (F3). "Pior" depende do sen
 - **F1:** painel único com as 6 abas, os indicadores da tabela do §2.2, "Atacar agora" e "Decidir" pela regra do §3, e a migração dos 4 painéis e dos seus testes.
 - **F2:** margem prevista por cultura com a cascata ao orçamento; falta de insumo antes da necessidade (`cenEstDem`); disponibilidade da frota; momento de compra e venda (INTEL-02 e INTEL-03).
 - **F3:** meta por indicador, cadastrada pelo gestor com dono e ritmo; tendência das últimas semanas.
+
+## Revisão do Codex sobre a v133 (6252555281)
+
+- **Classe pela causa (feito na v134):**
+  - ativo bloqueado com risco à segurança (`seg` no registro da condição) entra em "Lei e segurança" (classe 1), com o título "· risco à segurança";
+  - o resto continua "Prazo e ativos". `pgClasseAtivo`; `painel03_test` P3c.
+  - A semente não tem bloqueio com risco à segurança marcado. A regra vale quando a Manutenção registrar.
+- **Item sem R$ não deve cair abaixo de risco conhecido só por faltar o valor:** aceito para a F2. Proposta de chave transitiva dentro da classe: primeiro os itens com algum impacto conhecido, depois dias até o dano, depois R$, depois ha, depois o mais antigo. A ordem de hoje (R$ → ha → dias) fica até o Codex confirmar a chave, porque muda a regra P3 especificada.
+- **F2:**
+  - custo previsto = realizado + saldo estimado a executar, sem somar de novo o orçamento inteiro;
+  - margem prevista e margem realizada separadas;
+  - cascata fixa explicada, sem Shapley.

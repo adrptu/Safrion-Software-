@@ -7,6 +7,7 @@ um quadrado de 200 m no centro de um pivô da Lagoa Grande sintética (dados_lag
   K3 o polígono cai no pivô (destino "Novo contorno de …") e o ponto sem área explica por que não vira talhão
   K4 .kmz sem .kml dentro mostra o motivo, sem travar a tela
   K5 sem erro de JavaScript
+  K6 KMZ corrompido (deslocamento fora do arquivo, tamanho maior que o arquivo): mensagem de formato com o que fazer, sem erro técnico
 Contraprova: o render da v132 reprova K1 e K2 ("KMZ é compactado: abra no Google Earth e salve como .kml").
 Uso (de gen37/): env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico [RENDER_DIR=…] python3 -B mapa_kmz_test.py"""
 import os, sys, json, time, zipfile, tempfile, math
@@ -31,6 +32,13 @@ KML = ('<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net
 tmp = tempfile.mkdtemp(prefix='kmz-'); ARQ = os.path.join(tmp, 'fazenda_teste.kmz'); RUIM = os.path.join(tmp, 'sem_kml.kmz')
 with zipfile.ZipFile(ARQ, 'w', zipfile.ZIP_DEFLATED) as z: z.writestr('files/leia.txt', 'imagens'); z.writestr('doc.kml', KML)
 with zipfile.ZipFile(RUIM, 'w', zipfile.ZIP_DEFLATED) as z: z.writestr('leia.txt', 'nada aqui')
+# K6 (revisão do Codex 6252555281): central directory apontando para fora do arquivo e arquivo truncado
+QUEB = os.path.join(tmp, 'quebrado.kmz'); TRUNC = os.path.join(tmp, 'truncado.kmz')
+_b = bytearray(open(ARQ, 'rb').read()); _e = _b.rfind(b'PK\x05\x06'); _b[_e + 16:_e + 20] = (len(_b) + 5000).to_bytes(4, 'little'); open(QUEB, 'wb').write(bytes(_b))
+_b = bytearray(open(ARQ, 'rb').read()); _c = _b.find(b'PK\x01\x02'); _off = int.from_bytes(_b[_c + 42:_c + 46], 'little')
+for _i in range(_c, _b.rfind(b'PK\x05\x06')):
+    if _b[_i:_i + 4] == b'PK\x01\x02' and _b[_i + 46:_i + 46 + int.from_bytes(_b[_i + 28:_i + 30], 'little')].endswith(b'doc.kml'): _b[_i + 20:_i + 24] = (len(_b) * 3).to_bytes(4, 'little')
+open(TRUNC, 'wb').write(bytes(_b))
 
 port, srv = servir(R); c = Chrome(); J = c.js
 def espera(cond, s=40):
@@ -66,6 +74,13 @@ try:
         chk('K4 .kmz sem .kml dentro mostra o motivo, sem travar a tela', 'não tem arquivo .kml' in t2, t2[:300])
     else:
         chk('K4 .kmz sem .kml dentro mostra o motivo, sem travar a tela', False, 'sem o campo de arquivo depois de "Outro arquivo"')
+    res6 = []
+    for arq in (QUEB, TRUNC):
+        J("(()=>{const b=[...document.querySelectorAll('main button')].find(x=>/Outro arquivo|Escolher outro/i.test(x.innerText)); if(b) b.click();})()"); time.sleep(.6)
+        if J("!!document.querySelector('input[type=file][accept*=\".kml\"]')"): escolhe(arq); espera("document.body.innerText.includes('KMZ ilegível')", 8)
+        res6.append((J(PAINEL) or '')[:400])
+    chk('K6 KMZ com deslocamento fora do arquivo ou tamanho maior que o arquivo: "KMZ ilegível…" com o que fazer, sem o erro técnico do leitor',
+        all('KMZ ilegível' in t and 'salve como .kml' in t and 'DataView' not in t and 'Offset' not in t for t in res6), res6)
     ee = [e for e in (J("window.__errs||[]") or []) if 'maplibre' not in e.lower()]
     chk('K5 sem erro de JavaScript', not ee, ee[:3])
 finally:

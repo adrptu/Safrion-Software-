@@ -398,7 +398,7 @@ try:
     vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
     chk('CD-03 (recusa): Classe = Irrigação + busca "Silo" → nenhuma linha e o aviso "Nenhuma linha corresponde aos filtros" (sem voltar a todas)', g.dicts() == [] and vaz, len(g.dicts()))
     limpa(J); n0 = len(g.dicts()); g.filtra('Classe', ['Trator']); a1 = [r.get('Máquina ou instalação') for r in g.dicts()]; g.filtra('Classe', ['Trator']); a2 = [r.get('Máquina ou instalação') for r in g.dicts()]
-    chk('CD-03 (repetição): o mesmo filtro duas vezes dá o mesmo recorte; Limpar filtros volta às 15', a1 == a2 and len(a1) == 4 and n0 == 15, (a1, a2, n0))
+    chk('CD-03 (repetição): o mesmo filtro duas vezes dá o mesmo recorte; Limpar filtros volta às 16 (o Comboio CB-01 entrou no CD-03 pelo ATIVO-UNICO)', a1 == a2 and len(a1) == 4 and n0 == 16, (a1, a2, n0))
     abre('CD-03.dc.html'); g = Grade(J, 0); base = [r.get('Máquina ou instalação') for r in g.dicts()]   # sem ordem aplicada
     g.cabecalho_ordena('Custo R$/h'); cr = [num(x) for x in g.col('Custo R$/h') if x != '—']
     chk('CD-03: um clique no título Custo R$/h ordena crescente pelo número', crescente(cr), g.col('Custo R$/h')[:6])

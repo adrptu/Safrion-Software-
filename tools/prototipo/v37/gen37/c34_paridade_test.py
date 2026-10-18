@@ -55,3 +55,14 @@ out=check(c5,dict(b,rec=dois),'F');assert [x['q'] for x in out['recebDt']]==[80,
 c6=copy.deepcopy(c5);c6['movs'][0]['estRec']['linha']=2
 out=check(c6,dict(b,rec=mesmo),'F');assert [x['q'] for x in out['recebDt']]==[100,30],out                              # com linha: baixa só a sua
 print('PASS 6 paridades Q5: legado único abate, unidade divergente não, legado ambíguo (unidades distintas ou mesma unidade sem linha) fora do suprimento com aviso, unidade ou linha única baixa só a sua.')
+# Fronteira do Q5 (revisão do Codex 6250436415; patch do integrador, Claude): cada outra previsão do mesmo PC e item é outra ocorrência,
+# mesmo sem linha ou com a mesma chave. A nota que cabe em duas não baixa nenhuma; não se inventa linha nem se deduplica quantidade.
+semlinha=[dict(ref='PC-X',item='A',un='kg',q=100,faz='F'),dict(ref='PC-X',item='A',un='kg',q=50,faz='F')]
+out=check(c3,dict(b,rec=semlinha),'F')                                                                                  # contraexemplo do Codex: 100 e 50 kg, ambas sem linha
+assert not out['recebDt'] and len(out['recebNaoApuravel'])==2 and all('7001' in x['motivo'] for x in out['recebNaoApuravel']),out
+parcelas=[dict(ref='PC-X',item='A',un='kg',linha=1,q=100,faz='F'),dict(ref='PC-X',item='A',un='kg',linha=1,q=50,faz='F')]
+out=check(c6,dict(b,rec=parcelas),'F');assert [x['q'] for x in out['recebDt']]==[100,50] and not out['recebNaoApuravel'],out   # nota da linha 2 não cabe em nenhuma
+c7=copy.deepcopy(c6);c7['movs'][0]['estRec']['linha']=1
+out=check(c7,dict(b,rec=parcelas),'F');assert not out['recebDt'] and len(out['recebNaoApuravel'])==2,out                # duas parcelas da mesma linha: não baixa 20 duas vezes
+out=check(c3,dict(b,rec=semlinha[:1]),'F');assert [x['q'] for x in out['recebDt']]==[80],out                            # uma só previsão sem linha continua abatendo
+print('PASS 4 paridades da fronteira Q5: duas previsões sem linha, duas parcelas da mesma linha (com e sem nota delas) e previsão única sem linha.')

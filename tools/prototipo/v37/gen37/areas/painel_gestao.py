@@ -49,6 +49,9 @@ function pgK(niv,nome,v,sub,cor,dica,href){ return {niv,nome,v:v===null||v===und
 function pgOrdem(a,b){ if(a.classe!==b.classe) return a.classe-b.classe;
   for(const u of ['rs','ha','dias']){ const x=(a.imp&&a.imp[u])||0, y=(b.imp&&b.imp[u])||0; if(x!==y) return y-x; }
   const da=a.desde||'9999-99-99', db=b.desde||'9999-99-99'; if(da!==db) return da<db?-1:1; return a.k<b.k?-1:(a.k>b.k?1:0); }
+// a classe do ativo bloqueado vem da causa (revisão do Codex 6252555281): bloqueio marcado com risco à segurança (seg no registro da condição)
+// é "Lei e segurança"; o resto é "Prazo e ativos"
+function pgClasseAtivo(a){ const h=(a&&a.condHist&&a.condHist[0])||{}; return (a&&(a.seg||h.seg))?1:4; }
 function pgImpTxt(imp){ const p=[]; if(imp.rs) p.push(pgRs(imp.rs)); if(imp.ha) p.push(pgNf(imp.ha,1)+' ha'); if(imp.dias) p.push(imp.dias+(imp.dias>1?' dias':' dia')); return p.join(' · ')||'—'; }
 
 function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
@@ -108,7 +111,7 @@ function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=
         imp:{dias:d&&d>0?d:0},dono:'PCM',desde:l.x.prev||'',quando:venc?'vencida':'na janela'+(l.x.prev?' · '+pgDdmm(l.x.prev):''),verbo:'Gerar ordem',href:'MA.dc.html#vis=semordem'}); });
     so.ach.forEach(q=>{ const a=m.ativos[q.aid]; I.push({k:'ach:'+q.id,mod:'man',b:'sem',func:'Pendências sem ordem',tipo:'atacar',classe:4,titulo:'Achado '+q.id+' · '+q.sint,onde:(a&&a.nome)||q.aid,
       imp:{dias:Math.max(0,pgDias(q.em,m.hoje)||0)},dono:'PCM',desde:q.em||'',quando:'desde '+pgDdmm(q.em),verbo:'Tratar',href:'MA.dc.html#vis=semordem'}); }); }
-  (at||[]).filter(a=>a.cond==='Bloqueado').forEach(a=>I.push({k:'atv:'+a.id,mod:'man',b:'atv',func:'Ativos e disponibilidade',tipo:'atacar',classe:4,titulo:(a.nome||a.id)+' bloqueado',onde:a.local||'',
+  (at||[]).filter(a=>a.cond==='Bloqueado').forEach(a=>I.push({k:'atv:'+a.id,mod:'man',b:'atv',func:'Ativos e disponibilidade',tipo:'atacar',classe:pgClasseAtivo(a),titulo:(a.nome||a.id)+' bloqueado'+(pgClasseAtivo(a)===1?' · risco à segurança':''),onde:a.local||'',
     imp:{},dono:'PCM',desde:'',quando:'',verbo:'Consultar ativo',href:'MA.dc.html#vis=ativos'}));
 }
 function pgSup(c,R){ const B=R.blocos.sup, I=R.itens, ps=pnValores(c,'PSUP');
@@ -170,7 +173,7 @@ function pgAlavancas(R){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) 
       cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:d===null?'gray':pgCor(d/100),cons:cons===null?'—':cons+'% do orçado',
       pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',prec:dp===null?'gray':pgCor(dp)}; }); }
 /* leitura para os testes (como window.__com do Comercial): só funções que leem */
-try{ window.__pg={pgDados,pgOrdem,pgAlavancas,pgCor,pnValores,agrPainelRef,agrCustoRef,cenGet,cenClone,CEN0}; }catch(e){}
+try{ window.__pg={pgDados,pgOrdem,pgClasseAtivo,pgAlavancas,pgCor,pnValores,agrPainelRef,agrCustoRef,cenGet,cenClone,CEN0}; }catch(e){}
 const PG_COR={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],none:['#15201A','transparent']};
 function pgSel(self,k){ self.setState({pg_mod:k,pg_todos:false}); try{ history.replaceState(history.state,'',location.pathname+location.search+(k==='pri'?'':'#mod='+k)); }catch(e){} }
 function EXTRAVALS(self,v){

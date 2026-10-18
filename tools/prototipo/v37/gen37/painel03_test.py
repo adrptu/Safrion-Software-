@@ -73,6 +73,8 @@ try:
               const xs=[it('a',3,{rs:50000},''),it('b',1,{},''),it('c',2,{dias:9},''),it('d',2,{ha:10},''),it('e',2,{ha:10},'2026-09-01'),it('f',4,{rs:999999},'')].sort(P.pgOrdem);
               return xs.map(x=>x.k);})())""") or '[]')
             chk('P3b ordem: receituário (classe 1) antes de R$ 50 mil (classe 3); na mesma classe, ha antes de dias e o mais antigo primeiro', o == ['b', 'e', 'd', 'c', 'a', 'f'], o)
+            cs = J("(()=>{const P=window.__pg; return [P.pgClasseAtivo({cond:'Bloqueado'}),P.pgClasseAtivo({cond:'Bloqueado',condHist:[{seg:true}]}),P.pgClasseAtivo({cond:'Bloqueado',seg:true})];})()")
+            chk('P3c ativo bloqueado: classe pela causa (risco à segurança = Lei e segurança; o resto = Prazo e ativos)', cs == [4, 1, 1], cs)
             chk('P4 coleções ausentes: "Sem dados" em fases, Manutenção e Estoque; nenhum cartão inventa 0', u and u['nulo'] == {'agr': ['Sem dados'] * 4, 'man': 'Sem dados', 'sup': ['Sem dados'] * 4} and not u['zeros'],
                 u and [u['nulo'], u['zeros']])
             chk('P5a a conta não altera o cenário', u and u['igual'], u and u['igual'])
