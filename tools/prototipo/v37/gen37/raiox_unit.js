@@ -99,3 +99,23 @@ try:g.gerar([{'qualquer':float('nan')}]);raise AssertionError('NaN aceito')
 except ValueError:pass
 print('PASS: 7 réplicas inválidas recusadas; sementes distintas não confirmam classe; NaN recusado antes do replay.')`;
 const ip=cp.spawnSync('python3',['-B','-c',invalidPy,__dirname],{encoding:'utf8'});assert.equal(ip.status,0,ip.stderr);console.log(ip.stdout.trim());
+
+// Exportação opcional: node raiox_unit.js fonte-v3.html --export-dir pasta-nova
+const exportIndex=process.argv.indexOf('--export-dir');
+if(exportIndex>=0) {
+ const path=require('path'),crypto=require('crypto');
+ const dir=process.argv[exportIndex+1];assert(dir,'Informe pasta nova para exportação');
+ fs.mkdirSync(dir); // Recusa sobrescrever pacote anterior, mesmo parcialmente.
+ const write=(name,body)=>fs.writeFileSync(path.join(dir,name),body,{flag:'wx'});
+ const hash=body=>crypto.createHash('sha256').update(body).digest('hex');
+ const origem=JSON.stringify(episodes);write('episodios.json',origem);
+ const cli=cp.spawnSync('python3',['-B',path.join(__dirname,'raiox_gabarito.py'),path.join(dir,'episodios.json')],{encoding:'utf8',maxBuffer:32*1024*1024});
+ assert.equal(cli.status,0,cli.stderr);
+ const pacote=JSON.parse(cli.stdout), entrada=JSON.stringify(pacote.entrada),oraculo=JSON.stringify(pacote.oraculo);
+ write('entrada.json',entrada);write('oraculo.json',oraculo);
+ const manifest={estado:'rascunho_para_revisao',recuperacao_motor:'nao_executada',fonte_html_sha256:hash(html),contrato_hash:pacote.oraculo.contrato_hash,arquivos:{'episodios.json':hash(origem),'entrada.json':hash(entrada),'oraculo.json':hash(oraculo)},fontes:{'raiox_gabarito.py':hash(fs.readFileSync(path.join(__dirname,'raiox_gabarito.py'))),'raiox_unit.js':hash(fs.readFileSync(__filename))},reproduzir:'python3 -B raiox_gabarito.py episodios.json; comparar JSON canônico e entrada_hash',limites:['Dados sintéticos; não são recomendações agronômicas.','Limiar e referências climáticas aguardam revisão.','Intervenção climática restrita ao crescimento; eficácia preservada.','Sem avaliação de recuperação pelo motor.']};
+ write('manifesto.json',JSON.stringify(manifest,null,2));
+ const roundtrip=cp.spawnSync('python3',['-B','-c',`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\nfrom pathlib import Path\np=Path(sys.argv[2]);e=json.loads((p/'entrada.json').read_text());o=json.loads((p/'oraculo.json').read_text());assert g.digest(e)==o['entrada_hash'];print('PASS: entrada exportada vinculada ao oráculo')`,__dirname,dir],{encoding:'utf8'});
+ assert.equal(roundtrip.status,0,roundtrip.stderr);console.log(roundtrip.stdout.trim());
+ console.log('Pacote exportado: '+path.resolve(dir));
+}
