@@ -194,7 +194,7 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('#sfz-pop button')].find(b=>b.innerText.trim()==='Fechar'); if(b) b.click();})()"); esp(.5)
     fg = J("[...document.querySelectorAll('[role=row].g2fgrp')].filter(r=>r.offsetParent).map(r=>r.innerText.replace(/\\s+/g,' ').trim())")
     hd = J("!!(document.getElementById('sl-abrir')&&document.getElementById('sl-abrir').offsetParent)")
-    chk('A4 com Santa Rita e Lagoa Grande: cada faixa de fazenda tem "Editar talhões ›" (e o título do bloco não repete a ação)', len(fg) == 2 and all(t.endswith('Editar talhões ›') for t in fg) and not hd, [fg, hd])
+    chk('A4 com Santa Rita e Lagoa Grande: cada faixa de fazenda tem "Editar talhões ›" (e o título do bloco não repete a ação)', len(fg) == 2 and all('Editar talhões ›' in t for t in fg) and not hd, [fg, hd])   # SAF-MAPA (18/10): depois dele vem "Planejar no mapa ›"
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>/Lagoa Grande/.test(r.innerText)); [...r.querySelectorAll('button')].find(b=>/Editar talhões/.test(b.innerText)).click();})()"); esp(1.8)
     pn = painel(); ro = J("[...document.querySelectorAll('#sl-grade .sl-tit')].map(r=>r.innerText.replace(/\\s+/g,' '))")
     chk('A5 a da Lagoa Grande abre "Editar talhões da Lagoa Grande" na sub-safra dela, com os 23 pivôs; ocupados pelo mamão de outra safra só leitura, com o motivo',

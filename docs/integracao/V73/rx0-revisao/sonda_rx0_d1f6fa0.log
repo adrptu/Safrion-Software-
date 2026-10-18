@@ -1,0 +1,16 @@
+A1 8 talhões: maior |corr(gatilho, n14 ou k14)| = 0.000; combinações distintas (n14,k14,gatilho) no dia 0 = 4
+A1 16 talhões: maior |corr(gatilho, n14 ou k14)| = 0.000; combinações distintas (n14,k14,gatilho) no dia 0 = 8
+A1 20 talhões: maior |corr(gatilho, n14 ou k14)| = 0.000; combinações distintas (n14,k14,gatilho) no dia 0 = 10
+A1b 6 talhões: recusa · População fatorial exige múltiplo de quatro, com pelo menos oito talhões
+A2 NaN: recusa · Suporte exige observações e aplicações finitas
+A2 Infinity: recusa · Suporte exige observações e aplicações finitas
+A2 None: recusa · Suporte exige observações e aplicações finitas
+A2 negativo: recusa · Suporte exige NC positivo e observações não negativas
+A2 texto: recusa · Suporte exige observações e aplicações finitas
+A2 entrada válida: excluídas 4 · motivos {'excluidas': 4, 'exclusoes_por_motivo': {'abaixo_nc': 0, 'intervalo': 0, 'aplicacao': 4}}
+A3 ENSAIO: {"versao": 2, "unidade_replica": "semente; talhoes agrupados dentro de cada replica", "comparacao": "classe e sinal; nunca magnitude beta versus delta", "por_safra": true, "limites": {"direcao_fixture_deterministica": 1.0, "direcao_series_fortes": 0.8, "forte_placebo_max": 0.05, "forte_fraco_max": 0.05, "forte_nao_identificavel_max": 0.0, "forte_nao_pareado_max": 0.0}, "insuf": "contar separadamente; sem denominador avaliavel nao ha aceite", "denominador_min": 20, "denominador_unidade": "sementes distintas por safra/alvo/fator/classe esperada; nunca janelas ou talhoes", "denominador_regra": "abaixo do minimo: nao avaliavel, mesmo com proporcao favoravel; nao juntar safras ou classes", "denominador_direcao": "todas as replicas de classe esperada forte; insuf do motor conta no denominador e nao como acerto", "denominador_fixture": "todos os casos determinísticos pre-especificados; 100% obr
+A2b 3 motivos numa janela: excluídas 1 · janelas 0 · motivos {'abaixo_nc': 1, 'intervalo': 1, 'aplicacao': 1}
+A2b 2 motivos (abaixo NC + intervalo): excluídas 1 · janelas 0 · motivos {'abaixo_nc': 1, 'intervalo': 1, 'aplicacao': 0}
+A2b 1 motivo (aplicação): excluídas 1 · janelas 0 · motivos {'abaixo_nc': 0, 'intervalo': 0, 'aplicacao': 1}
+A2b nenhum motivo: excluídas 0 · janelas 1 · motivos {'abaixo_nc': 0, 'intervalo': 0, 'aplicacao': 0}
+rc=0

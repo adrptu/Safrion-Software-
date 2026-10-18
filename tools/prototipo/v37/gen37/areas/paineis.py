@@ -67,6 +67,9 @@ function agrExecucao(ab,rec,ref){
 function agrMip(c,rec){
  if(typeof mipGet!=='function'||typeof mipSit!=='function'||typeof MIPD==='undefined'||rec.saf) return null;
  let s=null; try { s=mipGet(); } catch(e) { return null; }
+ /* base verde 2 (18/10, Claude; aviso ao Codex): desde o N-1/B-3 o MIP mora no cenário; ilegível ou incompatível, mipGet devolve o estado vazio e
+    avisa por mipErro. Sem esta guarda o painel mostrava 0 a decidir (ausente virando zero); agora é Sem dados, como o AG-01 */
+ if(typeof mipErro==='function'&&mipErro()) return null;
  const vs=s&&s.vis&&typeof s.vis==='object'&&!Array.isArray(s.vis)?Object.values(s.vis):null;
  if(!vs||!vs.every(v=>v&&typeof v.id==='string'&&MIPD.tal[v.tal]&&MIPD.prot[v.prot]&&typeof v.data==='string')) return null;
  const fazDe=v=>v.faz||MIPD.tal[v.tal].faz||null; if(rec.faz&&vs.some(v=>!fazDe(v))) return null;
@@ -162,35 +165,6 @@ CSS = '''<style>
 </style>'''
 
 
-def build():
-    for fid, (mod, titulo, itens, atalhos) in PAINEIS.items():
-        fname=fid+'.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1050
-        E.EXTRAJS[0]=(cenario.js_prefixo()+DM.js_regras()+JS_VOLTA+
-                       'const PN_ID='+json.dumps(fid)+';const PN_ALERT='+json.dumps([i[2] for i in itens])+';\n'+JS)
-        pna=''
-        if fid=='PAGR':   # PAINEL-02 (Codex, PR #62): colheita por cultivo e período, abaixo dos cartões; pnaVals no EXTRAVALS
-            from areas.painel_agricola import secao
-            pna, pna_js = secao(); E.EXTRAJS[0] += pna_js
-            # agrPainelRef lê a projeção do estado (osProjecaoEstado no núcleo da O.S.), com as mesmas ordens do registro que a tela O.S. e o Mapa usam
-            from areas.processo_os import JS_NUCLEO as _OSN, _ordens as _ords
-            import dados2 as _D2
-            E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords(),hoje=_D2.HOJE_ISO),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
-            import areas.custo_dominio as _CUS   # agrCustoRef: custo por cultura com as regras da camada Custos do Mapa
-            E.EXTRAJS[0] += _CUS.js_prefixo()
-            import dados_mip as _MIP   # agrPainelRef().mip: a mesma base do AG-01 (MIPD, MIP0 e mip.js)
-            E.EXTRAJS[0] += _MIP.js_prefixo()
-        cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+
-          '<button type="button" class="pn-tip g2dica-i" aria-label="Como calcular: '+E.esc(nome)+'" data-dica="'+E.esc(formula)+'">ⓘ</button></h2>'+
-          '<strong class="pn-value" data-alert="'+H('pn_alert'+str(i))+'">'+H('pn_v'+str(i))+'</strong></section>' for i,(nome,formula,_) in enumerate(itens))
-        labels=(['Com quarentena','Com reserva, sem quarentena','Sem reserva nem quarentena'] if fid=='PSUP' else ['A liberar','Liberadas','Em execução','Em conferência'])
-        rows=''.join('<div class="pn-row"><span>'+E.esc(l)+'</span><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="8" rx="2" fill="#EEF1EE"/><rect width="'+H('pn_w'+str(i))+'" height="8" rx="2" fill="#65736A"/></svg><strong>'+H('pn_b'+str(i))+'</strong></div>' for i,l in enumerate(labels))
-        links=''.join('<a class="mod-cartao pn-link" href="'+h+'">'+E.esc(n)+'</a>' for n,h in atalhos[1:])
-        empty='<p hidden="'+H('!pn_empty')+'">Nenhum registro neste recorte.</p>'
-        chart=(empty if fid=='PAGR' else '<section class="pn-chart" aria-label="'+E.esc(titulo)+'"><h2>'+E.esc(titulo)+'</h2>'+rows+empty+'</section>')
-        body=(CSS+'<div class="pn">'+   # 14/10 (menos é mais): saiu "<Módulo> · Todas as fazendas e safras · Estado atual"; o recorte está na faixa de filtros
-          '<div class="pn-grid" aria-label="Indicadores">'+cards+'</div>'+
-          '<p hidden="'+H('!pn_missing')+'" role="status">Há dados incompletos. Consulte a origem pelos acessos abaixo.</p>'+
-          chart+pna+
-          '<nav class="pn-links" aria-label="Acessos do painel">'+links+'</nav></div>')
-        prim=E.btn(atalhos[0][0],not re.match(r'^(Consultar|Abrir|Ver|Voltar)\b',atalhos[0][0]),href=atalhos[0][1]).replace('<a ', '<a class="pn-link mod-cartao" ')   # BOT-08: só navegar não é verde
-        shell37(fid,'Painel',body,fname=fname,status=None,primary_html=prim,search=False)
+# PAINEL-03 (18/10/2026, proprietário: "um painel só que navega pelos módulos ... num só lugar"): as páginas PAGR, PMAN e PSUP saíram do build.
+# As contas (pnValores, agrPainelRef, agrExecucao, agrMip) e o CSS dos cartões seguem aqui, com os mesmos testes (painel_modulos_test);
+# o painel único (areas/painel_gestao.py, PG.dc.html) as lê nas abas Agrícola, Manutenção e Suprimentos. Patch do integrador, com aviso ao Codex.

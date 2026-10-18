@@ -1,0 +1,20 @@
+FALHA 1440px · F1 visão Frentes no seletor e pelo endereço ?view=frentes · 
+FALHA 1440px · F2 Lagoa Grande: frentes de abamectina (5 pivôs, 2 caldas), tebuconazol (4 pivôs) e calcário (3 pivôs) · 
+FALHA 1440px · F3 porquê, rota numerada no mapa (1 a 5) e ganho em km e cargas contra cada O.S. sozinha · ['', '']
+FALHA 1440px · F4 OS-0421 e OS-0424 (Fungicida A) na mesma frente, com o adjuvante como troca de calda · 
+FALHA 1440px · F5 OS-0420 e OS-0431 (plantio de soja) na mesma frente · 
+FALHA 1440px · F6 plantio e calcário sem "alocar pulverizador"; fertirrigação fora (vai pelo pivô) · 
+FALHA 1440px · F7 P1 sem vazão com "Definir vazão", quem decide a aprovação, nada aprovado, liberado ou reservado · [True, '']
+FALHA 1440px · F8 "Agrupar 2 O.S. desta calda" abre a conferência do OS-LOTE com as O.S. da rota · 
+OK    1440px · F9 sem erro de JavaScript e sem rolagem horizontal
+FALHA 390px · F1 visão Frentes no seletor e pelo endereço ?view=frentes · 
+FALHA 390px · F2 Lagoa Grande: frentes de abamectina (5 pivôs, 2 caldas), tebuconazol (4 pivôs) e calcário (3 pivôs) · 
+FALHA 390px · F3 porquê, rota numerada no mapa (1 a 5) e ganho em km e cargas contra cada O.S. sozinha · ['', '']
+FALHA 390px · F4 OS-0421 e OS-0424 (Fungicida A) na mesma frente, com o adjuvante como troca de calda · 
+FALHA 390px · F5 OS-0420 e OS-0431 (plantio de soja) na mesma frente · 
+FALHA 390px · F6 plantio e calcário sem "alocar pulverizador"; fertirrigação fora (vai pelo pivô) · 
+FALHA 390px · F7 P1 sem vazão com "Definir vazão", quem decide a aprovação, nada aprovado, liberado ou reservado · [True, '']
+FALHA 390px · F8 "Agrupar 2 O.S. desta calda" abre a conferência do OS-LOTE com as O.S. da rota · 
+OK    390px · F9 sem erro de JavaScript e sem rolagem horizontal
+RESULTADO: 2/18 ok
+rc=1

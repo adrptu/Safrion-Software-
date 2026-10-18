@@ -40,8 +40,11 @@ caso('A5 compra a menos na Lagoa Grande: Glifosato 480 = 293,34 L a partir de 30
      lambda: (L(lg,'Glifosato 480')==293.34 and lg['Glifosato 480']['falta']=='2026-09-30' and lg['Glifosato 480']['estoque']==0,(L(lg,'Glifosato 480'),lg['Glifosato 480']['falta'],lg['Glifosato 480']['estoque'])))
 caso('A6 estoque da própria fazenda: Óleo mineral LG 630,03 L (630,025 L a comprar com 0,01 L, como a Compra; nunca 292,81) · Nitrato de cálcio LG 25.756,8 kg e Santa Rita 680 kg',
      lambda: (L(lg,'Óleo mineral')==630.03 and L(lg,'Nitrato de cálcio')==25756.8 and L(d,'Nitrato de cálcio')==680.0,(L(lg,'Óleo mineral'),L(lg,'Nitrato de cálcio'),L(d,'Nitrato de cálcio'))))
-caso('A7 totais: S2627 14 insumos · R$ 428.305,00 (MAP −500 kg da custódia sem uso da OS-0417); S27SF 8 · R$ 1.094.947,10; LG2627 13 · R$ 1.614.360,34 (valor = quantidade a comprar com 0,01 da unidade × preço, o mesmo da Compra)',
-     lambda: (nins(d)==14 and perto(tot(d),428305.00,0.005) and nins(s27)==8 and perto(tot(s27),1094947.10,0.005) and nins(lg)==13 and perto(tot(lg),1614360.34,0.005),
+# EX-54 (18/10, integrador Claude): a semente de demonstração do OS-LOTE (Sulfato de magnésio: 85 kg na Santa Rita e 75 kg na Lagoa Grande,
+# a R$ 2,10/kg) saiu; as O.S. de demonstração das frentes (OS-0584…0599, selo "Demonstração") ficam fora da compra (cenOsDem e dados2.os_dem).
+# Volta à conta sem a demonstração: 2026/27 da Santa Rita 14 insumos e R$ 428.305,00 (−R$ 178,50); Lagoa Grande R$ 1.614.202,84 (−R$ 157,50)
+caso('A7 totais: S2627 14 insumos · R$ 428.305,00 (MAP −500 kg da custódia sem uso da OS-0417); S27SF 8 · R$ 1.094.947,10; LG2627 13 · R$ 1.614.202,84 (valor = quantidade a comprar com 0,01 da unidade × preço, o mesmo da Compra)',
+     lambda: (nins(d)==14 and perto(tot(d),428305.00,0.005) and nins(s27)==8 and perto(tot(s27),1094947.10,0.005) and nins(lg)==13 and perto(tot(lg),1614202.84,0.005),
               ((nins(d),round(tot(d),2)),(nins(s27),round(tot(s27),2)),(nins(lg),round(tot(lg),2)))))
 # Mapa › Insumos: a página leva as entradas da mesma conta (MDATA.dem) e calcula com demFazenda/demSituacao (cal01.js) sobre o cenário vivo
 import cenario
@@ -55,7 +58,10 @@ Object.keys(X.faz).forEach(f=>{{ const F=X.faz[f]; const m=demFazenda(cenDemEntr
 MP={}
 def _mapa():
     import areas.inicio as I
-    MP.update(mapa_js(dict(I.MDATA['dem'],lim30=I.MDATA['lim30']))); return MP
+    MP.update(mapa_js(dict(I.MDATA['dem'],lim30=I.MDATA['lim30'])))
+    # fe296d63 (15/10, filtro Safra do Mapa): a demanda do Mapa passou a ser por safra; as asserções por fazenda leem a safra corrente
+    # de cada uma (Santa Rita = 2026/27, Lagoa Grande = 2026/27 da LG), como o Mapa abria antes (base verde 2, 18/10)
+    MP['Santa Rita'], MP['Lagoa Grande'] = MP['S2627'], MP['LG2627']; return MP
 def a8():
     import areas.inicio as I
     if 'dem' in I.MDATA: m=_mapa(); sr=m['Santa Rita']['st']['Safra toda']; lgs=m['Lagoa Grande']['st']['Safra toda']
@@ -292,9 +298,9 @@ const R={{c}}; Object.keys(XS).forEach(s=>{{ const m=demFazenda(ENT(c,XS[s]));
 console.log(JSON.stringify(R));""")
 G0=viva('')
 def g0():
-    r=G0; return (r['S2627']['tot']==428305.00 and r['S27SF']['tot']==1094947.10 and r['LG2627']['tot']==1614360.34 and r['S2627']['liq']['NPK 20-05-20']==14800,
+    r=G0; return (r['S2627']['tot']==428305.00 and r['S27SF']['tot']==1094947.10 and r['LG2627']['tot']==1614202.84 and r['S2627']['liq']['NPK 20-05-20']==14800,
                   {s:(r[s]['tot'],r[s]['liq'].get('NPK 20-05-20')) for s in GX})
-caso('G0 semente: as telas dão os mesmos totais de dados2 (R$ 428.305,00 · R$ 1.094.947,10 · R$ 1.614.360,34) e NPK 14.800 kg',g0)
+caso('G0 semente: as telas dão os mesmos totais de dados2 (R$ 428.305,00 · R$ 1.094.947,10 · R$ 1.614.202,84) e NPK 14.800 kg',g0)
 def g1():
     r=viva("cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',{k:'Paula'});"); s=r['S2627']; lt=r['c']['lotes']['NPK 20-05-20|N26-03']
     return (lt['fisico']==0 and lt['reservado']==0 and s['liq']['NPK 20-05-20']==14800 and s['est']['NPK 20-05-20']==0 and s['tot']==428305.00,

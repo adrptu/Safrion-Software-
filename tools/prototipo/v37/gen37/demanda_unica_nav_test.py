@@ -76,6 +76,7 @@ try:
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear(); sessionStorage.clear()")
     # ================= normal (1440 px) =================
     saf(); t6=k6(); foto('1_saf_demanda')
+    # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio na 2026/27 (+1 insumo, +R$ 178,50; base verde 2, 18/10)
     chk('N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)',
         t6.startswith('Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07'),t6)
     fa=[cel('Fungicida A',k) for k in ('Necessidade líquida','Situação')]; mp=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Falta em')]

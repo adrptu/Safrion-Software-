@@ -1,0 +1,39 @@
+OK    A1a 1440 IV.dc.html: o bloco abre em 36 meses, com preço de agora, percentil, melhor mês, gráfico e 12 barras
+OK    A1b 1440 IV.dc.html: 12, 24 e 48 meses mudam o gráfico (pontos = meses), o percentil e o N de anos (1, 2, 4)
+OK    A5 1440 IV.dc.html: 12 meses não mostra selo e diz que um ano é exemplo, não padrão
+OK    A1c 1440 IV.dc.html: com 48 meses, a leitura diz o melhor mês para vender, "padrão observado em 4 anos" e o acerto retrospectivo, sem rótulo de força (ou "Sem padrão")
+OK    A7a 1440 IV.dc.html: a dica ⓘ traz a regra do percentil, do selo e do padrão observado (acerto retrospectivo, não previsão)
+OK    A7b 1440 IV.dc.html: nada vaza (página nem bloco) e os toques de produto e período têm 36 px ou mais
+OK    A7c 1440 IV: a lista curta de produtos é um toque e trocar o produto muda a leitura
+OK    A8 1440 IV.dc.html: o bloco lê e não grava (armazenamento igual antes e depois)
+OK    A7d 1440 IV.dc.html: sem erro de JavaScript
+OK    A1a 1440 IC.dc.html: o bloco abre em 36 meses, com preço de agora, percentil, melhor mês, gráfico e 12 barras
+OK    A1b 1440 IC.dc.html: 12, 24 e 48 meses mudam o gráfico (pontos = meses), o percentil e o N de anos (1, 2, 4)
+OK    A5 1440 IC.dc.html: 12 meses não mostra selo e diz que um ano é exemplo, não padrão
+OK    A1c 1440 IC.dc.html: com 48 meses, a leitura diz o melhor mês para comprar, "padrão observado em 4 anos" e o acerto retrospectivo, sem rótulo de força (ou "Sem padrão")
+OK    A7a 1440 IC.dc.html: a dica ⓘ traz a regra do percentil, do selo e do padrão observado (acerto retrospectivo, não previsão)
+OK    A7b 1440 IC.dc.html: nada vaza (página nem bloco) e os toques de produto e período têm 36 px ou mais
+OK    A7c 1440 IC: o catálogo de insumos é uma lista de escolha e trocar o insumo muda a leitura
+OK    A8 1440 IC.dc.html: o bloco lê e não grava (armazenamento igual antes e depois)
+OK    A7d 1440 IC.dc.html: sem erro de JavaScript
+OK    A1a 390 IV.dc.html: o bloco abre em 36 meses, com preço de agora, percentil, melhor mês, gráfico e 12 barras
+OK    A1b 390 IV.dc.html: 12, 24 e 48 meses mudam o gráfico (pontos = meses), o percentil e o N de anos (1, 2, 4)
+OK    A5 390 IV.dc.html: 12 meses não mostra selo e diz que um ano é exemplo, não padrão
+OK    A1c 390 IV.dc.html: com 48 meses, a leitura diz o melhor mês para vender, "padrão observado em 4 anos" e o acerto retrospectivo, sem rótulo de força (ou "Sem padrão")
+OK    A7a 390 IV.dc.html: a dica ⓘ traz a regra do percentil, do selo e do padrão observado (acerto retrospectivo, não previsão)
+OK    A7b 390 IV.dc.html: nada vaza (página nem bloco) e os toques de produto e período têm 36 px ou mais
+OK    A7c 390 IV: a lista curta de produtos é um toque e trocar o produto muda a leitura
+OK    A8 390 IV.dc.html: o bloco lê e não grava (armazenamento igual antes e depois)
+OK    A7d 390 IV.dc.html: sem erro de JavaScript
+OK    A1a 390 IC.dc.html: o bloco abre em 36 meses, com preço de agora, percentil, melhor mês, gráfico e 12 barras
+OK    A1b 390 IC.dc.html: 12, 24 e 48 meses mudam o gráfico (pontos = meses), o percentil e o N de anos (1, 2, 4)
+OK    A5 390 IC.dc.html: 12 meses não mostra selo e diz que um ano é exemplo, não padrão
+OK    A1c 390 IC.dc.html: com 48 meses, a leitura diz o melhor mês para comprar, "padrão observado em 4 anos" e o acerto retrospectivo, sem rótulo de força (ou "Sem padrão")
+OK    A7a 390 IC.dc.html: a dica ⓘ traz a regra do percentil, do selo e do padrão observado (acerto retrospectivo, não previsão)
+OK    A7b 390 IC.dc.html: nada vaza (página nem bloco) e os toques de produto e período têm 36 px ou mais
+OK    A7c 390 IC: o catálogo de insumos é uma lista de escolha e trocar o insumo muda a leitura
+OK    A8 390 IC.dc.html: o bloco lê e não grava (armazenamento igual antes e depois)
+OK    A7d 390 IC.dc.html: sem erro de JavaScript
+OK    A9 IV · Mamão (perecível) em 48 meses: a leitura diz que não se guarda para esperar o melhor mês (ou "Sem padrão")
+RESULTADO: 37 ok · 0 falhas
+rc=0

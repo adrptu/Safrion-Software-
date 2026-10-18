@@ -44,12 +44,13 @@ c.ordens.c.etapa=null;chk('Estado ausente impede contagem parcial de O.S.',pnVal
 // PAINEL-02 · agrPainelRef (contrato 6163002343/6163029779; revisão Codex 6163287732: projeção da O.S. e recorte)
 const ag=cenClone(CEN0), antes=JSON.stringify(ag), r0=agrPainelRef(ag);
 chk('agrPainelRef: não muda o estado (JSON igual antes e depois)',JSON.stringify(ag),antes);
-chk('agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba)',r0.os.impedidas.map(x=>[x.id,x.dono]),[['OS-0418','Suprimentos'],['OS-0420','Manutenção'],['OS-0431','PCP'],['OS-0502','Suprimentos'],['OS-0507','Manutenção']]);
+// v135 (EX-54): as calagens da semente das Frentes (OS-0593/0594, selo "Demonstração") não têm calcário em estoque; o Painel mostra o mesmo impedimento da tela O.S.
+chk('agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba), OS-0593/0594 (calcário da demonstração)',r0.os.impedidas.map(x=>[x.id,x.dono]),[['OS-0418','Suprimentos'],['OS-0420','Manutenção'],['OS-0431','PCP'],['OS-0502','Suprimentos'],['OS-0507','Manutenção'],['OS-0593','Suprimentos'],['OS-0594','Suprimentos']]);
 chk('agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osProjecao + OS_IMP_RE)',r0.os.impedidas.map(x=>[x.id,x.motivo]),
  osProjecao(ag).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)).map(o=>[o.id,(o.selos.find(s=>OS_IMP_RE.test(s.t))||{}).t]).filter(x=>x[1]));
-chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',5]);
-chk('agrPainelRef: causa estruturada pela projeção (não pelo texto do selo)',r0.os.impedidas.map(x=>[x.id,x.causa]),[['OS-0418','Insumo no Estoque'],['OS-0420','Máquina ou equipamento'],['OS-0431','Máquina ou equipamento'],['OS-0502','Insumo no Estoque'],['OS-0507','Máquina ou equipamento']]);
-chk('agrPainelRef: cada impedida traz fazenda e safra do registro',r0.os.impedidas.map(x=>[x.id,x.faz,x.saf]),[['OS-0418','Santa Rita','2026/27'],['OS-0420','Santa Rita','2026/27'],['OS-0431','Santa Rita','2026/27'],['OS-0502','Lagoa Grande','2026/27'],['OS-0507','Lagoa Grande','2026/27']]);
+chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',7]);
+chk('agrPainelRef: causa estruturada pela projeção (não pelo texto do selo)',r0.os.impedidas.map(x=>[x.id,x.causa]),[['OS-0418','Insumo no Estoque'],['OS-0420','Máquina ou equipamento'],['OS-0431','Máquina ou equipamento'],['OS-0502','Insumo no Estoque'],['OS-0507','Máquina ou equipamento'],['OS-0593','Insumo no Estoque'],['OS-0594','Insumo no Estoque']]);
+chk('agrPainelRef: cada impedida traz fazenda e safra do registro',r0.os.impedidas.map(x=>[x.id,x.faz,x.saf]),[['OS-0418','Santa Rita','2026/27'],['OS-0420','Santa Rita','2026/27'],['OS-0431','Santa Rita','2026/27'],['OS-0502','Lagoa Grande','2026/27'],['OS-0507','Lagoa Grande','2026/27'],['OS-0593','Lagoa Grande','2026/27'],['OS-0594','Lagoa Grande','2026/27']]);
 chk('agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem prazo; custos null; desde null',[r0.os.atrasadas,r0.os.n.atrasadas,r0.os.n.sem_prazo,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[[],0,0,null,true]);
 { const h0=OSD.hoje; OSD.hoje='2026-09-25'; const ra=agrPainelRef(cenClone(CEN0));
   chk('agrPainelRef: hoje 25/09 → atrasadas = abertas com fim antes de hoje (Em conferência fora)',ra.os.atrasadas.map(x=>[x.id,x.etapa,x.prevista,x.dias]),
@@ -61,34 +62,34 @@ chk('agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem praz
   const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0430'))); bz.id='OS-0601'; delete bz.fim; const ne=cenClone(CEN0); ne.ordens['OS-0601']={id:'OS-0601',etapa:'A liberar',osc:{novo:bz}};
   chk('agrPainelRef: ordem emitida sem fim não é julgada: conta em sem_prazo',[agrPainelRef(ne).os.n.sem_prazo,agrPainelRef(ne).os.atrasadas.some(x=>x.id==='OS-0601')],[1,false]);
   chk('agrPainelRef: referência devolvida para a apresentação (não "hoje")',ra.os.referencia,'2026-09-25');
-  OSD.hoje='2026-99-99'; chk('agrPainelRef: data impossível (2026-99-99) = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.referencia,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,null,5]);
+  OSD.hoje='2026-99-99'; chk('agrPainelRef: data impossível (2026-99-99) = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.referencia,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,null,7]);
   OSD.hoje='2026-03-03'; { const k=OSD.ords.find(o=>o.id==='OS-0424'), f0=k.fim; k.fim='2026-02-30'; const rb=agrPainelRef(cenClone(CEN0)); k.fim=f0;
     chk('agrPainelRef: fim inexistente (2026-02-30) não é julgado: vai para sem_prazo',[rb.os.atrasadas.some(x=>x.id==='OS-0424'),rb.os.n.sem_prazo],[false,1]); }
   OSD.hoje='2028-03-01'; { const k=OSD.ords.find(o=>o.id==='OS-0424'), f0=k.fim; k.fim='2028-02-29'; const rb=agrPainelRef(cenClone(CEN0)); k.fim=f0;
     chk('agrPainelRef: ano bissexto (2028-02-29) é data válida: 1 dia de atraso',(rb.os.atrasadas.find(x=>x.id==='OS-0424')||{}).dias,1); }
-  OSD.hoje='23/09/2026'; chk('agrPainelRef: hoje fora do formato ISO = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,5]);
+  OSD.hoje='23/09/2026'; chk('agrPainelRef: hoje fora do formato ISO = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,7]);
   OSD.hoje=h0; }
 // S2: máquina apta (CMD-19) tira só o impedimento dela, como na tela O.S.
 const ap=cenClone(CEN0); ap.man.ativos.a01.cond='Disponível'; const rA=agrPainelRef(ap);
-chk('agrPainelRef: Trator T1 apto → OS-0420 e OS-0431 saem; falta de insumo e bomba ficam',rA.os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507']);
+chk('agrPainelRef: Trator T1 apto → OS-0420 e OS-0431 saem; falta de insumo e bomba ficam',rA.os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507','OS-0593','OS-0594']);
 chk('agrPainelRef: apto = a mesma projeção da tela O.S. (sem selo de impedimento na OS-0420)',osProjecao(ap).find(o=>o.id==='OS-0420').selos.some(s=>OS_IMP_RE.test(s.t)),false);
 // S3: recorte por fazenda e safra
-chk('agrPainelRef: recorte Lagoa Grande = OS-0502 e OS-0507',agrPainelRef(ag,{faz:'Lagoa Grande'}).os.impedidas.map(x=>x.id),['OS-0502','OS-0507']);
+chk('agrPainelRef: recorte Lagoa Grande = OS-0502, OS-0507 e as calagens da demonstração',agrPainelRef(ag,{faz:'Lagoa Grande'}).os.impedidas.map(x=>x.id),['OS-0502','OS-0507','OS-0593','OS-0594']);
 chk('agrPainelRef: recorte Santa Rita = OS-0418, OS-0420 e OS-0431',agrPainelRef(ag,{faz:'Santa Rita'}).os.impedidas.map(x=>x.id),['OS-0418','OS-0420','OS-0431']);
 chk('agrPainelRef: recorte safra 2025/26 = nenhuma',agrPainelRef(ag,{saf:'2025/26'}).os.impedidas,[]);
 chk('agrPainelRef: recorte Santa Rita · 2026/27 = OS-0418, OS-0420 e OS-0431',agrPainelRef(ag,{faz:'Santa Rita',saf:'2026/27'}).os.impedidas.map(x=>x.id),['OS-0418','OS-0420','OS-0431']);
 const sf=cenClone(CEN0); const k0=OSD.ords.find(o=>o.id==='OS-0507'); const fz0=k0.faz; k0.faz='';
 chk('agrPainelRef: ordem aberta sem fazenda com recorte pedido = Sem dados',agrPainelRef(sf,{faz:'Lagoa Grande'}).os,null);
-chk('agrPainelRef: sem recorte, a mesma ordem conta',agrPainelRef(sf).os.n.impedidas,5); k0.faz=fz0;
+chk('agrPainelRef: sem recorte, a mesma ordem conta',agrPainelRef(sf).os.n.impedidas,7); k0.faz=fz0;
 const en=cenClone(CEN0); en.ordens['OS-0420'].etapa='Encerradas';chk('agrPainelRef: encerrada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
 en.ordens['OS-0420'].etapa='Canceladas';chk('agrPainelRef: cancelada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
 chk('agrPainelRef: ordens ausentes = Sem dados',agrPainelRef({}).os,null);
 // revisão Codex 6163849078: o estado decide quais ordens existem; o registro não ressuscita ordem nem transforma vazio em impedida
 chk('agrPainelRef: ordens vazias = lista vazia e 0',[agrPainelRef({ordens:{}}).os.impedidas,agrPainelRef({ordens:{}}).os.n.impedidas],[[],0]);
 const dl=cenClone(CEN0); dl.man.ativos.a01.cond='Disponível'; delete dl.ordens['OS-0420'];
-chk('agrPainelRef: ordem fora do estado não volta (a01 apto, OS-0420 apagada)',agrPainelRef(dl).os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507']);
+chk('agrPainelRef: ordem fora do estado não volta (a01 apto, OS-0420 apagada)',agrPainelRef(dl).os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507','OS-0593','OS-0594']);
 const dl2=cenClone(CEN0); delete dl2.ordens['OS-0420'];
-chk('agrPainelRef: OS-0420 apagada com a01 bloqueado também não volta',agrPainelRef(dl2).os.impedidas.map(x=>x.id),['OS-0418','OS-0431','OS-0502','OS-0507']);
+chk('agrPainelRef: OS-0420 apagada com a01 bloqueado também não volta',agrPainelRef(dl2).os.impedidas.map(x=>x.id),['OS-0418','OS-0431','OS-0502','OS-0507','OS-0593','OS-0594']);
 const sb=cenClone(CEN0); sb.ordens['OS-9999']={id:'OS-9999',etapa:'A liberar'};
 chk('agrPainelRef: ordem do estado sem registro nem emissão = Sem dados',agrPainelRef(sb).os,null);
 const ce=cenClone(CEN0); ce.ordens['OS-0507'].id='OS-0508';
@@ -96,7 +97,7 @@ chk('agrPainelRef: chave diferente do id = Sem dados',agrPainelRef(ce).os,null);
 const se=cenClone(CEN0); delete se.ordens['OS-0418'].etapa;
 chk('agrPainelRef: ordem sem etapa = Sem dados',agrPainelRef(se).os,null);
 const ob=cenClone(CEN0);
-chk('agrPainelRef: beneficiamento fora do registro não invalida o estado',agrPainelRef(ob).os.n.impedidas,5);
+chk('agrPainelRef: beneficiamento fora do registro não invalida o estado',agrPainelRef(ob).os.n.impedidas,7);
 const em=cenClone(CEN0); const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0431'))); bz.id='OS-0600';
 em.ordens['OS-0600']={id:'OS-0600',etapa:'A liberar',osc:{novo:bz}};
 chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPainelRef(em).os.impedidas.map(x=>x.id).includes('OS-0600'),true);
@@ -165,8 +166,12 @@ chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os
   const c2=cenClone(CEN0), vc=Object.values(MIP0.vis).find(v=>v.dec&&v.dec.os&&c2.ordens[v.dec.os]); c2.ordens[vc.dec.os].etapa='Canceladas';
   const M2=agrPainelRef(c2).mip;
   chk('mip: O.S. de controle cancelada devolve a decisão ao RT (sit cancelada em decidir)',[M2.decidir.some(x=>x.vis===vc.id&&x.sit==='cancelada'),M2.n.em_controle],[true,2]);
-  MIP_MEM=Object.assign(mipClone(MIP0),{vis:{X:{id:'X',tal:'??',prot:'??',data:'2026-09-01'}}});
-  chk('mip: vistoria com talhão ou protocolo fora do MIP = Sem dados',agrPainelRef(cenClone(CEN0)).mip,null); mipReset(); }
+  /* base verde 2 (18/10, Claude): desde o N-1/B-3 o MIP mora no cenário (mipEstado lê c.mip); a injeção pela cópia antiga (MIP_MEM) não chegava mais à leitura */
+  const cm=cenGet(); cm.mip=Object.assign(mipClone(MIP0),{vis:{X:{id:'X',tal:'??',prot:'??',data:'2026-09-01'}}});
+  chk('mip: vistoria com talhão ou protocolo fora do MIP = Sem dados',agrPainelRef(cenClone(CEN0)).mip,null);
+  cm.mip={v:0};   // MIP do cenário incompatível: mipGet devolve vazio e avisa (mipErro); o painel não pode dizer 0 a decidir
+  chk('mip: MIP ilegível no cenário = Sem dados, nunca zero',[agrPainelRef(cenClone(CEN0)).mip,!!mipErro()],[null,true]);
+  delete cm.mip; mipReset(); }
 console.log('RESULTADO '+n+'/'+n);
 '''
 

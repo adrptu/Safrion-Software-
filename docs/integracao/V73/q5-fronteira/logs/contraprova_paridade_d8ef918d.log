@@ -1,0 +1,10 @@
+# contraprova: cenario.js e dados2.py de d8ef918d (antes da correção), teste novo
+PASS 5 paridades JS/Python: previsões canônicas da semente (2 fazendas), parcial deduplicado, multi-item, legado ambíguo excluído com aviso. Não é execução integral do build.
+PASS 6ª paridade: dois lotes em unidades distintas e recebimento parcial, previsão ambígua excluída.
+PASS 6 paridades Q5: legado único abate, unidade divergente não, legado ambíguo (unidades distintas ou mesma unidade sem linha) fora do suprimento com aviso, unidade ou linha única baixa só a sua.
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/q5f_contra/c34_paridade_test.py", line 62, in <module>
+    assert not out['recebDt'] and len(out['recebNaoApuravel'])==2 and all('7001' in x['motivo'] for x in out['recebNaoApuravel']),out
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'fisico': {}, 'quar': {}, 'quarRep': {}, 'quarRef': [], 'reservas': [], 'recebDt': [{'ref': 'PC-X', 'item': 'A', 'un': 'kg', 'q': 80.0, 'faz': 'F'}, {'ref': 'PC-X', 'item': 'A', 'un': 'kg', 'q': 30.0, 'faz': 'F'}], 'recebNaoApuravel': [], 'sobra': []}
+rc=1

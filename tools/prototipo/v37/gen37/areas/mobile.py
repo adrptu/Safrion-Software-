@@ -447,7 +447,7 @@ const ack=!!s.ack; v.noack=!ack;
 DCH(v,'ack',ack?'Ciência registrada · CI-0931 · 10:44':'Ciência pendente do operador',ack?'green':'yellow');
 v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência registrada (recibo CI-0931) · o saldo de 70 ha segue na v3 e fica parado até o Trator T1 voltar ou o substituto ser confirmado · os 30 ha realizados seguem na v2.'}); };'''
     emit('MB-02','Minhas ordens','',('1 impedida · 1 revogada','red'),
-         'Abrir ordem',corpo,H_=2320,back='MB-01.dc.html',js=js,cen=True,sem_prim=True,
+         'Abrir ordem',corpo,H_=3480,back='MB-01.dc.html',js=js,cen=True,sem_prim=True,
          dica='Mesma ordem do escritório. Da equipe: quem executa é o responsável indicado. Irrigação só com água abre em Irrigação, sem materiais e sem requisição. '
               'Fechar o turno não encerra a ordem: encerrar é no escritório, com apontamentos enviados e nada em custódia.')
 

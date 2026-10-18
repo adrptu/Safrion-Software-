@@ -205,7 +205,7 @@ function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const 
     if (!(x.chaves || []).length && !itens.some(i => i.q > 0)) return;
     out.push({ id: x.id, faz: x.faz, saf: x.saf, chaves: (x.chaves || []).slice(), area: co.area || 0, dt: (x.ini && x.ini > hoje) ? x.ini : hoje, etapa: co.etapa, t: x.t, loc: (x.loc || []).slice(), itens }); };
   (b.ords || []).forEach(x => { vistos[x.id] = 1; um(x, ((c && c.ordens) || {})[x.id]); });
-  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no) return;
+  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no || no.demoLote) return;   // semente de demonstração (EX-54) fora da compra, como em dados2.os_dem
     const faz = no.faz || 'Santa Rita'; const saf = safDe(faz, no.saf || ''); if (!saf) return;
     um({ id: k, faz, saf, chaves: (no.keys || []).slice(), loc: [no.talhao], ini: no.jan || '', t: no.talhao + ' · ' + k + ' · ' + (((no.atv || {}).nome) || no.tipo || '') }, co); });
   return out; }
@@ -268,7 +268,8 @@ function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; con
     return {id:r.ref,item:r.item,un:r.un||(unidades.length===1?unidades[0]:null),linha:r.linha};};
   (b.rec || []).forEach(r => { if (r.faz !== faz) return; const p=linhaDe(r);
     if(!p.un){recebNaoApuravel.push(Object.assign({},r,{motivo:'Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.'}));return;}
-    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&cenCompOutra(e,p,linhas));
+    // cada outra previsão do mesmo PC e item é outra ocorrência, mesmo sem linha ou com a mesma chave: nota que cabe em duas não baixa nenhuma (Codex 6250436415)
+    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&linhas.some(q=>cenCompCabe(e,q)));
     if(amb.length){recebNaoApuravel.push(Object.assign({},r,{motivo:'Nota '+amb.map(e=>e.nf||e.id).join(', ')+' sem unidade ou linha cabe em mais de uma linha do '+r.ref+': previsão fora do suprimento. Confira a nota no Estoque.'}));return;}
     const baixa=recebidos.filter(e=>cenCompCabe(e,p)).reduce((a,e)=>a+(Number(e.apto==null&&e.quar==null?e.conf:((Number(e.apto)||0)+(Number(e.quar)||0)))||0),0);
     const q=Math.max(0,r.q-baixa); if(q>1e-9)recebDt.push(Object.assign({},r,{q})); });
@@ -901,28 +902,36 @@ function cenGrupoCompromisso(c,o) {
   return '';
 }
 // O.S. comuns: projetar instrução vigente e alocação; não inventar ficha técnica.
+function cenGrupoLiquido(o,b){const t=[((b||{}).atv||{}).op,o.operacao,o.tipo,(b||{}).tipo].filter(Boolean).join(' ');
+  if(/fertirriga/i.test(t))return false;return /pulveriz|dessec|fungic|herbic|insetic|acaric|calda/i.test(t);}
 function cenGrupoComum(c,o){
   const b=(o.osc||{}).novo||(typeof OSD!=='undefined'?(OSD.ords||[]).find(x=>x.id===o.id):null)||o;
-  const preparo=cenPreparoOrdem(c,o);if(!preparo.ok)throw Error(o.id+': '+preparo.motivo);
+  // OS-AGRUPA-2 R6: só a calda (pulverização) pede pulverizador, vazão e tanque; a lanço, plantio e demais operações agrupam pela receita
+  const liq=cenGrupoLiquido(o,b),preparo=liq?cenPreparoOrdem(c,o):{ok:true,vazao:null,tanque:null,cargas:[]};if(!preparo.ok)throw Error(o.id+': '+preparo.motivo);
   const fazenda=b.faz||o.faz,safra=b.saf||o.saf,cultura=b.cultura||o.cultura||((b.culturas||[]).length?(b.culturas||[]).slice().sort().join(' / '):''),operacao=(b.atv||{}).op||o.operacao;
   if(!fazenda||!safra||!cultura||!operacao)throw Error(o.id+': conferir fazenda, safra, cultura e atividade na origem');
-  const rec=alDaOrdem(c,o.id),maquina=rec.find(x=>AL0.tipo[x.r]==='Máquina');
+  const rec=alDaOrdem(c,o.id),maquina=rec.find(x=>AL0.tipo[x.r]==='Máquina'),impl=rec.find(x=>AL0.tipo[x.r]==='Implemento');
   if(!maquina)throw Error(o.id+': alocar máquina na O.S.');
   const prods=(o.ins||[]).map(x=>{const d=cenGrupoDose(x.dose,x.un);return {id:x.p,p:x.p,un:d.un,dose:d.dose,chave:d.chave}}).sort((a,b)=>a.id.localeCompare(b.id));
   if(!prods.length||new Set(prods.map(x=>x.id)).size!==prods.length)throw Error(o.id+': conferir produtos da instrução');
-  const f={comum:true,fazenda,safra,cultura,operacao,tipo:'liquido',volumeHa:preparo.vazao,tanqueUtil:preparo.tanque,parcela:b.cult||b.talhao||o.talhao,
-    receita:(b.atv||{}).nome||operacao,receitaVersao:o.versao,recursos:{maquina:AL0.classe[maquina.r],implemento:'Pulverizador'},insumos:prods.map(x=>({p:x.p,id:x.id})),prazo:b.jan||''};
+  const implemento=liq?'Pulverizador':(impl?AL0.classe[impl.r]||AL0.nome[impl.r]:'Sem implemento');
+  const pulv=liq?(rec.find(x=>x.classe==='Pulverizador')||{}).r||null:null;
+  const f={comum:true,fazenda,safra,cultura,operacao,tipo:liq?'liquido':'solido',volumeHa:preparo.vazao,tanqueUtil:preparo.tanque,pulv,parcela:b.cult||b.talhao||o.talhao,
+    receita:(b.atv||{}).nome||operacao,receitaVersao:o.versao,recursos:{maquina:AL0.classe[maquina.r],implemento},insumos:prods.map(x=>({p:x.p,id:x.id})),prazo:b.jan||''};
   if(!f.parcela)throw Error(o.id+': conferir talhão da origem');
-  return {o,f,prods,preparo,eq:cenGrupoCanon({comum:true,fazenda,safra,cultura,operacao,atividade:f.receita,implemento:'Pulverizador',volumeHa:f.volumeHa,insumos:prods.map(({id,un,chave})=>({id,un,chave}))})};
+  return {o,f,prods,preparo,eq:cenGrupoCanon({comum:true,fazenda,safra,cultura,operacao,atividade:f.receita,implemento,volumeHa:f.volumeHa,insumos:prods.map(({id,un,chave})=>({id,un,chave}))})};
 }
 function cenGrupoPreviaComum(c,rows,ator,programa){
   if(programa)throw Error('Conferir os recursos na O.S.; o grupo usa a alocação vigente de cada origem.');
   const a=rows[0];if(rows.some(x=>!x.f.comum||x.eq!==a.eq))throw Error('Atividade, receita efetiva, cultura, vazão ou contexto incompatíveis: reveja as origens.');
   if(new Set(rows.map(x=>x.f.parcela)).size!==rows.length)throw Error('Destino repetido na mesma operação.');
-  rows=rows.slice().sort((a,b)=>a.f.prazo.localeCompare(b.f.prazo)||a.o.id.localeCompare(b.o.id));
-  const ids=rows.map(x=>x.o.id),cargas=[];
+  // OS-AGRUPA-2 R4: a ordem é a da rota escolhida na tela (antes: prazo da origem)
+  const ids=rows.map(x=>x.o.id),liq=a.f.tipo==='liquido';
+  // EX-54 §7: carga fechada por O.S. até o RT decidir o rateio da calda contínua (a tela mostra o ganho que ele traria)
+  const continua=false,cargas=[];
   for(const r of rows)for(const x of r.preparo.cargas)cargas.push({n:cargas.length+1,vol:x.vol,destinos:[{os:r.o.id,area:x.area}],produtos:x.prods.map(i=>{const d=cenDec(i.q),div=['mL','g'].includes(i.un)?1000:1;return {id:i.p,p:i.p,un:i.un==='mL'?'L':i.un==='g'?'kg':i.un,q:Number(d.n)/10**d.e/div}})});
-  return {comum:true,ids,versoes:Object.fromEntries(ids.map(id=>[id,cenGrupoSnapshot(c,id)])),assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:'versão individual por O.S.',area:rows.reduce((s,x)=>s+x.o.area,0),produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)})),cargas,horas:null,inicio:null,fim:null,programa:null,programacao:null,pendencias:['Sequência por prazo da origem; cada talhão usa seu conjunto e suas cargas, sem transferir restos entre O.S.']};
+  const pend=liq?'Sequência da rota; cada O.S. prepara as suas cargas, sem transferir restos entre O.S. (calda contínua com rateio depende da decisão do RT).':'Sequência da rota; operação sem calda: abastecimento por O.S.';
+  return {comum:true,ids,versoes:Object.fromEntries(ids.map(id=>[id,cenGrupoSnapshot(c,id)])),assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:'versão individual por O.S.',area:rows.reduce((s,x)=>s+x.o.area,0),produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)})),cargas,continua,horas:null,inicio:null,fim:null,programa:null,programacao:null,pendencias:[pend]};
 }
 function cenGrupoFicha(c,id,grupoPermitido) {
   const o=c.ordens[id]; if(!o) throw new Error(id+': ordem não encontrada');
@@ -963,6 +972,22 @@ function cenGrupoQuantidade(rows,produto){
   const e=Math.max(...ds.map(d=>d.e)),n=ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n);
   return Number(n)/10**e;
 }
+function cenGrupoCargasContinuas(rows,a,tanque){
+  const area=rows.reduce((s,x)=>s+x.o.area,0),volume=area*a.f.volumeHa,n=Math.max(1,Math.ceil(volume/tanque-1e-9));
+  if(!Number.isSafeInteger(n)||n<1||n>10000) throw new Error('Preparo fora da faixa.');
+  let ri=0,rest=rows[0].o.area;const preparado={};
+  return Array.from({length:n},(_,i)=>{const vol=Math.min(tanque,Math.max(0,volume-i*tanque));let ha=vol/a.f.volumeHa;const destinos=[];
+    while(ha>0&&ri<rows.length){const q=Math.min(ha,rest);destinos.push({os:rows[ri].o.id,area:q});ha-=q;rest-=q;if(rest<=0){ri++;rest=ri<rows.length?rows[ri].o.area:0;}}
+    // Arredonda cada origem antes de converter unidades; diferenças acumuladas fecham o total da O.S.
+    const produtosCarga=a.prods.map(x=>{
+      const ds=destinos.map(d=>{const r=rows.find(r=>r.o.id===d.os),m=r.f.insumos.find(m=>m.id===x.id),ins=r.o.ins.find(ins=>ins.p===m.p);
+        const fim=Math.min(r.o.area,(preparado[d.os]||0)+d.area),q=cenDec(cenQtdTrecho(ins.dose,preparado[d.os]||0,fim-(preparado[d.os]||0)));
+        return {n:q.n,e:q.e+(['mL','g'].includes(ins.un)?3:0)};});
+      const e=Math.max(0,...ds.map(d=>d.e)),q=Number(ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n))/10**e;
+      return {id:x.id,p:x.p,un:x.un,q};});
+    destinos.forEach(d=>{preparado[d.os]=(preparado[d.os]||0)+d.area;});
+    return {n:i+1,vol,destinos,produtos:produtosCarga}; });
+}
 function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   cenGrupoAtor(ator);
   if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length) throw new Error('Selecione ao menos duas O.S. distintas.');
@@ -982,22 +1007,8 @@ function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
   // Preparo é projeção. Capacidade útil deve ser explícita e igual; não escolher conjunto da primeira ordem.
   const tanques=rows.map(x=>x.f.tanqueUtil),tanque=tanques.every(t=>Number.isFinite(t)&&t>0&&t===tanques[0])?tanques[0]:null;
   let cargas=null;
-  if(a.f.tipo==='liquido'&&tanque!==null){
-    const volume=area*a.f.volumeHa,n=Math.max(1,Math.ceil(volume/tanque-1e-9));
-    if(!Number.isSafeInteger(n)||n<1||n>10000) throw new Error('Preparo fora da faixa.');
-    let ri=0,rest=rows[0].o.area;const preparado={};
-    cargas=Array.from({length:n},(_,i)=>{const vol=Math.min(tanque,Math.max(0,volume-i*tanque));let ha=vol/a.f.volumeHa;const destinos=[];
-      while(ha>0&&ri<rows.length){const q=Math.min(ha,rest);destinos.push({os:rows[ri].o.id,area:q});ha-=q;rest-=q;if(rest<=0){ri++;rest=ri<rows.length?rows[ri].o.area:0;}}
-      // Arredonda cada origem antes de converter unidades; diferenças acumuladas fecham o total da O.S.
-      const produtosCarga=a.prods.map(x=>{
-        const ds=destinos.map(d=>{const r=rows.find(r=>r.o.id===d.os),m=r.f.insumos.find(m=>m.id===x.id),ins=r.o.ins.find(ins=>ins.p===m.p);
-          const fim=Math.min(r.o.area,(preparado[d.os]||0)+d.area),q=cenDec(cenQtdTrecho(ins.dose,preparado[d.os]||0,fim-(preparado[d.os]||0)));
-          return {n:q.n,e:q.e+(['mL','g'].includes(ins.un)?3:0)};});
-        const e=Math.max(0,...ds.map(d=>d.e)),q=Number(ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n))/10**e;
-        return {id:x.id,p:x.p,un:x.un,q};});
-      destinos.forEach(d=>{preparado[d.os]=(preparado[d.os]||0)+d.area;});
-      return {n:i+1,vol,destinos,produtos:produtosCarga}; });
-  } else if(a.f.tipo==='liquido') pendencias.push('Preparo não calculado · conferir capacidade útil do conjunto');
+  if(a.f.tipo==='liquido'&&tanque!==null) cargas=cenGrupoCargasContinuas(rows,a,tanque);
+  else if(a.f.tipo==='liquido') pendencias.push('Preparo não calculado · conferir capacidade útil do conjunto');
   const versoes={};ids.forEach(id=>versoes[id]=cenGrupoSnapshot(c,id));
   const previa={ids:ids.slice(),versoes,assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:a.f.receitaVersao,area,produtos,cargas,horas,inicio:new Date(inicio).toISOString(),fim:new Date(fim).toISOString(),pendencias};
   previa.programa=programa?cenClone(programa):null;previa.programacao=cenGrupoProgramacao(c,ids,programa,previa);

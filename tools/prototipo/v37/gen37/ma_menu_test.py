@@ -72,7 +72,8 @@ try:
     cs = json.loads(J(CARDS) or '[]'); cur = [x[0] for x in json.loads(J(NAV) or '[]') if x[3] == 'page']
     # DS-MAN (17/10/2026): a entrada da Manutenção em blocos como a do Agrícola (ui37.FLUXO37), na ordem do processo: Cadastro (Ativos, Planos),
     # Execução (Sem ordem, Ordens), Resultados (Painel). Antes, a ordem do menu (Painel primeiro); os 5 cartões são os mesmos
-    esp = {'PMAN.dc.html': 'Painel'}; esp.update({'MA.dc.html#vis=' + v: t for v, t in zip(VIS, TIT)})
+    esp = {'PG.dc.html#mod=man': 'Painel'};   # PAINEL-03 (18/10): o Painel da Manutenção é a aba do painel único
+    esp.update({'MA.dc.html#vis=' + v: t for v, t in zip(VIS, TIT)})
     ordem = [h for _t, b in FLUXO37['Manutenção'] for h in b]
     m.ok(r == 'ok' and foi and cs == [[h, esp[h], True] for h in ordem] and sorted(ordem) == sorted(esp) and cur == ['Manutenção'],
          f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com o Painel e os 4 cartões (ícone e nome curto), nos blocos do processo, ícone destacado', [r, foi, cs, cur])

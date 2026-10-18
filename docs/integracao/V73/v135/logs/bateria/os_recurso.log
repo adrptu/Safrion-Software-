@@ -1,0 +1,18 @@
+OK  R1 OS-0430 com o Trator 03 e "Trocar" disponível para Caio (PCP)
+OK  R2 substitutos: T1 bloqueado e T02 ocupado não escolhíveis; T04 livre
+OK  R3 confirmar troca
+OK  R4 painel: Trator 04 no lugar do Trator 03, com aviso de retorno
+OK  R5 conjunto da atividade com o Trator 04
+OK  R6 Origem com a troca, quem e quando
+OK  R7 cenário: troca gravada uma vez
+OK  R8 Carga: OS-0430 na linha do Trator 04 (no lugar do 03) e fora da linha do Trator 03
+OK  R9 Otávio (PCM): "Trocar" indisponível, com o motivo
+OK  R10 OS-0420 em execução: sem "Trocar"
+OK  R12 #painel=OS-0418,OS-0420,OS-9999: só as duas O.S. que existem, com a faixa do Painel
+OK  R13 "Ver todas as O.S." encerra o recorte do Painel e limpa o endereço
+OK  R14 busca guardada (OS-0430): o recorte mostra 0418 e 0420, com busca e Fazenda suspensas e a faixa dizendo isso
+OK  R15 "Ver todas as O.S." devolve a busca guardada (OS-0430) e a Fazenda habilitada, sem nada sobrescrito
+OK  R16 OS-0507 (Lagoa Grande) com Fazenda Santa Rita guardada: a O.S. aparece e o filtro de Fazenda fica suspenso, não fingindo governar o recorte
+OK  R11 sem erro de JS
+RESULTADO: 16/16
+rc=0

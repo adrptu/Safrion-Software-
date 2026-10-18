@@ -36,15 +36,8 @@ PROC_NOMES=[n for _,n in DC.PROCESSOS]
 SEMENTES_BASE=sorted(set(DC.SEMENTES.values()))
 
 # ---- auxiliares desta frente (CD-02, CD-06, CD-07 importam daqui; o estado do cabeçalho fica em areas/cadastros.estado_cab) ----
-CADC_JS=r'''
-// lista sem valor escolhido mostra "Escolha…" (sem isto o navegador exibe a 1ª opção e o rascunho continua vazio)
-function cadcEscolha(v,gid){ const F=v[gid+'_F']; if(!F||!F.open||!F.fields) return; F.fields.forEach(f=>{ if(f.isSel&&!f.dis&&f.v==='') f.opts=[{v:'',t:'Escolha…'}].concat(f.opts); }); }
-// abre a linha só com os valores gravados (r.v): o texto de exibição da tabela (r.s, ex.: 'Sem preço') não entra no rascunho
-function cadcAbrir(self,gid,rid){ const sp=GR(gid); const r=g2find(RW(self,gid),rid); if(!r) return; const d={};
-  (sp.edit.fields||[]).forEach(f=>{ const x=r.v[f.k]; d[f.k]=(x===undefined||x===null||x==='')?'':(f.t==='num'?String(x).replace('.',','):String(x)); });
-  g2set(self,gid,{fm:{rid,draft:d,orig:Object.assign({},d),errs:{},warn:false,ro:!!r.ro,isNew:false,mode:'form'},fl:null,fmc:null}); }
-// valor-padrão que acompanha o registro de origem pelo id: renomear a cultura, o grupo ou o local não deixa o padrão órfão
-function cadcPadrao(gid,k,val){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.def=val; }
+# chave dos cadastros no navegador e as funções de gravar e ler: uma peça só para CD-02, CD-06, CD-08, CD-03 e a Manutenção (ATIVO-UNICO, 18/10)
+CAD_LS_JS=r'''
 // chave dos cadastros no navegador (o CD-06 lê as sementes; CD-02 e CD-08 leem as culturas)
 const CAD_LS='talhao-os-cadastros-v1';
 // fonte única de culturas entre telas (CD08-CULTURA-01, revisão Codex de 13/10): o CD-02 grava a lista atual a cada mudança (cadLsSe) e o
@@ -62,6 +55,17 @@ function cadLsGrava(self,obj){ self.__lsU=self.__lsU||{}; const ks=Object.keys(o
 function cadLsSe(self,k,val){ return !cadLsGrava(self,{[k]:val}); }
 function cadLsLer(k){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); return o[k]||null; }catch(e){ return null; } }
 '''
+CADC_JS=r'''
+// lista sem valor escolhido mostra "Escolha…" (sem isto o navegador exibe a 1ª opção e o rascunho continua vazio)
+function cadcEscolha(v,gid){ const F=v[gid+'_F']; if(!F||!F.open||!F.fields) return; F.fields.forEach(f=>{ if(f.isSel&&!f.dis&&f.v==='') f.opts=[{v:'',t:'Escolha…'}].concat(f.opts); }); }
+// abre a linha só com os valores gravados (r.v): o texto de exibição da tabela (r.s, ex.: 'Sem preço') não entra no rascunho
+function cadcAbrir(self,gid,rid){ const sp=GR(gid); const r=g2find(RW(self,gid),rid); if(!r) return; const d={};
+  (sp.edit.fields||[]).forEach(f=>{ const x=r.v[f.k]; d[f.k]=(x===undefined||x===null||x==='')?'':(f.t==='num'?String(x).replace('.',','):String(x)); });
+  g2set(self,gid,{fm:{rid,draft:d,orig:Object.assign({},d),errs:{},warn:false,ro:!!r.ro,isNew:false,mode:'form'},fl:null,fmc:null}); }
+// valor-padrão que acompanha o registro de origem pelo id: renomear a cultura, o grupo ou o local não deixa o padrão órfão
+function cadcPadrao(gid,k,val){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.def=val; }
+// gravação dos cadastros no navegador: CAD_LS_JS (peça comum, também no CD-03 e na Manutenção; ATIVO-UNICO, 18/10)
+'''+CAD_LS_JS
 
 def cd02():
     fname='CD-02.dc.html'; E._reset_screen(fname)

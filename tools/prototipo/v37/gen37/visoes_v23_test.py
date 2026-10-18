@@ -81,12 +81,14 @@ try:
                     r == 'ok' and r2 == 'ok' and len(gr) >= 1 and all(x[1] > 0 for x in gr) and (soma >= len(base) if multi else soma == len(base)), [r, r2, gr[:6], soma, len(base)])
                 if gr:
                     k0 = gr[0][0][4:]; n0 = gr[0][1]
-                    # AGR-02 (16/10/2026): o nome do grupo não desce; a seta do grupo recolhe as linhas dele, no lugar
+                    # AGR-02 (16/10/2026): o nome do grupo não desce; a seta do grupo abre e recolhe as linhas dele, no lugar
+                    # DRILL-RECOLHIDO (TAB-12, v129, pedido do proprietário de 17/10): os grupos nascem recolhidos; a seta abre as n0 linhas e a 2ª recolhe de novo
                     l0 = [x for x in (J(f"({LINHAS})({json.dumps(gid)})") or []) if not x.startswith('grp@')]
                     dz = J("(()=>{const r=document.querySelector('[data-g2g=\"%s\"] [role=row][data-rid=\"grp@%s\"]'); if(!r) return null; const d=!!r.querySelector('button.g2desce'); const b=r.querySelector('button.g2car'); if(b) b.click(); return {desce:d, seta:!!b};})()" % (gid, k0.replace('"', '\\"'))); time.sleep(.45)
                     ln = [x for x in (J(f"({LINHAS})({json.dumps(gid)})") or []) if not x.startswith('grp@')]
                     J("(()=>{const r=document.querySelector('[data-g2g=\"%s\"] [role=row][data-rid=\"grp@%s\"]'); const b=r&&r.querySelector('button.g2car'); if(b) b.click();})()" % (gid, k0.replace('"', '\\"'))); time.sleep(.3)
-                    chk(f'D {pg} {gid} {d["l"]}: o grupo "{k0}" não desce pelo nome; a seta recolhe as {n0} linhas dele', dz and not dz['desce'] and dz['seta'] and len(l0) - len(ln) == n0, [dz, len(l0), len(ln), n0])
+                    l2 = [x for x in (J(f"({LINHAS})({json.dumps(gid)})") or []) if not x.startswith('grp@')]
+                    chk(f'D {pg} {gid} {d["l"]}: o grupo "{k0}" nasce recolhido e não desce pelo nome; a seta abre as {n0} linhas dele e a 2ª recolhe', dz and not dz['desce'] and dz['seta'] and len(ln) - len(l0) == n0 and len(l2) == len(l0), [dz, len(l0), len(ln), len(l2), n0])
                 J("(()=>{const b=document.querySelector('[data-g2agb=\"%s\"]'); if(b) b.click();})()" % gid); time.sleep(.3)
                 J("(()=>{const m=document.querySelector('[data-g2agm=\"%s\"]'); const i=m&&[...m.querySelectorAll('[role=menuitemradio]')].find(x=>x.innerText.trim().split('\\n')[0].trim()==='Sem agrupar'); if(i) i.click();})()" % gid); time.sleep(.4)
             fim = J(f"({LINHAS})({json.dumps(gid)})") or []

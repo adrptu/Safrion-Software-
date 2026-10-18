@@ -69,7 +69,8 @@ function selFiel(F,suf){ if(!F||!F.open||!F.fields) return; F.fields.forEach(f=>
 ''')
 # ================= CD-03 · Máquinas, instalações e setores =================
 CLS=[('Trator','tr'),('Pulverizador','pv'),('Plantadeira','pl'),('Distribuidor','di'),('Colhedora','co'),('Implemento','im'),
-     ('Tratamento de sementes','ts'),('Irrigação','ir'),('Beneficiamento','be'),('Armazenagem','ar')]
+     ('Tratamento de sementes','ts'),('Irrigação','ir'),('Beneficiamento','be'),('Armazenagem','ar'),
+     ('Veículo','ve')]   # ATIVO-UNICO (18/10): o Comboio CB-01 existia só na Manutenção; agora todo ativo nasce aqui
 COD=dict(CLS)
 IMPL=['Pulverizador','Plantadeira','Distribuidor','Implemento']            # vão num trator e exigem potência mínima
 CALIB_CLS=['Pulverizador','Plantadeira','Distribuidor','Tratamento de sementes','Irrigação','Beneficiamento','Armazenagem']
@@ -86,7 +87,8 @@ CAP={'Trator':[('pot','Potência','cv',dict(min=20,max=700))],
      'Tratamento de sementes':[('kgh','Capacidade','kg/h',dict(min=100,max=20000))],
      'Irrigação':[('vazao','Vazão','m³/h',dict(min=1,max=2000))],
      'Beneficiamento':[('kgh','Capacidade','kg/h',dict(min=100,max=50000))],
-     'Armazenagem':[('capsc','Capacidade','sc de 60 kg',dict(min=100,max=1000000))]}
+     'Armazenagem':[('capsc','Capacidade','sc de 60 kg',dict(min=100,max=1000000))],
+     'Veículo':[('carga','Capacidade de carga','L',dict(min=100,max=60000))]}
 _DK={'capsc':'cap_sc'}                                                       # chave em dados_cad quando difere
 PREQ={'a05':100,'a06':140,'a07':75,'a10':75}                                # potência mínima exigida pelo implemento (cv)
 CFONTES=['Apurado na fazenda','Tabela de referência','Premissa a validar']
@@ -99,7 +101,8 @@ OPHAB={'Pulverização':['Operar trator','Operar pulverizador'],'Plantio':['Oper
 SEM_IMPL='Sem implemento'
 # capacidade principal por classe (rótulo, unidade), a mesma de c3capn(): a coluna só aparece quando o filtro de Classe deixa uma grandeza
 CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantadeira':('Linhas','linhas'),'Distribuidor':('Carga','kg'),
-        'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h')}
+        'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h'),
+        'Veículo':('Carga','L')}
 # TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro (Classe no CD-03, Tanque/Silo no CD-06);
 # o filtro, a ordenação e o menu de filtro dela não podem sobrar de outra grandeza. Uma função para as duas telas (o CD-06 importa daqui).
 # Revisão do TABR-CTX-01 (10/10/2026): a coluna Fazenda da Irrigação (só com "Todas" no topo) usa a mesma função (TABR-CTX-02); e a coluna
@@ -138,7 +141,7 @@ def _campos_ativo():
             if o=='live': cap.append(dict(k=f'{k}_{cd}',l=l,ro=True,live=True,u=u,cond=cond('classe',cl),help='Linhas × espaçamento.'))
             else: cap.append(num(f'{k}_{cd}',l,u,cond=cond('classe',cl),**o))
         if cl in MEDIDOR:
-            cont.append(dict(k=f'cont_{cd}',l='Leitura do horímetro',t='num',u='h',ro=True,cond=cond('classe',cl),help='Só leitura: vem da Manutenção (abastecimento, conclusão da OM, leitura avulsa); troca de contador se decide lá (PCM S3).'))
+            cont.append(dict(k=f'cont_{cd}',l='Leitura do hodômetro' if cl=='Veículo' else 'Leitura do horímetro',t='num',u='km' if cl=='Veículo' else 'h',ro=True,cond=cond('classe',cl),help='Só leitura: vem da Manutenção (abastecimento, conclusão da OM, leitura avulsa); troca de contador se decide lá (PCM S3).'))
     return ([sel('classe','Classe',[c for c,_ in CLS],newOnly=True,help='Abre só a capacidade desta classe; fica fixa depois do cadastro.',**{'def':'Trator'}),
              txt('nome','Nome',help='Ex.: Trator 05. Não pode repetir.'),txt('modelo','Modelo',req=False),
              dict(k='cond_t',l='Condição técnica',t='area',ro=True,help='Vem da Manutenção (condição única); não se altera no cadastro.',**{'def':'Apto'})]
@@ -177,7 +180,7 @@ def cd03():
         edit=dict(m='form',title='Máquina',newTitle='Cadastrar máquina ou instalação',
             sub=SUB_EDIT,fields=_campos_ativo()))
     rend={c['id']:c['rend'] for c in D2.CONJ}
-    maqs=[a['nome'] for a in DC.ATIVOS if a['classe'] not in IMPL]; imps=[a['nome'] for a in DC.ATIVOS if a['classe'] in IMPL]
+    maqs=[a['nome'] for a in DC.ATIVOS if a['classe'] not in IMPL+['Veículo']]; imps=[a['nome'] for a in DC.ATIVOS if a['classe'] in IMPL]
     # Conjuntos (16/10/2026): eram só cartões próprios; agora a grade do motor com Tabela | Cartões (VIS-05), com o que o cartão mostrava em
     # colunas (situação com o próximo passo, operações, largura, rendimento, potência e operadores alocáveis)
     cj=grid([dict(k='nome',l='Conjunto',w=330),dict(k='est',l='Situação',w=200),dict(k='ops',l='Operações',w=180),dict(k='larg',l='Largura',t='num',a='r',un='m'),
@@ -198,7 +201,8 @@ def cd03():
     EXTRA_FP=FP.painel()   # gaveta "Ficha do pivô" (o mesmo componente do IR-01)
     import cenario   # PCM simplificado S3: condição, responsável técnico e leitura do cenário único (c.man)
     import dados_manutencao as DM   # MA-VINCULO: "Plano: PM-01 ›" (só leitura; um único lugar edita: a Manutenção) pela regra comum do vínculo
-    js({},cenario.js_prefixo()+ALOC_JS+CAPCOL_JS+FP.store_js()+FP.js('CD')+DM.JS_VINC_BASE+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    from areas.cad_culturas import CAD_LS_JS   # ATIVO-UNICO (18/10): o CD-03 grava os ativos na chave dos cadastros; a Manutenção lê dali
+    js({},cenario.js_prefixo()+ALOC_JS+CAPCOL_JS+FP.store_js()+FP.js('CD')+DM.JS_VINC_BASE+CAD_LS_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -209,13 +213,13 @@ function c3cap(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?'—':nfa(x)+' '+u;
     case 'Plantadeira': return nfa(n('linhas')||0)+' linhas × '+f(n('esp'),'m')+' = '+f(c3larg(V),'m');
     case 'Distribuidor': return f(n('larg'),'m')+' · carga '+f(n('carga'),'kg');
     case 'Colhedora': return 'plataforma '+f(n('plat'),'m'); case 'Implemento': return f(n('larg'),'m');
-    case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg');
+    case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg'); case 'Veículo': return 'carga '+f(n('carga'),'L');
     default: return f(n('kgh'),'kg/h'); } }
 // capacidade principal da classe (a largura de trabalho tem coluna própria): número para ordenar e texto com a unidade
 function c3capn(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?null:{n:x,t:nfa(x)+' '+u};
   switch(V.classe){ case 'Trator': return f(n('pot'),'cv'); case 'Pulverizador': return f(n('tanque'),'L'); case 'Plantadeira': return f(n('linhas'),'linhas');
     case 'Distribuidor': return f(n('carga'),'kg'); case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg');
-    case 'Tratamento de sementes': case 'Beneficiamento': return f(n('kgh'),'kg/h'); default: return null; } }
+    case 'Tratamento de sementes': case 'Beneficiamento': return f(n('kgh'),'kg/h'); case 'Veículo': return f(n('carga'),'L'); default: return null; } }
 /* condição única (PCM simplificado S3, F107): lida de c.man do cenário, a mesma da Manutenção e da O.S.; o cadastro não a altera */
 function c3man(id){ try{ return ((cenGet().man||{}).ativos||{})[id]||null; }catch(e){ return null; } }
 function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gray',ok:false,curto:'inativo'}; const a=c3man(r.id); const x=C3.cond[r.id];
@@ -280,7 +284,34 @@ CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[
     return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; })); };
 CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-08.dc.html'; }},
   cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Operações e rendimentos; troque o conjunto lá antes':'')];
-function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
+/* ATIVO-UNICO (proprietário, 18/10: "Tem cadastro de ativos no módulo manutenção e cadastros"): o CD-03 é a fonte única da identidade do ativo
+   (nome, classe, modelo, local, capacidade, situação). Grava na chave dos cadastros (CAD_LS 'ativos'); a Manutenção lê a mesma chave na hora.
+   Gravação com a versão lida (Codex 6252809331, S2): a tela guarda o que leu (__atvDisco) e a lista de partida (__atvBase). Se outra tela gravou
+   depois, a gravação junta por id só o que mudou aqui (nos campos do formulário; os calculados na tela não contam): o ativo criado ou mudado na
+   outra tela fica; o mesmo ativo mudado nas duas é recusado com o motivo, e o rascunho continua. Último gravador não apaga nem inativa ninguém. */
+function c3lista(self){ return RW(self,'g_atv').map(r=>({id:r.id,v:Object.assign({},r.v)})); }
+function c3poe(self,L){ const all=Object.assign({},self.state.g2||{}); all.g_atv=Object.assign({},all.g_atv||{},{rows:L.map(a=>({id:a.id,v:Object.assign({},a.v),s:{},p:{}}))}); self.state.g2=all; }
+function c3atvIni(self){ if(self.__atvLido) return; self.__atvLido=1; const L=cadLsLer('ativos'); const tem=Array.isArray(L)&&L.length;
+  self.__atvDisco=tem?JSON.stringify(L):null; if(tem) c3poe(self,L); self.__atvBase=c3lista(self); }
+function c3junta(base,loc,disco){ const ks=(GR('g_atv').edit.fields||[]).map(f=>f.k); const J=a=>a?JSON.stringify(ks.map(k=>{ const x=a.v[k]; return x===undefined||x===null?'':String(x); })):null;
+  const by=xs=>{ const o={}; xs.forEach(a=>{ o[a.id]=a; }); return o; }; const B=by(base),L=by(loc),D=by(disco); const conf=[], poe={}, tira={};
+  Array.from(new Set(Object.keys(B).concat(Object.keys(L)))).forEach(id=>{ const b=J(B[id]),l=J(L[id]),d=J(D[id]); if(l===b) return;
+    if(d!==b&&d!==l){ conf.push(((L[id]||B[id]||D[id]).v||{}).nome||id); return; }
+    if(l===null) tira[id]=1; else poe[id]=L[id]; });
+  const lista=disco.filter(a=>!tira[a.id]).map(a=>poe[a.id]||a); loc.forEach(a=>{ if(poe[a.id]&&!D[a.id]) lista.push(a); });
+  return {lista,conf}; }
+function c3grava(self){ const loc=c3lista(self); const D=cadLsLer('ativos'); const dj=Array.isArray(D)&&D.length?JSON.stringify(D):null;
+  if(dj===(self.__atvDisco===undefined?null:self.__atvDisco)){ const e=cadLsGrava(self,{ativos:loc}); if(!e){ self.__atvDisco=JSON.stringify(loc); self.__atvBase=loc; } return e; }
+  const m=c3junta(self.__atvBase||loc,loc,D||self.__atvBase||loc);
+  if(m.conf.length) return 'outra tela alterou '+m.conf.join(', ')+' depois que esta abriu. Seu rascunho continua aqui: recarregue a página para ver o que foi salvo e refaça a alteração.';
+  const e=cadLsGrava(self,{ativos:m.lista}); if(e) return e; self.__atvDisco=JSON.stringify(m.lista); self.__atvBase=m.lista;
+  if(JSON.stringify(m.lista)!==JSON.stringify(loc)){ c3poe(self,m.lista); setTimeout(()=>{ try{ self.setState({g2:Object.assign({},self.state.g2)}); }catch(x){} },0); }
+  return ''; }
+function PREVALS(self,v){ cadActsIni(self); c3atvIni(self); fpvVals(self,v);
+  /* ATIVO-UNICO: CD-03.dc.html#maq=<id> (vindo da Manutenção, "Editar cadastro ›") abre a ficha do ativo; abrir não grava */
+  if(!self.__maqHash){ self.__maqHash=1; try{ const m=/[#&]maq=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; const r=id?g2find(RW(self,'g_atv'),id):null;
+    if(r){ const sp=GR('g_atv'); const d={}; (sp.edit.fields||[]).forEach(f=>{ const x=r.v[f.k]; d[f.k]=(x===undefined||x===null||x==='')?'':(f.t==='num'?String(x).replace('.',','):String(x)); });
+      setTimeout(()=>g2set(self,'g_atv',{fm:{rid:id,draft:d,orig:Object.assign({},d),errs:{},warn:false,ro:!!r.ro,isNew:false,mode:'form'},fl:null,fmc:null}),0); } }catch(e){} }
   // CD-03.dc.html#ficha=<equipamento> (vindo da Irrigação) abre a ficha do pivô; fechar volta ao detalhe do equipamento
   if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV_EQ[id]&&fpvFicha(id)) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
   const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self); v.c3_ncol=c3capCol(self);
@@ -300,7 +331,7 @@ function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
     const n=(usos[V.nome]||[]).length; V.ncj=n; r.p.ncj=[{k:(n?'txt':'mut'),t:n?String(n):'—'}]; r.s.ncj=n?String(n):'';
     const S=c3sit(r); r.p.est=S.p; r.s.est=S.t; });
   cadQf(self,v,'g_atv','c3qf',[{k:'res',t:'A resolver',f:r=>!!c3sit(r).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativo',oz:true}]);
-  c3opts('g_cj','maq',atv.filter(r=>C3.impl.indexOf(r.v.classe)<0).map(r=>r.v.nome));
+  c3opts('g_cj','maq',atv.filter(r=>C3.impl.indexOf(r.v.classe)<0&&r.v.classe!=='Veículo').map(r=>r.v.nome));   /* veículo não puxa implemento */
   c3opts('g_cj','impl',[C3.sem].concat(atv.filter(r=>C3.impl.indexOf(r.v.classe)>=0).map(r=>r.v.nome)));
   // conjuntos na grade do motor (antes cartões próprios): máquina + implemento, situação com o próximo passo (o motivo na dica), operações,
   // largura, rendimento, potência e operadores alocáveis
@@ -319,7 +350,7 @@ function c3cjSit(self,V){ const X=c3conj(self,V);
     return {t:'Calibrar antes de usar',p:[Object.assign(chipc('Calibrar antes de usar','yellow'),{dica:det}),{k:'b',t:'Registrar calibração ›'}],res:true}; }
   if(!c3temR(V)) return {t:'Sem rendimento',p:sitX('Sem rendimento','yellow','Cadastrar rendimento','CD-08.dc.html'),res:true};
   return {t:'Disponível',p:sitOk('Disponível')}; }
-function EXTRAVALS(self,v){
+function EXTRAVALS(self,v){ self.g2persist=(gid)=>gid==='g_atv'?c3grava(self):''; c3grava(self);
   const atv=RW(self,'g_atv'); const manL=atv.filter(r=>c3sit(r).res==='man'), calL=atv.filter(r=>c3sit(r).res==='cal'); const man=manL.length, cal=calL.length;
   cadEstado(v,'c3e',[man?man+(man>1?' máquinas bloqueadas':' máquina bloqueada'):'',cal?cal+(cal>1?' calibrações a resolver':' calibração a resolver'):''].filter(Boolean).join(' · ')||'Máquinas aptas e calibradas',
             man?'red':(cal?'yellow':'green'));

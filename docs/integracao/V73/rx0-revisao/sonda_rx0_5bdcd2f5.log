@@ -1,0 +1,25 @@
+cb481aab9dc714712f2c2d8e348231891837022195d70c871fa1df8b2b665a25
+combinado 1280 {'fraca': 141, 'nulo': 468, 'moderada': 31, 'nao_selecionado': 640}
+populações por safra e alvo:
+  ('1', 'acaro', 'com representante') 80 janelas 80 – 96
+  ('1', 'antrac', 'modelo vazio') 80 janelas 16 – 16
+  ('1', 'cochon', 'modelo vazio') 80 janelas 12 – 18
+  ('1', 'mosca', 'com representante') 80 janelas 60 – 84
+  ('2', 'acaro', 'com representante') 80 janelas 44 – 72
+  ('2', 'antrac', 'com representante') 4 janelas 24 – 24
+  ('2', 'antrac', 'modelo vazio') 76 janelas 16 – 22
+  ('2', 'cochon', 'modelo vazio') 80 janelas 16 – 18
+  ('2', 'mosca', 'com representante') 80 janelas 56 – 68
+não selecionado com modelo vazio em pelo menos uma safra: 640 de 640
+fraca/moderada por origem:
+  ('molh', 'fraca', 'herdado do grupo') 36
+  ('molh', 'fraca', 'próprio nas duas') 41
+  ('molh', 'moderada', 'herdado do grupo') 2
+  ('molh', 'moderada', 'próprio nas duas') 18
+  ('placebo', 'fraca', 'herdado do grupo') 9
+  ('placebo', 'fraca', 'próprio nas duas') 4
+  ('qs', 'fraca', 'herdado do grupo') 41
+  ('qs', 'fraca', 'próprio nas duas') 9
+  ('qs', 'moderada', 'herdado do grupo') 11
+  ('ur', 'fraca', 'herdado do grupo') 1
+moderada herdada (fator, representante por safra): {('molh', ('molh', 'qs')): 1, ('qs', ('molh', 'molh')): 10, ('qs', ('qs', 'molh')): 1, ('molh', ('qs', 'molh')): 1}

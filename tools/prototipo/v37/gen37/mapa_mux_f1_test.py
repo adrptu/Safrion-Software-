@@ -8,18 +8,18 @@ proprietário de 16/10/2026; implantação de 17/10). Chrome a 1440 × 900 (tecl
   F1-3 cada talhão é role=button, com aria-pressed igual à seleção e nome completo ("P5, 71 ha, …, data")
   F1-4 "/" (com o foco no bloco do mapa) abre a busca; "P5", "PV05", "Pivô 5" (e "T4" na Santa Rita) + Enter escolhe e abre o painel; na Lagoa
        Grande a busca enquadra o pivô (pedido explícito); fora disso a câmera não se move
-  F1-5 "Ver dados": Lista | Mapa no mesmo bloco; uma linha por talhão com valor, estado em texto e data; ordem pela gravidade; "N de M"; a linha
-       abre o mesmo painel; "Localizar no mapa" volta ao mapa com o talhão escolhido; o filtro de cultura vale na lista
-  F1-6 "Todas": a lista traz as três fazendas; o mapa mostra a Santa Rita e diz onde estão as outras
+  F1-5 sem a visão Lista (proprietário, 18/10/2026: "tire a opção de listas ... ficou confuso"): nem "Ver dados" nem a seção da lista; a busca
+       "Ir para talhão" sugere todos os talhões da fazenda
+  F1-6 "Todas": o mapa mostra a Santa Rita e o aviso diz onde estão as outras
   F1-7 Esc desliga o modo (Medir), depois fecha a seleção; o rascunho de desenho não se perde; clique no fundo desmarca
   F1-8 o endereço guarda fazenda, camada, talhão e data (#faz=&lay=&t=&dt=); recarregar #faz=LG&lay=sat&t=PV05&dt=25-09 restaura; voltar do
        CD-01det ("Abrir talhão ›") restaura a câmera e a seleção, sem reenquadrar
-  F1-10 com o MapLibre indisponível (CDN bloqueado), a Lista continua e o aviso oferece "Tentar de novo" sem recarregar
+  F1-10 com o MapLibre indisponível (CDN bloqueado), o aviso oferece "Tentar de novo" sem recarregar
   F1-11 390 px com toque: tocar o talhão escolhe e abre o painel embaixo, com o título à vista; sem cartão de hover no toque
   F1-12 sem erro de JavaScript
   Portão (não executável aqui): F1-9 prova com leitor de tela real (NVDA, VoiceOver, TalkBack) antes de fechar D1, D2 e T7.
 Medidas (antes → depois): M1 pivôs da Lagoa Grande alcançáveis por teclado; M2 paradas de Tab no mapa da Santa Rita; talhões com aria-pressed;
-lista equivalente; Esc fecha o painel; location.hash com a seleção.
+busca com todos os talhões; Esc fecha o painel; location.hash com a seleção.
 Contraprova: RENDER_DIR=<render da base 0b3d0d4> reprova F1-1 a F1-8 e F1-10.
 Uso (de gen37/): env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER_DIR=$PWD/_render python3 -B mapa_mux_f1_test.py"""
 import os, sys, json, time
@@ -115,42 +115,19 @@ try:
             foca('PV05'); ENTER(); espera(J, "!!document.querySelector('main aside[data-mux-painel]')", 4); time.sleep(.6); ESC(); time.sleep(.4)
             cam1 = J("(()=>{const m=__LGI.map; const c=m.getCenter(); return [c.lng,c.lat,m.getZoom()];})()")
             chk('F1-4d Lagoa Grande: Enter e Esc no P5 (à vista) não mexem na câmera (sem zoom nem recentralização sozinhos)', cam0 == cam1, [cam0, cam1])
-        # ---------- F1-5 Ver dados (Lista | Mapa) ----------
-        J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()")
-        espera(J, "document.querySelectorAll('.mux-lista [data-talhao-lista]').length>0", 5)
-        li = json.loads(J("JSON.stringify((()=>{const s=document.querySelector('.mux-lista'); if(!s) return null; const rs=[...s.querySelectorAll('[data-talhao-lista]')];"
-                          " return {nm:(s.querySelector('[role=status]')||{}).innerText||'',n:rs.length,rows:rs.map(r=>[r.getAttribute('data-talhao-lista'),r.querySelector('.mux-l-v').innerText,r.querySelector('.mux-l-e').innerText,r.querySelector('.mux-l-d').innerText]),"
-                          " mapaOculto:[...document.querySelectorAll('[data-mux-grupo]')].every(g=>getComputedStyle(g).visibility==='hidden'||!g.getClientRects().length), seg:[...document.querySelectorAll('[role=group][aria-label=\"Ver dados\"] button')].map(b=>[b.innerText.trim(),b.getAttribute('aria-pressed')])};})())") or 'null')
-        MED[f'lista_{fz}'] = (li or {}).get('n')
-        okl = bool(li) and li['n'] == n and all(r[1] and r[2] and r[2] != '—' and r[3] for r in li['rows']) and li['nm'].startswith(f'{n} de {n} talhões') and li['mapaOculto'] and ['Lista', 'true'] in li['seg']
-        chk(f'F1-5a {fz}: "Ver dados" troca para a Lista no mesmo bloco: {n} linhas com valor, estado em texto e data, "{n} de {n} talhões"', okl, li if not okl else li['nm'])
-        # ordem pela gravidade: o estado de cada linha segue a ordem de cores (a pior primeiro): o 1º da lista não é melhor que o último
-        cores = J("[...document.querySelectorAll('.mux-lista [data-talhao-lista] > span:first-child')].map(s=>getComputedStyle(s).backgroundColor)") or []
-        RANK = {'rgb(200, 85, 61)': 0, 'rgb(217, 138, 78)': 1, 'rgb(212, 178, 90)': 2, 'rgb(169, 192, 106)': 4, 'rgb(127, 174, 104)': 5, 'rgb(95, 143, 85)': 6, 'rgb(68, 115, 154)': 7, 'rgb(110, 159, 198)': 8, 'rgb(155, 139, 196)': 9, 'rgb(201, 207, 203)': 10, 'rgb(228, 233, 223)': 11}
-        rk = [RANK.get(x, 3) for x in cores]
-        chk(f'F1-5b {fz}: ordem pela gravidade da camada (a pior primeiro)', rk == sorted(rk) and len(rk) == n, [rk, cores[:3]])
-        prim = (li or {'rows': [['']]})['rows'][0][0]
-        J("(()=>{const r=document.querySelector('.mux-lista [data-talhao-lista=%s]'); r&&r.click();})()" % json.dumps(prim)); espera(J, "!!document.querySelector('main aside[data-mux-painel]')", 4); time.sleep(.3)
-        tl = J("(document.querySelector('main aside[data-mux-painel] h2')||{}).innerText||''"); prs = J("(document.querySelector('.mux-lista [data-talhao-lista=%s]')||{getAttribute:()=>null}).getAttribute('aria-pressed')" % json.dumps(prim))
-        chk(f'F1-5c {fz}: a linha abre o mesmo painel do mapa (e fica escolhida)', bool(tl) and prs == 'true', [prim, tl, prs])
-        J("(()=>{const r=document.querySelector('.mux-lista [data-talhao-lista=%s]'); const b=r&&r.parentElement.querySelector('.mux-loc'); b&&b.click();})()" % json.dumps(prim))
-        espera(J, "!document.querySelector('.mux-lista')&&document.activeElement&&document.activeElement.getAttribute('data-talhao')===%s" % json.dumps(prim), 5)
-        loc = [J("!document.querySelector('.mux-lista')"), ativo(J), J("(%s||{getAttribute:()=>null}).getAttribute('aria-pressed')" % tal_el(prim))]
-        chk(f'F1-5d {fz}: "Localizar no mapa" volta ao mapa com o talhão escolhido e focado', loc == [True, prim, 'true'], loc)
-        if fz == 'Santa Rita':   # filtro de cultura: na Santa Rita (na Lagoa Grande todo pivô tem mamão na safra)
-            J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por cultura\"]'); if(!s) return; const o=[...s.options].map(x=>x.value).find(v=>v!=='Todas'); if(o){ s.value=o; s.dispatchEvent(new Event('change',{bubbles:true})); }})()"); time.sleep(.6)
-            J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()"); time.sleep(.6)
-            nm = J("((document.querySelector('.mux-lista [role=status]')||{}).innerText||'')") or ''
-            nr = J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length")
-            chk('F1-5e Santa Rita: o filtro Cultura do topo vale na Lista ("N de 8", com N = linhas)', nm.startswith(f'{nr} de 8') and 0 < nr < 8, [nm, nr])
-            J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por cultura\"]'); if(s){ s.value='Todas'; s.dispatchEvent(new Event('change',{bubbles:true})); }})()"); time.sleep(.4)
-            J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Mapa'); b&&b.click();})()"); time.sleep(.5)
+        # ---------- F1-5 sem a visão Lista (proprietário, 18/10/2026: "tire a opção de listas que foi adicionado dentro do mapa, ficou confuso") ----------
+        sl = json.loads(J("JSON.stringify({ver:!!document.querySelector('[role=group][aria-label=\"Ver dados\"]'), lista:!!document.querySelector('.mux-lista'),"
+                          " bts:[...document.querySelectorAll('main button')].filter(b=>b.innerText.trim()==='Lista').length})")) or {}
+        chk(f'F1-5a {fz}: o Mapa não tem a opção Lista (nem "Ver dados", nem a seção da lista)', sl == {'ver': False, 'lista': False, 'bts': 0}, sl)
+        # o que a Lista dava continua: todo talhão da fazenda se acha pelo nome na busca "Ir para talhão"
+        op = J("[...document.querySelectorAll('#mux-tal-lista option')].map(o=>o.value)") or []
+        MED[f'busca_{fz}'] = len(op)
+        chk(f'F1-5b {fz}: a busca "Ir para talhão" sugere os {n} talhões da fazenda', len(op) == n and len(set(op)) == n, [len(op), op[:4]])
     # ---------- F1-6 Todas ----------
     abre(c, U, 1440, 900, False, faz='Todas'); camada(J, 'Integrado')
     av = J("((document.querySelector('.mux-aviso')||{}).innerText||'')") or ''
-    J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()"); espera(J, "document.querySelectorAll('.mux-lista li').length>8", 5)
-    tx = J("((document.querySelector('.mux-lista')||{}).innerText||'')") or ''
-    chk('F1-6 Todas: a Lista traz as três fazendas (Santa Rita, Lagoa Grande, Boa Vista sem geometria); o mapa diz onde estão as outras', 'Lagoa Grande' in tx and 'Boa Vista' in tx and 'sem geometria' in tx and 'T4' in tx and 'Lagoa Grande' in av, [av, tx[:200]])
+    sl = J("!!document.querySelector('.mux-lista')")
+    chk('F1-6 Todas: o mapa mostra a Santa Rita e o aviso diz onde estão as outras (Lagoa Grande: escolher a fazenda; Boa Vista sem geometria), sem Lista', 'Santa Rita' in av and 'Lagoa Grande' in av and 'Boa Vista sem geometria' in av and 'Lista' not in av and not sl, [av, sl])
     # ---------- F1-7 Esc por nível; rascunho; clique no fundo ----------
     abre(c, U, 1440, 900, False, faz='Santa Rita'); camada(J, 'Integrado')
     J("(()=>{const b=[...document.querySelectorAll('[role=toolbar][aria-label=\"Ferramentas do mapa\"] button')].find(x=>x.innerText.trim()==='Medir'); b&&b.click();})()"); time.sleep(.4)
@@ -192,12 +169,9 @@ try:
     sem = c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__semCDN=true;(function(){const ap=Element.prototype.appendChild; Element.prototype.appendChild=function(n){ if(window.__semCDN&&n&&n.tagName==='SCRIPT'&&/maplibre-gl/.test(n.src||'')) n.src='http://127.0.0.1:9/maplibre-indisponivel.js'; return ap.call(this,n); };})();"}).get('identifier')
     c.goto('about:blank', .3); c.goto(U + '#faz=LG&lay=int', 1.5); espera(J, "!!document.querySelector('main [role=alert] button')", 15)   # documento novo (só o # mudaria a mesma página)
     er = J("((document.querySelector('main [role=alert]')||{}).innerText||'')") or ''
-    J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()"); espera(J, "document.querySelectorAll('.mux-lista [data-talhao-lista]').length===23", 5)
-    nl = J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length")
     J("window.__semCDN=false"); c.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': sem})   # a rede volta
-    J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Mapa'); b&&b.click();})()"); time.sleep(.3)
     J("(()=>{const b=document.querySelector('main [role=alert] button'); b&&b.click();})()"); ok2 = espera(J, LG_PRONTO, 30)
-    chk('F1-10 sem o MapLibre: aviso com "Tentar de novo", a Lista continua (23 linhas) e o mapa volta sem recarregar a página', 'Tentar de novo' in er and nl == 23 and ok2, [er[:120], nl, ok2])
+    chk('F1-10 sem o MapLibre: aviso com "Tentar de novo" (sem citar a Lista, que saiu) e o mapa volta sem recarregar a página', 'Tentar de novo' in er and 'Lista' not in er and ok2, [er[:120], ok2])
     ee = erros(J); chk('F1-12a 1440: sem erro de JavaScript (fora o aviso esperado do CDN bloqueado)', not [e for e in ee if 'maplibre' not in e.lower() and 'carregar o mapa' not in e], ee[:3])
     # ================= 390 · toque =================
     abre(c, U, 390, 844, True, faz='Santa Rita'); camada(J, 'Integrado'); J("window.__errs=[]")

@@ -5,14 +5,14 @@ O build (engine.visoes) e os testes leem daqui; o JS não recalcula, recebe a li
 Desenho: DESENHO.md §1 e §2.1 (tabela entidade × visões; o que fica de fora tem motivo)."""
 
 # ordem fixa no seletor (a Lista é sempre a primeira); no celular aparecem as 3 primeiras válidas e "mais"
-ORDEM = ['lista', 'cartoes', 'agrupada', 'kanban', 'calendario', 'timeline', 'mapa', 'carga', 'matriz', 'arvore', 'galeria']
+ORDEM = ['lista', 'cartoes', 'agrupada', 'kanban', 'calendario', 'timeline', 'mapa', 'carga', 'frentes', 'matriz', 'arvore', 'galeria']
 # nome curto (minúsculo: entra no "Ver em <nome>") e nome de menu (texto do item no "mais", celular)
 NOME = {'lista': 'tabela',   # VISOES-2 §2: Lista e Tabela agrupada são uma visão só, a Tabela (a chave e o ?view=lista ficam)
         'cartoes': 'cartões',   # DS VIS-05 (15/10/2026): toda lista tem Tabela e Cartões
          'agrupada': 'tabela agrupada', 'kanban': 'kanban', 'calendario': 'calendário', 'timeline': 'linha do tempo',
-        'mapa': 'mapa', 'carga': 'carga por recurso', 'matriz': 'matriz', 'arvore': 'árvore', 'galeria': 'galeria'}
+        'mapa': 'mapa', 'carga': 'carga por recurso', 'frentes': 'frentes de trabalho', 'matriz': 'matriz', 'arvore': 'árvore', 'galeria': 'galeria'}
 # ícones Lucide 1.45.0 (ISC; LICENSES/lucide-ISC.txt) convertidos para o icon() do engine; só entram os que alguma tela usa
-ICONE = {'lista': 'v_agrupada', 'cartoes': 'v_cartoes', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga'}
+ICONE = {'lista': 'v_agrupada', 'cartoes': 'v_cartoes', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga', 'frentes': 'v_frentes'}
 # Modo de ver a listagem (proprietário, 15/10/2026: "Coloque modos de visão em todas telas... tem que ter opção tabela e 'Cartões'"):
 # Tabela | Cartões no fim da barra de toda grade de listagem do menu (engine.grid, com colunas essenciais ou "Agrupar por") e nas Atividades
 # do plano (PA). Os cartões leem as mesmas linhas da Tabela (busca, filtro rápido, filtros, Agrupar por com descer e trilha, Colunas).
@@ -40,6 +40,7 @@ EXIGE = {
     'timeline': ['inicio', 'fim'],              # início E fim
     'mapa': ['geometria'],                      # geometria ou coordenada própria (nunca inventada)
     'carga': ['recurso', 'tempo'],              # recurso × dia/hora
+    'frentes': ['familia', 'rota'],             # EX-54: família de implemento + geometria para a sequência de talhões
     'matriz': ['linha', 'coluna', 'valor'],     # duas dimensões e um valor que se soma
     'arvore': ['pai_filho'],                    # hierarquia que a Lista ainda não mostra
     'galeria': ['foto_principal'],              # imagem real como informação principal
@@ -64,6 +65,9 @@ REGISTRO = {
             'calendario': {'data': 'Janela da O.S.: início e fim ISO (o.ini e o.fim, colunas Início e Fim da grade g_os em areas/processo_os.py)'},
             'carga': {'recurso': 'alocacao.py RECURSOS (máquina, implemento, pessoa)',
                       'tempo': 'alocacao.py DIAS e ALOC (dia e hora; DEC-2609-09)'},
+            # EX-54 (proprietário, 18/10/2026): frentes de trabalho, a visão ao lado da Carga por recurso (prompt-safrion-frentes-trabalho.md)
+            'frentes': {'familia': 'implemento da alocação ou da ficha técnica, senão a operação (os_frentes.js frFamilia)',
+                        'rota': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04)'},
         },
         'cortes': {
             'agrupada': 'Fundida na Tabela (VISOES-2 §2, pedido do proprietário de 14/10): agrupar é o "Agrupar por" da Tabela, com descer e trilha; ?view=agrupada abre a Tabela agrupada por Onde.',

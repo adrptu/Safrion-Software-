@@ -1,0 +1,9 @@
+OK   C1 contraexemplo do Codex: d0 8,4 com CAD 6 mostra 6; aplicar os 6 mm líquidos zera (antes ficava 2,4)
+OK   C2 a necessidade exibida, aplicada, zera o déficit (lâmina líquida = déficit mostrado)
+OK   C3 ETc depois da aplicação não se perde: aplicação no dia −5, ETc 1 mm/dia, CAD 6 (oráculo diário)
+OK   C4 série e déficit de hoje coerentes: cada fim de dia igual ao oráculo e o último dia = hoje sem aplicação hoje
+OK   C5 parcial zera só a faixa: déficit do pivô fica; a faixa coberta vai a 0
+OK   C6 sem CAD calculável: o balanço de antes (8,4 − 6 = 2,4), sem passo diário
+OK   C7 água acima da CAD drena: d0 2, aplicação de 6 mm no dia −6 e 7 mm de ETc em 7 dias dão 5 (oráculo), não 3
+RESULTADO: 7/7 ok
+rc=0

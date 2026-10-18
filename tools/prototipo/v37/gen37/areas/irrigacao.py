@@ -187,17 +187,57 @@ def ir01():
                edit=dict(m='form',title='Setor',sub='Os limites valem para a próxima programação; ordens liberadas não mudam.',
                    fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='ordT',l='Ordem que cobre',ro=True),
                            dict(k='donoT',l='Responsável pelo próximo passo',ro=True),dict(k='cultT',l='Cultura e estádio',ro=True),dict(k='eqT',l='Equipamento',ro=True),
-                           dict(k='cadT',l='Água disponível no solo (referência)',ro=True,help='Propriedade do solo medida em Agrícola › Análises de solo. Não é a capacidade do equipamento nem a lâmina recomendada: a lâmina segue a política de água e o responsável técnico.'),
+                           dict(k='aguaT',l='Água no solo usada no cálculo',ro=True,help='CAD = (CC − PMP) × profundidade das raízes; AFD = f × CAD. O déficit não passa da CAD e o gatilho é o limiar do setor, nunca acima da AFD. A lâmina líquida recomendada é o déficit: repõe até a capacidade de campo (FAO-56).'),
+                           dict(k='fdep',l='Fração de depleção (f)',t='num',min=0.1,max=0.9,help='Parte da CAD que a cultura usa sem estresse. Vazio = a referência da cultura (FAO-56, Tabela 22).'),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
                gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
-    import dados_solo as DSO   # água no solo do talhão (SOLO-01): só leitura, a CAD medida como referência
-    EXTRAJS[0]=prefixo()+FP.js('IR')+'const SOLO_AGUA0='+json.dumps(DSO.AGUA,ensure_ascii=False)+';\n'+JS_COMUM+r"""
-function irrCadTxt(F,k,x){ const tal=x.faz==='SR'?k:x.nome; const m=soloAguaDo({agua:SOLO_AGUA0},cenGet(),F.nome,tal); if(!m) return 'sem medição de água no solo neste talhão';
-  const cad=soloCAD(m); return (cad.v===null?'CAD não calculável ('+cad.nc+')':'CAD '+prFmtT(cad.v,1)+' mm em '+m.prof+' cm (raízes até '+prFmtT(m.z,1)+' cm)')+' · '+m.id+(m.zona?' · zona '+m.zona:'')+' · '+m.met.toLowerCase()+' · '+soloBr(m.data); }
+    # Água no solo (AGUA-SOLO-IRR, proprietário 18/10/2026: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do solo
+    # para os calculos, deficit e recomendações de irrigação"): a grade saiu de Agrícola › Análises de solo; o comando (soloMedir) e o estado
+    # (c.solo.agua) são os mesmos. A coluna "No balanço" diz qual setor usa a medição, com a AFD e o gatilho que ela dá.
+    import dados_solo as DSO, ocupacao_cen as OCEN
+    g_agua=grid([dict(k='med',l='Medição',w=100),dict(k='tal',l='Talhão · zona',w=120),dict(k='data',l='Data',t='num',w=110),dict(k='uso',l='No balanço',w=200),
+                 dict(k='cc',l='Capacidade de campo',t='num',a='r',w=140),dict(k='pmp',l='Ponto de murcha',t='num',a='r',w=130),dict(k='cad',l='CAD',t='num',a='r',w=130),
+                 dict(k='prof',l='Profundidade',w=150)],[],   # método, fonte e responsável ficam no formulário da medição (a grade cabe na caixa a 1440 px, A1)
+                edit=dict(m='form',title='Medição de água no solo',newTitle='Registrar medição de água no solo',
+                          sub='Capacidade de campo e ponto de murcha do talhão ou da zona: a CAD entra no déficit, no gatilho e na lâmina do setor.',
+                          fields=[dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Lagoa Grande','Boa Vista'],req=True,**{'def':'Santa Rita'}),
+                                  dict(k='talv',l='Talhão',t='sel',dyn=True,opts=[],req=True),dict(k='zona',l='Zona (opcional)',t='txt',help='Ex.: Z1 (baixada). Vazio = talhão inteiro.'),
+                                  dict(k='datav',l='Data da medição',t='date',req=True),dict(k='profv',l='Profundidade amostrada',t='sel',opts=['0–20','0–30','0–40','20–40'],req=True,u='cm'),
+                                  dict(k='z',l='Profundidade efetiva das raízes',t='num',req=True,min=1,max=200,u='cm'),
+                                  dict(k='metv',l='Método',t='sel',opts=DSO.METODOS_AGUA,req=True),dict(k='un',l='Unidade',t='sel',opts=DSO.UN_AGUA,req=True,**{'def':'% volume'}),
+                                  dict(k='ccv',l='Capacidade de campo (CC)',t='num',req=True,min=0,max=100),dict(k='pmpv',l='Ponto de murcha permanente (PMP)',t='num',min=0,max=100,help='Sem PMP medido, a CAD fica "não calculável" e vale o limiar do setor.'),
+                                  dict(k='fontev',l='Fonte ou laboratório',t='sel',opts=DSO.LABS+['Equipe da fazenda'],req=True),dict(k='resp',l='Responsável',t='sel',opts=DSO.RESP_AGUA,req=True,**{'def':'Ana (agrônoma)'}),
+                                  dict(k='cadT',l='Água disponível (CAD)',ro=True,live=True,help='CAD = (CC − PMP) × profundidade efetiva; unidades explícitas.')]),
+                add='Registrar medição',gid='g_agua',total=False,so=dict(k='data',d=True))
+    talf={f:[[t,ha] for t,ha in lst] for f,lst in OCEN.talhoes().items()}
+    EXTRAJS[0]=prefixo()+FP.js('IR')+'const SOLO_TAL='+json.dumps(talf,ensure_ascii=False)+';\n'+JS_COMUM+r"""
+function irAgDia(r,k,iso){ const ok=/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')); r.v[k]=ok?Number(String(iso).slice(0,10).replace(/-/g,'')):''; const t=ok?soloBr(iso):'—'; r.p[k]=[{k:'txt',t}]; r.s[k]=t; }
+function irAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav,prof:x.profv,z:x.z,met:x.metv,un:x.un,cc:x.ccv,pmp:x.pmpv,fonte:x.fontev,resp:x.resp}; }
+// linhas da Água no solo: medições semeadas e gravadas, da fazenda do filtro; "No balanço" = o setor que usa a medição (a mais recente do talhão)
+function irAgRows(self,s,fz){ const c=cenGet(); const ms=(IRR_SOLO0.agua||[]).concat(Object.values(((c&&c.solo)||{}).agua||{}));
+  const nomeF=fz?(s.faz[fz]||{}).nome:''; const uso={}; const porTal={};
+  Object.keys(s.setores).forEach(k=>{ const x=s.setores[k]; const a=irrAgua(s,k); const F=s.faz[x.faz]||{}; porTal[F.nome+'|'+irrTal(x,k)]=k; if(a&&a.m) (uso[a.m.id]=uso[a.m.id]||[]).push(k); });
+  return ms.filter(m=>!nomeF||m.faz===nomeF).map(m=>{ const cad=soloCAD(m); const r={id:m.id,ro:true,v:{},s:{},p:{}};
+    r.p.med=[{k:'b',t:m.id}]; r.s.med=m.id; r.p.tal=[{k:'txt',t:m.tal}].concat(m.zona?[{k:'br'},{k:'mut',t:m.zona}]:[]); r.s.tal=m.tal+(m.zona?' · '+m.zona:''); irAgDia(r,'data',m.data);
+    const ks=uso[m.id]||[]; let up, us;
+    if(ks.length){ const k=ks[0]; const x=s.setores[k]; const a=irrAgua(s,k); const G=irrGatilho(s,k);
+      const det=a.cad===null?'CAD não calculável: vale o limiar':('AFD '+irrN(a.afd,1)+' mm'+(G?' · gatilho '+irrN(G.v,1)+' mm':''));
+      up=[{k:'chip',t:x.bal?'Em uso · '+x.nome:x.nome+' sem rega agora',c:x.bal?'green':'gray'},{k:'br'},{k:'mut',t:det}]; us=(x.bal?'Em uso · ':'')+x.nome+' · '+det; }
+    else { const k=porTal[m.faz+'|'+m.tal]; const a=k?irrAgua(s,k):null;
+      up=[{k:'mut',t:k?(a&&a.m?'Substituída por '+a.m.id:'—'):'Talhão sem setor irrigado'}]; us=up[0].t; }
+    r.p.uso=up; r.s.uso=us;
+    r.p.prof=[{k:'txt',t:m.prof+' cm'},{k:'br'},{k:'mut',t:'raízes até '+prFmtT(m.z,1)+' cm'}]; r.s.prof=m.prof+' cm · raízes '+prFmtT(m.z,1)+' cm'; r.p.met=[{k:'txt',t:m.met}]; r.s.met=m.met;
+    const vu=(q)=>q===''||q===null||q===undefined?'—':prFmtT(q,2)+' '+(m.un==='% volume'?'% vol.':m.un);
+    r.p.cc=[{k:'txt',t:vu(m.cc)}]; r.s.cc=vu(m.cc); r.v.cc=Number(m.cc); r.p.pmp=m.pmp===''?[{k:'mut',t:'não medido'}]:[{k:'txt',t:vu(m.pmp)}]; r.s.pmp=m.pmp===''?'não medido':vu(m.pmp); r.v.pmp=m.pmp===''?'':Number(m.pmp);
+    r.p.cad=cad.v===null?[{k:'mut',t:'não calculável'},{k:'br'},{k:'mut',t:cad.nc}]:[{k:'b',t:prFmtT(cad.v,1)+' mm'}]; r.s.cad=cad.v===null?'não calculável':prFmtT(cad.v,1)+' mm'; r.v.cad=cad.v===null?'':cad.v;
+    r.p.fonte=[{k:'txt',t:m.fonte},{k:'br'},{k:'mut',t:m.resp}]; r.s.fonte=m.fonte+' · '+m.resp;
+    Object.assign(r.v,{faz:m.faz,talv:m.tal,zona:m.zona,datav:m.data,profv:m.prof,z:m.z,metv:m.met,un:m.un,ccv:m.cc,pmpv:m.pmp,fontev:m.fonte,resp:m.resp,cadT:cad.v===null?'não calculável: '+cad.nc:cad.e});
+    return r; }); }
 const RK={'Impedida':1,'A conferir':2,'A programar':3,'A liberar':3,'Irrigando':4,'Programada':5,'Sem necessidade':6,'Sem irrigação':7};
 function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
-  irrHashOuvir(self,(h)=>{ if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
+  irrHashOuvir(self,(h)=>{ if(h==='agua'){ let n=0; const vai=()=>{ const e=document.getElementById('ir-agua'); if(e) e.scrollIntoView({block:'start'}); else if(n++<8) setTimeout(vai,120); }; setTimeout(vai,0); return; }   // link do AG-02 (AGUA-SOLO-IRR)
+    if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
     const sid=h.split(':')[0]; const x=irrGet().setores[sid]; if(!x) return; irrFazDe(self,x.faz);
     // #P2:ficha abre a ficha do pivô do setor (sub-detalhe; fechar volta ao setor); setor sem ficha abre só o setor
     const fid=h.split(':')[1]==='ficha'?fpvDe(sid):'';
@@ -217,6 +257,8 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
       o2.push(F.demo?('Memória (demonstrativa): déficit 0 na reposição de '+irrDdmm(irrDiaN(b.repos))+' + ETc de '+b.dias+(b.dias>1?' dias':' dia')+' (ETo 5,5 × Kc '+irrN(x.kc,2)+') = '+irrN(si.d,1)+' mm')
         :('Memória: déficit em 15/09 '+irrN(b.d0,1)+' + ETc 7 dias '+irrN(b.etc,1)+' − chuva efetiva '+irrN(b.pef,1)+' − irrigação líquida '+irrN(net,1)+' = '+(si.est?'≈':'')+irrN(si.d,1)+' mm'));
       if(!F.demo) o2.push('Chuva efetiva: '+b.chuva+' · ETc = ET₀ Penman-Monteith (Estação Santa Rita) × Kc do estádio');
+      // com CAD a conta é dia a dia (irrBalDias): a soma acima pode não fechar no déficit; a linha diz por quê (Codex 6252809331)
+      const bd=irrBalDias(s,k,irrCreditos(s,k)); if(bd&&!si.est&&Math.abs(Math.max(0,b.d0+b.etc-b.pef-net)-si.d)>0.05) o2.push('Com a CAD de '+irrN(bd.cad,1)+' mm a conta é dia a dia: o déficit não passa da CAD e a água acima da capacidade de campo drena (FAO-56)');
       const se=irrSerie(s,k).filter(z=>z.v!==null); if(se.length) o2.push('Déficit no fim do dia: '+se.map(z=>z.t+' '+(z.est?'≈':'')+irrN(z.v,1)).join(' · ')+' · hoje '+(si.est?'≈':'')+irrN(si.d,1));
       if(si.faixa) o2.push('Passagem parcial · '+si.faixa);
       irrApsSetor(s,k).slice().sort((p,q)=>q.q-p.q).forEach(a=>{ const pc=irrApParc(a,x.ha); o2.push('Aplicado · '+irrDdmm(irrDiaN(a.q))+' · '+a.os+' · '+a.txt+' · '+irrN(a.vol)+' m³ em '+irrN(irrApCob(a),pc?1:0)+' ha = '+irrMm(irrApBr(a))+' mm brutos'+(pc?' na faixa':'')+' × '+a.ef+' % = '+irrMm(irrApNet(a))+' mm líquidos'+(pc?' · fora do déficit do pivô':'')+(a.prov?' · provisório':'')); }); }
@@ -227,7 +269,7 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
       v:{def:temD?si.d:'',nec:temN?n.demandaBr:'',cob:cobN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+(si.fon||fon)),
          necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.demandaBr)+' mm · programação '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas necessárias de ':' passada necessária de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',
          ordT:ordId?(ordId+(cobN!==''?' · cobre '+cobN+' %'+(restaN>0?' · resta '+irrN(restaN,1)+' mm':''):(cb&&cb.prox?' · próximo ciclo':''))):'sem ordem',
-         donoT:si.acao?(si.dono||'—'):'—',cultT:CE.c+(CE.e?' · '+CE.e:''),eqT:eq,cadT:irrCadTxt(F,k,x)},
+         donoT:si.acao?(si.dono||'—'):'—',cultT:CE.c+(CE.e?' · '+CE.e:''),eqT:eq,aguaT:irrAguaTxt(s,k,si.d),fdep:irrFdep(x).f},
       s:{},p:{def}};
     irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':'';
     r.p.nec=[temN?{k:'txt',t:irrMm(n.demandaBr)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.demandaBr):''; irrTxt(r,'ord',ordId);
@@ -245,18 +287,32 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
     r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:'';
     return r; });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0))||String(a.id).localeCompare(String(b.id),'pt-BR',{numeric:true}));
-  IRG('g_set').rows=rows;
+  IRG('g_set').rows=rows; IRG('g_agua').rows=irAgRows(self,s,fz);
   const imp=rows.filter(r=>r.rk===1).length, pen=rows.filter(r=>r.rk>=2&&r.rk<=3).length;
   const urg=rows.filter(r=>r.rk<=3&&r.ac).sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0)))[0];
   v.prim_has=!!urg; v.prim_h=urg?urg.ac[1]:'#'; v.prim_t=urg?(urg.ac[0].indexOf(urg.acId)>=0?urg.ac[0]:urg.ac[0]+' · '+urg.acId):'';
   v.hs_t=imp||pen?[imp?imp+(imp>1?' impedidos':' impedido'):'',pen?pen+(pen>1?' pendentes':' pendente'):''].filter(Boolean).join(' · '):'Sem pendências'; v.hs_st=chipSt(imp?'red':(pen?'yellow':'green'));
   v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem setor irrigado cadastrado.'; }
 function EXTRAVALS(self,v){ irrVista(self,'g_set');
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_set'||!r) return; g2set(self,'g_set',{rows:null,fl:r.id});
-    irrMudar(self,s=>irrLimites(s,r.id,{lmax:Number(r.v.lmax),imin:Number(r.v.imin),efic:Number(r.v.efic)})); };
+  self.g2after=(gid,rows,r)=>{
+    if(gid==='g_agua'&&r){ g2set(self,'g_agua',{rows:null}); const ch=self.__agK||('AGS-'+Date.now()); self.__agK=null;
+      const res=cenMudar(null,cc=>soloMedir(cc,irAgDados(r.v),ch,g2perfil().k)); irrSoloInval();
+      self.setState({cenrev:Date.now(),g2toast:res.erro||(res.repetido?res.msg:res.msg.replace(' Referência para a Irrigação, não a lâmina.',' Déficit, gatilho e lâmina do setor já usam esta medição.'))}); return; }
+    if(gid!=='g_set'||!r) return; g2set(self,'g_set',{rows:null,fl:r.id});
+    irrMudar(self,s=>irrLimites(s,r.id,{lmax:Number(r.v.lmax),imin:Number(r.v.imin),efic:Number(r.v.efic),f:r.v.fdep===''||r.v.fdep===null||r.v.fdep===undefined?'':Number(r.v.fdep)})); };
+  self.g2check=(gid,rows,r,d)=>{ if(gid!=='g_agua') return {}; if(!self.__agK) self.__agK='AGS-'+Date.now(); const k=cenClone(cenGet());
+    try{ soloMedir(k,irAgDados(d),'PREVIA-'+Date.now(),g2perfil().k); return {}; }
+    catch(e){ const m=String(e.message||e); const f=/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/capacidade de campo/.test(m)?'ccv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje|já está registrada/i.test(m)?'datav':'talv'))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };
+  self.g2opts=(gid,k,d)=>{ if(gid==='g_agua'&&k==='talv') return [{v:'',t:'Escolha o talhão'}].concat((SOLO_TAL[d.faz||'Santa Rita']||[]).map(x=>({v:x[0],t:x[0]+' · '+cenNum(x[1])+' ha'}))); return null; };
+  self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
+  self.g2newDraft=(gid,dr)=>{ if(gid!=='g_agua') return {}; const p=self.__agPre||null; self.__agPre=null; if(p) return p;
+    const fz=irrFazK(self); const F=fz?(irrGet().faz[fz]||{}):null; return F&&F.nome?{faz:F.nome}:{}; };
   self.g2formActs=(gid,r)=>{ if(gid!=='g_set') return []; const s=irrGet(); const si=irrSituacao(s,r.id); const out=[];
     if(si.acao) out.push({t:si.acao[0],h:si.hoje,go:()=>irrGo(si.acao[1])});
     if(s.setores[r.id].bal&&(!si.acao||si.acao[0]!=='Programar irrigação')&&!(si.ords||[]).length) out.push({t:'Programar irrigação',h:'Abre a programação com a necessidade e a janela sugerida.',go:()=>irrGo('IR-02.dc.html#programar='+r.id)});
+    // água no solo do talhão do setor: registra a medição (capacidade de campo e ponto de murcha) com a fazenda e o talhão preenchidos
+    { const x=s.setores[r.id]; const F=s.faz[x.faz]||{}; const tal=irrTal(x,r.id); if((SOLO_TAL[F.nome]||[]).some(z=>z[0]===tal)) out.push({t:'Registrar medição de água no solo',h:'Capacidade de campo e ponto de murcha do '+tal+': a CAD passa a valer no déficit e no gatilho.',
+      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); self.__agPre={faz:F.nome,talv:tal}; g2new(self,IRG('g_agua')); }}); }
     // ficha do pivô (capacidade do equipamento, a mesma do cadastro CD-03): o setor de pivô com equipamento do cadastro (x.eq) abre a ficha
     // ou, sem ficha, registra (revisão de 10/10, A4); gotejo e setor sem equipamento no cadastro não oferecem
     const fpo=fpvPode(r.id), fid=fpvDe(r.id); if(fpo) out.push({t:fid?'Ficha do pivô':'Registrar ficha do pivô',
@@ -266,7 +322,8 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
 """
     EXTRA.append(FP.painel())   # gaveta "Ficha do pivô" (o mesmo componente do CD-03)
     corpo=(vazio('vazio','vazioT','Cadastrar setores','CD-03.dc.html')
-           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',g_set)+'</sc-if>')
+           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',g_set)+'</sc-if>'
+           + '<div id="ir-agua">'+section('Água no solo','','',g_agua)+'</div>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
           f'<sc-if value="{H("prim_has")}" hint-placeholder-val="{T()}"><a href="{H("prim_h")}" style="{BTN_ST(True)} text-decoration: none;">{H("prim_t")}</a></sc-if>')
     shell37('IR-01','Irrigação',corpo,fname=fname,primary_html=prim,steps=faixa(1),search=False)

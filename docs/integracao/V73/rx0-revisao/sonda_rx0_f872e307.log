@@ -1,0 +1,4 @@
+A1 maior |corr(gatilho, n14 ou k14)| no mesmo dia, 16 talhões: 0.79
+A2 NaN numa observação: sem erro; excluídas 4 -> 5 (dado malformado contado como exclusão por regra)
+A3 limites do ENSAIO (só proporções): {'direcao_fixture_deterministica': 1.0, 'direcao_series_fortes': 0.8, 'forte_placebo_max': 0.05, 'forte_fraco_max': 0.05, 'forte_nao_identificavel_max': 0.0, 'forte_nao_pareado_max': 0.0} · denominador mínimo por limite: nenhum
+rc=0

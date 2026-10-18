@@ -250,7 +250,7 @@ def build():
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
     # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
     EXTRA.append('<style>'+UNP.CSS+'</style>')
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'\n'+open(os.path.join(ROOT,'safra_lote.js')).read()+'''
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'\n'+open(os.path.join(ROOT,'safra_lote.js')).read()+'\n'+__import__('areas.saf_lote',fromlist=['mapa_js']).mapa_js()+open(os.path.join(ROOT,'safra_mapa.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r){ const msg=sgAplicar(self,rows,r,isNew);   /* SAF-FAZ-2: uma sub-safra por fazenda */
       if(isNew && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:msg||('Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.')}); } else if(msg) self.setState({g2toast:msg}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);

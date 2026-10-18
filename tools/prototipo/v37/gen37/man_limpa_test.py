@@ -103,7 +103,7 @@ try:
     chk('L8 Abastecimentos: o Grupo filtra pelo ativo do lançamento; limpar restaura; o grupo continua ao voltar a Ativos',
         bool(ga) and sorted(b1) == sorted(ga[1]) and len(b1) < len(b0) and sorted(b2) == sorted(b0) and ga_vol == ga[0], [ga, len(b0), b1, ga_vol, len(b2)])
     # L9 · a mesma conta no Painel e na visão (oráculo: manSemOrdem do domínio)
-    c.goto(U('PMAN.dc.html'), 1.6)
+    c.goto(U('PG.dc.html#mod=man'), 1.6)   # PAINEL-03 (18/10): o Painel da Manutenção é a aba do painel único
     pm = J("(()=>{ const m=document.querySelector('main').innerText.match(/Pendências sem ordem\\s*(?:ⓘ\\s*)?(\\d+)/); return m?+m[1]:null; })()")
     vis('semordem'); setf('tipo', ''); setf('criticidade', ''); setf('grupo', '')
     so = len(J(RIDS) or []); n = J("window.__man.manSemOrdem?window.__man.manSemOrdem(window.__man.manGet()).n:null")

@@ -1,0 +1,478 @@
+<title>Frentes de trabalho do Safrion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: especificação viva. O que falha hoje, demonstração (lista de frentes, mapa dos pivôs com rota, sequência, linha do tempo com horas aptas, insumos e roteiro no app), como o sistema monta a frente, regras e referências. */
+:root {
+  --bg: #F3F5F1; --surface: #FFFFFF; --surface-2: #EEF2EC; --line: #DCE3DA; --ink: #16211B; --ink-2: #3D4A42; --muted: #637168;
+  --accent: #1E7A4C; --accent-weak: #E2F1E7; --ok: #2E7A4F; --warn: #8A5A00; --warn-bg: #FFF1D6; --bad: #A3261B; --bad-bg: #FBE4E1; --info: #2F6F9F; --info-bg: #E3EEF7;
+  --f1: #2F6F9F; --f2: #8A4FB8; --f3: #B3641B; --f4: #2E7A4F; --idle: #CBD5CD; --map: #E8EEE6; --road: #C9D2C7;
+  --shadow: 0 18px 40px -18px rgba(22,33,27,.45); --on-accent: #FFFFFF;
+  --font-d: 'Sora', 'Segoe UI', system-ui, sans-serif; --font-b: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif; --font-m: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1612; --surface: #161F1A; --surface-2: #1C2721; --line: #2A3830; --ink: #E4ECE6; --ink-2: #C1CDC5; --muted: #92A398;
+  --accent: #52B585; --accent-weak: #1C3527; --ok: #52B585; --warn: #E0B04F; --warn-bg: #33290F; --bad: #EC8A7E; --bad-bg: #3A1D1A; --info: #7DB2DE; --info-bg: #17293A;
+  --f1: #7DB2DE; --f2: #C49BE6; --f3: #E6A15C; --f4: #52B585; --idle: #3A4A40; --map: #18221C; --road: #2C3A31;
+  --shadow: 0 18px 40px -18px rgba(0,0,0,.8); --on-accent: #0B1410; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0F1612; --surface: #161F1A; --surface-2: #1C2721; --line: #2A3830; --ink: #E4ECE6; --ink-2: #C1CDC5; --muted: #92A398;
+  --accent: #52B585; --accent-weak: #1C3527; --ok: #52B585; --warn: #E0B04F; --warn-bg: #33290F; --bad: #EC8A7E; --bad-bg: #3A1D1A; --info: #7DB2DE; --info-bg: #17293A;
+  --f1: #7DB2DE; --f2: #C49BE6; --f3: #E6A15C; --f4: #52B585; --idle: #3A4A40; --map: #18221C; --road: #2C3A31;
+  --shadow: 0 18px 40px -18px rgba(0,0,0,.8); --on-accent: #0B1410; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-b);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 56px; }
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--font-d); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h1 { font-size: clamp(26px, 3.6vw, 34px); font-weight: 800; }
+h2 { font-size: 21px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--accent); }
+.eyebrow { font: 600 12px/1 var(--font-b); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 82ch; margin-top: 8px; }
+.intro { color: var(--ink-2); max-width: 86ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-m); font-size: .9em; }
+.num { font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 14px; min-width: 0; }
+svg.lucide { width: 16px; height: 16px; stroke-width: 2; flex: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.today { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+.tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+.tcard b { font-size: 14.5px; }
+.tcard p { font-size: 14px; color: var(--ink-2); }
+
+.demo { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; min-width: 0; position: relative; }
+.dtool { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.dtool h3 { margin-right: auto; font-size: 16px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12.5px; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.s-ok { color: var(--ok); background: var(--accent-weak); } .s-warn { color: var(--warn); background: var(--warn-bg); } .s-bad { color: var(--bad); background: var(--bad-bg); } .s-info { color: var(--info); background: var(--info-bg); } .s-mut { color: var(--muted); background: var(--surface-2); }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: 700 13.5px var(--font-b); cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; gap: 7px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: 13px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.iconbtn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); display: inline-grid; place-items: center; cursor: pointer; }
+.iconbtn[disabled] { opacity: .35; cursor: not-allowed; }
+@media (pointer: coarse) { .iconbtn { width: 44px; height: 44px; } }
+.note { font-size: 13px; color: var(--ink-2); background: var(--info-bg); border-radius: 10px; padding: 8px 10px; }
+
+.dgrid { display: grid; grid-template-columns: 330px minmax(0, 1fr); }
+.list { border-right: 1px solid var(--line); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.fcard { text-align: left; font: inherit; color: inherit; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; cursor: pointer; position: relative; }
+.fcard::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 0 4px 4px 0; background: var(--fc, var(--idle)); }
+.fcard:hover { border-color: var(--accent); }
+.fcard[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.fcard .t { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.fcard .t b { font-size: 14.5px; }
+.fcard .sub { font-size: 12.5px; color: var(--muted); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.kpis div { background: var(--surface-2); border-radius: 8px; padding: 4px 6px; display: grid; }
+.kpis b { font-size: 14px; font-variant-numeric: tabular-nums; }
+.kpis span { font-size: 11px; color: var(--muted); }
+.why { display: flex; flex-wrap: wrap; gap: 4px; }
+.why .chip { font-size: 11.5px; padding: 1px 7px; }
+.loose { display: grid; gap: 6px; }
+.loose h4 { margin: 4px 0 0; font: 700 12px var(--font-b); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.lrow { font-size: 13px; display: grid; gap: 2px; padding: 8px 10px; border: 1px dashed var(--line); border-radius: 10px; }
+
+.main { display: grid; gap: 0; min-width: 0; }
+.maparea { position: relative; border-bottom: 1px solid var(--line); background: var(--map); }
+.maparea svg { display: block; width: 100%; height: auto; }
+.pv { cursor: pointer; }
+.pv circle.c { stroke: var(--surface); stroke-width: 2; }
+.pv text { font: 700 13px var(--font-b); fill: var(--ink); pointer-events: none; }
+.pv text.s { font: 600 10.5px var(--font-b); fill: var(--ink-2); }
+.pv:focus-visible circle.c { stroke: var(--ink); stroke-width: 4; }
+.route { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ord { font: 700 12px var(--font-m); fill: var(--on-accent); pointer-events: none; }
+.mapfoot { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; padding: 8px 12px; background: var(--surface); border-top: 1px solid var(--line); }
+.legend { font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.maptip { font-size: 12.5px; color: var(--ink-2); max-width: 46ch; }
+
+.detail { padding: 14px 16px 18px; display: grid; gap: 16px; min-width: 0; }
+.dh { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.dh h3 { font-size: 18px; margin-right: auto; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.t th { text-align: left; font: 700 11px var(--font-b); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 7px 8px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+.t td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.t tr:last-child td { border-bottom: 0; }
+.t td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.t tr.step td { background: var(--surface-2); color: var(--ink-2); font-size: 12.5px; }
+.ordbtns { display: inline-flex; gap: 4px; }
+.box { background: var(--surface-2); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box h4 { margin: 0; font: 700 12px var(--font-b); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+.gantt { display: grid; gap: 6px; }
+.grow { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 12px; }
+.gbar { position: relative; height: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.gbar .apt { position: absolute; top: 0; bottom: 0; background: var(--accent-weak); }
+.gbar .seg { position: absolute; top: 3px; bottom: 3px; border-radius: 4px; display: grid; place-items: center; font: 700 10.5px var(--font-m); color: var(--on-accent); overflow: hidden; white-space: nowrap; }
+.gbar .tr { position: absolute; top: 9px; height: 4px; background: var(--muted); border-radius: 2px; }
+.gkey { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.gkey i { display: inline-block; width: 12px; height: 10px; border-radius: 3px; vertical-align: middle; margin-right: 5px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.phone { width: 260px; max-width: 100%; border: 1px solid var(--line); border-radius: 22px; padding: 12px; background: var(--surface); display: grid; gap: 8px; box-shadow: var(--shadow); }
+.phone .bar { font: 700 12px var(--font-b); color: var(--muted); display: flex; justify-content: space-between; }
+.phone .cur { border: 1px solid var(--accent); border-radius: 12px; padding: 8px; display: grid; gap: 3px; }
+.phone .nx { border: 1px solid var(--line); border-radius: 12px; padding: 8px; font-size: 13px; color: var(--ink-2); }
+.phone .big { font: 800 18px var(--font-d); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 10px; counter-reset: r; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.rule h3 { display: flex; gap: 8px; align-items: baseline; }
+.rule h3::before { counter-increment: r; content: counter(r); font: 700 12px var(--font-m); color: var(--accent); background: var(--accent-weak); border-radius: 6px; padding: 1px 6px; }
+.rule p { color: var(--ink-2); font-size: 14.5px; }
+.refs { display: grid; gap: 6px; padding-left: 18px; margin: 0; font-size: 14.5px; }
+.toast { position: absolute; z-index: 9; left: 50%; transform: translateX(-50%); bottom: 14px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px; width: max-content; max-width: calc(100% - 32px); box-shadow: var(--shadow); }
+@media (max-width: 900px) {
+  .dgrid { grid-template-columns: minmax(0, 1fr); }
+  .list { border-right: 0; border-bottom: 1px solid var(--line); }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .toast { position: fixed; bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 70; }
+}
+footer { color: var(--muted); font-size: 13px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Safrion · Ordem de Serviço agrícola · EX-54</div>
+    <h1>Frentes de trabalho do Safrion</h1>
+    <p class="lede">Uma frente é um conjunto (trator, implemento e operador) percorrendo uma sequência de talhões com a mesma operação. O sistema sugere as frentes, explica por que juntou, calcula rota, cargas, dias e horas boas de clima, e cada O.S. continua com a sua aprovação, o seu apontamento e o seu rastro.</p>
+  </header>
+
+  <section aria-labelledby="h-hoje">
+    <h2 id="h-hoje">Como o agrupamento funciona hoje</h2>
+    <p class="intro">Reproduzido na versão publicada 1792342402-4b90, em Ordem de Serviço › "Agrupar operações compatíveis".</p>
+    <div class="today">
+      <div class="tcard"><b>Só junta calda idêntica</b><p>Mesmo produto e mesma dose. A OS-0598 (sulfato de magnésio a 3 kg/ha) fica fora do grupo das que usam 2 kg/ha, embora vá no mesmo pulverizador logo em seguida.</p></div>
+      <div class="tcard"><b>Só pulverização e só "A liberar"</b><p>Plantio, calagem e adubação a lanço não agrupam. Liberadas e em execução ficam fora, então OS-0421 e OS-0424 (Fungicida A, talhões vizinhos) nunca se encontram.</p></div>
+      <div class="tcard"><b>Sem mapa, rota, capacidade nem clima</b><p>A sequência é "por prazo da origem". O resumo diz "horas não calculadas". Não há distância entre talhões, horas boas para pulverizar nem dias necessários.</p></div>
+      <div class="tcard"><b>Cada talhão faz as suas cargas</b><p>"Sem transferir restos entre O.S.": 30 ha com a mesma calda viram 3 cargas separadas em vez de uma sequência contínua com rateio registrado.</p></div>
+      <div class="tcard"><b>Mensagens que confundem</b><p>A OS-0431 é plantio e aparece como "Sem conjunto · alocar pulverizador na O.S.". Os talhões do exemplo são "Talhão demonstrativo A a E", sem lugar no mapa.</p></div>
+      <div class="tcard"><b>O que já está certo e fica</b><p>O grupo não aprova nem libera: "aprovação e liberação continuam por O.S." e as origens ficam preservadas. A frente mantém isso.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-demo">
+    <h2 id="h-demo">Demonstração: Lagoa Grande, semana de 28/09 a 05/10</h2>
+    <p class="intro">Pivôs, áreas, produtos e doses do cenário da Lagoa Grande. As O.S. 0601 a 0611, os conjuntos de pulverização e a previsão do tempo são exemplos para a demonstração. Clique numa frente; clique num pivô para tirar ou pôr na frente selecionada; mude a ordem com as setas.</p>
+    <div class="demo" id="demo">
+      <div class="dtool">
+        <h3>Frentes sugeridas</h3>
+        <button type="button" class="btn sm" id="b-reset"><i data-lucide="rotate-ccw"></i>Recomeçar</button>
+      </div>
+      <div class="dgrid">
+        <aside class="list" aria-label="Frentes e O.S. fora de frente">
+          <div id="cards" style="display:grid;gap:10px"></div>
+          <div class="loose" id="loose"></div>
+        </aside>
+        <div class="main">
+          <div class="maparea">
+            <svg id="map" viewBox="0 0 1000 655" role="group" aria-label="Mapa dos pivôs da Lagoa Grande"></svg>
+            <div class="mapfoot"><div class="legend" id="legend"></div><div class="maptip" id="maptip">Clique num pivô para pôr ou tirar da frente selecionada.</div></div>
+          </div>
+          <div class="detail" id="detail" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-como">
+    <h2 id="h-como">Como o Safrion monta a frente</h2>
+    <div class="rules">
+      <div class="rule"><h3>Mesmo implemento, mesma família</h3><p>Junta O.S. que usam o mesmo tipo de conjunto: pulverização com pulverização, calagem com distribuidor, plantio com plantadeira da mesma cultivar e adubo. Troca de implemento é parada; a frente evita.</p></div>
+      <div class="rule"><h3>Calda: igual continua, parecida ajusta</h3><p>Calda idêntica continua no tanque de um talhão para o outro, com o volume rateado por O.S. Mesmo produto com outra dose entra na mesma frente com nova calda. Herbicida vai por último, seguido de tríplice lavagem registrada antes de voltar a uma cultura sensível.</p></div>
+      <div class="rule"><h3>Janela primeiro, distância depois</h3><p>Ordena pela janela que fecha antes e, dentro da folga, pelo caminho mais curto a partir da sede. Talhão que não cabe na janela com a capacidade do conjunto aparece em vermelho, com a saída: outro conjunto ou reprogramar.</p></div>
+      <div class="rule"><h3>Capacidade e clima reais</h3><p>Dias calculados pelo rendimento do conjunto (ha/h do cadastro), pelas cargas e reabastecimentos e pelo deslocamento. Pulverização só nas horas aptas da previsão (Delta T, vento e chuva com limites configuráveis por produto).</p></div>
+      <div class="rule"><h3>Mostra o ganho e o porquê</h3><p>Cada frente diz por que juntou (mesma calda, janelas que se cruzam, vizinhos) e quanto economiza contra fazer cada O.S. sozinha: horas, quilômetros e cargas.</p></div>
+      <div class="rule"><h3>Cada O.S. continua dona de si</h3><p>A frente organiza a execução. Aprovação agronômica, reserva no estoque, apontamento, consumo e custo continuam por O.S. A frente começa pelas liberadas; a que aguarda aprovação aparece com quem decide.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-refs">
+    <h2 id="h-refs">Referências</h2>
+    <ul class="refs">
+      <li><a href="https://www.rdoequipment.com/resources/blogs/john-deere-work-planner-overview" target="_blank" rel="noopener">John Deere Work Planner</a>: plano de trabalho para vários talhões escolhidos no mapa, com detalhes por talhão enviados ao monitor da máquina.</li>
+      <li><a href="https://www.solinftec.com/en-us/machine-utilization/" target="_blank" rel="noopener">Solinftec · utilização de máquinas</a> e <a href="https://www.croplife.com/?p=86314" target="_blank" rel="noopener">parceria com a Ceres Solutions</a>: programação diária e rotas a partir das ordens, da previsão do tempo e dos dados das máquinas; o fabricante relata que máquinas ficavam 30 % do tempo paradas e 35 % se deslocando.</li>
+      <li><a href="https://www.igi-global.com/chapter/the-agricultural-routing-planning-in-field-logistics/196931" target="_blank" rel="noopener">Agricultural routing planning in field logistics</a> e <a href="https://arxiv.org/pdf/1703.08999" target="_blank" rel="noopener">atribuição de culturas e roteamento na colheita</a>: a ordem dos talhões tratada como problema de roteamento com janelas de tempo, a linha iniciada por Bochtis e Sørensen.</li>
+      <li><a href="https://groundcover.grdc.com.au/weeds-pests-diseases/weeds/spray-safely-to-reduce-drift-risk-this-summer" target="_blank" rel="noopener">GRDC · deriva e inversão térmica</a> e <a href="https://dpir.nt.gov.au/primary-industry/primary-industry-publications/regional-newsletters/tp/top-paddock-122017/limiting-spray-drift-and-improving-coverage" target="_blank" rel="noopener">Delta T de 2 a 8</a>: janela de vento e de Delta T para pulverizar.</li>
+      <li><a href="https://edis.ifas.ufl.edu/publication/PI291" target="_blank" rel="noopener">UF/IFAS · limpeza do pulverizador</a> e <a href="https://utia.tennessee.edu/publications/wp-content/uploads/sites/269/2023/10/W071.pdf" target="_blank" rel="noopener">UT · resíduo de auxínicos</a>: esvaziar e lavar logo depois, tríplice lavagem, culturas sensíveis antes.</li>
+    </ul>
+  </section>
+  <footer>Demonstração com dados de exemplo sobre a geometria real dos pivôs da Lagoa Grande do protótipo. Rendimentos, volumes de calda e previsão do tempo são premissas da demonstração e ficam configuráveis no produto.</footer>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const icons = () => { try { lucide.createIcons({ attrs: { 'aria-hidden': 'true' } }); } catch (e) {} };
+  const nf1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  const nf0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+
+  // ---------- geometria real dos pivôs (lagoa_s2.json do protótipo) ----------
+  const PV = [['PV01','Pivô 1',29.92,-47.19217,-34.605647,308.61],['PV02','Pivô 2',37.75,-47.178723,-34.605916,346.64],['PV03','Pivô 3',70.18,-47.164504,-34.60523,472.64],['PV04','Pivô 4',73.18,-47.15056,-34.606304,482.64],['PV05','Pivô 5',71.11,-47.135709,-34.606355,475.76],['PV06','Pivô 6',62.79,-47.121665,-34.605969,447.06],['PV07','Pivô 7',61.39,-47.193376,-34.61741,442.05],['PV08','Pivô 8',50.63,-47.179152,-34.617654,401.45],['PV09','Pivô 9',74.98,-47.165337,-34.617571,488.54],['PV10','Pivô 10',30.15,-47.150886,-34.617902,309.79],['PV11','Pivô 11',50.0,-47.135807,-34.618103,398.94],['PV12','Pivô 12',48.47,-47.122468,-34.617099,392.79],['PV13','Pivô 13',49.31,-47.192626,-34.630115,396.18],['PV14','Pivô 14',63.16,-47.179047,-34.628942,448.38],['PV15','Pivô 15',36.17,-47.163938,-34.628733,339.31],['PV17','Pivô 17',33.36,-47.14991,-34.629291,325.87],['PV18','Pivô 18',48.93,-47.135608,-34.628722,394.65],['PV19','Pivô 19',75.11,-47.122425,-34.629941,488.96],['PV20','Pivô 20',77.39,-47.192371,-34.641376,496.33],['PV21','Pivô 21',80.82,-47.178289,-34.641591,507.21],['PV22','Pivô 22',62.07,-47.164106,-34.641793,444.49],['PV23','Pivô 23',63.99,-47.150189,-34.640813,451.32],['PV24','Pivô 24',34.37,-47.137001,-34.640909,330.76]]
+    .map(a => ({ id: a[0], nome: a[1], ha: a[2], lon: a[3], lat: a[4], r: a[5] }));
+  const BASE = { nome: 'Sede · água e calda', lon: -47.1435, lat: -34.6118 };
+  const PILHA = { nome: 'Pilha de calcário', lon: -47.1290, lat: -34.6232 };
+  const LAT0 = -34.623, KX = Math.cos(LAT0 * Math.PI / 180) * 111320, KY = 110574;
+  const LON_MIN = -47.2035, LAT_MAX = -34.5975, S = 1000 / ((-47.1115 - LON_MIN) * KX);   // px por metro
+  const xy = p => [ (p.lon - LON_MIN) * KX * S, (LAT_MAX - p.lat) * KY * S ];
+  const distKm = (a, b) => { const dx = (a.lon - b.lon) * KX, dy = (a.lat - b.lat) * KY; return Math.hypot(dx, dy) / 1000 * 1.3; };   // 1,3 = estrada não é reta
+  const pvById = Object.fromEntries(PV.map(p => [p.id, p]));
+
+  // ---------- conjuntos, caldas e O.S. de exemplo ----------
+  const FAM = { pulv: 'Pulverização', cal: 'Calagem a lanço' };
+  const CONJ = {
+    P1: { nome: 'Pulverizador 1', desc: 'Trator 05 + turboatomizador 2.000 L', fam: 'pulv', rend: 6, tanque: 2000, recarga: 0.25, setup: 0.33, vel: 15 },
+    P2: { nome: 'Pulverizador 2', desc: 'Trator 06 + turboatomizador 2.000 L', fam: 'pulv', rend: 6, tanque: 2000, recarga: 0.25, setup: 0.33, vel: 15 },
+    P3: { nome: 'Pulverizador 3', desc: 'Trator 07 + turboatomizador 2.000 L', fam: 'pulv', rend: 6, tanque: 2000, recarga: 0.25, setup: 0.33, vel: 15 },
+    C1: { nome: 'Calcário', desc: 'Trator 03 + distribuidor 3 t', fam: 'cal', rend: 5, tanque: 3000, recarga: 0.15, setup: 0, vel: 12 }
+  };
+  const CALDAS = {
+    aba5: { nome: 'Abamectina 18 EC 0,5 L/ha', vol: 200, herb: false, prod: [['Abamectina 18 EC', 0.5, 'L']] },
+    aba6: { nome: 'Abamectina 18 EC 0,6 L/ha', vol: 200, herb: false, prod: [['Abamectina 18 EC', 0.6, 'L']] },
+    teb: { nome: 'Tebuconazol 200 EC 1,0 L/ha', vol: 200, herb: false, prod: [['Tebuconazol 200 EC', 1.0, 'L']] },
+    gli: { nome: 'Glifosato 480 3 L/ha + óleo mineral 0,5 L/ha', vol: 150, herb: true, prod: [['Glifosato 480', 3, 'L'], ['Óleo mineral', 0.5, 'L']] },
+    cal: { nome: 'Calcário dolomítico filler 2.000 kg/ha', vol: 2000, herb: false, prod: [['Calcário dolomítico filler', 2000, 'kg']] }
+  };
+  const OS0 = [
+    { id: 'OS-0601', pv: 'PV06', fam: 'pulv', calda: 'aba5', ini: 0, fim: 4, est: 'Liberada', alvo: 'ácaro-rajado' },
+    { id: 'OS-0602', pv: 'PV04', fam: 'pulv', calda: 'aba5', ini: 1, fim: 5, est: 'Liberada', alvo: 'ácaro-rajado' },
+    { id: 'OS-0603', pv: 'PV09', fam: 'pulv', calda: 'aba5', ini: 1, fim: 5, est: 'A liberar', alvo: 'ácaro-rajado' },
+    { id: 'OS-0604', pv: 'PV17', fam: 'pulv', calda: 'aba5', ini: 2, fim: 6, est: 'Liberada', alvo: 'ácaro-rajado' },
+    { id: 'OS-0605', pv: 'PV14', fam: 'pulv', calda: 'aba6', ini: 2, fim: 6, est: 'A liberar', alvo: 'ácaro-rajado (infestação maior)' },
+    { id: 'OS-0606', pv: 'PV20', fam: 'pulv', calda: 'teb', ini: 1, fim: 6, est: 'Liberada', alvo: 'antracnose' },
+    { id: 'OS-0607', pv: 'PV21', fam: 'pulv', calda: 'teb', ini: 1, fim: 6, est: 'Liberada', alvo: 'antracnose' },
+    { id: 'OS-0608', pv: 'PV22', fam: 'pulv', calda: 'teb', ini: 2, fim: 7, est: 'A liberar', alvo: 'antracnose' },
+    { id: 'OS-0609', pv: 'PV24', fam: 'pulv', calda: 'teb', ini: 3, fim: 7, est: 'Liberada', alvo: 'antracnose' },
+    { id: 'OS-0501', pv: 'PV13', fam: 'pulv', calda: 'gli', ini: 2, fim: 6, est: 'A liberar', alvo: 'dessecação pré-plantio' },
+    { id: 'OS-0502', pv: 'PV12', fam: 'cal', calda: 'cal', ini: 2, fim: 4, est: 'A liberar', alvo: 'calagem (janela reprogramada)' },
+    { id: 'OS-0610', pv: 'PV10', fam: 'cal', calda: 'cal', ini: 0, fim: 4, est: 'Liberada', alvo: 'calagem' },
+    { id: 'OS-0611', pv: 'PV08', fam: 'cal', calda: 'cal', ini: 1, fim: 5, est: 'Liberada', alvo: 'calagem' }
+  ];
+  const DIAS = ['28/09', '29/09', '30/09', '01/10', '02/10', '03/10', '04/10', '05/10'];
+  // horas aptas (exemplo): pulverização pelo Delta T, vento e chuva; calagem pelo solo e chuva
+  const APT_PULV = [[[6, 11], [15, 19]], [[6, 11], [15, 19]], [[6, 10]], [[7, 11], [16, 19]], [[6, 10], [16, 19]], [[6, 11], [15, 19]], [[6, 11], [15, 19]], [[6, 11], [15, 19]]];
+  const APT_CAL = [[[7, 17]], [[7, 17]], [[7, 12]], [[10, 17]], [[7, 17]], [[7, 17]], [[7, 17]], [[7, 17]]];
+  const CLIMA = ['bom', 'bom', 'chuva à tarde', 'manhã úmida', 'vento à tarde', 'bom', 'bom', 'bom'];
+  const COR = { F1: 'var(--f1)', F2: 'var(--f2)', F3: 'var(--f3)', F4: 'var(--f4)' };
+
+  let ST;
+  function osById(id) { return ST.os.find(o => o.id === id); }
+  function area(o) { return pvById[o.pv].ha; }
+
+  // ---------- sugestão: família → calda → janela → vizinhança ----------
+  function sugerir() {
+    const pool = ST.os.filter(o => !o.fora);
+    const frentes = [], livres = { pulv: ['P1', 'P2', 'P3'], cal: ['C1'] }, ids = ['F1', 'F2', 'F3', 'F4'];
+    const nova = (fam, lista) => { const conj = livres[fam].shift(); if (!conj) return null; const f = { id: ids[frentes.length], conj, os: ordenar(lista, conj) }; frentes.push(f); return f; };
+    // grupos: família do implemento + produtos da calda (dose pode variar); herbicida no mamão fica fora até alguém decidir
+    const grupos = {};
+    pool.forEach(o => { if (CALDAS[o.calda].herb) return; const k = o.fam + '|' + CALDAS[o.calda].prod.map(x => x[0]).join('+'); (grupos[k] = grupos[k] || []).push(o.id); });
+    const ordemG = Object.entries(grupos).sort((a, b) => Math.min(...a[1].map(id => osById(id).fim)) - Math.min(...b[1].map(id => osById(id).fim)));
+    ordemG.forEach(([k, lista]) => { const fam = k.split('|')[0]; const f = nova(fam, lista); if (!f) return; ST.os.forEach(o => { if (f.os.includes(o.id)) o.frente = f.id; }); });
+    // não cabe na janela? divide com o próximo conjunto livre da mesma família, tirando do fim da sequência
+    frentes.slice().forEach(f => { let r = simular(f), g = 0;
+      while (r.linhas.some(l => l.atraso || l.resta > 1e-6) && livres[CONJ[f.conj].fam].length && g++ < 1) {
+        const n = Math.max(1, Math.floor(f.os.length / 2)), parte = f.os.slice(f.os.length - n);
+        f.os = f.os.slice(0, f.os.length - n); const h = nova(CONJ[f.conj].fam, parte); h.dividida = f.id; r = simular(f); } });
+    ST.frentes = frentes; ST.sel = frentes[0] ? frentes[0].id : null;
+    ST.os.forEach(o => { o.frente = null; }); frentes.forEach(f => f.os.forEach(id => { osById(id).frente = f.id; }));
+  }
+  // ordem: janela que fecha antes; dentro da folga de 1 dia, vizinho mais perto; herbicida sempre por último; caldas iguais juntas
+  function ordenar(ids, conj) {
+    const C = CONJ[conj], start = C.fam === 'cal' ? PILHA : BASE, hDia = C.fam === 'cal' ? 8 : 7;
+    const left = ids.slice(), out = []; let cur = start, dia = 0;
+    while (left.length) {
+      const nonHerb = left.filter(id => !CALDAS[osById(id).calda].herb), cand0 = nonHerb.length ? nonHerb : left;
+      const abertas = cand0.filter(id => osById(id).ini <= dia + 0.5), base = abertas.length ? abertas : cand0.filter(id => osById(id).ini === Math.min(...cand0.map(z => osById(z).ini)));
+      const minFim = Math.min(...base.map(id => osById(id).fim)), cand = base.filter(id => osById(id).fim === minFim);
+      const prevCalda = out.length ? osById(out[out.length - 1]).calda : null;
+      cand.sort((a, b) => { const A = osById(a), B = osById(b);
+        return (distKm(cur, pvById[A.pv]) + (A.calda === prevCalda ? 0 : 1.5)) - (distKm(cur, pvById[B.pv]) + (B.calda === prevCalda ? 0 : 1.5)); });
+      const pick = cand[0], o = osById(pick); out.push(pick); left.splice(left.indexOf(pick), 1); cur = pvById[o.pv];
+      dia = Math.max(dia, o.ini) + area(o) / C.rend / hDia;
+    }
+    return out;
+  }
+
+  // ---------- simulação: rota, cargas contínuas, horas aptas, janela ----------
+  function simular(f) {
+    const C = CONJ[f.conj], apt = C.fam === 'cal' ? APT_CAL : APT_PULV, dep = C.fam === 'cal' ? PILHA : BASE;
+    let t = 6;   // horas desde 28/09 00:00
+    const eventos = [], linhas = []; let tanque = 0, caldaAtual = null, km = 0, cargas = 0, setups = 0, lavagem = false;
+    const aptAt = h => { const d = Math.floor(h / 24), hr = h - d * 24; return d < DIAS.length && apt[d].some(([a, b]) => hr >= a && hr < b); };
+    const workAt = h => { const d = Math.floor(h / 24), hr = h - d * 24; return d < DIAS.length && hr >= 6 && hr < 19; };
+    const advanceTo = cond => { let g = 0; while (!cond(t) && g < 2000) { t += 0.25; g++; } };
+    const gastar = (horas, tipo, label) => { let h = horas; const s0 = t; while (h > 1e-6 && t < DIAS.length * 24) { advanceTo(workAt); const step = Math.min(0.25, h); eventos.push({ t, d: step, tipo, label }); t += step; h -= step; } return s0; };
+    let pos = dep;
+    f.os.forEach((id, i) => {
+      const o = osById(id), p = pvById[o.pv], cal = CALDAS[o.calda];
+      const dk = distKm(pos, p); km += dk; gastar(dk / C.vel, 'tr', 'deslocamento');
+      if (t < o.ini * 24 + 6) { t = o.ini * 24 + 6; }
+      if (caldaAtual !== o.calda) {
+        if (caldaAtual && CALDAS[caldaAtual].herb && !cal.herb) { gastar(0.75, 'lav', 'tríplice lavagem'); lavagem = true; linhas.push({ step: 'Tríplice lavagem registrada antes de voltar ao mamão' }); }
+        if (caldaAtual) { setups++; linhas.push({ step: 'Nova calda: ' + cal.nome + (tanque > 1 ? ' · sobra de ' + nf0.format(tanque) + ' L da calda anterior' : ' · a última carga da calda anterior saiu do tamanho exato, sem sobra') }); tanque = 0; }
+        caldaAtual = o.calda;
+      }
+      let resta = area(o); const iniO = t; let cargasO = 0, contO = 0; const un = C.fam === 'cal' ? ' kg' : ' L'; const contTxt = tanque > 1 ? nf0.format(tanque) + un + ' continuam da carga anterior' : '';
+      if (tanque > 0) contO = Math.min(resta, tanque / cal.vol);
+      while (resta > 1e-6 && t < DIAS.length * 24) {
+        if (tanque <= 1e-6) { gastar(C.recarga, 'rc', 'reabastecer'); let run = resta; for (let j = i + 1; j < f.os.length && osById(f.os[j]).calda === o.calda; j++) run += area(osById(f.os[j])); tanque = Math.min(C.tanque, run * cal.vol); cargas++; cargasO++; }
+        advanceTo(aptAt); if (t >= DIAS.length * 24) break;
+        const haStep = Math.min(C.rend * 0.25, resta, tanque / cal.vol);
+        const hrs = haStep / C.rend; eventos.push({ t, d: hrs, tipo: 'op', label: id, os: id }); t += hrs; resta -= haStep; tanque -= haStep * cal.vol;
+      }
+      const fimO = t, atraso = Math.floor((fimO - 0.01) / 24) > o.fim;
+      linhas.push({ os: id, ini: iniO, fim: fimO, cargas: cargasO, cont: contTxt, atraso, resta });
+      pos = p;
+    });
+    km += distKm(pos, dep); gastar(distKm(pos, dep) / C.vel, 'tr', 'volta à sede');
+    if (caldaAtual && CALDAS[caldaAtual].herb) { gastar(0.75, 'lav', 'tríplice lavagem'); lavagem = true; linhas.push({ step: 'Tríplice lavagem registrada no fim da frente' }); }
+    const horasOp = eventos.filter(e => e.tipo === 'op').reduce((a, e) => a + e.d, 0), horasTot = eventos.reduce((a, e) => a + e.d, 0);
+    // separado: cada O.S. sozinha, ida e volta da sede, cargas arredondadas por O.S., preparo de calda em cada uma
+    let kmSep = 0, cargasSep = 0, horasSep = 0;
+    f.os.forEach(id => { const o = osById(id), p = pvById[o.pv], cal = CALDAS[o.calda], d = 2 * distKm(dep, p);
+      kmSep += d; const cg = Math.ceil(area(o) * cal.vol / C.tanque); cargasSep += cg; horasSep += d / C.vel + cg * C.recarga + area(o) / C.rend + C.setup + (cal.herb ? 0.75 : 0); });
+    const haTot = f.os.reduce((a, id) => a + area(osById(id)), 0);
+    const fimDia = Math.floor((t - 0.01) / 24);
+    return { eventos, linhas, km, cargas, setups, horasOp, horasTot, kmSep, cargasSep, horasSep, haTot, fimDia, lavagem, naoCabe: t >= DIAS.length * 24 - 0.01 && linhas.some(l => l.resta > 1e-6) };
+  }
+
+  // ---------- conflitos e porquês ----------
+  function porques(f) {
+    const os = f.os.map(osById), w = [];
+    const caldas = [...new Set(os.map(o => o.calda))];
+    if (caldas.length === 1) w.push(['s-ok', CONJ[f.conj].fam === 'cal' ? 'mesmo produto e dose' : 'mesma calda']); else w.push(['s-info', caldas.length + ' doses do mesmo produto']);
+    if (f.dividida) w.push(['s-info', 'dividida da ' + f.dividida + ' para caber na janela']);
+    const ini = Math.max(...os.map(o => o.ini)), fim = Math.min(...os.map(o => o.fim));
+    w.push(ini <= fim ? ['s-ok', 'janelas se cruzam ' + DIAS[ini] + '–' + DIAS[fim]] : ['s-warn', 'janelas em sequência']);
+    let maxd = 0; for (let i = 1; i < os.length; i++) maxd = Math.max(maxd, distKm(pvById[os[i - 1].pv], pvById[os[i].pv]));
+    w.push(maxd <= 3 ? ['s-ok', 'vizinhos (≤ ' + nf1.format(maxd) + ' km)'] : ['s-warn', 'trecho de ' + nf1.format(maxd) + ' km']);
+    return w;
+  }
+  function alertas(f, r) {
+    const a = [];
+    f.os.forEach(id => { const o = osById(id); if (o.est !== 'Liberada') a.push(['s-warn', id + ' aguarda a aprovação da Ana']); });
+    if (r.lavagem) a.push(['s-info', 'herbicida no fim, com tríplice lavagem']);
+    r.linhas.filter(l => l.atraso).forEach(l => a.push(['s-bad', l.os + ' termina depois da janela']));
+    if (r.naoCabe) a.push(['s-bad', 'não cabe na semana com 1 conjunto']);
+    return a;
+  }
+
+  // ---------- render ----------
+  const fmtT = h => { if (h >= DIAS.length * 24 - 0.01) return 'depois de ' + DIAS[DIAS.length - 1]; const d = Math.floor(h / 24), hr = h - d * 24, hh = Math.floor(hr), mm = Math.round((hr - hh) * 60 / 15) * 15; return (DIAS[d] || '—') + ' ' + String(hh + (mm === 60 ? 1 : 0)).padStart(2, '0') + ':' + String(mm === 60 ? 0 : mm).padStart(2, '0'); };
+  function cards() {
+    $('#cards').innerHTML = ST.frentes.map(f => { const r = simular(f), C = CONJ[f.conj], ec = r.horasSep - r.horasTot;
+      return `<button type="button" class="fcard" data-f="${f.id}" aria-pressed="${ST.sel === f.id}" style="--fc:${COR[f.id]}">
+        <span class="t"><b>${esc(f.id)} · ${esc(FAM[C.fam])}</b><span class="sub">${esc(C.nome)}</span></span>
+        <span class="sub">${f.os.map(id => esc(pvById[osById(id).pv].nome.replace('Pivô ', 'P'))).join(' → ')}${f.prog ? ' · <b>programada</b>' : ''}</span>
+        <span class="kpis"><div><b>${nf0.format(r.haTot)}</b><span>ha</span></div><div><b>${r.fimDia < DIAS.length ? DIAS[r.fimDia] : '—'}</b><span>termina</span></div><div><b>${r.cargas}</b><span>cargas</span></div><div><b>${ec > 0 ? '−' + nf1.format(ec) : nf1.format(-ec)}</b><span>h vs. separado</span></div></span>
+        <span class="why">${porques(f).map(c => `<span class="chip ${c[0]}">${esc(c[1])}</span>`).join('')}${alertas(f, r).slice(0, 2).map(c => `<span class="chip ${c[0]}">${esc(c[1])}</span>`).join('')}</span></button>`; }).join('');
+    $('#cards').querySelectorAll('.fcard').forEach(b => b.onclick = () => { ST.sel = b.dataset.f; render(); });
+    const fora = ST.os.filter(o => !o.frente);
+    $('#loose').innerHTML = `<h4>Fora de frente (${fora.length})</h4>` + (fora.length ? fora.map(o => `<div class="lrow"><b>${esc(o.id)} · ${esc(pvById[o.pv].nome)}</b><span class="muted">${esc(CALDAS[o.calda].nome)} · janela ${DIAS[o.ini]}–${DIAS[o.fim]}</span><span>${esc(motivoFora(o))}</span></div>`).join('') : '<div class="lrow muted">Todas as O.S. da semana estão em frentes.</div>');
+  }
+  function motivoFora(o) {
+    if (CALDAS[o.calda].herb) return 'Herbicida no mamão: só entra numa frente de pulverização por último, com tríplice lavagem depois, ou com pulverizador dedicado. Clique no Pivô 13 com a F1 selecionada para ver.';
+    return 'Tirada da frente. Clique no pivô com uma frente da mesma família selecionada para devolver.';
+  }
+  function mapa() {
+    const svg = $('#map'); const f = ST.frentes.find(x => x.id === ST.sel);
+    let h = `<rect x="0" y="0" width="1000" height="655" fill="var(--map)"/>`;
+    // estradas esquemáticas entre as fileiras
+    [-34.6118, -34.6232, -34.6355].forEach(lat => { const y = xy({ lon: 0, lat })[1]; h += `<line x1="10" y1="${y}" x2="990" y2="${y}" stroke="var(--road)" stroke-width="6" stroke-linecap="round"/>`; });
+    PV.forEach(p => { const [x, y] = xy(p), r = p.r * S, o = ST.os.find(z => z.pv === p.id); const fr = o && o.frente ? COR[o.frente] : (o ? 'var(--surface)' : 'var(--idle)');
+      const dim = f && o && o.frente && o.frente !== f.id ? .35 : 1;
+      const lab = p.nome.replace('Pivô ', 'P'), sub = o ? o.id : '';
+      h += `<g class="pv" data-pv="${p.id}" tabindex="${o ? 0 : -1}" role="${o ? 'button' : 'img'}" aria-label="${esc(p.nome)}${o ? ' · ' + esc(o.id) + ' · ' + esc(CALDAS[o.calda].nome) + (o.frente ? ' · frente ' + o.frente : ' · fora de frente') : ''}" opacity="${dim}">
+        <circle class="c" cx="${x}" cy="${y}" r="${r}" fill="${fr}" ${o && !o.frente ? 'stroke-dasharray="6 4" style="stroke:var(--muted)"' : ''} fill-opacity="${o ? .9 : .55}"/>
+        <text x="${x}" y="${y - (sub ? 2 : -4)}" text-anchor="middle">${esc(lab)}</text>${sub ? `<text class="s" x="${x}" y="${y + 13}" text-anchor="middle">${esc(sub)}</text>` : ''}</g>`; });
+    [BASE, PILHA].forEach(b => { const [x, y] = xy(b); h += `<g><rect x="${x - 9}" y="${y - 9}" width="18" height="18" rx="4" fill="var(--ink)"/><text x="${x + 14}" y="${y + 4}" style="font:700 12px var(--font-b);fill:var(--ink)">${esc(b.nome)}</text></g>`; });
+    if (f) { const dep = CONJ[f.conj].fam === 'cal' ? PILHA : BASE; const pts = [dep].concat(f.os.map(id => pvById[osById(id).pv])).concat([dep]).map(xy);
+      h += `<polyline class="route" points="${pts.map(p => p.join(',')).join(' ')}" stroke="${COR[f.id]}" stroke-dasharray="${f.prog ? '0' : '10 6'}"/>`;
+      f.os.forEach((id, i) => { const [x, y] = xy(pvById[osById(id).pv]); h += `<circle cx="${x + 26}" cy="${y - 26}" r="13" fill="${COR[f.id]}"/><text class="ord" x="${x + 26}" y="${y - 22}" text-anchor="middle">${i + 1}</text>`; }); }
+    svg.innerHTML = h;
+    svg.querySelectorAll('.pv[role=button]').forEach(g => { g.onclick = () => togglePv(g.dataset.pv); g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePv(g.dataset.pv); } };
+      g.onmouseenter = () => { const o = ST.os.find(z => z.pv === g.dataset.pv); $('#maptip').innerHTML = `<b>${esc(pvById[o.pv].nome)} · ${esc(o.id)}</b> · ${esc(CALDAS[o.calda].nome)} · ${nf1.format(area(o))} ha · janela ${DIAS[o.ini]}–${DIAS[o.fim]} · ${esc(o.est)}`; }; g.onfocus = g.onmouseenter; });
+    $('#legend').innerHTML = ST.frentes.map(x => `<span><i style="background:${COR[x.id]}"></i>${x.id} · ${esc(CONJ[x.conj].nome)}</span>`).join('') + '<span><i style="background:var(--surface);border:1px dashed var(--muted)"></i>fora de frente</span><span><i style="background:var(--idle)"></i>sem O.S. na semana</span>';
+  }
+  function togglePv(pvId) {
+    const o = ST.os.find(z => z.pv === pvId), f = ST.frentes.find(x => x.id === ST.sel); if (!o || !f) return;
+    if (o.frente === f.id) { f.os = f.os.filter(id => id !== o.id); o.frente = null; f.prog = false; toast(o.id + ' saiu da ' + f.id + '. A rota e as cargas foram recalculadas.'); render(); return; }
+    const C = CONJ[f.conj];
+    if (o.fam !== C.fam) { toast(FAM[o.fam] + ' não entra numa frente de ' + FAM[C.fam].toLowerCase() + ': o implemento é outro.'); return; }
+    if (o.frente) { const g = ST.frentes.find(x => x.id === o.frente); g.os = g.os.filter(id => id !== o.id); g.prog = false; }
+    o.frente = f.id; f.os = ordenar(f.os.concat([o.id]), f.conj); f.prog = false;
+    toast(CALDAS[o.calda].herb ? o.id + ' entrou na ' + f.id + ' por último, com tríplice lavagem depois: herbicida não vem antes do mamão.' : o.id + ' entrou na ' + f.id + '. Ordem, cargas e dias recalculados.');
+    render();
+  }
+  function mover(f, i, d) {
+    const j = i + d; if (j < 0 || j >= f.os.length) return;
+    const a = osById(f.os[i]), b = osById(f.os[j]);
+    if ((CALDAS[a.calda].herb && d > 0 === false && false) ) return;
+    const nv = f.os.slice(); [nv[i], nv[j]] = [nv[j], nv[i]];
+    const hi = nv.findIndex(id => CALDAS[osById(id).calda].herb);
+    if (hi >= 0 && hi < nv.length - 1) { toast('Herbicida antes do mamão exige tríplice lavagem no meio da frente. Mantido por último.'); return; }
+    f.os = nv; f.prog = false; render(); const btn = document.querySelector(`[data-mv="${f.id}:${j}:${d}"]`) || document.querySelector(`[data-mv^="${f.id}:${j}:"]`); if (btn) btn.focus();
+  }
+  function detail() {
+    const f = ST.frentes.find(x => x.id === ST.sel), el = $('#detail');
+    if (!f) { el.innerHTML = '<p class="muted">Selecione uma frente.</p>'; return; }
+    const C = CONJ[f.conj], r = simular(f), ec = r.horasSep - r.horasTot;
+    const rows = []; let k = 0;
+    r.linhas.forEach(l => { if (l.step) { rows.push(`<tr class="step"><td></td><td colspan="6">${esc(l.step)}</td></tr>`); return; }
+      const o = osById(l.os), i = f.os.indexOf(l.os); k++;
+      rows.push(`<tr><td class="n">${k}</td><td><b>${esc(pvById[o.pv].nome)}</b><br><span class="mono">${esc(o.id)}</span></td><td class="n">${nf1.format(area(o))} ha</td><td>${DIAS[o.ini]}–${DIAS[o.fim]}</td><td>${esc(fmtT(l.ini))}<br>${esc(fmtT(l.fim))}${l.atraso ? '<br><span class="chip s-bad">fora da janela</span>' : ''}</td><td class="n">${l.cargas}${l.cont ? `<br><span class="muted" style="font-size:12px">${esc(l.cont)}</span>` : ''}</td><td>${o.est === 'Liberada' ? '<span class="chip s-ok">Liberada</span>' : '<span class="chip s-warn">Aguarda Ana</span>'}<br><span class="ordbtns"><button type="button" class="iconbtn" data-mv="${f.id}:${i}:-1" aria-label="Subir ${esc(o.id)}" ${i === 0 ? 'disabled' : ''}><i data-lucide="arrow-up"></i></button><button type="button" class="iconbtn" data-mv="${f.id}:${i}:1" aria-label="Descer ${esc(o.id)}" ${i === f.os.length - 1 ? 'disabled' : ''}><i data-lucide="arrow-down"></i></button></span></td></tr>`); });
+    // insumos da frente: uma requisição, rateio por O.S.
+    const tot = {}; f.os.forEach(id => { const o = osById(id); CALDAS[o.calda].prod.forEach(([p, d, u]) => { tot[p] = tot[p] || { q: 0, u, por: [] }; const q = d * area(o); tot[p].q += q; tot[p].por.push(id + ' ' + nf1.format(q) + ' ' + u); }); });
+    const ins = Object.entries(tot).map(([p, v]) => `<li><b>${esc(p)}</b>: ${nf1.format(v.q)} ${esc(v.u)} <span class="muted">(${esc(v.por.join(' · '))})</span></li>`).join('');
+    // gantt
+    const segs = (d) => { const ev = r.eventos.filter(e => e.t >= d * 24 && e.t < d * 24 + 24); const out = [];
+      ev.forEach(e => { const last = out[out.length - 1]; if (last && last.tipo === e.tipo && last.label === e.label && Math.abs(last.t + last.d - e.t) < 1e-6) last.d += e.d; else out.push(Object.assign({}, e)); }); return out; };
+    const apt = C.fam === 'cal' ? APT_CAL : APT_PULV, X = h => ((h - 5) / 15) * 100;
+    const gantt = DIAS.map((dd, d) => `<div class="grow"><span>${dd}<br><span class="muted">${esc(CLIMA[d])}</span></span><div class="gbar" role="img" aria-label="${dd}: ${segs(d).filter(s => s.tipo === 'op').map(s => s.label).join(', ') || 'sem operação'}">
+      ${apt[d].map(([a, b]) => `<i class="apt" style="left:${X(a)}%;width:${X(b) - X(a)}%"></i>`).join('')}
+      ${segs(d).map(s => { const hr = s.t - d * 24; if (s.tipo === 'op') { const o = osById(s.label); return `<span class="seg" style="left:${X(hr)}%;width:${Math.max(.8, (s.d / 15) * 100)}%;background:${COR[f.id]}" title="${esc(s.label)}">${s.d >= 1.2 ? esc(pvById[o.pv].nome.replace('Pivô ', 'P')) : ''}</span>`; } return `<i class="tr" style="left:${X(hr)}%;width:${Math.max(.6, (s.d / 15) * 100)}%;${s.tipo === 'lav' ? 'background:var(--bad);height:8px;top:7px' : s.tipo === 'rc' ? 'background:var(--info)' : ''}" title="${esc(s.label)}"></i>`; }).join('')}
+    </div></div>`).join('');
+    const hoje = f.os.map(osById), dia1 = r.linhas.filter(l => l.os && Math.floor(l.ini / 24) === 0);
+    const first = r.linhas.find(l => l.os), firstO = first ? osById(first.os) : null, second = r.linhas.filter(l => l.os)[1];
+    el.innerHTML = `<div class="dh"><h3>${esc(f.id)} · ${esc(FAM[C.fam])} · ${esc(C.nome)}</h3>${f.prog ? '<span class="chip s-ok">Programada</span>' : '<span class="chip s-mut">Sugerida</span>'}</div>
+      <p class="muted" style="font-size:13.5px">${esc(C.desc)} · ${C.fam === 'cal' ? '1,5 ha por carga de 3 t' : '200 L/ha, 10 ha por tanque'} · ${nf0.format(C.rend)} ha/h · ${C.fam === 'cal' ? 'saída da pilha de calcário' : 'saída da sede'}</p>
+      <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))"><div><b>${nf0.format(r.haTot)} ha</b><span>${f.os.length} O.S.</span></div><div><b>${DIAS[0]} a ${DIAS[Math.min(r.fimDia, DIAS.length - 1)]}</b><span>começo e fim</span></div><div><b>${nf1.format(r.horasOp)} h</b><span>trabalho no talhão</span></div><div><b>${r.cargas} <span class="muted" style="font-size:12px">(${r.cargasSep} separado)</span></b><span>cargas</span></div><div><b>${nf1.format(r.km)} km <span class="muted" style="font-size:12px">(${nf1.format(r.kmSep)})</span></b><span>deslocamento</span></div><div><b>${ec >= 0 ? nf1.format(ec) + ' h' : '+' + nf1.format(-ec) + ' h'}</b><span>${ec >= 0 ? 'economia' : 'a mais'} vs. separado</span></div></div>
+      <div class="why">${porques(f).concat(alertas(f, r)).map(c => `<span class="chip ${c[0]}">${esc(c[1])}</span>`).join('')}</div>
+      <div class="cols"><div style="display:grid;gap:10px;min-width:0"><div class="tw"><table class="t"><thead><tr><th>#</th><th>Talhão · O.S.</th><th>Área</th><th>Janela</th><th>Previsto</th><th>Cargas</th><th>Estado · ordem</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>
+        <div class="actions"><button type="button" class="btn primary" id="b-prog" ${f.prog ? 'disabled' : ''}><i data-lucide="calendar-check"></i>${f.prog ? 'Frente programada' : 'Programar frente'}</button><button type="button" class="btn" id="b-otim"><i data-lucide="route"></i>Otimizar ordem</button></div>
+        <p class="note">Programar grava início e fim previstos em cada O.S., uma requisição de insumos para a frente com o rateio por O.S. e o roteiro no app do operador. Não aprova, não libera e não reserva: a O.S. que aguarda aprovação continua na fila da Ana e a frente começa pelas liberadas.</p></div>
+        <div style="display:grid;gap:10px;min-width:0"><div class="box"><h4>Insumos da frente · uma requisição</h4><ul>${ins}</ul></div>
+        <div class="box"><h4>Roteiro no app do operador</h4><div class="phone" aria-label="Prévia do roteiro no app"><div class="bar"><span>Hoje · ${DIAS[firstO ? Math.max(firstO.ini, 0) : 0]}</span><span>${esc(C.nome)}</span></div>
+          ${firstO ? `<div class="cur"><span class="muted" style="font-size:12px">Agora · 1 de ${f.os.length}</span><span class="big">${esc(pvById[firstO.pv].nome)}</span><span>${esc(firstO.id)} · ${nf1.format(area(firstO))} ha · ${first.cargas} cargas</span><span class="muted" style="font-size:12.5px">${esc(CALDAS[firstO.calda].nome)}</span></div>` : ''}
+          ${second ? `<div class="nx">Depois: <b>${esc(pvById[osById(second.os).pv].nome)}</b> · ${nf1.format(distKm(pvById[firstO.pv], pvById[osById(second.os).pv]))} km${second.cont ? ' · ' + esc(second.cont) : ''}</div>` : ''}
+          <div class="nx">Apontamento de cada talhão começa sozinho ao entrar no pivô (GPS) e fica na O.S. dele.</div></div></div></div></div>
+      <div><h3 style="font-size:14px;margin-bottom:8px">Linha do tempo · 05h às 20h</h3><div class="gantt">${gantt}</div>
+        <div class="gkey" style="margin-top:6px"><span><i style="background:var(--accent-weak);border:1px solid var(--line)"></i>horas aptas (${C.fam === 'cal' ? 'solo e chuva' : 'Delta T, vento e chuva'})</span><span><i style="background:${COR[f.id]}"></i>no talhão</span><span><i style="background:var(--muted)"></i>deslocamento</span><span><i style="background:var(--info)"></i>reabastecer</span><span><i style="background:var(--bad)"></i>lavagem</span></div></div>`;
+    el.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const [fid, i, d] = b.dataset.mv.split(':'); mover(ST.frentes.find(x => x.id === fid), +i, +d); });
+    $('#b-prog').onclick = () => { f.prog = true; const pend = f.os.filter(id => osById(id).est !== 'Liberada'); toast(f.id + ' programada. ' + f.os.length + ' O.S. com início e fim previstos' + (pend.length ? '; ' + pend.join(', ') + ' segue na fila de aprovação da Ana' : '') + '.'); render(); };
+    $('#b-otim').onclick = () => { f.os = ordenar(f.os, f.conj); f.prog = false; toast('Ordem otimizada: janela que fecha antes e, na folga, o caminho mais curto.'); render(); };
+  }
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.k); toast.k = setTimeout(() => { t.hidden = true; }, 5200); }
+  function render() { cards(); mapa(); detail(); icons(); }
+  function reset() { ST = { os: OS0.map(o => Object.assign({}, o)), frentes: [], sel: null }; sugerir(); render(); }
+  $('#b-reset').onclick = () => { reset(); toast('Frentes sugeridas de novo a partir das O.S. da semana.'); };
+  reset();
+})();
+</script>

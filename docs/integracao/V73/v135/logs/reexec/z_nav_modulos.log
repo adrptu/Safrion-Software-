@@ -1,0 +1,17 @@
+OK    N1 barra: um ícone por módulo (o Mapa primeiro, sem o logotipo repetido) + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica
+OK    N1 O.S. aberta: o ícone Agrícola marcado (aria-current) e só ele
+OK    N1 hover no ícone Suprimentos: a dica mostra "Suprimentos"
+OK    N2 6 telas de entrada (Agrícola, Comercial, Suprimentos, Configurações, Manutenção, Crédito): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título
+OK    N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada
+FALHA N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta) · ['/OS.dc.html', '/MOD-AGR.dc.html', '']
+FALHA N3 cartões das telas de entrada: link nativo dentro de item de lista · []
+OK    N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos), na ordem do fluxo
+OK    N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice
+OK    N5 nenhuma tela aponta para o índice (Main.dc.html); sem o logotipo "Início (Mapa)": o 1º ícone da barra é o Mapa
+OK    N6 o avatar troca o perfil (seletor por cima do avatar, ≥ 32 px) e a dica diz o perfil
+OK    N7 busca em pílula: sem caixa no campo de dentro (hover e foco); o contorno da pílula dá o retorno
+OK    N8 O.S.: tabela na largura natural (nunca menor que o contêiner) e cada selo de Fase em uma linha
+OK    N9 390 px: sem rolagem lateral da página (telas de entrada e O.S.)
+OK    N9 sem erro de JS
+RESULTADO: 13 ok · 2 falhas
+rc=1

@@ -16,6 +16,91 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 H = lambda k: '{{' + k + '}}'
 
 
+# INTEL-03 F1 (proprietário, 18/10/2026: "gráficos e informações mais estratégicos ... gráfico por período selecionado (12m, 24m, 36m, 48m) e
+# no período qual em média é melhor para comprar ou vender"): o bloco "Mercado e momento", no alto das duas telas. Só lê; contas em inteligencia.js.
+INT3_UI_JS = r"""
+const INT3_MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const INT3_COR = { 'Bom momento para vender': 'green', 'Bom momento para comprar': 'green', 'Neutro': 'gray', 'Abaixo do normal': 'yellow', 'Acima do normal': 'yellow' };
+function int3MesAno(m) { return INT_MESES[intMes(m)] + '/' + String(m).slice(2, 4); }
+function int3Vals(self, v, lado) { const venda = lado === 'venda', st = self.state;
+  const L = (venda ? INTP.vendas.map(x => ({ k: x.prod, un: x.un, serie: x.serie, perecivel: !!x.perecivel })) : INTP.compras.map(x => ({ k: x.nome, un: x.un, serie: x.serie, lim: x.lim || null }))).filter(x => x.serie && x.serie.length);
+  const k = L.some(x => x.k === st.i3_prod) ? st.i3_prod : (L[0] || {}).k, n = INT3_PER.indexOf(st.i3_n) >= 0 ? st.i3_n : 36;
+  v.i3_curto = L.length <= 6; v.i3_longo = !v.i3_curto;
+  v.i3_prods = L.map(x => ({ t: x.k, on: String(x.k === k), st: prPill(x.k === k), go: () => self.setState({ i3_prod: x.k }) }));
+  v.i3_opts = L.map(x => ({ v: x.k, t: x.k, sel: x.k === k })); v.i3_sel = (e) => { const t = e && e.target && e.target.value; if (t) self.setState({ i3_prod: t }); };
+  v.i3_pers = INT3_PER.map(p => ({ t: p + ' meses', on: String(p === n), st: prPill(p === n), go: () => self.setState({ i3_n: p }) }));
+  const x = L.find(y => y.k === k), R = x ? int3Leitura(x.serie, INTP.ipca, n, lado) : null;
+  v.i3_sem = !R; v.i3_falta = !!(R && R.falta); v.i3_tem = !!(R && !R.falta); v.i3_falta_t = R && R.falta ? 'A série deste produto tem menos de ' + n + ' meses: escolha um período menor.' : '';
+  if (!v.i3_tem) { v.i3_pts = ''; v.i3_barras = []; return; }
+  const un = x.un, nom = R.js.map(y => y.nom), lo = nom.reduce((a, b) => prCmp(b, a) < 0 ? b : a), hi = nom.reduce((a, b) => prCmp(b, a) > 0 ? b : a);
+  const W = 600, Hh = 150, P = 10, esc = y => { const d = Number(prSub(hi, lo)) || 1; return (Hh - P - (Number(prSub(y, lo)) / d) * (Hh - 2 * P)).toFixed(1); };
+  const X = i => (P + i * (W - 2 * P) / Math.max(1, nom.length - 1)).toFixed(1);
+  v.i3_pts = nom.map((y, i) => X(i) + ',' + esc(y)).join(' '); const medN = intMedia(nom); v.i3_my = esc(medN);
+  v.i3_cx = X(nom.length - 1); v.i3_cy = esc(nom[nom.length - 1]);
+  v.i3_ymax = ipRS(hi, un); v.i3_ymin = ipRS(lo, un); v.i3_x0 = int3MesAno(R.js[0].m); v.i3_x1 = int3MesAno(R.hoje.m); v.i3_med = 'média do período ' + ipRS(medN, un);
+  v.i3_agora = ipRS(R.hoje.nom, un);
+  v.i3_l1 = R.vsMed === null ? 'Percentil ' + R.pct + ' dos últimos ' + n + ' meses' : 'Percentil ' + R.pct + ' dos últimos ' + n + ' meses · ' + prFmt(prMul(prCmp(R.vsMed, 0) < 0 ? prSub(0, R.vsMed) : R.vsMed, 100), 1) + '% ' + (prCmp(R.vsMed, 0) < 0 ? 'abaixo' : 'acima') + ' da média do período, sem inflação';
+  const mes = INT3_MES[R.melhor], gan = prFmt(prMul(prCmp(R.ganho, 0) < 0 ? prSub(0, R.ganho) : R.ganho, 100), 1) + '%';
+  v.i3_l2 = R.ev === 'Sem padrão'
+    ? (R.N === 1 ? (venda ? 'Maior' : 'Menor') + ' preço do período em ' + mes + '. Um ano só é exemplo, não padrão: escolha 24 meses ou mais.'
+                 : 'Sem padrão: a época muda o preço em menos de 3% no período (' + mes + ' ' + (venda ? 'acima' : 'abaixo') + ' em ' + gan + ').')
+    : 'Melhor mês para ' + (venda ? 'vender' : 'comprar') + ' em média: ' + mes + ' (' + gan + (venda ? ' acima' : ' abaixo') + ' da média do ano) · padrão observado em ' + R.N + ' anos · acerto retrospectivo ' + R.acerto + ' de ' + R.N + ' (nos mesmos anos: descreve, não prevê)';
+  // revisão do Codex 6252555281: o histórico não vira "esperar" quando o produto é perecível ou a necessidade vem antes do melhor mês
+  if (R.ev !== 'Sem padrão' && venda && x.perecivel) v.i3_l2 += ' · produto perecível: não se guarda para esperar o melhor mês; vende-se na colheita.';
+  if (R.ev !== 'Sem padrão' && !venda && x.lim) { const ym = String(R.hoje.m).slice(0, 7), a = Number(ym.slice(0, 4)), m0 = Number(ym.slice(5, 7)) - 1;
+    const ano = R.melhor >= m0 ? a : a + 1, ini = ano + '-' + String(R.melhor + 1).padStart(2, '0') + '-01';
+    if (ini > x.lim) v.i3_l2 += ' · a necessidade vem antes: pedir até ' + x.lim.slice(8, 10) + '/' + x.lim.slice(5, 7) + ', sem esperar ' + mes + '.'; }
+  v.i3_ev = R.ev; v.i3_tem_selo = !!R.selo; v.i3_selo = R.selo || ''; const sc = PRK[INT3_COR[R.selo] || 'gray']; v.i3_selo_st = 'color:' + sc[0] + ';background:' + sc[1] + ';';
+  v.i3_dica = 'Percentil: posição do preço de agora entre os ' + n + ' meses (0 = o mais baixo, 100 = o mais alto), sem inflação (IPCA). Selo: só com padrão (24 meses ou mais e a época mudando o preço em 3% ou mais); '
+    + (venda ? 'percentil ' + INT3_ALTO + ' ou mais = bom momento para vender; ' + INT3_BAIXO + ' ou menos = abaixo do normal.' : 'percentil ' + INT3_BAIXO + ' ou menos = bom momento para comprar; ' + INT3_ALTO + ' ou mais = acima do normal.')
+    + ' Padrão observado: o melhor mês e o acerto saem dos mesmos anos (acerto retrospectivo), então descrevem o passado e não medem previsão. Histórico não é previsão.';
+  const dev = k2 => Number(prSub(k2, 1)), M = Math.max(0.0001, ...R.z.min.concat(R.z.max).map(z => Math.abs(dev(z))));
+  const Y = d => 50 - d / M * 44;
+  v.i3_barras = R.z.idx.map((z, i) => { const y = Y(dev(z)), y0 = Math.min(y, 50), h = Math.max(1, Math.abs(y - 50)), ya = Y(dev(R.z.max[i])), yb = Y(dev(R.z.min[i])), best = i === R.melhor;
+    const c = best ? '#1E7A4C' : '#9AA59E';
+    return { m: INT_MESES[i], bar: 'position:absolute;left:30%;width:40%;top:' + y0.toFixed(1) + '%;height:' + h.toFixed(1) + '%;border-radius:3px;background:' + c + ';',
+      fx: 'position:absolute;left:calc(50% - 1px);width:2px;top:' + ya.toFixed(1) + '%;height:' + Math.max(1, yb - ya).toFixed(1) + '%;background:' + (best ? '#1E7A4C' : '#C9CFCB') + ';opacity:.55;',
+      rot: INT3_MES[i] + ': ' + (dev(z) >= 0 ? '+' : '−') + Math.abs(dev(z) * 100).toFixed(1).replace('.', ',') + '% (faixa ' + (dev(R.z.min[i]) * 100).toFixed(1).replace('.', ',') + '% a ' + (dev(R.z.max[i]) * 100).toFixed(1).replace('.', ',') + '%)' + (best ? ' · melhor mês' : ''),
+      lst: 'font-size:11px;font-weight:' + (best ? '800' : '600') + ';color:' + (best ? '#1E7A4C' : '#65736A') + ';' }; });
+  v.i3_n_anos = R.N + (R.N > 1 ? ' anos' : ' ano'); }
+"""
+
+
+def _int3_html():
+    """INTEL-03 F1: produto, período, cabeçalho de decisão, gráfico do preço e sazonalidade (barras com a faixa do pior e do melhor ano)"""
+    chips = (f'<sc-if value="{H("i3_curto")}" hint-placeholder-val="true"><span role="group" aria-label="Produto" style="display: inline-flex; flex-wrap: wrap; gap: 6px;">'
+             f'<sc-for list="{H("i3_prods")}" as="p" hint-placeholder-count="3"><button type="button" aria-pressed="{H("p.on")}" onClick="{H("p.go")}" style="{H("p.st")}">{H("p.t")}</button></sc-for></span></sc-if>'
+             f'<sc-if value="{H("i3_longo")}" hint-placeholder-val="false"><select aria-label="Insumo" onChange="{H("i3_sel")}" style="min-height: 40px; font-family: inherit; font-size: 13px; font-weight: 700; padding: 0 10px; border-radius: 10px; border: 1px solid {V.LINE}; background: #FFFFFF; max-width: 100%;">'
+             f'<sc-for list="{H("i3_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}" selected="{H("o.sel")}">{H("o.t")}</option></sc-for></select></sc-if>'
+             f'<span role="group" aria-label="Período" style="display: inline-flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("i3_pers")}" as="p" hint-placeholder-count="4">'
+             f'<button type="button" aria-pressed="{H("p.on")}" onClick="{H("p.go")}" style="{H("p.st")}">{H("p.t")}</button></sc-for></span>')
+    cab = (f'<div class="i3-cab" style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">'
+           f'<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;"><strong class="i3-agora" style="font-size: 24px; font-weight: 800; letter-spacing: -.01em;">{H("i3_agora")}</strong>'
+           f'<sc-if value="{H("i3_tem_selo")}" hint-placeholder-val="false"><span class="i3-selo" style="{H("i3_selo_st")} display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 800;">{H("i3_selo")}</span></sc-if>'
+           f'<button type="button" class="g2dica-i" aria-label="Como ler o momento" data-dica="{H("i3_dica")}" style="width: 44px; height: 36px; border: 0; background: transparent; color: {V.MUTED}; cursor: pointer; font: inherit;">ⓘ</button></div>'
+           f'<div class="i3-l1" style="font-size: 13px; font-weight: 600; color: #15201A; overflow-wrap: anywhere;">{H("i3_l1")}</div>'
+           f'<div class="i3-l2" style="font-size: 13px; color: {V.MUTED}; overflow-wrap: anywhere;">{H("i3_l2")}</div></div>')
+    graf = (f'<figure class="i3-graf" style="margin: 0; min-width: 0;"><figcaption style="font-size: 12px; font-weight: 700; color: {V.MUTED}; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;">'
+            f'<span>Preço nominal · {H("i3_ymax")} a {H("i3_ymin")}</span><span>{H("i3_med")}</span></figcaption>'
+            f'<svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Preço no período" style="width: 100%; height: 150px; display: block;">'
+            f'<line x1="0" x2="600" y1="{H("i3_my")}" y2="{H("i3_my")}" stroke="#9AA59E" stroke-dasharray="5 4" stroke-width="1.5"/>'
+            f'<polyline points="{H("i3_pts")}" fill="none" stroke="#1E5F8F" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'
+            f'<circle cx="{H("i3_cx")}" cy="{H("i3_cy")}" r="5" fill="#1E7A4C" stroke="#FFFFFF" stroke-width="2"/></svg>'
+            f'<div style="display: flex; justify-content: space-between; font-size: 11.5px; color: {V.MUTED};"><span>{H("i3_x0")}</span><span>agora · {H("i3_x1")}</span></div></figure>')
+    saz = (f'<figure class="i3-saz" style="margin: 0; min-width: 0;"><figcaption style="font-size: 12px; font-weight: 700; color: {V.MUTED};">Índice do mês sem inflação (0 = média do ano) · faixa do pior ao melhor ano · {H("i3_n_anos")}</figcaption>'
+           f'<div role="list" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; align-items: end; margin-top: 6px;">'
+           f'<sc-for list="{H("i3_barras")}" as="b" hint-placeholder-count="12"><div role="listitem" aria-label="{H("b.rot")}" title="{H("b.rot")}" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0;">'
+           f'<div style="position: relative; width: 100%; height: 96px; border-bottom: 1px solid #E4E9E5; background: linear-gradient(#EEF1EE,#EEF1EE) center / 100% 1px no-repeat;"><span style="{H("b.fx")}"></span><span style="{H("b.bar")}"></span></div>'
+           f'<span style="{H("b.lst")}">{H("b.m")}</span></div></sc-for></div></figure>')
+    rot = f'<p style="margin: 0; font-size: 11.5px; color: {V.MUTED};">Demonstração: série sintética de 60 meses e IPCA sintético, não é cotação. O gráfico mostra o preço nominal; percentil, média e melhor mês são sem inflação.</p>'
+    # SEP-20261015 (b): a barra de produto e período é a barra da visão (grupo com aria-pressed) e abre o corpo: o título fica sem linha (ds_test A2c)
+    return (f'<div class="i3" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;"><div role="group" aria-label="Produto e período" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">{chips}</div>'
+            f'<sc-if value="{H("i3_falta")}" hint-placeholder-val="false"><p role="status" style="margin: 0; font-size: 13px; color: {V.MUTED};">{H("i3_falta_t")}</p></sc-if>'
+            f'<sc-if value="{H("i3_sem")}" hint-placeholder-val="false"><p role="status" style="margin: 0; font-size: 13px; color: {V.MUTED};">Sem série de preço para este produto.</p></sc-if>'
+            f'<sc-if value="{H("i3_tem")}" hint-placeholder-val="true">{cab}<div class="i3-figs" style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px;">{graf}{saz}</div></sc-if>{rot}'
+            f'<style>@media (max-width: 760px){{ .i3-figs{{ grid-template-columns: 1fr !important; }} }}</style></div>')
+
+
 def _ijs():
     return open(os.path.join(HERE, 'inteligencia.js'), encoding='utf-8').read() + '\n'
 
@@ -139,6 +224,7 @@ function EXTRAVALS(self, v) { prRst(self, v); const c = self._c || cenGet(); con
   const ag = M.vendas.filter(x => x.rec === 'Vender agora'), ab = I.prods.filter(p => p.abaixo).length, rk = I.posicao.filter(intRiscoOferta).length;
   prStatus(v, [ag.length ? 'vender agora: ' + ag.map(x => x.prod.split(' ')[0]).join(', ') : 'nenhum produto no melhor momento de venda',
     ab ? ab + ' produto(s) vendido(s) abaixo da referência' : 'nenhuma venda abaixo da referência', rk ? rk + ' produto(s) com venda sem oferta que cubra' : 'vendas cobertas pela oferta'].join(' · '), (ab || rk) ? 'yellow' : 'green');
+  int3Vals(self, v, 'venda');   /* INTEL-03: mercado e momento por período */
   const pan = st.pr_pan; const PP = pan ? ivPan(self, c, pan) : null; comPrimPainel(v, PP && PP.prim ? PP.prim : null, PP); prPainel(self, v, PP); }
 """
 
@@ -159,11 +245,12 @@ def iv():
                   dict(k='frete', l='Frete', t='num', a='r', w=110), dict(k='dias', l='Prazo', t='num', a='r', w=90), dict(k='fin', l='Custo do prazo', t='num', a='r', w=130),
                   dict(k='liq', l='Líquido', t='num', a='r', w=130)],
                  [], edit=dict(m='pick'), gid='g_ivc', total=False)
-    V.EXTRAJS[0] = V._js(DI.js_precos() + _ijs() + IV_JS)
+    V.EXTRAJS[0] = V._js(DI.js_precos() + _ijs() + IV_JS + INT3_UI_JS)
     # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a 1ª lista; "em alta" e o melhor mês estão nas colunas Tendência e
     # Melhor mês, "Vender agora N" no filtro rápido de "O que fazer" e o resumo no selo do cabeçalho. Os indicadores dos blocos seguintes ficam
     # entre os blocos: são o painel do assunto desta tela de análise
-    corpo = (AP.bloco('Preço e melhor mês para vender', 'Preço de agora, variação, tendência sem o efeito da época e o mês que historicamente paga mais. Esperar só aparece quando o ganho da época passa de 3% depois do custo do dinheiro (1,2% a.m.). Série sintética de 60 meses: histórico não é previsão.', g_ivm + AP.cartoes('cards_ivm'))
+    corpo = (AP.bloco('Mercado e momento', '', _int3_html())   # INTEL-03 F1 (18/10/2026)
+             + AP.bloco('Preço e melhor mês para vender', 'Preço de agora, variação, tendência sem o efeito da época e o mês que historicamente paga mais. Esperar só aparece quando o ganho da época passa de 3% depois do custo do dinheiro (1,2% a.m.). Série sintética de 60 meses: histórico não é previsão.', g_ivm + AP.cartoes('cards_ivm'))
              + _ind(('Vendas abaixo da referência', 'k_ab', 'k_abn'), ('Venda sem oferta que cubra', 'k_rk', 'k_rkn'), ('Melhor recebimento líquido', 'k_liq', 'k_liqn'))
              + AP.bloco('Preço × mercado', 'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) × referência de mercado com fonte. Abaixo de −5% vira alerta; sem cotação, fica em branco.', g_ivp + AP.cartoes('cards_ivp'))
              + AP.bloco('Safra comercializada', 'Vendido ÷ oferta da safra (previsão publicada ou estoque apto, todas as fazendas). Acima de 100% é venda maior que a oferta.', g_ivs + AP.cartoes('cards_ivs'))
@@ -269,6 +356,7 @@ function EXTRAVALS(self, v) { prRst(self, v); const I = self._ic || intCompras(I
   const agc = M.compras.filter(x => x.rec === 'Comprar agora').length;
   prStatus(v, [agc ? agc + ' insumo(s) para comprar agora' : 'nada urgente para comprar', I.acima ? I.acima + ' insumo(s) com cotação acima da referência' : 'cotações dentro da referência']
     .concat(I.vencidas ? [I.vencidas + ' insumo(s) só com cotação vencida'] : []).join(' · '), (I.acima || I.vencidas) ? 'yellow' : 'green');
+  int3Vals(self, v, 'compra');   /* INTEL-03: mercado e momento por período */
   const pan = st.pr_pan; const PP = pan ? icPan(self, pan) : null; comPrimPainel(v, PP && PP.prim ? PP.prim : null, PP); prPainel(self, v, PP); }
 """
 
@@ -288,10 +376,11 @@ def ic():
                  [], edit=dict(m='pick'), gid='g_icf', total=False)
     g_ich = grid([dict(k='grupo', l='Grupo', w=200), dict(k='total', l='Total orçado', t='num', a='r', w=160), dict(k='rsha', l='R$/ha', t='num', a='r', w=140)],
                  [], edit=dict(m='pick'), gid='g_ich', total=False)
-    V.EXTRAJS[0] = V._js(DI.js() + DI.js_precos() + _ijs() + IC_JS)
+    V.EXTRAJS[0] = V._js(DI.js() + DI.js_precos() + _ijs() + IC_JS + INT3_UI_JS)
     # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a 1ª lista; "em alta" está na coluna Tendência e "Comprar agora N" no
     # filtro rápido de "O que fazer"; a economia esperando o mês certo é o total da lista e abre os indicadores entre os blocos
-    corpo = (AP.bloco('Preço e melhor mês para comprar', 'Preço de agora, tendência sem o efeito da época, o mês mais barato no histórico e o que fazer até a próxima necessidade do Planejar safra, já descontado o prazo de entrega. Esperar só aparece quando a época barateia 3% ou mais. Série sintética de 60 meses: histórico não é previsão.', g_icm + AP.cartoes('cards_icm'))
+    corpo = (AP.bloco('Mercado e momento', '', _int3_html())   # INTEL-03 F1 (18/10/2026)
+             + AP.bloco('Preço e melhor mês para comprar', 'Preço de agora, tendência sem o efeito da época, o mês mais barato no histórico e o que fazer até a próxima necessidade do Planejar safra, já descontado o prazo de entrega. Esperar só aparece quando a época barateia 3% ou mais. Série sintética de 60 meses: histórico não é previsão.', g_icm + AP.cartoes('cards_icm'))
              + _ind(('Economia esperando o mês certo', 'k_es', 'k_esn'), ('Cotações acima da referência', 'k_ac', 'k_acn'), ('Economia pela melhor cotação', 'k_ec', 'k_ecn'), ('Insumos por hectare', 'k_ha', 'k_han'))
              + AP.bloco('Preço por insumo', 'Último preço pago × referência da safra × melhor cotação atual. Cotação 5% acima da referência vira alerta. O histórico de preço é sintético e vem marcado.', g_ici + AP.cartoes('cards_ici'))
              + AP.bloco('Fornecedores', 'Preço relativo (média das cotações contra a referência), prazo de entrega cotado e pontualidade (entregas no prazo ÷ entregas).', g_icf + AP.cartoes('cards_icf'))

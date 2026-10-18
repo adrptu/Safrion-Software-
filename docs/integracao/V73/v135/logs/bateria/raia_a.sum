@@ -1,0 +1,17 @@
+os_frentes RESULTADO: 18/18 ok rc=0
+os_lote RESULTADO 36/36 rc=0
+saf_mapa RESULTADO: 10/10 ok rc=0
+agua_irr RESULTADO: 10/10 ok rc=0
+ativo_unico RESULTADO: 7/7 ok rc=0
+config RESULTADO: FALHOU 89/90 rc=1
+irr_estado  rc=0
+irr_fluxo  rc=0
+irtest  rc=0
+ctl5 RESULTADO 19/30 ['E2.2 cultura Mamão × antracnose: "Ordem A liberar" oferece só a ordem de pulverização de mamão ( rc=1
+ficha_pivo RESULTADO: OK 21/21 rc=0
+tabelas_irr RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro del rc=1
+solo_ag02 RESULTADO: OK 30/30 rc=0
+painel_modulos  rc=1
+tabelas_os RESULTADO: 34/40 ok · FALHAS: TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418); TF01 T1 ou T2 pelo filtro da coluna:  rc=1
+os_cenario RESULTADO: 22/22 ok rc=0
+os_recurso RESULTADO: 16/16 rc=0

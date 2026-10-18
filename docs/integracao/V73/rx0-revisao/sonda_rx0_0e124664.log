@@ -1,0 +1,20 @@
+W 0/80: 0.0000–0.0458 · oráculo 0.0000–0.0458 · ok
+W 1/80: 0.0022–0.0675 · oráculo 0.0022–0.0675 · ok
+W 0/20: 0.0000–0.1611 · oráculo 0.0000–0.1611 · ok
+W 16/20: 0.5840–0.9193 · oráculo 0.5840–0.9193 · ok
+W 17/20: 0.6396–0.9476 · oráculo 0.6396–0.9476 · ok
+W bool : recusa
+W float : recusa
+W eventos > total : recusa
+W negativo : recusa
+W 0/0: None
+R1 80 sementes, 0 forte: 0 descritivo_para_revisao 0.0458
+R2 uma semente com 2 células forte conta 1 evento: 1 0.0675
+R3 célula faltante: nao_avaliavel None 1
+R4 motor só insuf: 0 160 descritivo_para_revisao (direção reprova à parte: insuf não é acerto)
+R5 desenho diferente entre sementes : recusa · Sementes da safra têm desenhos diferentes
+R5 resultado fora do desenho : recusa · Resultado fora do desenho ou duplicado
+R5 classe do motor inválida : recusa · Classe do motor inválida
+R5 classe esperada forte no desenho : recusa · Identidade/classe inválida no desenho ou resultado
+R6 safras separadas: [('s1', 3), ('s2', 3)]
+rc=0

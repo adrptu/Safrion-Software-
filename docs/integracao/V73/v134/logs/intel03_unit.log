@@ -1,0 +1,30 @@
+OK    motor JS (node) executou sem erro
+OK    A3 venda · Soja em grão · 12 meses: índice, faixa, melhor mês, acerto (1 de 1), evidência (Sem padrão) e percentil (100) = oráculo
+OK    A5 venda · Soja em grão: 12 meses é "Sem padrão" e não dá selo
+OK    A3 venda · Soja em grão · 24 meses: índice, faixa, melhor mês, acerto (2 de 2), evidência (Fraca) e percentil (100) = oráculo
+OK    A3 venda · Soja em grão · 36 meses: índice, faixa, melhor mês, acerto (3 de 3), evidência (Forte) e percentil (100) = oráculo
+OK    A3 venda · Soja em grão · 48 meses: índice, faixa, melhor mês, acerto (4 de 4), evidência (Forte) e percentil (100) = oráculo
+OK    A3 venda · Milho em grão · 12 meses: índice, faixa, melhor mês, acerto (1 de 1), evidência (Sem padrão) e percentil (18) = oráculo
+OK    A5 venda · Milho em grão: 12 meses é "Sem padrão" e não dá selo
+OK    A3 venda · Milho em grão · 24 meses: índice, faixa, melhor mês, acerto (2 de 2), evidência (Fraca) e percentil (9) = oráculo
+OK    A3 venda · Milho em grão · 36 meses: índice, faixa, melhor mês, acerto (3 de 3), evidência (Forte) e percentil (6) = oráculo
+OK    A3 venda · Milho em grão · 48 meses: índice, faixa, melhor mês, acerto (4 de 4), evidência (Forte) e percentil (4) = oráculo
+OK    A3 compra · Adjuvante espalhante · 12 meses: índice, faixa, melhor mês, acerto (1 de 1), evidência (Sem padrão) e percentil (82) = oráculo
+OK    A5 compra · Adjuvante espalhante: 12 meses é "Sem padrão" e não dá selo
+OK    A3 compra · Adjuvante espalhante · 24 meses: índice, faixa, melhor mês, acerto (2 de 2), evidência (Fraca) e percentil (57) = oráculo
+OK    A3 compra · Adjuvante espalhante · 36 meses: índice, faixa, melhor mês, acerto (3 de 3), evidência (Forte) e percentil (37) = oráculo
+OK    A3 compra · Adjuvante espalhante · 48 meses: índice, faixa, melhor mês, acerto (4 de 4), evidência (Forte) e percentil (28) = oráculo
+OK    A3 compra · Óleo mineral · 12 meses: índice, faixa, melhor mês, acerto (1 de 1), evidência (Sem padrão) e percentil (82) = oráculo
+OK    A5 compra · Óleo mineral: 12 meses é "Sem padrão" e não dá selo
+OK    A3 compra · Óleo mineral · 24 meses: índice, faixa, melhor mês, acerto (2 de 2), evidência (Fraca) e percentil (48) = oráculo
+OK    A3 compra · Óleo mineral · 36 meses: índice, faixa, melhor mês, acerto (3 de 3), evidência (Forte) e percentil (31) = oráculo
+OK    A3 compra · Óleo mineral · 48 meses: índice, faixa, melhor mês, acerto (4 de 4), evidência (Forte) e percentil (23) = oráculo
+OK    A4 série que só sobe com o IPCA: sem inflação é "Sem padrão" em 24, 36 e 48 meses (igual ao oráculo)
+OK    A4 sem o IPCA, a tendência linear do período também tira a inflação: "Sem padrão" (igual ao oráculo)
+OK    A4 contraprova: a leitura ingênua (nominal e com tendência, a do INTEL-02) acha um falso melhor mês (setembro, o último de cada janela) com amplitude de 3% ou mais
+OK    ausente ≠ zero: período maior que a série é falta (não índice 0)
+OK    ausente ≠ zero: mês sem IPCA = sem leitura (null), não preço real inventado
+OK    percentil: o menor preço do período é 0, o maior é 100, um só mês não tem posição
+OK    selo segue o lado: com evidência, venda e compra leem o mesmo percentil ao contrário
+RESULTADO: OK 28/28
+rc=0

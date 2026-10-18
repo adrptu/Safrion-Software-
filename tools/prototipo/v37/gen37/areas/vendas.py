@@ -3,7 +3,7 @@
 Três telas ligadas ao mesmo estado da Colheita (c.producao; regras em comercial.js e producao.js), sem redigitar:
   VEN.dc.html    Contratos e pedidos    planejamento: venda pronta ou futura, preço, condição, crédito, reserva de lote
   EXPED.dc.html  Expedição e entregas   execução: carga de saída (romaneio), pesagem, saída única, entrega, devolução
-  PCOM.dc.html   Painel comercial       controle: oferta × compromissos × livre por período; preço médio e a receber
+  PCOM.dc.html   Oferta e compromissos  controle: oferta × compromissos × livre por período; preço médio e a receber
 Mesmo motor da Colheita (areas/producao.py: painel, cartões, bloco, PR_UI_JS) e o mesmo script _js(), com o núcleo da carência (CE-01).
 Uma ação primária por tela, escolhida pelo registro selecionado; sem o papel do comando, a primária mostra o dono (R-C14).
 VE-01..VE-06 e LO-01..LO-04 continuam ocultos e intocados (D-C02). Dados sintéticos (a Lagoa Grande é sintética)."""
@@ -433,7 +433,7 @@ def pcom():
                             g_of + AP.cartoes('cards_of'))
              + AP.bloco('Preço e recebimento', 'Médias ponderadas (Σ valor ÷ Σ quantidade), só venda; CPR e barter liquidam em produto, à parte. Recebimento é do Financeiro: o a receber não baixa nesta etapa.',
                         g_pr + AP.cartoes('cards_pr')))
-    _shell('PCOM', 'Painel comercial', 'Quanto ainda posso vender de cada produto em cada período, quanto está comprometido, a que preço vendi e quanto vou receber.', corpo, fname, 1250,
+    _shell('PCOM', 'Oferta e compromissos', 'Quanto ainda posso vender de cada produto em cada período, quanto está comprometido, a que preço vendi e quanto vou receber.', corpo, fname, 1250,
            'Números lidos do estado (estoque, previsão publicada, vendas e cargas): nada digitado aqui. Período em curso entra pelo estoque; previsão publicada só para período futuro (PRD 49.2).')
 
 

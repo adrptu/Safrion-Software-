@@ -97,7 +97,7 @@ def main():
     try:
         if '--capturas' in sys.argv:   # fotos das telas da frente: <pasta> <prefixo> (antes|depois), 1440 × 900 e 390 × 844 (toque)
             i = sys.argv.index('--capturas'); pasta, pre = sys.argv[i + 1], sys.argv[i + 2]; os.makedirs(pasta, exist_ok=True)
-            telas = [('MOD-MAN', 'MOD-MAN.dc.html', '', 'Ana')] + [(f'MA-{k}', 'MA.dc.html', h, 'Ana') for k, h in VISOES] + [('PMAN', 'PMAN.dc.html', '', 'Ana')]
+            telas = [('MOD-MAN', 'MOD-MAN.dc.html', '', 'Ana')] + [(f'MA-{k}', 'MA.dc.html', h, 'Ana') for k, h in VISOES] + [('PG-man', 'PG.dc.html', 'mod=man', 'Ana')]   # PAINEL-03 (18/10): o Painel da Manutenção é a aba do painel único
             for w, h_, toque in ((1440, 900, False), (390, 844, True)):
                 c.aparelho(w, h_, 1, toque)
                 for nome, pg, h, perfil in telas + ([(f'MA-{k}-otavio', 'MA.dc.html', hh, 'Otávio') for k, hh in VISOES[:1] + VISOES[2:3]] + [(f'MA-{k}', 'MA.dc.html', hh, 'Ana') for k, hh in DETALHES] if w == 1440 else []):
@@ -121,8 +121,8 @@ def main():
             for nome, h in VISOES + DETALHES:
                 ir('MA.dc.html', h, perfil='Otávio'); J("document.querySelectorAll('aside[role=dialog] button[aria-label^=Fechar]').forEach(b=>b.click())"); time.sleep(.3)
                 res[nome] = J(INV)
-            for pg in ('MOD-MAN.dc.html', 'PMAN.dc.html'):
-                ir(pg, perfil='Otávio'); res[pg] = J(INV)
+            for pg in ('MOD-MAN.dc.html', 'PG.dc.html'):   # PAINEL-03: o Painel da Manutenção é a aba do painel único
+                ir(pg, 'mod=man' if pg == 'PG.dc.html' else '', perfil='Otávio'); res[pg] = J(INV)
             json.dump(res, open(saida, 'w'), ensure_ascii=False, indent=1); print('inventário:', saida); return 0
         # ---------- R · referência (O.S.): a régua mede o que a tela aprovada cumpre ----------
         ir('OS.dc.html'); cab = J(CAB); lin = J(LINHAS_JS)
@@ -192,7 +192,7 @@ def main():
         ac = e.get('acima') or []
         chk('E2 MOD-MAN: acima dos cartões, só a linha de pendência "N ativos sem plano · Vincular ›" (um toque) e nada mais',
             len(ac) <= 1 and all(x.endswith('Vincular ›') and 'sem plano' in x for x in ac), ac)
-        chk('E3 MOD-MAN: os mesmos 5 destinos (Painel e as 4 visões)', dest == sorted(['PMAN.dc.html', 'MA.dc.html#vis=semordem', 'MA.dc.html#vis=ordens', 'MA.dc.html#vis=ativos', 'MA.dc.html#vis=planos']), dest)
+        chk('E3 MOD-MAN: os mesmos 5 destinos (Painel e as 4 visões)', dest == sorted(['PG.dc.html#mod=man', 'MA.dc.html#vis=semordem', 'MA.dc.html#vis=ordens', 'MA.dc.html#vis=ativos', 'MA.dc.html#vis=planos']), dest)
         ir('MOD-AGR.dc.html'); ea = J(ENTRADA) or {}
         chk('E4 referência MOD-AGR: blocos com título e sem aviso solto (a régua é a da tela aprovada)', len(ea.get('blocos') or []) >= 2 and not ea.get('acima'), ea.get('blocos'))
         erros = J("window.__errs||[]") or []

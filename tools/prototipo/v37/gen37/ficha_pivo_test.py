@@ -113,9 +113,9 @@ try:
     esc()
     # ---------- 12 · IR-01 P2: a mesma ficha do CD-03; a nota lê o limite do setor (A3) ----------
     t.goto('IR-01.dc.html#P2'); time.sleep(.9); eqP2 = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_eqT\"]'); return i?i.value:'';})()") or ''
-    # integração V56 (SOLO-01): o talhão P2 tem análise de solo (AGS-003), então a ficha mostra a mesma CAD do campo "Água disponível no solo
-    # (referência)" do setor (irrCadTxt, uma fonte), e não "sem medição"; sem análise no talhão o texto segue "sem medição de água no solo neste talhão"
-    cad12 = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_cadT\"]'); return i?i.value:'';})()") or ''
+    # integração V56 (SOLO-01): o talhão P2 tem análise de solo (AGS-003), então a ficha mostra a mesma CAD do campo "Água no solo usada no
+    # cálculo" do setor (irrCadTxt → irrAguaTxt, uma fonte; AGUA-SOLO-IRR 18/10/2026), e não "sem medição"
+    cad12 = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_aguaT\"]'); return i?i.value:'';})()") or ''
     botao('Ficha do pivô'); time.sleep(.6); f12 = ficha(); k12 = kvs(); L12 = lin(); n12 = nota()
     lk12 = J(f"(()=>{{const a=[...document.querySelectorAll('{FX} a')].pop(); return a?[a.innerText.trim(),a.getAttribute('href')]:null;}})()")
     t.chk('12 IR-01 › setor P2 ("Bomba do Pivô 2", o nome do cadastro): os mesmos campos e a mesma tabela do CD-03; a nota diz o limite do setor (até 12,0 mm por passada); CAD como leitura; link para o cadastro',

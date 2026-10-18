@@ -102,13 +102,15 @@ try:
     ic = cab.index('área cultivável') if 'área cultivável' in cab else -1
     cel = lambda nome: J("(()=>{ const r=%s; return r?[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()):null; })()" % (ROW % json.dumps(nome)))
     num = lambda s: float(s.replace(' ha', '').replace('.', '').replace(',', '.')) if s else 0.0
+    # TAB-12 (17/10): a fazenda nasce recolhida; a seta abre os talhões (soma conferida aberta) e recolhe de novo (base verde 2, 18/10)
+    exp0 = J("(()=>{ const r=%s; const b=r&&r.querySelector('.g2car'); return b?b.getAttribute('aria-expanded'):null; })()" % (ROW % '"Santa Rita"'))
+    fechada0 = cel('T1') is None
+    J("(()=>{ const r=%s; const b=r&&r.querySelector('.g2car'); if(b) b.click(); })()" % (ROW % '"Santa Rita"')); time.sleep(.4); abriu = cel('T1') is not None
     sr = cel('Santa Rita') or []; kids = ['T1', 'T2', 'T3', 'T4', 'P1', 'P2', 'T7', 'C1']; soma = round(sum(num((cel(k) or [''] * 9)[ic]) for k in kids), 1)
     chk('P5a fazenda é a linha-pai da árvore (Santa Rita com empresa e município), com a soma da área cultivável dos talhões ativos',
         sr and 'Santa Rita Agro' in sr[0] and 'Rio Verde/GO' in sr[0] and ic > 0 and abs(num(sr[ic]) - soma) < 0.05 and soma > 0, [sr, ic, soma])
-    exp0 = J("(()=>{ const r=%s; const b=r&&r.querySelector('.g2car'); return b?b.getAttribute('aria-expanded'):null; })()" % (ROW % '"Santa Rita"'))
     J("(()=>{ const r=%s; const b=r&&r.querySelector('.g2car'); if(b) b.click(); })()" % (ROW % '"Santa Rita"')); time.sleep(.4); fechou = cel('T1') is None
-    J("(()=>{ const r=%s; const b=r&&r.querySelector('.g2car'); if(b) b.click(); })()" % (ROW % '"Santa Rita"')); time.sleep(.4); abriu = cel('T1') is not None
-    chk('P5b a seta da fazenda recolhe e abre os talhões', exp0 == 'true' and fechou and abriu, [exp0, fechou, abriu])
+    chk('P5b a fazenda nasce recolhida (TAB-12) e a seta abre e recolhe os talhões', exp0 == 'false' and fechada0 and abriu and fechou, [exp0, fechada0, abriu, fechou])
     J("(()=>{ const r=%s; if(r) (r.querySelector('.g2pw')||r).click(); })()" % (ROW % '"Boa Vista"')); espera("document.querySelector('aside[role=dialog]')")
     tit = J("(document.querySelector('aside[role=dialog] h2')||{}).innerText||''"); lb = J("[...document.querySelectorAll('aside[role=dialog] label[for]')].map(l=>l.innerText.trim())") or []
     acts = J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim())") or []

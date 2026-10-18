@@ -439,6 +439,7 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     grupos.push({id:'fzg_'+su.id,fgrp:true,nosel:true,ro:true,v:{local:su.faz,area},s:{local:su.faz+' · '+nfa(area)+' ha · '+res},
       p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true,alvo:true}]:[])
         .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,alvo:true,al:'Editar talhões da '+su.faz}]:[])
+        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Planejar no mapa ›',fn:'slmapa:'+su.id,lk:true,alvo:true,al:'Planejar a safra no mapa da '+su.faz}]:[])   // SAF-MAPA (18/10)
         .concat(!m.info.safra.ro&&L.length&&g2estreito()?[{k:'act',t:'Editar talhões',fn:'slfaz:'+su.id,al:'Editar talhões da '+su.faz}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });   // EDL-01: todos os talhões da fazenda numa grade (safra_lote.js); no estreito, também no ⋯ da faixa
   G2DISP[sp.id]=grupos; self.__ocG=G;
   if(info){ info.bandG=band; info.linhasG=linhas; info.totG=tot; } return info; }

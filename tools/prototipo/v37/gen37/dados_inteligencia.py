@@ -102,6 +102,18 @@ def serie(nome, perfil, ancora):
     return [dict(m=m, p=_d(b * f, '0.01')) for m, b in zip(MESES, bruto)]
 
 
+def ipca():
+    """INTEL-03 · IPCA SINTÉTICO (número-índice, 100 no 1º mês da série), para tirar a inflação das comparações entre anos: ~0,38% ao mês com
+    variação determinística de ±0,15 p.p. No software real vem do Banco Central (API SGS, série 433). Nada aqui é dado oficial."""
+    idx, out = Decimal('100'), {}
+    for t, m in enumerate(MESES):
+        if t:
+            h = int(hashlib.md5(('ipca|' + m).encode('utf-8')).hexdigest()[:8], 16)
+            idx = idx * (1 + Decimal('0.0038') + (Decimal(h % 301) - 150) / Decimal(100000))
+        out[m] = _d(idx, '0.000001')
+    return out
+
+
 def precos():
     import dados_comercial as DC
     import dados2 as D2
@@ -117,7 +129,7 @@ def precos():
         lim = (date.fromisoformat(evs[0]) - timedelta(days=prz)).isoformat() if evs else None   # último dia para pedir e receber a tempo
         compras.append(dict(nome=i['nome'], grupo=i['grupo'], un=i['un'], qtd=i['qtd'], nec=evs[0] if evs else None, prazo=prz, lim=lim,
                             serie=serie(i['nome'], SAZ[i['grupo']], i['ref'])))
-    return dict(meses=MESES, hoje=HOJE, vendas=vendas, compras=compras,
+    return dict(meses=MESES, hoje=HOJE, vendas=vendas, compras=compras, ipca=ipca(),
                 rotulo='série sintética de demonstração (60 meses); no software real: CEPEA/Esalq, CONAB, CEAGESP e as compras da fazenda')
 
 

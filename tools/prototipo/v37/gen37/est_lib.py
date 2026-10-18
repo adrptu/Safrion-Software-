@@ -36,10 +36,22 @@ class Est:
     def abrir(self, wait=1.0):
         self.c.goto(f'http://127.0.0.1:{self.p}/EST.dc.html', wait=wait)
         self.J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }")
+        self.expandir()
+
+    def expandir(self):
+        """TAB-12 (17/10/2026): as grades nascem recolhidas. O teste de domínio lê lotes e requisições como a pessoa faz depois de usar o
+        "Expandir tudo" de cada grade visível; o recolhimento padrão é conferido no drill_recolhido_test (base verde 2, 18/10)."""
+        n = 0
+        for _ in range(4):   # cada clique redesenha a tela: repete até nenhuma grade visível ter "Expandir tudo"
+            k = self.J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 0; b.click(); return 1;})()")
+            if not k: break
+            n += 1; time.sleep(.3)
+        return n
 
     def etapa(self, i):
         # Estoque é trabalho paralelo: as visões ficam na navegação "Seções do estoque" (mesma ordem 1…5), não em etapas (UX-ACAO-UNICA-20261003)
         self.J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.4)
+        self.expandir()
 
     def clk(self, t, root=None):
         r = self.J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
@@ -101,3 +113,17 @@ class Est:
         finally: self.srv.terminate()
         print(f'RESULTADO: {self.n - len(self.FAIL)}/{self.n} ok' + (' · FALHAS: ' + '; '.join(self.FAIL) if self.FAIL else ''))
         return not self.FAIL
+
+
+# TAB-12: uma gravação redesenha a grade recolhida; a linha não achada abre as grades visíveis e é procurada de novo (base verde 2, 18/10)
+def _reabre(f):
+    def g(self, *a, **k):
+        r = f(self, *a, **k)
+        if r == 'sem linha' and self.expandir():
+            r = f(self, *a, **k)
+        return r
+    return g
+
+
+for _m in ('row', 'rowtxt', 'cel', 'rowbtn'):
+    setattr(Est, _m, _reabre(getattr(Est, _m)))

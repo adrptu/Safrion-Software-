@@ -1,0 +1,6 @@
+config RESULTADO: OK 90/90 rc=0
+ctl5 RESULTADO 30/30 [] rc=0
+cmptest FALHAS: nenhuma rc=0
+demanda_unica_nav RESULTADO: 29 ok · 0 falhas rc=0
+visoes2_agrupar RESULTADO: 3/3 rc=0
+tabelas_os RESULTADO: 40/40 ok rc=0

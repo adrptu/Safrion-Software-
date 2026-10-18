@@ -143,20 +143,21 @@ def unit():
         print(r.stdout);print(r.stderr,end='');return r.returncode
 
 def prepare():
-    """Contrato de composição exercitado sem editar paineis.py do Claude."""
+    """PAINEL-03 (18/10/2026, Claude; aviso ao Codex): a seção do PAINEL-02 mora na aba Agrícola do painel único (PG.dc.html), repartida pelos
+    blocos (O.S. e execução, MIP, custos, colheita), com o pnaVals de sempre. Confere a composição no build (antes: paineis.build com o PAGR)."""
     import engine as E
-    from areas import paineis
-    original=paineis.shell37
-    def composto(fid,title,body,**kwargs):
-        if fid=='PAGR':
-            html,js=P.secao()
-            body=body.replace('<nav class="pn-links"',html+'<nav class="pn-links"',1)
-            E.EXTRAJS[0]=E.EXTRAJS[0].replace('function EXTRAVALS(', 'function pnBaseVals(',1)+js+'\nfunction EXTRAVALS(self,v){pnBaseVals(self,v);pnaVals(self,v);}'
-        return original(fid,title,body,**kwargs)
-    paineis.shell37=composto
-    try:paineis.build()
-    finally:paineis.shell37=original
-    return 0
+    from areas import painel_gestao as PG
+    PG.build(); html=Path(E.P,'PG.dc.html').read_text(encoding='utf-8')
+    # na ordem dos blocos do painel único (processo): Ordem de Serviço (O.S. e execução), Pragas e doenças, Previsão e colheita, Custos e fechamento
+    marcas=['aria-label="O.S. que precisam de atenção"','aria-label="Execução das O.S."','aria-label="Atenção no MIP"','aria-label="Colheita por cultivo"','aria-label="Custos por cultura"']
+    pos=[html.find(m) for m in marcas]; ok=all(x>=0 for x in pos) and pos==sorted(pos) and 'function pnaVals(self,v) {' in html and 'pnaVals(self,v)' in html.split('function EXTRAVALS(self,v){',1)[-1]
+    print(('OK ' if ok else 'FALHA ')+'PG compõe as 5 seções do PAINEL-02 na ordem dos blocos e chama pnaVals no EXTRAVALS',pos)
+    return 0 if ok else 1
+
+def pg_det(c):
+    """PAINEL-03: o detalhe do PAINEL-02 (O.S., execução, MIP, custos) fica recolhido em "Detalhe" dentro do bloco; o teste abre, como a pessoa.
+    Cada abertura passa antes por about:blank: o mesmo endereço com #mod=agr seria navegação no mesmo documento e o roteiro da prova não rodaria."""
+    time.sleep(.3); c.js("document.querySelectorAll('details.pg-det').forEach(d=>d.open=true)"); time.sleep(.2)
 
 def ui():
     from comp_lib import Chrome,servir
@@ -173,10 +174,10 @@ def ui():
     try:
         c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
         for w,touch in [(1440,False),(390,True)]:
-            c.aparelho(w,844,1,touch);c.goto(url('PAGR.dc.html'),1)
+            c.aparelho(w,844,1,touch);c.goto('about:blank',.2);c.goto(url('PG.dc.html#mod=agr'),1);pg_det(c)
             chk('Linhas renderizadas '+str(w),wait("document.querySelectorAll('[data-rid]').length>=23"))
-            chk('Quatro cartões e ação originais preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&[...document.querySelectorAll('a')].some(a=>a.textContent.trim()==='Consultar O.S.')"))
-            chk('Seção abaixo dos cartões sem frase redundante '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"Colheita por cultivo\"]'),g=document.querySelector('.pn-grid');return g.getBoundingClientRect().bottom<=s.getBoundingClientRect().top&&!s.innerText.includes('Todas as fazendas e safras')})()"))
+            chk('Quatro cartões de fase e acesso à O.S. preservados (bloco Ordem de Serviço do painel único) '+str(w),J("document.querySelectorAll('[data-pg-bloco=agr-os] .pg-card').length>=4&&!!document.querySelector('[data-pg-bloco=agr-os] .pg-bh a[href=\"OS.dc.html\"]')"))
+            chk('Seção abaixo dos cartões sem frase redundante '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"Colheita por cultivo\"]'),g=document.querySelector('[data-pg-bloco=agr-os] .pg-cards');return g.getBoundingClientRect().bottom<=s.getBoundingClientRect().top&&!s.innerText.includes('Todas as fazendas e safras')})()"))
             chk('Valores comparáveis '+str(w),J("(()=>{let r=document.querySelector('[data-rid=lg19]');return !!r&&r.innerText.includes('72,9 t')&&r.innerText.includes('36,42 t')&&r.innerText.includes('S39')})()"))
             chk('Sem JS nem overflow da página '+str(w),J("__errors.length===0&&document.documentElement.scrollWidth<=innerWidth"),J('__errors'))
             chk('Sem total somando culturas '+str(w),not J("document.querySelector('[role=table]').innerText.includes('Total')"))
@@ -196,7 +197,7 @@ def ui():
                 c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
             chk('Toque/Enter abre cultivo na origem '+str(w),wait("location.pathname.endsWith('COLH.dc.html')&&location.hash==='#lg19'&&!!document.querySelector('aside[role=dialog]')"))
             J('history.back()');time.sleep(1)
-            chk('Voltar preserva busca '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&!!document.querySelector('[data-rid=lg19]')"))
+            chk('Voltar preserva busca '+str(w),wait("location.pathname.endsWith('PG.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&!!document.querySelector('[data-rid=lg19]')"))
             chk('Voltar restaura foco no cultivo '+str(w),wait("!!document.activeElement&&document.activeElement.getAttribute('data-rid')==='lg19'"))
             J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'');i.dispatchEvent(new Event('input',{bubbles:true}));})()")
         Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel02-390.png').resolve()))
@@ -210,10 +211,10 @@ def os_contract_ui():
     # O bundle fecha funções no escopo local; window.agrPainelRef não substitui a função real.
     render=Path(__file__).parent/'_render'; tmp=tempfile.TemporaryDirectory(prefix='pn02-contrato-'); root=Path(tmp.name)
     for item in render.iterdir():
-        if item.name!='PAGR.dc.html': (root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
-    html=(render/'PAGR.dc.html').read_text(); marker='function pnaVals(self,v) {'
+        if item.name!='PG.dc.html': (root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
+    html=(render/'PG.dc.html').read_text(); marker='function pnaVals(self,v) {'
     assert html.count(marker)==1, 'Gancho de apresentação ausente ou ambíguo'
-    (root/'PAGR.dc.html').write_text(html.replace(marker,marker+'\n const agrPainelRef=window.__pnOSFixture;',1))
+    (root/'PG.dc.html').write_text(html.replace(marker,marker+'\n const agrPainelRef=window.__pnOSFixture;',1))
     port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
     def chk(t,v):
         checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
@@ -227,17 +228,17 @@ def os_contract_ui():
     try:
         for w,touch in [(1440,False),(390,True)]:
             absence=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>null;'})['identifier']
-            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.aparelho(w,844,1,touch);c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Fonte ausente explícita '+str(w),wait("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').innerText.includes('Dados de impedimentos e prazos indisponíveis')&&!document.querySelector('.pna-grupo')"))
             J("(()=>{let e=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}));})()")
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absence})
             # O adaptador é fixture exclusiva desta prova; montagem do produto não recebe seed paralelo.
             fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Dois gráficos sem lista operacional '+str(w),wait("document.querySelectorAll('.pna-grupo').length===2&&!document.querySelector('[data-rid^=\"os:\"]')"))
             chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. precisam de ação','Máquina ou equipamento','Prazos até 23/09/2026','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
             chk('Impedimento vermelho '+str(w),J("[...document.querySelectorAll('.pna-grupo [aria-hidden] span')].every(e=>getComputedStyle(e).backgroundColor==='rgb(180, 35, 24)')"))
-            chk('Cartões e colheita preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&!!document.querySelector('[data-rid=lg19]')&&document.documentElement.scrollWidth<=innerWidth"))
+            chk('Cartões e colheita preservados '+str(w),J("document.querySelectorAll('[data-pg-bloco=agr-os] .pg-card').length>=4&&!!document.querySelector('[data-rid=lg19]')&&document.documentElement.scrollWidth<=innerWidth"))
             button="document.querySelector('[aria-label=\"Como ler os impedimentos e atrasos\"]')"
             if touch:
                 xy=J("(()=>{let e="+button+";e.scrollIntoView({block:'center'});let r=e.getBoundingClientRect();return {x:r.left+20,y:r.top+20}})()")
@@ -251,16 +252,16 @@ def os_contract_ui():
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':fixture_script})
             parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None;parcial['os']['referencia']=None
             partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Máquina ou equipamento')&&s.innerText.includes('Referência de prazos indisponível')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':partial_script})
             incomplete={"os":{"impedidas":[],"atrasadas":[],"n":{"sem_prazo":2}}}
             incomplete_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(incomplete)+');'})['identifier']
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Sem prazo não permite falsa ausência de pendência '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s.innerText.includes('2 O.S. sem prazo válido')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':incomplete_script})
         final_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
-        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
         J("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').scrollIntoView({block:'start'})")
         Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel-os-contrato-390.png').resolve()))
     finally:c.close();srv.terminate();tmp.cleanup()
@@ -272,10 +273,10 @@ def custos_ui():
     from comp_lib import Chrome,servir
     render=Path(__file__).parent/'_render';tmp=tempfile.TemporaryDirectory(prefix='pn02-custos-');root=Path(tmp.name)
     for item in render.iterdir():
-        if item.name!='PAGR.dc.html':(root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
-    html=(render/'PAGR.dc.html').read_text();marker='function pnaVals(self,v) {'
+        if item.name!='PG.dc.html':(root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
+    html=(render/'PG.dc.html').read_text();marker='function pnaVals(self,v) {'
     assert html.count(marker)==1
-    (root/'PAGR.dc.html').write_text(html.replace(marker,marker+"\n const agrCustoRef=window.__semCusto?()=>null:globalCusto;\n",1).replace(
+    (root/'PG.dc.html').write_text(html.replace(marker,marker+"\n const agrCustoRef=window.__semCusto?()=>null:globalCusto;\n",1).replace(
         'function pnaVals(self,v)', 'const globalCusto=agrCustoRef;\nfunction pnaVals(self,v)',1))
     port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
     def chk(t,v):
@@ -289,7 +290,7 @@ def custos_ui():
     try:
         c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
         for w,touch in [(1440,False),(390,True)]:
-            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.aparelho(w,844,1,touch);c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Quatro culturas do getter '+str(w),wait("document.querySelectorAll('.pna-custo').length===4"))
             chk('Soja: área plantada, razão e estados corretos '+str(w),J("""(()=>{let t=document.querySelector('.pna-custo').innerText;
               return ['Soja · Santa Rita · Safra 2026/27','1.085,00 ha plantados','62,18 R$/ha','49.135,88 R$','18.326,88 R$','Parcial','Orçamento por hectare indisponível','Sem orçamento de plano: T4, T3, P1, P2'].every(x=>t.includes(x))})()"""))
@@ -315,7 +316,7 @@ def custos_ui():
             J('history.back()')
             chk('Volta aos quatro grupos '+str(w),wait("document.querySelectorAll('.pna-custo').length===4"))
             absent=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__semCusto=true;'})['identifier']
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Ausência explícita sem falso zero '+str(w),wait("""(()=>{let e=document.querySelector('[aria-label="Custos por cultura"]');return e&&e.innerText.includes('Dados de custos indisponíveis')&&e.querySelectorAll('.pna-custo').length===0})()"""))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absent})
     finally:c.close();srv.terminate();tmp.cleanup()
@@ -343,7 +344,7 @@ def grupos_ui():
             J("(()=>{let b=document.querySelector('[data-visao=lista]');if(b)b.click();})()")
             busca('OS-0430');time.sleep(.2)
             guardado=J("sessionStorage.getItem('g2:OS.dc.html:g_os')")
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1);busca('Café');time.sleep(.2)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c);busca('Café');time.sleep(.2)
             chk('Grupos independem da busca de colheita '+str(w),wait("document.querySelectorAll('a[data-pna-grupo]').length>1"))
             for campo in ['causa','dono']:
                 sel='a[data-pna-grupo^="'+campo+':"]'
@@ -361,7 +362,7 @@ def grupos_ui():
                 chk('Subconjunto visível apesar da busca anterior '+campo+' '+str(w),wait(expr))
                 chk('Busca de OS não sobrescrita '+campo+' '+str(w),J("sessionStorage.getItem('g2:OS.dc.html:g_os')")==guardado)
                 J('history.back()')
-                chk('Retorno ao grupo com foco '+campo+' '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==="+json.dumps(dados['foco'])))
+                chk('Retorno ao grupo com foco '+campo+' '+str(w),wait("location.pathname.endsWith('PG.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==="+json.dumps(dados['foco'])))
                 chk('Busca Café preservada '+campo+' '+str(w),J("document.querySelector('main input[type=search]').value==='Café'"))
             chk('Sem erro ou overflow '+str(w),J('__errors.length===0&&document.documentElement.scrollWidth<=innerWidth'))
     finally:c.close();srv.terminate()
@@ -371,12 +372,12 @@ def execucao_ui():
     from comp_lib import Chrome,servir
     import shutil
     temp=tempfile.TemporaryDirectory(prefix='pna-exec-ui-');root=Path(temp.name)
-    for name in ['PAGR.dc.html','OS.dc.html','support.js']:
+    for name in ['PG.dc.html','OS.dc.html','support.js']:
         shutil.copy2(Path(__file__).parent/'_render'/name,root/name)
-    html=(root/'PAGR.dc.html').read_text()
+    html=(root/'PG.dc.html').read_text()
     fixture="window.__pnaTest={reset:cenReset,get:cenGet,save:cenSave,mode:m=>{const f=agrPainelRef;agrPainelRef=(...a)=>({...f(...a),execucao:m==='empty'?{ordens:[]}:null})}};if(window.__pnaMode)__pnaTest.mode(window.__pnaMode);\n"
     assert html.count('function pnaVals(self,v)')==1
-    (root/'PAGR.dc.html').write_text(html.replace('function pnaVals(self,v)',fixture+'function pnaVals(self,v)',1))
+    (root/'PG.dc.html').write_text(html.replace('function pnaVals(self,v)',fixture+'function pnaVals(self,v)',1))
     port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
     def chk(t,v):
         checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
@@ -389,8 +390,8 @@ def execucao_ui():
     try:
         c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
         for w,touch in [(1440,False),(390,True)]:
-            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
-            J('__pnaTest.reset()');c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.aparelho(w,844,1,touch);c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
+            J('__pnaTest.reset()');c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Sete ordens e etapas '+str(w),wait("document.querySelectorAll('.pna-exec').length===7"))
             chk('Domínio refletido e conferência não encerrada '+str(w),J("(()=>{let a=document.querySelector('[data-pna-exec=\"OS-0417\"]'),b=document.querySelector('[data-pna-exec=\"OS-0421\"]');return a.innerText.includes('Em conferência')&&a.innerText.includes('Sobra em custódia')&&a.innerText.includes('100%')&&b.innerText.includes('190,00 ha de 350,00 ha')})()"))
             chk('Contexto e alvo44 '+str(w),J("[...document.querySelectorAll('.pna-exec')].every(e=>e.innerText.includes('Safra')&&e.querySelector('a').getBoundingClientRect().height>=44)"))
@@ -400,7 +401,7 @@ def execucao_ui():
             c.tecla('Escape','Escape',27)
             # Apenas fixture sintética: simula apontamento ainda no aparelho, sem chamar comando de produção.
             J("(()=>{let s=__pnaTest.get();s.ordens['OS-0421'].ap.push({dia:9,ha:12,sinc:false});__pnaTest.save(s)})()")
-            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Sinal não aumenta enviada '+str(w),wait("(()=>{let e=document.querySelector('[data-pna-exec=\"OS-0421\"]');return e&&e.innerText.includes('12,00 ha no aparelho')&&e.innerText.includes('190,00 ha de 350,00 ha')})()"))
             J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Café');i.dispatchEvent(new Event('input',{bubbles:true}))})()")
             sel='a[data-pna-grupo="execucao:OS-0421"]'
@@ -414,16 +415,16 @@ def execucao_ui():
                 J('document.querySelector('+json.dumps(sel)+').focus()');c.tecla('Enter','Enter',13)
             chk('Toque ou Enter abre O.S. exata '+str(w),wait("location.pathname.endsWith('OS.dc.html')&&location.hash==='#OS-0421'&&!!document.querySelector('aside[role=dialog]')"))
             J('history.back()')
-            chk('Volta ao ponto de execução '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==='execucao:OS-0421'"))
+            chk('Volta ao ponto de execução '+str(w),wait("location.pathname.endsWith('PG.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==='execucao:OS-0421'"))
             chk('Busca de colheita preservada '+str(w),J("document.querySelector('main input[type=search]').value==='Café'"))
             chk('Sem erro e sem overflow '+str(w),J('__errors.length===0&&document.documentElement.scrollWidth<=innerWidth'))
         # Ausência e coleção vazia na composição real, fixture no getter sem alterar o domínio.
         absent=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMode='missing';"})['identifier']
-        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
         chk('Ausência mostra indisponível sem cartões',wait("document.querySelector('[aria-label=\"Execução das O.S.\"]').innerText.includes('Execução indisponível')&&document.querySelectorAll('.pna-exec').length===0"))
         c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absent})
         c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMode='empty';"})
-        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
         chk('Vazio válido mostra nenhuma ordem',wait("document.querySelector('[aria-label=\"Execução das O.S.\"]').innerText.includes('Nenhuma O.S. em execução')"))
     finally:c.close();srv.terminate();temp.cleanup()
     print('RESULTADO execução '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
@@ -432,12 +433,12 @@ def mip_ui():
     from comp_lib import Chrome,servir
     import shutil
     temp=tempfile.TemporaryDirectory(prefix='pna-mip-ui-');root=Path(temp.name)
-    for name in ['PAGR.dc.html','AG-01.dc.html','support.js']:
+    for name in ['PG.dc.html','AG-01.dc.html','support.js']:
         shutil.copy2(Path(__file__).parent/'_render'/name,root/name)
-    html=(root/'PAGR.dc.html').read_text()
+    html=(root/'PG.dc.html').read_text()
     hook="window.__pnaMipReset=()=>{mipReset();cenReset()};if(window.__pnaMipMode){const f=agrPainelRef;agrPainelRef=(...a)=>({...f(...a),mip:window.__pnaMipMode==='empty'?{referencia:'2026-09-23',decidir:[],atrasadas:[],coleta:[]}:null})};\n"
     assert html.count('function pnaVals(self,v)')==1
-    (root/'PAGR.dc.html').write_text(html.replace('function pnaVals(self,v)',hook+'function pnaVals(self,v)',1))
+    (root/'PG.dc.html').write_text(html.replace('function pnaVals(self,v)',hook+'function pnaVals(self,v)',1))
     other_html=(root/'AG-01.dc.html').read_text()
     sync_hook="window.__pnaSyncChange=()=>mipMudar(null,s=>{s.vis['VIS-006'].resp='Responsável atualizado na outra aba'});window.__pnaSyncReset=()=>mipReset();\n"
     assert other_html.count('function mipMudar(self, fn)')==1
@@ -453,8 +454,8 @@ def mip_ui():
     try:
         c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
         for w,touch in [(1440,False),(390,True)]:
-            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
-            J('__pnaMipReset()');c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            c.aparelho(w,844,1,touch);c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
+            J('__pnaMipReset()');c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
             chk('Seis vistorias sem duplicação '+str(w),wait("document.querySelectorAll('.pna-mip').length===6"))
             chk('Referência e categorias '+str(w),J("(()=>{let e=document.querySelector('[aria-label=\"Atenção no MIP\"]');return e.innerText.includes('23/09/2026')&&e.innerText.includes('Decisão do responsável técnico')&&e.innerText.includes('Vistorias atrasadas')&&e.innerText.includes('Coleta a resolver')})()"))
             chk('NC e presença distintos '+str(w),J("document.querySelector('[data-pna-mip=\"VIS-013\"]').innerText.includes('128% do NC')&&!document.querySelector('[data-pna-mip=\"VIS-055\"]').innerText.includes('%')"))
@@ -488,13 +489,13 @@ def mip_ui():
             else:J('document.querySelector('+json.dumps(sel)+').focus()');c.tecla('Enter','Enter',13)
             chk('Vistoria exata abre por Enter/toque '+str(w),wait("location.pathname.endsWith('AG-01.dc.html')&&location.hash==='#VIS-055'&&[...document.querySelectorAll('[role=dialog]')].some(e=>e.offsetParent&&e.innerText.includes('VIS-055'))"))
             J('history.back()')
-            chk('Foco volta à vistoria '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==='mip:VIS-055'"))
+            chk('Foco volta à vistoria '+str(w),wait("location.pathname.endsWith('PG.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==='mip:VIS-055'"))
             chk('Busca conservada e sem JS/overflow '+str(w),J("document.querySelector('main input[type=search]').value==='Café'&&__errors.length===0&&document.documentElement.scrollWidth<=innerWidth"))
         mode=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMipMode='missing';"})['identifier']
-        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
         chk('MIP ausente não vira sem pendências',wait("document.querySelector('[aria-label=\"Atenção no MIP\"]').innerText.includes('Dados de MIP indisponíveis')&&document.querySelectorAll('.pna-mip').length===0"))
         c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':mode});c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMipMode='empty';"})
-        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        c.goto('about:blank',.2);c.goto(f'http://127.0.0.1:{port}/PG.dc.html#mod=agr',1);pg_det(c)
         chk('MIP vazio tem três mensagens específicas',wait("(()=>{let t=document.querySelector('[aria-label=\"Atenção no MIP\"]').innerText;return t.includes('Nenhuma decisão pendente')&&t.includes('Nenhuma vistoria atrasada')&&t.includes('Nenhuma coleta pendente')})()"))
     finally:c.close();srv.terminate();temp.cleanup()
     print('RESULTADO MIP '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
