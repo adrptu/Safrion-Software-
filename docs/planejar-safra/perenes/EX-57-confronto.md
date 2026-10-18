@@ -68,3 +68,28 @@
 **Condição:** nenhuma fatia começa a ser codificada antes do Gemini real (§4) e da validação do RT. A F0 é exceção: não muda regra agronômica, só unifica o que existe, e pode entrar quando abrir uma frente (§3.6).
 
 **Autoria:** o Claude implementa e o Codex revisa e registra.
+
+## 6. Ajustes da revisão do Codex (6254156428), aceitos
+
+1. **Identidade da ocorrência (corrige C8).** O par "ciclo + atividade + data-alvo" não é estável: a reprogramação cria outra chave. Vale então:
+   - ID persistente = escopo (ciclo) + atividade de plano versionada + âncora (evento por ID, ou a recorrência) + **ordinal da recorrência**;
+   - a data-alvo é atributo revisável, com histórico;
+   - recalcular nunca cria outra obrigação nem perde o vínculo com a O.S.
+   
+   Prova no contrato: a mesma florada-7 reprogramada de 01 para 03 mantém um único ID.
+2. **"Fora do recorte = consulta" vale só para gerar ocorrência histórica *nova*** (corrige §1, §5 e o M8 do lacrado):
+   - a obrigação já criada ou em aberto, a execução e o custo real **ficam**, com identidade compartilhada entre safras (C11);
+   - o que sai do custo e da demanda é só a ocorrência nunca gerada que cairia antes do recorte;
+   - nada se apaga, nada se exclui.
+3. **F0 deixa de ser "sem mudança visível".** Corrigir as cópias divergentes muda o resultado. A F0 vira duas partes:
+   - **F0a:** extração que preserva o comportamento atual, caso a caso, com testes de paridade onde as cópias concordam e a lista explícita dos casos em que discordam;
+   - **F0b:** correção explícita por caso, com a referência declarada, o impacto medido (antes × depois) e uma regressão por caso. Exemplo: DAPC/DANC sem colheita deixa de cair no plantio e vira **âncora ausente**, já reproduzida pelo Codex.
+   
+   Nenhuma regra divergente vira canônica por ser maioria entre as cópias.
+
+**Contrato de coorte (responde à condição do C2):**
+- A identidade da coorte é o **`ciclo`**. Ele persiste entre safras pelo vínculo da R-24, que copia o `ciclo`, a cultura, o plantio e a parcela (`local`). O `local` é só o escopo espacial.
+- **Replantio parcial:** "Dividir" a parcela e abrir um **novo `ciclo`** na parte replantada, com `substitui` apontando para o ciclo anterior. A parte que não foi replantada continua no ciclo antigo, com idade e histórico intactos.
+- A paridade entre parcela e coorte não é presumida. **Aceite da F1:** o mesmo ciclo mantém o ID depois de vincular a 2027/28 e depois de um replantio parcial.
+
+**Gemini:** o pacote leva as 7 perguntas do §4 mais estes limites: identidade persistente, preservação de obrigações e custos reais e correção explícita das cópias. É uma consulta só.
