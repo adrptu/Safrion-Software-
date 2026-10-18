@@ -1135,7 +1135,7 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
         un=r.get('un') or (next(iter(unidades)) if len(unidades)==1 else None)
         if not un:
             nao_apuravel.append(dict(r,motivo='Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.')); continue
-        def casa(e): return pc(e)==r.get('ref') and (e.get('item') or e.get('prod'))==r['item'] and e.get('un')==un and (e.get('linha') is None or r.get('linha') is None or str(e['linha'])==str(r['linha']))
+        def casa(e): return pc(e)==r.get('ref') and (e.get('item') or e.get('prod'))==r['item'] and (e.get('un') in (None,'') or e.get('un')==un) and (e.get('linha') is None or r.get('linha') is None or str(e['linha'])==str(r['linha']))
         baixa=sum(float(e.get('conf') or 0) if e.get('apto') is None and e.get('quar') is None else float(e.get('apto') or 0)+float(e.get('quar') or 0) for e in recebidos if casa(e))
         q=max(0,r['q']-baixa)
         if q>1e-9: receb.append(dict(r,q=q))

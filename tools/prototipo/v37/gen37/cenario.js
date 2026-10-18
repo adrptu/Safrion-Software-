@@ -337,7 +337,8 @@ function cenCompGravar(id,snap,chave,ator){
 }
 function cenCompRecebimentos(c){const seen=new Set();return ((c&&c.movs)||[]).filter(m=>{const r=m.tipo==='recebimento-nf'&&m.estRec;if(!r||!r.id||seen.has(r.id))return false;seen.add(r.id);return true;}).map(m=>m.estRec);}
 function cenCompPC(r){return String(r.pedido||r.ref||r.ped||r.id||'').split(' · ')[0].trim();}
-function cenCompCasa(r,p){return cenCompPC(r)===p.id&&(r.item||r.prod)===p.item&&r.un===p.un&&(r.linha==null||p.linha==null||String(r.linha)===String(p.linha));}
+// nota conferida antes de 16/10 (7762fd3d) não grava unidade: vale a do pedido, como a baixa antiga por PC (revisão do Claude, PR #114)
+function cenCompCasa(r,p){return cenCompPC(r)===p.id&&(r.item||r.prod)===p.item&&(r.un==null||r.un===''||r.un===p.un)&&(r.linha==null||p.linha==null||String(r.linha)===String(p.linha));}
 function cenCompLinhas(c){let s;cenCompLinhas.aviso='';try{s=cenCompEstado(c,false);cenCompLinhas.aviso=s.aviso||'';}catch(e){cenCompLinhas.aviso=String(e.message||e);return [];}
   const out=[];Object.keys(s.proc).forEach(saf=>{const v=s.proc[saf],a=v.aprov;if(!a||a.estado!=='aprovada')return;
     (a.pcs||[]).forEach(p=>(p.itens||[]).forEach(it=>out.push({id:p.id,linha:it.i,item:it.nome,un:it.un,grupo:it.grupo,forn:p.nome,qtd:Number(it.ped)||0,a_entregar:Number(it.ped)||0,saf,sol:v.sol,prev:(v.pcx&&v.pcx[p.id]||{}).prev||p.prev,cmp:true,label:p.id+' · '+p.nome+' · '+it.nome+' · '+it.un+' · linha '+it.i})));});return out;
