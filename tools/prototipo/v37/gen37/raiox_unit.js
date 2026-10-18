@@ -199,16 +199,36 @@ a=g.gerar(eps)
 assert len(a['entrada'])==2
 assert all(e['agenda_referencia']=='ligado' for e in a['entrada'])
 assert len(a['oraculo']['pares'])==8
-pop=g.expandir_populacao(eps,3)
-assert len(pop)==12 and len({x['talhao'] for x in pop})==3
+pop=g.expandir_populacao(eps,8)
+assert len(pop)==32 and len({x['talhao'] for x in pop})==8
 assert all(x['semente']==0 for x in pop)
 assert len({g.digest(x['dias']) for x in pop[:3]})==3
 assert all([d['clima'] for d in x['dias']]==[d['clima'] for d in eps[0]['dias']] for x in pop[:3])
-assert len({x['politica']['gatilho'] for x in pop[:3]})==3
-assert len(g.gerar(pop)['entrada'])==6
+assert len({x['politica']['gatilho'] for x in pop[:8]})==2
+assert len(g.gerar(pop)['entrada'])==16
 suporte=g.medir_suporte(g.gerar(pop)['entrada'])
-assert len(suporte)==2 and all(x['janelas']==3 and not x['necessario'] and x['talhoes']==3 for x in suporte)
-assert g.digest(pop)==g.digest(g.expandir_populacao(eps,3))
+assert len(suporte)==2 and all(x['janelas']==8 and not x['necessario'] and x['talhoes']==8 for x in suporte)
+for campo,valor in [('v',float('nan')),('v',float('inf')),('v',-1),('v',True),('v',None),('day',0)]:
+ bad=copy.deepcopy(a['entrada']);bad[0]['obs'][1][campo]=valor
+ try:g.medir_suporte(bad);raise AssertionError('suporte aceitou observação malformada')
+ except ValueError:pass
+bad=copy.deepcopy(a['entrada']);bad[0]['obs']=bad[0]['obs'][:1];bad[0]['obs'][0]['v']=float('nan')
+try:g.medir_suporte(bad);raise AssertionError('observação isolada malformada aceita')
+except ValueError:pass
+bad=copy.deepcopy(a['entrada']);bad[0]['apps']=[dict(day=float('nan'))]
+try:g.medir_suporte(bad);raise AssertionError('aplicação malformada aceita')
+except ValueError:pass
+print('PASS A2: dado malformado recusado antes das exclusões; observação isolada e aplicação incluídas.')
+assert g.digest(pop)==g.digest(g.expandir_populacao(eps,8))
+# A1: cada gatilho contém o mesmo conjunto de exposições, em todos os dias.
+for tamanho in (8,16,20):
+ pp=g.expandir_populacao(eps[:1],tamanho)
+ gates=sorted({p['politica']['gatilho'] for p in pp})
+ for d in range(9):
+  blocos=[sorted((p['dias'][d]['n14'],p['dias'][d]['k14']) for p in pp if p['politica']['gatilho']==gt) for gt in gates]
+  assert all(b==blocos[0] for b in blocos)
+assert g.ENSAIO['denominador_min']==20 and g.ENSAIO['versao']==2
+print('PASS A1/A3: cruzamento balanceado em 8/16/20 talhões; mínimo de 20 sementes por estrato, sem pooling.')
 try:g.expandir_populacao(eps,2);raise AssertionError('população insuficiente aceita')
 except ValueError:pass
 print('PASS população: clima comum, exposições/agenda próprias, sementes preservadas, factual único, repetição determinística.')

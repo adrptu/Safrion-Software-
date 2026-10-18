@@ -27,7 +27,7 @@ CONTRATO = {
 # Pré-especificação anterior ao primeiro ensaio do motor. Não reduz o gate
 # de 100% de direção nas fixtures determinísticas ao agregado de séries.
 ENSAIO = {
-    'versao': 1,
+    'versao': 2,
     'unidade_replica': 'semente; talhoes agrupados dentro de cada replica',
     'comparacao': 'classe e sinal; nunca magnitude beta versus delta',
     'por_safra': True,
@@ -36,6 +36,12 @@ ENSAIO = {
                 'forte_fraco_max': 0.05, 'forte_nao_identificavel_max': 0.0,
                 'forte_nao_pareado_max': 0.0},
     'insuf': 'contar separadamente; sem denominador avaliavel nao ha aceite',
+    'denominador_min': 20,
+    'denominador_unidade': 'sementes distintas por safra/alvo/fator/classe esperada; nunca janelas ou talhoes',
+    'denominador_regra': 'abaixo do minimo: nao avaliavel, mesmo com proporcao favoravel; nao juntar safras ou classes',
+    'denominador_direcao': 'todas as replicas de classe esperada forte; insuf do motor conta no denominador e nao como acerto',
+    'denominador_fixture': 'todos os casos determinísticos pre-especificados; 100% obrigatório, reportar contagem',
+    'limites_status': 'proposta para revisao; proporcoes nao sao garantia estatistica',
     'ambiguo': 'sem expectativa de sinal; reportar separadamente',
     'suporte': {'talhoes_min': 3, 'alto_min': 40, 'baixo_min': 40, 'semanas_min': 5},
     'ausentes': 'nao avaliavel; sem imputacao; n14/k14 nao sao eventos',
@@ -52,8 +58,8 @@ def expandir_populacao(episodios, talhoes=16):
     A identidade fonte deve ser única por cenário/safra/semente/alvo/fator.
     """
     import copy
-    if type(talhoes) is not int or talhoes < 3:
-        raise ValueError('População exige pelo menos três talhões')
+    if type(talhoes) is not int or talhoes < 8 or talhoes % 4:
+        raise ValueError('População fatorial exige múltiplo de quatro, com pelo menos oito talhões')
     vistos, saida = set(), []
     for ep in episodios:
         chave = tuple(ep[k] for k in ('cenario','safra','semente','alvo','fator'))
@@ -62,15 +68,16 @@ def expandir_populacao(episodios, talhoes=16):
         vistos.add(chave)
         for i in range(talhoes):
             novo = copy.deepcopy(ep)
-            novo['cenario'] = ep['cenario']+'-populacao-v1'
+            novo['cenario'] = ep['cenario']+'-populacao-v2'
             novo['talhao'] = ep['talhao']+'-P'+str(i+1).zfill(2)
             for d, dia in enumerate(novo['dias']):
-                # Oscilação defasada e amplitude próprias, sem consultar o alvo
-                # ou os resultados do oráculo para escolher exposições.
-                fase = 2*math.pi*i/talhoes
-                dia['n14'] = 6.4 + 3*(1+math.sin(d/7+fase))
-                dia['k14'] = 10 + 8*(1+math.cos(d/9+fase))
-            novo['politica']['gatilho'] = ep['politica']['gatilho']*(0.8+0.4*i/(talhoes-1))
+                # Cruzamento completo N × K × gatilho. Cada nível de agenda
+                # recebe as quatro combinações, sem selecionar por resultado.
+                fase_n = math.pi*(i % 2)
+                fase_k = math.pi*((i // 2) % 2)
+                dia['n14'] = 6.4 + 3*(1+math.sin(d/7+fase_n))
+                dia['k14'] = 10 + 8*(1+math.cos(d/9+fase_k))
+            novo['politica']['gatilho'] = ep['politica']['gatilho']*(0.8+0.4*(i//4)/(talhoes//4-1))
             saida.append(novo)
     return saida
 
@@ -350,6 +357,17 @@ def gerar(episodios):
 
 def medir_suporte(entradas):
     """Condições necessárias por réplica; não testa limiar/colinearidade do motor."""
+    # Dado malformado não é exclusão agronômica. Validar também observações
+    # isoladas e aplicações fora das janelas antes de contar qualquer suporte.
+    digest(entradas)
+    for e in entradas:
+        valores = [e['nc']] + [x[k] for x in e['obs'] for k in ('day', 'v')] + [x['day'] for x in e['apps']]
+        if any(type(x) not in (int, float) or not math.isfinite(x) for x in valores):
+            raise ValueError('Suporte exige observações e aplicações finitas')
+        if e['nc'] <= 0 or any(x['v'] < 0 for x in e['obs']):
+            raise ValueError('Suporte exige NC positivo e observações não negativas')
+        if any(a['day'] >= b['day'] for a,b in zip(e['obs'], e['obs'][1:])):
+            raise ValueError('Suporte exige observações em ordem estritamente crescente')
     grupos = {}
     for e in entradas:
         chave = tuple(e[k] for k in ('cenario', 'safra', 'semente', 'alvo'))
