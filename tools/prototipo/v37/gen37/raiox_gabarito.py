@@ -348,6 +348,32 @@ def gerar(episodios):
             'exclusoes_por_safra': exclusoes, 'classes_por_safra': classes_por_safra, 'recuperacao_motor': 'nao_executada'}}
 
 
+def medir_suporte(entradas):
+    """Condições necessárias por réplica; não testa limiar/colinearidade do motor."""
+    grupos = {}
+    for e in entradas:
+        chave = tuple(e[k] for k in ('cenario', 'safra', 'semente', 'alvo'))
+        g = grupos.setdefault(chave, {'janelas': 0, 'excluidas': 0, 'talhoes': set(), 'semanas': set()})
+        apps = [a['day'] for a in e['apps']]
+        for a,b in zip(e['obs'], e['obs'][1:]):
+            try:
+                crescimento(a['v'], b['v'], e['nc'], a['day'], b['day'], e['obs'][-1]['day'], apps)
+            except ValueError:
+                g['excluidas'] += 1
+                continue
+            g['janelas'] += 1
+            g['talhoes'].add(e['talhao'])
+            g['semanas'].add(b['day']//7)
+    saida = []
+    for chave,g in sorted(grupos.items()):
+        saida.append(dict(zip(('cenario','safra','semente','alvo'),chave),
+                          janelas=g['janelas'], excluidas=g['excluidas'],
+                          talhoes=len(g['talhoes']), semanas=len(g['semanas']),
+                          necessario=(g['janelas'] >= 80 and len(g['talhoes']) >= 3 and len(g['semanas']) >= 5),
+                          suporte_alto_baixo='nao_avaliado', recuperacao_motor='nao_executada'))
+    return saida
+
+
 def selecionar_disponiveis(registros, corte, protocolo, unidade):
     """Contrato temporal de QA (dias sintéticos); não é adaptador do MIP.
 
@@ -479,7 +505,20 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('episodios', help='JSON de episódios/exógenos pré-sorteados')
+    parser.add_argument('--suporte-populacao', type=int, metavar='TALHOES', help='Só mede suporte por réplica, sem executar motor')
     args = parser.parse_args()
     with open(args.episodios, encoding='utf8') as f:
-        pacote = gerar(json.load(f))
+        episodios = json.load(f)
+    if args.suporte_populacao is not None:
+        grupos = {}
+        for e in episodios:
+            chave = tuple(e[k] for k in ('cenario','semente','alvo'))
+            grupos.setdefault(chave, []).append(e)
+        suporte = []
+        for grupo in grupos.values():
+            p = gerar(expandir_populacao(grupo,args.suporte_populacao))
+            suporte.extend(medir_suporte(p['entrada']))
+        pacote = {'ensaio': ENSAIO, 'ensaio_hash': digest(ENSAIO), 'suporte': suporte}
+    else:
+        pacote = gerar(episodios)
     print(json.dumps(pacote, ensure_ascii=False, sort_keys=True, allow_nan=False))

@@ -206,6 +206,8 @@ assert len({g.digest(x['dias']) for x in pop[:3]})==3
 assert all([d['clima'] for d in x['dias']]==[d['clima'] for d in eps[0]['dias']] for x in pop[:3])
 assert len({x['politica']['gatilho'] for x in pop[:3]})==3
 assert len(g.gerar(pop)['entrada'])==6
+suporte=g.medir_suporte(g.gerar(pop)['entrada'])
+assert len(suporte)==2 and all(x['janelas']==3 and not x['necessario'] and x['talhoes']==3 for x in suporte)
 assert g.digest(pop)==g.digest(g.expandir_populacao(eps,3))
 try:g.expandir_populacao(eps,2);raise AssertionError('população insuficiente aceita')
 except ValueError:pass
