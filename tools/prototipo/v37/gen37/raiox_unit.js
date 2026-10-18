@@ -2,9 +2,15 @@
 const fs=require('fs'), vm=require('vm'), assert=require('assert'), cp=require('child_process');
 const html=fs.readFileSync(process.argv[2], 'utf8');
 const recomb=process.argv.indexOf('--recombinar');
-if(recomb>=0){const p=JSON.parse(fs.readFileSync(process.argv[recomb+1],'utf8'));assert.equal(p.fonte_sha256,require('crypto').createHash('sha256').update(html).digest('hex'),'fonte diverge da execução congelada');const i=html.indexOf('const impute ='),j=html.indexOf('// camada 3:',i),r=html.indexOf('function rngFor('),t=html.indexOf('// ---- clima diário',r);assert(i>=0&&j>i&&r>=0&&t>r);p.combinados=combinarMotor(p.resultados,html.slice(i,j),html.slice(r,t));p.combinacao_contrato='C2.1-6253661375';console.log(JSON.stringify(p));process.exit(0);}
+if(recomb>=0){const p=JSON.parse(fs.readFileSync(process.argv[recomb+1],'utf8'));assert.equal(p.fonte_sha256,require('crypto').createHash('sha256').update(html).digest('hex'),'fonte diverge da execução congelada');const i=html.indexOf('const impute ='),j=html.indexOf('// camada 3:',i),r=html.indexOf('function rngFor('),t=html.indexOf('// ---- clima diário',r);assert(i>=0&&j>i&&r>=0&&t>r);p.combinados=combinarMotor(p.resultados,html.slice(i,j),html.slice(r,t));p.combinacao_contrato='C2.1-emenda-6253665230';console.log(JSON.stringify(p));process.exit(0);}
 const motorInput=process.argv.indexOf('--motor-input');
 if(motorInput>=0){executarMotorObservavel(process.argv[motorInput+1]);process.exit(0);}
+const ns=estadoFator({estado:'executado',reps:[]},'x');assert.equal(ns.level,'nao_selecionado');assert(!('beta' in ns));
+const naoChama=()=>{throw Error('combinação numérica indevida');};
+assert.equal(combinarEstados(ns,{level:'forte'},naoChama).level,'nao_selecionado');
+assert.equal(combinarEstados(ns,{level:'grupo'},naoChama).level,'grupo');
+assert.equal(combinarEstados(undefined,ns,naoChama).level,'nao_avaliavel');
+assert.equal(combinarEstados({level:'nulo'},{level:'fraca'},()=>({level:'nulo'})).level,'nulo');
 assert.equal(estadoFator(undefined,'x'),undefined);
 assert.equal(estadoFator({estado:'singular',reps:[]},'x').level,'insuf');
 assert.equal(estadoFator({estado:'executado',reps:[]},'x').origem,'nao_selecionado');
@@ -404,7 +410,7 @@ function estadoFator(p,fator){
  const q=p.reps.find(q=>q.fator===fator);if(q)return {...q,origem:'representante'};
  const r=p.reps.find(q=>q.mates.includes(fator));
  if(r)return {level:r.level,beta:r.beta,candidatoSafra:false,origem:'mate',representante:r.fator};
- return {level:'nulo',beta:0,origem:'nao_selecionado'};
+ return {level:'nao_selecionado',origem:'nao_selecionado'};
 }
 function combinarMotor(saida,fonte,rng){
  const fatores=['qs','molh','ur','placebo']; const combinados=[];
@@ -413,8 +419,16 @@ function combinarMotor(saida,fonte,rng){
  if(vm.runInContext("typeof rxCombinaSafras==='function'",combCtx)){
   for(const ps of pares.values()){assert(ps.length<=2&&new Set(ps.map(p=>p.safra)).size===ps.length,'combinação exige safras distintas, duas no máximo');
    for(const fator of fatores){const a=estadoFator(ps[0],fator),b=estadoFator(ps[1],fator);combCtx.A=a;combCtx.B=b;
-    const r=vm.runInContext('rxCombinaSafras(A,B)',combCtx);combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),origens:[a&&a.origem,b&&b.origem],...r});}
+    const r=combinarEstados(a,b,()=>vm.runInContext('rxCombinaSafras(A,B)',combCtx));combinados.push({semente:ps[0].semente,alvo:ps[0].alvo,fator,safras:ps.map(p=>p.safra),origens:[a&&a.origem,b&&b.origem],...r});}
   }
  }
  return combinados;
+}
+
+// Emenda6253665230: não seleção é estado separado, sem beta artificial.
+function combinarEstados(a,b,combina){
+ if(!a||!b)return {level:'nao_avaliavel',motivo:'população ausente'};
+ if(a.level==='grupo'||b.level==='grupo')return {level:'grupo',motivo:'grupo correlacionado em pelo menos uma safra'};
+ if(a.level==='nao_selecionado'||b.level==='nao_selecionado')return {level:'nao_selecionado',motivo:'fator fora do modelo em pelo menos uma safra'};
+ return combina();
 }
