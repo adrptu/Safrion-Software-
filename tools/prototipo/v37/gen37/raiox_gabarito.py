@@ -18,6 +18,8 @@ CONTRATO = {
     'limiar_status': 'proposta técnica sintética, pendente de revisão',
     'agendas': ['ligado', 'desligado'],
     'safras_min': 2,
+    'intervencao_clima': 'somente crescimento; eficácia de aplicação preservada',
+    'referencias_clima': {'qs': False, 'molh': False, 'ur': 65},
 }
 
 
@@ -100,13 +102,14 @@ def replay(x0, dias, agenda, cap, fx, desligar=None):
     """Reexecuta trajetória com exógenos e eficácia já sorteados e agenda fixa.
 
     `dias` contém wk, clima, falta, n14, k14, imigracao, chuva e ruido_obs.
-    Só def/n/k/lav podem ser neutralizados nesta etapa. Não altera a agenda.
+    def/n/k/lav neutralizam coeficientes. qs/molh/ur usam multiplicadores
+    clima_sem explícitos do alvo; só crescimento, não eficácia de aplicação.
     Fórmula e ordem seguem simulatePest v3, inclusive decremento do resíduo.
     """
-    if desligar not in (None, 'def', 'n', 'k', 'lav'):
+    if desligar not in (None, 'def', 'n', 'k', 'lav', 'qs', 'molh', 'ur'):
         raise ValueError('Fator não implementado no replay')
     efeito = dict(fx)
-    if desligar:
+    if desligar in ('def', 'n', 'k', 'lav'):
         efeito[desligar] = 1 if desligar == 'lav' else 0
     if len({a['day'] for a in agenda}) != len(agenda):
         raise ValueError('Aplicações duplicadas no mesmo dia')
@@ -119,7 +122,10 @@ def replay(x0, dias, agenda, cap, fx, desligar=None):
                 raise ValueError('Aplicação inválida')
             x *= 1-ap['eff']
             resid = ap['resid']
-        g = clima['wk']**(1/7)*clima['clima']*(1 + efeito['def']*clima['falta'] +
+        multiplicador = clima['clima']
+        if desligar in ('qs', 'molh', 'ur'):
+            multiplicador = clima['clima_sem'][desligar]
+        g = clima['wk']**(1/7)*multiplicador*(1 + efeito['def']*clima['falta'] +
                 efeito['n']*(clima['n14']-6.4) + efeito['k']*max(0, 1-clima['k14']/20))
         if resid > 0:
             g = 1+(g-1)*.2
