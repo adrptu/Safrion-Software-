@@ -281,6 +281,52 @@ def gerar(episodios):
             'exclusoes_por_safra': exclusoes, 'classes_por_safra': classes_por_safra, 'recuperacao_motor': 'nao_executada'}}
 
 
+def selecionar_disponiveis(registros, corte, protocolo, unidade):
+    """Contrato temporal de QA (dias sintéticos); não é adaptador do MIP.
+
+    Revisão conhecida mais recente prevalece, inclusive se remove o valor.
+    Previsão futura só é legível quando já publicada no corte; fatos futuros
+    nunca entram. Protocolo/unidade incompatíveis são exclusões explícitas.
+    """
+    digest(registros)
+    recentes, vistos, excluidos = {}, set(), []
+    for r in registros:
+        if not r.get('fonte') or not r.get('id') or type(r.get('versao')) is not int:
+            raise ValueError('Identidade, versão e fonte obrigatórias')
+        if r.get('tipo') not in ('fato', 'previsao'):
+            raise ValueError('Tipo de registro desconhecido')
+        for campo in ('dia', 'disponivel_em'):
+            if type(r.get(campo)) is not int:
+                raise ValueError('Dia inteiro obrigatório: '+campo)
+        chave = (r['id'], r['versao'])
+        if chave in vistos:
+            raise ValueError('Versão duplicada')
+        vistos.add(chave)
+        if r['disponivel_em'] > corte:
+            excluidos.append({'id': r['id'], 'versao': r['versao'], 'motivo': 'ainda_nao_disponivel'})
+            continue
+        anterior = recentes.get(r['id'])
+        if anterior is None or (r['disponivel_em'], r['versao']) > (anterior['disponivel_em'], anterior['versao']):
+            recentes[r['id']] = r
+    elegiveis = []
+    for r in recentes.values():
+        motivo = None
+        if r['tipo']=='fato' and r['dia'] > corte:
+            motivo = 'fato_futuro'
+        elif r.get('protocolo') != protocolo or r.get('unidade') != unidade:
+            motivo = 'protocolo_ou_unidade_incompativel'
+        elif r.get('valor') is None:
+            motivo = 'valor_ausente'
+        elif isinstance(r['valor'], bool) or not isinstance(r['valor'], (int, float)):
+            raise ValueError('Valor numérico ou ausência explícita obrigatórios')
+        if motivo:
+            excluidos.append({'id': r['id'], 'versao': r['versao'], 'motivo': motivo})
+        else:
+            elegiveis.append(dict(r))
+    return {'registros': sorted(elegiveis, key=lambda r: (r['dia'], r['id'])),
+            'exclusoes': excluidos, 'corte': corte}
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)

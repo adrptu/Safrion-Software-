@@ -119,3 +119,21 @@ if(exportIndex>=0) {
  assert.equal(roundtrip.status,0,roundtrip.stderr);console.log(roundtrip.stdout.trim());
  console.log('Pacote exportado: '+path.resolve(dir));
 }
+
+const temporalPy=`import sys;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+base=dict(id='obs',versao=1,tipo='fato',dia=1,disponivel_em=2,fonte='fixture',protocolo='p1',unidade='contagem',valor=4)
+late=dict(base,versao=2,disponivel_em=9,valor=99)
+def sel(rows):return g.selecionar_disponiveis(rows,8,'p1','contagem')
+assert sel([base,late])['registros']==[base]
+assert sel([base,dict(late,valor=1000)])['registros']==[base]
+assert not sel([dict(base,dia=9)])['registros']
+assert not sel([base,dict(late,disponivel_em=7,valor=None)])['registros']
+assert sel([dict(base,valor=0)])['registros'][0]['valor']==0
+assert not sel([dict(base,tipo='previsao',dia=10,disponivel_em=9)])['registros']
+assert sel([dict(base,tipo='previsao',dia=10,disponivel_em=7)])['registros']
+for key in ('unidade','protocolo'):
+ assert not sel([dict(base,**{key:'mudou'})])['registros']
+try:sel([base,base]);raise AssertionError('duplicada aceita')
+except ValueError:pass
+print('PASS: corte temporal, revisão retroativa, ausência/zero, previsão publicada, protocolo/unidade e versão duplicada.')`;
+const tp=cp.spawnSync('python3',['-B','-c',temporalPy,__dirname],{encoding:'utf8'});assert.equal(tp.status,0,tp.stderr);console.log(tp.stdout.trim());
