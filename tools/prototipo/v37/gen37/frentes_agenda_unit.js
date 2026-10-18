@@ -27,11 +27,11 @@ test('deslocamento entre O.S. impede janela antes viável', () => {
   const r=frAgenda([os('A',2,8,10),os('B',2,10,12,20)],p);
   assert.equal(r.status,'inviavel'); assert.equal(r.linhas[1].inicio,D+11*H);
 });
-test('deslocamento também respeita a janela; não inventa folga antes dela', () => {
+test('viagem chega antes da janela e espera no destino', () => {
   const r=frAgenda([os('A',2,10,12,20)],p);
-  assert.equal(r.status,'inviavel'); assert.equal(r.linhas[0].chegada,D+11*H);
-  assert.equal(r.linhas[0].esperaMs,2*H); assert.equal(r.linhas[0].operacaoExecutadaMs,H);
-  assert.equal(r.linhas[0].fim,null);
+  assert.equal(r.status,'viavel'); assert.equal(r.linhas[0].chegada,D+9*H);
+  assert.equal(r.linhas[0].esperaMs,H); assert.equal(r.linhas[0].operacaoExecutadaMs,2*H);
+  assert.equal(r.linhas[0].fim,D+12*H);
   assert.equal(r.premissas.incluiTrocaCaldaLavagem,false);
   assert.equal(r.premissas.incluiPausas,true);
 });
@@ -109,5 +109,17 @@ test('viagem termina na borda; operação inicia somente no próximo turno',()=>
   const l=frAgenda([os('A',1,7,41,20)],q).linhas[0];
   assert.equal(l.chegada,D+17*H); assert.equal(l.inicio,D+31*H);
   assert.equal(l.pausaMs,14*H); assert.equal(l.fim,D+32*H);
+});
+test('A1: termina A08h, viaja até09h e opera B10–12h',()=>{
+  const q={...p,inicio:D+7*H,turnos:[[D+7*H,D+17*H]]};
+  const r=frAgenda([os('A',1,7,17),os('B',2,10,12,20)],q), b=r.linhas[1];
+  assert.equal(r.status,'viavel'); assert.equal(b.chegada,D+9*H);
+  assert.equal(b.inicio,D+10*H); assert.equal(b.fim,D+12*H); assert.equal(b.esperaMs,H);
+});
+test('viagem incompleta sem turno tem motivo próprio e não inicia operação',()=>{
+  const r=frAgenda([os('A',1,8,20,40)],{...p,turnos:[[D+8*H,D+9*H]]});
+  assert.equal(r.status,'inviavel'); assert.equal(r.motivo,'Sem turno para o deslocamento');
+  assert.equal(r.linhas[0].chegada,null); assert.equal(r.linhas[0].inicio,null);
+  assert.equal(r.linhas[0].fim,null); assert.equal(r.linhas[0].deslocamentoExecutadoMs,H);
 });
 console.log(total+' cenários passaram');
