@@ -114,7 +114,7 @@ def replay(x0, dias, agenda, cap, fx, desligar=None):
     clima_sem explícitos do alvo; só crescimento, não eficácia de aplicação.
     Fórmula e ordem seguem simulatePest v3, inclusive decremento do resíduo.
     """
-    if desligar not in (None, 'def', 'n', 'k', 'lav', 'qs', 'molh', 'ur'):
+    if desligar not in (None, 'def', 'n', 'k', 'lav', 'qs', 'molh', 'ur', 'placebo'):
         raise ValueError('Fator não implementado no replay')
     efeito = dict(fx)
     if desligar in ('def', 'n', 'k', 'lav'):
@@ -236,7 +236,8 @@ def gerar(episodios):
             entrada.update(id=digest([chave_ep, referencia]),
                            series=[{'day': d, 'clima': q.get('clima_observado'),
                                     'chuva': q['chuva'], 'falta_agua': q['falta'],
-                                    'n14': q['n14'], 'k14': q['k14']} for d, q in enumerate(dias)],
+                                    'n14': q['n14'], 'k14': q['k14'],
+                                    'covariavel_teste': q.get('covariavel_teste')} for d, q in enumerate(dias)],
                            proveniencia='gerador sintético RX-0; sem dados reais',
                            agenda_referencia=referencia,
                            obs=[{'day': d, 'v': trajetorias[referencia][d]['v']} for d in obs],

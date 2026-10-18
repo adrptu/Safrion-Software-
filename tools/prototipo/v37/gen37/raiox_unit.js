@@ -79,7 +79,7 @@ for(const a of ac.alvos) for(const season of [1,2]) for(let seed=0;seed<20;seed+
  });
  for(const fator of ['qs','molh','ur']) episodes.push({cenario:'alvos-v3-clima',safra:String(season),semente:seed,talhao:'T',alvo:a.id,fator,dias,observacoes:[1,8,15,22,29,36,42],x0:(a.x0[0]+a.x0[1])/2,cap:a.cap,nc:a.nc,fx:a.fx,politica:{produtos:a.prods,oleo1:true,repete:false,id_tamanho:1,cobertura:.8,app_qs:.78,app_chuva:.7,gatilho:.9,delay:2}});
 }
-const realPy=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\ne=json.load(sys.stdin);p=g.gerar(e)\nassert len(e)==480\nassert all(len(x['series'])==43 for x in p['entrada'])\nassert len({x['id'] for x in p['entrada']})==len(p['entrada'])\nfor x in p['entrada']:\n for d in x['series']:\n  assert set(d)=={'day','clima','chuva','falta_agua','n14','k14'}\n  assert set(d['clima'])=={'quenteSeco','molhado','ur'}\nassert not any(k in json.dumps(p['entrada']) for k in ('clima_sem', 'ruido_app', 'ruido_obs', 'delta', 'coeficiente'))\nfor c in p['oraculo']['classes_por_safra'].values():\n assert c['total']==72 and sum(c['contagens'].values())==72\n assert abs(sum(c['fracoes'].values())-1)<1e-12\n# Cochonilha não tem efeito de molhamento/UR no crescimento do v3.\nneg=[q for q in p['oraculo']['pares'] if q['ligado']['alvo']=='cochon' and q['intervencao'] in ('molh','ur') and 'resultado' in q]\nassert neg and all(q['resultado']['delta']==0 for q in neg)\nassert g.digest(p)==g.digest(g.gerar(e))\nprint(json.dumps(dict(episodios=len(e),pares=len(p['oraculo']['pares']),negativos_zero=len(neg),hash=g.digest(p),exclusoes=p['oraculo']['exclusoes_por_safra'],classes=p['oraculo']['classes_por_safra'])))`;
+const realPy=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g\ne=json.load(sys.stdin);p=g.gerar(e)\nassert len(e)==480\nassert all(len(x['series'])==43 for x in p['entrada'])\nassert len({x['id'] for x in p['entrada']})==len(p['entrada'])\nfor x in p['entrada']:\n for d in x['series']:\n  assert set(d)=={'day','clima','chuva','falta_agua','n14','k14','covariavel_teste'}\n  assert set(d['clima'])=={'quenteSeco','molhado','ur'}\nassert not any(k in json.dumps(p['entrada']) for k in ('clima_sem', 'ruido_app', 'ruido_obs', 'delta', 'coeficiente'))\nfor c in p['oraculo']['classes_por_safra'].values():\n assert c['total']==72 and sum(c['contagens'].values())==72\n assert abs(sum(c['fracoes'].values())-1)<1e-12\n# Cochonilha não tem efeito de molhamento/UR no crescimento do v3.\nneg=[q for q in p['oraculo']['pares'] if q['ligado']['alvo']=='cochon' and q['intervencao'] in ('molh','ur') and 'resultado' in q]\nassert neg and all(q['resultado']['delta']==0 for q in neg)\nassert g.digest(p)==g.digest(g.gerar(e))\nprint(json.dumps(dict(episodios=len(e),pares=len(p['oraculo']['pares']),negativos_zero=len(neg),hash=g.digest(p),exclusoes=p['oraculo']['exclusoes_por_safra'],classes=p['oraculo']['classes_por_safra'])))`;
 const rp=cp.spawnSync('python3',['-B','-c',realPy,__dirname],{input:JSON.stringify(episodes),encoding:'utf8',maxBuffer:8*1024*1024});assert.equal(rp.status,0,rp.stderr);console.log('PASS alvos v3/clima: '+rp.stdout.trim());
 
 const invalidPy=`import sys;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
@@ -149,6 +149,24 @@ assert g.eficacia_referencia(dict(base,depois=20),[dict(c,depois=10)],3,8)['pare
 print('PASS HT QA: 80%, campanha sem controle, denominadores zero, futuro/mesmo dia, unidade e efeito negativo preservado.')`;
 const hp=cp.spawnSync('python3',['-B','-c',htPy,__dirname],{encoding:'utf8'});assert.equal(hp.status,0,hp.stderr);console.log(hp.stdout.trim());
 
+// Placebo estrutural: covariável sorteada por fluxo separado, sem coeficiente no replay.
+const placeboEpisodes=episodes.filter(e=>e.fator==='qs').map(e=>{
+ let state=0x9e3779b9^(Number(e.safra)*1000+e.semente);
+ return {...e,fator:'placebo',dias:e.dias.map(d=>{state=(Math.imul(state,1103515245)+12345)>>>0;return {...d,covariavel_teste:state/4294967296};})};
+});
+const placeboPy=`import sys,json;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+e=json.load(sys.stdin);p=g.gerar(e)
+rs=[x['resultado']['delta'] for x in p['oraculo']['pares'] if 'resultado' in x]
+assert rs and all(x==0 for x in rs)
+assert all(c['resultado']['classe']!='forte' for c in p['oraculo']['classes'])
+assert all(d['covariavel_teste'] is not None for x in p['entrada'] for d in x['series'])
+print(json.dumps(dict(episodios=len(e),pares_elegiveis=len(rs),contrastes_nao_zero=sum(x!=0 for x in rs),hash=g.digest(p),recuperacao_motor='nao_executada')))`;
+const placeboTmp=fs.mkdtempSync(require('path').join(require('os').tmpdir(),'rx0-placebo-'));
+const placeboPath=require('path').join(placeboTmp,'entrada.json');fs.writeFileSync(placeboPath,JSON.stringify(placeboEpisodes));
+const placeboFd=fs.openSync(placeboPath,'r');let pp;
+try {pp=cp.spawnSync('python3',['-B','-c',placeboPy,__dirname],{stdio:[placeboFd,'pipe','pipe'],encoding:'utf8',maxBuffer:16*1024*1024,timeout:20000});} finally {fs.closeSync(placeboFd);fs.rmSync(placeboTmp,{recursive:true});}
+assert.equal(pp.status,0,pp.stderr||String(pp.error));console.log('PASS placebo: '+pp.stdout.trim());
+
 // Exportação opcional: node raiox_unit.js fonte-v3.html --export-dir pasta-nova
 const exportIndex=process.argv.indexOf('--export-dir');
 if(exportIndex>=0) {
@@ -157,7 +175,7 @@ if(exportIndex>=0) {
  fs.mkdirSync(dir); // Recusa sobrescrever pacote anterior, mesmo parcialmente.
  const write=(name,body)=>fs.writeFileSync(path.join(dir,name),body,{flag:'wx'});
  const hash=body=>crypto.createHash('sha256').update(body).digest('hex');
- const origem=JSON.stringify(episodes);write('episodios.json',origem);
+ const origem=JSON.stringify([...episodes,...placeboEpisodes]);write('episodios.json',origem);
  const cli=cp.spawnSync('python3',['-B',path.join(__dirname,'raiox_gabarito.py'),path.join(dir,'episodios.json')],{encoding:'utf8',maxBuffer:32*1024*1024});
  assert.equal(cli.status,0,cli.stderr);
  const pacote=JSON.parse(cli.stdout), entrada=JSON.stringify(pacote.entrada),oraculo=JSON.stringify(pacote.oraculo);
