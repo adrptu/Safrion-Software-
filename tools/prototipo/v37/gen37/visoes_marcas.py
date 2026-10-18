@@ -52,10 +52,10 @@ COLH g_tal ; Talhão · variedade ; Situação · próximo passo ; Previsão ; C
 CARGA g_cg ; Carga · ticket ; Situação · próximo passo ; Líquido ; Origem
 BEN g_ob ; Ordem ; Produto ; Próximo passo ; Fase ; Em processo
 PROD g_lot ; Lote · produto ; Disponível ; Qualidade · próximo passo ; Físico ; Local · validade
-MA g_so ; Item ; Ativo · leitura ; O que ; Prazo ; Próximo passo
+MA g_so ; Item ; Ativo · leitura ; O que ; Prazo ; A fazer
 MA g_om ; Ordem · ativo ; Serviço · tipo ; Janela ; Executante ; Fase
-MA g_at ; Ativo · local ; Plano ; Em aberto ; Próxima manutenção ; Leitura
-MA g_ab ; Lançamento · operador ; Ativo ; Data · leitura ; Volume ; Consumo
+MA g_at ; Ativo · local ; Plano ; Em aberto ; Próxima ; Leitura
+MA g_ab ; Lançamento ; Ativo ; Data · leitura ; Volume ; Consumo
 MA g_pl ; Plano ; Aplica-se a ; Serviços ; Ativos
 CMP g_dem ; Grupo · insumo ; Falta a partir de ; Necessidade ; Un. ; Valor ; Na compra
 CMP g_conv ; Grupo · fornecedor ; Convite ; Responder até ; Resposta

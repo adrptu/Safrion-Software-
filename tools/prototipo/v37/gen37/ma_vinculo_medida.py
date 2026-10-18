@@ -30,8 +30,11 @@ try:
     m.ir('vis=ativos', perfil='Otávio', limpa=True); novo = bool(J("!!(window.__man&&window.__man.manVincular)")); RES['versao'] = 'depois' if novo else 'base'
     # M1
     m.ir('', perfil='Otávio', limpa=True, pagina='MOD-MAN.dc.html'); zera()
-    if novo:
+    if novo and J("!!document.querySelector('a.mod-aviso')"):   # MA-VINCULO (16/10): o aviso da entrada, um toque
         js_clk("(()=>{const a=document.querySelector('a.mod-aviso'); if(!a) return false; a.click(); return true;})()"); time.sleep(1)
+    elif novo:   # DS-MAN (17/10): a entrada sem aviso solto; o cartão Ativos e o filtro rápido "Sem plano" (dois toques)
+        js_clk("(()=>{const a=[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ativos'); if(!a) return false; a.click(); return true;})()"); time.sleep(1)
+        js_clk("(()=>{const b=[...document.querySelectorAll('main button[aria-pressed]')].find(b=>/^Sem plano/.test(b.innerText.trim())&&b.getClientRects().length); if(!b) return false; b.click(); return true;})()")
     else:
         js_clk("(()=>{const a=[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ativos'); if(!a) return false; a.click(); return true;})()"); time.sleep(1)
         sel('main select[aria-label="Filtrar por pendência"]', 'Sem plano')
