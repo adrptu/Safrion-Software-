@@ -1,12 +1,12 @@
-# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 18/10, 15h UTC
+# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 18/10, noite (UTC)
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v132 (versão 138, `1792329558-1f0c`).
+**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v133 (versão 142, `1792342402-4b90`).
 
 **Conferência do artefato (executada):**
-- v132: 59 páginas que mudaram enviadas em 2 lotes (versões 137 e 138); as outras 89 e os arquivos de apoio são iguais aos da v131;
-- 4 páginas lidas de volta e conferidas por sha256 (`artefato-v132/LEIAME.md`);
-- origem: `f6a9374a` (v131 + Q5-AMB).
+- v133: 146 páginas que mudaram ou entraram enviadas em 4 lotes (versões 139 a 142); PAGR, PMAN e PSUP saíram (o painel único PG as substitui);
+- 4 páginas lidas de volta e conferidas por sha256 (`artefato-v133/LEIAME.md`);
+- origem: `466d7b8e` (v132 + PAINEL-03 F1, INTEL-03 F1, KMZ no Mapa, Mapa sem Lista, base verde 2).
 
 | Quando | Pedido | Situação | Onde conferir no artefato |
 |---|---|---|---|
@@ -34,6 +34,17 @@
 | 17/10 10:40 | EX-49: padrão único para listas, cartões, pai e filho, botões e ⋯ com ícone | **Combinado com o Codex:** Claude implanta no motor logo depois do DRILL; medida pelo robô v4 antes e depois | — |
 | 17/10 10:40 | EX-50: telas ocultas, levar o que tem valor e excluir o resto | **Decisões tomadas** (exclusão aceita; financeiro no ERP; portal mínimo; implantação assistida). Classificação dos 123 IDs versionada (`ex50-classificacao-codex.md`). **SU-01 publicado na v122** (PR #106 do Codex em `2249b84`): a falta da OM-0234 vem da manutenção viva e o rolamento e a COT-113 fictícios saíram. **SU-02 publicado na v123** (PR #107 em `c31d9c4`): propor, aprovar e publicar política com recibo, sem tocar na vigente até publicar; selo do cabeçalho pelo estado. **SU-08 publicado na v125** (PR #108 em `df887d9`): perda vira ajuste pendente e só baixa o saldo na aprovação AL-09; transferência e estorno genérico só em prévia, sem efeito fictício. **CA-02 publicado na v126** (PR #109 em `7c5723a`): a fila vem dos apontamentos reais, conferir e divergência usam a conferência diária oficial (AL-12) sem mexer em área, horas ou consumo, e o botão principal abre o próximo a revisar. **LO-02det publicado na v127** (PR #110 em `687d5a7`): a conferência lê a carga programada oficial (RM), a pesagem confirma a saída com baixa única do estoque (só Ana ou Rui), e saem as etapas, a viagem e o frete fictícios do T2. Telas com contrato de Suprimentos e Logística concluídas. Próximo: levar Aprovações e Meu dia para o Mapa, depois das frentes de design e do Mapa; exclusão só depois de migrar as funções e os links | Logística › Expedição: programe a carga do PV-030 e abra Conferir carga |
 | 17/10 17:58 | EX-51 fluxo conectado: unir Claude e Codex e implantar da melhor forma | **N-1/B-3 publicado na v130** (versão 134): a decisão do AG-01 emite o receituário com autor, chave e versão; O.S. com receituário divergente mostra o selo e não aprova nem libera até reemitir; a coleta do MB-06 grava. **C-3/C-4 publicado na v131** (versão 136): a compra aprovada vira pedido por linha no Estoque, o recebimento parcial baixa a linha certa e a Compra mostra Recebido, Em quarentena e A entregar por linha. O teste de navegador achou 3 S2, corrigidos: NF com vários itens, Planejar safra sem ver os pedidos emitidos (risco de reduzir insumo já comprado) e nota antiga sem unidade contando em dobro. **v132** (versão 138): o Codex achou um S2 na última correção (nota antiga baixava duas linhas do mesmo item); agora só baixa a linha única em que cabe e, na dúvida, a previsão sai do suprimento com aviso. F1 a F5 seguem depois | Pragas e doenças › decisão; Ordens de serviço (selo "Receituário divergente") |
+| 18/10 | Painel de gestão único que navega pelos módulos | **Publicado na v133** (versões 139–142): Painel no topo do menu (PG), com Prioridades e uma aba por módulo; os painéis antigos PAGR, PMAN e PSUP saíram | Painel |
+| 18/10 | Inteligência estratégica de compra e venda (futuro, câmbio, físico, 12 a 48 meses, melhor mês) | **Publicado na v133** (INTEL-03 F1): bloco "Mercado e momento" com período, percentil, melhor mês e selo | Suprimentos › Inteligência de compras; Comercial › Inteligência de vendas |
+| 18/10 | Importar KMZ/KML no Mapa e tirar a Lista de dentro do Mapa | **Publicado na v133** | Mapa |
+| 18/10 | Cadastro de ativos em dois lugares (Manutenção e Cadastros) | **Implantado, a publicar na v134** (ATIVO-UNICO): o cadastro é só em Cadastros › Máquinas e instalações; a Manutenção lê dele; Comboio CB-01 entrou no cadastro; bloco "Planejamento" na entrada da Manutenção | — |
+| 18/10 | Planejar safra no mapa, clicando nos talhões | **Implantado, em teste na v134** (SAF-MAPA F1): visão Tabela · Mapa no "Editar talhões…", seleção no mapa e painel "Planejar N talhões" | — |
+| 18/10 | Plano agronômico por etapa e por operação; manter as especificidades ao editar o talhão | **Não implantado** (PA-OPER F1 é a próxima frente; os ajustes de insumo já sobrevivem à edição do talhão) | — |
+| 18/10 | Apontamento da colheita; orçamento; nível de controle por alvo (MIP); composição de custos e fechamento | **Especificado** (`docs/gestao/GESTAO-1810.md`), enviado ao Codex; implantação por fatias depois da v134 | — |
+| 18/10 | Água no solo no submenu Irrigação, com a capacidade de campo nos cálculos | **Implantado, a publicar na v134** (AGUA-SOLO-IRR): bloco Água no solo no IR-01; a CAD limita o déficit e a AFD vira o gatilho; `agua_irr_test` 10/10, contraprova na v133 1/10 | — |
+| 18/10 | Laudos georreferenciados, taxa variável com arquivo para máquinas e visão de todos os talhões × indicadores | **Especificado** (`docs/analise-solo/SOLO-GEO.md`): o mapa de calor atual usa pontos sintéticos; F1 = matriz mín/méd/máx e pontos com coordenada no laudo | — |
+| 18/10 | Visão macro e micro, sintética e analítica, em todas as funções do Mapa | **Especificado** (`docs/mapa/MAPA-VISOES.md`): Mapa · Resumo · Matriz + Talhão; Solo primeiro | — |
+| 18/10 | Ideias dos jogos e simuladores (EX-52) e prompt de excelência | **Recebido**: validação do Claude e pedido de classificação independente ao Codex | — |
 
 ## Por que quase nada da noite chegou ao artefato
 
