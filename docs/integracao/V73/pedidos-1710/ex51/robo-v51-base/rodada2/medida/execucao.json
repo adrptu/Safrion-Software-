@@ -1,0 +1,13 @@
+{
+ "chrome": "Chromium 141.0.7390.37",
+ "isolado": {
+  "robo_min": 12.4,
+  "leva_min": 8.0,
+  "dialogos_js": [],
+  "so": [],
+  "quando": "2026-10-18T00:15:04Z",
+  "total_min": 20.4
+ },
+ "nav_min": 2.8,
+ "escopo28_min": 2.4
+}

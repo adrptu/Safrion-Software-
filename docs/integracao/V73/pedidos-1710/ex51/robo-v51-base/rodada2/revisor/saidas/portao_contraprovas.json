@@ -1,0 +1,29 @@
+{
+ "P0_base_rodada1": {
+  "estado": "BLOQUEADO",
+  "taxaChegada": 0.5,
+  "criticosExecutados": 20,
+  "bloqueios": [
+   "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0424')",
+   "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0425')",
+   "Crítico ausente ou falhou: ('OS→EST', 'devolver', 'OS-0417')",
+   "Crítico ausente ou falhou: ('OS→EST', 'saldo', 'OS-0418')",
+   "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0504')",
+   "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0508')",
+   "Crítico ausente ou falhou: ('Aprovações→OS', None, None)",
+   "Crítico ausente ou falhou: ('OM→OS', None, 'OM-0233')",
+   "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0420')",
+   "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0507')",
+   "Crítico OS→RA ausente/falhou",
+   "Crítico RA→OS ausente/falhou",
+   "Há caso crítico inconclusivo ou falho",
+   "Chegada geral abaixo de 95% ou sem denominador"
+  ],
+  "limite": "Medição de navegação; não substitui T3/T5, acessibilidade ou aceite integral do produto."
+ },
+ "P1_controle_tudo_aprovado": "PASSOU_MEDICAO",
+ "P1_extra_inconclusivo": "BLOQUEADO",
+ "P2_sem_OS0424_titulo_0425_cita_0424": "PASSOU_MEDICAO",
+ "P3_recibo_sem_vinculo_ao_render": "o recibo não traz hash do render nem identificador da execução; avaliar() aceita qualquer JSON com o formato (P1 controle usa recibo fabricado e dá PASSOU_MEDICAO)",
+ "P4_so_chegada": "PASSOU_MEDICAO com taxa de chegada 0,95; a assinatura avaliar(diretorio, taxa, erros) não recebe IDs clicáveis, volta à origem nem Voltar"
+}

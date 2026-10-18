@@ -1,0 +1,438 @@
+23:53:32 Chrome principais em execução: 2 (< 4), pode abrir
+23:53:32 Chrome iniciado, PID 31280
+23:53:32 servidor em 127.0.0.1:43905, PID 31359
+23:53:33 Chrome PID 31280 encerrado
+23:53:33 servidor PID 31359 encerrado
+23:53:33 Chrome iniciado, PID 31375
+23:53:33 servidor em 127.0.0.1:37147, PID 31462
+23:53:34 servidor em 127.0.0.1:39159, PID 31472
+23:53:34 robô (isolado): 8 telas em 2 aba(s)
+23:53:40 robô (isolado): feitas 0 de 8 · 0.1 min
+23:53:52 robô (isolado): feitas 2 de 8 · 0.3 min
+23:53:58 robô (isolado): feitas 4 de 8 · 0.4 min
+23:54:04 robô (isolado): feitas 5 de 8 · 0.5 min
+23:54:10 robô (isolado): feitas 7 de 8 · 0.6 min
+23:54:16 robô (isolado): feitas 8 de 8 · 0.7 min
+23:54:16 robô (isolado) terminou em 0.7 min
+23:54:16 servidor em 127.0.0.1:39709, PID 32091
+23:54:16 2ª passada (isolado): 4 passagens que levam um registro
+23:54:31 2ª passada (isolado): leva-check.json gravado
+23:54:38 Chrome PID 31375 encerrado
+23:54:38 servidor PID 31462 encerrado
+23:54:38 servidor PID 31472 encerrado
+23:54:38 servidor PID 32091 encerrado
+{
+ "A": "PASS: reprovou · armazenamento não isolado: [{'worker': 0, 'origin': 'http://127.0.0.1:43905', 'marks': ['ex51-isolation-1', 'ex51-isolation-0']}]",
+ "B_isolamento": [
+  {
+   "worker": 0,
+   "origin": "http://127.0.0.1:37147",
+   "marks": [
+    "ex51-isolation-0"
+   ]
+  },
+  {
+   "worker": 1,
+   "origin": "http://127.0.0.1:39159",
+   "marks": [
+    "ex51-isolation-1"
+   ]
+  }
+ ],
+ "B": {
+  "ZZ-P-RAPIDA": [
+   {
+    "r": "navega",
+    "para": "ZZ-DONA#OS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-P-RAPIDA",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-P-LENTA": [
+   {
+    "r": "navega",
+    "para": "ZZ-DONA#OS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-P-LENTA",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-PH-RAPIDA": [
+   {
+    "r": "navega",
+    "para": "ZZ-DONA#OS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-PH-RAPIDA#OS-0913%3EOS-0502",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-PH-LENTA": [
+   {
+    "r": "mesma tela",
+    "para": "ZZ-PH-LENTA#OS-0914%3EOS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · resumo empilhado",
+    "voltar": {
+     "chegou": "ZZ-PH-LENTA",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-PH-LENTAERR": [
+   {
+    "r": "mesma tela",
+    "para": "ZZ-PH-LENTAERR#OS-0915%3EOS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · resumo empilhado",
+    "voltar": {
+     "chegou": "ZZ-PH-LENTAERR",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-P-SEMIR": [
+   {
+    "r": "abre no lugar",
+    "para": null,
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": null,
+    "destacou": null,
+    "titulo": "OS-0502 · resumo empilhado",
+    "voltar": null
+   }
+  ],
+  "ZZ-PH-SEMIR": [
+   {
+    "r": "mesma tela",
+    "para": "ZZ-PH-SEMIR#OS-0917%3EOS-0502",
+    "alvo": "OS-0502",
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · resumo empilhado",
+    "voltar": {
+     "chegou": "ZZ-PH-SEMIR",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-DESVIO": [
+   {
+    "r": "navega",
+    "para": "ZZ-DONA#OS-0503",
+    "alvo": "OS-0502",
+    "empilhado": null,
+    "abriu": false,
+    "destacou": false,
+    "titulo": "OS-0503 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-DESVIO",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ]
+ },
+ "C_leva": [
+  {
+   "tela": "ZZ-DESVIO",
+   "i": 0,
+   "endereco": "ZZ-DONA.dc.html#OS-0502",
+   "alvo": "OS-0502",
+   "dlg": "OS-0502 · registro na dona",
+   "h1": "Tela dona sintética",
+   "alvoNoH1": false,
+   "url": "ZZ-DONA#OS-0502",
+   "alvoNoCorpo": false,
+   "tokNoCorpo": "",
+   "chegouEstrito": false,
+   "diag": {
+    "tokens": [
+     "os 0502"
+    ],
+    "tokSemEndereco": false,
+    "alvoSemEndereco": false
+   }
+  },
+  {
+   "tela": "ZZ-P-LENTA",
+   "i": 0,
+   "endereco": "ZZ-DONA.dc.html#OS-0502",
+   "alvo": "OS-0502",
+   "dlg": "OS-0502 · registro na dona",
+   "h1": "Tela dona sintética",
+   "alvoNoH1": false,
+   "url": "ZZ-DONA#OS-0502",
+   "alvoNoCorpo": false,
+   "tokNoCorpo": "",
+   "chegouEstrito": true,
+   "diag": {
+    "tokens": [
+     "os 0502"
+    ],
+    "tokSemEndereco": false,
+    "alvoSemEndereco": false
+   }
+  },
+  {
+   "tela": "ZZ-P-RAPIDA",
+   "i": 0,
+   "endereco": "ZZ-DONA.dc.html#OS-0502",
+   "alvo": "OS-0502",
+   "dlg": "OS-0502 · registro na dona",
+   "h1": "Tela dona sintética",
+   "alvoNoH1": false,
+   "url": "ZZ-DONA#OS-0502",
+   "alvoNoCorpo": false,
+   "tokNoCorpo": "",
+   "chegouEstrito": true,
+   "diag": {
+    "tokens": [
+     "os 0502"
+    ],
+    "tokSemEndereco": false,
+    "alvoSemEndereco": false
+   }
+  },
+  {
+   "tela": "ZZ-PH-RAPIDA",
+   "i": 0,
+   "endereco": "ZZ-DONA.dc.html#OS-0502",
+   "alvo": "OS-0502",
+   "dlg": "OS-0502 · registro na dona",
+   "h1": "Tela dona sintética",
+   "alvoNoH1": false,
+   "url": "ZZ-DONA#OS-0502",
+   "alvoNoCorpo": false,
+   "tokNoCorpo": "",
+   "chegouEstrito": true,
+   "diag": {
+    "tokens": [
+     "os 0502"
+    ],
+    "tokSemEndereco": false,
+    "alvoSemEndereco": false
+   }
+  }
+ ],
+ "D": {
+  "ZZ-LEVASEM": {
+   "leva": {
+    "dlg": "",
+    "temDialogo": true,
+    "h1": "Página sintética da 2ª passada",
+    "selected": [],
+    "url": "ZZ-LEVASEM"
+   },
+   "chegadaEstrita": false,
+   "esperado": false,
+   "ok": true
+  },
+  "ZZ-LEVACOM": {
+   "leva": {
+    "dlg": "OS-0503 · outro registro",
+    "temDialogo": true,
+    "h1": "Página sintética da 2ª passada",
+    "selected": [],
+    "url": "ZZ-LEVACOM"
+   },
+   "chegadaEstrita": false,
+   "esperado": false,
+   "ok": true
+  },
+  "ZZ-LEVAOK": {
+   "leva": {
+    "dlg": "OS-0502 · registro aberto",
+    "temDialogo": true,
+    "h1": "Página sintética da 2ª passada",
+    "selected": [],
+    "url": "ZZ-LEVAOK"
+   },
+   "chegadaEstrita": true,
+   "esperado": true,
+   "ok": true
+  },
+  "ZZ-LEVAH1": {
+   "leva": {
+    "dlg": "",
+    "temDialogo": false,
+    "h1": "OS-0502 · página do registro",
+    "selected": [],
+    "url": "ZZ-LEVAH1"
+   },
+   "chegadaEstrita": true,
+   "esperado": true,
+   "ok": true
+  }
+ },
+ "E_resumo": "{\"processo\": {\"det\": 0, \"passo\": 0, \"quem\": 0}, \"telas\": 8, \"detalhes\": 8, \"refsTotal\": 8, \"refsClic\": 8, \"rotTotal\": 0, \"rotClic\": 0, \"passagens\": 8, \"navega\": 4, \"noLugar\": 4, \"nada\": 0, \"metodo\": \"v5.1\", \"erros\": 0, \"inconclusivasProporcao\": 0.0, \"navegacoesTela\": 0, \"inconclusivas\": 0, \"empilhados\": 7, \"empilhadosChegaramDona\": 6, \"empilhadosVolta\": 0, \"empilhadosCorretos\": 7, \"navRegistro\": 4, \"naoLeva\": 0, \"levaIgnora\": 1, \"chegou\": 3, \"voltaOrigem\": 0, \"voltarDet\": 4, \"reabre\": 0, \"passoTotal\": 0, \"passoPessoa\": 0, \"semPasso\": 8, \"escopo\": {\"telas\": 28, \"faz\": 0, \"saf\": 0, \"herda\": null}}\nlinhas 8 com problema 4",
+ "E_portao": {
+  "ZZ-P-RAPIDA": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-P-LENTA": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-PH-RAPIDA": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-PH-LENTA": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-PH-LENTAERR": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-P-SEMIR": [
+   {
+    "passaria": false,
+    "bloqueios": [
+     "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0424')",
+     "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0425')",
+     "Crítico ausente ou falhou: ('OS→EST', 'devolver', 'OS-0417')",
+     "Crítico ausente ou falhou: ('OS→EST', 'saldo', 'OS-0418')",
+     "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0504')",
+     "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0508')",
+     "Crítico ausente ou falhou: ('receituário→OS', None, 'VIS-051')",
+     "Crítico ausente ou falhou: ('receituário→OS', None, 'VIS-052')",
+     "Crítico ausente ou falhou: ('Aprovações→OS', None, None)",
+     "Crítico ausente ou falhou: ('OM→OS', None, 'OM-0233')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0420')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0431')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0507')",
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou",
+     "Há caso crítico inconclusivo ou falho"
+    ]
+   }
+  ],
+  "ZZ-PH-SEMIR": [
+   {
+    "passaria": true,
+    "bloqueios": [
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou"
+    ]
+   }
+  ],
+  "ZZ-DESVIO": [
+   {
+    "passaria": false,
+    "bloqueios": [
+     "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0424')",
+     "Crítico ausente ou falhou: ('OS→EST', 'entregar', 'OS-0425')",
+     "Crítico ausente ou falhou: ('OS→EST', 'devolver', 'OS-0417')",
+     "Crítico ausente ou falhou: ('OS→EST', 'saldo', 'OS-0418')",
+     "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0504')",
+     "Crítico ausente ou falhou: ('OS→receituário', None, 'OS-0508')",
+     "Crítico ausente ou falhou: ('receituário→OS', None, 'VIS-051')",
+     "Crítico ausente ou falhou: ('receituário→OS', None, 'VIS-052')",
+     "Crítico ausente ou falhou: ('Aprovações→OS', None, None)",
+     "Crítico ausente ou falhou: ('OM→OS', None, 'OM-0233')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0420')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0431')",
+     "Crítico ausente ou falhou: ('OS→OM', None, 'OS-0507')",
+     "Crítico OS→RA ausente/falhou",
+     "Crítico RA→OS ausente/falhou",
+     "Há caso crítico inconclusivo ou falho"
+    ]
+   }
+  ]
+ }
+}

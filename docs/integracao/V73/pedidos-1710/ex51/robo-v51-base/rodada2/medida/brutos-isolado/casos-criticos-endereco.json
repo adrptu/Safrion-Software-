@@ -1,0 +1,378 @@
+{
+ "quando": "2026-10-18T00:24:12Z",
+ "origens": [
+  {
+   "tela": "OS",
+   "hv": "#OS-0504",
+   "landed": "OS#OS-0504",
+   "linhas": 15,
+   "land": [],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0504 · Controle de ácaro e cochonilha",
+     "impedida": true,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "OS",
+   "hv": "#OS-0508",
+   "landed": "OS#OS-0508",
+   "linhas": 15,
+   "land": [],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0508 · Fungicida para antracnose",
+     "impedida": false,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "OS",
+   "hv": "#OS-0420",
+   "landed": "OS#OS-0420",
+   "linhas": 15,
+   "land": [
+    {
+     "k": "a",
+     "t": "Abrir ordem completa ›",
+     "h": "CA-01x-os0420.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Abrir a ordem completa ›",
+     "h": "CA-01x-os0420.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Retirar no almoxarifado ›",
+     "h": "EST.dc.html"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0420 · Plantio · Soja 58 W",
+     "impedida": true,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir ordem completa ›",
+       "h": "CA-01x-os0420.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Abrir a ordem completa ›",
+       "h": "CA-01x-os0420.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Retirar no almoxarifado ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "OS",
+   "hv": "#OS-0431",
+   "landed": "OS#OS-0431",
+   "linhas": 15,
+   "land": [
+    {
+     "k": "a",
+     "t": "Acompanhar OM-0233 ›",
+     "h": "MA.dc.html#om=OM-0233"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0431 · Plantio · Soja 58 W",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Acompanhar OM-0233 ›",
+       "h": "MA.dc.html#om=OM-0233"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "OS",
+   "hv": "#OS-0507",
+   "landed": "OS#OS-0507",
+   "linhas": 15,
+   "land": [],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0507 · Fertirrigação de arranque",
+     "impedida": true,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "MA",
+   "hv": "#om=OM-0233",
+   "landed": "MA#vis=ordens&om=OM-0233",
+   "linhas": 16,
+   "land": [
+    {
+     "k": "b",
+     "t": "Abrir Trator T1 ›",
+     "h": ""
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OM-0233 · Trator T1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator T1 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado INSP-105 · Pressão hidráulica abaixo da faixa no pré-uso das 07:10 · Na OM ›",
+       "h": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "MA",
+   "hv": "#om=OM-0228",
+   "landed": "MA#vis=ordens&om=OM-0228",
+   "linhas": 16,
+   "land": [
+    {
+     "k": "b",
+     "t": "Abrir Bomba do Pivô 2 ›",
+     "h": ""
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OM-0228 · Bomba do Pivô 2",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Bomba do Pivô 2 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado SM-0152 · Pressão baixa 3 vezes esta noite · Na OM ›",
+       "h": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "MA",
+   "hv": "#om=OM-0219",
+   "landed": "MA#vis=ordens&om=OM-0219",
+   "linhas": 16,
+   "land": [
+    {
+     "k": "b",
+     "t": "Abrir Trator 02 ›",
+     "h": ""
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OM-0219 · Trator 02",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator 02 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-01 · a ordem segue na v3 ›",
+       "h": ""
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "casos": [
+  {
+   "percurso": "OM→OS",
+   "sub": "",
+   "tela": "MA",
+   "visao": "#om=OM-0233",
+   "linha": 0,
+   "detalhe": "OM-0233 · Trator T1",
+   "impedida": false,
+   "el": {
+    "k": "b",
+    "t": "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+    "h": ""
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "mesma tela",
+    "de": "MA",
+    "origemId": "OM-0233",
+    "mencionaOrigem": true,
+    "dlgOrigem": false,
+    "para": "MA#vis=ordens&achado=SM-0147",
+    "telaDestino": "MA",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "SM-0147 · Trator T1",
+    "destacou": false,
+    "foco": "SM-0147 · Trator T1 Relato · Hidráulico · na OM-0233 × SINTOMA Pressão hidráulic",
+    "volta": [
+     "Voltar para Manutenção → MOD-MAN.dc.html",
+     "OM-0233 → #om=OM-0233",
+     "Abrir OM-0233 ›"
+    ],
+    "voltaOrigem": true,
+    "avisos": [
+     "Tela: Manutenção · 1 ativo bloqueado · 1 conflito"
+    ],
+    "escopo": [],
+    "voltar": {
+     "chegou": "MA#vis=ordens&om=OM-0219",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "outro",
+   "tela": "OS",
+   "visao": "#OS-0420",
+   "linha": 0,
+   "detalhe": "OS-0420 · Plantio · Soja 58 W",
+   "impedida": true,
+   "el": {
+    "k": "a",
+    "t": "Retirar no almoxarifado ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0420",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS#OS-0420",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→OM",
+   "sub": "MA",
+   "tela": "OS",
+   "visao": "#OS-0431",
+   "linha": 0,
+   "detalhe": "OS-0431 · Plantio · Soja 58 W",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Acompanhar OM-0233 ›",
+    "h": "MA.dc.html#om=OM-0233"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OM-0233",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0431",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "MA#vis=ordens&om=OM-0233",
+    "telaDestino": "MA",
+    "alvo": "OM-0233",
+    "abriu": true,
+    "titulo": "OM-0233 · Trator T1",
+    "destacou": false,
+    "foco": "",
+    "volta": [
+     "Voltar para Manutenção → MOD-MAN.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Manutenção · 1 ativo bloqueado · 1 conflito"
+    ],
+    "escopo": [],
+    "voltar": {
+     "chegou": "OS#OS-0431",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  }
+ ],
+ "naoRodados": [],
+ "min": 0.8
+}

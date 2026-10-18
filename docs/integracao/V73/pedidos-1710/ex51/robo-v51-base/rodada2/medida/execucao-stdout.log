@@ -1,0 +1,73 @@
+23:54:38 Chrome principais em execução: 3 (< 4), pode abrir
+23:54:38 Chrome iniciado, PID 32509
+23:54:39 servidor em 127.0.0.1:39999, PID 32597
+23:54:39 servidor em 127.0.0.1:43879, PID 32620
+23:54:40 servidor em 127.0.0.1:41627, PID 32640
+23:54:40 robô (isolado): 102 telas em 3 aba(s)
+00:07:01 robô (isolado) terminou em 12.4 min
+00:07:01 2ª passada (isolado): 122 passagens que levam um registro
+00:15:04 2ª passada (isolado): leva-check.json gravado
+00:15:04 Chrome PID 32509 encerrado
+00:15:04 servidor PID 32597 encerrado
+00:15:04 servidor PID 32620 encerrado
+00:15:04 servidor PID 32640 encerrado
+00:15:04 Chrome principais em execução: 2 (< 4), pode abrir
+00:15:04 Chrome iniciado, PID 12563
+00:15:04 servidor em 127.0.0.1:38519, PID 12645
+00:17:50 navegacao.json: 156 páginas
+00:20:12 escopo-28.json: não herda=9, sem seletor=19
+00:20:12 Chrome PID 12563 encerrado
+00:20:12 servidor PID 12645 encerrado
+00:20:12 Chrome principais em execução: 2 (< 4), pode abrir
+00:20:12 Chrome iniciado, PID 14871
+00:20:13 servidor em 127.0.0.1:40057, PID 14953
+00:20:54 OS: 15 linhas, 12 passagens em detalhes, 0 na tela
+00:21:01 IN-02: 4 linhas, 4 passagens em detalhes, 4 na tela
+00:21:44 MA#vis=ordens: 16 linhas, 32 passagens em detalhes, 1 na tela
+00:22:01 AG-01: 10 linhas, 16 passagens em detalhes, 2 na tela
+00:22:24 AG-01det: 14 linhas, 0 passagens em detalhes, 1 na tela
+00:22:31 AG-04: 4 linhas, 4 passagens em detalhes, 8 na tela
+00:22:56 AG-04det: 15 linhas, 9 passagens em detalhes, 8 na tela
+00:23:00 OM→OS/ MA[2] 'Achado SM-0147 · Pressão hidráulica baix' → r=mesma tela alvo='' abriu=False destacou=False
+00:23:06 OS→EST/devolver OS[1] 'Receber devolução no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+00:23:11 OS→EST/entregar OS[5] 'Entregar no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+00:23:16 OS→EST/entregar OS[6] 'Entregar no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+00:23:21 OS→EST/outro OS[3] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+00:23:27 OS→EST/outro OS[4] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+00:23:32 OS→EST/saldo OS[2] 'Ver saldos no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+00:23:38 OS→OM/MA OS[8] 'Acompanhar OM-0233 ›' → r=navega alvo='OM-0233' abriu=True destacou=False
+00:23:41 receituário→OS/AG-01 AG-01[None] 'Abrir OS-0504' → r=navega alvo='OS-0504' abriu=True destacou=False
+00:23:45 receituário→OS/AG-01 AG-01[None] 'Abrir OS-0508' → r=navega alvo='OS-0508' abriu=True destacou=False
+00:23:49 receituário→OS/AG-01 AG-01[3] 'Abrir OS-0504' → r=navega alvo='OS-0504' abriu=True destacou=False
+00:23:53 receituário→OS/AG-01 AG-01[3] 'Aplicação · Abamectina 18 EC' → r=navega alvo='OS-0504' abriu=True destacou=False
+00:23:58 receituário→OS/AG-01 AG-01[4] 'Abrir OS-0508' → r=navega alvo='OS-0508' abriu=True destacou=False
+00:24:02 receituário→OS/AG-01 AG-01[4] 'Aplicação · Tebuconazol 200 EC' → r=navega alvo='OS-0508' abriu=True destacou=False
+00:24:05 receituário→OS/AG-04 AG-04[None] 'Abrir OS-0421' → r=navega alvo='OS-0421' abriu=True destacou=False
+00:24:09 receituário→OS/AG-04 AG-04[None] 'Liberar OS-0418' → r=navega alvo='OS-0418' abriu=True destacou=False
+00:24:12 receituário→OS/AG-04det AG-04det[None] 'OS-0420' → r=navega alvo='OS-0420' abriu=True destacou=False
+00:24:12 Chrome PID 14871 encerrado
+00:24:12 servidor PID 14953 encerrado
+00:24:12 casos críticos: 17 em 4.0 min → /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rob51b/trab/saida-isolado/casos-criticos.json
+00:24:12 Chrome principais em execução: 1 (< 4), pode abrir
+00:24:12 Chrome iniciado, PID 17397
+00:24:13 servidor em 127.0.0.1:36563, PID 17479
+00:24:17 OS#OS-0504: 15 linhas, 0 passagens em detalhes, 0 na tela
+00:24:21 OS#OS-0508: 15 linhas, 0 passagens em detalhes, 0 na tela
+00:24:26 OS#OS-0420: 15 linhas, 3 passagens em detalhes, 3 na tela
+00:24:30 OS#OS-0431: 15 linhas, 1 passagens em detalhes, 1 na tela
+00:24:34 OS#OS-0507: 15 linhas, 0 passagens em detalhes, 0 na tela
+00:24:37 MA#om=OM-0233: 16 linhas, 3 passagens em detalhes, 1 na tela
+00:24:41 MA#om=OM-0228: 16 linhas, 2 passagens em detalhes, 1 na tela
+00:24:45 MA#om=OM-0219: 16 linhas, 2 passagens em detalhes, 1 na tela
+00:24:50 OM→OS/ MA[0] 'Achado SM-0147 · Pressão hidráulica baix' → r=mesma tela alvo='' abriu=False destacou=False
+00:24:55 OS→EST/outro OS[0] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+00:25:00 OS→OM/MA OS[0] 'Acompanhar OM-0233 ›' → r=navega alvo='OM-0233' abriu=True destacou=False
+00:25:00 Chrome PID 17397 encerrado
+00:25:01 servidor PID 17479 encerrado
+00:25:01 casos críticos: 3 em 0.8 min → /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rob51b/trab/saida-isolado/casos-criticos-endereco.json
+resumo-isolado.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 80, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 246, "navega": 232, "noLugar": 11, "nada": 3, "metodo": "v5.1", "erros": 1, "inconclusivasProporcao": 0.5466666666666666, "navegacoesTela": 82, "inconclusivas": 82, "empilhados": 0, "empilhadosChegaramDona": 0, "empilhadosVolta": 0, "empilhadosCorretos": 0, "navRegistro": 68, "naoLeva": 0, "levaIgnora": 23, "chegou": 45, "voltaOrigem": 8, "voltarDet": 106, "reabre": 9, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 246 com problema 214 
+resumo-isolado-1a-passada.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 80, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 246, "navega": 232, "noLugar": 11, "nada": 3, "metodo": "v5.1", "erros": 1, "inconclusivasProporcao": 0.5466666666666666, "navegacoesTela": 82, "inconclusivas": 82, "empilhados": 0, "empilhadosChegaramDona": 0, "empilhadosVolta": 0, "empilhadosCorretos": 0, "navRegistro": 68, "naoLeva": 0, "levaIgnora": 23, "chegou": 45, "voltaOrigem": 8, "voltarDet": 106, "reabre": 9, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 246 com problema 214 
+00:25:01 entrega em /tmp/claude-0/rob51/docs/integracao/V73/pedidos-1710/ex51/robo-v51-base/rodada2/medida: 106 brutos (0.3 MB)
+00:25:01 fim em 30.4 min

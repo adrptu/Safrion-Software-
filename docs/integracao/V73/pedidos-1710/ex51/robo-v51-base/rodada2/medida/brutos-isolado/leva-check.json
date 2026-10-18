@@ -1,0 +1,2372 @@
+[
+{
+"tela": "AG-01",
+"i": 0,
+"endereco": "OS.dc.html#OS-0504",
+"alvo": "OS-0504",
+"dlg": "OS-0504 · Controle de ácaro e cochonilha",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0504",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0504"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-01",
+"i": 1,
+"endereco": "OS.dc.html#OS-0508",
+"alvo": "OS-0508",
+"dlg": "OS-0508 · Fungicida para antracnose",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0508",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0508"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-01",
+"i": 2,
+"endereco": "AG-01det.dc.html#VIS-055",
+"alvo": "VIS-055",
+"dlg": "",
+"h1": "Rota e evidências",
+"alvoNoH1": false,
+"url": "AG-01det#VIS-055",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"vis 055"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-01",
+"i": 3,
+"endereco": "AG-01det.dc.html#VIS-060",
+"alvo": "VIS-060",
+"dlg": "",
+"h1": "Rota e evidências",
+"alvoNoH1": false,
+"url": "AG-01det#VIS-060",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"vis 060"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-01",
+"i": 4,
+"endereco": "AG-01det.dc.html#VIS-058",
+"alvo": "VIS-058",
+"dlg": "",
+"h1": "Rota e evidências",
+"alvoNoH1": false,
+"url": "AG-01det#VIS-058",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"vis 058"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-02",
+"i": 0,
+"endereco": "SAF.dc.html#saf=LG2627&passo=cultivos&sug=1",
+"alvo": "",
+"dlg": "Sugestões pelas análises · Safra Mamão 2026/27",
+"h1": "Planejar safra",
+"alvoNoH1": false,
+"url": "SAF#saf=LG2627&passo=cultivos&sug=1",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"lg2627"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-04",
+"i": 1,
+"endereco": "AG-04det.dc.html",
+"alvo": "REC-014",
+"dlg": "",
+"h1": "Recomendação · REC-014 plantio T4",
+"alvoNoH1": true,
+"url": "AG-04det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04",
+"i": 2,
+"endereco": "AG-03det.dc.html",
+"alvo": "DIA-007",
+"dlg": "",
+"h1": "Diagnóstico · DIA-007 nematoide T4",
+"alvoNoH1": true,
+"url": "AG-03det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04",
+"i": 3,
+"endereco": "AG-04det.dc.html",
+"alvo": "REC-014",
+"dlg": "",
+"h1": "Recomendação · REC-014 plantio T4",
+"alvoNoH1": true,
+"url": "AG-04det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04det",
+"i": 0,
+"endereco": "AG-07.dc.html#abamectina-500-fs",
+"alvo": "",
+"dlg": "",
+"h1": "Consulta Agrofit",
+"alvoNoH1": false,
+"url": "AG-07#abamectina-500-fs",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"abamectina 500 fs"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-04det",
+"i": 1,
+"endereco": "AG-07.dc.html#pasteuria-nishizawae-fs",
+"alvo": "",
+"dlg": "",
+"h1": "Consulta Agrofit",
+"alvoNoH1": false,
+"url": "AG-07#pasteuria-nishizawae-fs",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pasteuria nishizawae fs"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-04det",
+"i": 2,
+"endereco": "PL-02.dc.html",
+"alvo": "NEC-028",
+"dlg": "",
+"h1": "Plano operacional",
+"alvoNoH1": false,
+"url": "PL-02",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04det",
+"i": 3,
+"endereco": "OS.dc.html#OS-0420",
+"alvo": "OS-0420",
+"dlg": "OS-0420 · Plantio · Soja 58 W",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0420",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0420"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04det",
+"i": 5,
+"endereco": "AG-02.dc.html",
+"alvo": "LAU-2043",
+"dlg": "",
+"h1": "Análises de solo",
+"alvoNoH1": false,
+"url": "AG-02",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-04det",
+"i": 6,
+"endereco": "MA.dc.html#vis=ativos&modo=abastecimentos",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ativos&modo=abastecimentos",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-07",
+"i": 3,
+"endereco": "OS.dc.html#OS-0504",
+"alvo": "OS-0504",
+"dlg": "OS-0504 · Controle de ácaro e cochonilha",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0504",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0504"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "AG-07",
+"i": 4,
+"endereco": "AG-04det.dc.html",
+"alvo": "REC-014",
+"dlg": "",
+"h1": "Recomendação · REC-014 plantio T4",
+"alvoNoH1": true,
+"url": "AG-04det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "AG-07",
+"i": 5,
+"endereco": "CA-01x-os0420.dc.html",
+"alvo": "OS-0420",
+"dlg": "",
+"h1": "OS-0420 · Plantio Soja 58 W",
+"alvoNoH1": true,
+"url": "CA-01x-os0420",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "BEN",
+"i": 1,
+"endereco": "PROD.dc.html#L39-117",
+"alvo": "",
+"dlg": "L39-117 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L39-117",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 117"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 2,
+"endereco": "PROD.dc.html#L39-118",
+"alvo": "",
+"dlg": "L39-118 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L39-118",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 118"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 3,
+"endereco": "PROD.dc.html#L39-119",
+"alvo": "",
+"dlg": "L39-119 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L39-119",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 119"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 4,
+"endereco": "PROD.dc.html#L38-115",
+"alvo": "",
+"dlg": "L38-115 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-115",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 115"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 5,
+"endereco": "PROD.dc.html#L38-116",
+"alvo": "",
+"dlg": "L38-116 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-116",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 116"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 6,
+"endereco": "PROD.dc.html#L38-117",
+"alvo": "",
+"dlg": "L38-117 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-117",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 117"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "BEN",
+"i": 7,
+"endereco": "PROD.dc.html#L38-118",
+"alvo": "",
+"dlg": "L38-118 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-118",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 118"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CA-02",
+"i": 0,
+"endereco": "OS.dc.html#OS-0418",
+"alvo": "OS-0418",
+"dlg": "OS-0418 · Fertirrigação · reclassificada",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0418",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0418"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CA-02",
+"i": 1,
+"endereco": "OS.dc.html#OS-0420",
+"alvo": "OS-0420",
+"dlg": "OS-0420 · Plantio · Soja 58 W",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0420",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0420"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CA-02",
+"i": 2,
+"endereco": "OS.dc.html#OS-0508",
+"alvo": "OS-0508",
+"dlg": "OS-0508 · Fungicida para antracnose",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0508",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0508"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CA-03det",
+"i": 0,
+"endereco": "CA-01x-os0420.dc.html",
+"alvo": "OS-0420",
+"dlg": "",
+"h1": "OS-0420 · Plantio Soja 58 W",
+"alvoNoH1": true,
+"url": "CA-01x-os0420",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CA-03det",
+"i": 1,
+"endereco": "MA.dc.html#ativo=a01",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#ativo=a01",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"a01"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CA-03det",
+"i": 2,
+"endereco": "MA.dc.html#om=OM-0233",
+"alvo": "OM-0233",
+"dlg": "OM-0233 · Trator T1",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ordens&om=OM-0233",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"om 0233"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 0,
+"endereco": "BEN.dc.html#nova=L39-132",
+"alvo": "",
+"dlg": "Nova ordem de beneficiamento",
+"h1": "Beneficiamento",
+"alvoNoH1": false,
+"url": "BEN#nova=L39-132",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 132"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 1,
+"endereco": "BEN.dc.html#nova=L39-131",
+"alvo": "",
+"dlg": "Nova ordem de beneficiamento",
+"h1": "Beneficiamento",
+"alvoNoH1": false,
+"url": "BEN#nova=L39-131",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 131"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 2,
+"endereco": "BEN.dc.html#nova=L38-132",
+"alvo": "",
+"dlg": "Nova ordem de beneficiamento",
+"h1": "Beneficiamento",
+"alvoNoH1": false,
+"url": "BEN#nova=L38-132",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 132"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 3,
+"endereco": "PROD.dc.html#L39-132",
+"alvo": "",
+"dlg": "L39-132 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L39-132",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l39 132"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 4,
+"endereco": "PROD.dc.html#L38-132",
+"alvo": "",
+"dlg": "L38-132 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-132",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 132"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CARGA",
+"i": 5,
+"endereco": "PROD.dc.html#L38-131",
+"alvo": "",
+"dlg": "L38-131 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-131",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 131"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-01",
+"i": 0,
+"endereco": "GE-08.dc.html#vis=documentos",
+"alvo": "",
+"dlg": "",
+"h1": "Crédito e garantias",
+"alvoNoH1": false,
+"url": "GE-08#vis=documentos",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-01",
+"i": 1,
+"endereco": "CD-01det.dc.html#talhao=PV06",
+"alvo": "",
+"dlg": "",
+"h1": "Talhão",
+"alvoNoH1": false,
+"url": "CD-01det#talhao=PV06",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pv06"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 0,
+"endereco": "OS.dc.html",
+"alvo": "",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 1,
+"endereco": "MA.dc.html#om=OM-0233",
+"alvo": "OM-0233",
+"dlg": "OM-0233 · Trator T1",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ordens&om=OM-0233",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"om 0233"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 2,
+"endereco": "MA.dc.html#plano=PM-03",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#plano=PM-03",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pm 03"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 3,
+"endereco": "MA.dc.html#ativo=a01",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#ativo=a01",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"a01"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 5,
+"endereco": "MA.dc.html#plano=PM-06",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#plano=PM-06",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pm 06"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 6,
+"endereco": "MA.dc.html#ativo=a08",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#ativo=a08",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"a08"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-03",
+"i": 8,
+"endereco": "MA.dc.html#plano=PM-09",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#plano=PM-09",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pm 09"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-04",
+"i": 0,
+"endereco": "CF-01.dc.html#pessoa=Ana",
+"alvo": "",
+"dlg": "Ana · Agronomia",
+"h1": "Usuários e alçadas",
+"alvoNoH1": false,
+"url": "CF-01#pessoa=Ana",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"ana"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-04",
+"i": 1,
+"endereco": "CF-01.dc.html#pessoa=Jo%C3%A3o",
+"alvo": "",
+"dlg": "João · Irrigação",
+"h1": "Usuários e alçadas",
+"alvoNoH1": false,
+"url": "CF-01#pessoa=Jo%C3%A3o",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"joao"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CD-04",
+"i": 2,
+"endereco": "CF-01.dc.html#pessoa=Dora",
+"alvo": "",
+"dlg": "Dora · Comercial",
+"h1": "Usuários e alçadas",
+"alvoNoH1": false,
+"url": "CF-01#pessoa=Dora",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"dora"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-01",
+"i": 1,
+"endereco": "OS.dc.html#OS-0418",
+"alvo": "OS-0418",
+"dlg": "OS-0418 · Fertirrigação · reclassificada",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0418",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0418"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CF-01",
+"i": 2,
+"endereco": "OS.dc.html#OS-0430",
+"alvo": "OS-0430",
+"dlg": "OS-0430 · Dessecação pré-plantio",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0430",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0430"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CF-01",
+"i": 3,
+"endereco": "OS.dc.html#OS-0431",
+"alvo": "OS-0431",
+"dlg": "OS-0431 · Plantio · Soja 58 W",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0431",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0431"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "CF-01",
+"i": 4,
+"endereco": "OS.dc.html#OS-0501",
+"alvo": "OS-0501",
+"dlg": "OS-0501 · Dessecação pré-plantio",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0501",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0501"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-01",
+"i": 5,
+"endereco": "OS.dc.html#OS-0502",
+"alvo": "OS-0502",
+"dlg": "OS-0502 · Calagem",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-01",
+"i": 6,
+"endereco": "OS.dc.html#OS-0511",
+"alvo": "OS-0511",
+"dlg": "OS-0511 · Sexagem e desbaste",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0511",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0511"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-01",
+"i": 7,
+"endereco": "OS.dc.html#OS-0590",
+"alvo": "OS-0590",
+"dlg": "OS-0590 · Pulverização · demonstração de agrupamento",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0590",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0590"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-01",
+"i": 8,
+"endereco": "OS.dc.html#OS-0591",
+"alvo": "OS-0591",
+"dlg": "OS-0591 · Pulverização · demonstração de agrupamento",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0591",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0591"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-04",
+"i": 2,
+"endereco": "CF-01.dc.html#pessoa=Lucas",
+"alvo": "",
+"dlg": "Lucas · Campo 2",
+"h1": "Usuários e alçadas",
+"alvoNoH1": false,
+"url": "CF-01#pessoa=Lucas",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"lucas"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-04",
+"i": 5,
+"endereco": "CF-01.dc.html#pessoa=Rui",
+"alvo": "",
+"dlg": "Rui · Suprimentos",
+"h1": "Usuários e alçadas",
+"alvoNoH1": false,
+"url": "CF-01#pessoa=Rui",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"rui"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-05",
+"i": 0,
+"endereco": "CD-01det.dc.html#talhao=T1",
+"alvo": "",
+"dlg": "",
+"h1": "Talhão",
+"alvoNoH1": false,
+"url": "CD-01det#talhao=T1",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CF-05",
+"i": 1,
+"endereco": "CD-01det.dc.html#talhao=PV07",
+"alvo": "",
+"dlg": "",
+"h1": "Talhão",
+"alvoNoH1": false,
+"url": "CD-01det#talhao=PV07",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"pv07"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CMP",
+"i": 0,
+"endereco": "SAF.dc.html#saf=S2627&passo=demanda",
+"alvo": "",
+"dlg": "",
+"h1": "Planejar safra",
+"alvoNoH1": false,
+"url": "SAF#saf=S2627&passo=demanda",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"s2627"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CMP",
+"i": 1,
+"endereco": "SAF.dc.html#saf=S27SF&passo=demanda",
+"alvo": "",
+"dlg": "",
+"h1": "Planejar safra",
+"alvoNoH1": false,
+"url": "SAF#saf=S27SF&passo=demanda",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"s27sf"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "CMP",
+"i": 2,
+"endereco": "SAF.dc.html#saf=LG2627&passo=demanda",
+"alvo": "",
+"dlg": "",
+"h1": "Planejar safra",
+"alvoNoH1": false,
+"url": "SAF#saf=LG2627&passo=demanda",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"lg2627"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "EXPED",
+"i": 0,
+"endereco": "VEN.dc.html#PV-037",
+"alvo": "PV-037",
+"dlg": "PV-037 · Frutas Real",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#PV-037",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"pv 037"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "EXPED",
+"i": 1,
+"endereco": "PROD.dc.html#L38-131",
+"alvo": "",
+"dlg": "L38-131 · Mamão Formosa · fruta de campo",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L38-131",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l38 131"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "GE-01",
+"i": 7,
+"endereco": "CO-06det.dc.html",
+"alvo": "INSP-88",
+"dlg": "",
+"h1": "INSP-88 · Lote L27-013 bloqueado",
+"alvoNoH1": true,
+"url": "CO-06det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-01",
+"i": 8,
+"endereco": "VE-05.dc.html",
+"alvo": "",
+"dlg": "",
+"h1": "Contratos e compromissos",
+"alvoNoH1": false,
+"url": "VE-05",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "GE-02det",
+"i": 0,
+"endereco": "CA-02.dc.html",
+"alvo": "OS-0409",
+"dlg": "",
+"h1": "Apontamentos e conferência",
+"alvoNoH1": false,
+"url": "CA-02",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "GE-02det",
+"i": 1,
+"endereco": "SU-07.dc.html",
+"alvo": "OS-0409",
+"dlg": "",
+"h1": "Requisições e entregas",
+"alvoNoH1": false,
+"url": "SU-07",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "GE-03",
+"i": 2,
+"endereco": "CA-02.dc.html",
+"alvo": "OS-0421",
+"dlg": "",
+"h1": "Apontamentos e conferência",
+"alvoNoH1": false,
+"url": "CA-02",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-03",
+"i": 5,
+"endereco": "CA-02.dc.html",
+"alvo": "OS-0420",
+"dlg": "",
+"h1": "Apontamentos e conferência",
+"alvoNoH1": false,
+"url": "CA-02",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-03",
+"i": 6,
+"endereco": "CA-01.dc.html",
+"alvo": "OS-0420",
+"dlg": "",
+"h1": "Ordens de campo",
+"alvoNoH1": false,
+"url": "CA-01",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-04",
+"i": 5,
+"endereco": "SU-05.dc.html",
+"alvo": "PC-088",
+"dlg": "",
+"h1": "Contratos, pedidos e entregas",
+"alvoNoH1": false,
+"url": "SU-05",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-04",
+"i": 6,
+"endereco": "SU-05.dc.html",
+"alvo": "PC-090",
+"dlg": "",
+"h1": "Contratos, pedidos e entregas",
+"alvoNoH1": false,
+"url": "SU-05",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 1,
+"endereco": "VE-04.dc.html",
+"alvo": "PV-027",
+"dlg": "",
+"h1": "Pedidos de venda",
+"alvoNoH1": false,
+"url": "VE-04",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 2,
+"endereco": "VE-04.dc.html",
+"alvo": "PV-029",
+"dlg": "",
+"h1": "Pedidos de venda",
+"alvoNoH1": false,
+"url": "VE-04",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 3,
+"endereco": "VE-06.dc.html",
+"alvo": "RC-14",
+"dlg": "",
+"h1": "Reclamações e devoluções",
+"alvoNoH1": false,
+"url": "VE-06",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 4,
+"endereco": "VE-04.dc.html",
+"alvo": "PV-027",
+"dlg": "",
+"h1": "Pedidos de venda",
+"alvoNoH1": false,
+"url": "VE-04",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 5,
+"endereco": "VE-06.dc.html",
+"alvo": "RC-12",
+"dlg": "",
+"h1": "Reclamações e devoluções",
+"alvoNoH1": false,
+"url": "VE-06",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-05",
+"i": 6,
+"endereco": "VE-06.dc.html",
+"alvo": "RC-13",
+"dlg": "",
+"h1": "Reclamações e devoluções",
+"alvoNoH1": false,
+"url": "VE-06",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "GE-06",
+"i": 4,
+"endereco": "GE-06det.dc.html",
+"alvo": "OS-0409",
+"dlg": "",
+"h1": "Detalhar · custo de pulverização",
+"alvoNoH1": false,
+"url": "GE-06det",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "IN-01",
+"i": 1,
+"endereco": "OS.dc.html#OS-0418",
+"alvo": "OS-0418",
+"dlg": "OS-0418 · Fertirrigação · reclassificada",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0418",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0418"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "IN-01",
+"i": 2,
+"endereco": "OS.dc.html#OS-0430",
+"alvo": "OS-0430",
+"dlg": "OS-0430 · Dessecação pré-plantio",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0430",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0430"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "IR-01",
+"i": 0,
+"endereco": "IR-03det.dc.html#OS-0423:conflito",
+"alvo": "OS-0423",
+"dlg": "Resolver conflito · OS-0423",
+"h1": "OS-0423 · Irrigação · Gotejo T7",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0423:conflito",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0423:conflito"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 1,
+"endereco": "IR-02.dc.html#programar=P1",
+"alvo": "",
+"dlg": "Programar irrigação",
+"h1": "Programação",
+"alvoNoH1": false,
+"url": "IR-02#programar=P1",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 2,
+"endereco": "IR-03det.dc.html#OS-0394:conferir",
+"alvo": "OS-0394",
+"dlg": "Conferir medição · OS-0394",
+"h1": "OS-0394 · Irrigação · Pivô 2",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0394:conferir",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0394:conferir"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 3,
+"endereco": "IR-03det.dc.html#OS-0392",
+"alvo": "OS-0392",
+"dlg": "",
+"h1": "OS-0392 · Irrigação · Gotejo T7",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0392",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0392"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 4,
+"endereco": "IR-03det.dc.html#OS-0423",
+"alvo": "OS-0423",
+"dlg": "",
+"h1": "OS-0423 · Irrigação · Gotejo T7",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0423",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0423"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 7,
+"endereco": "IR-03det.dc.html#OS-0394",
+"alvo": "OS-0394",
+"dlg": "",
+"h1": "OS-0394 · Irrigação · Pivô 2",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0394",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0394"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "IR-01",
+"i": 8,
+"endereco": "IR-03det.dc.html#OS-0419",
+"alvo": "OS-0419",
+"dlg": "",
+"h1": "OS-0419 · Irrigação · Pivô 2",
+"alvoNoH1": true,
+"url": "IR-03det#OS-0419",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0419"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "IV",
+"i": 0,
+"endereco": "VEN.dc.html#PV-037",
+"alvo": "PV-037",
+"dlg": "PV-037 · Frutas Real",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#PV-037",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"pv 037"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "MB-01",
+"i": 2,
+"endereco": "MB-05.dc.html#OS-0424",
+"alvo": "OS-0424",
+"dlg": "",
+"h1": "Almoxarifado móvel",
+"alvoNoH1": false,
+"url": "MB-05#OS-0424",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0424"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "MB-02",
+"i": 2,
+"endereco": "MB-05.dc.html#OS-0424",
+"alvo": "OS-0424",
+"dlg": "",
+"h1": "Almoxarifado móvel",
+"alvoNoH1": false,
+"url": "MB-05#OS-0424",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0424"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "MB-03",
+"i": 2,
+"endereco": "MB-05.dc.html#OS-0424",
+"alvo": "OS-0424",
+"dlg": "",
+"h1": "Almoxarifado móvel",
+"alvoNoH1": false,
+"url": "MB-05#OS-0424",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0424"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "MB-09",
+"i": 1,
+"endereco": "MB-04.dc.html#ativo=a03",
+"alvo": "",
+"dlg": "",
+"h1": "Registrar ocorrência",
+"alvoNoH1": false,
+"url": "MB-04#ativo=a03",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"a03"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MB-09det",
+"i": 1,
+"endereco": "MB-09.dc.html#ativo=a01",
+"alvo": "",
+"dlg": "",
+"h1": "Máquina",
+"alvoNoH1": false,
+"url": "MB-09#ativo=a01",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"a01"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-CRE",
+"i": 0,
+"endereco": "GE-08.dc.html#vis=ficha",
+"alvo": "",
+"dlg": "",
+"h1": "Crédito e garantias",
+"alvoNoH1": false,
+"url": "GE-08#vis=ficha",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-CRE",
+"i": 1,
+"endereco": "GE-08.dc.html#vis=dossie",
+"alvo": "",
+"dlg": "",
+"h1": "Crédito e garantias",
+"alvoNoH1": false,
+"url": "GE-08#vis=dossie",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-CRE",
+"i": 2,
+"endereco": "GE-08.dc.html#vis=contratos",
+"alvo": "",
+"dlg": "",
+"h1": "Crédito e garantias",
+"alvoNoH1": false,
+"url": "GE-08#vis=contratos",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-CRE",
+"i": 3,
+"endereco": "GE-08.dc.html#vis=liberacoes",
+"alvo": "",
+"dlg": "",
+"h1": "Crédito e garantias",
+"alvoNoH1": false,
+"url": "GE-08#vis=liberacoes",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-MAN",
+"i": 0,
+"endereco": "MA.dc.html#vis=ativos&pend=semplano",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ativos&pend=semplano",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"semplano"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-MAN",
+"i": 2,
+"endereco": "MA.dc.html#vis=semordem",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=semordem",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "MOD-MAN",
+"i": 3,
+"endereco": "MA.dc.html#vis=ordens",
+"alvo": "",
+"dlg": "",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ordens&om=OM-0230",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PAGR",
+"i": 0,
+"endereco": "OS.dc.html#painel=OS-0420,OS-0431,OS-0507",
+"alvo": "",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#painel=OS-0420,OS-0431,OS-0507",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0420,os 0431,os 0507"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PAGR",
+"i": 1,
+"endereco": "OS.dc.html#painel=OS-0418,OS-0502",
+"alvo": "",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#painel=OS-0418,OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0418,os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PAGR",
+"i": 2,
+"endereco": "OS.dc.html#painel=OS-0420,OS-0507",
+"alvo": "",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#painel=OS-0420,OS-0507",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0420,os 0507"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PAGR",
+"i": 3,
+"endereco": "OS.dc.html#painel=OS-0418,OS-0502",
+"alvo": "",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#painel=OS-0418,OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0418,os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PCOM",
+"i": 0,
+"endereco": "VEN.dc.html#PV-030",
+"alvo": "PV-030",
+"dlg": "PV-030 · Coop Grão Sul",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#PV-030",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"pv 030"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PCOM",
+"i": 1,
+"endereco": "PROD.dc.html#L10-031",
+"alvo": "",
+"dlg": "L10-031 · Soja em grão",
+"h1": "Estoque de produto",
+"alvoNoH1": false,
+"url": "PROD#L10-031",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"l10 031"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PCOM",
+"i": 2,
+"endereco": "VEN.dc.html#PV-030",
+"alvo": "PV-030",
+"dlg": "PV-030 · Coop Grão Sul",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#PV-030",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"pv 030"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PCOM",
+"i": 3,
+"endereco": "VEN.dc.html#CT-203",
+"alvo": "CT-203",
+"dlg": "CT-203 · Coop Grão Sul",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#CT-203",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"ct 203"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PCOM",
+"i": 4,
+"endereco": "VEN.dc.html#CRE-0095",
+"alvo": "CRE-0095",
+"dlg": "CRE-0095 · Agroquímica Delta",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#CRE-0095",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"cre 0095"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PCOM",
+"i": 5,
+"endereco": "VEN.dc.html#BT-090",
+"alvo": "",
+"dlg": "BT-090 · Fertisul",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#BT-090",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"bt 090"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PL-04",
+"i": 0,
+"endereco": "OS.dc.html#OS-0430",
+"alvo": "OS-0430",
+"dlg": "OS-0430 · Dessecação pré-plantio",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0430",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0430"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PL-04",
+"i": 1,
+"endereco": "OS.dc.html#OS-0431",
+"alvo": "OS-0431",
+"dlg": "OS-0431 · Plantio · Soja 58 W",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0431",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0431"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PL-04",
+"i": 2,
+"endereco": "OS.dc.html#OS-0418",
+"alvo": "OS-0418",
+"dlg": "OS-0418 · Fertirrigação · reclassificada",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0418",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0418"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PL-04",
+"i": 3,
+"endereco": "OS.dc.html#OS-0422",
+"alvo": "OS-0422",
+"dlg": "",
+"h1": "Ordem de Serviço",
+"alvoNoH1": false,
+"url": "OS#OS-0422",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0422"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "PROD",
+"i": 0,
+"endereco": "BEN.dc.html#OB-0112",
+"alvo": "OB-0112",
+"dlg": "OB-0112 · Mamão Formosa · PACK-FRU v3",
+"h1": "Beneficiamento",
+"alvoNoH1": false,
+"url": "BEN#OB-0112",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"ob 0112"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "PROD",
+"i": 1,
+"endereco": "VEN.dc.html#PV-030",
+"alvo": "PV-030",
+"dlg": "PV-030 · Coop Grão Sul",
+"h1": "Contratos e pedidos",
+"alvoNoH1": false,
+"url": "VEN#PV-030",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"pv 030"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "SU-01",
+"i": 3,
+"endereco": "MA.dc.html#om=OM-0234",
+"alvo": "OM-0234",
+"dlg": "OM-0234 · Trator 02",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ordens&om=OM-0234",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"om 0234"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+},
+{
+"tela": "SU-01",
+"i": 5,
+"endereco": "MA.dc.html#om=OM-0234",
+"alvo": "OM-0234",
+"dlg": "OM-0234 · Trator 02",
+"h1": "Manutenção",
+"alvoNoH1": false,
+"url": "MA#vis=ordens&om=OM-0234",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"om 0234"
+],
+"tokSemEndereco": true,
+"alvoSemEndereco": true
+}
+}
+]

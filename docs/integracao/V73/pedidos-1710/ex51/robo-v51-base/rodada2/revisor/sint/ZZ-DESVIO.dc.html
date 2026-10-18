@@ -1,0 +1,11 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>ZZ desvio</title></head><body>
+<h1>Origem sintética do desvio (A6)</h1><p>Texto de apoio para o robô considerar a página montada, com mais de cinquenta caracteres.</p>
+<div class="g2r" style="display:flex;gap:8px;padding:6px"><span>Linha 1</span><span>Registro de teste OS-0920</span></div>
+<script>
+function dlg(html) { const d = document.createElement('div'); d.setAttribute('role', 'dialog');
+  d.style.cssText = 'position:fixed;top:20px;right:20px;width:400px;background:#fff;border:1px solid #333;padding:10px'; d.innerHTML = html; document.body.appendChild(d); return d; }
+document.querySelector('.g2r').addEventListener('click', () => {
+  const d = dlg('<h2>OS-0920 · detalhe de origem</h2><p>Referência: <a href="ZZ-DONA.dc.html#OS-0502">OS-0502</a></p>');
+  d.querySelector('a').addEventListener('click', ev => { ev.preventDefault(); location.href = 'ZZ-DONA.dc.html#OS-0503'; });
+});
+</script></body></html>

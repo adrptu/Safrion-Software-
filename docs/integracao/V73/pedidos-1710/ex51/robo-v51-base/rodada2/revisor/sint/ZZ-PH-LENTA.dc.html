@@ -1,0 +1,18 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>ZZ origem</title></head><body>
+<h1>Origem sintética ZZ-PH-LENTA</h1><p>Texto de apoio para o robô considerar a página montada, com mais de cinquenta caracteres.</p>
+<div class="g2r" style="display:flex;gap:8px;padding:6px"><span>Linha 1</span><span>Registro de teste OS-0914</span></div>
+<script>
+// pilha grava hash, Abrir na tela com 1,5 s
+const OWN = 'OS-0914', ALVO_LINK = 'OS-0502', ALVO_PILHA = 'OS-0502', DONA_HASH = 'OS-0502', HASH = true, ATRASO = 1500, IR = true;
+function dlg(html, pilha) { const d = document.createElement('div'); d.setAttribute('role', 'dialog'); if (pilha) d.setAttribute('data-g2pilha', '');
+  d.style.cssText = 'position:fixed;top:20px;right:20px;width:400px;background:#fff;border:1px solid #333;padding:10px'; d.innerHTML = html; document.body.appendChild(d); return d; }
+document.querySelector('.g2r').addEventListener('click', () => {
+  const d = dlg('<h2>' + OWN + ' · detalhe de origem</h2><p>Referência: <a href="ZZ-DONA.dc.html#' + ALVO_LINK + '">' + ALVO_LINK + '</a></p>', false);
+  d.querySelector('a').addEventListener('click', ev => { ev.preventDefault();
+    const p = dlg('<h2>' + ALVO_PILHA + ' · resumo empilhado</h2><p>Resumo somente leitura.</p>' + (IR ? '<a href="ZZ-DONA.dc.html#' + DONA_HASH + '">Abrir na tela de Dona</a>' : ''), true);
+    if (HASH) history.replaceState(history.state, '', location.pathname + location.search + '#' + OWN + '>' + ALVO_PILHA);
+    const go = p.querySelector('a');
+    if (go && ATRASO) go.addEventListener('click', e => { e.preventDefault(); const h = go.getAttribute('href'); setTimeout(() => { location.href = h; }, ATRASO); });
+  });
+});
+</script></body></html>

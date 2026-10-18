@@ -1,0 +1,22 @@
+# Testes do PR #112 @7c2045d6, executados pelo revisor em 2026-10-17T23:55:08Z, node v22.22.0, Python 3.11.15
+$ node oraculo_test.cjs
+PASS 13 contraprovas do oráculo JS real: alvo errado/ambíguo/ausente, prefixos, igualdade e painel/seleção. Sem navegador.
+PASS A2/A3: query de não fornece alvo; h1 somente sem diálogo.
+PASS A10 limites e entidade primária
+rc=0
+$ node segunda_passada_test.cjs
+PASS A5 extração real LEVA_JS: corpo nunca vira título; h1 só sem diálogo. Verificação estática A6 não substitui navegador.
+rc=0
+$ python3 -I resumo_test.py
+PASS resumo: alvo errado e texto corporal da 2ª passada recusados; inconclusiva separada; controle positivo passa
+rc=0
+$ python3 -I segunda_passada_test.py
+PASS 7 casos da função real da segunda passada A3/A5/A6/A10; sem navegador.
+rc=0
+$ python3 -I aceite_test.py
+PASS 6 contraprovas do portão; sem execução de navegador.
+rc=0
+$ python3 -I -m py_compile rodar.py resumo.py aceite.py casos_criticos.py
+rc=0
+$ node ../robo-v51-base/rodada2/revisor/contraprova_alvo2.cjs robot.html
+19 casos, 5 DIF. Esperado entre parênteses = limite documentado (N1 e lista filtrada no A3); sem parênteses = achado (N2 no LEIAME da rodada 2)

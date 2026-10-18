@@ -1,0 +1,82 @@
+[
+{
+"tela": "ZZ-DESVIO",
+"i": 0,
+"endereco": "ZZ-DONA.dc.html#OS-0502",
+"alvo": "OS-0502",
+"dlg": "OS-0502 · registro na dona",
+"h1": "Tela dona sintética",
+"alvoNoH1": false,
+"url": "ZZ-DONA#OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": false,
+"diag": {
+"tokens": [
+"os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "ZZ-P-LENTA",
+"i": 0,
+"endereco": "ZZ-DONA.dc.html#OS-0502",
+"alvo": "OS-0502",
+"dlg": "OS-0502 · registro na dona",
+"h1": "Tela dona sintética",
+"alvoNoH1": false,
+"url": "ZZ-DONA#OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "ZZ-P-RAPIDA",
+"i": 0,
+"endereco": "ZZ-DONA.dc.html#OS-0502",
+"alvo": "OS-0502",
+"dlg": "OS-0502 · registro na dona",
+"h1": "Tela dona sintética",
+"alvoNoH1": false,
+"url": "ZZ-DONA#OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+},
+{
+"tela": "ZZ-PH-RAPIDA",
+"i": 0,
+"endereco": "ZZ-DONA.dc.html#OS-0502",
+"alvo": "OS-0502",
+"dlg": "OS-0502 · registro na dona",
+"h1": "Tela dona sintética",
+"alvoNoH1": false,
+"url": "ZZ-DONA#OS-0502",
+"alvoNoCorpo": false,
+"tokNoCorpo": "",
+"chegouEstrito": true,
+"diag": {
+"tokens": [
+"os 0502"
+],
+"tokSemEndereco": false,
+"alvoSemEndereco": false
+}
+}
+]

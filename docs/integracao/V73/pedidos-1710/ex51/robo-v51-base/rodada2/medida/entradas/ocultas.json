@@ -1,0 +1,740 @@
+[
+ {
+  "n": 1,
+  "tela": "AG-01 › #VIS-…:decidir e :programar",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 2,
+  "tela": "AG-04",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 3,
+  "tela": "AG-04det",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 4,
+  "tela": "AG-05",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; migracao condicionada a equivalencia"
+ },
+ {
+  "n": 5,
+  "tela": "CA-02",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 6,
+  "tela": "CA-03",
+  "decisao": "Levar para o visível",
+  "situacao": "Confirmado; migracao exige reconciliar fonte da ocorrencia"
+ },
+ {
+  "n": 7,
+  "tela": "CD-01 › detalhe do talhão",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 8,
+  "tela": "CO-06",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 9,
+  "tela": "GE-01",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 10,
+  "tela": "GE-06",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 11,
+  "tela": "IN-01",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 12,
+  "tela": "IN-02",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 13,
+  "tela": "IR-01 › seletor de etapas",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; preservar comandos ao migrar navegacao"
+ },
+ {
+  "n": 14,
+  "tela": "LO-02det",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 15,
+  "tela": "MB-05 › aba Almoxarife",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 16,
+  "tela": "MB-05det",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 17,
+  "tela": "MB-08",
+  "decisao": "Levar para o visível",
+  "situacao": "Confirmado como demonstracao; manter nao equivale a funcionamento"
+ },
+ {
+  "n": 18,
+  "tela": "OS › colunas ocultas",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 19,
+  "tela": "PL-04",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 20,
+  "tela": "PL-05det",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 21,
+  "tela": "SU-01",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 22,
+  "tela": "SU-02",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 23,
+  "tela": "SU-05",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 24,
+  "tela": "SU-06",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 25,
+  "tela": "SU-08",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 26,
+  "tela": "Tabelas › ⋯ da linha",
+  "decisao": "Levar para o visível",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 27,
+  "tela": "BO-01",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Presenca e acesso confirmados; decisao comercial pendente"
+ },
+ {
+  "n": 28,
+  "tela": "BO-02",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente com ressalvas; migracao pendente"
+ },
+ {
+  "n": 29,
+  "tela": "GE-04",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 30,
+  "tela": "GE-05",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 31,
+  "tela": "MOD-OUT",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Presenca e acesso confirmados; decisao comercial pendente"
+ },
+ {
+  "n": 32,
+  "tela": "ON-01",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Presenca e acesso confirmados; decisao comercial pendente"
+ },
+ {
+  "n": 33,
+  "tela": "PT-01",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Presenca e acesso confirmados; decisao comercial pendente"
+ },
+ {
+  "n": 34,
+  "tela": "PT-02",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 35,
+  "tela": "PT-02det",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 36,
+  "tela": "PT-03",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 37,
+  "tela": "PT-04",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 38,
+  "tela": "PT-04det",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 39,
+  "tela": "PT-05",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 40,
+  "tela": "PT-05det",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 41,
+  "tela": "PT-07",
+  "decisao": "Decidir com o proprietário",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 42,
+  "tela": "AG-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; migracao condicionada a equivalencia"
+ },
+ {
+  "n": 43,
+  "tela": "AG-03det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; migracao condicionada a equivalencia"
+ },
+ {
+  "n": 44,
+  "tela": "AG-06",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; migracao condicionada a equivalencia"
+ },
+ {
+  "n": 45,
+  "tela": "CA-01",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 46,
+  "tela": "CA-01det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 47,
+  "tela": "CA-01x-os0420",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 48,
+  "tela": "CA-04",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 49,
+  "tela": "CO-01",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente: legado local, equivalencia pendente"
+ },
+ {
+  "n": 50,
+  "tela": "CO-02",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente: legado local, equivalencia pendente"
+ },
+ {
+  "n": 51,
+  "tela": "CO-02det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente: legado local, equivalencia pendente"
+ },
+ {
+  "n": 52,
+  "tela": "CO-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido: carga em grade local, equivalencia pendente"
+ },
+ {
+  "n": 53,
+  "tela": "CO-04",
+  "decisao": "Excluir",
+  "situacao": "Conferido: recebimento legado demonstrativo"
+ },
+ {
+  "n": 54,
+  "tela": "CO-05",
+  "decisao": "Excluir",
+  "situacao": "Conferido: lista legada com edicao local"
+ },
+ {
+  "n": 55,
+  "tela": "CO-05det",
+  "decisao": "Excluir",
+  "situacao": "Conferido: detalhe legado com estados locais"
+ },
+ {
+  "n": 56,
+  "tela": "CO-06det",
+  "decisao": "Excluir",
+  "situacao": "Confirmado; detalhe legado de qualidade e demonstrativo"
+ },
+ {
+  "n": 57,
+  "tela": "CO-07",
+  "decisao": "Excluir",
+  "situacao": "Confirmado; saldo legado usa dados de cenario"
+ },
+ {
+  "n": 58,
+  "tela": "Ferramentas de demonstração",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 59,
+  "tela": "GE-06det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 60,
+  "tela": "GE-07",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 61,
+  "tela": "GE-08 › #vis=",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; aceite da migracao pendente"
+ },
+ {
+  "n": 62,
+  "tela": "IN-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 63,
+  "tela": "IR-02",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 64,
+  "tela": "LO-01",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 65,
+  "tela": "LO-02",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 66,
+  "tela": "LO-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 67,
+  "tela": "LO-04",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 68,
+  "tela": "MA-01",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 69,
+  "tela": "MA-02",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 70,
+  "tela": "MA-03",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 71,
+  "tela": "MA-04",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 72,
+  "tela": "MA-04det",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 73,
+  "tela": "MA-05",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 74,
+  "tela": "MB-10 › aba Motorista",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; aceite da migracao pendente"
+ },
+ {
+  "n": 75,
+  "tela": "Main",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao refutada e retirada por Claude; manter pagina tecnica Main"
+ },
+ {
+  "n": 76,
+  "tela": "OS › \"Abrir ordem completa ›\"",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente com limites funcionais"
+ },
+ {
+  "n": 77,
+  "tela": "OS-0424-ficha",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente com limites funcionais"
+ },
+ {
+  "n": 78,
+  "tela": "PL-01",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 79,
+  "tela": "PL-02",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 80,
+  "tela": "PL-02det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 81,
+  "tela": "PL-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 82,
+  "tela": "PL-05",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 83,
+  "tela": "PL-06",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 84,
+  "tela": "PM",
+  "decisao": "Manter (exclusão retirada na classificação do EX-50)",
+  "situacao": "Exclusao retirada: manter alias tecnico fora do menu"
+ },
+ {
+  "n": 85,
+  "tela": "PT-06",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 86,
+  "tela": "SU-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 87,
+  "tela": "SU-03det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 88,
+  "tela": "SU-04",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 89,
+  "tela": "SU-05det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; consolidacao condicionada a equivalencia"
+ },
+ {
+  "n": 90,
+  "tela": "SU-07",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 91,
+  "tela": "SU-07det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 92,
+  "tela": "SU-09",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 93,
+  "tela": "VE-01",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 94,
+  "tela": "VE-02",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 95,
+  "tela": "VE-03",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 96,
+  "tela": "VE-04",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 97,
+  "tela": "VE-04det",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 98,
+  "tela": "VE-05",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 99,
+  "tela": "VE-06",
+  "decisao": "Excluir",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 100,
+  "tela": "AG-01det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 101,
+  "tela": "CA-03det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Confirmado; migracao exige reconciliar fonte da ocorrencia"
+ },
+ {
+  "n": 102,
+  "tela": "CD-01det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 103,
+  "tela": "Faixa \"Pagar fatura ›\"",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 104,
+  "tela": "GE-02det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 105,
+  "tela": "IR-03",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; preservar comandos ao migrar navegacao"
+ },
+ {
+  "n": 106,
+  "tela": "IR-03det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; preservar comandos ao migrar navegacao"
+ },
+ {
+  "n": 107,
+  "tela": "IR-04",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; preservar comandos ao migrar navegacao"
+ },
+ {
+  "n": 108,
+  "tela": "Links diretos por ID",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 109,
+  "tela": "MB-01",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 110,
+  "tela": "MB-02",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 111,
+  "tela": "MB-02det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 112,
+  "tela": "MB-03",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 113,
+  "tela": "MB-03x-recibo",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 114,
+  "tela": "MB-04",
+  "decisao": "Manter como detalhe",
+  "situacao": "Confirmado: app registra ocorrencia no cenario"
+ },
+ {
+  "n": 115,
+  "tela": "MB-05",
+  "decisao": "Manter como detalhe",
+  "situacao": "Confirmado: vistoria tem entrada e estado compartilhado"
+ },
+ {
+  "n": 116,
+  "tela": "MB-06",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 117,
+  "tela": "MB-07",
+  "decisao": "Manter como detalhe",
+  "situacao": "Confirmado como demonstracao; manter nao equivale a funcionamento"
+ },
+ {
+  "n": 118,
+  "tela": "MB-08x-recibo",
+  "decisao": "Manter como detalhe",
+  "situacao": "Confirmado como demonstracao; manter nao equivale a funcionamento"
+ },
+ {
+  "n": 119,
+  "tela": "MB-09",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 120,
+  "tela": "MB-09det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 121,
+  "tela": "MB-10",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; aceite da migracao pendente"
+ },
+ {
+  "n": 122,
+  "tela": "ON-01det",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente; equivalencia funcional pendente"
+ },
+ {
+  "n": 123,
+  "tela": "OS-0424-app",
+  "decisao": "Manter como detalhe",
+  "situacao": "Conferido estaticamente com limites funcionais"
+ }
+]

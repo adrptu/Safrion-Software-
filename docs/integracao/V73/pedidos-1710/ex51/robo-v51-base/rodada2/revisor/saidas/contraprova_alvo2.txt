@@ -1,0 +1,20 @@
+OK  A2 · F1 ?de= com %23 na query | obtido="REQ-039" | esperado=REQ-039
+OK  A2 · F1 ?de= com %23, hash sem ID | obtido="" | esperado=
+OK  A2 · fragmento codificado | obtido="REQ-039" | esperado=REQ-039
+OK  A2 · só query ?de=, sem fragmento, texto sem ID | obtido="" | esperado=
+OK  A10 · exactId sufixo /2 | obtido="false" | esperado=false
+OK  A10 · exactId título com 2 IDs (aberto é PC-0012) | obtido="false" | esperado=false
+OK  A10 · exactId controle positivo | obtido="true" | esperado=true
+OK  A10 · hash com contexto para=OS, texto sem ID | obtido="" | esperado=
+DIF N1 · hash de contexto + texto cita a ORIGEM (OS-0502 aberta) | obtido="OS-0502" | esperado=(inconclusiva: OS-0502 é a origem)
+DIF N2 · formato F1 do Painel #painel=a&abre=b (abre OS-0431) | obtido="OS-0420" | esperado=OS-0431 ou inconclusiva
+DIF N2 · formato F1 do Painel com 2 OS | obtido="" | esperado=OS-0431 ou inconclusiva
+DIF N2 · ID só no 2º parâmetro (#vis=ordens&om=OM-0233) | obtido="" | esperado=OM-0233 ou inconclusiva
+OK  A3 · sem diálogo, h1 com o ID primeiro | obtido="{\"abriu\":true,\"destacou\":false}" | esperado={"abriu":true,"destacou":false}
+OK  A3 · sem diálogo, h1 é o registro | obtido="{\"abriu\":true,\"destacou\":false}" | esperado={"abriu":true,"destacou":false}
+OK  A3 · diálogo sem título, h1 com o ID: não conta | obtido="{\"abriu\":false,\"destacou\":false}" | esperado={"abriu":false,"destacou":false}
+OK  A3 · diálogo com outro registro, h1 com o ID | obtido="{\"abriu\":false,\"destacou\":false}" | esperado={"abriu":false,"destacou":false}
+DIF A3 · sem diálogo, h1 de lista filtrada que cita o alvo | obtido="{\"abriu\":true,\"destacou\":false}" | esperado=(limite: conta como chegada)
+OK  A3 · seleção: linha começa por outro ID | obtido="{\"abriu\":false,\"destacou\":false}" | esperado={"abriu":false,"destacou":false}
+OK  A3 · seleção: controle positivo | obtido="{\"abriu\":false,\"destacou\":true}" | esperado={"abriu":false,"destacou":true}
+19 casos, 5 DIF. Esperado entre parênteses = limite documentado (N1 e lista filtrada no A3); sem parênteses = achado (N2 no LEIAME da rodada 2)

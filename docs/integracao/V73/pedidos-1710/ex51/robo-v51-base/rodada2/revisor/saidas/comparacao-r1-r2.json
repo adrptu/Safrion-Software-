@@ -1,0 +1,846 @@
+{
+ "passagens_r1": 247,
+ "passagens_r2": 246,
+ "erros_r1": [],
+ "erros_r2": [
+  "PAGR[4] não reabriu"
+ ],
+ "mesmasChaves": false,
+ "razoes": {
+  "igual": 235,
+  "chegada": 11,
+  "só na rodada 1": 1
+ },
+ "diferentes": [
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "Abrir REC-014",
+   "href": "AG-04det.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "DIA-007",
+   "href": "AG-03det.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "AG-03det",
+    "alvo": "DIA-007",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "AG-03det",
+    "alvo": "DIA-007",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "REC-014",
+   "href": "AG-04det.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "OS-0420 ›",
+   "href": "CA-01x-os0420.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "REC-014 v2 ›",
+   "href": "AG-04det.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "CA-03det",
+   "k": "a",
+   "clique": "OS-0420",
+   "href": "CA-01x-os0420.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "L27-013 · INSP-88 aberta · Qualidade · prazo 25/09 ›",
+   "href": "CO-06det.dc.html",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "INSP-88",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "INSP-88",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0392 · Encerradas · 19/09 14:00–16:00 ›",
+   "href": "IR-03det.dc.html#OS-0392",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "IR-03det#OS-0392",
+    "alvo": "OS-0392",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "IR-03det#OS-0392",
+    "alvo": "OS-0392",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0394 · Em conferência · ontem 20:00–22:06 ›",
+   "href": "IR-03det.dc.html#OS-0394",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394",
+    "alvo": "OS-0394",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394",
+    "alvo": "OS-0394",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0419 · Liberadas · hoje 20:00–amanhã 10:31 ›",
+   "href": "IR-03det.dc.html#OS-0419",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "IR-03det#OS-0419",
+    "alvo": "OS-0419",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "IR-03det#OS-0419",
+    "alvo": "OS-0419",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0423 · A liberar · hoje 14:00–16:00 ›",
+   "href": "IR-03det.dc.html#OS-0423",
+   "razao": [
+    "chegada: False × True · prova da rodada 2: h1 da página (sem diálogo; o h1 não fica no bruto); titulo=''"
+   ],
+   "r1": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423",
+    "alvo": "OS-0423",
+    "chegou": false,
+    "titulo": ""
+   },
+   "r2": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423",
+    "alvo": "OS-0423",
+    "chegou": true,
+    "titulo": ""
+   }
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Coletar contagem",
+   "href": "MB-07.dc.html#lg24",
+   "razao": [
+    "só na rodada 1"
+   ]
+  }
+ ],
+ "refsDiferentes": [],
+ "criticos": {
+  "r1": 20,
+  "r2": 20,
+  "iguais": 20,
+  "casos": [
+   {
+    "chave": [
+     "casos-criticos-endereco.json",
+     "OM→OS",
+     "",
+     "MA#om=OM-0233",
+     0,
+     "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+     ""
+    ],
+    "r1": {
+     "r": "mesma tela",
+     "para": "MA#vis=ordens&achado=SM-0147",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "mesma tela",
+     "para": "MA#vis=ordens&achado=SM-0147",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos-endereco.json",
+     "OS→EST",
+     "outro",
+     "OS#OS-0420",
+     0,
+     "Retirar no almoxarifado ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos-endereco.json",
+     "OS→OM",
+     "MA",
+     "OS#OS-0431",
+     0,
+     "Acompanhar OM-0233 ›",
+     "MA.dc.html#om=OM-0233"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "MA#vis=ordens&om=OM-0233",
+     "alvo": "OM-0233",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "MA#vis=ordens&om=OM-0233",
+     "alvo": "OM-0233",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OM→OS",
+     "",
+     "MA#vis=ordens",
+     2,
+     "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+     ""
+    ],
+    "r1": {
+     "r": "mesma tela",
+     "para": "MA#vis=ordens&achado=SM-0147",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "mesma tela",
+     "para": "MA#vis=ordens&achado=SM-0147",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "devolver",
+     "OS",
+     1,
+     "Receber devolução no Estoque ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "entregar",
+     "OS",
+     5,
+     "Entregar no Estoque ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "entregar",
+     "OS",
+     6,
+     "Entregar no Estoque ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "outro",
+     "OS",
+     3,
+     "Retirar no almoxarifado ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "outro",
+     "OS",
+     4,
+     "Retirar no almoxarifado ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→EST",
+     "saldo",
+     "OS",
+     2,
+     "Ver saldos no Estoque ›",
+     "EST.dc.html"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "r2": {
+     "r": "navega",
+     "para": "EST",
+     "alvo": "",
+     "abriu": false,
+     "destacou": false,
+     "inconclusivo": true
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "OS→OM",
+     "MA",
+     "OS",
+     8,
+     "Acompanhar OM-0233 ›",
+     "MA.dc.html#om=OM-0233"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "MA#vis=ordens&om=OM-0233",
+     "alvo": "OM-0233",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "MA#vis=ordens&om=OM-0233",
+     "alvo": "OM-0233",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     3,
+     "Abrir OS-0504",
+     "OS.dc.html#OS-0504"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     3,
+     "Aplicação · Abamectina 18 EC",
+     "OS.dc.html#OS-0504"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     4,
+     "Abrir OS-0508",
+     "OS.dc.html#OS-0508"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     4,
+     "Aplicação · Tebuconazol 200 EC",
+     "OS.dc.html#OS-0508"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     null,
+     "Abrir OS-0504",
+     "OS.dc.html#OS-0504"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0504",
+     "alvo": "OS-0504",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-01",
+     "AG-01",
+     null,
+     "Abrir OS-0508",
+     "OS.dc.html#OS-0508"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0508",
+     "alvo": "OS-0508",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-04",
+     "AG-04",
+     null,
+     "Abrir OS-0421",
+     "OS.dc.html#OS-0421"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0421",
+     "alvo": "OS-0421",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0421",
+     "alvo": "OS-0421",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-04",
+     "AG-04",
+     null,
+     "Liberar OS-0418",
+     "OS.dc.html#OS-0418"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0418",
+     "alvo": "OS-0418",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0418",
+     "alvo": "OS-0418",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   },
+   {
+    "chave": [
+     "casos-criticos.json",
+     "receituário→OS",
+     "AG-04det",
+     "AG-04det",
+     null,
+     "OS-0420",
+     "OS.dc.html#OS-0420"
+    ],
+    "r1": {
+     "r": "navega",
+     "para": "OS#OS-0420",
+     "alvo": "OS-0420",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "r2": {
+     "r": "navega",
+     "para": "OS#OS-0420",
+     "alvo": "OS-0420",
+     "abriu": true,
+     "destacou": false,
+     "inconclusivo": false
+    },
+    "igual": true
+   }
+  ]
+ }
+}
