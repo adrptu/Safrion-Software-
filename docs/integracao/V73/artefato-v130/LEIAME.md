@@ -27,6 +27,6 @@
   | `aprova_quem_decide` | 102/103 | 103/103: oráculo do seletor com o perfil "todos os papéis" (`1b5a4acd`) |
   | `config_unit` | 216/226 | 226/226: fixture emite OS-0699/0698, fora da semente nova (`35b8b040`) |
   | `textos_soltos` | 266/267 | 267/267: oráculo do CA-01det segue o rodapé honesto de `d3435d04` (`98788456`) |
-  | `mbtest` MB-02 "conteúdo cabe na altura" | excesso 1142 px (`mbtest_base_v129.log`) | igual, sem regressão; fica para a próxima rodada da base verde |
+  | `mbtest` MB-02 "conteúdo cabe na altura" | `MB-02.dc.html` igual byte a byte ao desta versão; o render da v128 também reprova (`mbtest_render_v128.log`) | excesso de 1142 px, não vem desta versão; fica para a próxima rodada da base verde |
 
   - O `mbtest` termina com código 0 mesmo com 1 falha. O executor não sinaliza a falha pelo código de saída.
