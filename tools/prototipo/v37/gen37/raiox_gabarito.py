@@ -92,9 +92,11 @@ def consolidar(agendas):
         cs = [classe(por_agenda[k]) for k in CONTRATO['agendas']]
         sementes = [{r['semente'] for r in por_agenda[k]} for k in CONTRATO['agendas']]
         pareamento = sementes[0] == sementes[1]
-        if any(c['classe'] in ('insuficiente', 'nao_identificavel') for c in cs):
+        if not pareamento:
+            estado = 'nao_pareado'
+        elif any(c['classe'] in ('insuficiente', 'nao_identificavel') for c in cs):
             estado = 'nao_identificavel' if any(c['classe']=='nao_identificavel' for c in cs) else 'insuficiente'
-        elif not pareamento or len({(c['classe'], c['sinal']) for c in cs}) != 1:
+        elif len({(c['classe'], c['sinal']) for c in cs}) != 1:
             estado = 'ambiguo'
         else:
             estado = cs[0]['classe']
@@ -102,7 +104,7 @@ def consolidar(agendas):
                         'sinal': cs[0].get('sinal') if estado in ('forte', 'fraco') else None}
     estados = {(x['classe'], x['sinal']) for x in saida.values()}
     return {'contrato_hash': hash_contrato(), 'safras': saida,
-            'classe': next(iter(estados))[0] if len(estados)==1 else 'ambiguo',
+            'classe': ('nao_pareado' if any(x['classe']=='nao_pareado' for x in saida.values()) else next(iter(estados))[0] if len(estados)==1 else 'ambiguo'),
             'recuperacao_motor': 'nao_executada'}
 
 
@@ -211,6 +213,7 @@ def gerar(episodios):
     # Rejeita NaN/Infinity no pacote antes de calcular ou mascarar por clipping.
     digest(episodios)
     entradas, pares, grupos, exclusoes, identidades = [], [], {}, {}, set()
+    mundos = {}
     for ep in episodios:
         if type(ep['semente']) is not int or ep['semente'] < 0:
             raise ValueError('Semente inteira não negativa obrigatória')
@@ -233,7 +236,7 @@ def gerar(episodios):
             trajetorias = {braco: replay(ep['x0'], dias, agenda, ep['cap'], ep['fx'],
                             fator if braco=='desligado' else None) for braco in CONTRATO['agendas']}
             entrada = {k: ep[k] for k in ('cenario', 'safra', 'semente', 'talhao', 'alvo', 'nc')}
-            entrada.update(id=digest([chave_ep, referencia]),
+            entrada.update(id=digest(chave_ep[:-1]),
                            series=[{'day': d, 'clima': q.get('clima_observado'),
                                     'chuva': q['chuva'], 'falta_agua': q['falta'],
                                     'n14': q['n14'], 'k14': q['k14'],
@@ -242,7 +245,13 @@ def gerar(episodios):
                            agenda_referencia=referencia,
                            obs=[{'day': d, 'v': trajetorias[referencia][d]['v']} for d in obs],
                            apps=[{'day': a['day']} for a in agenda])
-            entradas.append(entrada)
+            if referencia == 'ligado':
+                mundo = chave_ep[:-1]
+                if mundo in mundos and mundos[mundo] != entrada:
+                    raise ValueError('Mundo factual conflitante')
+                if mundo not in mundos:
+                    mundos[mundo] = entrada
+                    entradas.append(entrada)
             for d1, d2 in zip(obs, obs[1:]):
                 chave = tuple(ep[k] for k in ('cenario', 'talhao', 'alvo', 'fator'))+(d1,d2)
                 safra = grupos.setdefault(chave, {}).setdefault(ep['safra'], {a: [] for a in CONTRATO['agendas']})
@@ -279,7 +288,7 @@ def gerar(episodios):
     for c in classes_por_safra.values():
         c['denominador'] = 'grupos cenário/talhão/alvo/fator/janela, consolidados entre agendas'
         c['fracoes'] = {estado: c['contagens'].get(estado, 0)/c['total']
-                        for estado in ('forte', 'fraco', 'ambiguo', 'nao_identificavel', 'insuficiente')}
+                        for estado in ('forte', 'fraco', 'ambiguo', 'nao_identificavel', 'insuficiente', 'nao_pareado')}
     for c in exclusoes.values():
         c['fracao_excluida'] = (c['inelegivel']+c['clipping'])/c['total'] if c['total'] else None
     return {'entrada': entradas, 'oraculo': {'contrato': CONTRATO, 'contrato_hash': hash_contrato(),
@@ -314,6 +323,14 @@ def selecionar_disponiveis(registros, corte, protocolo, unidade):
         anterior = recentes.get(r['id'])
         if anterior is None or (r['disponivel_em'], r['versao']) > (anterior['disponivel_em'], anterior['versao']):
             recentes[r['id']] = r
+    conhecidos = {}
+    for r in registros:
+        if r['disponivel_em'] <= corte:
+            conhecidos.setdefault(r['id'], []).append(r)
+    for revisoes in conhecidos.values():
+        ordenadas = sorted(revisoes, key=lambda r: r['versao'])
+        if any(a['disponivel_em'] > b['disponivel_em'] for a,b in zip(ordenadas, ordenadas[1:])):
+            raise ValueError('Versão e publicação fora de ordem')
     elegiveis = []
     for r in recentes.values():
         motivo = None
@@ -394,6 +411,8 @@ def eficacia_referencia(tratado, controles, aplicacao, corte):
         falha = motivo(c)
         if c.get('unidade') != tratado.get('unidade') or c.get('protocolo') != tratado.get('protocolo'):
             falha = 'protocolo_ou_unidade_incompativel'
+        if falha is None and (c['antes_dia'], c['depois_dia']) != (tratado['antes_dia'], tratado['depois_dia']):
+            falha = 'datas_nao_pareadas'
         if falha is None and (c['antes'] == 0 or c['depois'] == 0):
             falha = 'denominador_zero'
         if falha:

@@ -41,7 +41,7 @@ assert.equal(pa.status,0,pa.stderr);assert.deepEqual(JSON.parse(pa.stdout),expec
 console.log('PASS: 5 limites de aplicação e inversão de sinal entre safras; '+'PASS: 6 janelas em paridade com rxRows real; controles zero, forte, clipping, agendas opostas, duas safras e sementes duplicadas. Recuperação pelo motor ainda não executada.');
 
 // Duas safras sintéticas: política simplificada declarada, não recuperação do motor.
-const batch = "import sys,random,math,json,pathlib,copy\nsys.path.insert(0,sys.argv[1])\nimport raiox_gabarito as g\neps=[]\nfor season in (1,2):\n for seed in range(20):\n  rng=random.Random(1000*season+seed)\n  dias=[dict(wk=1.03,clima=1+.01*math.sin((d+season*4)/6),falta=.2,n14=10+math.sin((d+season*5)/7),k14=20,imigracao=.01,chuva=12 if (d+season)%13==0 else 0,ruido_obs=.88+rng.random()*.24,eff=.6+rng.random()*.1) for d in range(43)]\n  for scenario in ('zero','ausente','positivo'):\n   ds=copy.deepcopy(dias)\n   if scenario=='ausente':\n    for d in ds:d['n14']=6.4\n   eps.append(dict(cenario=scenario,safra=str(season),semente=seed,talhao='T',alvo='sintetico',fator='n',dias=ds,observacoes=[1,8,15,22,29,36,42],nc=1,x0=2,cap=1000,fx={'def':0,'n':0 if scenario=='zero' else .03,'k':0,'lav':1},politica={'delay':2,'gatilho':8,'resid':3}))\na=g.gerar(eps);b=g.gerar(eps)\nassert g.digest(a)==g.digest(b)\nassert len(a['entrada'])==240\nassert all(c['resultado']['classe']!='forte' for c in a['oraculo']['classes'] if c['chave'][0]!='positivo')\nassert any(c['resultado']['classe']=='forte' for c in a['oraculo']['classes'] if c['chave'][0]=='positivo')\nassert all(p['resultado']['delta']==0 for p in a['oraculo']['pares'] if p['cenario'] in ('zero','ausente') and 'resultado' in p)\nassert all('resultado' not in e and 'intervencao' not in e for e in a['entrada'])\nprint(json.dumps({'episodios':len(eps),'entradas':len(a['entrada']),'pares':len(a['oraculo']['pares']),'hash_repeticao':g.digest(a),'classes':[(x['chave'][0],x['chave'][-2:],x['resultado']['classe']) for x in a['oraculo']['classes']],'exclusoes':a['oraculo']['exclusoes_por_safra']},ensure_ascii=False))";
+const batch = "import sys,random,math,json,pathlib,copy\nsys.path.insert(0,sys.argv[1])\nimport raiox_gabarito as g\neps=[]\nfor season in (1,2):\n for seed in range(20):\n  rng=random.Random(1000*season+seed)\n  dias=[dict(wk=1.03,clima=1+.01*math.sin((d+season*4)/6),falta=.2,n14=10+math.sin((d+season*5)/7),k14=20,imigracao=.01,chuva=12 if (d+season)%13==0 else 0,ruido_obs=.88+rng.random()*.24,eff=.6+rng.random()*.1) for d in range(43)]\n  for scenario in ('zero','ausente','positivo'):\n   ds=copy.deepcopy(dias)\n   if scenario=='ausente':\n    for d in ds:d['n14']=6.4\n   eps.append(dict(cenario=scenario,safra=str(season),semente=seed,talhao='T',alvo='sintetico',fator='n',dias=ds,observacoes=[1,8,15,22,29,36,42],nc=1,x0=2,cap=1000,fx={'def':0,'n':0 if scenario=='zero' else .03,'k':0,'lav':1},politica={'delay':2,'gatilho':8,'resid':3}))\na=g.gerar(eps);b=g.gerar(eps)\nassert g.digest(a)==g.digest(b)\nassert len(a['entrada'])==120\nassert all(c['resultado']['classe']!='forte' for c in a['oraculo']['classes'] if c['chave'][0]!='positivo')\nassert any(c['resultado']['classe']=='forte' for c in a['oraculo']['classes'] if c['chave'][0]=='positivo')\nassert all(p['resultado']['delta']==0 for p in a['oraculo']['pares'] if p['cenario'] in ('zero','ausente') and 'resultado' in p)\nassert all('resultado' not in e and 'intervencao' not in e for e in a['entrada'])\nprint(json.dumps({'episodios':len(eps),'entradas':len(a['entrada']),'pares':len(a['oraculo']['pares']),'hash_repeticao':g.digest(a),'classes':[(x['chave'][0],x['chave'][-2:],x['resultado']['classe']) for x in a['oraculo']['classes']],'exclusoes':a['oraculo']['exclusoes_por_safra']},ensure_ascii=False))";
 const bp=cp.spawnSync("python3",["-B","-c",batch,__dirname],{encoding:"utf8"});
 assert.equal(bp.status,0,bp.stderr);console.log(bp.stdout.trim());
 
@@ -93,7 +93,7 @@ for field,value in [('semente',True),('semente',-1),('identificavel',1)]:
  try:g.classe(q);raise AssertionError('Réplica inválida aceita')
  except ValueError:pass
 p={'s1':{'ligado':r(0),'desligado':r(20)},'s2':{'ligado':r(0),'desligado':r(0)}}
-assert g.consolidar(p)['classe']=='ambiguo'
+assert g.consolidar(p)['classe']=='nao_pareado'
 assert not g.consolidar(p)['safras']['s1']['sementes_pareadas']
 try:g.gerar([{'qualquer':float('nan')}]);raise AssertionError('NaN aceito')
 except ValueError:pass
@@ -203,3 +203,31 @@ if(exportIndex>=0) {
  console.log('Pacote exportado: '+path.resolve(dir));
 }
 
+
+// Revisão Claude R1–R4: factual único, datas pareadas e versões coerentes.
+const revisao=String.raw`
+import sys,json,copy
+sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+# Dois fatores do mesmo mundo não duplicam observações.
+eps=[]
+for safra in ('1','2'):
+ for fator in ('n','k'):
+  eps.append(dict(cenario='revisao',safra=safra,semente=0,talhao='T',alvo='A',fator=fator,nc=1,x0=2,cap=1000,fx={'n':.03,'k':.02,'def':0,'lav':1},observacoes=[1,8],politica=dict(delay=2,gatilho=100,resid=3),dias=[dict(wk=1.03,clima=1,falta=0,n14=10,k14=20,imigracao=.01,chuva=0,ruido_obs=1,eff=.6) for _ in range(9)]))
+a=g.gerar(eps)
+assert len(a['entrada'])==2
+assert all(e['agenda_referencia']=='ligado' for e in a['entrada'])
+assert len(a['oraculo']['pares'])==8
+bad=copy.deepcopy(eps);bad[1]['x0']=3
+try:g.gerar(bad);raise AssertionError('mundo conflitante aceito')
+except ValueError as e:assert 'Mundo factual conflitante' in str(e)
+t=dict(antes=10,depois=2,antes_dia=9,depois_dia=17,unidade='u',protocolo='p')
+c=dict(t,id='C',antes_dia=1,depois_dia=30)
+assert g.eficacia_referencia(t,[c],10,30)['exclusoes'][0]['motivo']=='datas_nao_pareadas'
+r=dict(id='R',fonte='teste',tipo='fato',dia=1,unidade='u',protocolo='p',valor=1)
+try:g.selecionar_disponiveis([dict(r,versao=1,disponivel_em=3),dict(r,versao=2,disponivel_em=2)],3,'p','u');raise AssertionError('versão regressiva aceita')
+except ValueError:pass
+# Versão futura não influencia decisão no corte.
+assert len(g.selecionar_disponiveis([dict(r,versao=1,disponivel_em=3),dict(r,versao=2,disponivel_em=2)],2,'p','u')['registros'])==1
+print('PASS: R1 factual único e conflito recusado; R2 datas; R4 ordem de versões no corte.')
+`;
+const rr=cp.spawnSync('python3',['-B','-c',revisao,__dirname],{encoding:'utf8',timeout:20000});assert.equal(rr.status,0,rr.stderr);console.log(rr.stdout.trim());
