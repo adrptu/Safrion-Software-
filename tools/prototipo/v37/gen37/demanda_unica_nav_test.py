@@ -94,8 +94,8 @@ try:
     chk('N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)',
         '428.305,00' in tot and '1.140' in ur2 and mc==ms and any('OS-0420' in l for l in ms) and any('OS-0431' in l for l in ms),(tot,ur2,ms[:4],mc[:4]))
     mapa(); n0=nums(); f0=fonte(); tap('T4'); p4=pan('T4'); tap('T4'); tap('T1'); p1=pan('T1'); tap('T1'); foto('3_mapa_sr')
-    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 20 produtos · 15 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
-        all(x in n0 for x in ('Produtos 20','Faltam 15','A receber 3','Estoque cobre 2'))   # rótulos curtos na faixa (o completo na dica), 13/10/2026 and 'MAP 11-52 · 17.500 kg' in p4 and 'Falta 79.500 kg' in p4
+    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
+        all(x in n0 for x in ('Produtos 19','Faltam 14','A receber 3','Estoque cobre 2'))   # rótulos curtos na faixa (o completo na dica), 13/10/2026 and 'MAP 11-52 · 17.500 kg' in p4 and 'Falta 79.500 kg' in p4
         and 'Fungicida A' in p1 and 'Falta 145' not in p1 and 'Falta 130' not in p1
         and 'necessidade líquida da Safra 2026/27' in f0 and 'a mesma do Planejar safra e da Compra' in f0 and 'sem plano: O.S. abertas' not in f0,(n0,p4[:400],p1[:300]))
     mapa('Lagoa Grande',tsel=['PV13']); p13=pan1(); f13=fonte(); foto('4_mapa_lg')
@@ -112,7 +112,7 @@ try:
     chk('I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar',
         'OS-0418 cancelada sem execução' in tc and u1=='0 kg' and t6b.startswith('Valor da necessidade líquida R$ 424.771,00 · 13 insumos a comprar'),(tc,u1,t6b))
     mapa(); n1=nums(); tap('P1'); pp=pan('P1'); tap('P1')
-    chk('I2 Mapa › Insumos acompanha: 19 produtos · 14 faltam; P1 sem Ureia',all(x in n1 for x in ('Produtos 19','Faltam 14')) and 'Ureia' not in pp,(n1,pp[:300]))
+    chk('I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia',all(x in n1 for x in ('Produtos 18','Faltam 13')) and 'Ureia' not in pp,(n1,pp[:300]))
     # ================= a SOL já enviada pede mais do que a demanda de agora (a O.S. saiu depois do envio): o Planejar safra mostra e atualiza =================
     prim=lambda: (J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(x=>x.offsetParent); return b?b.innerText.replace(/\\s+/g,' ').trim():'';})()") or '')
     saf(); ux=[cel('Ureia 45%',k) for k in ('Necessidade líquida','Situação','Solicitação')]; t6x=k6(); px=prim(); rowclick('Ureia 45%'); mu=memo(); fechar(); foto('5b_saf_acima')

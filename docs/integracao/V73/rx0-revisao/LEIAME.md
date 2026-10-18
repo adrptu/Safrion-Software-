@@ -16,3 +16,11 @@ O parecer está no PR #47, comentário 6250325658.
 - R2: o controle com datas diferentes sai como `datas_nao_pareadas`.
 - R3: `nao_pareado`.
 - R4: a versão fora de ordem é recusada, e no corte anterior a versão ainda indisponível não muda nada.
+
+## Revisão do C2.1 emendado `5bdcd2f5` (18/10/2026)
+
+- `sonda_rx0_5bdcd2f5.sh` reexecuta as 640 populações no motor v3.1 (`cb481aab…`) com o harness do Codex; saída em `sonda_rx0_5bdcd2f5.log`.
+- Reproduz o resultado do Codex: 640 não selecionado, 468 nulo, 141 fraca, 31 moderada, 0 forte e 0 grupo.
+- Os 640 "não selecionado" vêm todos de modelo vazio: antracnose e cochonilha têm de 12 a 24 janelas. O limiar exige 8 casos de cada lado, então nenhum fator chega ao modelo. Isso é falta de dado (`insuf`), não seleção. A lacuna está no C2.1 (autoria Claude), não no harness; a correção é o C2.2.
+- Dos 31 moderados, 13 são herdados do grupo (o fator é só *mate* em pelo menos uma safra). Exemplo: 10 vezes "qs moderada" com a molhadura como representante nas duas safras.
+- Placebo: 0 forte, 0 moderada; 4 fraca própria e 9 fraca herdada do grupo.

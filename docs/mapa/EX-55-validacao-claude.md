@@ -55,7 +55,7 @@ Pedido do proprietário (18/10/2026) e prompt: `docs/integracao/V73/pedidos-1810
 | Análises de solo | alto | **Adaptar** | F3 | Só com laudo georreferenciado. A interpolação exige a legenda de valores e a qualidade do dado (SOLO-GEO F1 antes) |
 | Custos | alto | **Adaptar** | F3 | Corrigir antes o "todo talhão com previsto fica azul" (EX-44). Sem a correção, o mapa engana |
 | Orçamento | médio | **Adotar** | F3 | Junto com o ORC-2 (variação explicada), não antes |
-| Planos agronômicos | médio | **Adiar** | F4 | A decisão é "adotar a versão": a lista com filtro resolve, e o mapa só repete |
+| Planos agronômicos | médio | **Adaptar** (ver §6, ponto 1) | F4 | Versão adotada por talhão; destaca a adoção desigual |
 | Recebimento | médio | **Adotar** | F4 | A origem por talhão |
 | Agrofit, Beneficiamento, Estoque de produto, Painel | sem mapa | **Rejeitar** a visão; adotar o link ao talhão | F4 | Não há decisão espacial |
 
@@ -84,6 +84,28 @@ Pedido do proprietário (18/10/2026) e prompt: `docs/integracao/V73/pedidos-1810
   - laço de seleção: F2;
   - interpolação de solo: volta com o SOLO-GEO F1;
   - mapa de custos: volta com a correção do EX-44;
-  - mapa de planos: volta se o proprietário pedir.
+  - mapa de planos: F4 (§6, ponto 1).
 - **Cortado:** mapa no Agrofit, Beneficiamento, Estoque de produto e Painel; MapLibre embutido.
 - **Gemini:** não é necessário para a F1, porque não há divergência de domínio. Fica para a F3, em solo (interpolação) e produtividade.
+
+## 6. Confronto com o Codex (6253659075, 18/10/2026): os 5 pontos aceitos e incorporados
+
+| # | Ponto do Codex | Decisão | Como fica |
+|---|---|---|---|
+| 1 | Planos não pode ficar à espera de novo pedido do proprietário | **Aceito** | Planos agronômicos passa de "Adiar" para **Adaptar, F4**: o mapa mostra a versão adotada por talhão e destaca a adoção desigual. O requisito já está no prompt de 18/10 |
+| 2 | Separar abrir de selecionar | **Aceito** | Nas telas de consulta (O.S., Pragas, Irrigação), clique, toque ou Enter no talhão **abre** o detalhe. A seleção tem controle próprio e acessível: o botão "Selecionar talhões" liga o modo de seleção, e então o toque marca, sem depender de Shift. Um gesto nunca abre e marca ao mesmo tempo. No Planejar safra o contrato atual continua: tocar marca as linhas do talhão, inclusive "em parte" (mixed) |
+| 3 | Paridade no mesmo contexto | **Aceito** | A classe, a dica, o total e a lista curta vêm **das linhas visíveis da própria lista** (o mesmo recorte de fazenda, safra, cultura, talhão e busca). Um talhão com duas O.S., uma delas filtrada fora, pinta só pela visível. Unidades diferentes não se somam e a lista curta mantém os IDs. O extrator declara as suas dependências e não carrega o IN-04 inteiro |
+| 4 | O Planejar safra pinta o rascunho | **Aceito** | Ficam em comum o desenho, a seleção e a geometria. O adaptador de contexto do Planejar safra continua lendo o rascunho (`sl.vals`: cultivar, plano e semana) e nunca o `lavOf` publicado. A regressão prova rascunho, seleção parcial e foco ao alternar Tabela e Mapa (`saf_mapa_test` M1–M9) |
+| 5 | Não chamar as nove camadas de prontas | **Aceito** | A F1 valida só os contextos usados (camada O.S. em Fases, Avanço, Atrasos e Impedimentos; MIP; Irrigação de hoje e balanço) e as regressões existentes. "Sem leitura", "sem cultura" e "não aplicável" continuam distintos. Laço, solo e índices seguem pendentes com os seus IDs |
+
+**O aceite da F1 (§4) muda assim:**
+- **Item 1:** a paridade é medida com o recorte real de cada tela, com um caso de talhão com registro filtrado fora.
+- **Item 3:** clique abre; a seleção só pelo modo "Selecionar talhões".
+- **Novo item 9:** no Planejar safra, a cor vem do rascunho e não do publicado. A contraprova é alterar o rascunho sem salvar: a cor muda.
+
+**Divisão de arquivos antes do código** (pedido do Codex):
+- `mapa_camadas.js`: a classificação extraída do IN-04, só as funções e dependências declaradas;
+- `mapa_emb.js`: desenho, legenda, dica, teclado e seleção;
+- adaptadores por tela: `os_mapa.js`, `mip_mapa.js`, `irr_mapa.js` e o atual `safra_mapa.js`, que vira adaptador.
+
+Autoria Claude; o Codex revisa.

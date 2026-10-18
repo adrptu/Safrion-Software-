@@ -63,7 +63,7 @@ try:
     print('  abrir compra:', clk('Abrir compra'), T())
     chk('etapa 2 · demanda', cur().startswith('2 Confira a demanda'))
     # CTL-4 (demanda única): as O.S. entram na demanda (antes R$ 379.580,00 e MAP 62.500 kg); Fungicida A e Adjuvante saem da SOL; a Ureia da OS-0418 entra
-    # OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio na 2026/27 (+1 insumo, +R$ 178,50; base verde 2, 18/10)
+    # v135 (EX-54): as O.S. de demonstração (selo "Demonstração") ficam fora da demanda de compra; o Sulfato de magnésio que elas punham na 2026/27 sai
     b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 428.305,00' in b and '428.305,00' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
     clk('Expandir tudo'); b=body()
     chk('MAP 11-52 79.500 (500 kg da OS-0417 em custódia contam) e KCl coberto com quarentena', '79.500' in b and 'em quarentena não contam' in b)
@@ -134,10 +134,10 @@ try:
     t=rowtxt('Nitrato de cálcio'); chk('Nitrato de cálcio: padrão Casa do Adubo (Fertisul chega depois)', 'Casa do Adubo' in t and 'Menor custo a tempo' in t, t)
     # CTL-4 (DEM-08): a Ureia da OS-0418 falta em 24/09 e nenhuma proposta chega antes: padrão = a que chega primeiro, sem justificativa obrigatória
     # (não há alternativa a tempo para justificar); o aviso "chega depois da falta" continua e o resumo conta a escolha atrasada
-    # OS-LOTE (6dfa09c1, 16/10): o Sulfato de magnésio das O.S. de demonstração também chega depois da falta: o resumo conta 2 (base verde 2, 18/10)
+    # v135 (EX-54): sem as O.S. de demonstração na demanda, o Sulfato de magnésio não tem linha e o resumo volta a contar só a Ureia
     t=rowtxt('Ureia 45%'); k4b=J("(document.body.innerText.match(/\\d+ propostas · custo total escolhido [^\\n]+/)||[''])[0]") or ''
-    chk('DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "2 escolhas chegam depois da falta" (Ureia e Sulfato de magnésio) e nenhuma sem justificativa',
-        'Casa do Adubo' in t and 'Chega primeiro' in t and 'Chega depois da falta (24/09)' in t and 'Justificativa pendente' not in t and '2 escolhas chegam depois da falta' in k4b and 'Chega depois da falta' in rowtxt('Sulfato de magnésio') and 'sem justificativa' not in k4b, (t,k4b,rowtxt('Sulfato de magnésio')))
+    chk('DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "1 escolha chega depois da falta" (só a Ureia; o Sulfato de magnésio das O.S. de demonstração não entra) e nenhuma sem justificativa',
+        'Casa do Adubo' in t and 'Chega primeiro' in t and 'Chega depois da falta (24/09)' in t and 'Justificativa pendente' not in t and '1 escolha chega depois da falta' in k4b and rowtxt('Sulfato de magnésio')=='sem linha' and 'sem justificativa' not in k4b, (t,k4b,rowtxt('Sulfato de magnésio')))
     # etapa 5 · Direção (total acima de 300 mil?) → depende da quantidade; primeiro volta MAP ao total
     row('MAP 11-52'); setv('#'+fid('ped'),'79500'); clk('Salvar','aside[role=dialog]')
     clk('Revisar aprovação'); chk('etapa 5', cur().startswith('5 '))
