@@ -274,13 +274,6 @@ def _nome(p,c):  # nome do insumo no cultivo (a semente leva a variedade)
     return p
 _CJ={c['op']:c for c in D2.CONJ}
 COP={op:round(D2.custo_h(c)/c['rend'],2) for op,c in _CJ.items()}   # R$/ha da operação (conjunto e rendimento da safra)
-def _data_atv(c,a):
-    g=a.get('g') or {}; t=g.get('tipo')
-    if t=='DAP': return _iso(c['plantio'])+_dt.timedelta(days=g['dias'])
-    if t=='DATA' and g.get('data'): return _iso(g['data'])
-    if t in ('DAPC','DANC') and c.get('colheita'): return _iso(c['colheita'])+_dt.timedelta(days=(g['dias'] if t=='DAPC' else -g['dias']))
-    return None
-
 # ---- previsto por talhão: plano da safra (dose × preço × área + operação); sem plano, as O.S. emitidas no talhão ----
 ORD_REG={o['id']:o for o in _ordens_os()}
 def _prev():
@@ -309,6 +302,12 @@ def _prev():
     return out
 def _somar_plano(P,cs,orig):
     P['fonte']='plano'; P['base']=sum(c['area'] for c in cs); P['orig']=orig
+    from datas_atividade import calcular_lote
+    entradas = [dict(atividade=a, cultivo=c,
+                     contexto=dict(variante='canonica', plano=pl))
+                for c in cs for pl in D2.PLANOS if pl['id']==c['plano']
+                for a in pl['atividades']]
+    datas = iter(calcular_lote(entradas))
     for c in cs:
         pl=next(p for p in D2.PLANOS if p['id']==c['plano'])
         for a in pl['atividades']:
@@ -319,8 +318,9 @@ def _somar_plano(P,cs,orig):
                 vi+=x['dose']*pr*c['area']
             co=COP.get(a['op']); vo=(co*c['area']) if co is not None else 0
             if co is None: P['pend'].append('Operação '+a['op']+' sem rendimento na safra (não somada)')
-            P['ins']+=vi; P['op']+=vo; d=_data_atv(c,a)
-            P['lin'].append([c['local']+' · '+a['nome'],(d.isoformat() if d else ''),round(vi+vo,2)])
+            P['ins']+=vi; P['op']+=vo; d=next(datas)['data']
+            if d is None: P['pend'].append(a['nome']+' · aguarda '+('plantio' if a['g']['tipo']=='DAP' else ('colheita' if a['g']['tipo'] in ('DAPC','DANC') else 'data válida')))
+            P['lin'].append([c['local']+' · '+a['nome'],(d or ''),round(vi+vo,2)])
     return P
 def _fechar(P):
     P['tot']=round(P['ins']+P['op'],2); P['ins']=round(P['ins'],2); P['op']=round(P['op'],2); P['pend']=list(dict.fromkeys(P['pend'])); return P

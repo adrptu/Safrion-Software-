@@ -18,10 +18,6 @@ function iso(d){ return d.toISOString().slice(0,10); }
 function addDays(s,n){ const d=new Date(s+'T12:00:00'); d.setDate(d.getDate()+n); return iso(d); }
 function br(s){ if(!s) return '—'; const a=s.split('-'); return a[2]+'/'+a[1]+'/'+a[0]; }
 function prodNome(p,c){ if(p.indexOf('variedade do cultivo')>=0||p.indexOf('híbrido do cultivo')>=0){ return p.split(' · ')[0]+' '+String(c.v.var||'').replace('Híbrido ',''); } return p; }
-function colheitaDe(c,pl){ if(c.v.colheita) return c.v.colheita; const ca=pl.atividades.find(a=>a.op.indexOf('Colheita')===0);
-  if(ca&&ca.g.tipo==='DAP') return addDays(c.v.plantio,ca.g.dias); if(ca&&ca.g.tipo==='DATA') return ca.g.data; return c.v.plantio; }
-function dataAtv(c,a,pl){ const g=a.g; if(g.tipo==='DAP') return addDays(c.v.plantio,g.dias); if(g.tipo==='DATA') return g.data;
-  const col=colheitaDe(c,pl); return addDays(col, g.tipo==='DAPC'? g.dias : -g.dias); }
 function gatLabel(g){ if(g.tipo==='DAP') return 'DAP '+(g.dias>0?'+':(g.dias<0?'−':''))+Math.abs(g.dias); if(g.tipo==='DATA') return br(g.data); if(g.tipo==='DAPC') return g.dias+' dias após a colheita'; return g.dias+' dias antes da colheita'; }
 function gatOrder(g){ if(g.tipo==='DATA') return g.data; return g.tipo==='DANC'? -g.dias : g.dias; }
 function grupoGat(t){ return t==='DAP'?'DAP':(t==='DATA'?'DATA':'DAC'); }
@@ -296,7 +292,7 @@ function cargaItens(i){ const o=[]; ((i.rp&&i.rp.itens)||[]).forEach((x,j)=>{ co
   Object.keys(rc).forEach(k=>{ const u=Number(rc[k])||0; if(u<=0) return; o.push({k,j,u,h:(Number(x.nh)||0)*u,ha:(Number(x.h)||0)*u,sim:(Number(x.nq)||0)>1e-12?u:0,semRec:!!x.semRec,nome:x.nome}); }); }); return o; }
 function cargaRec(i,k){ return cargaItens(i).filter(c=>c.k===k).reduce((a,c)=>a+c.h,0); }
 // etiqueta do calendário de uma ocorrência (uma só): antes do início, depois do fim ou fora do calendário; conta no custo, não na capacidade
-function classeOc(dt,mi,ini,fim){ if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim) return 'depois'; if(mi<0) return 'fora'; return 'cal'; }
+function classeOc(dt,mi,ini,fim){ if(!dt) return 'fora'; if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim) return 'depois'; if(mi<0) return 'fora'; return 'cal'; }
 // texto único da ocupação (célula, aria-label, filtro, atalhos e espelho): "<1 %" abaixo de 1 %; "—" sem demanda; null = não calculável
 function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
 // atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
@@ -458,7 +454,7 @@ function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.c
       const pe=L&&(L.pend[o.id]||[]); const tv=L&&L.trav.some(x=>x[1]===o.id||x[2]===o.id);
       if(tv){ r.p.sit=[{k:'chip',t:'Sobreposição',c:'red',dica:ocMotivo(L,info)}]; r.s.sit='Sobreposição'; }
       else if(pe&&pe.length){ const d=pe.map(p=>ocPendCurta(ctx,o,p,byO)).join(' · '); r.p.sit=[{k:'chip',t:'A conferir',c:'yellow',dica:d}]; r.s.sit='A conferir'; }
-      if(o.avisos.length){ const a=o.avisos[0]; r.p.plano=(r.p.plano||[]).concat([{k:'ico',c:'yellow',t:'O plano '+a[1]+' tem datas fixas fora desta safra (ex.: '+ocBr(a[2])+'). Revise o plano ou troque o gatilho para DAP/DAPC.'}]); } }   // SAF-TAB: ícone com a dica
+      if(o.avisos.length){ const mensagens=o.avisos.map(a=>a[0]==='ancora_ausente'?a[1]+' · aguarda '+(a[2]==='DAP'?'plantio':(['DAPC','DANC'].includes(a[2])?'colheita':'data válida')):'O plano '+a[1]+' tem datas fixas fora desta safra (ex.: '+ocBr(a[2])+'). Revise o plano ou troque o gatilho para DAP/DAPC.'); r.p.plano=(r.p.plano||[]).concat([{k:'ico',c:'yellow',t:mensagens.join(' · ')}]); } }   // SAF-TAB: ícone com a dica
     else { r.v.ate=''; r.p.ate=[{k:'mut',t:'—'}]; r.s.ate=''; r.v.fimpor=''; r.p.fimpor=[{k:'mut',t:'—'}]; r.s.fimpor=''; } };
   const foraRow=(o)=>{ const pl=planById(o.plano); const r={id:'fora_'+o.id,fora:true,ro:true,v:{talhao:o.t,local:o.faixa,cult:o.cult,var:o.var,area:'',ver:'',meta:'',aj:'',tipo:o.tipo},s:{},p:{}};
     r.p.local=[{k:'mut',t:o.faixa}]; r.s.local=o.faixa; r.p.sit=[{k:'mut',t:''}]; r.s.sit=''; r.p.livre=[{k:'mut',t:'—'}]; r.p.desde=[{k:'mut',t:'—'}];
@@ -595,7 +591,7 @@ function adjOf(self){ return self.state.adj||D2.ajustes; }
    sessão, senão aceite, senão padrão), as atividades incluídas e as retiradas pela análise vêm de soloAtividades (solo.js, R14/R16) ---- */
 function soloSaf(self){ const k=self.state.cenrev||0; if(!self.__sac||self.__sac.k!==k){ const c=cenGet(); self.__sac={k,c,ac:((c.solo||{}).aceites)||{},ls:soloLaudos(c,SOLO0)}; } return self.__sac; }
 function soloCu(self,saf,c){ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return null; const S=safList(self)[saf]||{};
-  return {id:c.id,saf,faz:S.faz||'Santa Rita',local:c.v.local,tal:c.v.talhao||c.v.local,cultura:c.v.cult,area:Number(c.v.area)||0,meta:c.v.meta,plano:pl,plantio:c.v.plantio,dt:(a)=>dataAtv(c,a,pl)}; }
+  return {id:c.id,saf,faz:S.faz||'Santa Rita',local:c.v.local,tal:c.v.talhao||c.v.local,cultura:c.v.cult,area:Number(c.v.area)||0,meta:c.v.meta,plano:pl,plantio:c.v.plantio,dt:(a)=>daDataAtividade(a,c.v,{variante:'canonica',plano:pl}).data}; }
 function soloAlvoSaf(self){ const S=safList(self); const cs=[]; const sn={};
   Object.keys(S).forEach(id=>{ sn[id]={nome:S[id].nome,ro:S[id].ro}; if(S[id].ro) return; cultsDe(self,id).forEach(c=>cs.push({faz:S[id].faz,tal:c.v.talhao||c.v.local,saf:id,plantio:c.v.plantio})); });
   return soloAlvo(cs,sn); }
@@ -606,7 +602,7 @@ function soloSugsSaf(self,saf,c,limpo){ const cu=soloCu(self,saf,c); if(!cu) ret
 function soloNacSaf(self,c){ return soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length; }
 function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self); const AC=soloSaf(self).ac;
   cultRows(self,saf).forEach(c=>{ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return; const area=Number(c.v.area)||0;
-    soloAtividades({id:c.id,plano:pl},adj[c.id]||{},AC).atvs.forEach(x=>{ const a=x.a; const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
+    soloAtividades({id:c.id,plano:pl},adj[c.id]||{},AC).atvs.forEach(x=>{ const a=x.a; const dt=daDataAtividade(a,c.v,{variante:'canonica',plano:pl}).data; const cfs=cfgsOf(self,saf,a.op,a.nome);
       // a área da ocorrência se divide entre as configurações do formulário Rendimento; os insumos seguem dose × área e não mudam com a divisão
       const rp=repartir(area,cfs.map(cfgIn),pools); const horas=rp.hconj||0;
       // recursos (capacidade da etapa 3): horas × multiplicador = Σ horas de cada configuração × unidades dela (máquinas por grupo e pessoas)
@@ -1360,7 +1356,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
   const base=capF?oc.filter(i=>i.mi===capF.mi&&naConta(i)&&cargaRec(i,kF)>1e-9):oc;
   const grupo=(lst)=>{ const by={}, ord=[]; lst.forEach(i=>{ let o=by[i.a.op]; if(!o){ o=by[i.a.op]={op:i.a.op,atv:{},ordA:[],its:[]}; ord.push(o); } o.its.push(i);
       let a=o.atv[i.a.nome]; if(!a){ a=o.atv[i.a.nome]={nome:i.a.nome,its:[]}; o.ordA.push(a); } a.its.push(i); });
-    const d0=(its)=>its.map(i=>i.dt).sort()[0]||''; const cmp=(x,y)=>{ const a=d0(x.its), b=d0(y.its); return a<b?-1:(a>b?1:0); };
+    const d0=(its)=>its.map(i=>i.dt).filter(Boolean).sort()[0]||''; const cmp=(x,y)=>{ const a=d0(x.its), b=d0(y.its); return a<b?-1:(a>b?1:0); };
     ord.sort(cmp); ord.forEach(o=>o.ordA.sort(cmp)); return ord; };
   // conjunto e rendimento comuns às atividades em uso da operação (todas as ocorrências, mesmo com filtro)
   const comum={}; grupo(oc).forEach(o=>{ const L=o.ordA.map(a=>a.its[0].cfs); const uma=L.every(l=>l.length===1);
@@ -1390,7 +1386,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
     p=p.concat(eq); return p.length?p:[{k:'mut',t:''}]; };
   const linha=(id,nome,its,pai,tipo,un)=>{ const av=avisos(its); const sit=sitDe(its,av); const r={id,ro:true,v:{nome,sit},s:{nome,sit},p:{}};
     r.p.sit=sitP(sit,pai,av,etq(its,tipo==='oc'));
-    const fx=e3Faixa(its); if(tipo==='oc') dcol(r,'data',its[0].dt); else dcol(r,'data',its.map(i=>i.dt).sort()[0],fx);
+    const fx=e3Faixa(its); if(tipo==='oc') dcol(r,'data',its[0].dt); else dcol(r,'data',its.map(i=>i.dt).filter(Boolean).sort()[0],fx);
     const A=its.reduce((a,i)=>a+(Number(i.area)||0),0); r.v.area=A; r.s.area=nfa(A)+' '+un; r.p.area=[{k:'txt',t:r.s.area}];
     const h=somaH(its); r.v.horas=h; if(h===''){ r.p.horas=[{k:'mut',t:''}]; }
     const c=rha(its); r.v.rha=c===null?'':c; r.s.rha=c===null?'':rs(c)+'/'+un; r.p.rha=c===null?[{k:'mut',t:''}]:[{k:'txt',t:r.s.rha}];
@@ -1916,7 +1912,7 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=abre(gid,atvs.some(a=>temErr(String(a.id))));
-      return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), open, exp:g2seta(open).exp, lab:g2seta(open,key.split('||')[0]).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
+      return {t:key.split('||')[0], dt:soloDataTexto(daDataAtividade(atvs[0],c.v,{variante:'canonica',plano:pl}).data,atvs[0]), open, exp:g2seta(open).exp, lab:g2seta(open,key.split('||')[0]).lab, tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
         atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=abre(aid,temErr(String(a.id))); const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
               const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9; const ng=ngAc(a0);
@@ -1956,14 +1952,14 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
   /* operação incluída pela análise (R18): gravada (aceite) ou a salvar (rascunho), no topo do painel; e a sugestão de incluir */
   const tipoInc=(s)=>/:ges$/.test(s.atv.id)?'gessagem':'calagem';
   const incG=acSt.filter(x=>x.tipo==='incluir'&&!(lp.inclRm||{})[x.k]); const incP=Object.values(lp.incl||{});
-  v.lp_incl=incG.map(x=>{ const ng=ngAc(x); return {t:x.atv.nome+' · '+x.prod, d:soloDoseTxt(x.dose,x.un)+' · '+soloBr(x.dt)+' · '+soloQtdTxt(cenQtd(x.dose,area),x.un,false)+(ng?' · '+ng+': não se desfaz':''), chip:'incluída pela análise · '+x.laudo,
+  v.lp_incl=incG.map(x=>{ const ng=ngAc(x); return {t:x.atv.nome+' · '+x.prod, d:soloDoseTxt(x.dose,x.un)+' · '+soloDataTexto(x.dt,x.atv)+' · '+soloQtdTxt(cenQtd(x.dose,area),x.un,false)+(ng?' · '+ng+': não se desfaz':''), chip:'incluída pela análise · '+x.laudo,
       podeDesf:!ro&&!ng, desf:()=>upd({inclRm:Object.assign({},self.state.lp.inclRm||{},{[x.k]:true})}), desfT:'Desfazer inclusão'}; })
-    .concat(incP.map(s=>({t:s.atv.nome+' · '+s.prod, d:soloDoseTxt(s.sug,s.un)+' · '+soloBr(s.dt)+' · '+soloQtdTxt(cenQtd(s.sug,area),s.un,false), chip:'incluída pela análise · '+s.laudo.id+' (a salvar)',
+    .concat(incP.map(s=>({t:s.atv.nome+' · '+s.prod, d:soloDoseTxt(s.sug,s.un)+' · '+soloDataTexto(s.dt,s.atv)+' · '+soloQtdTxt(cenQtd(s.sug,area),s.un,false), chip:'incluída pela análise · '+s.laudo.id+' (a salvar)',
       podeDesf:!ro, desf:()=>{ const x=Object.assign({},self.state.lp.incl||{}); delete x[s.k]; upd({incl:x}); }, desfT:'Desfazer'})));
   v.lp_hasIncl=v.lp_incl.length>0;
   v.lp_incSug=ro?[]:SG.sug.filter(s=>s.tipo==='incluir'&&!s.nega&&!(lp.incl||{})[s.k]).filter(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); return !g0||prCmp(g0.dose,s.sug)!==0; })
     .map(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); const fid='lp_inc_'+tipoInc(s);
-      return {d:(g0?s.atv.nome+' '+soloDoseTxt(s.sug,s.un)+' (incluída '+soloDoseTxt(g0.dose,g0.un)+')':'incluir '+s.atv.nome+' · '+s.prod+' '+soloDoseTxt(s.sug,s.un)+' em '+soloBr(s.dt)),
+      return {d:(g0?s.atv.nome+' '+soloDoseTxt(s.sug,s.un)+' (incluída '+soloDoseTxt(g0.dose,g0.un)+')':'incluir '+s.atv.nome+' · '+s.prod+' '+soloDoseTxt(s.sug,s.un)+' em '+soloDataTexto(s.dt,s.atv)),
         q:soloQtdTxt(g0?prSub(cenQtd(s.sug,area),cenQtd(g0.dose,area)):cenQtd(s.sug,area),s.un,true), u:g0?'Usar '+soloDoseTxt(s.sug,s.un):'Incluir '+tipoInc(s), pqId:'pq_'+fid,
         pq:()=>pqAbre(s,'pq_'+fid), go:()=>{ const x=Object.assign({},self.state.lp.incl||{},{[s.k]:s}); const r0=Object.assign({},self.state.lp.inclRm||{}); if(g0) r0[g0.k]=true; upd({incl:x,inclRm:r0}); }}; })
     /* R22 (revisão A3): o laudo vigente dispensa a correção incluída → "retirar"; preenche o rascunho (inclRm guarda a sugestão) e o Salvar grava */
