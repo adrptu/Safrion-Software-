@@ -27,7 +27,7 @@ CONTRATO = {
 # Pré-especificação anterior ao primeiro ensaio do motor. Não reduz o gate
 # de 100% de direção nas fixtures determinísticas ao agregado de séries.
 ENSAIO = {
-    'versao': 2,
+    'versao': 3,
     'unidade_replica': 'semente; talhoes agrupados dentro de cada replica',
     'comparacao': 'classe e sinal; nunca magnitude beta versus delta',
     'por_safra': True,
@@ -41,7 +41,12 @@ ENSAIO = {
     'denominador_regra': 'abaixo do minimo: nao avaliavel, mesmo com proporcao favoravel; nao juntar safras ou classes',
     'denominador_direcao': 'todas as replicas de classe esperada forte; insuf do motor conta no denominador e nao como acerto',
     'denominador_fixture': 'todos os casos determinísticos pre-especificados; 100% obrigatório, reportar contagem',
-    'limites_status': 'proposta para revisao; proporcoes nao sao garantia estatistica',
+    'limites_status': 'decisao A3 Claude/Codex 6253317001; nao e garantia agronomica',
+    'falso_forte_sementes_min_por_safra': 80,
+    'falso_forte_eventos_max': 0,
+    'direcao_wilson_inferior_min': 0.60,
+    'aceite': 'conjunto: direcao, falso forte, fixtures, suporte e independencia; nunca um gate isolado',
+    'pre_registro': 'hash do conjunto e parametros antes do rxFit; sem selecao pelos resultados',
     'ambiguo': 'sem expectativa de sinal; reportar separadamente',
     'suporte': {'talhoes_min': 3, 'alto_min': 40, 'baixo_min': 40, 'semanas_min': 5},
     'ausentes': 'nao avaliavel; sem imputacao; n14/k14 nao sao eventos',
@@ -62,6 +67,26 @@ def intervalo_wilson(eventos, total):
     margem = z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / den
     return {'inferior': max(0.0, centro - margem),
             'superior': min(1.0, centro + margem), 'confianca': 0.95}
+
+
+def avaliar_direcao(acertos, total):
+    """Gate de um estrato pré-especificado; insuf conta no total, não acerta."""
+    intervalo = intervalo_wilson(acertos, total)
+    if total < ENSAIO['denominador_min']:
+        return {'estado': 'nao_avaliavel', 'wilson95': intervalo}
+    passa = (acertos / total >= ENSAIO['limites']['direcao_series_fortes']
+             and intervalo['inferior'] >= ENSAIO['direcao_wilson_inferior_min'])
+    return {'estado': 'atende' if passa else 'nao_atende', 'wilson95': intervalo}
+
+
+def avaliar_falso_forte(eventos, total):
+    """Gate por safra com uma réplica por semente; não certifica o conjunto."""
+    intervalo = intervalo_wilson(eventos, total)
+    if total < ENSAIO['falso_forte_sementes_min_por_safra']:
+        return {'estado': 'nao_avaliavel', 'wilson95': intervalo}
+    passa = (eventos == ENSAIO['falso_forte_eventos_max']
+             and intervalo['superior'] <= ENSAIO['limites']['forte_placebo_max'])
+    return {'estado': 'atende' if passa else 'nao_atende', 'wilson95': intervalo}
 
 
 def resumir_falsos_fortes(resultados, desenho):
@@ -621,4 +646,6 @@ if __name__ == '__main__':
         pacote = {'ensaio': ENSAIO, 'ensaio_hash': digest(ENSAIO), 'suporte': suporte}
     else:
         pacote = gerar(episodios)
+    pacote['ensaio'] = ENSAIO
+    pacote['ensaio_hash'] = digest(ENSAIO)
     print(json.dumps(pacote, ensure_ascii=False, sort_keys=True, allow_nan=False))
