@@ -1,0 +1,4 @@
+PASS 5 paridades JS/Python: previsões canônicas da semente (2 fazendas), parcial deduplicado, multi-item, legado ambíguo excluído com aviso. Não é execução integral do build.
+PASS 6ª paridade: dois lotes em unidades distintas e recebimento parcial, previsão ambígua excluída.
+PASS 6 paridades Q5: legado único abate, unidade divergente não, legado ambíguo (unidades distintas ou mesma unidade sem linha) fora do suprimento com aviso, unidade ou linha única baixa só a sua.
+rc=0

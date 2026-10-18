@@ -1,7 +1,9 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const mip=fs.readFileSync(__dirname+'/mip.js','utf8');
 const cl=fs.readFileSync(__dirname+'/cenario.js','utf8').split('\n');
-const actual=cl.slice(5,44).join('\n')+'\n'+cl.slice(305,310).join('\n')+'\n'+mip;
+// o cenIdem pelo nome, não pela linha: o C-3/C-4 e o Q5 deslocaram o cenario.js (integrador, 18/10)
+const ci=cl.findIndex(l=>l.startsWith('function cenIdem('));
+const actual=cl.slice(5,44).join('\n')+'\n'+cl.slice(ci,ci+5).join('\n')+'\n'+mip;
 function setup(fail=false){
  const s={v:1,rev:0,vis:{V1:{id:'V1',tal:'T1'}},seq:{dia:1,rec:1,ra:1},dia:{},rec:{},apl:[]},c={v:1,rev:0,ordens:{}};
  const disk=new Map([['talhao-os-mip-v1',JSON.stringify(s)],['talhao-os-cenario-v1',JSON.stringify(c)]]),writes=[];

@@ -41,3 +41,12 @@ console.log('TOTAL P1-P6 '+n+' PASS');
 test('Q1 reset sem armazenamento ou com quota restaura em memória',()=>{for(const modo of ['ausente','quota']){const x=setup();x.data.set(old,JSON.stringify({v:1,proc:{S:{sol:'antiga'}}}));if(modo==='ausente')delete x.ctx.localStorage;else x.quota(true);assert.doesNotThrow(()=>x.run('cenReset()'));assert.equal(x.run("cenCompLer('S').proc"),null);}});
 test('Q2 mesma NF não troca de PC com id item e unidade novos',()=>{const x=setup();const ui=fs.readFileSync(__dirname+'/areas/processo_estoque.py','utf8');x.ctx.E2={recs:[{id:'original',nf:'4533',ped:'PC-OLD',item:'A',un:'kg'}]};x.ctx.epedBase=()=>({id:'PC-096',item:'B',un:'L'});x.ctx.erecs=()=>[];x.ctx.elotId=s=>s.split(' · ')[0];vm.runInContext(ui.slice(ui.indexOf('function estRecIdentidadeErro('),ui.indexOf('function estReceber(')),x.ctx);assert(x.run("estRecIdentidadeErro({}, {id:'novo',nf:'4533',ped:'PC-096',item:'B',un:'L'})").includes('PC-OLD'));});
 console.log('TOTAL Q1-Q2 '+n+' PASS');
+// Q5 (revisão do Codex 6249640248; patch do integrador, Claude): nota antiga sem unidade ou linha só baixa a linha única do PC e item em que cabe
+test('Q5 nota antiga não baixa duas linhas do mesmo item; com uma linha só, baixa',()=>{const x=setup();x.ctx.c={v:1,ordens:{},reqs:{},lotes:{},movs:[{tipo:'recebimento-nf',estRec:{id:'ANTIGA',nf:'7001',ped:'PC-X',item:'A',apto:20,quar:0}}]};
+ x.ctx.L=[{id:'PC-X',linha:1,item:'A',un:'kg',qtd:100},{id:'PC-X',linha:2,item:'A',un:'L',qtd:50}];
+ let r=x.run('cenCompSaldo(c,L[0],L)');assert.equal(r.rec,0);assert.equal(r.ae,100);assert.deepEqual(Array.from(r.amb),['7001']);r=x.run('cenCompSaldo(c,L[1],L)');assert.equal(r.rec,0);assert.equal(r.amb.length,1);
+ x.ctx.c.compras={v:1,proc:{S:{sol:'SOL',aprov:{estado:'aprovada',pcs:[{id:'PC-X',nome:'F',itens:[{i:1,nome:'A',un:'kg',ped:100},{i:2,nome:'A',un:'L',ped:50}]}]}}}};
+ r=x.run("cenCompSaldo(c,{id:'PC-X',linha:1,item:'A',un:'kg',qtd:100})");assert.equal(r.rec,0);assert.equal(r.amb.length,1);
+ x.ctx.L=[x.ctx.L[0]];r=x.run('cenCompSaldo(c,L[0],L)');assert.equal(r.rec,20);assert.equal(r.amb.length,0);
+ x.ctx.c.movs[0].estRec.un='kg';x.ctx.L=[{id:'PC-X',linha:1,item:'A',un:'kg',qtd:100},{id:'PC-X',linha:2,item:'A',un:'L',qtd:50}];r=x.run('cenCompSaldo(c,L[0],L)');assert.equal(r.rec,20);assert.equal(r.amb.length,0);assert.equal(x.run('cenCompSaldo(c,L[1],L).rec'),0);});
+console.log('TOTAL Q5 '+n+' PASS');

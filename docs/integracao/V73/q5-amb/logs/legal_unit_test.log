@@ -1,0 +1,47 @@
+OK    P1 OS-0430 como está (Glifosato 2 · 2,4-D 1 · Óleo 0,5 L/ha em soja T1-A) libera
+OK    P2 ajuste 150 ha + Glifosato 1,8 L/ha (os_cenario_test 14) libera a v2 com 270 L
+OK    P3 limite da bula: Glifosato 1.5 L/ha libera
+OK    P3 limite da bula: Glifosato 3 L/ha libera
+OK    P4 Óleo mineral 2 L/ha (adjuvante) não passa pela regra de agrotóxico
+OK    P5 OS-0431 (semente e MAP) libera: fertilizante e semente fora da regra
+OK    P6 AG-01 → O.S.: VIS-054 (PV02 mamão × mosca-branca) Acetamiprido 200 SP 0.25 kg/ha emite e a O.S. libera
+OK    P7 OS-0430 cancelada sem execução não conta: a nova dessecação no T1-A libera
+OK    P8 OS-0415 (T3, safra 2025/26) não conta para a safra 2026/27: Glifosato no T3 libera
+OK    P9 parcela: dessecação no T1-B libera mesmo com a OS-0430 (T1-A) liberada — a contagem é por parcela
+OK    P10 cultura do cultivo da ordem (safrinha de milho no T1-A): Atrazina 500 3 L/ha passa na regra
+OK    N10 a mesma Atrazina sem a cultura do cultivo cai na cultura atual do talhão (soja) e é recusada
+OK    N11 unidade da ordem (L/ha) diferente da bula (kg/ha): trava "unidade diferente da bula" (antes só alerta; CTL-1 rev. 1)
+OK    P12 produto fora do cadastro classificado pelo plano como semente fica fora da regra
+OK    N1 Glifosato 7,5 L/ha (2,5 × o máximo) recusado com a faixa da bula
+       msg: Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha.
+OK    N2 fora do limite: Glifosato 1.49 L/ha recusado
+OK    N2 fora do limite: Glifosato 3.01 L/ha recusado
+OK    N3 Abamectina 18 EC (registro só em mamão) em soja recusada
+       msg: Abamectina 18 EC 0,5 L/ha em T1 (T1-A): sem registro para soja.
+OK    N4 Fungicida A no Pivô 13 (mamão) recusado
+       msg: Fungicida A 0,5 L/ha em Pivô 13: sem registro para mamão.
+OK    N5 2ª dessecação com Glifosato 480 no T1-A recusada (bula: 1 aplicação no ciclo)
+       msg: Glifosato 480 2 L/ha em T1 (T1-A): nº máximo de aplicações no ciclo atingido: 1 de 1 (OS-0430).
+OK    N6 "Salvar ajuste" sem liberar também recusa e não grava a versão
+OK    N7 Pivô 6: Abamectina já aplicada em 28/08 (caderno) + OS-0504 → nova O.S. recusada "2 de 2"
+       msg: Abamectina 18 EC 0,5 L/ha em Pivô 6: nº máximo de aplicações no ciclo atingido: 2 de 2 (OS-0504, caderno 28/08).
+OK    N8 Paraquate 200 SL em soja: "registro cancelado: uso proibido"
+OK    N9 produto fora de todo cadastro é tratado como sem registro (nunca liberado por falta de dado)
+OK    M1 painel: selo "Fora do registro · Glifosato 480", dono Ana, "Liberar bloqueado" com quem resolve = agrônoma (não Suprimentos)
+       painel: Liberar bloqueado: Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha. · Quem resolve: Ana (agrônoma), ajustando produto ou dose antes de liberar.
+SEMENTE · 32 ordens · fora da regra: []
+OK    S1 semente: nenhuma ordem fora da regra legal (osUsoErro vazio em todas, em todas as fases; OS-0424 em soja T1-B 0,5 L/ha)
+legal: 26/26 passaram
+OK    D1 duas A liberar: cada uma libera sozinha; liberada a OS-0440, a OS-0430 é recusada nomeando a OS-0440
+OK    D2 Pivô 6: "2 de 2 (OS-0504, caderno 28/08)"
+OK    D3 OS-0504 cancelada: Pivô 6 tem 1 de 2 (caderno) e a nova libera
+OK    A1 sem trava e com 3 alertas: Epoxiconazol em reavaliação e não conferido, Cletodim não conferido (T1 e T1-A não repetem)
+        ["Epoxiconazol + piraclostrobina 50+133 SE: produto em reavaliação na Anvisa.","Epoxiconazol + piraclostrobina 50+133 SE: uso não conferido na bula: confira antes de aplicar.","Cletodim 240: uso não conferido na bula: confira antes de aplicar."]
+OK    R1 ajuste com Inseticida B 0.3 L/ha: recusado pela unidade, v1 e A liberar, sem CMD-42
+OK    R1 ajuste com Inseticida B 5 L/ha: recusado pela unidade, v1 e A liberar, sem CMD-42
+OK    R2 Fungicida TS 5 L/ha na dessecação da soja: recusado ("só para tratamento de sementes"); na ordem de tratamento de sementes passa
+OK    R3 ajuste com Cletodim (uso não conferido): liberado e a mensagem traz "Atenção (não bloqueia): Cletodim 240: uso não conferido"
+OK    U1 Atrazina na safrinha de milho: ordem do cenário passa (como o comando); objeto da tela recusaria "sem registro para soja"
+legal: 9/9 passaram
+RESULTADO 35/35
+rc=0

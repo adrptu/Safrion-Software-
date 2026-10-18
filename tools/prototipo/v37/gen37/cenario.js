@@ -264,11 +264,13 @@ function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; con
       if (!y || !(y.ef > 1e-9)) return; const mesma = fo === faz && !!od;
       reservas.push({ item: it.prod, q: mesma ? y.q : y.ef, dt: od ? od.dt : (b.hoje || ''), t: 'Reserva ' + rid + ' · ' + r.os + (o.talhao ? ' (' + o.talhao + ')' : '') + (fo !== faz ? ' · ' + fo : ''), chave: r.os, faz }); }); });
   const recebidos=cenCompRecebimentos(c);
-  (b.rec || []).forEach(r => { if (r.faz !== faz) return;
-    const unidades=[...new Set(Object.values(lotes).filter(l=>l.prod===r.item).map(l=>l.un).concat(recebidos.filter(e=>cenCompPC(e)===r.ref&&e.item===r.item).map(e=>e.un)).filter(Boolean))];
-    const p={id:r.ref,item:r.item,un:r.un||(unidades.length===1?unidades[0]:null),linha:r.linha};
+  const linhaDe=r=>{const unidades=[...new Set(Object.values(lotes).filter(l=>l.prod===r.item).map(l=>l.un).concat(recebidos.filter(e=>cenCompPC(e)===r.ref&&e.item===r.item).map(e=>e.un)).filter(Boolean))];
+    return {id:r.ref,item:r.item,un:r.un||(unidades.length===1?unidades[0]:null),linha:r.linha};};
+  (b.rec || []).forEach(r => { if (r.faz !== faz) return; const p=linhaDe(r);
     if(!p.un){recebNaoApuravel.push(Object.assign({},r,{motivo:'Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.'}));return;}
-    const baixa=recebidos.filter(e=>cenCompCasa(e,p)).reduce((a,e)=>a+(Number(e.apto==null&&e.quar==null?e.conf:((Number(e.apto)||0)+(Number(e.quar)||0)))||0),0);
+    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&cenCompOutra(e,p,linhas));
+    if(amb.length){recebNaoApuravel.push(Object.assign({},r,{motivo:'Nota '+amb.map(e=>e.nf||e.id).join(', ')+' sem unidade ou linha cabe em mais de uma linha do '+r.ref+': previsão fora do suprimento. Confira a nota no Estoque.'}));return;}
+    const baixa=recebidos.filter(e=>cenCompCabe(e,p)).reduce((a,e)=>a+(Number(e.apto==null&&e.quar==null?e.conf:((Number(e.apto)||0)+(Number(e.quar)||0)))||0),0);
     const q=Math.max(0,r.q-baixa); if(q>1e-9)recebDt.push(Object.assign({},r,{q})); });
   return { fisico, quar, quarRep, quarRef, reservas, recebDt, recebNaoApuravel, sobra }; }
 // entradas vivas da demanda única (Planejar safra, Mapa › Insumos e Compra de insumos): x = partes fixas (safra, fazenda, hoje, viavel, ordem e
@@ -337,21 +339,24 @@ function cenCompGravar(id,snap,chave,ator){
 }
 function cenCompRecebimentos(c){const seen=new Set();return ((c&&c.movs)||[]).filter(m=>{const r=m.tipo==='recebimento-nf'&&m.estRec;if(!r||!r.id||seen.has(r.id))return false;seen.add(r.id);return true;}).map(m=>m.estRec);}
 function cenCompPC(r){return String(r.pedido||r.ref||r.ped||r.id||'').split(' · ')[0].trim();}
-// nota conferida antes de 16/10 (7762fd3d) não grava unidade: vale a do pedido, como a baixa antiga por PC (revisão do Claude, PR #114)
-function cenCompCasa(r,p){return cenCompPC(r)===p.id&&(r.item||r.prod)===p.item&&(r.un==null||r.un===''||r.un===p.un)&&(r.linha==null||p.linha==null||String(r.linha)===String(p.linha));}
+// nota conferida antes de 16/10 (7762fd3d) não grava unidade, e antes do C-3 não grava linha: cabe na linha do pedido pela unidade dele, como a baixa antiga por PC (revisão do Claude, PR #114).
+// Só baixa se a linha for a única do mesmo PC e item em que a nota cabe; com outra possível, não baixa nenhuma: quantidade sem unidade não se converte nem conta duas vezes (revisão do Codex 6249640248)
+function cenCompCabe(r,p){return cenCompPC(r)===p.id&&(r.item||r.prod)===p.item&&(r.un==null||r.un===''||r.un===p.un)&&(r.linha==null||p.linha==null||String(r.linha)===String(p.linha));}
+function cenCompOutra(r,p,linhas){const k=q=>[q.id,q.item,q.un,q.linha==null?'':String(q.linha)].join('|');return (linhas||[]).some(q=>k(q)!==k(p)&&cenCompCabe(r,q));}
+function cenCompCasa(r,p,linhas){return cenCompCabe(r,p)&&!cenCompOutra(r,p,linhas);}
 function cenCompLinhas(c){let s;cenCompLinhas.aviso='';try{s=cenCompEstado(c,false);cenCompLinhas.aviso=s.aviso||'';}catch(e){cenCompLinhas.aviso=String(e.message||e);return [];}
   const out=[];Object.keys(s.proc).forEach(saf=>{const v=s.proc[saf],a=v.aprov;if(!a||a.estado!=='aprovada')return;
     (a.pcs||[]).forEach(p=>(p.itens||[]).forEach(it=>out.push({id:p.id,linha:it.i,item:it.nome,un:it.un,grupo:it.grupo,forn:p.nome,qtd:Number(it.ped)||0,a_entregar:Number(it.ped)||0,saf,sol:v.sol,prev:(v.pcx&&v.pcx[p.id]||{}).prev||p.prev,cmp:true,label:p.id+' · '+p.nome+' · '+it.nome+' · '+it.un+' · linha '+it.i})));});return out;
 }
-function cenCompSaldo(c,p){const all=cenCompRecebimentos(c),rs=all.filter(r=>cenCompCasa(r,p));
+function cenCompSaldo(c,p,linhas){const all=cenCompRecebimentos(c),ls=linhas||cenCompLinhas(c).filter(q=>q.id===p.id&&q.item===p.item),rs=all.filter(r=>cenCompCasa(r,p,ls));
   const rec=rs.reduce((a,r)=>a+(Number(r.apto)||0)+(Number(r.quar)||0),0),entrada=rs.reduce((a,r)=>a+(Number(r.quar)||0),0);
   let quar=0,ambigua=false;const lotes=new Set(rs.filter(r=>r.quar>0).map(r=>r.item+'|'+r.lote));
   lotes.forEach(key=>{const l=(c.lotes||{})[key];if(!l)return;
-    const outros=all.some(r=>r.item+'|'+r.lote===key&&r.quar>0&&!cenCompCasa(r,p));
+    const outros=all.some(r=>r.item+'|'+r.lote===key&&r.quar>0&&!cenCompCasa(r,p,ls));
     // Um lote compartilhado entre linhas não permite atribuir saldo sem rateio inventado.
     const recebidoNoLote=all.filter(r=>r.item+'|'+r.lote===key).reduce((a,r)=>a+(Number(r.quar)||0),0);
     if((outros||Number(l.quarentena)>recebidoNoLote)&&l.quarentena>0)ambigua=true;else quar+=Math.min(Number(l.quarentena)||0,rs.filter(r=>r.item+'|'+r.lote===key).reduce((a,r)=>a+(Number(r.quar)||0),0));});
-  return {rec,quar:ambigua?null:quar,quarEntrada:entrada,ae:Math.max(0,(Number(p.qtd)||0)-rec)};
+  return {rec,quar:ambigua?null:quar,quarEntrada:entrada,ae:Math.max(0,(Number(p.qtd)||0)-rec),amb:all.filter(r=>cenCompCabe(r,p)&&!cenCompCasa(r,p,ls)).map(r=>r.nf||r.id)};
 }
 
 // ---------- O.S. (web) ----------

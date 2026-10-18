@@ -1128,15 +1128,23 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
         if not e or not e.get('id') or e['id'] in vis: continue
         vis.add(e['id']); recebidos.append(e)
     def pc(e): return str(e.get('pedido') or e.get('ref') or e.get('ped') or e.get('id') or '').split(' · ')[0].strip()
-    for r in b['rec']:
-        if r['faz']!=faz: continue
+    def linha_de(r):
         unidades={l.get('un') for l in lotes.values() if l.get('prod')==r['item']} | {e.get('un') for e in recebidos if pc(e)==r.get('ref') and e.get('item')==r['item']}
         unidades.discard(None); unidades.discard('')
-        un=r.get('un') or (next(iter(unidades)) if len(unidades)==1 else None)
-        if not un:
+        return dict(id=r.get('ref'),item=r['item'],un=r.get('un') or (next(iter(unidades)) if len(unidades)==1 else None),linha=r.get('linha'))
+    # mesma regra de cenCompCabe/cenCompOutra (cenario.js): nota sem unidade ou linha só baixa se a linha for a única do PC e item em que ela cabe (revisão do Codex 6249640248)
+    def cabe(e,p): return pc(e)==p['id'] and (e.get('item') or e.get('prod'))==p['item'] and (e.get('un') in (None,'') or e.get('un')==p['un']) and (e.get('linha') is None or p.get('linha') is None or str(e['linha'])==str(p['linha']))
+    def chave(q): return (q['id'],q['item'],q['un'],'' if q.get('linha') is None else str(q['linha']))
+    for r in b['rec']:
+        if r['faz']!=faz: continue
+        p=linha_de(r)
+        if not p['un']:
             nao_apuravel.append(dict(r,motivo='Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.')); continue
-        def casa(e): return pc(e)==r.get('ref') and (e.get('item') or e.get('prod'))==r['item'] and (e.get('un') in (None,'') or e.get('un')==un) and (e.get('linha') is None or r.get('linha') is None or str(e['linha'])==str(r['linha']))
-        baixa=sum(float(e.get('conf') or 0) if e.get('apto') is None and e.get('quar') is None else float(e.get('apto') or 0)+float(e.get('quar') or 0) for e in recebidos if casa(e))
+        outras=[linha_de(x) for x in b['rec'] if x is not r and x.get('ref')==r.get('ref') and x['item']==r['item']]
+        amb=[e for e in recebidos if cabe(e,p) and any(chave(q)!=chave(p) and cabe(e,q) for q in outras)]
+        if amb:
+            nao_apuravel.append(dict(r,motivo='Nota '+', '.join(e.get('nf') or e['id'] for e in amb)+' sem unidade ou linha cabe em mais de uma linha do '+str(r.get('ref'))+': previsão fora do suprimento. Confira a nota no Estoque.')); continue
+        baixa=sum(float(e.get('conf') or 0) if e.get('apto') is None and e.get('quar') is None else float(e.get('apto') or 0)+float(e.get('quar') or 0) for e in recebidos if cabe(e,p))
         q=max(0,r['q']-baixa)
         if q>1e-9: receb.append(dict(r,q=q))
     return dict(fisico=fisico,quar=quar,quarRep=quar_rep,quarRef=quar_ref,reservas=reservas,recebDt=receb,recebNaoApuravel=nao_apuravel,sobra=sobra)
