@@ -946,8 +946,8 @@ def _nf(n,d=0):
 def _nfa(n):   # como nfa do safra.js: até 2 casas, sem zeros à direita
     return _nf(n,2).rstrip('0').rstrip(',')
 # recebimentos previstos com data e fazenda (pedidos em aberto, todos da Santa Rita; o calcário da Lagoa Grande não tem PC no protótipo: pedido de 30/09)
-RECEB_DT=[dict(item=p['item'],q=p['a_entregar'],dt=iso_br(p['previsao']),ref=p['id'],faz='Santa Rita',t=f"Recebimento {p['id']} ({next(f['nome'] for f in FORNECEDORES if f['id']==p['f'])})")
-          for p in PEDIDOS if p['a_entregar']]+[dict(item='Calcário dolomítico filler',q=50000,dt='2026-09-30',ref=None,faz='Lagoa Grande',t='Recebimento previsto (pedido de 30/09)')]
+RECEB_DT=[dict(item=p['item'],un=p['un'],linha=p.get('linha'),q=p['a_entregar'],dt=iso_br(p['previsao']),ref=p['id'],faz='Santa Rita',t=f"Recebimento {p['id']} ({next(f['nome'] for f in FORNECEDORES if f['id']==p['f'])})")
+          for p in PEDIDOS if p['a_entregar']]+[dict(item='Calcário dolomítico filler',un='kg',q=50000,dt='2026-09-30',ref=None,faz='Lagoa Grande',t='Recebimento previsto (pedido de 30/09)')]
 # ---- CTL-4 · demanda única (DEM-01..07): espelho de cenOsDem (cenario.js) e de demRestante/demOsEvs/demFazenda (cal01.js) ----
 OS_FASES_PEND=('A liberar','Liberadas','Em execução')
 def _saf_id(faz,lab):   # rótulo de safra da ordem ('2026/27', 'Safrinha 2027') → id da safra aberta da fazenda
@@ -1122,17 +1122,24 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
             mesma=fo==faz and od is not None
             reservas.append(dict(item=it['prod'],q=y['q'] if mesma else y['ef'],dt=od['dt'] if od else hoje,
                                  t=f"Reserva {rid} · {r['os']}"+(f" ({o['talhao']})" if o.get('talhao') else '')+(f" · {fo}" if fo!=faz else ''),chave=r['os'],faz=faz))
-    rc={}; vis=set()
+    recebidos=[]; vis=set(); nao_apuravel=[]
     for m in c.get('movs') or []:
         e=m.get('estRec') if m.get('tipo')=='recebimento-nf' else None
-        if not e or e.get('id') in vis: continue
-        vis.add(e.get('id')); p=str(e.get('ped') or '').split(' · ')[0].strip()
-        if p: rc[p]=rc.get(p,0)+(float(e.get('conf') or 0))
+        if not e or not e.get('id') or e['id'] in vis: continue
+        vis.add(e['id']); recebidos.append(e)
+    def pc(e): return str(e.get('pedido') or e.get('ref') or e.get('ped') or e.get('id') or '').split(' · ')[0].strip()
     for r in b['rec']:
         if r['faz']!=faz: continue
-        q=max(0,r['q']-(rc.get(r['ref'],0) if r['ref'] else 0))
+        unidades={l.get('un') for l in lotes.values() if l.get('prod')==r['item']} | {e.get('un') for e in recebidos if pc(e)==r.get('ref') and e.get('item')==r['item']}
+        unidades.discard(None); unidades.discard('')
+        un=r.get('un') or (next(iter(unidades)) if len(unidades)==1 else None)
+        if not un:
+            nao_apuravel.append(dict(r,motivo='Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.')); continue
+        def casa(e): return pc(e)==r.get('ref') and (e.get('item') or e.get('prod'))==r['item'] and (e.get('un') in (None,'') or e.get('un')==un) and (e.get('linha') is None or r.get('linha') is None or str(e['linha'])==str(r['linha']))
+        baixa=sum(float(e.get('conf') or 0) if e.get('apto') is None and e.get('quar') is None else float(e.get('apto') or 0)+float(e.get('quar') or 0) for e in recebidos if casa(e))
+        q=max(0,r['q']-baixa)
         if q>1e-9: receb.append(dict(r,q=q))
-    return dict(fisico=fisico,quar=quar,quarRep=quar_rep,quarRef=quar_ref,reservas=reservas,recebDt=receb,sobra=sobra)
+    return dict(fisico=fisico,quar=quar,quarRep=quar_rep,quarRef=quar_ref,reservas=reservas,recebDt=receb,recebNaoApuravel=nao_apuravel,sobra=sobra)
 def _tal_de(c):
     import ocupacao_cen as _OC
     return _OC.tal_de(c['local'],c['tipo'])

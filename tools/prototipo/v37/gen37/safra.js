@@ -938,7 +938,7 @@ function safNovaDraft(self,gid){ if(gid!=='g_saf') return null; const fq=g2st(se
 function sgLista(self){ return g2rows(self,GR('g_saf')).map(r=>Object.assign({id:r.id,nome:r.v.nome,ini:r.v.ini,fim:r.v.fim,faz:r.v.faz||'Santa Rita',estado:r.v.estado||'Rascunho'},r.v.mae?{mae:r.v.mae}:{},r.ro?{ro:true}:{})); }
 function sgFazsTxt(d){ return String((d&&d.fazs)||'').split(';').map(x=>x.trim()).filter(Boolean); }
 // o que prende a fazenda à safra: cultivos, solicitação enviada e O.S. (o protótipo não registra aprovação de plano e de orçamento por safra nova)
-function sgDeps(self){ return (saf)=>{ const sol=solMap(self)[saf]; return {cultivos:cultsDe(self,saf).length,sol:sol?{id:sol.id,estado:sol.estado||''}:null,os:[]}; }; }
+function sgDeps(self){ return (saf)=>{ const sol=solMap(self)[saf]; return {cultivos:cultsDe(self,saf).length,sol:sol?{id:sol.id,estado:solEstado(saf,sol)||sol.estado||''}:null,os:[]}; }; }   // estado da compra: o andamento gravado pela Compra (cenário) vale sobre o do envio
 function sgPed(self,r,d,isNew){ return {chave:self.__sgCh||('saf-form:'+(r?r.id:'novo')),nome:d.nome,ini:d.ini,fim:d.fim,fazendas:sgFazsTxt(d),saf:isNew?undefined:(r&&r.id)}; }
 function sgMotivos(b){ return b.map(x=>x.faz+' não pode sair da safra: '+x.motivos.map(m=>m.t.replace(/\.$/,'')+(m.destino?' (resolva em '+m.destino+')':'')).join('; ')+'.').join(' '); }
 // antes de gravar: a mesma composição, sem efeito, para recusar com o motivo no próprio campo (nada muda)
@@ -968,7 +968,7 @@ function sgMsgMuda(res){ const sb=res.recibo.subs, ent=sb.filter(x=>x.acao==='cr
 function sgInfo(self,G,comDem){ const o={}; G.subs.forEach(s=>{ const cs=cultsDe(self,s.id); const sol=solMap(self)[s.id];
   let dem=null; if(comDem){ try{ const dm=demanda(self,s.id); dem=Object.values(dm).filter(x=>x&&x.nome).map(x=>({insumo:x.nome,un:x.un,qtd:x.liq,destino:(dm._ent&&dm._ent.local)||('Almoxarifado '+s.faz)})); }catch(e){ dem=null; } }
   const ar=sgAreaDe(cs.map(c=>c.v.area));   // Codex 6179070575: área vazia não vira zero
-  o[s.id]={area_ha:ar.area_ha,area_incompleta:ar.area_incompleta,cultivos:cs.length,estado:s.estado,sol:sol?{id:sol.id,estado:sol.estado||''}:null,demanda:dem}; }); return o; }
+  o[s.id]={area_ha:ar.area_ha,area_incompleta:ar.area_incompleta,cultivos:cs.length,estado:s.estado,sol:sol?{id:sol.id,estado:solEstado(s.id,sol)||sol.estado||''}:null,demanda:dem}; }); return o; }
 // envio das fazendas da safra: uma solicitação por sub-safra pelo comando de sempre; a chave fica até tudo dar certo (repetir só tenta o que falhou)
 function sgEnviarUm(self,saf){ const cap={msg:''}; const ant=(self.__solTmp||{})[saf]; self.__envCap=cap; try{ enviar(self,saf); }finally{ self.__envCap=null; }
   const m=cap.msg||''; const volta=()=>{ if(!self.__solTmp) return; if(ant) self.__solTmp[saf]=ant; else delete self.__solTmp[saf]; };   // o que não foi gravado não fica como enviado
@@ -1572,11 +1572,15 @@ const SOL_KEY='talhao-os-compras-v1';
 function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.sols)||{}; }catch(e){ return {}; } }
 function solGravar(rec){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.sols=o.sols||{}; o.sols[rec.safra]=rec; localStorage.setItem(SOL_KEY,JSON.stringify(o)); return true; }catch(e){ return false; } }
 // a versão nova da SOL que só baixou itens (DEM-09) não muda o número de complementos: o andamento gravado era da versão anterior e sai
-function solProcLimpar(saf){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); if(o&&o.proc&&o.proc[saf]){ delete o.proc[saf]; localStorage.setItem(SOL_KEY,JSON.stringify(o)); } }catch(e){} }
+// C-3/C-4 (PR #114): o andamento da Compra mora no cenário (compras.proc, cenCompLer/cenCompEstado); a chave antiga só vale até a migração
+function solProcLimpar(saf){ try{ if(typeof cenCompLer==='function'){ const r=cenCompLer(saf); if(r&&r.proc) cenMudar(null,c=>{ delete cenCompEstado(c,true).proc[saf]; return {}; },{estrito:true}); return; }
+  const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); if(o&&o.proc&&o.proc[saf]){ delete o.proc[saf]; localStorage.setItem(SOL_KEY,JSON.stringify(o)); } }catch(e){} }
+function solProcDe(saf){ try{ if(typeof cenCompLer==='function'){ const r=cenCompLer(saf); return (r&&!r.erro&&r.proc)||null; }
+  const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.proc&&o.proc[saf])||null; }catch(e){ return null; } }
 function solMap(self){ if(self.__solTmp) return self.__solTmp; if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
-// andamento gravado pela Compra de insumos (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
-function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
-  return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
+// andamento gravado pela Compra de insumos (cenário · compras.proc): o planejamento vê em que pé está a compra da mesma solicitação
+function solEstado(saf,sol){ const p=solProcDe(saf);
+  return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }
 function solHref(saf,sol){ return 'CMP.dc.html#sol='+encodeURIComponent(sol.id)+'&saf='+encodeURIComponent(saf); }
 // DEM-09 · pedido já emitido para esta solicitação: nada baixa. Vale o andamento da versão de agora ou o de uma anterior, guardado na versão nova
 // (pedEmit): o complemento muda a versão e a Compra recomeça o andamento, mas o pedido emitido antes continua valendo (revisão do CTL-4, risco 1:
