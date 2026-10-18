@@ -41,21 +41,17 @@ def so_da(rows, cu):   # linha de outra cultura = contém o nome de outra cultur
 def folhas_colheita(mobile):
     if not mobile:
         return Grade(J).dicts(so_folhas=True)
-    # No celular a apresentação inicial é Cartões. Abrir pelos controles visíveis,
-    # sem trocar a visão nem ler GRIDS/estado interno para provar o filtro.
-    for _ in range(100):
-        abriu = J("""(()=>{const g=document.querySelector('[data-g2cd="g_tal"]');
-          if(!g||!g.getClientRects().length) throw Error('Cartões da Colheita não visíveis');
-          const b=[...g.querySelectorAll('button[aria-expanded="false"]')].find(x=>x.getClientRects().length);
-          if(!b) return false; b.click(); return true;})()""")
-        if not abriu: break
-        time.sleep(.1)
-    else: raise AssertionError('Cartões da Colheita não terminaram de expandir')
-    return J("""(()=>{const g=document.querySelector('[data-g2cd="g_tal"]');
-      return [...g.querySelectorAll('[role=listitem][data-rid]')]
-        .filter(r=>r.getClientRects().length&&!r.dataset.rid.startsWith('grp:'))
-        .map(r=>({id:r.dataset.rid, 'Talhão · variedade':r.querySelector('.g2cd-tl .g2pw').innerText.replace(/\\s+/g,' ').trim(),
+    # Produção tem cartões próprios (.pr-card), não cartões da grade G2.
+    # Ler somente folhas visíveis; ausência de cartões mantém F2 vermelho.
+    return J("""(()=>{
+      const listas=[...document.querySelectorAll('[role=list][aria-label="Lista em cartões"]')]
+        .filter(g=>g.getClientRects().length);
+      if(listas.length!==1) throw Error('Lista de cartões da Colheita ausente ou ambígua');
+      return [...listas[0].querySelectorAll('button[role=listitem]')]
+        .filter(r=>r.getClientRects().length)
+        .map(r=>({'Talhão · variedade':r.querySelector('b').innerText.replace(/\\s+/g,' ').trim(),
           texto:r.innerText.replace(/\\s+/g,' ').trim()}));})()""") or []
+
 try:
     c.aparelho(1440, 900, 1, False); c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     res = {}
