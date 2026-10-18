@@ -16,3 +16,23 @@ Revisor e integrador: Claude. Os dois PRs entram na composição `claude/v44-v13
 - **Sem deslocamento:** sem mudança.
 
 O núcleo da agenda ainda não está ligado a nenhuma página: o render não muda e o artefato não precisa de nova publicação.
+
+## Saída dos testes (PR #72) e oráculos desatualizados (revisão automática do Codex no PR #47)
+
+**Proteção de saída do PR #72.** Antes, o processo podia terminar com código 0 mesmo com verificação falha ou sem nenhuma verificação. Agora `intest.py`, `solo_os_test.py` e `solo_rev_test.py` terminam com 1 nesses casos. Só entrou a proteção; os oráculos atuais ficaram como estão.
+
+| Teste | Verde | Com falha proposital | Vazio |
+|---|---|---|---|
+| `solo_os_test` | 18/18, saída 0 | 18/19, saída 1 | — |
+| `solo_rev_test` | 22/22, saída 0 | 22/23, saída 1 | — |
+| `intest` | não executável: o teste está vermelho de verdade (oráculos do Mapa antigo, ver abaixo) | — | 0/0: saída 1 com a proteção, saída 0 sem ela |
+
+O `intest` cobre o Mapa antigo: 9 abas, rótulo em `foreignObject` e NDWI. No Mapa atual ele falha em 6 verificações e para num erro de script ao tocar no T7 (`logs/pr72/intest.log`). Ele fica vermelho e visível. A correção dos oráculos não entrou nesta mudança.
+
+**Oráculos desatualizados** (achados P2 do revisor automático no `d482c334`; reproduzidos antes da correção):
+
+| Teste | Antes | Depois | Causa |
+|---|---|---|---|
+| `tabelas_cad_irr_unit` | 44/51 | 52/52 | O ambiente de teste não trazia a `g2ordk`, que a `g2fkeys` passou a chamar (C15–C19). Operações e rendimentos saíram do CD-02 para o CD-08 (A1) |
+| `usar_os_unit_test` | 19/24 | 25/25 | A demonstração das Frentes (OS-0584 a 0597) entra nos candidatos do AG-07. A O.S. da demonstração tem a cultura planejada, conferida à parte (U1b) |
+| `alocacao_unit_test` | 20/21 | 21/21 | O Trator 03 também atende a demonstração (OS-0595 a 0597). Ao cancelar a OS-0430, ele perde só os blocos dela |

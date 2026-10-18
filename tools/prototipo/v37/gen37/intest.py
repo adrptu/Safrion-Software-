@@ -138,3 +138,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(0 if OK and not FAIL else 1)   # PR #72 (Codex): falha ou nenhuma verificação não sai verde
