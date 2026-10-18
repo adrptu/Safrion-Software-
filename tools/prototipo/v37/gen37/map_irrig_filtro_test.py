@@ -101,8 +101,12 @@ try:
         'Renovar política' not in b and 'Resolver conflito · OS-0423' in rg('OS-0423') and 'parada da B3' in rg('OS-0423') and 'Caio' in rg('OS-0423') and 'Definir janela · OS-0422' in rg('OS-0422') and 'João' in rg('OS-0422'), [rg('OS-0423'), rg('OS-0422')])
     # 15 · contagens do mapa = tela O.S. (Santa Rita, cenário limpo): ordens de água fora da camada Ordens de serviço e de "Ordens abertas"
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.2)
-    os_rows=J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
-    ids=[r.split(' ')[0] for r in os_rows if r.startswith('OS-')]; abertas=[r.split(' ')[0] for r in os_rows if r.startswith('OS-') and 'Encerradas' not in r]
+    # mesma safra do Mapa (o IN-04 filtra a safra exata, como a lista: PRD 8.4); o ID vem de qualquer coluna da linha, porque a
+    # 1ª célula pode ser o selo ("Falta insumo", "Impedida")
+    J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por safra\"]'); if(s){ s.value='2026/27'; s.dispatchEvent(new Event('change',{bubbles:true})); }})()"); time.sleep(.6)
+    os_rows=J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.getClientRects().length).map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    _id=lambda r: (re.search(r'OS-\d{4}',r) or [None])[0]
+    ids=[_id(r) for r in os_rows if _id(r)]; abertas=[_id(r) for r in os_rows if _id(r) and 'Encerradas' not in r]
     fz=J("(document.querySelector('select[aria-label=\"Filtrar por fazenda\"]')||{}).value")
     chk('15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423',
         fz=='Santa Rita' and len(ids)>0 and num('Ordens',n_os)==len(ids) and num('Ordens abertas',n_int)==len(abertas)
@@ -112,3 +116,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(0 if OK and not FAIL else 1)   # falha ou nenhuma verificação não sai verde (mesma guarda do PR #72)

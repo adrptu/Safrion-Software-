@@ -26,6 +26,7 @@ R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 PACK = os.environ.get('MAPA_A2_PACK')
 p, srv = servir(R); c = Chrome(); J = c.js
 U = lambda pg: f'http://127.0.0.1:{p}/{pg}'
+SAF_ATUAL = '2026/27'   # safra padrão do IN-04 (coleta A2) e da O.S.
 VERS = ['Fases', 'Avanço', 'Atrasos', 'Impedimentos']
 def idGeo(t):
     return 'Pivô %d' % int(t[2:]) if t.startswith('PV') and t[2:].isdigit() else t
@@ -57,9 +58,8 @@ try:
     if PACK and os.path.exists(PACK):
         pk = json.load(open(PACK, encoding='utf-8')); dif = []; n = 0
         for faz in ('Santa Rita', 'Lagoa Grande'):
-            # o IN-04 na safra atual mostra também as O.S. de safras anteriores (osSaf em areas/inicio.py); a lista da O.S. filtra a safra exata.
-            # Mesmo conjunto de ordens dos dois lados: Safra "Todas" na O.S.
-            sel('Filtrar por fazenda', faz); sel('Filtrar por safra', 'Todas')
+            # o IN-04 e a O.S. filtram a safra exata (osSaf em areas/inicio.py; PRD 8.4): mesma safra dos dois lados, a atual do coletor A2
+            sel('Filtrar por fazenda', faz); sel('Filtrar por safra', SAF_ATUAL)
             for v in VERS:
                 mostrar(v); got = {x['t']: x for x in talhoes()}
                 for r in pk[f'{faz}|OS|{v}|Todas']['linhas']:
