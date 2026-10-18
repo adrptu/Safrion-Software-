@@ -37,6 +37,25 @@ def limpa(): c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStor
 def so_da(rows, cu):   # linha de outra cultura = contém o nome de outra cultura e não o desta
     outras = [x for x in CULTURAS if x != cu and not (cu == 'Mamão Formosa' and x == 'Mamão')]
     return [r for r in rows if any(o in r for o in outras) and cu not in r]
+
+def folhas_colheita(mobile):
+    if not mobile:
+        return Grade(J).dicts(so_folhas=True)
+    # No celular a apresentação inicial é Cartões. Abrir pelos controles visíveis,
+    # sem trocar a visão nem ler GRIDS/estado interno para provar o filtro.
+    for _ in range(100):
+        abriu = J("""(()=>{const g=document.querySelector('[data-g2cd="g_tal"]');
+          if(!g||!g.getClientRects().length) throw Error('Cartões da Colheita não visíveis');
+          const b=[...g.querySelectorAll('button[aria-expanded="false"]')].find(x=>x.getClientRects().length);
+          if(!b) return false; b.click(); return true;})()""")
+        if not abriu: break
+        time.sleep(.1)
+    else: raise AssertionError('Cartões da Colheita não terminaram de expandir')
+    return J("""(()=>{const g=document.querySelector('[data-g2cd="g_tal"]');
+      return [...g.querySelectorAll('[role=listitem][data-rid]')]
+        .filter(r=>r.getClientRects().length&&!r.dataset.rid.startsWith('grp:'))
+        .map(r=>({id:r.dataset.rid, 'Talhão · variedade':r.querySelector('.g2cd-tl .g2pw').innerText.replace(/\\s+/g,' ').trim(),
+          texto:r.innerText.replace(/\\s+/g,' ').trim()}));})()""") or []
 try:
     c.aparelho(1440, 900, 1, False); c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     res = {}
@@ -52,10 +71,10 @@ try:
         c.aparelho(largura, 844 if mobile else 900, 2 if mobile else 1, mobile)
         limpa(); c.goto(U('COLH.dc.html'), 1.4)
         t0 = opts('Filtrar por talhão'); sel('Filtrar por cultura', 'Café'); t1 = opts('Filtrar por talhão')
-        sel('Filtrar por cultura', 'Todas'); g = Grade(J)
-        antes = g.dicts(so_folhas=True)
+        sel('Filtrar por cultura', 'Todas')
+        antes = folhas_colheita(mobile)
         esperadas = [x for x in antes if x.get('Talhão · variedade', '').split(' ')[0] == 'P1']
-        sel('Filtrar por talhão', 'P1'); depois = g.dicts(so_folhas=True)
+        sel('Filtrar por talhão', 'P1'); depois = folhas_colheita(mobile)
         chk(f'F2 {largura} Colheita: Café → só C1; P1 mantém exatamente suas folhas e exclui as demais',
             t0[:1] == ['Todos'] and 'P1' in t0 and len(t0) > 3 and t1 == ['Todos', 'C1']
             and esperadas and len(esperadas) < len(antes) and depois == esperadas,
