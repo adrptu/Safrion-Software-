@@ -145,9 +145,9 @@ O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigo
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
 - **Design system único** (PRD cap. 74 e [`docs/design-system/`](docs/design-system/), padrões do proprietário de 09/10/2026): botões BOT-01 a BOT-09 (um verde por contexto; lugar, verbo, tamanho e ícone fixos; componente comum), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04). Vale para toda tela nova e para a correção das existentes, no protótipo e no software real.
-- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41 e 73.9).
+- **Toda O.S. agrícola tem registro de aprovação agronômica por ID e versão**, inclusive operação mecânica (PRD 41 e 73.9). A seleção pode ser aprovada em lote, por agrônomo/RT habilitado, com prévia e um CMD-42 por O.S.; “individual” qualifica o registro, não exige um clique por ordem (EX-32, confirmação do proprietário de 18/10; `docs/DECISIONS.md`).
   - Exceções expressas: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
-  - Aprovar não libera; liberar é o CMD-06.
+  - Aprovar não libera; liberar é o CMD-06. Aprovação e liberação em lote são duas ações separadas, mesmo para quem tem ambos os papéis; cada O.S. é revalidada e recebe resultado e recibo próprios. A versão alterada após a prévia fica fora da confirmação, com motivo (PRD 41.2, OSA-03, APROV-08/09; IDEM-03).
 - **O servidor é a autoridade** para saldo, reserva, custódia, aprovação e encerramento (PRD 24).
   - Cada comando carrega a chave de idempotência gerada por quem inicia a ação (ENG-021/022; PRD 73.3).
   - Grava o efeito, o recibo e a outbox na mesma transação.
