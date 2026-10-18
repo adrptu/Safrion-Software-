@@ -146,6 +146,57 @@ def resumir_falsos_fortes(resultados, desenho):
     return saida
 
 
+def resumir_motor_observavel(pacote, desenho):
+    """C3: resume execução recuperável sem inferir desenho a partir dos resultados.
+
+    Representante ausente não é execução ausente. Placebo em mates é contado
+    separadamente, não convertido em forte individual nem apagado do relatório.
+    """
+    campos = ('safra', 'semente', 'alvo')
+    def chave(r):
+        k = tuple(r.get(c) for c in campos)
+        if any(type(v) not in (str, int) or v == '' for v in k):
+            raise ValueError('Identidade inválida')
+        return k
+    esperado = [chave(r) for r in desenho]
+    if not esperado or len(set(esperado)) != len(esperado):
+        raise ValueError('Desenho vazio ou duplicado')
+    visto, linhas, totais, grupos_placebo = set(), [], {}, 0
+    for r in pacote['resultados']:
+        k = chave(r)
+        if k not in esperado or k in visto:
+            raise ValueError('Execução fora do desenho ou duplicada')
+        visto.add(k)
+        estado = r.get('estado')
+        if estado not in ('executado', 'insuf', 'singular'):
+            raise ValueError('Execução inválida')
+        reps = r['reps']
+        if estado != 'executado' and reps:
+            raise ValueError('Abstenção com representantes')
+        fatores = [q['fator'] for q in reps]
+        if len(set(fatores)) != len(fatores):
+            raise ValueError('Representante duplicado')
+        for q in reps:
+            lv = q['level']
+            if lv not in ('forte', 'moderada', 'fraca', 'nulo', 'insuf', 'grupo'):
+                raise ValueError('Nível desconhecido')
+            totais[lv] = totais.get(lv, 0) + 1
+            grupos_placebo += 'placebo' in q.get('mates', [])
+        forte = any(q['fator'] == 'placebo' and q['level'] == 'forte' for q in reps)
+        linhas.append(dict(zip(campos, k), fator='placebo', classe='placebo',
+                           motor='forte' if forte else ('insuf' if estado != 'executado' else 'fraco')))
+    des = [dict(r, fator='placebo', classe='placebo') for r in desenho]
+    resumo = resumir_falsos_fortes(linhas, des)
+    for r in resumo:
+        r['gate'] = ({'estado': 'nao_avaliavel'} if r['faltantes'] else
+                     avaliar_falso_forte(r['eventos_nas_completas'], r['sementes_planejadas']))
+    return {'safras': resumo, 'representantes_por_nivel': totais,
+            'grupos_com_placebo_como_mate': grupos_placebo,
+            'populacoes_planejadas': len(esperado), 'populacoes_executadas': len(visto),
+            'desenho_hash': digest(desenho), 'resultado_hash': digest(pacote),
+            'direcao': 'nao_avaliavel', 'recuperacao_motor': 'nao_certificada'}
+
+
 PERFIL_SUPORTE = {
     'versao': 1, 'nome': 'pressao_sustentada_sintetica',
     'x0_nc': 0.5, 'imigracao_diaria_nc': 0.05,

@@ -8,6 +8,21 @@ assert.equal(tipoObservado(estrutura,'placebo'),'Clima');assert.equal(tipoObserv
 assert.throws(()=>tipoObservado([estrutura[0]],'placebo'));
 assert.throws(()=>tipoObservado([estrutura[0],{series:[{day:1,covariavel_teste:.2}]}],'placebo'));
 console.log('PASS C1: tempo comum, variação espacial e recusa de calendário incompleto');
+const c3=cp.spawnSync('python3',['-B','-c',`import sys,copy;sys.path.insert(0,sys.argv[1]);import raiox_gabarito as g
+d=[dict(safra=s,semente=i,alvo=a) for s in ('1','2') for i in range(80) for a in ('a','b')]
+p={'resultados':[dict(x,estado='executado',reps=[]) for x in d]}
+r=g.resumir_motor_observavel(p,d);assert all(x['gate']['estado']=='atende' for x in r['safras'])
+p['resultados'][0]['reps']=[dict(fator='placebo',level='forte',mates=[])]
+p['resultados'][1]['reps']=[dict(fator='placebo',level='forte',mates=[])]
+r=g.resumir_motor_observavel(p,d);assert r['safras'][0]['eventos_nas_completas']==1 and r['representantes_por_nivel']['forte']==2
+p['resultados'][0]['reps']=[dict(fator='qs',level='grupo',mates=['placebo'])]
+r=g.resumir_motor_observavel(p,d);assert r['grupos_com_placebo_como_mate']==1
+p['resultados'].pop();r=g.resumir_motor_observavel(p,d);assert r['safras'][1]['gate']['estado']=='nao_avaliavel' and r['safras'][1]['wilson95'] is None
+p['resultados'].append(p['resultados'][0])
+try:g.resumir_motor_observavel(p,d);raise AssertionError('duplicado aceito')
+except ValueError:pass
+print('PASS C3: sementes sem pooling, ausência sem aceite, mates explícitos, duplicação recusada')`,__dirname],{encoding:'utf8'});
+assert.equal(c3.status,0,c3.stderr);console.log(c3.stdout.trim());
 const ini=html.indexOf('function rxRows('), fim=html.indexOf('// controles:',ini);
 assert(ini>=0&&fim>ini,'fonte rxRows ausente');
 const ctx={Math,PIVOS:[{id:'T',stage:'adulta'}],PEST:{A:{T:{obs:[],apps:[]}}}};
