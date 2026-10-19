@@ -137,10 +137,13 @@ try:
         ir('MB-03.dc.html', 390, 1800, toque=True); espera("!!document.querySelector('#ft_h')")
         chk('I2e sem início registrado: o comando recusa ("Informe as horas trabalhadas.") e o campo fica vazio (nada inventado)', 'Informe as horas trabalhadas.' in (r or '') and val('#ft_h') == '', [r, val('#ft_h')])
     with secao('I2 App · colheita (MB-10)'):
+        # o caso é a hora calculada, não o rótulo: a COLH-APONT F1 (PR #143) renomeia o botão do MB-10 de "Apontar área · OS-…" para
+        # "Apontar colheita · OS-…" (mesmo nome da web); o roteiro aceita os dois para valer em qualquer ordem de integração
+        abrir_apont = lambda: clk('Apontar colheita · OS-0505') == 'ok' or clk('Apontar área · OS-0505')
         ir('MB-10.dc.html', 390, 1800, limpa=True, toque=True); espera("!!(window.__cen&&window.__cen.cenGet)")
-        clk('Apontar área · OS-0505'); time.sleep(.3); h0 = val('#mb_h')
+        abrir_apont(); time.sleep(.3); h0 = val('#mb_h')
         J(f"(()=>{{const X=window.__cen; X.cenMudar(null,c=>{{ c.app.turno={{os:'OS-0505',ini:{HM}(185),d:'26/09',chave:'TU-T',pausas:[{{ini:{HM}(70),fim:{HM}(45)}}],fim:null}}; return {{msg:'ok'}}; }}); }})()")
-        ir('MB-10.dc.html', 390, 1800, toque=True); espera("!!(window.__cen&&window.__cen.cenGet)"); clk('Apontar área · OS-0505'); time.sleep(.3); h1 = val('#mb_h')
+        ir('MB-10.dc.html', 390, 1800, toque=True); espera("!!(window.__cen&&window.__cen.cenGet)"); abrir_apont(); time.sleep(.3); h1 = val('#mb_h')
         chk('I2f colheita: sem turno, horas vazias (pede); com turno aberto na OS-0505, horas = 2,7 (editáveis)', h0 == '' and h1 == '2,7', [h0, h1])
     # ======================================================================================== I3 · Nova ordem
     with secao('I3 O.S. › Nova ordem: início da janela preenchido'):
