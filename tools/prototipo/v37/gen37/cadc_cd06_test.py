@@ -3,13 +3,16 @@
 data, embalagem estruturada, controle em um campo, situação Ativo/Inativo, unidade-base travada com motivo, locais com fazenda e
 capacidade só em tanque e silo; o cabeçalho mostra pendência do cadastro (não do Estoque).
 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): preço sem data deixa de ser barrado e grava com a data de hoje (23/09/2026 na
-demonstração); o oráculo "Informe a data do preço." vira "salvo com hoje", e a data informada continua valendo."""
+demonstração); o oráculo "Informe a data do preço." vira "salvo com hoje", e a data informada continua valendo.
+Vermelho antigo corrigido no roteiro (19/10, o mesmo na base cbe4cd38): desde o DRILL-RECOLHIDO (v129) a árvore abre recolhida e as linhas dos
+itens (KCl 60% …) não existem até o "Expandir tudo"; o teste parava no 2º caso (TypeError). Agora expande ao abrir, como o cadf_test."""
 # TABELAS-FOCO (06/10/2026): natureza, unidade, embalagem e capacidade em colunas próprias (o ativo de origem do silo fica no painel do local)
 from cadc_lib import T
 import time, json
 t=T(); J=t.J
 try:
     t.goto('CD-06.dc.html'); body=J("document.body.innerText")
+    J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.35)   # árvore recolhida (v129)
     # SOLO-01 (D-10): o Calcário dolomítico ganhou preço de referência (R$ 180,00/t) e data; o selo abre sem pendência de preço
     t.chk('abre sem pendência de preço no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
           'sem preço' not in t.header() and 'Criar item' in t.header() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
