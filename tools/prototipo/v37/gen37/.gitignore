@@ -1,0 +1,4 @@
+# Dado real da Fazenda Lagoa Grande: nunca no git (ENG-017; exceção do proprietário de 19/10/2026 vale só para o artefato privado).
+# Gerados por tools/geo/s2_l2a.py, que já recusa gravar dentro de um repositório; esta regra é a segunda barreira.
+dados_lagoa/
+dados_lagoa_kml.py
