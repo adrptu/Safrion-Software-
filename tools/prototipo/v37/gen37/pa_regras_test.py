@@ -18,6 +18,8 @@ e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
      com ela e o aviso diz "inclui …"; a dose gravada pela saída do campo no mesmo gesto também aparece no aviso; dose aberta inválida
      não publica e o erro fica no campo (R2); dose aberta acima da bula entra no rascunho e não publica, com o ⛔ no aviso
   U15 sair do detalhe com a dose ou a inclusão digitadas avisa e não troca de plano (R8); vazio sai direto
+  U18 (revisão Codex 6271563229, item 2) a gravação do rascunho que falha não é marcada como guardada: o selo mostra a falha e a
+     renderização seguinte tenta de novo sem nova edição
   U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4); U17 salvar sem mudança não cria rascunho (R3)
 PA-OPER F1 (19/10): o exemplo de dose passou de 0,6 para 0,45 L/ha. Com a bula na versão (P7), 0,6 L/ha de Fungicida A passa do máximo de
 0,5 L/ha da bula de demonstração e impede publicar (⛔); 0,45 fica dentro. A primária virou "Salvar e publicar vN" (decisão 9 + proprietário
@@ -134,6 +136,19 @@ caso('U14 Salvar e publicar com a dose aberta (leve, 19/10): válida publica com
      &&b1[0]===7&&/ · inclui Fungicida A: 0,5 → 0,45 L\/ha/.test(b1[1])&&c1[0]===7&&!/inclui/.test(c1[1])
      &&d1[0]===6&&!d1[1]&&d1[2]==='Informe a dose por hectare, maior que zero.'
      &&e1[0]===6&&e1[1]&&e1[2]===0.6&&/^⛔ /.test(e1[3]||'')&&e1[4]===null, [a1,b1,c1,d1,e1]); });
+// revisão Codex 6271563229, item 2: o estado só fica marcado como guardado depois do recibo; a falha aparece no selo e a próxima
+// renderização tenta de novo, sem editar outra vez
+caso('U18 gravação do rascunho que falha não é marcada como guardada; o selo diz; a renderização seguinte tenta de novo e confirma',['paGuarda','paSelo'],()=>{
+  const ant=[globalThis.cenMudar,globalThis.cenAgora]; let n=0; globalThis.cenAgora=()=>'14:32';
+  globalThis.cenMudar=(x,fn)=>{ n++; if(n===1) return {erro:'quota de armazenamento'}; const c={pa:{}}; fn(c); return {msg:''}; };
+  try{ const pl=doseFung(ps0,0.45).ps; const t=tela({pid:'SOJA-AT',pl}); paGuarda(t); const f1=[n,t.__paPlGrav===pl,t.__paErroGrav,t.__paRecibo||''];
+    const s1=paSelo(t.state.pl.find(p=>p.id==='SOJA-AT'),t.__paRecibo,t.__paErroGrav)[0];
+    paGuarda(t); const f2=[n,t.__paPlGrav===pl,t.__paErroGrav,t.__paRecibo]; const s2=paSelo(t.state.pl.find(p=>p.id==='SOJA-AT'),t.__paRecibo,t.__paErroGrav)[0];
+    paGuarda(t); const f3=n;
+    ok('U18 gravação do rascunho que falha não é marcada como guardada; o selo diz; a renderização seguinte tenta de novo e confirma',
+       f1[0]===1&&!f1[1]&&f1[2]==='quota de armazenamento'&&!f1[3]&&/^Rascunho v7 não guardado \(quota de armazenamento\)/.test(s1)
+       &&f2[0]===2&&f2[1]&&f2[2]===''&&f2[3]==='14:32'&&s2==='Rascunho v7 guardado 14:32 · v6 em vigor'&&f3===2, [f1,s1,f2,s2,f3]);
+  } finally { globalThis.cenMudar=ant[0]; globalThis.cenAgora=ant[1]; } });
 caso('U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto',['paPend','paSair','paSaiNao'],()=>{
   const pend=[paPend({iadd:{aid:'a',prod:'Inseticida B',dose:'',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:'0,3',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:' ',err:''}}),paPend({ied:{aid:'a',prod:'Fungicida A',val:'0',err:'x'}}),paPend({})];
   const t=tela({pid:'SOJA-AT',iadd:{aid:fungId(),prod:'Inseticida B',dose:'0,3',err:''}}); paSair(t,{pid:null}); const av=[t.state.pid,t.state.saiAv];
@@ -164,4 +179,4 @@ finally:
     os.unlink(f.name)
 print(r.stdout.strip()); print(r.stderr.strip()[-2000:]) if r.stderr.strip() else None
 lin = r.stdout.splitlines(); n = sum(1 for l in lin if l.startswith(('OK ', 'FALHA '))); fa = sum(1 for l in lin if l.startswith('FALHA '))
-sys.exit(0 if r.returncode == 0 and n == 18 and not fa else 1)
+sys.exit(0 if r.returncode == 0 and n == 19 and not fa else 1)

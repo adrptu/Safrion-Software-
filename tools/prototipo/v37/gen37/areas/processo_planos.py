@@ -129,11 +129,14 @@ function paCarrega(){ let sv={}; try{ const c=(typeof cenGet==='function')?cenGe
   return base.concat(Object.keys(sv).filter(k=>!PA_BASE.some(p=>p.id===k)&&sv[k]&&sv[k].nome).map(k=>paClone(sv[k]))); }
 function paPlans(self){ if(self.state.pl) return self.state.pl; if(!self.__paPl0) self.__paPl0=paCarrega(); return self.__paPl0; }
 function paSalvavel(p){ return {id:p.id,nome:p.nome,cultura:p.cultura,versao:p.versao,atividades:p.atividades,params:p.params||{},rasc:p.rasc||null,hist:p.hist||[],versoes:p.versoes||{},pubPor:p.pubPor||''}; }
-function paGuarda(self){ const pl=self.state.pl; if(!pl||pl===self.__paPlGrav||typeof cenMudar!=='function') return; self.__paPlGrav=pl;
+// só marca o estado como guardado depois do recibo; se a gravação falhar, o selo diz e a próxima renderização tenta de novo, sem editar
+// outra vez (revisão Codex 6271563229, item 2)
+function paGuarda(self){ const pl=self.state.pl; if(!pl||pl===self.__paPlGrav||typeof cenMudar!=='function') return;
   const r=cenMudar(null,c=>{ c.pa=Object.assign({},c.pa||{}); pl.forEach(p=>{ const b=PA_BASE.find(x=>x.id===p.id);
       if(b&&JSON.stringify(paSalvavel(p))===JSON.stringify(paSalvavel(b))) delete c.pa[p.id]; else c.pa[p.id]=paSalvavel(p); });
     Object.keys(c.pa).forEach(k=>{ if(!pl.some(p=>p.id===k)) delete c.pa[k]; }); return {msg:''}; });
-  if(!r||!r.erro) self.__paRecibo=(typeof cenAgora==='function')?cenAgora():''; }
+  if(r&&r.erro){ self.__paErroGrav=String(r.erro); return; }
+  self.__paPlGrav=pl; self.__paErroGrav=''; self.__paRecibo=(typeof cenAgora==='function')?cenAgora():''; }
 function paNovoRasc(p){ return {v:p.versao+1,atividades:paClone(p.atividades),params:paClone(p.params||{})}; }
 function paWorkParams(p){ return p.rasc?(p.rasc.params||{}):(p.params||{}); }
 function paPlan(self,id){ return paPlans(self).find(p=>p.id===id)||null; }
@@ -214,7 +217,8 @@ function paCuf(self,cu){ const f=self.state.cuf||''; return cu.indexOf(f)<0?'':f
 function paQf(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu);
   const ch=(t,n,on,go)=>({t:t,n:String(n),on:String(!!on),go:go,st:PA_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   return [ch('Todas',ps.length,!f,()=>self.setState({cuf:''}))].concat(cu.map(c=>ch(c,ps.filter(p=>p.cultura===c).length,f===c,()=>self.setState({cuf:f===c?'':c})))); }
-function paSelo(p,recibo){ const vig=(p.hist||[]).find(h=>h.v===p.versao);
+function paSelo(p,recibo,erro){ const vig=(p.hist||[]).find(h=>h.v===p.versao);
+  if(p.rasc&&erro) return ['Rascunho v'+p.rasc.v+' não guardado ('+erro+') · nova tentativa a seguir','r'];
   if(p.versao===0) return ['Rascunho v1 · ainda não publicado','y'];
   if(p.rasc) return ['Rascunho v'+p.rasc.v+(recibo?' guardado '+recibo:'')+' · v'+p.versao+' em vigor','y'];
   return ['Publicada v'+p.versao+(p.pubPor?' · por '+p.pubPor:'')+(vig&&vig.at&&vig.at!=='—'?' em '+vig.at:''),'g']; }
@@ -379,7 +383,7 @@ function paS2(self,v,p){ const todas=paWork(p); const oper=paOper(p); const ops=
   const xa0=self.state.xa||{}; const todasAb=atv.length>0&&atv.every(a=>xa0[a.id]); v.x_lab=todasAb?'Recolher tudo':'Expandir tudo'; v.x_tog=todasAb?v.x_none:v.x_all; v.x_up=todasAb; v.x_down=!todasAb;
   // 14/10 (Versões saiu do detalhe): com rascunho, o selo diz também a versão que segue valendo para as O.S.
   // PA-OPER F1 (decisão 9): o rascunho se guarda sozinho, com o recibo; ele e a versão publicada ficam no mesmo selo
-  const est=paSelo(p,self.__paRecibo);
+  const est=paSelo(p,self.__paRecibo,self.__paErroGrav);
   v.p_nome=p.nome; v.p_est=est[0]; v.p_est_st=paChip(est[1]);
   const tp=[]; todas.forEach(a=>{ const t=PA_TAG[a.g.tipo]; if(tp.indexOf(t)<0) tp.push(t); }); tp.sort((a,b)=>PA_TORD.indexOf(a)-PA_TORD.indexOf(b));
   v.k2=p.cultura+' · '+todas.length+(todas.length===1?' atividade':' atividades')+' · '+paRS(paCt(todas))+'/ha de insumos'+(tp.length?' · gatilhos: '+tp.join(', '):'');

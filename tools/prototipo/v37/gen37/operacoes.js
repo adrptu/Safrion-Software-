@@ -112,13 +112,16 @@ function opBula(pulverizacoes, bula, ctx) {
         if (!daCultura[a.alvo]) { out.push({nivel: 'impede', ativ: a.id, prod: nome, motivo: `${nome}: sem registro para ${cultura} × ${a.alvo}`}); continue; }
         cand = [daCultura[a.alvo]];
       }
+      // a unidade da bula (L/ha, kg/ha, L/100 L, kg/100 L…) precisa ser a do plano, também na dose por 100 L de calda: kg × L nunca se
+      // compara nem se converte (revisão Codex 6271563229, item 1); divergente vira aviso "dose não conferida"
+      const mesmaUn = u => String(u.un || '').startsWith(String(p.un || ''));
       const lims = cand.map(u => {
-        if (!(Number(u.dmax) > 0)) return null;
+        if (!(Number(u.dmax) > 0) || !mesmaUn(u)) return null;
         if (u.porCalda) return vol !== null ? Number(u.dmax) * vol / 100 : null;
-        return String(u.un || '').startsWith(String(p.un || '')) ? Number(u.dmax) : null;
+        return Number(u.dmax);
       });
       const dha = Number(p.dose);
-      if (lims.every(x => x === null) && cand.some(u => !u.porCalda && Number(u.dmax) > 0 && !String(u.un || '').startsWith(String(p.un || ''))))
+      if (lims.every(x => x === null) && cand.some(u => Number(u.dmax) > 0 && !mesmaUn(u)))
         out.push({nivel: 'aviso', ativ: a.id, prod: nome, motivo: `${nome}: unidade da bula (${cand[0].un}) diferente da do plano (${p.un}/ha); dose não conferida`});
       if (lims.every(x => x !== null) && dha > Math.max(...lims) + OP_EPS)
         out.push({nivel: 'impede', ativ: a.id, prod: nome, motivo: `${nome}: dose de ${opNum(dha)} ${p.un}/ha acima da bula (${opNum(Math.max(...lims))} ${p.un}/ha)`});

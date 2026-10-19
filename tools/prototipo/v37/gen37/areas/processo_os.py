@@ -713,7 +713,10 @@ function osc_nova(c,no){ if(c.ordens[no.id]) throw new Error(no.id+' já existe.
    versão dele (40.3) e a O.S. nova lê a instrução dessa versão */
 function osPlanoVer(cc,pid,ver){ const b=OSD.nova.planos[pid]; if(!b) return null; const pa=((cc||{}).pa||{})[pid]; const vs=(pa&&pa.versoes)||{};
   if(vs[ver]) return {versao:Number(ver),params:vs[ver].params||{},atividades:vs[ver].atividades||[]};
-  return {versao:b.versao,params:b.params||{},atividades:null}; }
+  // a semente só responde pela versão dela: pedir uma versão que não está guardada nem é a da semente devolve nada (calda pendente),
+  // nunca os parâmetros de outra versão com o número da pedida (revisão Codex 6271563229, item 3)
+  if(Number(ver)===Number(b.versao)) return {versao:b.versao,params:b.params||{},atividades:null};
+  return null; }
 function osPlanoVig(cc,pid){ const b=OSD.nova.planos[pid]; const pa=((cc||{}).pa||{})[pid]; return pa&&pa.versao?Number(pa.versao):(b?b.versao:null); }
 function osCaldaPlano(cc,pid,ver,op,aid){ const pv=osPlanoVer(cc,pid,ver); if(!pv||typeof opParam!=='function') return {valor:null,origem:'pendente'};
   const at=(pv.atividades||[]).find(x=>x.id===aid)||{}; return opParam(at,(pv.params||{})[op]||{},'calda'); }

@@ -99,6 +99,35 @@ Brutos em `brutos/leve/` (`resumo.txt` e um log por teste).
 | `frota_unit.js` · `mapa_frota_test.py` (K4 juntado) | 57/57 · 23/23 |
 | `mapa_real_semdado_test.py` · `tools/geo` (`s2_l2a_test` e `s2_l2a_montagem_test`) | 3/3 · 18/18 |
 
+## Revisão do Codex 6271563229: três achados P2 corrigidos (19/10, executado, dados sintéticos)
+1. **Unidade por 100 L (`operacoes.js`, `opBula`).** A dose por 100 L de calda era convertida sem conferir a unidade, então kg/100 L chegava a ser comparado com L/ha.
+   - Agora a unidade da bula precisa ser a do plano, também por 100 L.
+   - Unidade divergente vira o aviso "dose não conferida", e não ⛔ falso.
+   - Teste: `pa_oper_unit` R1a (kg/100 L com plano em L: aviso, sem ⛔) e R1b (L/100 L: ⛔ acima de 0,06 L/ha).
+2. **Nova tentativa de gravação (`processo_planos.py`, `paGuarda`/`paSelo`).** Uma falha do `cenMudar` marcava o rascunho como guardado.
+   - Agora a falha não marca nada.
+   - O selo mostra "Rascunho vN não guardado (motivo) · nova tentativa a seguir", e a renderização seguinte tenta de novo.
+   - Teste: `pa_regras` U18.
+3. **Versão ausente na O.S. (`processo_os.py`, `osPlanoVer`).** Pedir uma versão que não está guardada devolvia a calda da semente com o número da versão pedida.
+   - Agora a semente só responde pela própria versão. Fora disso não volta nada, e a calda fica "pendente".
+   - Teste novo: `pa_oper_versao_test.py`, com V1, V2 e V3 nas funções reais da tela O.S.
+
+Brutos em `brutos/revisao/`.
+
+| Teste (build da correção sobre `367e521e`) | Resultado | Contraprova na `ccda8c8d` |
+|---|---|---|
+| `pa_oper_unit.js` | 44/44 | 41/44 (R1a; E4 e P12d são da rodada leve) |
+| `pa_regras_test.py` | 19/19 | 16/19 (U5, U14 e U18) |
+| `pa_oper_versao_test.py` | 3/3 | 2/3 (V1) |
+| `pa_oper_test.py` · `pa_oper_cen_test.py` · `os_cenario_test.py` | 24/24 · 7/7 · 22/22 | — |
+| `pa_lista_test.py` · `carencia_test.py` | 24/24 · 90/90 | — |
+| `ficha_pivo_test.py` · `demanda_unica_test.py` | 21/21 · 71/71 | — |
+| `ex38_test.py` | 16/17 (P3) | P3 reprova igual na `ccda8c8d`, na `f285b4a6` e na `5063709b` |
+
+O P3 do `ex38` não vem desta frente. O oráculo dele ficou obsoleto no `a6dedd70` (Codex, 17/10), que passou a arredondar a quantidade de cada carga ao centésimo, conservando o total.
+- Medido nas 400 combinações: erro por carga de até 0,0099, e a soma das cargas igual a `cenQtd(dose, área)` (diferença de 1,4e-12).
+- Proposta ao dono do teste: erro por carga < 0,01 e soma das cargas igual ao total.
+
 ## Fora desta fatia (PA-OPER decisão 10)
 F2: Plantio e Tratamento de sementes (população, PMS, germinação), etapa 2 do Planejar safra com o resumo por operação e o ajuste por talhão, aplicar a vN nova ao cultivo. F3: Adubação e correção, fertirrigação. F4: Colheita, tratos, poda e preparo.
 

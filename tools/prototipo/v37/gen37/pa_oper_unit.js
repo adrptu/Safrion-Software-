@@ -61,6 +61,13 @@ conf = O.opBula([at('f1', 30, [fa()]), at('f2', 50, [{prod: 'Fungicida B', dose:
 ok('P7f', 'mesmo grupo FRAC em sequência → só ⚠', conf.length === 1 && conf[0].nivel === 'aviso' && conf[0].ativ === 'f2', conf);
 conf = O.opBula([at('f1', 30, [fa()], {alvo: 'percevejo'})], BULA, ctx);
 ok('P7g', 'sem registro para cultura × alvo → ⛔', conf.some(x => x.nivel === 'impede' && x.motivo.includes('sem registro para Soja × percevejo')), conf);
+// revisão Codex 6271563229, item 1: dose por 100 L de calda com unidade da bula diferente da do plano não se compara (kg × L)
+const B100 = (un) => ({P: {grupos: ['G'], usos: {Soja: {Alvo: {dmax: 0.06, un, porCalda: true, car: 0, mx: 3}}}}});
+const c100 = {cultura: 'Soja', params: {calda: 100}, colheitasT: [100]};
+conf = O.opBula([{id: 'A', t: 10, alvo: 'Alvo', produtos: [{prod: 'P', un: 'L', dose: 0.1}]}], B100('kg/100 L'), c100);
+ok('R1a', 'bula 0,06 kg/100 L × plano 0,1 L/ha: sem ⛔ dimensional; ⚠ "dose não conferida"', !conf.some(x => x.nivel === 'impede') && conf.some(x => x.nivel === 'aviso' && x.motivo.includes('dose não conferida')), conf);
+conf = O.opBula([{id: 'A', t: 10, alvo: 'Alvo', produtos: [{prod: 'P', un: 'L', dose: 0.1}]}], B100('L/100 L'), c100);
+ok('R1b', 'bula 0,06 L/100 L, calda 100 L/ha (0,06 L/ha) × plano 0,1 L/ha: ⛔ acima da bula (mesma unidade)', conf.some(x => x.nivel === 'impede' && x.motivo.includes('acima da bula (0,06 L/ha)')), conf);
 conf = O.opBula([at('f1', 30, [fa()])], BULA, {cultura: 'Milho', colheitaT: 140, params: p100});
 ok('P7h', 'sem registro para a cultura → ⛔', conf.some(x => x.nivel === 'impede' && x.motivo.includes('sem registro para Milho')), conf);
 conf = O.opBula([at('f1', 30, [fa(0.45)], {alvo: ''})], BULA, ctx);
