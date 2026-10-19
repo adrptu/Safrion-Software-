@@ -248,7 +248,7 @@ for _v in VIS:
 
 def seed():
     # v=2 (04/10, PRE-REV-20261004): área das decisões ligadas = área da O.S.; descarta o estado salvo com a área antiga
-    return dict(v=2, rev=0, vis={v['id']: v for v in VIS}, dia=DIA, rec=REC, apl=APL, seq=dict(vis=18, dia=11, rec=19, ra=142))
+    return dict(v=2, rev=0, origemSemente='sintetica', vis={v['id']: v for v in VIS}, dia=DIA, rec=REC, apl=APL, seq=dict(vis=18, dia=11, rec=19, ra=142))
 
 def estatico():
     return dict(hoje=HOJE, key=KEY, prot=PROT, tal=TAL, agf=AGF, grupo=GRUPO, conj=CONJ, resp=RESP, rt='Ana',
@@ -281,3 +281,4 @@ if __name__ == '__main__':
     verificar()
     for k, v in AGF.items(): print(k, [(x['nome'], x['g'], x['dmin'], x['dmax'], x['un'], x['car'], x['mx']) for x in v])
     print({t: (x['cultura'], x['fase'], prots_do(t)) for t, x in TAL.items() if x['faz'] == LG})
+

@@ -266,6 +266,8 @@ function mipColetar(s, vid, valor, gpsOk) {
   if (v.est === 'programada') { v.est = 'coleta'; if (v.data > MIPD.hoje) v.data = MIPD.hoje; }
   if (reab) { v.est = 'coleta'; v.parcial = false; }
   const prox = mipAlvoPt(v); const vez = prox && prox.n !== pt.n ? prox : null;
+  // RX1: disponibilidade desta revisão local; não é o instante da observação em campo.
+  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
   return { msg: (reab ? vid + ' reaberta · ' : '') + 'Ponto ' + pt.n + (eraRec && !pt.rec ? ' recoletado' : ' registrado') + (pt.rec ? ' para recoleta (GPS fora da tolerância)' : '')
     + (vez ? ' · ponto ' + vez.n + (vez.rec ? ' (recoleta)' : '') + ' aberto.' : (prox ? ' · ponto ' + prox.n + ' segue em recoleta.' : ' · todos os pontos coletados.')) };
 }
@@ -276,12 +278,14 @@ function mipCorrigir(s, vid, n, valor, gpsOk) {
   const pt = v.pts.find(x => x.n === Number(n)); if (!pt || pt.v === null || pt.v === undefined) throw new Error('Ponto ' + n + ' ainda não foi coletado.');
   const x = mipValor(mipP(v), valor, pt.n); const de = pt.v;
   pt.v = x; pt.ok = gpsOk !== false; pt.rec = gpsOk === false;
+  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
   return { msg: 'Ponto ' + pt.n + ' corrigido: ' + mipN(de) + ' → ' + mipN(x) + (pt.rec ? ' (recoleta)' : '') + '.' };
 }
 function mipConcluir(s, vid) {
   const v = s.vis[vid]; if (!v) throw new Error('Vistoria não encontrada.'); if (v.est === 'concluida') throw new Error(vid + ' já foi concluída.');
   const R0 = mipRes(v); if (!R0.col) throw new Error('Colete ao menos um ponto antes de concluir.');
   v.est = 'concluida'; v.parcial = false; const R = mipRes(v, s); const S = MIP_SIT[R.k];
+  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
   return { msg: vid + ' concluída com ' + R.col + ' de ' + R.tot + ' pontos · ' + (S ? S[0].toLowerCase() : '') + (R.kr && R.k === 'incompleta' ? ' (parcial: ' + MIP_SIT[R.kr][0].toLowerCase() + ')' : '') + '.' };
 }
 function mipSinc(s, vid) {
@@ -443,3 +447,26 @@ function mipDoTal(s, tal, dias, c) {
 }
 try { window.__mip = { chaves: { mip: MIP_KEY, marca: MIP_MIGRADO, cen: mipCenKey() }, mipGet, mipErro, mipMudar, mipReset, mipRes, mipSit, mipProx, mipChecks, mipNovaVis, mipEmitir, mipMonitorar, mipColetar, mipCorrigir, mipConcluir }; } catch (e) {}
 
+// RX1: proveniência disponível no MIP, sem promover planejamento a execução.
+// Este diagnóstico não autoriza comparação: o legado não guarda histórico temporal.
+function mipRaioxFontes(s, vid, c) {
+  const v = s && s.vis && s.vis[vid];
+  if (!v) return { estado: 'fonte_ausente', antes: null, depois: null, aplicacoes: [], variacao: null };
+  const leitura = x => {
+    if (!x) return null;
+    const R = mipRes(x);
+    return { id: x.id, talhao: x.tal, protocolo: x.prot, data: x.data,
+      estado: x.est, valorObservado: Number.isFinite(R.media) ? R.media : null, unidade: R.un,
+      completa: x.est === 'concluida' && Number.isInteger(R.tot) && R.tot > 0 && R.val === R.tot && Number.isFinite(R.media) && !R.pend,
+      versao: Number.isSafeInteger(x.versao) && x.versao > 0 ? x.versao : null,
+      disponivelEm: typeof x.disponivelEm === 'string' ? x.disponivelEm : null,
+      precisao: 'dia', historico: 'indisponivel', href: 'AG-01.dc.html#' + encodeURIComponent(x.id) };
+  };
+  const d = v.dec || {}, pos = d.pos && s.vis[d.pos];
+  const depois = pos && pos.pos_de === v.id && pos.tal === v.tal && pos.prot === v.prot ? pos : null;
+  const aplicacoes = (s.apl || []).filter(a => d.os && a.os === d.os && a.tal === v.tal && a.chave === mipP(v).chave)
+    .map(a => ({ os: a.os, talhao: a.tal, produto: a.prod, data: a.data,
+      estado: mipOsFora(c, a.os) ? 'cancelada_ou_ausente' : 'execucao_nao_demonstrada',
+      precisao: 'dia', historico: 'indisponivel', href: 'OS.dc.html#' + encodeURIComponent(a.os) }));
+  return { estado: 'historico_indisponivel', antes: leitura(v), depois: leitura(depois), aplicacoes, variacao: null };
+}
