@@ -8,7 +8,7 @@ As regras de equipe continuam em [protocolo](../../docs/parceria/protocolo.md).
 por SHA. Usa `gh` autenticado **com a identidade existente do executor**, sem ler
 ou guardar tokens. Não instala ferramentas, cria contas, muda ruleset, faz push,
 atualiza branch, habilita auto-merge, resolve discussões ou emite pareceres.
-O merge manual pelo revisor segue [DEC-1810-01](../../docs/DECISIONS.md#dec-1810-01--integração-manual-pelo-revisor) e AGENTS.md §3.
+O merge manual pelo revisor segue [DEC-1810-02](../../docs/DECISIONS.md#dec-1810-02--integração-manual-pelo-revisor) e AGENTS.md §3.
 Essa autorização não dispensa checks, pareceres, proteção ou confirmação do destino.
 Não é serviço de plantão. O agente continua sendo responsável pelo acionamento e
 por examinar a evidência. Não executa textos de PR no shell.

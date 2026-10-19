@@ -213,7 +213,7 @@ Propostas do texto ao proprietário; **não são decisões**. Até o acordo escr
 | DEC-0910-43 (PLA-24) | PEND-REPO-01 resolvida pelo fato conferido | PEND-REPO-01 |
 
 
-## DEC-1810-01 — Integração manual pelo revisor
+## DEC-1810-02 — Integração manual pelo revisor
 
 Data da instrução: 18/10/2026. Registro por Codex: 19/10/2026, para revisão de Claude no PR #38.
 
