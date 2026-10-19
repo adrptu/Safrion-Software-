@@ -84,7 +84,8 @@ ok('P7o', 'unidade da bula (kg/ha) diferente da do plano (L): ⚠ "dose não con
 ok('E1', 'pendência sem impedimento → Pendente', O.opEstado([{}], []).cod === 'pendente');
 ok('E2', 'impedimento vence pendência → Impedida', O.opEstado([{}], [{nivel: 'impede'}]).cod === 'impedida');
 ok('E3', 'só aviso → Com aviso; nada → Pronta', O.opEstado([], [{nivel: 'aviso'}]).cod === 'aviso' && O.opEstado([], []).cod === 'pronta');
-ok('E4', 'pendências da Pulverização: calda e alvo', O.opPendencias({familia: 'pulverizacao', atividades: [{id: 'q', nome: 'Q'}]}, {}).map(x => x.campo).join() === 'calda,alvo');
+ok('E4', 'pendência da Pulverização é só a calda; alvo é opcional (leve, proprietário 19/10)', O.opPendencias({familia: 'pulverizacao', atividades: [{id: 'q', nome: 'Q'}]}, {}).map(x => x.campo).join() === 'calda'
+  && O.opPendencias({familia: 'pulverizacao', atividades: [{id: 'q', nome: 'Q'}]}, {calda: 100}).length === 0);
 
 // ---- P12 · publicação explícita e idempotente
 let pl = {versoes: [{v: 6, estado: 'publicada', por: 'Ana', em: '12/08/2026'}]};
@@ -93,10 +94,11 @@ ok('P12a', 'Ana publica v7', r.v === 7 && r.plano.versoes.some(x => x.v === 7 &&
 ok('P12b', 'mesma chave não cria v8', O.opPublicar(r.plano, {tipo: 'publicar', podePublicar: true, por: 'Ana', em: '16/10/2026', chave: 'k1'}).repetido === true);
 r = O.opPublicar(pl, {tipo: 'publicar', podePublicar: false, por: 'Caio', chave: 'k2'});
 ok('P12c', 'Caio sem o papel não publica', !!r.erro && r.plano === pl);
+// sem etapa de revisão (proprietário 19/10: "leve e fluido"): submeter e devolver não existem; o plano não muda
 r = O.opPublicar(pl, {tipo: 'submeter', por: 'Caio', chave: 'k3'});
-ok('P12d', 'Caio submete: v7 em revisão, v6 segue vigente', r.v === 7 && r.plano.versoes.some(x => x.v === 7 && x.estado === 'em revisão') && r.plano.versoes.some(x => x.v === 6 && x.estado === 'publicada'));
-const r2 = O.opPublicar(r.plano, {tipo: 'publicar', podePublicar: true, por: 'Ana', chave: 'k4'});
-ok('P12e', 'Ana publica a v7 em revisão (não pula para v8)', r2.v === 7 && r2.plano.versoes.filter(x => x.v === 7).length === 1 && r2.plano.versoes.find(x => x.v === 7).estado === 'publicada');
+ok('P12d', 'submeter não existe: ato desconhecido, v6 segue vigente e nada é criado', r.erro === 'ato desconhecido' && r.plano === pl && pl.versoes.length === 1);
+const r2 = O.opPublicar({versoes: pl.versoes.concat([{v: 7, estado: 'publicada', por: 'Ana'}])}, {tipo: 'publicar', podePublicar: true, por: 'Ana', chave: 'k4'});
+ok('P12e', 'com a v7 publicada, publicar de novo cria a v8 (numeração segue a última publicada)', r2.v === 8 && r2.plano.versoes.filter(x => x.v === 8).length === 1);
 ok('P12f', 'impedimento recusa publicar', !!O.opPublicar(pl, {tipo: 'publicar', podePublicar: true, impedimentos: [{motivo: 'x'}], chave: 'k5'}).erro);
 
 // ---- K7 · deslocar os gatilhos de uma operação

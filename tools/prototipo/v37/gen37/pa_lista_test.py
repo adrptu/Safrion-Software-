@@ -20,9 +20,9 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
   L12 cliques para "mudar uma dose e publicar" (abrir o plano, abrir a atividade, tocar a dose, digitar 0,45 + Enter, publicar):
       medidos na execução real; com ANTES=<_render da base> mede também a base cdc185f no mesmo cenário (1 a menos)
   Revisão adversarial do Codex (09/10), um caso por achado, com a reprodução dele:
-  L14 R1/R2: dose digitada sem Enter e clique de verdade em "Publicar" não publica: o botão fica desabilitado com o motivo enquanto
-      a dose está aberta; a dose válida entra no rascunho e no resumo ao lado do botão, e só o clique seguinte publica; a dose 0
-      sem Enter não publica e o erro continua no campo
+  L14 R1/R2 (leve, proprietário 19/10: "leve e fluido"; antes o clique só gravava a dose e pedia um 2º clique): dose digitada sem
+      Enter e um clique de verdade em "Salvar e publicar" publicam a v7 com essa dose, e o aviso diz qual dose entrou; a dose 0 sem
+      Enter não publica e o erro continua no campo
   L15 R3: rascunho que volta a ficar igual à v6 desabilita "Publicar" com o motivo
   L16 R4: trocar o endereço com o painel da atividade aberto não troca de plano (endereço volta) nem grava em outro plano
   L17 R6: Esc com o menu ⋯ da atividade aberto fecha só o menu, a 1440 e a 390 px (toque); a 390 px a barra lateral fica recolhida
@@ -262,22 +262,21 @@ try:
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45')
         clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3); clique(lab('Alterar a dose de Glifosato 480'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('2,5'); aberta = J(NOTA)
-        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/entrou no rascunho agora|salvas na v7/.test(x.innerText))", 4)
-        t14 = toast(); n14 = J(NOTA); e14 = est(); v14 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")   # Versões saiu do detalhe (14/10): o cabeçalho diz a versão em vigor
-        chk('L14a R1: dose do Glifosato 480 digitada (6) sem Enter: "Salvar alterações" desabilitado com o motivo; o clique de verdade nele não salva: a dose entra no rascunho v7 (a atividade fica marcada), o aviso pede para conferir e clicar de novo; a v6 segue em vigor',
-            aberta['dis'] and aberta['txt'] == 'Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para salvar.'
-            and 'salvas na v7' not in t14 and 'A dose de Glifosato 480: 2 → 2,5 L/ha entrou no rascunho agora: confira e clique em Salvar e publicar de novo.' in t14
-            and not n14['txt'] and not n14['dis'] and 'Alterada' in v14
-            and re.search(r'Rascunho v7( guardado \d\d:\d\d)? · v6 em vigor', v14) and 'Publicada v7' not in v14, [aberta, t14, n14, v14[:400]])
-        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Publicada v7/.test(x.innerText))", 4); t14b = toast()
+        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Publicada v7/.test(x.innerText))", 4)
+        t14 = toast(); v14 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")   # Versões saiu do detalhe (14/10): o cabeçalho diz a versão em vigor
+        chk('L14a R1 (leve): dose do Glifosato 480 digitada (2,5) sem Enter: "Salvar e publicar v7" habilitado, sem nota; um clique de verdade publica a v7 e o aviso diz "inclui Glifosato 480: 2 → 2,5 L/ha"',
+            not aberta['dis'] and not aberta['txt'] and 'Publicada v7' in t14 and 'inclui Glifosato 480: 2 → 2,5 L/ha' in t14
+            and 'Publicada v7' in v14 and 'Rascunho v7' not in v14, [aberta, t14, v14[:400]])
         clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Abrir insumos de Dessecação pré-plantio')}") else None
         g14 = J(f"(()=>{{const b={lab('Alterar a dose de Glifosato 480')}; return b?b.innerText.trim():'';}})()")
-        chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 2,5 L/ha)', 'Publicada v7' in t14b and g14 == '2,5 L/ha', [t14b, g14])
+        clique(lab('Abrir insumos de Fungicida 1ª aplicação'), w=.3) if J(f"!!{lab('Abrir insumos de Fungicida 1ª aplicação')}") else None
+        f14 = J(f"(()=>{{const b={lab('Alterar a dose de Fungicida A')}; return b?b.innerText.trim():'';}})()")
+        chk('L14b R1 (leve): a v7 publicada leva as duas doses (Glifosato 480 em 2,5 L/ha e Fungicida A em 0,45 L/ha), sem 2º clique', g14 == '2,5 L/ha' and f14 == '0,45 L/ha', [g14, f14])
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45'); clique(lab('Alterar a dose de Fungicida A'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('0'); clique(PUB, w=.6)
         t2 = toast(); a2 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); n2 = J(NOTA); campo = J("(document.querySelector('input[id^=pa-dose-]')||{value:null}).value")
-        chk('L14c R2: dose 0 digitada sem Enter e clique em "Publicar": não publica; o erro continua junto ao campo aberto e o botão segue desabilitado com o motivo',
-            'salvas na v7' not in t2 and 'Informe a dose por hectare, maior que zero.' in a2 and campo == '0' and n2['dis'] and n2['txt'].startswith('Confirme (Enter) ou cancele (Esc) a dose de Fungicida A'), [t2, a2, n2, campo])
+        chk('L14c R2: dose 0 digitada sem Enter e clique em "Salvar e publicar": não publica; o erro continua junto ao campo aberto, com o 0',
+            'Publicada' not in t2 and 'Informe a dose por hectare, maior que zero.' in a2 and campo == '0' and 'Publicada' not in J("document.querySelector('main').innerText"), [t2, a2, n2, campo])
     # ---------------- L15 · R3: rascunho igual à versão publicada ----------------
     with secao('L15'):
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45'); mudar_dose('0,5', abrir=False); n15 = J(NOTA); e15 = est()

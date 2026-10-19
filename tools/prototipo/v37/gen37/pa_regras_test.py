@@ -5,7 +5,8 @@ e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
   U2 rascunho v(n+1) na 1ª mudança, a versão publicada não muda; U3 a 2ª mudança fica no mesmo rascunho
   U4 diferenças vN × vM (dose, inclusão, retirada de insumo, exclusão, gatilho)
   U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Salvar alterações" (14/10, proprietário) sem nota;
-     desabilitado com motivo sem atividade, com a dose em edição (R1/R2), com a inclusão de insumo aberta e com o rascunho igual (R3)
+     desabilitado com motivo sem atividade, com a inclusão de insumo aberta e com o rascunho igual (R3); a dose em edição não
+     desabilita mais (leve, proprietário 19/10: ela entra no mesmo clique, U14)
   U6 publicar cria a vN, põe no histórico e não muda os cultivos; U7 recusa sem rascunho, com rascunho vazio e com rascunho igual (R3)
   U8 situação do cultivo (X-AGR-6): chip "Na vN · vM publicada" e link ao cultivo no Planejar safra (#saf&passo=cultivos&cult) nas
      três safras abertas (S2627, S27SF e LG2627)
@@ -13,9 +14,9 @@ e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
      rascunho dela); U11 descartar
   U12 resumo das alterações na nota (até 2 e "e mais N"; plano novo)
   U13 dose na tabela: 0, vazio, "−2" e "-2" recusados sem rascunho; a saída do campo marca a hora da gravação (R1)
-  U14 "Publicar" recusa o clique que começou com o botão desabilitado ou logo depois de a saída do campo gravar a dose (R1); com a
-     dose em edição não publica (R2); depois, publica (aviso curto "Plano salvo · v7 …", 15/10: "caixa pequena, pouco texto"; o oráculo
-     antigo esperava o resumo das doses, que saiu do aviso)
+  U14 (leve, proprietário 19/10; antes R1 recusava o clique e pedia um 2º) "Salvar e publicar" com a dose aberta e válida publica a v7
+     com ela e o aviso diz "inclui …"; a dose gravada pela saída do campo no mesmo gesto também aparece no aviso; dose aberta inválida
+     não publica e o erro fica no campo (R2); dose aberta acima da bula entra no rascunho e não publica, com o ⛔ no aviso
   U15 sair do detalhe com a dose ou a inclusão digitadas avisa e não troca de plano (R8); vazio sai direto
   U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4); U17 salvar sem mudança não cria rascunho (R3)
 PA-OPER F1 (19/10): o exemplo de dose passou de 0,6 para 0,45 L/ha. Com a bula na versão (P7), 0,6 L/ha de Fungicida A passa do máximo de
@@ -52,7 +53,7 @@ caso('U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado,
   const d=paDiff(p); const t=d.map(x=>x.k+': '+x.n+' · '+x.t).join(' | ');
   ok('U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado, atividade excluída e gatilho mudado', /Alterada: Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,45 L\/ha · inclui Inseticida B 0,2 L\/ha/.test(t)&&/Excluída: Herbicida pós-emergente/.test(t)&&/gatilho: DAP −20 → DAP −25/.test(t)
      &&t.includes('Alterada: Dessecação pré-plantio · gatilho: DAP −20 → DAP −25 · retira '+tirado), t); });
-const U5='U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Salvar alterações", sem nota (o resumo vai no aviso ao salvar); desabilitado com o motivo sem atividade, com a dose em edição (R1/R2), com a inclusão aberta e com o rascunho igual à v6 (R3)';
+const U5='U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Salvar alterações", sem nota (o resumo vai no aviso ao salvar); desabilitado com o motivo sem atividade, com a inclusão aberta e com o rascunho igual à v6 (R3); a dose em edição não desabilita (leve, 19/10)';
 caso(U5,['paAcoes','paRascNo','paResumo'],()=>{
   const sem=paAcoes(soja()); const p7=doseFung(ps0,0.45).ps.find(x=>x.id==='SOJA-AT'); const com=paAcoes(p7); const ab=paAcoes(p7,{iadd:true}); const ed=paAcoes(p7,{ied:{aid:'x',prod:'Glifosato 480',val:'6'}});
   const vaz=paClone(p7); vaz.rasc.atividades=[]; const zv=paAcoes(vaz);
@@ -60,7 +61,7 @@ caso(U5,['paAcoes','paRascNo','paResumo'],()=>{
   ok(U5, sem.prim===null&&com.prim.t==='Salvar e publicar v7'&&!com.prim.dis&&com.nota===''&&paResumo(p7)==='1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,45 L/ha).'
      &&zv.prim.dis==='Inclua ao menos uma atividade para salvar.'&&zv.nota===zv.prim.dis
      &&ab.prim.dis==='Conclua ou cancele a inclusão do insumo para salvar.'
-     &&ed.prim.dis==='Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para salvar.'&&ed.nota===ed.prim.dis
+     &&!ed.prim.dis&&ed.nota===''
      &&igual.prim.dis==='O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.', [sem,com,zv,ab,ed,igual]); });
 caso('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo',['paPubFaz','paRascNo'],()=>{
   const antes=JSON.stringify(PA0.cultivos); const r=paPubFaz(doseFung(ps0,0.45).ps,'SOJA-AT',PA0.hoje); const p=r.p;
@@ -121,15 +122,18 @@ caso('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados
   ok('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,45 grava; a saída do campo marca a hora e o que mudou (R1)',
      rec.every(x=>x.err==='Informe a dose por hectare, maior que zero.'&&!x.rasc)&&t.state.ied===null&&t.state.pl.find(p=>p.id==='SOJA-AT').rasc.v===7&&!t.__paSaiT
      &&e.__paSaiT>=t0&&e.__paSaiTxt==='Fungicida A: 0,5 → 0,45 L/ha', [rec,t.__paSaiT,e.__paSaiTxt]); });
-caso('U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7',['paPub','paPubAgora'],()=>{
-  const pl=doseFung(ps0,0.45).ps; const v=(t)=>t.state.pl.find(p=>p.id==='SOJA-AT').versao;
-  const a=tela({pid:'SOJA-AT',pl}); a.__paPubDis=true; paPub(a); const a1=[v(a),a.state.g2toast]; paPub(a); const a2=[v(a),a.state.g2toast];
-  const b=tela({pid:'SOJA-AT',pl}); b.__paSaiT=Date.now(); b.__paSaiTxt='Glifosato 480: 2 → 6 L/ha'; paPub(b); const b1=[v(b),b.state.g2toast];
-  const c=tela({pid:'SOJA-AT',pl}); c.__paSaiT=Date.now()-PA_SAI_MS-5; paPub(c); const c1=v(c);
-  const d=tela({pid:'SOJA-AT',pl,ied:{aid:fungId(),prod:'Fungicida A',val:'0',err:''}}); paPub(d); const d1=[v(d),d.state.g2toast];
-  ok('U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7',
-     a1[0]===6&&a1[1]==='O rascunho mudou neste clique: confira e clique em Salvar e publicar de novo.'&&a2[0]===7&&/^Publicada v7( · por [^·]+)?( · cultivos seguem na versão deles)?$/.test(a2[1])
-     &&b1[0]===6&&b1[1]==='A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar e publicar de novo.'&&c1===7&&d1[0]===6&&!d1[1], [a1,a2,b1,c1,d1]); });
+caso('U14 Salvar e publicar com a dose aberta (leve, 19/10): válida publica com ela; a do mesmo gesto aparece no aviso; inválida não publica (R2); acima da bula fica no rascunho',['paPub','paDoseAplica'],()=>{
+  const v=(t)=>t.state.pl.find(p=>p.id==='SOJA-AT').versao; const dose=(t)=>{ const p=t.state.pl.find(p=>p.id==='SOJA-AT'); const a=(p.rasc?p.rasc.atividades:p.atividades).find(a=>a.id===fungId()); return a.prods.find(x=>x.prod==='Fungicida A').dose; };
+  const a=tela({pid:'SOJA-AT',pl:ps0,ied:{aid:fungId(),prod:'Fungicida A',val:'0,45',err:''}}); paPub(a); const a1=[v(a),dose(a),a.state.g2toast,a.state.ied];
+  const b=tela({pid:'SOJA-AT',pl:doseFung(ps0,0.45).ps}); b.__paSaiT=Date.now(); b.__paSaiTxt='Fungicida A: 0,5 → 0,45 L/ha'; paPub(b); const b1=[v(b),b.state.g2toast];
+  const c=tela({pid:'SOJA-AT',pl:doseFung(ps0,0.45).ps}); c.__paSaiT=Date.now()-PA_SAI_MS-5; c.__paSaiTxt='Fungicida A: 0,5 → 0,45 L/ha'; paPub(c); const c1=[v(c),c.state.g2toast];
+  const d=tela({pid:'SOJA-AT',pl:ps0,ied:{aid:fungId(),prod:'Fungicida A',val:'0',err:''}}); paPub(d); const d1=[v(d),d.state.g2toast,d.state.ied&&d.state.ied.err];
+  const e=tela({pid:'SOJA-AT',pl:ps0,ied:{aid:fungId(),prod:'Fungicida A',val:'0,6',err:''}}); paPub(e); const pe=e.state.pl.find(p=>p.id==='SOJA-AT'); const e1=[v(e),!!pe.rasc,dose(e),e.state.g2toast,e.state.ied];
+  ok('U14 Salvar e publicar com a dose aberta (leve, 19/10): válida publica com ela; a do mesmo gesto aparece no aviso; inválida não publica (R2); acima da bula fica no rascunho',
+     a1[0]===7&&a1[1]===0.45&&/^Publicada v7( · por [^·]+)? · inclui Fungicida A: 0,5 → 0,45 L\/ha( · cultivos seguem na versão deles)?$/.test(a1[2])&&a1[3]===null
+     &&b1[0]===7&&/ · inclui Fungicida A: 0,5 → 0,45 L\/ha/.test(b1[1])&&c1[0]===7&&!/inclui/.test(c1[1])
+     &&d1[0]===6&&!d1[1]&&d1[2]==='Informe a dose por hectare, maior que zero.'
+     &&e1[0]===6&&e1[1]&&e1[2]===0.6&&/^⛔ /.test(e1[3]||'')&&e1[4]===null, [a1,b1,c1,d1,e1]); });
 caso('U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto',['paPend','paSair','paSaiNao'],()=>{
   const pend=[paPend({iadd:{aid:'a',prod:'Inseticida B',dose:'',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:'0,3',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:' ',err:''}}),paPend({ied:{aid:'a',prod:'Fungicida A',val:'0',err:'x'}}),paPend({})];
   const t=tela({pid:'SOJA-AT',iadd:{aid:fungId(),prod:'Inseticida B',dose:'0,3',err:''}}); paSair(t,{pid:null}); const av=[t.state.pid,t.state.saiAv];

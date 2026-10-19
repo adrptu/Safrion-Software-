@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """PA-OPER F1 · planos por operação no navegador (docs/integracao/V71/PA-OPER.md, aceites da F1), no Chrome headless:
   P1  SOJA-AT: faixa "Visão geral" + operações na ordem do ciclo (Pulverização, TS, Plantio, Adubação, Colheita), contagens 4/1/1/1/1,
-      estado em texto visível em cada uma
+      estado em texto visível em cada uma; alvo em branco não deixa a Pulverização "Pendente" (alvo opcional, proprietário 19/10)
   P2  tocar Pulverização: só as 4 atividades, os parâmetros da operação; #plano=SOJA-AT&op=pulverizacao; F5 reabre a operação;
       Esc com o editor aberto fecha só o editor; o 2º Esc volta à visão geral; o 3º, à biblioteca
   P3  Fungicida 2ª com calda própria de 150 e a calda da operação 100 → 120: as 3 herdeiras mostram 120 "da operação", a 2ª mantém 150;
@@ -9,7 +9,8 @@
   P7  bula na versão: Fungicida 1ª com alvo ferrugem-asiática na DAP 100 (colheita na 118, carência de 30 dias) → ⛔ e "Salvar e publicar"
       desabilitado com o motivo; na DAP 85 volta
   P17 rascunho inválido persiste: o ⛔ e a dose voltam depois do F5; a v6 segue em vigor
-  P12 Caio (PCP) submete à revisão; a v7 fica "em revisão" e a v6 em vigor; Ana publica ("Publicada v7 · por Ana"); sem v8 no 2º clique
+  P12 sem ciclo de revisão (proprietário 19/10: "leve e fluido"): Caio (PCP) edita e o rascunho fica guardado, sem botão de submeter;
+      Ana abre e publica ("Publicada v7 · por Ana"), sem "Devolver"; sem v8 no 2º clique
   P13 O.S. nova do cultivo T1-A emitida da v6 leva a calda do plano (100 L/ha) na instrução; publicada a v7 com 120 L/ha, a O.S. em
       A liberar mostra "Plano v7 difere: volume de calda" e não muda sozinha; a OS-0421 (em execução) segue com 100 L/ha e 6 cargas
   P19 tanque do PJ editado no cadastro (2.500 L): a OS-0421 emitida segue com 6 cargas de 3.000 L; a O.S. emitida depois leva 2.500 L
@@ -104,7 +105,7 @@ try:
         ch = J(CHIPS)
         chk('P1 faixa: Visão geral + Pulverização 4, Tratamento de sementes 1, Plantio 1, Adubação a lanço 1, Colheita de grãos 1 (ordem do ciclo), estado em texto',
             [re.sub(r' · .*', '', x) for x in ch] == ['Visão geral 8', 'Pulverização 4', 'Tratamento de sementes 1', 'Plantio 1', 'Adubação a lanço 1', 'Colheita de grãos 1']
-            and all(re.search(r'· (✓ Pronta|• Pendente|⚠ Com aviso|⛔ Impedida)$', x) for x in ch[1:]) and 'Pulverização 4 · • Pendente' in ch, ch)
+            and all(re.search(r'· (✓ Pronta|• Pendente|⚠ Com aviso|⛔ Impedida)$', x) for x in ch[1:]) and 'Pulverização 4 · ⚠ Com aviso' in ch, ch)
     # ---------------- P2 · foco, endereço, F5 e Esc ----------------
     with secao('P2'):
         clique(chip('Pulverização'), w=.5); h = J("location.hash"); at = J(ATVS)
@@ -140,18 +141,18 @@ try:
         chk('P17 F5: o rascunho reabre com o mesmo ⛔ e a v6 segue em vigor (guardar não publica)', pr2['dis'] and 'carência termina 12 dias' in pr2['nota'] and re.search(r'Rascunho v7( guardado \d\d:\d\d)? · v6 em vigor', J(SELO)), [pr2, J(SELO)])
         editar_atividade('Fungicida 1ª aplicação'); campo_painel('fm_dias', '85'); salvar_painel(); pr3 = J(PRIM)
         chk('P7b na DAP 85 a carência cabe: "Salvar e publicar v7" volta', not pr3['dis'] and pr3['t'] == 'Salvar e publicar v7', pr3)
-    # ---------------- P12 · revisão e publicação; P13 · O.S. × versão ----------------
+    # ---------------- P12 · publicação sem ciclo de revisão; P13 · O.S. × versão ----------------
     with secao('P12'):
         abre('PA.dc.html#plano=SOJA-AT&op=pulverizacao', perfil='Caio'); espera("!!document.querySelector('.pa-op-foco')", 5)
         clique(lab('Alterar o volume de calda da operação'), w=.3); seleciona_tudo(); digita('120'); enter()
-        pc = J(PRIM); clique("document.querySelector('[data-acoes] [data-acao=comando]')", w=.6); s1 = J(SELO); pc2 = J(PRIM)
-        chk('P12a Caio (sem o papel de agrônomo): "Submeter à revisão"; a v7 fica "em revisão" e a v6 em vigor; sem primária para ele',
-            pc['t'] == 'Submeter à revisão' and not pc['dis'] and s1 == 'v7 em revisão · v6 em vigor' and pc2['t'] == '', [pc, s1, pc2])
+        pc = J(PRIM); s1 = J(SELO); sub = J("[...document.querySelectorAll('button,a')].some(b=>b.getClientRects().length&&/Submeter|revisão/i.test(b.innerText))")
+        chk('P12a Caio (sem o papel de agrônomo): sem primária e sem "Submeter"; nota "Rascunho v7 guardado. O agrônomo publica ao abrir o plano."; a v6 segue em vigor',
+            pc['t'] == '' and pc['nota'] == 'Rascunho v7 guardado. O agrônomo publica ao abrir o plano.' and not sub and re.search(r'Rascunho v7( guardado \d\d:\d\d)? · v6 em vigor', s1), [pc, s1, sub])
         J("localStorage.setItem('safrion.perfilDemo','Ana')"); recarrega(); espera("!!document.querySelector('.pa-op-foco')", 5)
-        pa = J(PRIM); dev = J("[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].some(b=>b.textContent.includes('Devolver a v7 ao autor'))")
+        pa = J(PRIM); dev = J("[...document.querySelectorAll('button,a')].some(b=>b.getClientRects().length&&b.textContent.includes('Devolver'))")
         clique("document.querySelector('[data-acoes] [data-acao=comando]')", w=.7); t12 = toast(); s2 = J(SELO); pa2 = J(PRIM)
-        chk('P12b Ana: "Salvar e publicar v7" e "Devolver"; publica: "Publicada v7 · por Ana"; sem primária depois (o 2º clique não cria v8)',
-            pa['t'] == 'Salvar e publicar v7' and not pa['dis'] and dev and t12.startswith('Publicada v7 · por Ana') and s2.startswith('Publicada v7 · por Ana') and pa2['t'] == '', [pa, dev, t12, s2, pa2])
+        chk('P12b Ana: "Salvar e publicar v7", sem "Devolver"; publica: "Publicada v7 · por Ana"; sem primária depois (o 2º clique não cria v8)',
+            pa['t'] == 'Salvar e publicar v7' and not pa['dis'] and not dev and t12.startswith('Publicada v7 · por Ana') and s2.startswith('Publicada v7 · por Ana') and pa2['t'] == '', [pa, dev, t12, s2, pa2])
         cen = J("(()=>{const c=JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>/cenario-v1$/.test(k)))||'{}'); const p=(c.pa||{})['SOJA-AT']||{}; return {versao:p.versao,vs:Object.keys(p.versoes||{}),cal:(((p.versoes||{})[7]||{}).params||{})['Pulverização']};})()")
         chk('P12c a v7 publicada vai para o cenário compartilhado (imutável, com os parâmetros da operação)', cen.get('versao') == 7 and cen.get('vs') == ['7'] and (cen.get('cal') or {}).get('calda') == 120, cen)
     with secao('P13'):

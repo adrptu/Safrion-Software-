@@ -8,7 +8,7 @@
 Em **Agrícola › Planos agronômicos**, o plano abre com uma faixa: **Visão geral** e as operações na ordem do ciclo, cada uma com o número de atividades e o estado em texto (✓ Pronta, • Pendente, ⚠ Com aviso, ⛔ Impedida). Um toque põe a operação em foco:
 - só as atividades dela e o bloco **Parâmetros de <operação>** com as conferências;
 - na Pulverização, o **volume de calda da operação** (vale para as atividades sem valor próprio) e a **calda própria** de cada atividade, editável na linha;
-- o **alvo** de cada pulverização (no painel da atividade), que liga a dose à bula;
+- o **alvo** de cada pulverização (no painel da atividade), opcional: com ele, a dose é conferida pelo uso daquele alvo na bula; sem ele, pelo uso mais permissivo, e a operação não fica "Pendente" (proprietário 19/10, desvio 8);
 - **Deslocar gatilhos**: adia ou antecipa de uma vez todas as atividades da operação (K7);
 - endereço próprio (`#plano=SOJA-AT&op=pulverizacao`): F5 reabre a mesma operação; Esc fecha primeiro o editor, depois o foco, depois o plano.
 
@@ -16,7 +16,7 @@ Em **Agrícola › Planos agronômicos**, o plano abre com uma faixa: **Visão g
 
 **Rascunho e publicação** (decisão 9): toda mudança vai para o rascunho vN+1, que se guarda sozinho no cenário compartilhado, mesmo incompleto ou inválido, e reabre depois de sair ou recarregar. Publicar é ato explícito:
 - com o papel de agrônomo: **Salvar e publicar vN** (o pedido de 14/10, "deixe o botão salvar", com o achado 1 do Codex: publicação explícita);
-- sem o papel (PCP): **Submeter à revisão**; o agrônomo publica ou **Devolve** (menu ⋯); a versão vigente segue até lá;
+- sem o papel (PCP): o rascunho fica guardado e a nota diz "Rascunho vN guardado. O agrônomo publica ao abrir o plano."; a versão vigente segue até lá. Não há etapa de submeter nem devolver (proprietário 19/10, desvio 8);
 - o segundo clique não cria vN+2; publicar o plano não aprova nem libera O.S.
 
 **Do plano à O.S.** (transporte mínimo, decisão 10): a O.S. nova lê a calda da versão do plano em que o cultivo está e grava o **retrato** da instrução (versão do plano, calda e origem, tanque do pulverizador do conjunto no cadastro de agora). Editar o cadastro depois não muda a O.S. emitida; "Trocar conjunto" antes da execução refaz o retrato. Publicada uma versão com outra calda, a O.S. em A liberar emitida da anterior mostra "Plano vN difere: volume de calda …" e não muda sozinha.
@@ -77,6 +77,13 @@ Rodada na ponta antes da F1, `e32ada5e` (`ANTES=<_render dessa ponta>`, árvore 
    - SOJA-AT e MILHO-SF · Inseticida B: bula em kg/ha × plano em L/ha → ⚠ "dose não conferida".
 6. **ex38_test P3** está vermelho já na base (16/17, mesmo motivo, log em `brutos/`): o teste exige 1e-12 contra a quantidade arredondada aos centésimos por `cenQtdTrecho`. Não vem desta frente. O retrato também anula a variação de `CEN_PREP_ATIVOS` que o P3 faz na OS-0421; proposta ao Codex: o P3 variar `instrucao.tanque`.
 7. **390 px:** a faixa quebra em uma operação por linha (6 linhas no SOJA-AT). A base já quebrava assim (foto conferida); fica como melhoria possível de padrão (faixa com rolagem horizontal), fora desta fatia.
+8. **Leve e fluido (proprietário, 19/10: "Não quero um sistema travado e burocrático, quero leve e fluido").** Aplicado o AGENTS §4 (trava só onde protege algo concreto):
+   - **Saiu o ciclo submeter → em revisão → devolver** (decisão 9 e telas da PA-OPER §Revisão, item 1, na parte do AG-05 "revisão"). Era uma etapa a mais entre editar e publicar, sem dano concreto que só ela evitasse: a bula continua impedindo publicar, e publicar continua sendo de quem tem o papel. O serviço `opPublicar` só conhece "publicar"; "submeter" volta "ato desconhecido" e não cria versão.
+   - **O alvo deixou de ser pendência no plano.** Pendência nunca impediu publicar; só pintava a operação de "Pendente". A conferência da bula sem alvo já usava o uso mais permissivo. A lista do foco mostra só ⛔ e ⚠ e, sem alvo, uma linha cinza que explica a conferência.
+   - **Saiu o "clique de novo" (R1 da revisão NAV-1).** Antes, com a dose aberta no campo, "Salvar e publicar" ficava desabilitado; e o clique que gravava a dose pela saída do campo não publicava, pedindo um 2º clique. Agora a dose aberta e válida entra no mesmo clique, a bula é conferida com ela e o aviso diz "inclui <produto>: a → b L/ha". Dose inválida não publica e o erro fica no campo (R2). Dose acima da bula entra no rascunho e não publica, com o ⛔ no aviso.
+   - **Quem não tem o papel** vê a nota "Rascunho vN guardado. O agrônomo publica ao abrir o plano." à vista (sem ela, a barra ficava vazia).
+   - **Continua travado, com o dano:** dose, carência e número de aplicações fora da bula impedem publicar (lei e resultado técnico); publicar é do papel de agrônomo (AG-05, CMD-02); a O.S. segue com aprovação agronômica individual (PRD 41/73.9). A PA-OPER §Pulverização pede "receituário sem alvo" travado na aprovação da O.S.; essa conferência ainda não existe no protótipo, nem antes desta mudança, e fica registrada para a O.S.
+   - **Oráculos trocados, com motivo:** `pa_oper_test` P1 (Pulverização do SOJA-AT passa de "• Pendente" a "⚠ Com aviso": restam os avisos de grupo de modo de ação e de unidade da bula), P12a (Caio sem primária e sem "Submeter") e P12b (Ana publica, sem "Devolver"); `pa_oper_unit` E4 (só a calda é pendência), P12d (submeter é recusado) e P12e (publicar segue a numeração da última publicada); `pa_lista_test` L14a/b/c (um clique publica com a dose aberta; dose 0 não publica); `pa_regras_test` U5 (dose aberta não desabilita) e U14 (publicar com a dose aberta, válida, inválida e acima da bula).
 
 ## Fora desta fatia (PA-OPER decisão 10)
 F2: Plantio e Tratamento de sementes (população, PMS, germinação), etapa 2 do Planejar safra com o resumo por operação e o ajuste por talhão, aplicar a vN nova ao cultivo. F3: Adubação e correção, fertirrigação. F4: Colheita, tratos, poda e preparo.

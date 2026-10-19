@@ -148,7 +148,8 @@ function opPendencias(secao, params) {
   const out = [];
   for (const a of secao.atividades) {
     if (opParam(a, params, 'calda').valor === null) out.push({ativ: a.id, campo: 'calda', motivo: `${a.nome}: sem volume de calda`});
-    if (!a.alvo) out.push({ativ: a.id, campo: 'alvo', motivo: `${a.nome}: sem alvo`});
+    // alvo é opcional (proprietário 19/10: "leve e fluido, não travado e burocrático"): sem alvo a bula é conferida pelo uso mais
+    // permissivo (opBula) e o alvo vai no receituário da O.S.; só a calda é pendência, porque sem ela a O.S. não prepara as cargas
   }
   return out;
 }
@@ -160,7 +161,8 @@ function opEstado(pendencias, conferencias) {
   return {cod: 'pronta', marca: '✓', texto: 'Pronta'};
 }
 
-// Publicação (decisão 9). versoes = [{v, estado: 'publicada'|'em revisão'|'rascunho', por, em, chave}]. Pura: devolve o novo estado.
+// Publicação (decisão 9). versoes = [{v, estado: 'publicada', por, em, chave}]. Pura: devolve o novo estado. Sem etapa de revisão
+// (proprietário 19/10: "leve e fluido"): quem tem o papel publica; quem não tem deixa o rascunho guardado.
 function opPublicar(plano, ato) {
   const vs = (plano.versoes || []).slice();
   if (ato.chave && vs.some(x => x.chave === ato.chave)) return {plano, repetido: true};          // mesma chave: não cria vN+1
@@ -172,8 +174,6 @@ function opPublicar(plano, ato) {
   const resto = vs.filter(x => x.estado === 'publicada');
   const reg = {v: novo, por: ato.por, em: ato.em, chave: ato.chave || null};
   if (ato.tipo === 'publicar') resto.push(Object.assign(reg, {estado: 'publicada'}));
-  else if (ato.tipo === 'submeter') resto.push(Object.assign(reg, {estado: 'em revisão'}));
-  else if (ato.tipo === 'devolver') return {plano: Object.assign({}, plano, {versoes: resto, revisao: null}), devolvida: novo};
   else return {plano, erro: 'ato desconhecido'};
   return {plano: Object.assign({}, plano, {versoes: resto}), v: novo};
 }
