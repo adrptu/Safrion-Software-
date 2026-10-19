@@ -65,7 +65,9 @@ caso('V3 contraprova 1.000 h × 1.450 h (revisão Codex 6226249749)', () => {
 
 caso('V4 base de contagem e prévia', () => {
   const c = S(); const p = c.planos['PM-07'], a = c.ativos.a12;
-  ok('V4 · sem execução registrada: a pessoa escolhe (sem escolha, não vincula)', manVincBase(c, p, a).modo === '' && /Escolha como contar/.test(manVincRef(c, p, a, {}).errs.modo || ''));
+  /* LEVE-1 (leve, proprietário 19/10): sem escolha, conta de agora (marco estimado, com selo); antes recusava "Escolha como contar" */
+  const sx = manVincRef(c, p, a, {});
+  ok('V4 · sem execução registrada e sem escolha: conta de agora (hoje e leitura atual 5.210 h, marco estimado), sem erro (LEVE-1)', manVincBase(c, p, a).modo === '' && !Object.keys(sx.errs).length && sx.ref && sx.ref.data === c.hoje && sx.ref.leit === 5210 && sx.ref.est === true, sx);
   const ag = manVincRef(c, p, a, { modo: 'agora' });
   ok('V4 · contar de agora: hoje e a leitura atual do próprio ativo (5.210 h), marcado como estimado', ag.ref && ag.ref.data === c.hoje && ag.ref.leit === 5210 && ag.ref.est === true, ag);
   const pv = manVincPrev(c, p, a, { marco: ag.ref, ult: {} });

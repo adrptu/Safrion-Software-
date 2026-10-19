@@ -10,7 +10,10 @@ de manutenção, faça algo bem melhor. E que seja intuitivo, rapido, facil e pr
      de salvar · CD-03 só leitura · teclado
   B  390 px (toque): o mesmo caminho curto, alvos de 44 px, primária alcançável, sem rolagem lateral
 Uso (de gen37/, depois do build e do montar_render): python3 ma_vinculo_test.py [U] [A] [B]   (sem argumento: todas; sai 1 se algo falhar)
-Contraprova: na pasta de symlinks com o _render da base, A e B reprovam (não há filtro, link, painel nem coluna Plano)."""
+Contraprova: na pasta de symlinks com o _render da base, A e B reprovam (não há filtro, link, painel nem coluna Plano).
+19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): sem execução registrada, o painel abre com "Contar de agora" marcado (marco
+estimado, com selo) e a primária ligada; "Informar a última execução" segue a um toque. A2 e B2 trocam o oráculo "desligada até escolher" pelo
+padrão marcado; o caminho do celular passa de 3 para 2 toques (link e Vincular)."""
 import os, sys, json, time, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 FAIL = []; N = [0]
@@ -118,8 +121,9 @@ def parte_A():
         p0 = pan(m); pr = prim(m); mk = marcado(m, 'a12'); lv = linha_vl(m, 'a12')
         ok(aberto(m) and plano_ativo(m).startswith('PM-07') and mk == {'on': True, 'dis': False} and 'Modelo diferente: cabeçal + injetora de fertilizante' in lv,
            'A2 · o link abre o painel com o PM-07 já escolhido, Gotejo T7 marcado e o aviso de modelo diferente (permitido)', [plano_ativo(m), mk, lv[:200]])
-        ok(pr.get('dis') and 'Escolha como contar' in pr.get('why', '') and 'Contar de agora' in p0 and 'Informar a última execução' in p0,
-           'A2 · sem execução registrada a primária fica desligada até a pessoa escolher (nada é inferido)', [pr, p0[:300]])
+        agp = J(f"(()=>{{const b=[...document.querySelectorAll('{PAN} button')].find(x=>x.innerText.trim()==='Contar de agora'); return b?b.getAttribute('aria-pressed'):null;}})()")
+        ok(not pr.get('dis') and agp == 'true' and 'contando de agora: 23/09 · 5.210 h (marco estimado)' in lv and 'Informar a última execução' in p0,
+           'A2 · sem execução registrada o painel abre com "Contar de agora" marcado (padrão, marco estimado) e a primária ligada; a outra opção a um toque (LEVE-1)', [pr, agp, p0[:300]])
         botao(m, 'Contar de agora'); lv = linha_vl(m, 'a12'); pr = prim(m)
         prev = J(f"(()=>{{const e=document.querySelector('{PAN} [data-aid=\"a12\"] .vl-prev'); return e?e.innerText.replace(/\\s+/g,' ').trim():'';}})()") or ''
         ok('contando de agora: 23/09 · 5.210 h (marco estimado)' in lv and prev.startswith('Preventiva mensal próxima em') and pr.get('t') == 'Vincular ao PM-07' and not pr.get('dis'),
@@ -279,14 +283,14 @@ def parte_B():
         cartao = J("(()=>{const r=[...document.querySelectorAll('[data-rid=\"a12\"]')].find(e=>e.getClientRects().length); if(!r) return null; const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao/.test(a.innerText.trim())); const b=a&&a.getBoundingClientRect(); return b&&b.width>0?{h:b.height,r:b.right,t:a.innerText.trim()}:null;})()")
         ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and larg(m) <= 0 and cartao and cartao['h'] >= 44, 'B1 · Ativos › Sem plano no celular: 4 ativos, "Vincular ao PM-07 ›" à vista na linha (44 px), sem rolagem lateral da página', [rows, cartao, larg(m)])
         foto(m, 'B1_ativos_390.png')
-        abre_link(m, 'a12'); botao(m, 'Contar de agora')
+        abre_link(m, 'a12')   # LEVE-1: "Contar de agora" já vem marcado
         g = J(f"(()=>{{const p=document.querySelector('{PAN}'); const b=p.querySelector('.ma-rod button:last-child'); const r=b.getBoundingClientRect(); const ck=p.querySelector('[data-aid=\"a12\"] .vl-ck').getBoundingClientRect();"
               " const op=p.querySelector('[role=radio]').getBoundingClientRect(); const ag=[...p.querySelectorAll('button')].find(x=>x.innerText.trim()==='Contar de agora').getBoundingClientRect();"
               " return {pw:p.getBoundingClientRect().width,bb:r.bottom,bh:r.height,ck:ck.height,op:op.height,ag:ag.height,vh:innerHeight};})()")
         ok(g and g['pw'] <= 390 and g['bb'] <= g['vh'] and g['bh'] >= 44 and g['ck'] >= 44 and g['op'] >= 44 and g['ag'] >= 44,
            'B2 · painel a 390 px: largura da tela, primária alcançável (sem rolar) e alvos de 44 px (caixa, plano, contar de agora, Vincular)', g)
         foto(m, 'B2_painel_390.png')
-        salvar(m); ok(not aberto(m) and m.man("!!m.vinc['PM-07|a12']") is True and 'Gotejo T7 vinculado ao PM-07' in m.toast(), 'B2 · 3 toques: link, Contar de agora, Vincular ao PM-07', m.toast()[:120])
+        salvar(m); ok(not aberto(m) and m.man("!!m.vinc['PM-07|a12']") is True and 'Gotejo T7 vinculado ao PM-07' in m.toast(), 'B2 · 2 toques: link e Vincular ao PM-07 (Contar de agora já marcado, LEVE-1)', m.toast()[:120])
         J(PM11); m.ir('plano=PM-11'); m.clk('Vincular ativos', 'main'); botao(m, 'Informar a última execução')
         gi = J(f"(()=>{{const p=document.querySelector('{PAN}'); const d=p.querySelector('#vl_data_a02').getBoundingClientRect(), l=p.querySelector('#vl_leit_a02').getBoundingClientRect(); return {{d:d.height,l:l.height,dr:d.right,lr:l.right,im:p.querySelector('#vl_leit_a02').getAttribute('inputmode')}};}})()")
         ok(gi and gi['d'] >= 44 and gi['l'] >= 44 and gi['dr'] <= 390 and gi['lr'] <= 390 and gi['im'] == 'numeric', 'B3 · lote no celular: data e leitura com 44 px, teclado numérico, dentro da tela', gi)

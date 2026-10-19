@@ -1011,7 +1011,7 @@ function manVincBase(c,p,a){ const v=c.vinc[p.id+'|'+a.id]; if(v&&v.fim) return 
 /* b = {modo:'agora'|'ult', corr, data, leit, mot}: devolve o marco ou os erros por campo (a mesma conferência da prévia e do comando) */
 function manVincRef(c,p,a,b){ b=b||{}; const b0=manVincBase(c,p,a); const errs={}; let ref=null;
   if(b0.modo==='hist') return {ref:null,errs,modo:'hist'};
-  const modo=b0.modo==='om'?(b.corr?'ult':'om'):(b.modo||'');
+  const modo=b0.modo==='om'?(b.corr?'ult':'om'):(b.modo||'agora');   /* LEVE-1 (proprietário 19/10): sem escolha, conta de agora (marco estimado, com selo) */
   if(modo==='om') ref={data:b0.data,leit:a.un&&b0.leit!==undefined?b0.leit:null,om:null,est:false,de:b0.om};
   else if(modo==='agora'){ if(a.un&&!a.leit) errs.leit=a.nome+' não tem leitura registrada: registre a leitura ou informe a última execução.'; else ref={data:c.hoje,leit:a.un?a.leit.val:null,om:null,est:true}; }
   else if(modo==='ult'){ let n=null;

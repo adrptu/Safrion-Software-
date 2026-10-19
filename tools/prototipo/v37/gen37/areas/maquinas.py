@@ -976,7 +976,8 @@ function vlLista(c,st){ const p=c.planos[st.d.pid]; const rows=[], seen={};
 function vlMarcaIni(c,st){ const on={}; vlLista(c,st).forEach(r=>{ if(r.ja||r.cp.erro) return; if(r.pre||(st.fixo&&r.cp.nivel==='escopo')) on[r.a.id]=true; }); return on; }
 function vlAbrir(self,o){ pmRet(self); const c=manGet(); o=o||{}; const pre=(o.aids||[]).filter(id=>c.ativos[id]);
   const pid=o.pid||((vlOps(c,pre)[0]||{}).p||{}).id||'';
-  const st={fixo:!!o.pid,pre,q:'',d:{pid,on:{},bmodo:'',b:{}},errs:{},chave:manChave(),falha:'',warn:false};
+  /* LEVE-1 (proprietário 19/10): sem execução registrada, o padrão é "Contar de agora" (marco estimado, com selo); "Informar a última execução" segue a um toque */
+  const st={fixo:!!o.pid,pre,q:'',d:{pid,on:{},bmodo:'agora',b:{}},errs:{},chave:manChave(),falha:'',warn:false};
   st.d.on=vlMarcaIni(c,st); st.orig=JSON.stringify(st.d);
   self.setState({vl:st,sv:null,np:null,dv:null,pan:null}); pmFoco('vl-painel'); }
 function vlSet(self,patch,dpatch){ const cur=self.state.vl; if(!cur) return; self.setState({vl:Object.assign({},cur,patch||{},dpatch?{d:Object.assign({},cur.d,dpatch)}:{},{warn:false,falha:''})}); }
@@ -1013,7 +1014,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
   const L=vlLista(c,st); const on=st.d.on||{}; const ers=st.errs||{};
   const LT=vlLista(c,Object.assign({},st,{q:''})).filter(r=>on[r.a.id]); const marc=LT.filter(r=>!r.ja&&!r.cp.erro); const ruins=p?vlRuins(c,p,LT):[]; const semH=p?marc.filter(r=>manVincBase(c,p,r.a).modo===''):[];
   v.vl_temSem=semH.length>0; v.vl_semT='Sem execução registrada ('+semH.map(r=>r.a.nome).join(', ')+'): como contar?';
-  v.vl_semAj=st.d.bmodo==='agora'?'Conta de hoje e da leitura atual de cada ativo (marco estimado, fica marcado). Se houve revisão, informe-a.':(st.d.bmodo==='ult'?'Informe a data e a leitura da última execução de cada um.':'Escolha uma das duas: nada é inferido.');
+  v.vl_semAj=st.d.bmodo==='agora'?'Padrão: conta de hoje e da leitura atual de cada ativo (marco estimado, fica marcado). Se houve revisão, informe a última execução.':(st.d.bmodo==='ult'?'Informe a data e a leitura da última execução de cada um.':'Escolha uma das duas: nada é inferido.');
   v.vl_agoraOn=String(st.d.bmodo==='agora'); v.vl_ultOn=String(st.d.bmodo==='ult'); v.vl_agoraSt=vlChipSt(st.d.bmodo==='agora'); v.vl_ultSt=vlChipSt(st.d.bmodo==='ult');
   v.vl_agora=()=>{ const cur=self.state.vl; const er=Object.assign({},cur.errs||{}); delete er._modo; self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{bmodo:'agora'}),errs:er,warn:false,falha:''})}); };
   v.vl_ult=()=>{ const cur=self.state.vl; const er=Object.assign({},cur.errs||{}); delete er._modo; self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{bmodo:'ult'}),errs:er,warn:false,falha:''})}); };
