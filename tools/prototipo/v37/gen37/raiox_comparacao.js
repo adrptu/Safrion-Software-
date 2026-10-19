@@ -69,14 +69,42 @@ const RaioxComparacao = (() => {
       (!texto(x.avaliador) ? 'avaliador_ausente' : '');
   }
   function buscar(xs, ref) { return ref && xs.find(x => x.id === ref.id && x.talhao === ref.talhao); }
+  // Períodos são [de, ate); a janela consultada é inclusiva nas duas bordas.
+  function periodoManejo(x) {
+    const t = instante(x.evento);
+    if (x.precisao === 'instante' && Number.isFinite(t)) return {de: t, ate: t, pontual: true};
+    const incerto = {de: -Infinity, ate: Infinity, pontual: false};
+    if (!['dia', 'mes'].includes(x.precisao)) return incerto;
+    const e = typeof x.evento === 'string' ? x.evento : '';
+    const civil = x.precisao === 'dia' ? e.slice(0, 10) : e.slice(0, 7);
+    if (!(x.precisao === 'dia' ? /^\d{4}-\d\d-\d\d$/ : /^\d{4}-\d\d$/).test(civil)) return incerto;
+    if (e !== civil && !Number.isFinite(t)) return incerto;
+    const inicio = instante(civil + (x.precisao === 'dia' ? '' : '-01') + 'T00:00:00.000Z');
+    if (!Number.isFinite(inicio)) return incerto;
+    const proximo = new Date(inicio);
+    if (x.precisao === 'dia') proximo.setUTCDate(proximo.getUTCDate() + 1);
+    else proximo.setUTCMonth(proximo.getUTCMonth() + 1);
+    // União dos fusos UTC+14 a UTC-12, sem escolher um fuso para a fazenda.
+    const amplo = {de: inicio - 14 * DIA / 24, ate: proximo.getTime() + 12 * DIA / 24, pontual: false};
+    if (x.de === undefined && x.ate === undefined) return amplo;
+    const de = instante(x.de), ate = instante(x.ate);
+    // Limites do adaptador devem cobrir um período civil e caber no envelope.
+    const duracao = proximo.getTime() - inicio;
+    if (!Number.isFinite(de) || !Number.isFinite(ate) || de < amplo.de || ate > amplo.ate ||
+        ate - de < duracao - 2 * DIA / 24 || ate - de > duracao + 2 * DIA / 24) return incerto;
+    return {de, ate, pontual: false};
+  }
+  const cruza = (p, inicio, fim) => p.pontual ? p.de >= inicio && p.de <= fim : p.de <= fim && p.ate > inicio;
   function interferencia(s, talhao, inicio, fim, exceto) {
-    return s.aplicacoes.some(x => {
-      if (x.talhao !== talhao || chaveAplicacao(x) === exceto || x.estado === 'cancelada') return false;
-      const t = instante(x.evento);
-      // Evento conhecido sem ordem ou confirmação suficiente não comprova ausência.
-      if (!Number.isFinite(t)) return true;
-      return t >= inicio && t <= fim;
-    });
+    let motivo = '';
+    for (const x of s.aplicacoes) {
+      if (x.talhao !== talhao || chaveAplicacao(x) === exceto || x.estado === 'cancelada') continue;
+      const periodo = periodoManejo(x);
+      if (!cruza(periodo, inicio, fim)) continue;
+      if (periodo.pontual) return 'demonstrada';
+      motivo = 'precisao_do_manejo_insuficiente';
+    }
+    return motivo;
   }
   function comparar(s, pedido, aplicacao) {
     const a = buscar(s.leituras, pedido.antes), b = buscar(s.leituras, pedido.depois);
@@ -89,7 +117,8 @@ const RaioxComparacao = (() => {
     if (a.valor === 0) return indisponivel('tratado_zerado_antes');
     if (a.valor < p.pisoAntes) return indisponivel('tratado_abaixo_do_piso');
     if (!texto(a.estadio)) return indisponivel('estadio_ausente');
-    if (interferencia(s, a.talhao, ta - p.residualDias * DIA, tb, chaveAplicacao(aplicacao))) return indisponivel('interferencia_no_tratado');
+    const interferenciaTratado = interferencia(s, a.talhao, ta - p.residualDias * DIA, tb, chaveAplicacao(aplicacao));
+    if (interferenciaTratado) return indisponivel(interferenciaTratado === 'demonstrada' ? 'interferencia_no_tratado' : interferenciaTratado);
     const candidatos = Array.isArray(pedido.controles) ? pedido.controles : [];
     const repetidos = new Map();
     for (const c of candidatos) repetidos.set(c?.talhao, (repetidos.get(c?.talhao) || 0) + 1);
@@ -107,7 +136,7 @@ const RaioxComparacao = (() => {
         else if (ca.valor < p.pisoAntes) erro = 'controle_abaixo_do_piso';
         else if (ca.estadio !== a.estadio) erro = 'estadio_incompativel';
         else if (Math.abs(ca.valor - a.valor) / a.valor > p.diferencaRelativaAntes) erro = 'nivel_inicial_incompativel';
-        else if (interferencia(s, c.talhao, tca - p.residualDias * DIA, tcb)) erro = 'interferencia_no_controle';
+        else { const i = interferencia(s, c.talhao, tca - p.residualDias * DIA, tcb); erro = i === 'demonstrada' ? 'interferencia_no_controle' : i; }
       }
       if (erro) return {...out, motivo: erro};
       const razao = cb.valor / ca.valor, variacao = 1 - (b.valor / a.valor) / razao;
@@ -136,8 +165,10 @@ const RaioxComparacao = (() => {
   function seguir(s, aplicacao) {
     const t = instante(aplicacao.evento);
     const outras = s.aplicacoes.filter(x => x.talhao === aplicacao.talhao && chaveAplicacao(x) !== chaveAplicacao(aplicacao) && x.estado !== 'cancelada');
-    if (outras.some(x => !Number.isFinite(instante(x.evento)) || (instante(x.evento) >= t && instante(x.evento) <= s.corte && (problemaTempo(x, s.corte) || x.estado !== 'confirmada' || instante(x.evento) === t)))) return indisponivel('ordem_ou_confirmacao_da_proxima_aplicacao_pendente');
-    const proxima = outras.filter(x => instante(x.evento) > t && instante(x.evento) <= s.corte).sort(ordenar)[0];
+    if (outras.some(x => { const periodo = periodoManejo(x);
+      return cruza(periodo, t, s.corte) && (!periodo.pontual || problemaTempo(x, s.corte) || x.estado !== 'confirmada' || periodo.de === t);
+    })) return indisponivel('ordem_ou_confirmacao_da_proxima_aplicacao_pendente');
+    const proxima = outras.filter(x => x.precisao === 'instante' && instante(x.evento) > t && instante(x.evento) <= s.corte).sort(ordenar)[0];
     const fim = proxima ? instante(proxima.evento) : s.corte;
     const excluidas = [], validas = []; let incompatibilidade = false;
     for (const x of s.leituras.filter(x => x.talhao === aplicacao.talhao)) {
