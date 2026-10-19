@@ -18,6 +18,9 @@ e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
      antigo esperava o resumo das doses, que saiu do aviso)
   U15 sair do detalhe com a dose ou a inclusão digitadas avisa e não troca de plano (R8); vazio sai direto
   U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4); U17 salvar sem mudança não cria rascunho (R3)
+PA-OPER F1 (19/10): o exemplo de dose passou de 0,6 para 0,45 L/ha. Com a bula na versão (P7), 0,6 L/ha de Fungicida A passa do máximo de
+0,5 L/ha da bula de demonstração e impede publicar (⛔); 0,45 fica dentro. A primária virou "Salvar e publicar vN" (decisão 9 + proprietário
+14/10). As regras do PA-OPER têm testes próprios: pa_oper_unit.js, pa_oper_cen_test.py e pa_oper_test.py.
 Uso (de gen37/): python3 pa_regras_test.py   (sai 1 se algum caso falhar)
 Reprodução na base: GEN=<gen37 da base> python3 pa_regras_test.py (as funções que não existem lá contam como falha)."""
 import os, sys, json, subprocess, tempfile
@@ -25,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); GEN = os.environ.get('GEN') o
 sys.path.insert(0, GEN); os.chdir(GEN)
 import areas.processo_planos as P
 G2LIB = open(os.path.join(GEN, 'g2lib.js'), encoding='utf-8').read()   # g2num (paNum) e g2etapa (paOpen), como na tela
-src = (G2LIB + '\n/* foco e rolagem da tela (paFoco) sem DOM no node: nada a focar */ globalThis.document={getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[]};\nconst PA0 = ' + json.dumps(P._dados(), ensure_ascii=False) + ';\n' + P.JS + r'''
+src = (G2LIB + '\n/* foco e rolagem da tela (paFoco) sem DOM no node: nada a focar */ globalThis.document={getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[]};\n' + (open(os.path.join(GEN, 'operacoes.js'), encoding='utf-8').read() if os.path.exists(os.path.join(GEN, 'operacoes.js')) else '') + '\nconst PA0 = ' + json.dumps(P._dados(), ensure_ascii=False) + ';\n' + P.JS + r'''
 const R=[]; const ok=(n,c,info)=>{ R.push(!!c); console.log((c?'OK    ':'FALHA ')+n+(c?'':' · '+JSON.stringify(info===undefined?null:info).slice(0,500))); };
 const tem=(...fs)=>fs.every(f=>{ try{ return eval('typeof '+f)==='function'; }catch(e){ return false; } });
 const caso=(n,fs,f)=>{ if(!tem(...fs)){ ok(n,false,'sem '+fs.join(', ')); return; } try{ f(); }catch(e){ ok(n,false,'erro: '+e.message); } };
@@ -35,42 +38,42 @@ caso('U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codi
   const r=[paHashId('#plano=SOJA-AT'),paHashId('#x=1&plano=MILHO-SF'),paHashId('#plano=Soja%20teste'),paHashId(''),paHashId('#saf=S2627'),paHashId('#plano=')];
   ok('U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista', JSON.stringify(r)===JSON.stringify(['SOJA-AT','MILHO-SF','Soja teste','','','']), r); });
 caso('U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam',['paRascNo'],()=>{
-  const r=doseFung(ps0,0.6); const p=r.ps.find(x=>x.id==='SOJA-AT'); const a6=p.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
+  const r=doseFung(ps0,0.45); const p=r.ps.find(x=>x.id==='SOJA-AT'); const a6=p.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
   const a7=p.rasc.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
-  ok('U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam', r.novo&&r.v===7&&p.versao===6&&a6===0.5&&a7===0.6&&!soja().rasc&&/Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam/.test(r.fim), [r.novo,r.v,p.versao,a6,a7,r.fim]); });
+  ok('U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam', r.novo&&r.v===7&&p.versao===6&&a6===0.5&&a7===0.45&&!soja().rasc&&/Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam/.test(r.fim), [r.novo,r.v,p.versao,a6,a7,r.fim]); });
 caso('U3 a 2ª mudança fica no mesmo rascunho v7',['paRascNo'],()=>{
-  const r1=doseFung(ps0,0.6); const r2=paRascNo(r1.ps,'SOJA-AT',soja().atividades[0].id,(a)=>{ a.prods[0].dose=2.5; });
+  const r1=doseFung(ps0,0.45); const r2=paRascNo(r1.ps,'SOJA-AT',soja().atividades[0].id,(a)=>{ a.prods[0].dose=2.5; });
   ok('U3 a 2ª mudança fica no mesmo rascunho v7', !r2.novo&&r2.v===7&&/Gravado no rascunho v7/.test(r2.fim), [r2.novo,r2.v,r2.fim]); });
 caso('U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado, atividade excluída e gatilho mudado',['paRascNo','paDiff'],()=>{
-  let r=doseFung(ps0,0.6); const atv=soja().atividades; const herb=atv.find(a=>a.nome==='Herbicida pós-emergente'); const des=atv.find(a=>a.nome==='Dessecação pré-plantio');
+  let r=doseFung(ps0,0.45); const atv=soja().atividades; const herb=atv.find(a=>a.nome==='Herbicida pós-emergente'); const des=atv.find(a=>a.nome==='Dessecação pré-plantio');
   r=paRascNo(r.ps,'SOJA-AT',atv.find(a=>a.nome==='Fungicida 1ª aplicação').id,(a)=>{ a.prods.push({grupo:'Inseticidas',prod:'Inseticida B',dose:0.2,un:'L',preco:90}); });
   const ps=paClone(r.ps); const p=ps.find(x=>x.id==='SOJA-AT'); p.rasc.atividades=p.rasc.atividades.filter(a=>a.id!==herb.id); const dr=p.rasc.atividades.find(a=>a.id===des.id); dr.g={tipo:'DAP',dias:-25,data:null};
   const tirado=dr.prods[0].prod; dr.prods=dr.prods.slice(1);
   const d=paDiff(p); const t=d.map(x=>x.k+': '+x.n+' · '+x.t).join(' | ');
-  ok('U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado, atividade excluída e gatilho mudado', /Alterada: Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,6 L\/ha · inclui Inseticida B 0,2 L\/ha/.test(t)&&/Excluída: Herbicida pós-emergente/.test(t)&&/gatilho: DAP −20 → DAP −25/.test(t)
+  ok('U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado, atividade excluída e gatilho mudado', /Alterada: Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,45 L\/ha · inclui Inseticida B 0,2 L\/ha/.test(t)&&/Excluída: Herbicida pós-emergente/.test(t)&&/gatilho: DAP −20 → DAP −25/.test(t)
      &&t.includes('Alterada: Dessecação pré-plantio · gatilho: DAP −20 → DAP −25 · retira '+tirado), t); });
 const U5='U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Salvar alterações", sem nota (o resumo vai no aviso ao salvar); desabilitado com o motivo sem atividade, com a dose em edição (R1/R2), com a inclusão aberta e com o rascunho igual à v6 (R3)';
 caso(U5,['paAcoes','paRascNo','paResumo'],()=>{
-  const sem=paAcoes(soja()); const p7=doseFung(ps0,0.6).ps.find(x=>x.id==='SOJA-AT'); const com=paAcoes(p7); const ab=paAcoes(p7,{iadd:true}); const ed=paAcoes(p7,{ied:{aid:'x',prod:'Glifosato 480',val:'6'}});
+  const sem=paAcoes(soja()); const p7=doseFung(ps0,0.45).ps.find(x=>x.id==='SOJA-AT'); const com=paAcoes(p7); const ab=paAcoes(p7,{iadd:true}); const ed=paAcoes(p7,{ied:{aid:'x',prod:'Glifosato 480',val:'6'}});
   const vaz=paClone(p7); vaz.rasc.atividades=[]; const zv=paAcoes(vaz);
-  const igual=paAcoes(doseFung(doseFung(ps0,0.6).ps,0.5).ps.find(x=>x.id==='SOJA-AT'));
-  ok(U5, sem.prim===null&&com.prim.t==='Salvar alterações'&&!com.prim.dis&&com.nota===''&&paResumo(p7)==='1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha).'
+  const igual=paAcoes(doseFung(doseFung(ps0,0.45).ps,0.5).ps.find(x=>x.id==='SOJA-AT'));
+  ok(U5, sem.prim===null&&com.prim.t==='Salvar e publicar v7'&&!com.prim.dis&&com.nota===''&&paResumo(p7)==='1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,45 L/ha).'
      &&zv.prim.dis==='Inclua ao menos uma atividade para salvar.'&&zv.nota===zv.prim.dis
      &&ab.prim.dis==='Conclua ou cancele a inclusão do insumo para salvar.'
      &&ed.prim.dis==='Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para salvar.'&&ed.nota===ed.prim.dis
      &&igual.prim.dis==='O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.', [sem,com,zv,ab,ed,igual]); });
 caso('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo',['paPubFaz','paRascNo'],()=>{
-  const antes=JSON.stringify(PA0.cultivos); const r=paPubFaz(doseFung(ps0,0.6).ps,'SOJA-AT',PA0.hoje); const p=r.p;
+  const antes=JSON.stringify(PA0.cultivos); const r=paPubFaz(doseFung(ps0,0.45).ps,'SOJA-AT',PA0.hoje); const p=r.p;
   const d=p.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
-  ok('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo', !r.erro&&p.versao===7&&p.rasc===null&&d===0.6&&p.hist[0].v===7&&p.hist[0].at===PA0.hoje&&p.hist[1].v===6
+  ok('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo', !r.erro&&p.versao===7&&p.rasc===null&&d===0.45&&p.hist[0].v===7&&p.hist[0].at===PA0.hoje&&p.hist[1].v===6
      &&JSON.stringify(PA0.cultivos)===antes&&PA0.cultivos.filter(c=>c.plano==='SOJA-AT').map(c=>c.ver).join(',')==='6,6,6,5,5', [r.erro,p&&p.versao,p&&p.hist]); });
 caso('U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual à versão publicada (R3: nenhuma v7 vazia, nenhum cultivo marcado)',['paPubFaz'],()=>{
   const a=paPubFaz(ps0,'SOJA-AT',PA0.hoje); const ps=paClone(ps0); const p=ps.find(x=>x.id==='SOJA-PD'); p.rasc={v:4,atividades:[]}; const b=paPubFaz(ps,'SOJA-PD',PA0.hoje);
-  const ig=doseFung(doseFung(ps0,0.6).ps,0.5).ps; const c=paPubFaz(ig,'SOJA-AT',PA0.hoje);
+  const ig=doseFung(doseFung(ps0,0.45).ps,0.5).ps; const c=paPubFaz(ig,'SOJA-AT',PA0.hoje);
   ok('U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual à versão publicada (R3: nenhuma v7 vazia, nenhum cultivo marcado)',
      a.erro==='Sem rascunho para publicar.'&&b.erro==='Inclua ao menos uma atividade para salvar.'&&c.erro==='O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.'&&!c.ps, [a.erro,b.erro,c.erro]); });
 caso('U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link',['paSitCult','paPubFaz','paRascNo'],()=>{
-  const c1=PA0.cultivos.find(c=>c.id==='c1'), e1=PA0.cultivos.find(c=>c.id==='e1'); const p6=soja(); const p7r=doseFung(ps0,0.6).ps.find(x=>x.id==='SOJA-AT'); const p7=paPubFaz(doseFung(ps0,0.6).ps,'SOJA-AT',PA0.hoje).p;
+  const c1=PA0.cultivos.find(c=>c.id==='c1'), e1=PA0.cultivos.find(c=>c.id==='e1'); const p6=soja(); const p7r=doseFung(ps0,0.45).ps.find(x=>x.id==='SOJA-AT'); const p7=paPubFaz(doseFung(ps0,0.45).ps,'SOJA-AT',PA0.hoje).p;
   const a=paSitCult(c1,p6), b=paSitCult(c1,p7r), c=paSitCult(c1,p7), d=paSitCult(e1,p7);
   ok('U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link',
      a.length===1&&a[0].t==='Na versão em vigor'&&b.length===1&&b[0].t==='Continua na v6 ao publicar'&&c[0].t==='Na v6 · v7 publicada'&&c[0].c==='yellow'
@@ -89,44 +92,44 @@ caso('U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem 
      a.nome==='Informe o nome do plano.'&&b.nome==='Já existe um plano com este nome nesta cultura.'&&!Object.keys(c).length&&d.cultura==='Escolha a cultura.', [a,b,c,d]); });
 caso('U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base (mesmo com a base em rascunho), ids novos, base intacta',['paNovoFaz','paRascNo'],()=>{
   const r=paNovoFaz(ps0,{nome:'Soja teste',cultura:'Soja',base:'SOJA-PD'},'NPx'); const n=r.ps.find(p=>p.id==='NPx'); const b=r.ps.find(p=>p.id==='SOJA-PD');
-  /* base com rascunho: a Soja alta tecnologia com o Fungicida A em 0,6 no rascunho v7; a cópia leva a v6 publicada (0,5) */
-  const bR=doseFung(ps0,0.6).ps; const r2=paNovoFaz(bR,{nome:'Soja cópia',cultura:'Soja',base:'SOJA-AT'},'NPz'); const n2=r2.ps.find(p=>p.id==='NPz');
+  /* base com rascunho: a Soja alta tecnologia com o Fungicida A em 0,45 no rascunho v7; a cópia leva a v6 publicada (0,5) */
+  const bR=doseFung(ps0,0.45).ps; const r2=paNovoFaz(bR,{nome:'Soja cópia',cultura:'Soja',base:'SOJA-AT'},'NPz'); const n2=r2.ps.find(p=>p.id==='NPz');
   const fA=(atvs)=>atvs.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose; const b2=r2.ps.find(p=>p.id==='SOJA-AT');
   ok('U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base (mesmo com a base em rascunho), ids novos, base intacta',
      n.versao===0&&n.rasc.v===1&&n.rasc.atividades.length===b.atividades.length&&n.rasc.atividades.every(a=>a.id.startsWith('NPx_'))&&b.atividades.every(a=>!a.id.startsWith('NPx_'))&&!b.rasc&&r.ps.length===ps0.length+1
-     &&fA(n2.rasc.atividades)===0.5&&fA(b2.rasc.atividades)===0.6&&b2.rasc.v===7, [n.rasc.atividades.length,b.atividades.length,fA(n2.rasc.atividades)]); });
+     &&fA(n2.rasc.atividades)===0.5&&fA(b2.rasc.atividades)===0.45&&b2.rasc.v===7, [n.rasc.atividades.length,b.atividades.length,fA(n2.rasc.atividades)]); });
 caso('U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6',['paDescartaNo','paNovoFaz','paRascNo'],()=>{
-  const r=paNovoFaz(ps0,{nome:'Soja teste',cultura:'Soja',base:''},'NPy'); const a=paDescartaNo(r.ps,'NPy'); const b=paDescartaNo(doseFung(ps0,0.6).ps,'SOJA-AT');
+  const r=paNovoFaz(ps0,{nome:'Soja teste',cultura:'Soja',base:''},'NPy'); const a=paDescartaNo(r.ps,'NPy'); const b=paDescartaNo(doseFung(ps0,0.45).ps,'SOJA-AT');
   const pb=b.ps.find(p=>p.id==='SOJA-AT');
   ok('U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6', a.saiu&&!a.ps.some(p=>p.id==='NPy')&&!b.saiu&&pb.rasc===null&&pb.versao===6&&b.msg==='Rascunho v7 descartado. A v6 publicada continua valendo.', [a.msg,b.msg]); });
 // tela de mentira para as regras que gravam no estado (o setState da tela grava na hora, como o __setLogicState do runtime)
 const tela=(st)=>({state:Object.assign({},st),setState(o){ Object.assign(this.state,o); }});
 const fungId=()=>soja().atividades.find(a=>a.nome==='Fungicida 1ª aplicação').id;
 caso('U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 publica N atividades"',['paResumo','paRascNo','paNovoFaz'],()=>{
-  const p1=doseFung(ps0,0.6).ps.find(x=>x.id==='SOJA-AT'); const atv=soja().atividades;
-  let r=doseFung(ps0,0.6); r=paRascNo(r.ps,'SOJA-AT',atv.find(a=>a.nome==='Herbicida pós-emergente').id,(a)=>{ a.prods[0].dose=Number(a.prods[0].dose)+1; });
+  const p1=doseFung(ps0,0.45).ps.find(x=>x.id==='SOJA-AT'); const atv=soja().atividades;
+  let r=doseFung(ps0,0.45); r=paRascNo(r.ps,'SOJA-AT',atv.find(a=>a.nome==='Herbicida pós-emergente').id,(a)=>{ a.prods[0].dose=Number(a.prods[0].dose)+1; });
   const ps=paClone(r.ps); const p3=ps.find(x=>x.id==='SOJA-AT'); p3.rasc.atividades=p3.rasc.atividades.filter(a=>a.nome!=='Dessecação pré-plantio');
   const nv=paNovoFaz(ps0,{nome:'Soja nova',cultura:'Soja',base:'SOJA-PD'},'NPr').ps.find(p=>p.id==='NPr');
   const a=paResumo(p1), b=paResumo(p3), c=paResumo(nv);
   ok('U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 publica N atividades"',
-     a==='1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha).'&&/^3 alterações na v7: .+; .+; e mais 1\.$/.test(b)&&b.includes('Fungicida A: 0,5 → 0,6 L/ha')&&/^A v1 publica \d+ atividades\.$/.test(c)&&paResumo(soja())==='', [a,b,c]); });
-caso('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,6 grava; a saída do campo marca a hora e o que mudou (R1)',['paDoseOk','paNum'],()=>{
+     a==='1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,45 L/ha).'&&/^3 alterações na v7: .+; .+; e mais 1\.$/.test(b)&&b.includes('Fungicida A: 0,5 → 0,45 L/ha')&&/^A v1 publica \d+ atividades\.$/.test(c)&&paResumo(soja())==='', [a,b,c]); });
+caso('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,45 grava; a saída do campo marca a hora e o que mudou (R1)',['paDoseOk','paNum'],()=>{
   const rec=['0','','−2','-2','abc'].map(val=>{ const t=tela({pid:'SOJA-AT',ied:{aid:fungId(),prod:'Fungicida A',val,err:''}}); paDoseOk(t);
     return {val,err:t.state.ied&&t.state.ied.err,rasc:!!(t.state.pl&&t.state.pl.find(p=>p.id==='SOJA-AT').rasc)}; });
-  const t=tela({pid:'SOJA-AT',ied:{aid:fungId(),prod:'Fungicida A',val:'0,6',err:''}}); paDoseOk(t);
-  const e=tela({pid:'SOJA-AT',ied:{aid:fungId(),prod:'Fungicida A',val:'0,6',err:''}}); const t0=Date.now(); paDoseOk(e,{sai:true});
-  ok('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,6 grava; a saída do campo marca a hora e o que mudou (R1)',
+  const t=tela({pid:'SOJA-AT',ied:{aid:fungId(),prod:'Fungicida A',val:'0,45',err:''}}); paDoseOk(t);
+  const e=tela({pid:'SOJA-AT',ied:{aid:fungId(),prod:'Fungicida A',val:'0,45',err:''}}); const t0=Date.now(); paDoseOk(e,{sai:true});
+  ok('U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,45 grava; a saída do campo marca a hora e o que mudou (R1)',
      rec.every(x=>x.err==='Informe a dose por hectare, maior que zero.'&&!x.rasc)&&t.state.ied===null&&t.state.pl.find(p=>p.id==='SOJA-AT').rasc.v===7&&!t.__paSaiT
-     &&e.__paSaiT>=t0&&e.__paSaiTxt==='Fungicida A: 0,5 → 0,6 L/ha', [rec,t.__paSaiT,e.__paSaiTxt]); });
+     &&e.__paSaiT>=t0&&e.__paSaiTxt==='Fungicida A: 0,5 → 0,45 L/ha', [rec,t.__paSaiT,e.__paSaiTxt]); });
 caso('U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7',['paPub','paPubAgora'],()=>{
-  const pl=doseFung(ps0,0.6).ps; const v=(t)=>t.state.pl.find(p=>p.id==='SOJA-AT').versao;
+  const pl=doseFung(ps0,0.45).ps; const v=(t)=>t.state.pl.find(p=>p.id==='SOJA-AT').versao;
   const a=tela({pid:'SOJA-AT',pl}); a.__paPubDis=true; paPub(a); const a1=[v(a),a.state.g2toast]; paPub(a); const a2=[v(a),a.state.g2toast];
   const b=tela({pid:'SOJA-AT',pl}); b.__paSaiT=Date.now(); b.__paSaiTxt='Glifosato 480: 2 → 6 L/ha'; paPub(b); const b1=[v(b),b.state.g2toast];
   const c=tela({pid:'SOJA-AT',pl}); c.__paSaiT=Date.now()-PA_SAI_MS-5; paPub(c); const c1=v(c);
   const d=tela({pid:'SOJA-AT',pl,ied:{aid:fungId(),prod:'Fungicida A',val:'0',err:''}}); paPub(d); const d1=[v(d),d.state.g2toast];
   ok('U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7',
-     a1[0]===6&&a1[1]==='O rascunho mudou neste clique: confira e clique em Salvar alterações de novo.'&&a2[0]===7&&/^Plano salvo · v7( · cultivos seguem na versão deles)?$/.test(a2[1])
-     &&b1[0]===6&&b1[1]==='A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar alterações de novo.'&&c1===7&&d1[0]===6&&!d1[1], [a1,a2,b1,c1,d1]); });
+     a1[0]===6&&a1[1]==='O rascunho mudou neste clique: confira e clique em Salvar e publicar de novo.'&&a2[0]===7&&/^Publicada v7( · por [^·]+)?( · cultivos seguem na versão deles)?$/.test(a2[1])
+     &&b1[0]===6&&b1[1]==='A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar e publicar de novo.'&&c1===7&&d1[0]===6&&!d1[1], [a1,a2,b1,c1,d1]); });
 caso('U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto',['paPend','paSair','paSaiNao'],()=>{
   const pend=[paPend({iadd:{aid:'a',prod:'Inseticida B',dose:'',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:'0,3',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:' ',err:''}}),paPend({ied:{aid:'a',prod:'Fungicida A',val:'0',err:'x'}}),paPend({})];
   const t=tela({pid:'SOJA-AT',iadd:{aid:fungId(),prod:'Inseticida B',dose:'0,3',err:''}}); paSair(t,{pid:null}); const av=[t.state.pid,t.state.saiAv];

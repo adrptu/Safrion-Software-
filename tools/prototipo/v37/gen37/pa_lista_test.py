@@ -17,7 +17,7 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
       à lista com o foco no cartão aberto
   L10 voltar devolve a posição de rolagem da biblioteca e o foco no último cartão aberto (1440 × 900)
   L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; mudar a dose e publicar com a primária na tela
-  L12 cliques para "mudar uma dose e publicar" (abrir o plano, abrir a atividade, tocar a dose, digitar 0,6 + Enter, publicar):
+  L12 cliques para "mudar uma dose e publicar" (abrir o plano, abrir a atividade, tocar a dose, digitar 0,45 + Enter, publicar):
       medidos na execução real; com ANTES=<_render da base> mede também a base cdc185f no mesmo cenário (1 a menos)
   Revisão adversarial do Codex (09/10), um caso por achado, com a reprodução dele:
   L14 R1/R2: dose digitada sem Enter e clique de verdade em "Publicar" não publica: o botão fica desabilitado com o motivo enquanto
@@ -27,13 +27,15 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
   L16 R4: trocar o endereço com o painel da atividade aberto não troca de plano (endereço volta) nem grava em outro plano
   L17 R6: Esc com o menu ⋯ da atividade aberto fecha só o menu, a 1440 e a 390 px (toque); a 390 px a barra lateral fica recolhida
       (68 px, sem expandir: proprietário, 13/10/2026; antes: Esc com o menu sobreposto fechava só o menu)
-  L18 R7: plano novo e F5: o aviso não mostra o id interno
+  L18 R7: plano novo e F5: reabre o rascunho v1 guardado (PA-OPER F1, decisão 9) e o aviso não mostra o id interno
   L19 R8: voltar ou trocar de plano com a inclusão de insumo digitada avisa ("Descartar e …" ou "Continuar editando")
   L13 sem erro de JavaScript
 Uso (de gen37/): python3 pa_lista_test.py           (RENDER_DIR=<outro _render> roda contra outro build; sai 1 se falhar)
                  ANTES=<_render da base> python3 pa_lista_test.py   (inclui a medida da base em L12)
+PA-OPER F1 (19/10): dose de exemplo 0,6 → 0,45 L/ha (0,6 passa da bula de demonstração e impede publicar: P7); Glifosato 6 → 2,5 L/ha (máximo
+3 L/ha na bula); primária "Salvar e publicar vN"; selo "Publicada vN"; o plano novo fica guardado no cenário (L18).
 Emulação no Chrome headless; não é aparelho físico."""
-import sys, os, time, json
+import sys, os, time, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 from contextlib import contextmanager
@@ -57,7 +59,7 @@ EST = r"""(()=>{const n=s=>(s||'').replace(/\s+/g,' ').trim(); const vis=e=>{ if
  const prims=[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>vis(e)&&verde(e)&&!e.closest('.menu-lat')&&!e.closest('[aria-pressed]')&&e.getAttribute('aria-pressed')===null).map(e=>({t:n(e.innerText),cab:!!e.closest('header'),dis:!!e.disabled,why:e.title||''}));
  const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota')].filter(vis).map(e=>(e.dataset.acao||'nota')+':'+n(e.innerText)):[];
  const tit=[...document.querySelectorAll('main h3')].filter(vis).map(h=>n(h.innerText));
- return {prims, area, rot:a?a.getAttribute('aria-label'):'', faixa:!!document.querySelector('.etp-ind,.etp'), impedida:/impedid/i.test(document.body.innerText), tit, hash:location.hash,
+ return {prims, area, rot:a?a.getAttribute('aria-label'):'', faixa:!!document.querySelector('.etp-ind,.etp'), impedida:/impedid/i.test(document.body.innerText.replace(/\d+ operaç(ão|ões) impedidas?|⛔ Impedida/g,'')), tit, hash:location.hash,
    h2:n((document.querySelector('main h2')||{}).innerText||''), cards:document.querySelectorAll('main .g2card').length, dialogo:!!document.querySelector('aside[role=dialog]')};})()"""
 def J(x): return c.js(x)
 def est(): return J(EST)
@@ -123,14 +125,14 @@ def mudar_dose(val, toque=False, abrir=True):
 def publicar_ate(toque=False):
     """anda pelo caminho que a tela oferece até 'Salvar alterações' (na base passa por 'Revisar e publicar ›') e publica"""
     for _ in range(3):
-        if J(f"!!{btnc('Salvar alterações')}"): break
+        if J(f"!!{btnc('Salvar e publicar')}"): break
         if clique("document.querySelector('[data-acoes] [data-acao=avancar]')", toque, .6) != 'ok': break
-    return clique(btnc('Salvar alterações'), toque, .6)
+    return clique(btnc('Salvar e publicar'), toque, .6)
 def cenario_cliques(porta, toque=False, w=1440, h=900):
-    """mudar uma dose (Fungicida A 0,5 → 0,6 L/ha) e publicar a v7, do índice do menu (lista) até a versão publicada"""
+    """mudar uma dose (Fungicida A 0,5 → 0,45 L/ha) e publicar a v7, do índice do menu (lista) até a versão publicada"""
     abre('PA.dc.html', w, h, 3 if toque else 1, toque, porta=porta); CLIQUES[0] = 0
-    clique(CARD('Soja alta tecnologia'), toque, .7); mudar_dose('0,6', toque); r = publicar_ate(toque)
-    return CLIQUES[0], 3 + 1, r, toast()   # teclas: "0,6" (3) + Enter
+    clique(CARD('Soja alta tecnologia'), toque, .7); mudar_dose('0,45', toque); r = publicar_ate(toque)
+    return CLIQUES[0], 4 + 1, r, toast()   # teclas: "0,45" (4) + Enter
 try:
     c = Chrome()
     # ---------------- L1-L3 · lista e detalhe sem etapas ----------------
@@ -158,7 +160,7 @@ try:
             and mi['h2'] == 'Milho safrinha', [f5['h2'], x, tx, ex, mi['h2']])
     # ---------------- L5-L6 · mudar a dose, repetição e publicar ----------------
     with secao('L5-L6'):
-        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); t1 = toast(); m = est(); shot('1440_rascunho')
+        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45'); t1 = toast(); m = est(); shot('1440_rascunho')
         ordem = J(r"""(()=>{const a=document.querySelector('[data-acoes]'); const ss=[...document.querySelectorAll('main section')].filter(s=>s.getClientRects().length); const u=ss[ss.length-1]; if(!a||!u) return {ultimo:'',depois:false,texto:''};
           return {ultimo:(u.querySelector('h3')||{innerText:''}).innerText.trim(), depois:!!(u.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING), texto:u.innerText.replace(/\s+/g,' ')};})()""")
         nt = J(NOTA); alt = J("!!document.getElementById('pa-alt-tit')")
@@ -166,14 +168,14 @@ try:
         # 14/10/2026 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar"): sem bloco e sem nota; a
         # atividade mudada fica marcada na lista e o aviso ao salvar diz o que mudou (L6)
         chk('L5 mudar a dose na tabela: rascunho v7; UMA primária "Salvar alterações", sem nota ao lado e sem o bloco de alterações; a atividade mudada fica marcada "Alterada"',
-            'Rascunho v7 criado' in t1 and [x['t'] for x in m['prims']] == ['Salvar alterações'] and not m['prims'][0]['dis'] and 'comando:Salvar alterações' in m['area']
+            'Rascunho v7 criado' in t1 and [x['t'] for x in m['prims']] == ['Salvar e publicar v7'] and not m['prims'][0]['dis'] and 'comando:Salvar e publicar v7' in m['area']
             and not nt['txt'] and not alt and 'Fungicida 1ª aplicação' in sel, [t1, m, nt, alt, sel, ordem])
-        mudar_dose('0,7', abrir=False); t2 = toast(); m2 = est()
-        clique(btn('Salvar alterações'), w=.7); t3 = toast(); m3 = est(); shot('1440_publicado'); foco = J("(document.activeElement&&document.activeElement.id)||''")
+        mudar_dose('0,4', abrir=False); t2 = toast(); m2 = est()
+        clique(btn('Salvar e publicar v7'), w=.7); t3 = toast(); m3 = est(); shot('1440_publicado'); foco = J("(document.activeElement&&document.activeElement.id)||''")
         corpo = J("document.querySelector('main').innerText")
         chk('L6 repetição: a 2ª mudança fica no rascunho v7 (uma primária); salvar: aviso curto "Plano salvo · v7 · cultivos seguem na versão deles" (15/10, proprietário: pouco texto); "Publicado · v7", sem primária nem bloco de alterações; o foco vai ao nome do plano',
-            'Gravado no rascunho v7' in t2 and [x['t'] for x in m2['prims']] == ['Salvar alterações'] and t3.startswith('Plano salvo · v7') and 'cultivos seguem na versão deles' in t3 and m3['prims'] == [] and m3['area'] == ['voltar:‹ Biblioteca de planos']
-            and not any(t.startswith('Alterações do rascunho') for t in m3['tit']) and 'Publicado · v7' in corpo and foco == 'pa-det-tit' and len(t3) <= 60 and 'decida a adoção' not in t3 + corpo,
+            'Gravado no rascunho v7' in t2 and [x['t'] for x in m2['prims']] == ['Salvar e publicar v7'] and t3.startswith('Publicada v7') and 'cultivos seguem na versão deles' in t3 and m3['prims'] == [] and m3['area'] == ['voltar:‹ Biblioteca de planos']
+            and not any(t.startswith('Alterações do rascunho') for t in m3['tit']) and 'Publicada v7' in corpo and foco == 'pa-det-tit' and len(t3) <= 60 and 'decida a adoção' not in t3 + corpo,
             [t2, m2['prims'], t3, m3, foco])
     # ---------------- L8 · link ao Planejar safra ----------------
     with secao('L8'):
@@ -190,14 +192,14 @@ try:
         J("document.activeElement.select()"); digita('0'); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.4)
         e0 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); r0 = est()
         c.tecla('Escape', 'Escape', 27); time.sleep(.3); r0b = est()
-        clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4); mudar_dose('0,6', abrir=False)   # inclusão aberta + rascunho
+        clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4); mudar_dose('0,45', abrir=False)   # inclusão aberta + rascunho
         espera(f"!!{PUB}&&!{PUB}.disabled")
         clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.1); espera(f"!!{PUB}&&{PUB}.disabled&&!!document.querySelector('[id^=pa-add-dose-]')")
         ia = est(); nota = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
         clique(btn('Cancelar', "document.querySelector('main')"), w=.1); espera(f"!document.querySelector('[id^=pa-add-dose-]')&&!!{PUB}&&!{PUB}.disabled"); ib = est()
         chk('L7a dose 0 recusada junto ao campo sem criar rascunho; Esc cancela e o detalhe continua sem primária; com a inclusão de insumo aberta, "Incluir" verde na linha e "Salvar alterações" desabilitado com o motivo (nota e dica); Cancelar devolve',
             'Informe a dose por hectare, maior que zero.' in e0 and r0['prims'] == [] and r0b['prims'] == [] and r0b['h2'] == 'Soja alta tecnologia'
-            and [p['t'] for p in ia['prims']] == ['Incluir', 'Salvar alterações'] and not ia['prims'][0]['dis']   # 15/10 (proprietário): "Incluir" é a primária verde da linha de inclusão
+            and [p['t'] for p in ia['prims']] == ['Incluir', 'Salvar e publicar v7'] and not ia['prims'][0]['dis']   # 15/10 (proprietário): "Incluir" é a primária verde da linha de inclusão
             and ia['prims'][1]['dis'] and ia['prims'][1]['why'] == 'Conclua ou cancele a inclusão do insumo para salvar.' and nota == ia['prims'][1]['why']
             and len(ib['prims']) == 1 and not ib['prims'][0]['dis'], [e0, r0, r0b, ia, nota, ib])
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.6)
@@ -210,7 +212,7 @@ try:
         clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.8); nv = est(); nota2 = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
         chk('L7b plano novo: rodapé "Cancelar · Criar plano"; nome repetido na cultura recusado; em branco abre o detalhe #plano= com "Salvar alterações" desabilitado e o motivo; o bloco Atividades mantém "Incluir atividade"',
             rodape == ['Cancelar', 'Criar plano'] and 'Já existe um plano com este nome nesta cultura.' in dup and nv['h2'] == 'Soja teste' and nv['hash'].startswith('#plano=NP')
-            and len(nv['prims']) == 1 and nv['prims'][0]['t'] == 'Salvar alterações' and nv['prims'][0]['dis'] and nota2 == 'Inclua ao menos uma atividade para salvar.'
+            and len(nv['prims']) == 1 and nv['prims'][0]['t'] == 'Salvar e publicar v1' and nv['prims'][0]['dis'] and nota2 == 'Inclua ao menos uma atividade para salvar.'
             and J(f"!!{btn('Incluir atividade')}") and 'Nenhuma atividade ainda' in J("document.querySelector('main').innerText"), [rodape, dup[-200:], nv, nota2])
         clique(btn('Descartar rascunho'), w=.3); clique(btn('Descartar rascunho', "document.querySelector('main [role=alert]')"), w=.6); dsc = est()
         chk('L7c descartar o plano novo volta à lista (sem endereço) e ele sai da biblioteca', dsc['cards'] == len(D2.PLANOS) and dsc['hash'] == '' and 'Plano novo descartado' in toast(), dsc)
@@ -239,47 +241,47 @@ try:
     with secao('L11'):
         abre('PA.dc.html', 390, 844, 3, True); a = J(r"""(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Criar plano'); const r=b?b.getBoundingClientRect():null;
           return {lado:document.documentElement.scrollWidth>innerWidth+1, criar:!!r&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight};})()"""); shot('390_lista')
-        clique(CARD('Soja alta tecnologia'), True, .8); mudar_dose('0,6', True); n390 = J(NOTA)
+        clique(CARD('Soja alta tecnologia'), True, .8); mudar_dose('0,45', True); n390 = J(NOTA)
         b = J(r"""(()=>{const e=document.querySelector('[data-acoes] [data-acao=comando]'); const r=e?e.getBoundingClientRect():null; const t=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
           return {lado:document.documentElement.scrollWidth>innerWidth+1, prim:e?e.innerText.trim():'', naTela:!!r&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth&&!!t&&e.contains(t)};})()"""); shot('390_rascunho')
         clique("document.querySelector('[data-acoes] [data-acao=comando]')", True, .7); t390 = toast()
         chk('L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; depois de mudar a dose, "Salvar alterações" na tela, sem nada por cima e sem nota; salvar pelo toque e o aviso curto diz a versão salva',
-            not a['lado'] and a['criar'] and not b['lado'] and b['prim'] == 'Salvar alterações' and b['naTela'] and not n390['txt']
-            and t390.startswith('Plano salvo · v7'), [a, b, n390, t390])
+            not a['lado'] and a['criar'] and not b['lado'] and b['prim'] == 'Salvar e publicar v7' and b['naTela'] and not n390['txt']
+            and t390.startswith('Publicada v7'), [a, b, n390, t390])
     # ---------------- L12 · cliques medidos (mesmo cenário) ----------------
     with secao('L12'):
         n1, tec1, r1, tt1 = cenario_cliques(p)
-        res = {'depois': (n1, tec1, 'Plano salvo · v7' in tt1)}
+        res = {'depois': (n1, tec1, 'Publicada v7' in tt1)}
         if ANTES:
             n0, tec0, r0_, tt0 = cenario_cliques(p0); res['antes cdc185f'] = (n0, tec0, 'Versão v7 publicada' in tt0)
         info('cliques e teclas para mudar uma dose e publicar (cliques, teclas, publicou)', res)
-        chk('L12 mudar uma dose e publicar: 4 cliques (abrir o plano, abrir a atividade, tocar a dose, publicar) + "0,6" e Enter; com ANTES, 1 a menos que a base no mesmo cenário',
-            res['depois'] == (4, 4, True) and (not ANTES or (res['antes cdc185f'][2] and res['antes cdc185f'][0] - n1 == 1)), res)
+        chk('L12 mudar uma dose e publicar: 4 cliques (abrir o plano, abrir a atividade, tocar a dose, publicar) + "0,45" e Enter; com ANTES, 1 a menos que a base no mesmo cenário',
+            res['depois'] == (4, 5, True) and (not ANTES or (res['antes cdc185f'][2] and res['antes cdc185f'][0] - n1 == 1)), res)
     # ---------------- L14 · R1/R2: dose sem Enter e "Publicar" ----------------
     with secao('L14'):
-        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6')
+        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45')
         clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3); clique(lab('Alterar a dose de Glifosato 480'), w=.3)
-        J("document.activeElement.select&&document.activeElement.select()"); digita('6'); aberta = J(NOTA)
+        J("document.activeElement.select&&document.activeElement.select()"); digita('2,5'); aberta = J(NOTA)
         clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/entrou no rascunho agora|salvas na v7/.test(x.innerText))", 4)
         t14 = toast(); n14 = J(NOTA); e14 = est(); v14 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")   # Versões saiu do detalhe (14/10): o cabeçalho diz a versão em vigor
         chk('L14a R1: dose do Glifosato 480 digitada (6) sem Enter: "Salvar alterações" desabilitado com o motivo; o clique de verdade nele não salva: a dose entra no rascunho v7 (a atividade fica marcada), o aviso pede para conferir e clicar de novo; a v6 segue em vigor',
             aberta['dis'] and aberta['txt'] == 'Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para salvar.'
-            and 'salvas na v7' not in t14 and 'A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar alterações de novo.' in t14
+            and 'salvas na v7' not in t14 and 'A dose de Glifosato 480: 2 → 2,5 L/ha entrou no rascunho agora: confira e clique em Salvar e publicar de novo.' in t14
             and not n14['txt'] and not n14['dis'] and 'Alterada' in v14
-            and 'Rascunho v7 · v6 em vigor' in v14 and 'Publicado · v7' not in v14, [aberta, t14, n14, v14[:400]])
-        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Plano salvo · v7/.test(x.innerText))", 4); t14b = toast()
+            and re.search(r'Rascunho v7( guardado \d\d:\d\d)? · v6 em vigor', v14) and 'Publicada v7' not in v14, [aberta, t14, n14, v14[:400]])
+        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Publicada v7/.test(x.innerText))", 4); t14b = toast()
         clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Abrir insumos de Dessecação pré-plantio')}") else None
         g14 = J(f"(()=>{{const b={lab('Alterar a dose de Glifosato 480')}; return b?b.innerText.trim():'';}})()")
-        chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 6 L/ha)', 'Plano salvo · v7' in t14b and g14 == '6 L/ha', [t14b, g14])
-        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); clique(lab('Alterar a dose de Fungicida A'), w=.3)
+        chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 2,5 L/ha)', 'Publicada v7' in t14b and g14 == '2,5 L/ha', [t14b, g14])
+        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45'); clique(lab('Alterar a dose de Fungicida A'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('0'); clique(PUB, w=.6)
         t2 = toast(); a2 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); n2 = J(NOTA); campo = J("(document.querySelector('input[id^=pa-dose-]')||{value:null}).value")
         chk('L14c R2: dose 0 digitada sem Enter e clique em "Publicar": não publica; o erro continua junto ao campo aberto e o botão segue desabilitado com o motivo',
             'salvas na v7' not in t2 and 'Informe a dose por hectare, maior que zero.' in a2 and campo == '0' and n2['dis'] and n2['txt'].startswith('Confirme (Enter) ou cancele (Esc) a dose de Fungicida A'), [t2, a2, n2, campo])
     # ---------------- L15 · R3: rascunho igual à versão publicada ----------------
     with secao('L15'):
-        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); mudar_dose('0,5', abrir=False); n15 = J(NOTA); e15 = est()
-        chk('L15 R3: 0,5 → 0,6 → 0,5 deixa o rascunho v7 igual à v6: "Salvar alterações" desabilitado com o motivo (sem v7 vazia, sem cultivo marcado)',
+        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,45'); mudar_dose('0,5', abrir=False); n15 = J(NOTA); e15 = est()
+        chk('L15 R3: 0,5 → 0,45 → 0,5 deixa o rascunho v7 igual à v6: "Salvar alterações" desabilitado com o motivo (sem v7 vazia, sem cultivo marcado)',
             len(e15['prims']) == 1 and e15['prims'][0]['dis'] and n15['txt'] == 'O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.' and e15['prims'][0]['why'] == n15['txt'], [n15, e15])
     # ---------------- L16 · R4: endereço trocado com o painel aberto ----------------
     with secao('L16'):
@@ -293,7 +295,7 @@ try:
         J("location.hash='#plano=MILHO-SF'"); espera("document.querySelector('main h2')&&document.querySelector('main h2').innerText==='Milho safrinha'", 4); mi = J("document.querySelector('main').innerText")
         chk('L16 R4: com o painel "Atividade · Dessecação pré-plantio" aberto, trocar o endereço para #plano=MILHO-SF não troca de plano: o endereço volta, o painel continua o mesmo ("Salvar"), com aviso; salvar fica na Soja; o Milho continua sem rascunho e sem "Dessecação pré-plantio"',
             p0 == 'Atividade · Dessecação pré-plantio' and p1 == p0 and h16 == '#plano=SOJA-AT' and 'Feche o painel antes de trocar de plano.' in t16 and rod == ['Cancelar', 'Salvar']
-            and e16['h2'] == 'Soja alta tecnologia' and 'Publicado · v4' in mi and 'Rascunho v5' not in mi and 'Dessecação pré-plantio' not in mi, [p0, p1, h16, t16, rod, e16['h2'], mi[:300]])
+            and e16['h2'] == 'Soja alta tecnologia' and 'Publicada v4' in mi and 'Rascunho v5' not in mi and 'Dessecação pré-plantio' not in mi, [p0, p1, h16, t16, rod, e16['h2'], mi[:300]])
     # ---------------- L17 · R6: Esc fecha só a camada de cima ----------------
     # 13/10/2026 (proprietário: "deixe a barra lateral dos menus somente recolhido com os ícones e tooltip sem opção de expandir"): a 390 px
     # não há mais menu sobreposto para o Esc fechar. A parte de 390 px passa a ser a do filtro de coluna (por toque) e a barra recolhida
@@ -321,9 +323,10 @@ try:
         J("(()=>{const s=document.querySelector('#np_cult'); const P=HTMLSelectElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(s,'Soja'); s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
         J("(()=>{const i=document.querySelector('#np_nome'); const P=HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'Soja teste'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
         clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.8); h18 = J("location.hash")
-        recarrega(); espera("[...document.querySelectorAll('[role=status]')].some(x=>/não encontrado/.test(x.innerText))", 3); t18 = toast(); e18 = est()
-        chk('L18 R7: plano novo e F5: abre a lista com o aviso "Plano do endereço não encontrado…", sem o id interno', h18.startswith('#plano=NP') and e18['cards'] == len(D2.PLANOS) and e18['hash'] == ''
-            and 'Plano do endereço não encontrado' in t18 and h18.replace('#plano=', '') not in t18 and 'NP' not in t18, [h18, t18, e18['hash']])
+        recarrega(); espera("document.querySelector('main h2')&&/Soja teste/.test(document.querySelector('main h2').innerText)", 4); t18 = toast(); e18 = est()
+        # PA-OPER F1 (decisão 9, P17): o rascunho fica guardado no cenário; o plano novo reabre no F5 como rascunho v1, sem id interno no aviso
+        chk('L18 R7: plano novo e F5: reabre o próprio plano como rascunho v1 (guardado no cenário), sem o id interno no aviso', h18.startswith('#plano=NP') and e18['h2'] == 'Soja teste'
+            and e18['hash'].startswith('#plano=NP') and h18.replace('#plano=', '') not in t18 and 'NP' not in t18 and 'Rascunho v1' in J("document.body.innerText"), [h18, t18, e18['hash'], e18['h2']])
     # ---------------- L19 · R8: sair com a inclusão de insumo digitada ----------------
     with secao('L19'):
         abre('PA.dc.html#plano=SOJA-AT'); clique(lab('Abrir insumos de Fungicida 1ª aplicação'), w=.3); clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4)

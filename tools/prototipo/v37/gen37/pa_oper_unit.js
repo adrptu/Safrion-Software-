@@ -72,6 +72,14 @@ ok('P7k', 'dose por 100 L vira dose/ha pela calda (0,06 × 100/100 = 0,06 L/ha <
 conf = O.opBula([at('f1', 30, [{prod: 'Óleo mineral', dose: 0.5, un: 'L'}])], BULA, ctx);
 ok('P7l', 'adjuvante sem modo de ação não é conferido', conf.length === 0, conf);
 
+conf = O.opBula([at('f1', 100, [fa()])], BULA, {cultura: 'Soja', colheitasT: [90, 140], params: p100});
+ok('P7m', 'várias colheitas: vale a próxima depois da aplicação (DAP 100 + 30 = 130 ≤ 140)', !conf.some(x => x.nivel === 'impede'), conf);
+conf = O.opBula([at('f1', 120, [fa()])], BULA, {cultura: 'Soja', colheitasT: [90, 140], params: p100});
+ok('P7n', 'DAP 120 + 30 = 150 passa da colheita da DAP 140 em 10 dias → ⛔', conf.some(x => x.motivo.includes('carência termina 10 dias depois')), conf);
+
+conf = O.opBula([at('f1', 30, [{prod: 'Inseticida B', dose: 0.3, un: 'L'}], {alvo: ''})], {'Inseticida B': {grupos: ['IRAC 4A'], usos: {Soja: {'percevejo-marrom': {dmax: 1, un: 'kg/ha', car: 14, mx: 2}}}}}, ctx);
+ok('P7o', 'unidade da bula (kg/ha) diferente da do plano (L): ⚠ "dose não conferida", sem ⛔ inventado', conf.length === 1 && conf[0].nivel === 'aviso' && conf[0].motivo.includes('dose não conferida'), conf);
+
 // ---- estados (decisão 5)
 ok('E1', 'pendência sem impedimento → Pendente', O.opEstado([{}], []).cod === 'pendente');
 ok('E2', 'impedimento vence pendência → Impedida', O.opEstado([{}], [{nivel: 'impede'}]).cod === 'impedida');

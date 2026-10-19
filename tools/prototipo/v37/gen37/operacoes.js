@@ -91,7 +91,9 @@ function opDoseHa(prod, volumeLHa) {
 // Com alvo: vale o uso daquele cultura × alvo. Sem alvo: só reprova o que todos os usos da cultura reprovariam (o mais permissivo passa).
 // Devolve [{nivel: 'impede'|'aviso', ativ, prod, motivo}]. Impede publicar a versão; nunca impede guardar o rascunho.
 function opBula(pulverizacoes, bula, ctx) {
-  const out = [], cultura = ctx && ctx.cultura, colheita = ctx && ctx.colheitaT;
+  const out = [], cultura = ctx && ctx.cultura;
+  // colheitas do plano (perenes colhem várias vezes): a carência vale contra a próxima colheita depois da aplicação
+  const colheitas = ((ctx && ctx.colheitasT) || (ctx && ctx.colheitaT !== undefined && ctx.colheitaT !== null ? [ctx.colheitaT] : [])).slice().sort((x, y) => x - y);
   const ordem = [...pulverizacoes].sort((a, b) => a.t - b.t || String(a.id).localeCompare(String(b.id)));
   const usos = {};
   let grupoAnt = null;
@@ -116,6 +118,8 @@ function opBula(pulverizacoes, bula, ctx) {
         return String(u.un || '').startsWith(String(p.un || '')) ? Number(u.dmax) : null;
       });
       const dha = Number(p.dose);
+      if (lims.every(x => x === null) && cand.some(u => !u.porCalda && Number(u.dmax) > 0 && !String(u.un || '').startsWith(String(p.un || ''))))
+        out.push({nivel: 'aviso', ativ: a.id, prod: nome, motivo: `${nome}: unidade da bula (${cand[0].un}) diferente da do plano (${p.un}/ha); dose não conferida`});
       if (lims.every(x => x !== null) && dha > Math.max(...lims) + OP_EPS)
         out.push({nivel: 'impede', ativ: a.id, prod: nome, motivo: `${nome}: dose de ${opNum(dha)} ${p.un}/ha acima da bula (${opNum(Math.max(...lims))} ${p.un}/ha)`});
       const fx = cand.filter(u => u.volMin !== undefined || u.volMax !== undefined);   // faixa de volume, só quando a bula a define
@@ -125,7 +129,8 @@ function opBula(pulverizacoes, bula, ctx) {
       if (mxs.length === cand.length && usos[nome] > Math.max(...mxs))
         out.push({nivel: 'impede', ativ: a.id, prod: nome, motivo: `${nome}: ${usos[nome]}ª aplicação no plano; a bula permite ${Math.max(...mxs)}`});
       const cars = cand.map(u => u.car).filter(x => x !== null && x !== undefined);
-      if (colheita !== undefined && colheita !== null && cars.length === cand.length && a.t <= colheita) {
+      const colheita = colheitas.find(x => x >= a.t);
+      if (colheita !== undefined && cars.length === cand.length) {
         const sobra = a.t + Math.min(...cars) - colheita;
         if (sobra > 0) out.push({nivel: 'impede', ativ: a.id, prod: nome, motivo: `${nome}: carência termina ${sobra} dia${sobra === 1 ? '' : 's'} depois da colheita prevista`});
       }
