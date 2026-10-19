@@ -5,6 +5,7 @@
 const RaioxComparacao = (() => {
   const DIA = 86400000;
   const ESCOPO = ['org', 'fazenda', 'cultivo', 'safra', 'alvo'];
+  const ESCOPO_MANEJO = ['org', 'fazenda', 'cultivo', 'safra'];
   const texto = x => typeof x === 'string' && x.trim().length > 0;
   const numero = x => typeof x === 'number' && Number.isFinite(x);
   function instante(x) {
@@ -13,6 +14,7 @@ const RaioxComparacao = (() => {
     return Number.isFinite(n) && new Date(n).toISOString() === x ? n : NaN;
   }
   const chave = x => JSON.stringify([...ESCOPO.map(k => x[k]), x.talhao, x.id]);
+  const chaveAplicacao = x => JSON.stringify([...ESCOPO_MANEJO.map(k => x[k]), x.talhao, x.id]);
   const fonte = x => Object.fromEntries([...ESCOPO, 'talhao', 'id', 'versao', 'evento', 'disponivelEm'].map(k => [k, x[k]]));
   const ordenar = (a, b) => instante(a.evento) - instante(b.evento) || chave(a).localeCompare(chave(b));
   const indisponivel = motivo => ({estado: 'indisponivel', motivo});
@@ -20,24 +22,25 @@ const RaioxComparacao = (() => {
     if (!contexto || !ESCOPO.every(k => texto(contexto[k])) || !Number.isFinite(instante(contexto.corte))) throw Error('Contexto ou corte inválido.');
     if (!Array.isArray(dados?.leituras) || !Array.isArray(dados?.aplicacoes)) throw Error('Fontes ausentes.');
     const corte = instante(contexto.corte);
-    const escopo = x => x && ESCOPO.every(k => x[k] === contexto[k]);
-    function vigentes(registros) {
+    function vigentes(registros, manejos = false) {
+      const campos = manejos ? ESCOPO_MANEJO : ESCOPO;
+      const identidade = manejos ? chaveAplicacao : chave;
       const mapa = new Map(), instantesConhecidos = new Set(), versoesConhecidas = new Set();
       for (const x of registros) {
-        if (!escopo(x)) continue;
+        if (!x || !campos.every(k => x[k] === contexto[k])) continue;
         const disp = instante(x.disponivelEm);
         if (!Number.isFinite(disp)) throw Error('Disponibilidade inválida no escopo.');
         // A própria existência de uma versão futura não aparece na saída.
         if (disp > corte) continue;
         if (!texto(x.id) || !texto(x.talhao) || !Number.isInteger(x.versao) || x.versao < 1) throw Error('Identidade de fonte inválida.');
-        const k = chave(x), atual = mapa.get(k);
+        const k = identidade(x), atual = mapa.get(k);
         const kd = JSON.stringify([k, disp]), kv = JSON.stringify([k, x.versao]);
         if (instantesConhecidos.has(kd) || versoesConhecidas.has(kv)) throw Error('Versão ou instante de disponibilidade repetido na fonte.');
         instantesConhecidos.add(kd); versoesConhecidas.add(kv);
         if (!atual || disp > instante(atual.disponivelEm)) mapa.set(k, x);
       }
       // Revisão conhecida inválida ou cancelada substitui a antiga, sem fallback.
-      return [...mapa.values()].sort((a, b) => chave(a).localeCompare(chave(b)));
+      return [...mapa.values()].sort((a, b) => identidade(a).localeCompare(identidade(b)));
     }
     const p = parametros;
     if (!p || !texto(p.id) || !Number.isInteger(p.versao) || p.versao < 1 || p.origem !== 'demonstrativo') throw Error('Este núcleo só aceita parâmetros demonstrativos identificados.');
@@ -47,7 +50,9 @@ const RaioxComparacao = (() => {
       if (!numero(p[k]) || p[k] < 0) throw Error('Parâmetro inválido: ' + k);
     }
     if (p.depoisMaxDias < p.depoisMinDias || !Number.isInteger(p.minControles) || p.minControles < 1) throw Error('Janela ou mínimo de controles inválido.');
-    return {corte, p, leituras: vigentes(dados.leituras), aplicacoes: vigentes(dados.aplicacoes), contexto: {...contexto}};
+    // Defensivos de outros alvos também podem interferir. A identidade da aplicação
+    // não inclui alvo: corrigir o alvo de uma versão não duplica o mesmo manejo.
+    return {corte, p, leituras: vigentes(dados.leituras), aplicacoes: vigentes(dados.aplicacoes, true), contexto: {...contexto}};
   }
   function problemaTempo(x, corte) {
     if (!x) return 'fonte_nao_disponivel';
@@ -65,7 +70,7 @@ const RaioxComparacao = (() => {
   function buscar(xs, ref) { return ref && xs.find(x => x.id === ref.id && x.talhao === ref.talhao); }
   function interferencia(s, talhao, inicio, fim, exceto) {
     return s.aplicacoes.some(x => {
-      if (x.talhao !== talhao || chave(x) === exceto || x.estado === 'cancelada') return false;
+      if (x.talhao !== talhao || chaveAplicacao(x) === exceto || x.estado === 'cancelada') return false;
       const t = instante(x.evento);
       // Evento conhecido sem ordem ou confirmação suficiente não comprova ausência.
       if (!Number.isFinite(t)) return true;
@@ -83,7 +88,7 @@ const RaioxComparacao = (() => {
     if (a.valor === 0) return indisponivel('tratado_zerado_antes');
     if (a.valor < p.pisoAntes) return indisponivel('tratado_abaixo_do_piso');
     if (!texto(a.estadio)) return indisponivel('estadio_ausente');
-    if (interferencia(s, a.talhao, ta, tb, chave(aplicacao))) return indisponivel('interferencia_no_tratado');
+    if (interferencia(s, a.talhao, ta, tb, chaveAplicacao(aplicacao))) return indisponivel('interferencia_no_tratado');
     const candidatos = Array.isArray(pedido.controles) ? pedido.controles : [];
     const repetidos = new Map();
     for (const c of candidatos) repetidos.set(c?.talhao, (repetidos.get(c?.talhao) || 0) + 1);
@@ -94,7 +99,7 @@ const RaioxComparacao = (() => {
       erro ||= problemaLeitura(ca, s) || problemaLeitura(cb, s);
       if (!erro) {
         const tca = instante(ca.evento), tcb = instante(cb.evento);
-        if (!(tca < tcb)) erro = 'ordem_controle_invalida';
+        if (!(tca < t && tcb > t)) erro = 'ordem_controle_invalida';
         else if (Math.abs(tca - ta) / DIA > p.toleranciaDias || Math.abs(tcb - tb) / DIA > p.toleranciaDias) erro = 'controle_fora_da_tolerancia';
         else if (ca.valor === 0) erro = 'controle_zerado_antes';
         else if (cb.valor === 0) erro = 'controle_zerado_depois';
@@ -117,7 +122,7 @@ const RaioxComparacao = (() => {
   }
   function seguir(s, aplicacao) {
     const t = instante(aplicacao.evento);
-    const outras = s.aplicacoes.filter(x => x.talhao === aplicacao.talhao && chave(x) !== chave(aplicacao) && x.estado !== 'cancelada');
+    const outras = s.aplicacoes.filter(x => x.talhao === aplicacao.talhao && chaveAplicacao(x) !== chaveAplicacao(aplicacao) && x.estado !== 'cancelada');
     if (outras.some(x => !Number.isFinite(instante(x.evento)) || (instante(x.evento) >= t && instante(x.evento) <= s.corte && (problemaTempo(x, s.corte) || x.estado !== 'confirmada' || instante(x.evento) === t)))) return indisponivel('ordem_ou_confirmacao_da_proxima_aplicacao_pendente');
     const proxima = outras.filter(x => instante(x.evento) > t && instante(x.evento) <= s.corte).sort(ordenar)[0];
     const fim = proxima ? instante(proxima.evento) : s.corte;
@@ -146,6 +151,7 @@ const RaioxComparacao = (() => {
       const a = buscar(s.aplicacoes, pedido?.aplicacao);
       const erro = problemaTempo(a, s.corte) || (a.estado !== 'confirmada' ? 'aplicacao_nao_confirmada' : '');
       if (erro) return indisponivel(erro);
+      if (a.alvo !== contexto.alvo) return indisponivel('aplicacao_alvo_incompativel');
       return {estado: 'demonstrativo', contrato: 'RX-1.0', contexto: s.contexto,
         parametros: {...parametros}, aplicacao: fonte(a),
         comparacao: comparar(s, pedido, a), seguimento: seguir(s, a),

@@ -94,4 +94,35 @@ teste('duplicidade antiga é recusada independentemente da ordem de versões', (
   const d = fixture(); d.leituras.push(leitura('b', 'T', 10, 4, {versao: 2, disponivelEm: dia(15)}), {...d.leituras[1]});
   const r = executar(d); assert.equal(r.motivo, 'contrato_invalido'); d.leituras.reverse(); assert.deepEqual(executar(d), r);
 });
+teste('A1 controle precisa envolver o instante da aplicação', () => {
+  for (const d of [2, 3]) assert.equal(executar(mudar('a', 'C1', {evento: dia(d), disponivelEm: dia(d)})).comparacao.controles[0].motivo, 'ordem_controle_invalida');
+  const ps = {...p, toleranciaDias: 10};
+  for (const d of [1, 2]) assert.equal(executar(mudar('b', 'C1', {evento: dia(d), disponivelEm: dia(d)}), contexto, ps).comparacao.controles[0].motivo, 'ordem_controle_invalida');
+});
+teste('A2 defensivo para outro alvo interfere no tratado e encerra seguimento', () => {
+  const d = fixture(); d.aplicacoes.push(aplicacao('OUTRO', 'T', 5, {alvo: 'A2'})); const r = executar(d);
+  assert.equal(r.comparacao.motivo, 'interferencia_no_tratado'); assert.equal(r.seguimento.estado, 'S5a'); assert.equal(r.seguimento.proximaAplicacao.alvo, 'A2');
+});
+teste('A2 defensivo para outro alvo também exclui controle e respeita resíduo', () => {
+  const d = fixture(); d.aplicacoes.push(aplicacao('OUTRO', 'C1', 1, {alvo: 'A2'}));
+  assert.equal(executar(d).comparacao.controles[0].motivo, 'interferencia_no_controle');
+});
+teste('A2 mesmo ID de defensivo revisado para outro alvo substitui versão', () => {
+  const d = fixture(); d.aplicacoes.push(aplicacao('M', 'T', 2, {alvo: 'A2', versao: 2, disponivelEm: dia(15)}));
+  assert.equal(executar(d).motivo, 'aplicacao_alvo_incompativel');
+  assert.equal(executar(d, {...contexto, corte: dia(12)}).comparacao.estado, 'agregacao_pendente');
+});
+teste('A2 cancelamento em outro alvo substitui aplicação no universo amplo', () => {
+  const d = fixture(); d.aplicacoes.push(aplicacao('OUTRO', 'T', 5, {alvo: 'A2'}), aplicacao('OUTRO', 'T', 5, {alvo: 'A2', versao: 2, estado: 'cancelada', disponivelEm: dia(8)}));
+  assert.equal(executar(d).comparacao.estado, 'agregacao_pendente'); assert.equal(executar(d).seguimento.estado, 'S3');
+});
+teste('A2 outros alvos futuros continuam invisíveis e outras fazendas isoladas', () => {
+  const d = fixture(), r = executar(d);
+  d.aplicacoes.push(aplicacao('OUTRO', 'T', 5, {alvo: 'A2', disponivelEm: dia(21)}));
+  assert.deepEqual(executar(d), r);
+  for (const k of ['org', 'fazenda', 'cultivo', 'safra']) { d.aplicacoes.push(aplicacao('OUTRO', 'T', 5, {alvo: 'A2', [k]: 'outro'})); assert.deepEqual(executar(d), r); }
+});
+teste('A2 leitura de outro alvo não entra no seguimento', () => {
+  const d = fixture(), r = executar(d); d.leituras.push(leitura('OUTRA', 'T', 15, 100, {alvo: 'A2'})); assert.deepEqual(executar(d), r);
+});
 console.log(`${passou}/${passou} PASS — dados e parâmetros exclusivamente sintéticos.`);
