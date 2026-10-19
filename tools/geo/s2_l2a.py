@@ -195,6 +195,14 @@ def circulo(lon, lat, r, n=72):
     return out + [out[0][:]]
 def _b64(b): return base64.b64encode(b).decode('ascii')
 def _dump(o): return json.dumps(o, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+def indices(bl, rd, ni, re_, sw):
+    """Os cinco índices do contrato C4 sobre reflectâncias (arrays numpy). Denominador zero dá nan ou inf, que `valido` descarta."""
+    return dict(NDVI=(ni - rd) / (ni + rd), NDRE=(ni - re_) / (ni + re_), EVI=2.5 * (ni - rd) / (ni + 6 * rd - 7.5 * bl + 1),
+                SAVI=1.5 * (ni - rd) / (ni + rd + 0.5), NDMI=(ni - sw) / (ni + sw))
+def valido(v):
+    """Índice não finito ou fora de [−1, 1] é leitura inválida: sai da estatística e do mapa daquele índice, sem corte silencioso
+    para o limite (contrato MAPA-REAL, Codex 6266772947). A base de cada índice fica no seu `n`."""
+    v = float(v); return v if math.isfinite(v) and -1.0 <= v <= 1.0 else None
 def fase_de(v):
     if v is None: return 'sem leitura (nuvem)'
     return next(n for n, a, b in FASES if a <= v < b or (b == 1.0 and v >= 1.0))
@@ -255,6 +263,7 @@ def processar(kml, gen37, datas):
                 if math.hypot(x - px, y - py) <= r: pix.append((row, col)); dono.append(k)
     pv_json = [dict(id=p[0], rot=f"P{int(p[0][2:])}", nome=p[1], ha=p[2], lon=p[3], lat=p[4], r_m=p[5]) for p in pivos]
     arq, cen_res, cen_s2, cen_meta, analise, rgbj, anterior = {}, [], [], {}, {}, {}, None
+    invalidos = {n: 0 for n in IDX}
     for it in reversed(itens):                                   # cronológica; gravada da mais recente para a mais antiga
         pr, A = it['properties'], it['assets']; dts = pr['datetime'][:10]; d8 = dts.replace('-', ''); hora = pr['datetime'][11:16]
         b = (x0, y0, x1, y1)
@@ -262,25 +271,26 @@ def processar(kml, gen37, datas):
         B = {n: refl(ler(A[n]['href'], b, H, W), A[n], oa) for n in ('blue', 'green', 'red', 'nir', 'rededge1', 'swir16')}
         scl = ler(A['scl']['href'], b, H, W)
         bl, rd, ni, re_, sw = B['blue'], B['red'], B['nir'], B['rededge1'], B['swir16']
-        with np.errstate(divide='ignore', invalid='ignore'):
-            ind = dict(NDVI=(ni - rd) / (ni + rd), NDRE=(ni - re_) / (ni + re_), EVI=2.5 * (ni - rd) / (ni + 6 * rd - 7.5 * bl + 1),
-                       SAVI=1.5 * (ni - rd) / (ni + rd + 0.5), NDMI=(ni - sw) / (ni + sw))
+        with np.errstate(divide='ignore', invalid='ignore'): ind = indices(bl, rd, ni, re_, sw)
         nuv = np.isin(scl, list(NUVEM_SCL)) | (scl == 0) | np.isnan(ni)
         q = {n: bytearray() for n in IDX}; por = {p[0]: {n: [] for n in IDX} for p in pivos}; nuvem_p = {p[0]: [0, 0] for p in pivos}
         vnd = {}
         for (row, col), k in zip(pix, dono):
             pid = pivos[k][0]; nuvem_p[pid][1] += 1
-            if nuv[row, col] or not all(np.isfinite(ind[n][row, col]) for n in IDX):
+            if nuv[row, col]:
                 nuvem_p[pid][0] += 1
                 for n in IDX: q[n].append(255)
                 continue
             for n in IDX:
-                v = float(max(-1.0, min(1.0, ind[n][row, col]))); qq = quant(v); q[n].append(qq); por[pid][n].append(deq(qq))
-            vnd[(row, col)] = float(max(-1.0, min(1.0, ind['NDVI'][row, col])))
+                v = valido(ind[n][row, col])
+                if v is None: q[n].append(255); invalidos[n] += 1; continue
+                qq = quant(v); q[n].append(qq); por[pid][n].append(deq(qq))
+                if n == 'NDVI': vnd[(row, col)] = v
         est = {}
         for p in pivos:
             e = {n: _estat(por[p[0]][n]) for n in IDX}; e['nuvem'] = round(100 * nuvem_p[p[0]][0] / max(1, nuvem_p[p[0]][1]), 1); est[p[0]] = e
-        nuvem_faz = round(100 * sum(v[0] for v in nuvem_p.values()) / max(1, sum(v[1] for v in nuvem_p.values())), 1)
+        # a tela diz "% na cena": vale a nuvem do metadado da cena (quadrícula inteira); a nuvem sobre cada pivô fica em est[pivô]['nuvem']
+        nuvem_faz = round(float(pr.get('eo:cloud_cover', 100.0)), 2)
         img = [bytearray(4 * W) for _ in range(H)]
         for (row, col), k in zip(pix, dono):
             v = vnd.get((row, col)); c = (236, 239, 236) if v is None else cor_ndvi(v); img[row][4 * col:4 * col + 4] = bytes(c + (235,))
@@ -338,7 +348,7 @@ def processar(kml, gen37, datas):
             f.write(f'{n} = {v!r}\n')
     return dict(pivos=len(pivos), ha=round(sum(p[2] for p in pivos), 2), agua_kml=len(K['agua']), ambiental_kml=len(K['ambiental']), perimetros=len(PUB['perimetros']),
                 H=H, W=W, Hr=Hr, Wr=Wr, pixels=len(pix), cenas=[(c['id'], c['dt'], c['nuvem']) for c in cen_res],
-                conferencia_circulos=conf, arquivos={n: hashlib.sha256(b_).hexdigest()[:16] for n, b_ in sorted(arq.items())})
+                conferencia_circulos=conf, invalidos=invalidos, arquivos={n: hashlib.sha256(b_).hexdigest()[:16] for n, b_ in sorted(arq.items())})
 
 
 if __name__ == '__main__':

@@ -348,7 +348,7 @@ def _lg_key(c): y,m,d=c['dt'].split('-'); return f'{d}/{m}'
 def _lg_hora(c): h,mi=map(int,c['hora_utc'].split(':')); return f'{(h-3)%24:02d}:{mi:02d}'
 for _c in LG['cenas']:   # cenas reais entram no mesmo registro de cenas do mapa (chaves dd/mm), depois das demonstrativas
     _y,_m,_d=_c['dt'].split('-')
-    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc=(_LGROT+' · imagem e índices gerados, sem dado real') if _LGROT else 'processamento L2A da ESA (Copernicus) · catálogo Earth Search',
+    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc=(_LGROT+' · imagem e índices gerados, sem dado real') if _LGROT else 'processamento L2A da ESA (Copernicus) · catálogo Earth Search · índices em pixel de 10 m (NDRE e NDMI vêm de bandas de 20 m)',
         v={p:[_c['est'][p][n]['med'] for n in IDXN] for p in LG_IDS},nt={p:_c['est'][p]['nuvem'] for p in LG_IDS},manchas=[],png=_c['png'],real=True)
 _LGC={DLS.PID_DE[c['local']]:c for c in DLS.CULTIVOS}
 def _lav_lg(p,c):

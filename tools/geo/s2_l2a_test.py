@@ -150,6 +150,21 @@ class Formato(unittest.TestCase):
         self.assertEqual((S.fase_de(0.1), S.fase_de(0.5), S.fase_de(1.0), S.fase_de(None)), ('preparo · solo exposto', 'formação', 'produção', 'sem leitura (nuvem)'))
         self.assertEqual(S.cor_ndvi(1.0), (0x0B, 0x7A, 0x1E))
 
+    def test_indice_invalido_sai_sem_corte(self):
+        # contraprova: a regra anterior, max(-1, min(1, v)), levava 1,2 a 1,0 e o contava como vigor máximo
+        for v in (1.2, -1.0001, float('nan'), float('inf')): self.assertIsNone(S.valido(v), v)
+        for v in (-1.0, 0.0, 0.5, 1.0): self.assertEqual(S.valido(v), v)
+
+    def test_indices_pelo_oraculo(self):
+        np = __import__('numpy')
+        # oráculo calculado à mão: azul 0,04 · vermelho 0,05 · NIR 0,40 · borda 0,20 · SWIR 0,25
+        a = lambda v: np.array([v])
+        i = S.indices(a(0.04), a(0.05), a(0.40), a(0.20), a(0.25))
+        for n, esp in (('NDVI', 7 / 9), ('NDRE', 1 / 3), ('EVI', 0.625), ('SAVI', 0.525 / 0.95), ('NDMI', 3 / 13)):
+            self.assertAlmostEqual(float(i[n][0]), esp, places=12, msg=n)
+        with np.errstate(divide='ignore', invalid='ignore'): z = S.indices(a(0.0), a(0.0), a(0.0), a(0.0), a(0.0))
+        self.assertIsNone(S.valido(z['NDVI'][0]))           # denominador zero não vira zero
+
     def test_circulo_fechado(self):
         c = S.circulo(-47.2, -34.6, 100.0)
         self.assertEqual(len(c), 73); self.assertEqual(c[0], c[-1])

@@ -17,7 +17,7 @@
   - **Cor natural:** do produto TCI.
   - **Pivôs:** círculo pelo ponto central do KML e pela área declarada (HECTARE). Para conferência, compara com o círculo desenhado na pasta POLIGONO.
   - **Pasta de saída:** recusa gravar dentro de um repositório git.
-- **`tools/geo/s2_l2a_test.py`:** 13 casos com um KML fictício (no mar, valores inventados), sem rede e sem dado real.
+- **`tools/geo/s2_l2a_test.py`:** 15 casos com um KML fictício (no mar, valores inventados), sem rede e sem dado real.
 - **`tools/prototipo/v37/gen37/.gitignore`:** segunda barreira contra `dados_lagoa/` e `dados_lagoa_kml.py`.
 
 ## Escopo publicado (corrigido na v146, versão 164)
@@ -29,6 +29,23 @@ A v145 publicou, além da imagem e da geometria, dados de cadastro do KML: núme
   - na v145 publicada, apareciam em 9 arquivos (contraprova);
   - novo caso `EscopoPublicavel` no teste: 13/13.
 - **Publicação:** mudaram 10 páginas (cadastro, irrigação, mapa e mais duas), lidas de volta 10/10 por sha256. As versões 161 a 163 continuam no histórico do artefato, que só o proprietário (ou quem ele autorizar) abre.
+
+## Contrato do Codex e crítica do Claude (19/10)
+O contrato está em `../MAPA-REAL/contrato.md`, de autoria do Codex. É cópia byte a byte do recibo 6266772947 (sha256 `3013a98b…ca0b`, conferido). Ponto a ponto:
+
+| Ponto do contrato | Parecer | O que foi feito |
+|---|---|---|
+| Acesso efetivo do artefato | Aceito, com a evidência que existe | A ferramenta de publicação responde, a cada envio: "This artifact is private: only its owner and the people the owner has given access can open the link". O compartilhamento é do proprietário (menu Compartilhar). **Não executei** teste de acesso anônimo: a ferramenta proíbe abrir o link fora dela. |
+| Constantes `dados_lagoa_kml` além da pasta | Já atendido | O processador grava as duas; o build diz "reais 5/5". O leitor não mistura: sem uma das duas, tudo vem da demonstração. |
+| Propriedades do KML fora da exceção | Aceito | Corrigido na v146 (veja acima). |
+| Sem corte silencioso de índice inválido | Aceito: **era defeito** | O código levava valores fora de [−1, 1] ao limite. Agora `valido()` descarta a leitura só naquele índice, e a base de cada índice é o seu `n`. No dado real havia 0 leituras fora da faixa, e a saída ficou byte a byte igual. |
+| "Nuvem x %" com denominador | Aceito: **era defeito** | A tela diz "% na cena", mas o valor era a nuvem sobre os pivôs. Agora vem do metadado da cena (`eo:cloud_cover`, a quadrícula inteira): 0,02 % em 25/09 e 0,15 % em 10/09. A nuvem por pivô continua em "% no talhão". |
+| Resolução do índice no rótulo | Aceito | O rótulo da cena real diz "índices em pixel de 10 m (NDRE e NDMI vêm de bandas de 20 m)". |
+| Oráculo independente por índice | Aceito | As fórmulas foram para `indices()`. O caso `test_indices_pelo_oraculo` confere as cinco com valores calculados à mão, e denominador zero não vira zero. |
+| Classes só com limites homologados | Recusado nesta fatia, com fundamento | A legenda de vigor e a fase vêm da peça comum do protótipo (`engine.py`, legenda Vigor) e valem igual para a demonstração. Não são homologadas. Mudá-las é da frente do Mapa, não desta fatia. No software real, classe só com limite versionado. |
+| "HTTP 200 não prova custo zero" | Aceito | Fato executado: catálogo e imagens públicos, sem conta nem chave; não criei conta, chave nem cobrança. Não afirmo custo total zero além disso. |
+
+**Versão do artefato:** v147, versão 165 (`1792415686-e0bb`). Mudaram 2 arquivos (o Mapa e o `lagoa_s2.json`), lidos de volta 2/2 por sha256; `paginas_scan` deu 5/5 no build real.
 
 ## Defeito achado e corrigido antes de publicar
 - **Sintoma:** a primeira saída deu NDVI 1,00 em quase todos os pivôs.
@@ -49,7 +66,7 @@ A v145 publicou, além da imagem e da geometria, dados de cadastro do KML: núme
    - versões 161 a 163 (`1792413975-e91a`), com 147 páginas e 5 arquivos da Lagoa Grande, em 3 lotes;
    - leitura de volta de 7 arquivos (mapa, dados reais e uma página de cada lote): 7/7 iguais ao build por sha256.
    - v146: versão 164 (`1792414809-c42a`), 10 páginas trocadas, leitura de volta 10/10 por sha256; `paginas_scan` 5/5 no build com os dados reais.
-6. **Teste sintético:** `python3 -m unittest tools.geo.s2_l2a_test -v` deu 13/13.
+6. **Teste sintético:** `python3 -m unittest tools.geo.s2_l2a_test -v` deu 15/15.
 
 ## Observações para o proprietário (sem valores aqui)
 - **Pivôs:** em 4 dos 23, a área declarada (HECTARE) diverge do círculo desenhado no KML ou falta o círculo. A lista vai ao proprietário no canal dele, não ao repositório.
