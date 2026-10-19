@@ -1,0 +1,4 @@
+OK    D1 NDMI sem leitura no PV05 (cena 25/09): rótulo "sem dado de NDMI", estado "Sem dado · leitura mascarada ou inválida", os outros índices com valor e "NDMI · sem dado"; nunca "sem cultura" nem NDMI 0
+OK    D2 NDVI do PV05 segue com valor e a lista mostra "NDMI · sem dado"
+OK    D3 sem erro de JavaScript
+RESULTADO: 3 ok · 0 falhas

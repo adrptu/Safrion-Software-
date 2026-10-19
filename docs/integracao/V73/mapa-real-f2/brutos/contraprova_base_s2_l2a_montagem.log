@@ -1,0 +1,23 @@
+<scratchpad>/contra139/tools/geo/s2_l2a_montagem_test.py:44: ResourceWarning: unclosed file <_io.TextIOWrapper name='<scratchpad>/s2_montagem__nyx864e/dados_lagoa/lagoa_s2_resumo.json' mode='r' encoding='utf-8'>
+  cls.R = json.load(open(os.path.join(d, 'lagoa_s2_resumo.json'), encoding='utf-8'))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<scratchpad>/contra139/tools/geo/s2_l2a_montagem_test.py:45: ResourceWarning: unclosed file <_io.TextIOWrapper name='<scratchpad>/s2_montagem__nyx864e/dados_lagoa/lagoa_analise.json' mode='r' encoding='utf-8'>
+  cls.A = json.load(open(os.path.join(d, 'lagoa_analise.json'), encoding='utf-8'))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_M1_geracao_preserva_ausencia (tools.geo.s2_l2a_montagem_test.Montagem.test_M1_geracao_preserva_ausencia) ... ok
+test_M2_consumo_do_mapa_sem_quebrar (tools.geo.s2_l2a_montagem_test.Montagem.test_M2_consumo_do_mapa_sem_quebrar) ... ok
+test_M3_sem_estagio_inferido (tools.geo.s2_l2a_montagem_test.Montagem.test_M3_sem_estagio_inferido) ... FAIL
+
+======================================================================
+FAIL: test_M3_sem_estagio_inferido (tools.geo.s2_l2a_montagem_test.Montagem.test_M3_sem_estagio_inferido)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<scratchpad>/contra139/tools/geo/s2_l2a_montagem_test.py", line 70, in test_M3_sem_estagio_inferido
+    self.assertNotIn('fases', self.A); self.assertEqual(self.A['legenda']['faixas'], S.legenda_ndvi())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'fases' unexpectedly found in {'desc': {'NDVI': {'o': 'vigor geral', 'tec': '(NIR − R) / (NIR + R)', 'uso': 'falhas e manchas'}, 'NDRE': {'o': 'clorofila', 'tec': '(NIR − RE) / (NIR + RE)', 'uso': 'nutrição com dossel fechado'}, 'EVI': {'o': 'vigor sem saturar', 'tec': '2,5 (NIR − R) / (NIR + 6R − 7,5B + 1)', 'uso': 'lavoura fechada'}, 'SAVI': {'o': 'vigor com solo exposto', 'tec': '1,5 (NIR − R) / (NIR + R + 0,5)', 'uso': 'mudas e formação'}, 'NDMI': {'o': 'umidade da folha', 'tec': '(NIR − SWIR) / (NIR + SWIR)', 'uso': 'alerta de irrigação'}}, 'fases': [{'nome': 'preparo · solo exposto', 'faixa': [-1.0, 0.25]}, {'nome': 'plantio recente', 'faixa': [0.25, 0.4]}, {'nome': 'formação', 'faixa': [0.4, 0.6]}, {'nome': 'início da produção', 'faixa': [0.6, 0.72]}, {'nome': 'produção', 'faixa': [0.72, 1.0]}], 'cenas': {'25/09': {'dt': '2026-09-25', 'ant': '10/09', 'piv': {'PV01': {'fase': 'produção', 'ndvi': 0.768, 'dif': 0.0}, 'PV03': {'fase': 'sem leitura (nuvem)', 'ndvi': None, 'dif': None}}, 'faz': {'ha_por_fase': {'produção': 40.0, 'sem leitura (nuvem)': 18.5}, 'rotulo': ''}}, '10/09': {'dt': '2026-09-10', 'ant': None, 'piv': {'PV01': {'fase': 'produção', 'ndvi': 0.768, 'dif': None}, 'PV03': {'fase': 'sem leitura (nuvem)', 'ndvi': None, 'dif': None}}, 'faz': {'ha_por_fase': {'produção': 40.0, 'sem leitura (nuvem)': 18.5}, 'rotulo': ''}}}}
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.220s
+
+FAILED (failures=1)

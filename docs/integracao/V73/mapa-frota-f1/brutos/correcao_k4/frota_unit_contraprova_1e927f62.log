@@ -1,0 +1,58 @@
+OK    L1 · sequência normal: atual = última observada; idade 5 s ≤ 60 s
+OK    L2 · duplicata ignorada, rastro intacto
+OK    L3 · atrasada entra no rastro marcada; o marcador não volta
+OK    L4 · futura recusada
+OK    L5 · inválida (95° ou 0,0) recusada
+OK    L6 · fronteira inclusiva: 60 s Atual; 61 s Sem sinal há 1 min
+OK    L6b · idade: 1.145 s → há 19 min; 3.900 s → há 1 h 05 min
+OK    L6c · idade abaixo de 1 min
+OK    L7 · nenhuma leitura: Posição indisponível
+OK    L8 · salto confirmado pela seguinte coerente
+OK    L9 · salto isolado descartado
+OK    L10 · mesmo instante com outro id não troca a posição
+OK    L11 · mesmo instante da suspeita: sem divisão por zero; suspeita pendente
+OK    L12 · leitura entre a aceita e a suspeita avança a aceita; s fora do rastro
+OK    L13 · ordem de chegada invertida: mesmo estado final
+OK    L14 · Δt = 10 s coerente confirma a suspeita
+OK    P1 · telemetria e app atuais: vale a telemetria
+OK    P2 · telemetria velha e app atual: vale o app
+OK    P3 · as duas velhas: a mais recente, Sem sinal
+OK    P4 · desconectada sem app: Sem fonte
+OK    P5 · pausa há 40 min com o app conversando
+OK    P6 · pausa com o app sem sinal
+OK    P7 · nenhuma fonte com leitura
+OK    P8 · pausa sem leitura: nada presumido
+OK    P9 · desconectada com leitura de 10 s não é atual
+OK    P10 · conectada e online são eixos distintos
+OK    P11 · compartilhamento encerrado: dados da fonte retirados
+OK    P12 · O.S. impedida sem fonte: estado Desconhecido
+OK    P13 · leitura contradiz o impedimento: aviso, selo intacto
+OK    K1 · PJ em duas O.S. Em execução: conflito
+OK    K2 · mesmo PJ em dois tratores no mesmo grupo: conflito e dois marcadores
+OK    K3 · A liberar não ocupa
+OK    K4 · mesmo conjunto, grupo, em sequência: sem conflito, um marcador
+OK    K5 · programação de outra fonte: conflito
+OK    K6 · blocos sobrepostos: conflito
+OK    K7 · dois conjuntos distintos no mesmo grupo: dois marcadores
+OK    Z1 · modo ativo: mapa = lista
+OK    Z2 · pausado: mapa congelado com a hora dele; lista corrente
+OK    Z3 · a idade da congelada continua crescendo
+OK    Z4 · Retomar volta à leitura corrente
+OK    Z5 · O.S. encerrada ou perfil revogado na pausa: sem dado, com recuperação
+OK    Z6 · 21 no mesmo ponto com foco no m07: grupo de 20 sem ele
+OK    I1 · famílias: pulverização, plantio, adubação, preparo, colheita, transporte, outra
+OK    G3 · polígono: todos os vértices do percurso dentro e passadas a cada 36 m
+OK    G6 · círculo (Pivô 19, raio 488,96 m): vértices dentro do círculo, com recuo de 18 m na cabeceira de cada passada (como o oráculo)
+OK    G7 · posição na rota: começa no 1º vértice, anda 10 m e o rumo segue a passada
+OK    S1 · leituras simuladas a cada 10 s, a última no múltiplo de 10 anterior a agora, todas com Δt positivo
+OK    S2 · a simulação a 8 km/h passa pelo contrato sem salto suspeito; posição atual = última leitura
+OK    S3 · corte de sinal (fixture): sem leitura depois do corte; a idade cresce até "Sem sinal há 1 min" (M5)
+OK    S4 · colheita a 3 km/h com paradas: na parada, velocidade 0, sem rumo e "Parada · carregando"
+OK    C1 · só Em execução entra; OS-0421 = Trator 03 + PJ-3030 pela programação, com o operador; OS-0420 condicional
+OK    C2 · Lagoa Grande: OS-0505 com o conjunto de demonstração; OS-0506 (fertirrigação) é ativo fixo, sem conjunto móvel
+OK    C3 · iniciar a OS-0424 (programada em 24/09 com o PJ): o PJ fica nas duas e as duas mostram o conflito (M8)
+FALHA KT1 · K4 na tela: 2 O.S. do mesmo conjunto em sequência = 1 marcador ("· 2 O.S."), "Máquinas (1)", "Lista (1)", sem bolha "2 máquinas"; lista com 1 linha e as 2 O.S.; painel abre as 2 · [{"n":2,"btn":"Máquinas (2)","lis":"Lista (2)","mk":[],"bol":["2 máquinas"]},2,"Máquinas em execução (2) Santa Rita · 2026/27 Conjunto Operação O.S. Talhão Estado Posição Feito/saldo Trator 03 + Pulverizador PJ-3030 36 m Pulverização OS-0421 T1 + T2 Trabalhando (simulação) Atual · há menos de 1 min · fonte: simulação · leitura 14:13:20 190 de 350 ha · saldo 160 ha Trator 03 + P",[]]
+FALHA KT2 · K4 · "Ver no mapa" da OS-0424 seleciona o marcador do conjunto (OS-0421, aria-pressed), com as 2 O.S. no painel; seleção e foco ficam no redesenho; fechar devolve o foco a ele · [[["OS-0421","false"],["OS-0424","true"]],[["OS-0421","false"],["OS-0424","true"]],true,["OS-0424"]]
+OK    KT3 · K2, K5 e K6 na tela: duas entradas ("Máquinas (2)"), as duas linhas e os dois marcadores com "Conflito"; K7 (conjuntos distintos): duas entradas, sem conflito
+FALHA KT4 · K2, K5 e K6 no mesmo ponto: a bolha diz "2 máquinas · Conflito" (o agrupamento não esconde o conflito); K7: "2 máquinas" · [["2 máquinas"],["2 máquinas"],["2 máquinas"],["2 máquinas"]]
+RESULTADO: 54/57 ok

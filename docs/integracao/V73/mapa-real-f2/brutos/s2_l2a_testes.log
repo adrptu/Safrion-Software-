@@ -1,0 +1,77 @@
+test_nada_do_cadastro_do_kml_sai (tools.geo.s2_l2a_test.EscopoPublicavel.test_nada_do_cadastro_do_kml_sai) ... ok
+test_no_lugar_a_demonstracao_rotulada (tools.geo.s2_l2a_test.EscopoPublicavel.test_no_lugar_a_demonstracao_rotulada) ... ok
+test_perimetro_pela_geometria (tools.geo.s2_l2a_test.EscopoPublicavel.test_perimetro_pela_geometria) ... ok
+test_circulo_fechado (tools.geo.s2_l2a_test.Formato.test_circulo_fechado) ... ok
+test_indice_invalido_sai_sem_corte (tools.geo.s2_l2a_test.Formato.test_indice_invalido_sai_sem_corte) ... ok
+test_indices_pelo_oraculo (tools.geo.s2_l2a_test.Formato.test_indices_pelo_oraculo) ... ok
+test_quantizacao_e_legenda_numerica (tools.geo.s2_l2a_test.Formato.test_quantizacao_e_legenda_numerica) ... ok
+test_agua_no_formato_do_cadastro (tools.geo.s2_l2a_test.LeituraDoKml.test_agua_no_formato_do_cadastro) ... ok
+test_ambiental_sem_duplicar_partes_do_mesmo_tema (tools.geo.s2_l2a_test.LeituraDoKml.test_ambiental_sem_duplicar_partes_do_mesmo_tema) ... ok
+test_compativel_com_a_regra_de_outorga_do_cadastro (tools.geo.s2_l2a_test.LeituraDoKml.test_compativel_com_a_regra_de_outorga_do_cadastro) ... <repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:246: ResourceWarning: unclosed file <_io.TextIOWrapper name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/_carimbo.json' mode='r' encoding='utf-8'>
+  try: car = json.load(open(os.path.join(destino, '_carimbo.json'), encoding='utf-8'))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:237: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py'>
+  for f in ('gerar.py', 'kml.py', '__init__.py'): h.update(open(os.path.join(HERE, f), 'rb').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:237: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/kml.py'>
+  for f in ('gerar.py', 'kml.py', '__init__.py'): h.update(open(os.path.join(HERE, f), 'rb').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:237: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/__init__.py'>
+  for f in ('gerar.py', 'kml.py', '__init__.py'): h.update(open(os.path.join(HERE, f), 'rb').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:35: ResourceWarning: unclosed file <_io.TextIOWrapper name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_safra.py' mode='r' encoding='utf-8'>
+  src = open(os.path.join(GEN, 'dados_lagoa_safra.py'), encoding='utf-8').read(); out = {}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/cenas.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_20260910.png'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_20260925.png'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_analise.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_cadastro.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_pivos.geojson'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_rgb.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_rgb_20260910.png'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_rgb_20260925.png'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_s2.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/gerar.py:253: ResourceWarning: unclosed file <_io.BufferedReader name='<repo>/tools/prototipo/v37/gen37/dados_lagoa_sintetico/saida/lagoa_s2_resumo.json'>
+  if not isinstance(h, str) or not os.path.isfile(p) or hashlib.sha256(open(p, 'rb').read()).hexdigest() != h: return False
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_conferencia_com_o_circulo_desenhado (tools.geo.s2_l2a_test.LeituraDoKml.test_conferencia_com_o_circulo_desenhado) ... ok
+test_imovel_do_car_e_perimetro_sem_car (tools.geo.s2_l2a_test.LeituraDoKml.test_imovel_do_car_e_perimetro_sem_car) ... ok
+test_pivos_pelo_ponto_central_e_area_declarada (tools.geo.s2_l2a_test.LeituraDoKml.test_pivos_pelo_ponto_central_e_area_declarada) ... ok
+test_deslocamento_ja_aplicado_pelo_catalogo_nao_se_desconta_de_novo (tools.geo.s2_l2a_test.Reflectancia.test_deslocamento_ja_aplicado_pelo_catalogo_nao_se_desconta_de_novo) ... ok
+test_recusa_dentro_de_repositorio_e_aceita_fora (tools.geo.s2_l2a_test.SaidaForaDoGit.test_recusa_dentro_de_repositorio_e_aceita_fora) ... ok
+<repo>/tools/geo/s2_l2a_montagem_test.py:44: ResourceWarning: unclosed file <_io.TextIOWrapper name='<tmp>/dados_lagoa/lagoa_s2_resumo.json' mode='r' encoding='utf-8'>
+  cls.R = json.load(open(os.path.join(d, 'lagoa_s2_resumo.json'), encoding='utf-8'))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<repo>/tools/geo/s2_l2a_montagem_test.py:45: ResourceWarning: unclosed file <_io.TextIOWrapper name='<tmp>/dados_lagoa/lagoa_analise.json' mode='r' encoding='utf-8'>
+  cls.A = json.load(open(os.path.join(d, 'lagoa_analise.json'), encoding='utf-8'))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_M1_geracao_preserva_ausencia (tools.geo.s2_l2a_montagem_test.Montagem.test_M1_geracao_preserva_ausencia) ... ok
+test_M2_consumo_do_mapa_sem_quebrar (tools.geo.s2_l2a_montagem_test.Montagem.test_M2_consumo_do_mapa_sem_quebrar) ... ok
+test_M3_sem_estagio_inferido (tools.geo.s2_l2a_montagem_test.Montagem.test_M3_sem_estagio_inferido) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.234s
+
+OK

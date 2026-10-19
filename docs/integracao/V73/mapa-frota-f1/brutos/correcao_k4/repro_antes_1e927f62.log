@@ -1,0 +1,110 @@
+{
+ "caso": "K4",
+ "hash": "",
+ "modelItems": 2,
+ "physicalSets": 1,
+ "visiblePositions": 2,
+ "conflicts": [
+  0,
+  0
+ ],
+ "botao": "Máquinas (2)",
+ "lista": "Lista (2)",
+ "marcadores": [],
+ "grupos": [
+  "2 máquinas"
+ ],
+ "frSel": null,
+ "listaPainel": "Máquinas em execução (2) Santa Rita · 2026/27 Conjunto Operação O.S. Talhão Estado Posição Feito/saldo Trator 03 + Pulverizador PJ-3030 36 m Pulverização OS-0421 T1 + T2 Trabalhando (simulação) Atual · há menos de 1 min · fonte: simulação · leitura 14:13:20 190 de 350 ha · saldo 160 ha Trator 03 + Pulverizador PJ-3030 36 m Pulverização OS-0424 T1-B Trabalhando (simulação) Atual · há menos de 1 min · fonte: simulação · leitura 14:13:20 0 de 80 ha · saldo 80 ha Fonte: simulação · posições de demonstração",
+ "listaOS": [
+  "OS-0421",
+  "OS-0424"
+ ],
+ "verNoMapa": {
+  "marcadores": [
+   {
+    "os": "OS-0421",
+    "sel": "false",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0421 · Trabalhando (simulação) · leitura há menos de 1 min · simulação",
+    "html": "T03 · Pulverização ▶ trabalhando"
+   },
+   {
+    "os": "OS-0424",
+    "sel": "true",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0424 · Trabalhando (simulação) · leitura há menos de 1 min · simulação",
+    "html": "T03 · Pulverização ▶ trabalhando"
+   }
+  ],
+  "depois": [
+   {
+    "os": "OS-0421",
+    "sel": "false",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0421 · Trabalhando (simulação) · leitura há menos de 1 min · simulação",
+    "html": "T03 · Pulverização ▶ trabalhando"
+   },
+   {
+    "os": "OS-0424",
+    "sel": "true",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0424 · Trabalhando (simulação) · leitura há menos de 1 min · simulação",
+    "html": "T03 · Pulverização ▶ trabalhando"
+   }
+  ],
+  "mesmoBotao": true,
+  "painel": "Trator 03 + Pulverizador PJ-3030 36&nbsp;m Pulverização · OS-0424 · v1 · T1-B O.S. e versão OS-0424 · versão v1 Operação Pulverização · Fungicida A Talhão T1-B Conjunto Trator 03 + Pulverizador PJ-3030 36 m · pela programação Estado Trabalhando (simulação) · 14:13:30 Posição Atual · há menos de 1 min · fonte: simulação · leitura 14:13:30 · precisão não informada Quanto falta 0 de 80 ha apontados · saldo 80 ha Velocidade 8 km/h (leitura) Operador Marcos Fonte: simulação · posições de demonstração, sem efeito na O.S. Abrir O.S. Ver talhão"
+ }
+}
+{
+ "caso": "K6",
+ "hash": "",
+ "modelItems": 2,
+ "physicalSets": 1,
+ "visiblePositions": 2,
+ "conflicts": [
+  2,
+  2
+ ],
+ "botao": "Máquinas (2)",
+ "lista": "Lista (2)",
+ "marcadores": [],
+ "grupos": [
+  "2 máquinas"
+ ],
+ "frSel": null,
+ "listaPainel": "Máquinas em execução (2) Santa Rita · 2026/27 Conjunto Operação O.S. Talhão Estado Posição Feito/saldo Trator 03 + Pulverizador PJ-3030 36 m Pulverização OS-0421 T1 + T2 Trabalhando (simulação) · Conflito · também na OS-0424, OS-0424 Atual · há menos de 1 min · fonte: simulação · leitura 14:13:20 190 de 350 ha · saldo 160 ha Trator 03 + Pulverizador PJ-3030 36 m Pulverização OS-0424 T1-B Trabalhando (simulação) · Conflito · também na OS-0421, OS-0421 Atual · há menos de 1 min · fonte: simulação · leitura 14:13:20 0 de 80 ha · saldo 80 ha Fonte: simulação · posições de demonstração",
+ "listaOS": [
+  "OS-0421",
+  "OS-0424"
+ ],
+ "verNoMapa": {
+  "marcadores": [
+   {
+    "os": "OS-0421",
+    "sel": "false",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0421 · Trabalhando (simulação) · leitura há menos de 1 min · simulação · Conflito",
+    "html": "T03 · Pulverização ▶ trabalhando · Conflito"
+   },
+   {
+    "os": "OS-0424",
+    "sel": "true",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0424 · Trabalhando (simulação) · leitura há menos de 1 min · simulação · Conflito",
+    "html": "T03 · Pulverização ▶ trabalhando · Conflito"
+   }
+  ],
+  "depois": [
+   {
+    "os": "OS-0421",
+    "sel": "false",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0421 · Trabalhando (simulação) · leitura há menos de 1 min · simulação · Conflito",
+    "html": "T03 · Pulverização ▶ trabalhando · Conflito"
+   },
+   {
+    "os": "OS-0424",
+    "sel": "true",
+    "aria": "Trator 03 + Pulverizador PJ-3030 36 m · Pulverização · OS-0424 · Trabalhando (simulação) · leitura há menos de 1 min · simulação · Conflito",
+    "html": "T03 · Pulverização ▶ trabalhando · Conflito"
+   }
+  ],
+  "mesmoBotao": true,
+  "painel": "Trator 03 + Pulverizador PJ-3030 36&nbsp;m Pulverização · OS-0424 · v1 · T1-B O.S. e versão OS-0424 · versão v1 Operação Pulverização · Fungicida A Talhão T1-B Conjunto Trator 03 + Pulverizador PJ-3030 36 m · pela programação Estado Trabalhando (simulação) · 14:13:30 Posição Atual · há menos de 1 min · fonte: simulação · leitura 14:13:30 · precisão não informada Quanto falta 0 de 80 ha apontados · saldo 80 ha Velocidade 8 km/h (leitura) Operador Marcos Conflito · Trator 03 também na OS-0421 Conflito · Pulverizador PJ-3030 36 m também na OS-0421 Fonte: simulação · posições de demonstração, sem efeito na O.S. Abrir O.S. Ver talhão"
+ }
+}

@@ -26,8 +26,6 @@ IDX = ['NDVI', 'NDRE', 'EVI', 'SAVI', 'NDMI']
 PX = 10.0
 MARGEM, MARGEM_RGB = 200.0, 1500.0
 NUVEM_SCL = {3, 8, 9, 10}          # sombra de nuvem, nuvem média, nuvem alta, cirro
-FASES = [('preparo · solo exposto', -1.0, 0.25), ('plantio recente', 0.25, 0.40), ('formação', 0.40, 0.60),
-         ('início da produção', 0.60, 0.72), ('produção', 0.72, 1.0)]
 PAL_NDVI = [(.30, (0xE4, 0x00, 0x2B)), (.45, (0xFF, 0x6A, 0x00)), (.60, (0xFF, 0xD5, 0x00)), (.72, (0xB5, 0xE6, 0x1D)), (.82, (0x3F, 0xBF, 0x2A)), (9, (0x0B, 0x7A, 0x1E))]
 LG_FONTE = ('Pivôs e perímetro: KML do proprietário · imagem e índices: Sentinel-2 L2A da ESA (Copernicus), catálogo Earth Search · '
             'CAR, APP/RL e outorgas: demonstração sintética (fora da exceção de 19/10)')
@@ -167,10 +165,17 @@ def ler(href, b, H, W):
         a = s.read(1, window=from_bounds(*b, transform=s.transform), out_shape=(H, W), resampling=Resampling.nearest, boundless=True, fill_value=0)
     return a
 
+def ler_rgb(href, bounds, Hr, Wr):
+    """cor natural (TCI) recortada na grade da margem larga, em linhas RGB de 8 bits"""
+    np, rasterio, _, from_bounds, Resampling = _geo()
+    with rasterio.open('/vsicurl/' + href) as s:
+        t = s.read(window=from_bounds(*bounds, transform=s.transform), out_shape=(3, Hr, Wr), resampling=Resampling.bilinear, boundless=True, fill_value=0)
+    return np.ascontiguousarray(np.transpose(t, (1, 2, 0)).astype('uint8'))
+
 def refl(dn, banda, ja_aplicado):
     """reflectância de superfície. Com 'earthsearch:boa_offset_applied' verdadeiro o catálogo já descontou o deslocamento de −0,1
-    (linha de base ≥ 04.00): descontar de novo deixa o vermelho negativo na vegetação densa e satura o NDVI em 1 (conferido em 19/10:
-    B04 bruto p5 = 296 sobre os pivôs, isto é, 0,03 de reflectância)."""
+    (linha de base ≥ 04.00): descontar de novo deixa o vermelho negativo na vegetação densa e satura o NDVI acima de 1 (caso
+    Reflectancia do teste, com valores inventados)."""
     rb = banda.get('raster:bands', [{}])[0]; e, o = rb.get('scale', 1e-4), (0.0 if ja_aplicado else rb.get('offset', 0.0))
     r = dn.astype('float64') * e + o; r[dn == 0] = float('nan'); return r
 
@@ -203,9 +208,14 @@ def valido(v):
     """Índice não finito ou fora de [−1, 1] é leitura inválida: sai da estatística e do mapa daquele índice, sem corte silencioso
     para o limite (contrato MAPA-REAL, Codex 6266772947). A base de cada índice fica no seu `n`."""
     v = float(v); return v if math.isfinite(v) and -1.0 <= v <= 1.0 else None
-def fase_de(v):
-    if v is None: return 'sem leitura (nuvem)'
-    return next(n for n, a, b in FASES if a <= v < b or (b == 1.0 and v >= 1.0))
+def legenda_ndvi():
+    """Legenda numérica da cor do NDVI (contrato MAPA-REAL: sem limite homologado, valor contínuo e legenda; nenhum estágio
+    agronômico é inferido da observação real, Codex 6270730787). Só faixas de valor e a cor do PNG."""
+    out, a = [], -1.0
+    for lim, c in PAL_NDVI:
+        b = min(lim, 1.0); out.append(dict(de=a, ate=b, cor='#%02X%02X%02X' % c)); a = b
+        if b >= 1.0: break
+    return out
 
 
 def grade(cx, cy, rs, margem):
@@ -296,9 +306,7 @@ def processar(kml, gen37, datas):
             v = vnd.get((row, col)); c = (236, 239, 236) if v is None else cor_ndvi(v); img[row][4 * col:4 * col + 4] = bytes(c + (235,))
         pngn = f'lagoa_{d8}.png'; arq[pngn] = png(W, H, [bytes(l) for l in img], 6)
         tci = []
-        with rasterio.open('/vsicurl/' + A['visual']['href']) as s:
-            t = s.read(window=from_bounds(xr0, yr0, xr1, yr1, transform=s.transform), out_shape=(3, Hr, Wr), resampling=Resampling.bilinear, boundless=True, fill_value=0)
-        rgb = np.ascontiguousarray(np.transpose(t, (1, 2, 0)).astype('uint8'))
+        rgb = ler_rgb(A['visual']['href'], (xr0, yr0, xr1, yr1), Hr, Wr)
         arq[f'lagoa_rgb_{d8}.png'] = png(Wr, Hr, [rgb[i].tobytes() for i in range(Hr)], 2)
         rgbj[f'lagoa_rgb_{d8}.png'] = dict(H=Hr, W=Wr, cantos=cant_rgb, seg=0.0)
         cen_res.append(dict(id=it['id'], dt=dts, hora_utc=hora, nuvem=nuvem_faz, png=pngn, est=est))
@@ -309,12 +317,10 @@ def processar(kml, gen37, datas):
                                         for n in ('blue', 'green', 'red', 'nir', 'rededge1', 'swir16', 'scl')},
                                   dt=dts, nuvem=nuvem_faz, seg=0.0)
         k_ = f'{dts[8:10]}/{dts[5:7]}'
-        piv = {p[0]: dict(fase=fase_de(est[p[0]]['NDVI']['med'] if est[p[0]]['NDVI'] else None), ndvi=est[p[0]]['NDVI']['med'] if est[p[0]]['NDVI'] else None,
+        piv = {p[0]: dict(ndvi=est[p[0]]['NDVI']['med'] if est[p[0]]['NDVI'] else None,
                           dif=(round(est[p[0]]['NDVI']['med'] - anterior[1][p[0]]['NDVI']['med'], 3) if anterior and est[p[0]]['NDVI'] and anterior[1][p[0]]['NDVI'] else None))
                for p in pivos}
-        ha_f = {}
-        for p in pivos: f_ = piv[p[0]]['fase']; ha_f[f_] = round(ha_f.get(f_, 0) + p[2], 2)
-        analise[k_] = dict(dt=dts, ant=anterior[0] if anterior else None, piv=piv, faz=dict(ha_por_fase=ha_f, rotulo=''))
+        analise[k_] = dict(dt=dts, ant=anterior[0] if anterior else None, piv=piv, faz=dict(rotulo=''))   # sem classe nem estágio (contrato)
         anterior = (k_, est)
     cen_res.reverse(); cen_s2.reverse(); analise = dict(reversed(list(analise.items()))); rgbj = dict(reversed(list(rgbj.items())))
     pix_b = b''.join(struct.pack('<HH', r_, c_) for r_, c_ in pix)
@@ -336,7 +342,7 @@ def processar(kml, gen37, datas):
               'EVI': dict(o='vigor sem saturar', tec='2,5 (NIR − R) / (NIR + 6R − 7,5B + 1)', uso='lavoura fechada'),
               'SAVI': dict(o='vigor com solo exposto', tec='1,5 (NIR − R) / (NIR + R + 0,5)', uso='mudas e formação'),
               'NDMI': dict(o='umidade da folha', tec='(NIR − SWIR) / (NIR + SWIR)', uso='alerta de irrigação')},
-        fases=[dict(nome=n, faixa=[a, b]) for n, a, b in FASES], cenas=analise))
+        legenda=dict(indice='NDVI', tipo='valor contínuo; faixas só da cor, sem classe homologada', faixas=legenda_ndvi()), cenas=analise))
     arq['cenas.json'] = _dump(cen_meta)
     os.makedirs(dest, exist_ok=True)
     for n, b_ in arq.items():

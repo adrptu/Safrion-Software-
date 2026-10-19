@@ -8,6 +8,8 @@
   M5  relógio e corte de sinal de teste: 60 s "Atual"; 61 s "Sem sinal há 1 min", marcador vazado, sem seta e sem "parada"
   M7  pausa sem leitura (fixture): a O.S. continua na lista, sem marcador; impedida mostra o selo da O.S. e "estado desconhecido"
   M8  iniciar a OS-0424 (o PJ-3030 programado nela): as duas linhas dizem "Conflito · também na OS-…"
+  K4  OS-0421 e OS-0424 no mesmo grupo, mesmo conjunto, em sequência: 1 marcador, contado 1 vez, lista e painel com as 2 O.S.; "Ver no mapa" da
+      OS-0424 seleciona esse marcador e o Esc devolve o foco a ele. Contraexemplo K6 (blocos sobrepostos): 2 entradas, conflito nas linhas e na bolha
   M9  enviar a OS-0421 para conferência com o painel aberto: o marcador sai e o painel avisa "saiu de Em execução (agora Em conferência)"
   M10 Esc fecha o painel e devolve o foco ao marcador; a lista tem as colunas da decisão 10, em ordem estável por O.S.
   M12 "Ver no mapa" da O.S.: 1 clique abre o Mapa com o conjunto selecionado; com o contexto salvo na Lagoa Grande, faixa "Recorte temporário"
@@ -146,6 +148,40 @@ try:
     c.goto('about:blank', .1); c.goto(U('IN-04.dc.html'), 1.2); liga(); ls8 = lista()
     chk('M8 iniciar a OS-0424: o PJ-3030 nas duas O.S.; as linhas dizem "Conflito · também na OS-…"',
         any(r[2] == 'OS-0421' and 'Conflito · também na OS-0424' in r[4] for r in ls8) and any(r[2] == 'OS-0424' and 'Conflito · também na OS-0421' in r[4] for r in ls8), ls8)
+    # K4 (revisão Codex 6270760702): OS-0421 e OS-0424 no mesmo grupo, com o mesmo conjunto (Trator 03 + PJ) em sequência (06–09 e 09–11), as duas
+    # simuladas no T2 (mesmo ponto): 1 marcador e o conjunto contado 1 vez (com a OS-0420, "Máquinas (2)"; antes, 3), com as 2 O.S. no rótulo, na lista
+    # e no painel; "Ver no mapa" da OS-0424 seleciona esse marcador
+    K4C = """window.__frotaTeste.cenario(c=>{ const d=new Date(window.__frotaTeste.agora()*1000), dia=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const b=(i,f)=>['T03','PJ'].map(r=>({r,dia,ini:i,fim:f,sit:'firme'}));   // dia = a data operacional do cenário (o relógio do mapa usa CEN_DIA_OP)
+      c.ordens['OS-0424'].etapa='Em execução'; c.ordens['OS-0421'].prog={blocos:b(6,9)}; c.ordens['OS-0424'].prog={blocos:b(9,11)}; c.ordens['OS-0421'].rec={}; c.ordens['OS-0424'].rec={};
+      c.gruposExec=Object.assign(c.gruposExec||{},{'GRP-9':{id:'GRP-9',versao:1,ids:['OS-0421','OS-0424'],programa:{maquina:'T03',implemento:'PJ'}}}); }); 1"""
+    abre(); J(K4C); c.goto('about:blank', .1); c.goto(U('IN-04.dc.html'), 1.2)
+    J("(()=>{ const F=window.__frotaTeste.frota0(); F.simula.push('OS-0424'); F.rota_tal['OS-0424']='T2'; })(); 1"); liga()
+    mk4 = json.loads(J(MK) or '[]'); bol4 = J("[...document.querySelectorAll('.fr-grupo')].filter(b=>b.getClientRects().length).map(b=>b.innerText).join('|')")
+    tog4 = J("document.querySelector('[data-frota-tog]').innerText"); ls4 = lista(); lt4 = J("document.querySelector('[data-frota-lista]').innerText")
+    J("document.querySelector('[data-frota-painel] .fr-x').click()"); time.sleep(.4); J("(document.querySelector('[data-frota-os=\"OS-0421\"]')||{click(){}}).click()"); time.sleep(.6)
+    p4 = J(PAINEL); h4 = json.loads(J("JSON.stringify([...document.querySelectorAll('[data-frota-painel] .fr-acoes a')].map(a=>[a.className,a.getAttribute('href')]))") or '[]')
+    chk('K4 mesmo conjunto do mesmo grupo, em sequência: 1 marcador ("2 O.S."), contado 1 vez ("Máquinas (2)" e "Lista (2)" com a OS-0420), sem bolha; lista e painel com as 2 O.S., cada uma a 1 toque',
+        'Máquinas (2)' in tog4 and 'Lista (2)' in lt4 and [m['os'] for m in mk4] == ['OS-0421'] and '2 O.S.' in (mk4 or [{}])[0].get('txt', '') and 'OS-0421 e OS-0424' in (mk4 or [{}])[0].get('al', '') and not bol4
+        and [r[2] for r in ls4] == ['OS-0420', 'OS-0421 e OS-0424'] and 'OS-0421' in p4 and 'OS-0424' in p4 and 'em sequência' in p4
+        and h4[:2] == [['fr-prim', 'OS.dc.html#OS-0421'], ['fr-sec', 'OS.dc.html#OS-0424']], [tog4, lt4, mk4, bol4, ls4, h4, p4])
+    c.goto('about:blank', .1); c.goto(U('OS.dc.html#OS-0424'), 1.5)
+    lk4 = J("(()=>{ const a=document.querySelector('a[data-frota-link]'); return a&&a.getClientRects().length?a.getAttribute('href'):null; })()")
+    if lk4: J("document.querySelector('a[data-frota-link]').click()"); time.sleep(2.0)
+    espera("!!document.querySelector('[data-frota-os]')", 6)
+    sel4 = json.loads(J("JSON.stringify([...document.querySelectorAll('[data-frota-os]')].filter(b=>b.getClientRects().length).map(b=>[b.getAttribute('data-frota-os'),b.getAttribute('aria-pressed')]))") or '[]')
+    pv4 = J(PAINEL); J("window.__frotaTeste.redesenha(); 1"); time.sleep(.3)
+    sel4b = J("(document.querySelector('[data-frota-os=\"OS-0421\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed')")
+    J("document.querySelector('[data-frota-painel] h2')&&document.querySelector('[data-frota-painel] h2').focus()"); c.tecla('Escape', 'Escape', 27); time.sleep(.5)
+    foco4 = J("document.activeElement&&document.activeElement.getAttribute('data-frota-os')")
+    chk('K4 "Ver no mapa" da OS-0424: o marcador do conjunto (OS-0421) fica selecionado, também depois de redesenhar; painel com as 2 O.S.; Esc devolve o foco a ele',
+        lk4 == 'IN-04.dc.html#frota=OS-0424' and sel4 == [['OS-0421', 'true']] and sel4b == 'true' and 'OS-0421' in pv4 and 'OS-0424' in pv4 and foco4 == 'OS-0421', [lk4, sel4, sel4b, foco4, pv4])
+    # contraexemplo K6: blocos sobrepostos (06–10 e 09–11) não juntam: "Máquinas (3)", as duas linhas com conflito e a bolha diz "Conflito"
+    abre(); J(K4C.replace('b(6,9)', 'b(6,10)')); c.goto('about:blank', .1); c.goto(U('IN-04.dc.html'), 1.2)
+    J("(()=>{ const F=window.__frotaTeste.frota0(); F.simula.push('OS-0424'); F.rota_tal['OS-0424']='T2'; })(); 1"); liga()
+    tog6 = J("document.querySelector('[data-frota-tog]').innerText"); bol6 = J("[...document.querySelectorAll('.fr-grupo')].filter(b=>b.getClientRects().length).map(b=>b.innerText).join('|')"); ls6 = lista()
+    chk('K6 blocos sobrepostos no mesmo conjunto: nada se junta; "Máquinas (3)" (com a OS-0420), as duas linhas com "Conflito · também na OS-…" e a bolha "2 máquinas · Conflito"',
+        'Máquinas (3)' in tog6 and [r[2] for r in ls6] == ['OS-0420', 'OS-0421', 'OS-0424'] and all('Conflito · também na OS-04' in r[4] for r in ls6[1:]) and bol6 == '2 máquinas · Conflito', [tog6, bol6, ls6])
     # M9 sai de Em execução com o painel aberto
     abre(); liga(); J("document.querySelector('[data-frota-os=\"OS-0421\"]').click()"); time.sleep(.5)
     J("window.__frotaTeste.cenario(c=>{ c.ordens['OS-0421'].etapa='Em conferência'; }); window.__frotaTeste.render(); 1"); time.sleep(.8)
