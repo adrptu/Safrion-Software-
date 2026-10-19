@@ -8,6 +8,9 @@ As regras de equipe continuam em [protocolo](../../docs/parceria/protocolo.md).
 por SHA. Usa `gh` autenticado **com a identidade existente do executor**, sem ler
 ou guardar tokens. Não instala ferramentas, cria contas, muda ruleset, faz push,
 atualiza branch, habilita auto-merge, resolve discussões ou emite pareceres.
+O merge manual pelo revisor segue a autorização de Adrianus de 18/10/2026,
+reiterada no checkpoint da issue #1: auto-merge desligado não é bloqueio humano.
+Essa autorização não dispensa checks, pareceres, proteção ou confirmação do destino.
 Não é serviço de plantão. O agente continua sendo responsável pelo acionamento e
 por examinar a evidência. Não executa textos de PR no shell.
 
@@ -81,6 +84,10 @@ O coordenador reúne no `pedido.json`: `repo`, `pr`, `head_sha`, `base_sha`,
 `author`, `integrator` e `receipts` (dois objetos, ou três com contraprova, com `comment_id` e
 `sha256` do corpo UTF-8 exato retornado pela API). Agentes permitidos: `codex`,
 `claude`, `gemini`; papéis únicos: `author`, `reviewer`, `counterproof`. Autor e integrador são Codex/Claude distintos; o integrador é o revisor. Se o aceite exigir Gemini, incluir `counterproof_required: true` no pedido (booleano; padrão false). A decisão de pertinência vem do contrato da entrega, conferido pelo integrador; o helper não interpreta o risco do diff. Parecer já emitido para a candidata, inclusive Gemini, não pode ser omitido: seu último recibo precisa ser selecionado e favorável, mesmo com `counterproof_required: false`.
+O comentário dedicado de parecer favorável/retirada usa o formato exato de
+`revisao_codex.py`: não substitui os recibos JSON nem os checks. O último ato para
+o HEAD (por atualização e ID) deve ser favorável; retirada bloqueia mesmo diante
+de um check ainda verde. Texto adicional ou citado não recebe essa exceção.
 Um recibo estruturado posterior para a mesma candidata substitui o anterior,
 inclusive se bloquear. A conversa inteira é paginada. Comentário autorizado após
 o primeiro recibo selecionado que cite o schema ou HEAD atual e esteja fora do

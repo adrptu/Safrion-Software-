@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote, urlencode, urlsplit
 
+from revisao_codex import ATO, FAVORAVEL
+
 REPO = 'adrptu/Safrion-Software-'
 IMPLEMENTADORES = {'codex', 'claude'}
 AGENTES = IMPLEMENTADORES | {'gemini'}
@@ -131,9 +133,16 @@ def avaliar(pedido, s, agora_utc=None):
         exigir('CHANGES_REQUESTED' not in ultimas.values(), 'revisão nativa solicita mudanças')
         exigir(s['comments_complete'] is True, 'conversa incompleta: recibos podem ter sido revogados')
         recentes = {}
+        atos = []
         primeiro_recibo = min(r['comment_id'] for r in pedido['receipts'])
         for comentario in sorted(s['comments'], key=lambda c: c['id']):
             if comentario['author_association'] not in ('OWNER', 'MEMBER', 'COLLABORATOR'):
+                continue
+            corpo = comentario.get('body', '')
+            ato = ATO.fullmatch(corpo.strip()) if isinstance(corpo, str) else None
+            if (ato and ato.group(2) == pedido['head_sha']
+                    and not (comentario.get('user') or {}).get('login', '').endswith('[bot]')):
+                atos.append((comentario.get('updated_at') or '', comentario['id'], ato.group(1)))
                 continue
             try:
                 r = parse_recibo(comentario['body'])
@@ -153,6 +162,7 @@ def avaliar(pedido, s, agora_utc=None):
                    'recibo/revogação ambíguo: comentário ' + str(comentario['id']))
             if da_candidata:
                 recentes[r['agent']] = comentario['id']
+        exigir(not atos or max(atos)[2] == FAVORAVEL, 'último ato do revisor retirou o parecer')
         vistos, papeis = set(), set()
         for referencia in pedido['receipts']:
             c = s['receipts'][str(referencia['comment_id'])]

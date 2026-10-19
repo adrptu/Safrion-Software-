@@ -98,6 +98,38 @@ class GateTests(unittest.TestCase):
         self.pair_only()
         self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
 
+    def reviewer_act(self, body, number=103, updated='2026-10-04T22:00:00Z', login='adrptu'):
+        self.snapshot['comments'].append({'id': number, 'body': body,
+            'author_association': 'OWNER', 'updated_at': updated, 'user': {'login': login}})
+
+    def test_dedicated_favorable_after_receipt_is_not_malformed_revocation(self):
+        self.reviewer_act('Parecer favorável do revisor: ' + HEAD)
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_withdrawal_blocks_even_with_stale_green_check(self):
+        self.reviewer_act('Parecer retirado: ' + HEAD)
+        self.assertIn('retirou', self.blocked()['reasons'][0])
+
+    def test_latest_act_uses_edit_time_not_creation_order(self):
+        self.reviewer_act('Parecer retirado: ' + HEAD, 103, '2026-10-04T22:02:00Z')
+        self.reviewer_act('Parecer favorável do revisor: ' + HEAD, 104, '2026-10-04T22:01:00Z')
+        self.assertIn('retirou', self.blocked()['reasons'][0])
+        self.snapshot['comments'][-1]['updated_at'] = '2026-10-04T22:03:00Z'
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_favorable_does_not_hide_json_revocation(self):
+        self.reviewer_act('Parecer favorável do revisor: ' + HEAD)
+        rewrite_receipt(self.request, self.snapshot, {'verdict': 'blocked'}, 1)
+        self.blocked()
+
+    def test_only_exact_human_favorable_is_exempt(self):
+        for body, login in [('Parecer favorável do revisor: ' + HEAD + '\nmas pendente', 'adrptu'),
+                            ('Parecer favorável do revisor: ' + HEAD, 'example[bot]')]:
+            with self.subTest(body=body, login=login):
+                self.request, self.snapshot = fixture()
+                self.reviewer_act(body, login=login)
+                self.assertIn('fora do formato', self.blocked()['reasons'][0])
+
     def test_counterproof_cannot_replace_the_other_implementer(self):
         self.request['receipts'].pop(1)
         self.blocked()
