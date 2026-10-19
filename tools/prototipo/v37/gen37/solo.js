@@ -196,7 +196,7 @@ function soloSugestoes(ctx, cu) {
       else if (exCal && !exCal.incl) {   /* plano com calagem: outra dose, ou retirar quando NC = 0 */
         exCal.prods.forEach(q => { const prnt = (gar[q.p.prod] || {}).prnt; if (!prnt || q.i < 0) return; const cal = soloCalagem(ix.T.v, ix.V.v, V2, prnt);
           const dose = soloR2(q.p.un === 'kg' ? prMul(cal.dose, 1000) : cal.dose); fezL1 = true;
-          push({ tipo: prCmp(cal.nc, 0) > 0 ? 'dose' : 'retirar', regra: 'calagem', atv: { id: String(exCal.a.id), nome: exCal.a.nome, op: exCal.a.op }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo,
+          push({ tipo: prCmp(cal.nc, 0) > 0 ? 'dose' : 'retirar', regra: 'calagem', atv: { id: String(exCal.a.id), nome: exCal.a.nome, op: exCal.a.op, g: exCal.a.g }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo,
             preco: q.p.preco, padrao: q.p.dose, sug: dose, efX: efDe(q), efOrig: q.orig, laudo: lau(L1), ent: ents(q.p.prod, prnt), conta: conta(cal, prnt, q.p.un, dose), dt: cu.dt(exCal.a),
             unico: (exCal.a.prods || []).length === 1, motivo: prCmp(cal.nc, 0) > 0 ? '' : 'V já atinge ' + V2 + ' %' }); }); }
       else {   /* plano sem calagem e NC > 0: incluir (R18) com o produto padrão de correção da fazenda */
@@ -210,13 +210,13 @@ function soloSugestoes(ctx, cu) {
             const porDAP = (pl.atividades || []).some(a => a.g && a.g.tipo === 'DAP'); const dap = porDAP && cu.plantio ? soloMaisDias(cu.plantio, -60) : '';
             const dt = xa ? xa.dt : (dap && dap >= hoje ? dap : (S0.viavel || hoje));
             const atv = { id: 'solo:' + L1.id + ':cal', nome: 'Calagem', op: 'Adubação a lanço', g: { tipo: 'DATA', dias: null, data: dt }, prods: [{ grupo: it.grupo, prod, dose, un: it.un, preco: Number(preco) }] };
-            push({ tipo: 'incluir', regra: 'calagem', atv: { id: atv.id, nome: atv.nome, op: atv.op }, i: 0, prod, un: it.un, grupo: it.grupo, preco: Number(preco), padrao: null, sug: dose,
+            push({ tipo: 'incluir', regra: 'calagem', atv: { id: atv.id, nome: atv.nome, op: atv.op, g: atv.g }, i: 0, prod, un: it.un, grupo: it.grupo, preco: Number(preco), padrao: null, sug: dose,
               efX: xa ? xa.dose : null, efOrig: xa ? 'análise' : '', substitui: xa && xa.k !== cu.id + '|' + atv.id + '|' + prod ? xa.k : '', laudo: lau(L1), ent: ents(prod, prnt), conta: conta(cal, prnt, it.un, dose).concat(
               [xa ? 'Data gravada na inclusão: ' + soloBr(dt) : (dap && dap >= hoje ? 'Data: DAP −60 = ' + soloBr(dt) : 'Data: DAP −60 ' + (dap ? '(' + soloBr(dap) + ') já passou' : 'não se aplica (plano sem DAP)') + '; vale a chegada viável de uma compra nova, ' + soloBr(dt))]),
               dt, incl: atv, unico: false }); } }
         else if (exCal && exCal.incl) { const xa = exCal.ac; const pr0 = (gar[xa.prod] || {}).prnt || prnt || 100; const cal = soloCalagem(ix.T.v, ix.V.v, V2, pr0); fezL1 = true;
           /* R22 (revisão A3): o laudo vigente dispensa a calagem incluída (NC = 0) → retirar a inclusão; aceitar desfaz o uso com o laudo no histórico */
-          push({ tipo: 'retirar', incl0: true, regra: 'calagem', atv: { id: String(xa.atv.id), nome: xa.atv.nome, op: xa.atv.op }, i: 0, prod: xa.prod, un: xa.un, grupo: xa.grupo, preco: xa.preco, padrao: null, sug: 0,
+          push({ tipo: 'retirar', incl0: true, regra: 'calagem', atv: { id: String(xa.atv.id), nome: xa.atv.nome, op: xa.atv.op, g: ((xa.incl || {}).g) }, i: 0, prod: xa.prod, un: xa.un, grupo: xa.grupo, preco: xa.preco, padrao: null, sug: 0,
             efX: xa.dose, efOrig: 'análise', laudo: lau(L1), ent: ents(xa.prod, pr0), conta: conta(cal, pr0, xa.un, 0).concat(['A Calagem incluída pelo ' + xa.laudo + ' (' + soloDoseTxt(xa.dose, xa.un) + ') deixa de ter base no ' + L1.id + ': retirar.']),
             dt: xa.dt, unico: true, motivo: 'V já atinge ' + V2 + ' %' }); } } }
     /* ---- potássio (R07), só Soja e Mehlich-1 ---- */
@@ -234,7 +234,7 @@ function soloSugestoes(ctx, cu) {
             kAtv.forEach(y => y.ps.forEach(q => { const k2o = gar[q.p.prod].k2o;
               /* parcelamento (revisão A4): o K₂O da regra se reparte entre as linhas de K na proporção do K₂O do padrão; com uma linha, ela leva tudo */
               const kL = nK > 1 && prCmp(sK, 0) > 0 ? prMulDiv(r.k2o, prMul(q.p.dose, k2o), sK) : r.k2o; const dose = soloR2(prMulDiv(kL, 100, k2o));
-              push({ tipo: prCmp(r.k2o, 0) > 0 ? 'dose' : 'retirar', regra: 'potássio', atv: { id: String(y.x.a.id), nome: y.x.a.nome, op: y.x.a.op }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo, preco: q.p.preco,
+              push({ tipo: prCmp(r.k2o, 0) > 0 ? 'dose' : 'retirar', regra: 'potássio', atv: { id: String(y.x.a.id), nome: y.x.a.nome, op: y.x.a.op, g: y.x.a.g }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo, preco: q.p.preco,
                 padrao: q.p.dose, sug: dose, efX: efDe(q), efOrig: q.orig, laudo: lau(L1), dt: cu.dt(y.x.a), unico: (y.x.a.prods || []).length === 1, motivo: prCmp(r.k2o, 0) > 0 ? '' : 'K ' + r.classe,
                 ent: ['K ' + prFmtT(km.v, 2) + ' mg/dm³ (' + L1.ext + ') → ' + r.classe, 'meta ' + prFmtT(cu.meta, 2) + ' ' + prUn(cu.cultura).prtv + ' = ' + cenNum(metaKg) + ' kg/ha (Planejar safra)', q.p.prod + ': ' + k2o + ' % de K₂O (cadastro de produtos)'],
                 conta: ['Classe de K: ' + r.classe + ' (baixo < 40 ≤ médio < 80 ≤ adequado < 120 ≤ alto, mg/dm³)', 'Meta ' + cenNum(metaKg) + ' kg/ha → linha até ' + cenNum(Number(r.ate)) + ' kg/ha → ' + r.k2o + ' kg/ha de K₂O']
@@ -254,18 +254,18 @@ function soloSugestoes(ctx, cu) {
       const conta = (un, dose) => ['Gatilho: Ca < ' + prFmtT(R.gesso.ca, 2) + ' cmolc/dm³ ou m > ' + R.gesso.m + ' % → indicada', 'NG = ' + g.k + ' × ' + prFmtT(argila, 1) + ' = ' + prFmtT(g.ng, 2) + ' kg/ha' + (un === 't' ? ' = ' + prFmt(dose, 2) + ' t/ha' : '')];
       const exG = SA.atvs.find(x => soloTipoAtv(x.a) === 'ges');
       if (exG && !exG.incl) exG.prods.forEach(q => { if (q.i < 0 || !/^Gesso/.test(q.p.prod)) return; const dose = soloR2(q.p.un === 't' ? prDiv(g.ng, 1000) : g.ng);
-        push({ tipo: 'dose', regra: 'gessagem', atv: { id: String(exG.a.id), nome: exG.a.nome, op: exG.a.op }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo, preco: q.p.preco, padrao: q.p.dose, sug: dose,
+        push({ tipo: 'dose', regra: 'gessagem', atv: { id: String(exG.a.id), nome: exG.a.nome, op: exG.a.op, g: exG.a.g }, i: q.i, prod: q.p.prod, un: q.p.un, grupo: q.p.grupo, preco: q.p.preco, padrao: q.p.dose, sug: dose,
           efX: efDe(q), efOrig: q.orig, laudo: lau(L2), ent: ents, conta: conta(q.p.un, dose), dt: cu.dt(exG.a), unico: (exG.a.prods || []).length === 1 }); });
       else { const prod = ((S0.corr || {})[cu.faz] || {}).ges; const it = prod ? (S0.itens || {})[prod] : null; const preco = prod ? (S0.preco || {})[prod] : undefined;
         if (!prod || !it) info.push(L2.id + ': gessagem indicada, mas a fazenda não tem produto padrão de gesso; nada é incluído.');
         else if (preco === undefined || preco === '') info.push(L2.id + ': ' + prod + ' sem preço de referência; nada é incluído.');
         else { const xa = exG && exG.incl ? exG.ac : null; const dose = soloR2(it.un === 't' ? prDiv(g.ng, 1000) : g.ng); const dt = xa ? xa.dt : (S0.viavel || hoje);
           const atv = { id: 'solo:' + L2.id + ':ges', nome: 'Gessagem', op: 'Adubação a lanço', g: { tipo: 'DATA', dias: null, data: dt }, prods: [{ grupo: it.grupo, prod, dose, un: it.un, preco: Number(preco) }] };
-          push({ tipo: 'incluir', regra: 'gessagem', atv: { id: atv.id, nome: atv.nome, op: atv.op }, i: 0, prod, un: it.un, grupo: it.grupo, preco: Number(preco), padrao: null, sug: dose, efX: xa ? xa.dose : null,
+          push({ tipo: 'incluir', regra: 'gessagem', atv: { id: atv.id, nome: atv.nome, op: atv.op, g: atv.g }, i: 0, prod, un: it.un, grupo: it.grupo, preco: Number(preco), padrao: null, sug: dose, efX: xa ? xa.dose : null,
             efOrig: xa ? 'análise' : '', substitui: xa && xa.k !== cu.id + '|' + atv.id + '|' + prod ? xa.k : '', laudo: lau(L2), ent: ents, conta: conta(it.un, dose), dt, incl: atv, unico: false }); } } }
     else if (!g.gat && aqui) { const exG = SA.atvs.find(x => soloTipoAtv(x.a) === 'ges');
       if (exG && exG.incl) { const xa = exG.ac;   /* R22 (revisão A3): o 20–40 cm vigente não indica gessagem → retirar a gessagem incluída */
-        push({ tipo: 'retirar', incl0: true, regra: 'gessagem', atv: { id: String(xa.atv.id), nome: xa.atv.nome, op: xa.atv.op }, i: 0, prod: xa.prod, un: xa.un, grupo: xa.grupo, preco: xa.preco, padrao: null, sug: 0,
+        push({ tipo: 'retirar', incl0: true, regra: 'gessagem', atv: { id: String(xa.atv.id), nome: xa.atv.nome, op: xa.atv.op, g: ((xa.incl || {}).g) }, i: 0, prod: xa.prod, un: xa.un, grupo: xa.grupo, preco: xa.preco, padrao: null, sug: 0,
           efX: xa.dose, efOrig: 'análise', laudo: lau(L2), ent: ['Ca ' + (ca === null ? 'não calculável' : prFmt(ca, 2)) + ' cmolc/dm³ · m ' + soloF(ix2.m.v, 2) + ' % (20–40 cm)'],
           conta: ['Gatilho: Ca < ' + prFmtT(R.gesso.ca, 2) + ' cmolc/dm³ ou m > ' + R.gesso.m + ' % → não indicada no ' + L2.id, 'A Gessagem incluída pelo ' + xa.laudo + ' (' + soloDoseTxt(xa.dose, xa.un) + ') deixa de ter base: retirar.'],
           dt: xa.dt, unico: true, motivo: 'gessagem não indicada' }); } } }
@@ -275,7 +275,7 @@ function soloSugestoes(ctx, cu) {
     const at = (pl.atividades || []).find(q => String(q.id) === String(a.atv.id)); const i = at ? (at.prods || []).findIndex(p => p.prod === a.prod) : -1; if (i < 0) return;   /* órfão: fica com o aviso da R16 */
     if ((ctx.adj || {})[String(at.id) + '|' + i] !== undefined) return;   /* ajuste manual da sessão vale por cima (R14) */
     const p = at.prods[i]; const pq = info.find(t => t.indexOf(Lv.id) >= 0);
-    push({ tipo: 'dose', desf: true, regra: a.regra, atv: { id: String(at.id), nome: at.nome, op: at.op }, i, prod: a.prod, un: p.un, grupo: p.grupo, preco: p.preco, padrao: p.dose, sug: p.dose,
+    push({ tipo: 'dose', desf: true, regra: a.regra, atv: { id: String(at.id), nome: at.nome, op: at.op, g: at.g }, i, prod: a.prod, un: p.un, grupo: p.grupo, preco: p.preco, padrao: p.dose, sug: p.dose,
       efX: a.dose, efOrig: 'análise', laudo: lau(Lv), dt: cu.dt(at), unico: (at.prods || []).length === 1, motivo: 'padrão do plano',
       ent: ['uso da análise: ' + (a.dose === '-' ? 'retirado' : soloDoseTxt(a.dose, a.un)) + ' pelo ' + a.laudo + ', que deixou de ser o laudo vigente (vale o ' + Lv.id + ')'],
       conta: [pq || (Lv.id + ': nenhuma conta para ' + a.prod + '.'), 'Sem conta no laudo vigente, vale a dose do plano: ' + soloDoseTxt(p.dose, p.un) + '.'] }); });

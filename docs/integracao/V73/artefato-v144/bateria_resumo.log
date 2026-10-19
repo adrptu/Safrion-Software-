@@ -1,0 +1,20 @@
+BUILD_OK
+pg_cap_motivo_unit_test rc=0 RESULTADO: OK 10/10
+man_backlog_unit_test rc=0 RESULTADO: 23/23 ok
+mapa_colheita_unid_unit_test rc=0 RESULTADO: OK 6/6
+capacidade_unit rc=0 RESULTADO: 101 OK · 0 FALHA
+mapa_rotulo_corte rc=0 RESULTADO: 5/5 ok
+mapa_rotulo_real rc=0 RESULTADO: 6/6 ok
+alvo_fechar rc=0 RESULTADO: 6/6 ok
+cf06_orfa rc=0 RESULTADO: 6/6 ok
+ma_semanas rc=0 RESULTADO: 5/5 ok
+ma_backlog rc=0 RESULTADO: 5/5 ok
+painel03 rc=0 RESULTADO: 54 ok · 0 falhas
+config rc=0 RESULTADO: OK 90/90
+ds rc=0 RESULTADO: OK 72/72
+mapa_mux_f1 rc=0 RESULTADO: 43 ok · 0 falha(s)
+mapa_mux_f2 rc=0 RESULTADO: 29 ok · 0 falha(s)
+colheita_mapa rc=0 RESULTADO: 7 ok · 0 falhas
+paginas_scan rc=0 RESULTADO: 5 ok · 0 falhas (147 páginas)
+
+[exited with code 0]
