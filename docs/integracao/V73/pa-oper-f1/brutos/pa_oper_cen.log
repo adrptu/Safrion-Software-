@@ -1,0 +1,9 @@
+OK    P4a · OS-0421 (plano v6, 100 L/ha, PJ 3.000 L): 6 cargas, 5 de 30 ha + 1 de 10 ha, 15 L e 5 L de Fungicida A, 16.000 L de calda
+OK    P4b · a instrução traz o retrato do tanque (3.000 L) e a versão do plano
+OK    P19a · tanque do cadastro mudado para 2.500 L: a OS-0421 emitida continua com 6 cargas de 3.000 L
+OK    P4c · retrato de 2.500 L: 7 cargas, 6 de 25 ha + 1 de 10 ha, 12,5 L e 5 L
+OK    P19b · sem retrato (O.S. de antes da F1), o tanque vem do cadastro (2.500 L)
+OK    P4d · exemplo do 41.5: 500 + 500 + 200 L, 5 + 5 + 2 ha, 10 + 10 + 4 L (a última não é cheia)
+OK    PROP · 1.000 casos: Σ calda = área × volume; nenhuma carga passa do tanque nem fica vazia; Σ produto = dose × área (centésimos)
+
+7/7 OK

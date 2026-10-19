@@ -1,5 +1,5 @@
 // PA-OPER F1 · serviço único das contas por operação (docs/integracao/V71/PA-OPER.md, decisões 2, 3, 5, 8 e 9).
-// Plano, O.S., MB-02det e ficha chamam estas funções; nenhuma outra tela repete a fórmula (ENG-011).
+// Plano, O.S., MB-02det e ficha chamam estas funções; nenhuma outra tela repete a fórmula (ENG-011). As cargas ficam no cenPreparoOrdem.
 // Valores normativos (bula, curva de ponta) chegam como dado, com origem; o código não traz nenhum padrão.
 'use strict';
 
@@ -59,23 +59,8 @@ function opAlteracaoParam(secao, params0, params1, campo, rotulo, un) {
   return `${secao.op} · ${rotulo} ${fmt(a)} → ${fmt(b)} ${un} em ${herdeiras} atividade${herdeiras === 1 ? '' : 's'}`;
 }
 
-// Cargas (41.5): calda total = área × volume; cada carga cheia usa o tanque útil; a última leva o resto.
-// Produto por carga = dose/ha × área da carga. Arredondar só na apresentação.
+// Cargas (41.5): o serviço é o cenPreparoOrdem (cenario.js, EX-38), em decimal; este arquivo não repete a conta (ENG-011).
 const OP_EPS = 1e-9;
-function opCargas(areaHa, volumeLHa, tanqueL, produtos) {
-  const area = Number(areaHa), vol = Number(volumeLHa), tq = Number(tanqueL);
-  if (!(area > 0)) return {estado: 'sem área', cargas: []};
-  if (!(vol > 0)) return {estado: 'sem volume de calda', cargas: []};
-  if (!(tq > 0)) return {estado: 'sem tanque útil', cargas: []};
-  const haCheia = tq / vol, cheias = Math.floor(area / haCheia + OP_EPS);
-  let resto = area - cheias * haCheia; if (Math.abs(resto) < OP_EPS * Math.max(1, area)) resto = 0;
-  const areas = Array(cheias).fill(haCheia).concat(resto > 0 ? [resto] : []);
-  const ps = (produtos || []).filter(p => Number(p.doseHa) > 0);
-  const cargas = areas.map((a, i) => ({n: i + 1, areaHa: a, caldaL: a * vol, cheia: i < cheias,
-    produtos: ps.map(p => ({id: p.id, nome: p.nome, un: p.un, qtd: Number(p.doseHa) * a}))}));
-  const total = {areaHa: area, caldaL: area * vol, produtos: ps.map(p => ({id: p.id, nome: p.nome, un: p.un, qtd: Number(p.doseHa) * area}))};
-  return {estado: 'ok', haPorCarga: haCheia, cargas, total, entradas: {areaHa: area, volumeLHa: vol, tanqueL: tq}};
-}
 
 // Vazão por bico (EX-38 R10): alvo = volume × velocidade × espaçamento ÷ 600 (L/min). Sem velocidade ou espaçamento: desconhecido.
 function opVazaoAlvo(volumeLHa, velKmh, espM) {
@@ -194,4 +179,4 @@ function opNum(v, casas) {
   return Number(v).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: c});
 }
 
-if (typeof module !== 'undefined') module.exports = {OP_FAMILIAS, opFamilia, opChave, opSecoes, opParam, opAlteracaoParam, opCargas, opVazaoAlvo, opVazaoDisp, opVazao, opDoseHa, opBula, opPendencias, opEstado, opPublicar, opNum};
+if (typeof module !== 'undefined') module.exports = {OP_FAMILIAS, opFamilia, opChave, opSecoes, opParam, opAlteracaoParam, opVazaoAlvo, opVazaoDisp, opVazao, opDoseHa, opBula, opPendencias, opEstado, opPublicar, opNum};

@@ -56,9 +56,14 @@ def seed():
                                ap=[dict(d=a['d'], dia=a['dia'], ha=a['ha'], st=a['st'], sinc=True, origem='web') for a in o.get('ap', [])],
                                reservado=o['id'] in REQ_DA_OS and o['etapa'] != 'A liberar')
     # EX-38: instrução sintética validada no contrato 6218879317; não é recomendação agronômica.
+    import dados_cad as _DC0
+    _TANQUE_EMISSAO = next(x['tanque'] for x in _DC0.ATIVOS if x['id'] == 'a05')
     for oid in ('OS-0421', 'OS-0424'):
         if oid in ordens:
-            ordens[oid]['instrucao'] = dict(vazao=100, origem='instrução da O.S. vigente (demonstração)', versao=ordens[oid]['versao'])
+            # PA-OPER F1 (P19): a instrução guarda o retrato do conjunto na emissão (tanque útil do PJ = a05, dados_cad); editar o cadastro
+            # depois não muda a O.S. emitida; só "Trocar conjunto" refaz o retrato
+            ordens[oid]['instrucao'] = dict(vazao=100, origem='instrução da O.S. vigente (demonstração)', versao=ordens[oid]['versao'],
+                                            tanque=_TANQUE_EMISSAO, plano='SOJA-AT', planoVer=6)
     # reservas vigentes (liberadas e ainda não entregues): REQ-039 da OS-0424 e REQ-040 da OS-0425
     for oid, rid in (('OS-0424', 'REQ-039'), ('OS-0425', 'REQ-040')):
         o = ordens.get(oid)
@@ -126,7 +131,8 @@ def js_prefixo():
     # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
     return ('const CEN_PREP_ATIVOS = ' + json.dumps(capacidades, ensure_ascii=False) + ';\n' + 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
             + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'datas_atividade.js'), encoding='utf-8').read() + '\n' + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n'
-            + _AL.js())   # alocação vigente (semana do PCP + trocas de recurso das O.S.) em toda página do estado
+            + _AL.js()   # alocação vigente (semana do PCP + trocas de recurso das O.S.) em toda página do estado
+            + '\n' + open(os.path.join(HERE, 'operacoes.js'), encoding='utf-8').read())   # PA-OPER F1: serviço único das operações (vazão, bula, estado, publicação)
 
 
 def perfis_js():

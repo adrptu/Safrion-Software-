@@ -1,4 +1,4 @@
-// PA-OPER F1 · regras puras de operacoes.js com os oráculos de docs/integracao/V71/PA-OPER.md (P1, P3, P4, P7, P12, P18 e a propriedade das cargas).
+// PA-OPER F1 · regras puras de operacoes.js com os oráculos de docs/integracao/V71/PA-OPER.md (P1, P3, P7, P12 e P18; as cargas do P4 ficam em pa_oper_cen_test.py, no serviço da EX-38).
 // Valores sintéticos ou de demonstração, como aritmética de teste. Uso: node pa_oper_unit.js [caminho do operacoes.js]   (sai 0 com tudo OK)
 'use strict';
 const path = require('path');
@@ -29,20 +29,6 @@ ok('P3a', 'herdeiras mostram 120 "da operação"; a própria mantém 150',
 ok('P3b', 'alteração do rascunho em texto', O.opAlteracaoParam(pul, p100, p120, 'calda', 'volume de calda', 'L/ha') === 'Pulverização · volume de calda 100 → 120 L/ha em 3 atividades',
   O.opAlteracaoParam(pul, p100, p120, 'calda', 'volume de calda', 'L/ha'));
 ok('P3c', 'sem valor na operação nem próprio: pendente, nenhum padrão', O.opParam({}, {}, 'calda').valor === null && O.opParam({}, {}, 'calda').origem === 'pendente');
-
-// ---- P4 · cargas (EX-38 R1)
-let c = O.opCargas(160, 100, 3000, [{id: 'fa', nome: 'Fungicida A', un: 'L', doseHa: 0.5}]);
-ok('P4a', 'OS-0421 com tanque de 3.000 L: 6 cargas (5 de 30 ha + 1 de 10 ha), 15 L e 5 L, total 80 L e 16.000 L',
-  c.cargas.length === 6 && c.cargas.slice(0, 5).every(x => perto(x.areaHa, 30) && perto(x.produtos[0].qtd, 15)) && perto(c.cargas[5].areaHa, 10) && perto(c.cargas[5].produtos[0].qtd, 5)
-  && perto(c.total.produtos[0].qtd, 80) && perto(c.total.caldaL, 16000), c.cargas.map(x => [x.areaHa, x.produtos[0].qtd]));
-c = O.opCargas(160, 100, 2500, [{id: 'fa', nome: 'Fungicida A', un: 'L', doseHa: 0.5}]);
-ok('P4b', 'tanque de 2.500 L: 7 cargas (6 de 25 ha + 1 de 10 ha), 12,5 L e 5 L',
-  c.cargas.length === 7 && c.cargas.slice(0, 6).every(x => perto(x.areaHa, 25) && perto(x.produtos[0].qtd, 12.5)) && perto(c.cargas[6].areaHa, 10) && perto(c.cargas[6].produtos[0].qtd, 5), c.cargas.map(x => [x.areaHa, x.produtos[0].qtd]));
-c = O.opCargas(12, 100, 500, [{id: 'p', nome: 'P', un: 'L', doseHa: 2}]);
-ok('P4c', 'unidade 41.5: 500 + 500 + 200 L, 5 + 5 + 2 ha, 10 + 10 + 4 L, total 24 L (mutante "última cheia" daria 30 L)',
-  c.cargas.map(x => x.caldaL).join() === '500,500,200' && c.cargas.map(x => x.areaHa).join() === '5,5,2' && c.cargas.map(x => x.produtos[0].qtd).join() === '10,10,4' && perto(c.total.produtos[0].qtd, 24), c.cargas);
-ok('P4d', 'sem volume de calda: não gera cargas', O.opCargas(160, null, 3000, []).estado === 'sem volume de calda' && O.opCargas(160, null, 3000, []).cargas.length === 0);
-ok('P4e', 'área exata múltipla do tanque: sem carga vazia', O.opCargas(90, 100, 3000, []).cargas.length === 3);
 
 // ---- P18 · vazão alvo × disponível
 ok('P18a', '100 L/ha, 0,5 m, 6 km/h → 0,5 L/min; 12 km/h → 1,0 L/min', perto(O.opVazaoAlvo(100, 6, 0.5), 0.5) && perto(O.opVazaoAlvo(100, 12, 0.5), 1.0));
@@ -104,17 +90,5 @@ ok('P12d', 'Caio submete: v7 em revisão, v6 segue vigente', r.v === 7 && r.plan
 const r2 = O.opPublicar(r.plano, {tipo: 'publicar', podePublicar: true, por: 'Ana', chave: 'k4'});
 ok('P12e', 'Ana publica a v7 em revisão (não pula para v8)', r2.v === 7 && r2.plano.versoes.filter(x => x.v === 7).length === 1 && r2.plano.versoes.find(x => x.v === 7).estado === 'publicada');
 ok('P12f', 'impedimento recusa publicar', !!O.opPublicar(pl, {tipo: 'publicar', podePublicar: true, impedimentos: [{motivo: 'x'}], chave: 'k5'}).erro);
-
-// ---- propriedade: 1.000 casos com semente fixa
-let semente = 20261019; const rnd = () => (semente = (semente * 1103515245 + 12345) % 2147483648) / 2147483648;
-let falhas = 0;
-for (let i = 0; i < 1000; i++) {
-  const area = Math.round((0.5 + rnd() * 400) * 100) / 100, vol = [50, 80, 100, 120, 150, 200][Math.floor(rnd() * 6)], tq = [500, 600, 2000, 2500, 3000][Math.floor(rnd() * 5)];
-  const dose = Math.round(rnd() * 300) / 100;
-  const k = O.opCargas(area, vol, tq, [{id: 'p', doseHa: dose || 0.01}]);
-  const soma = k.cargas.reduce((a, x) => a + x.caldaL, 0), prod = k.cargas.reduce((a, x) => a + x.produtos[0].qtd, 0);
-  if (!perto(soma, area * vol) || !perto(prod, (dose || 0.01) * area) || k.cargas.some(x => x.caldaL > tq + 1e-6) || k.cargas.some(x => !(x.areaHa > 0))) falhas++;
-}
-ok('PROP', '1.000 casos: Σ calda = área × volume, Σ produto = dose × área, nenhuma carga passa do tanque nem fica vazia', falhas === 0, falhas);
 
 const n = R.filter(Boolean).length; console.log(`\n${n}/${R.length} OK`); process.exit(n === R.length ? 0 : 1);

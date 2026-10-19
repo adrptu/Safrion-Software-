@@ -96,13 +96,15 @@ function cenPreparoOrdem(c, ordem) {
   if (!o) return fail('Ordem indisponível · voltar às ordens');
   const rec = typeof alDaOrdem === 'function' ? alDaOrdem(c,o.id).filter(r=>r.classe==='Pulverizador') : [];
   if (rec.length !== 1) return fail(rec.length ? 'Mais de um pulverizador · conferir conjunto' : 'Sem conjunto · alocar pulverizador na O.S.');
-  const aid = typeof AL0 !== 'undefined' && AL0.ativo[rec[0].r];
-  const ativo = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid];
-  const tanque = ativo && ativo.tanque;
-  if (!(typeof tanque==='number' && Number.isFinite(tanque) && tanque>0)) return fail('Tanque não informado · conferir implemento');
   // Cenário salvo antes deste acréscimo: usar a semente apenas se a versão ainda for a mesma.
   const base = typeof CEN0 !== 'undefined' && CEN0.ordens[o.id];
   const instr = Object.prototype.hasOwnProperty.call(o,'instrucao') ? o.instrucao : (base && base.versao===o.versao ? base.instrucao : null);
+  // PA-OPER F1 (P19): vale o retrato do tanque gravado na emissão da instrução; sem retrato (O.S. antiga), o tanque do cadastro
+  const aid = typeof AL0 !== 'undefined' && AL0.ativo[rec[0].r];
+  const ativo = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid];
+  const retrato = instr && instr.versao === o.versao && typeof instr.tanque === 'number' && Number.isFinite(instr.tanque) && instr.tanque > 0;
+  const tanque = retrato ? instr.tanque : (ativo && ativo.tanque);
+  if (!(typeof tanque==='number' && Number.isFinite(tanque) && tanque>0)) return fail('Tanque não informado · conferir implemento');
   if (!instr || instr.versao !== o.versao || !(typeof instr.vazao==='number' && Number.isFinite(instr.vazao) && instr.vazao>0))
     return fail('Vazão não informada · conferir instrução da versão vigente');
   const vazao=instr.vazao, saldo=o.saldo;
