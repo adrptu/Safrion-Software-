@@ -620,9 +620,18 @@ function osIniErro(o,r){ const f=cenIniFalta(o,r); if(!f) return null;   // regr
   return {acao:'iniciar',t:'Iniciar bloqueado: '+f.t,q:f.q,h:L[0],hl:L[1]}; }
 function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw new Error(id+' não está liberada.');
   { const cb=carBloqColheita(c,o,'iniciar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
-  const e=osIniErro(o,o.req&&c.reqs[o.req]); if(e) throw new Error(e.t);
+  const r=o.req&&c.reqs[o.req]; const e=osIniErro(o,r); if(e) throw new Error(e.t);
   o.etapa='Em execução';
-  return {msg:id+' em execução. Registre o apontamento de cada turno.'}; }
+  /* LEVE-1 (proprietário 19/10): sem o bloco "Confirmar início", o recibo diz com quem estão os insumos (o que a confirmação mostrava) */
+  const com=r?r.itens.filter(i=>(o.ins||[]).some(x=>x.p===i.prod)&&i.custodia>1e-6).map(i=>i.quem||o.resp).filter((q,k,a)=>q&&a.indexOf(q)===k):[];
+  return {msg:id+' em execução'+(com.length?': insumos com '+com.join(', ')+', confirmados no app':'')+'. Registre o apontamento de cada turno.'}; }
+// LEVE-1 (proprietário 19/10: "Não quero um sistema travado e burocrático, quero leve e fluido"): Iniciar (CMD-07) e Enviar para conferência
+// (CMD-08) gravam no clique, sem o 2º bloco "Confirmar …"; o comando valida como antes (insumos com o operador, carência, saldo zero) e o aviso
+// é o recibo. Dano avaliado: nenhum (nada é reservado nem baixado; o envio grava quem e quando). Aprovar, Liberar e Encerrar mantêm a confirmação
+// (ato agronômico, reserva no Estoque e encerramento sem volta). Toque duplo: a 2ª chamada acha a ordem já em outra fase e não faz nada de novo.
+const OS_DIRETO=['iniciar','conferencia'];
+function osDireto(id,fn,etapa){ return c=>{ const o=c.ordens[id]; if(o&&o.etapa!==etapa) return {msg:id+' já está em '+o.etapa+': nada foi feito de novo.'};
+  return fn==='iniciar'?osc_iniciar(c,id):osc_conferencia(c,id,g2perfil()); }; }
 // apontamento pela web (O.S. e Mapa): o mesmo comando do app (cenApontar); cons/est vêm do formulário (osApIns), chave do formulário aberto
 function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha,cons,est,chave,origem:'web'}); const o=c.ordens[id]; const ap=R.ap;
   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
@@ -936,12 +945,15 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_pst='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;'+(b?(bam?'background:#FFF3D6;border:1px solid #F0D9A0;':'background:#FDE8E6;border:1px solid #F4C7C1;'):(P.btn?'background:#E4F3E9;border:1px solid #BFE0CB;':'background:#F4F6F3;border:1px solid #E4E9E5;'));
   const pa=(st.pa&&st.pa.id===o.id)?st.pa:null;
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
-  v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
+  v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; }
+    if(OS_DIRETO.indexOf(P.fn)>=0){ osRun(self,osDireto(o.id,P.fn,o.etapa),{pa:null,pae:null},(e)=>self.setState({pae:{id:o.id,err:e}})); return; }   /* LEVE-1: grava no clique */
+    self.setState({pa:{id:o.id,fn:P.fn},pae:null}); };
+  v.pan_ierr=(st.pae&&st.pae.id===o.id)?st.pae.err:''; v.pan_hasIerr=!!v.pan_ierr;
   // confirmação e formulários de decisão só com o papel: aberto por outro perfil (troca no seletor ou em outra aba), não aparece (achado 1)
   const DSP=g2alc('AL-05').papeis, agr=g2papel(PF,DSP), gest=g2papel(PF,g2alc('AL-04').papeis), AGR=g2papel(PF,g2alc('AL-02').papeis);
   const LP=g2alc('AL-02').papeis.concat(OS_LIB().filter(x=>g2alc('AL-02').papeis.indexOf(x)<0));   /* dispensa (CMD-47; AL-05); cancelar (CMD-46; AL-04); ajustar (AL-02): da alçada vigente */
   const paOk=!!pa&&({ajustar:AGR,dispensar:agr,cancelar:gest,aprovar:AGR}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar');
-  v.pan_conf=paOk&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
+  v.pan_conf=paOk&&['liberar','aprovar','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
   v.pan_canf=paOk&&pa.fn==='cancelar'; v.pan_disf=paOk&&pa.fn==='dispensar';
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
@@ -1037,11 +1049,10 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,LIB,g2perfil()),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
   v.pan_ct={aprovar:'Aprovar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+g2ator(PF,g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera e reserva os insumos.'+osUsoAtencao(cenC,o.id),
-    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF,o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
-    conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
-  v.pan_cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
+    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF,o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
+  v.pan_cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});
-  v.pan_yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
+  v.pan_yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
     if(F) osRun(self,F,{pa:null}); };
   v.pan_ad=pa&&pa.d||''; v.pan_aha=pa&&pa.ha||''; v.pan_aerr=pa&&pa.err||''; v.pan_hasAerr=!!(pa&&pa.err);
   v.pan_asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'');
@@ -1779,6 +1790,7 @@ def _painel():
       f'<sc-if value="{H("pan_hasBtnOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{BTN_ST(True,True)}">{H("pan_pbtnOff")}</button></sc-if>'
       f'<sc-if value="{H("pan_hasAjOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{_MINI}">{H("pan_ajbtnOff")}</button></sc-if>'
       f'<sc-if value="{H("pan_hasOffWhy")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED}; flex-basis: 100%;">{H("pan_offWhy")}</span></sc-if>'
+      f'<sc-if value="{H("pan_hasIerr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED}; flex-basis: 100%;">{H("pan_ierr")}</span></sc-if>'   # LEVE-1: recusa do comando direto
       f'<span style="flex-grow: 1;"></span>'
       f'<sc-if value="{H("pan_hasDisp")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_disgo")}" title="Dispensar parte do saldo sem executar (o realizado fica preservado)" style="{_LNK}">Dispensar saldo</button></sc-if>'
       f'<sc-if value="{H("pan_hasDispQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">{H("pan_dispQ")}</span></sc-if>'

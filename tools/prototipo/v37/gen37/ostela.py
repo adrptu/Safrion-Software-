@@ -2,6 +2,7 @@
 # 01/10/2026 (decisões do proprietário):
 #  - "Ajustar antes de liberar" também tira ("Tirar"/"Desfazer") e inclui produtos (#aj_inc + datalist #aj_prods + "Incluir"),
 #    além de dose e área; "Salvar e liberar" segue igual. O teste confere o formulário e a ordem liberada com o ajuste.
+# 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o oráculo passa a ser o recibo (aviso) e a fase.
 #  - ordens só de água (OS-0419, OS-0422, OS-0423) não são O.S. agrícola: saem da página O.S.; as regras da água que este
 #    teste conferia no painel da O.S. passam a ser conferidas onde vivem agora (IR-03 Ordens de irrigação e IR-03det = OS-0419).
 import sys, os, time, subprocess, json
@@ -79,9 +80,8 @@ try:
         and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"), t[:500])
     J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>X.cenConfirmarRecebimento(c,rq)); "+ST+";})()"); time.sleep(.4)
     chk('próximo passo agora é Iniciar execução', J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"))
-    btn('Iniciar execução'); t=pan()
-    chk('confirmação do início diz que os insumos estão com Marcos, confirmados no app', 'insumos com Marcos, confirmados no app' in t, t[-300:])
-    btn('Confirmar início')
+    btn('Iniciar execução'); t=pan(); tt=toast()
+    chk('Iniciar grava no clique (LEVE-1): o recibo diz que os insumos estão com Marcos, confirmados no app; sem bloco "Confirmar início"', 'OS-0430 em execução: insumos com Marcos, confirmados no app' in tt and not temb('Confirmar início'), (tt, t[-300:]))
     chk('em execução', 'Em execução' in fase_lista('OS-0430'), fase_lista('OS-0430'))
     btn('Registrar apontamento'); t=pan()
     chk('formulário de apontamento com saldo', 'Saldo da ordem: 160 ha' in t)
@@ -94,8 +94,8 @@ try:
     chk('coluna Usado atualiza (120 L)', '120 L' in t)
     btn('Registrar apontamento'); setin('Data do turno','2026-09-27'); setin('Área feita em hectares','100'); btn('Salvar apontamento')   # CTL-2 · A: outro dia (o mesmo dia com outra chave fica em conferência de duplicidade)
     chk('saldo zero muda o botão para Enviar para conferência', J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Enviar para conferência')"))
-    btn('Enviar para conferência'); btn('Confirmar envio')
-    chk('em conferência', 'Em conferência' in fase_lista('OS-0430'))
+    btn('Enviar para conferência'); tt=toast()
+    chk('em conferência no clique (LEVE-1), com recibo de quem enviou e sem "Confirmar envio"', 'Em conferência' in fase_lista('OS-0430') and 'OS-0430 enviada para conferência por' in tt and not temb('Confirmar envio'), (tt, fase_lista('OS-0430')))
     btn('Conferir e encerrar'); btn('Confirmar encerramento'); t=pan()
     chk('encerrada, sem botão de ação', 'Encerradas' in fase_lista('OS-0430') and 'somente consulta' in t and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>/Liberar|Ajustar|Iniciar|Registrar|Enviar|Conferir/.test(b.innerText))"))
     fechar()
