@@ -254,10 +254,11 @@ try:
             ir('BEN.dc.html')
         t.chk('BEN abre sem erro de JS', not t.errs(), t.errs())
         if PUB: t.chk('(1) BEN sem a faixa de telas', (J(FAIXA) or []) == [], J(FAIXA))
-        clk('Kanban', '[aria-label="Visão das ordens"]', w=.7)
+        # VIS-08 (18/10): o seletor é o da VISOES-1, só ícone; a visão vem pelo data-visao, não pelo texto
+        J("document.querySelector('[data-visoes-local=bn] [data-visao=kanban]').click()"); time.sleep(.7)
         kb = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > *')].filter(VIS).map(x=>N(x.innerText).slice(0,40))")
         t.chk('Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)', len(kb or []) == 5 and kb[0].lower().startswith('a liberar 1') and kb[2].lower().startswith('em execução 1') and kb[4].lower().startswith('encerradas 0'), kb)
-        J("window.__cl=1"); clk('Lista')   # a medida conta o toque da faixa e deixa de fora o Kanban (só conferência do teste)
+        J("window.__cl=1"); J("document.querySelector('[data-visoes-local=bn] [data-visao=lista]').click()"); time.sleep(.45)   # a medida conta o toque da faixa e deixa de fora o Kanban (só conferência do teste)
         # rodada 1 (S4, BOT-01/BOT-08): a primária do cabeçalho só abria o painel (navegação) e repetia o verde do painel: sai do cabeçalho
         t.chk('sem verde no cabeçalho do Beneficiamento (navegar não é primária; a decisão fica no painel da ordem)', J("PRIM()") == [], J("PRIM()"))
         shot('lista')

@@ -257,14 +257,15 @@ def cd01():
              dict(k='nt',l='Talhões',t='num',a='r',ajuda='Talhões ativos da fazenda; os inativos não contam.'),dict(k='sis',l='Sistema',w=130),
              dict(k='calc',l='Polígono',t='num',a='r',un='ha',d=1),dict(k='difp',l='Diferença',t='num',a='r',un='%',d=1),
              dict(k='parc',l='Parcelas na '+SAF_ATUAL['nome'].lower(),t='num',a='r')],
-        grupos,gid='g_tal',tree=True,search=True,total=False,qf=QF_CAD,
-        tools=seg('cdv',['Lista','Mapa'],'Visualização da lista'),   # ferramenta da tela, à direita da barra (TAB-01)
+        grupos,gid='g_tal',tree=True,search=True,total=False,qf=QF_CAD,cartoes='externo',   # VIS-08: Cartões entra no seletor de visões
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',sub=SUB_TAL,fields=campos_tal(list(nome.values())+[NOVA_FAZ])))
     acoes_form('g_tal'); acoes_form('g_faz')
-    # Mapa: a mesma alternância no mesmo lugar da barra; o mapa ocupa a área da lista (classe rola do motor: estica e rola)
-    mapa=(barra(seg('cdm',['Santa Rita','Lagoa Grande'],'Fazenda do mapa'),seg('cdv',['Lista','Mapa'],'Visualização da lista'))
+    # Mapa: o mapa ocupa a área da lista (classe rola do motor: estica e rola). VIS-08 (proprietário, 18/10/2026: "o modo de visão em mapa ...
+    # tem que ser pelo ícone igual os demais"): Tabela | Cartões | Mapa no seletor da VISOES-1 (visoes.REGISTRO['tal']), acima das visões
+    mapa=(barra(seg('cdm',['Santa Rita','Lagoa Grande'],'Fazenda do mapa'))
           + f'<div class="rola" style="padding: 4px 4px 0;">'+se('cd_mapa_sr',_mapa(430),True)+se('cd_mapa_lg',_mapa_lg())+'</div>')
-    p0=se('cd_lista',gt,True)+se('cd_mapa',mapa)
+    bar,panes=E.visoes('g_tal','tal',{'lista':gt,'cartoes':'lista','mapa':mapa},rotulo='Visão dos talhões')
+    p0=f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;"><div style="display: flex; justify-content: flex-end;">{bar}</div>{panes}</div>'
     # restrição ambiental e recursos hídricos da fazenda (vieram do KML): consulta com a origem; não viram talhão
     tot={g:a for g,t,a,tt in DC.LG_AMBIENTAL if tt}
     amb_rows=[R(f'am{i}',dict(tema=t,faz='Lagoa Grande',tipo=g,area=a,total='Sim' if tt else '',car=DC.LG_PERIMETROS[0]['car']))
@@ -406,7 +407,7 @@ function PREVALS(self,v){ cadIni(self); cadActsIni(self); const fz=RW(self,'g_fa
   MAPA_LG.forEach(id=>{ const r0=g2find(tr,id); const V=r0&&r0.v.faz===nlg?r0.v:null;
     const cor=!V?['#E9EEE6','#8A968E']:(V.sit==='Inativo'?['#C9CFCB','#5B6660']:(isnum(V.calc)?['#8FD67F','#1E7A4C']:(circ(V)?['#CFE3C2','#4F7A55']:['#E9EEE6','#8A968E'])));
     v['mf_'+id]=cor[0]; v['ms_'+id]=cor[1]; });
-  const vis=self.state.cd_vis||0; v.cd_lista=vis===0; v.cd_mapa=vis===1; cadSeg(v,'cdv',2,vis,i=>self.setState({cd_vis:i})); }
+}
 function retoma(self,nome){ const s=self._stash; if(!s) return; self._stash=null; const d=Object.assign({},s.draft); if(nome) d.faz=nome; const er=Object.assign({},s.errs||{}); delete er.faz;
   g2set(self,'g_tal',{fm:Object.assign({},s,{draft:d,errs:er,warn:false})}); }
 function fazErros(self,d,fm){ const e={}; const fz=RW(self,'g_faz'); const antes=fm.rid?(g2find(fz,fm.rid)||{v:{}}).v.nome:null; self._fazOld=antes;

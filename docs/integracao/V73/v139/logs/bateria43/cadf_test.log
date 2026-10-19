@@ -1,0 +1,21 @@
+OK  1 CD-01 sem erro, subtotal por fazenda e nenhum total somando fazendas · ['', 'Santa Rita Santa Rita Agro Rio Verde/GO Em dia Própria 1.480 ha 1.165,0 ha 8', 'Boa Vista Boa Vista Ltda Sorriso/MT Em dia Arrendada até 31/08/2029 420 ha 120,0 ha 1']
+OK  2 fazenda vazia: erros junto aos campos · Corrija os campos destacados; o que você preencheu foi mantido. | Informe nome da fazenda. | Informe município. | Informe área total do imóvel.
+OK  3 o fuso não é campo (calculado da UF ao salvar, 16/10) · ['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse']
+OK  4 arrendada pede o fim do contrato (sem arrendador nem custo da terra) · [['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse', 'Fim do contrato'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe o fim do contrato.']
+OK  5 fazenda salva: linha-pai nova com "Incluir talhão" e o fuso calculado da UF (MT → Cuiabá) · ['Fazenda Nova Esperança cadastrada. Próximo passo: incluir os talhões dela.', 'Nova Esperança Santa Rita Agro Lucas do Rio Verde/MT Incluir talhão Em dia Arrendada até 30/06/2030 600 ha 0,0 ha 0', 'América/Cuiabá (UTC−4)']
+OK  6 talhão nasce na fazenda do grupo · Nova Esperança
+OK  7 regras do talhão: pivô já usado e área acima da fazenda · Corrija os campos destacados; o que você preencheu foi mantido. | Bomba do Pivô 1 já irriga o P1 (Santa Rita). | Os talhões ativos da Nova Esperança somariam 700 ha; a fazenda tem 600 ha.
+OK  8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda) · ['Nova Esperança Santa Rita Agro Lucas do Rio Verde/MT Em dia Arrendada até 30/06/2030 600 ha 250,0 ha 1', 'N1 cadastrado na Nova Esperança. Próximo passo: definir o polígono no detalhe do talhão.']
+OK  9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido · ['X9', '50', 'Serra Azul']
+OK  10 talhão X9 salvo na Serra Azul · Serra Azul Santa Rita Agro Jataí/GO Em dia Própria 100 ha 50,0 ha 1
+Traceback (most recent call last):
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_test.py", line 73, in <module>
+    openrow1(0,'T1'); fset('sit','Inativo'); save(); al=alerts()
+    ^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_test.py", line 22, in openrow1
+    def openrow1(ti,cod): J(f"""(()=>{{const acha=()=>[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); let r=acha(); if(!r){{ [...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click()); r=acha(); }} (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

@@ -20,8 +20,8 @@ def build():
                 [], edit=dict(m='pick'), gid='g_ob', total=False, qf=dict(k='fase', l='Fase', todas='Todas'),
                 cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela (bn_vis 'c')
     EXTRAJS[0] = _js(BEN_JS)
-    vis = (f'<div class="pr-vis" role="group" aria-label="Visão das ordens"><button type="button" aria-pressed="{H("vl_on")}" onClick="{H("vl_go")}">Lista</button>'
-           f'<button type="button" aria-pressed="{H("vc_on")}" onClick="{H("vc_go")}">Cartões</button><button type="button" aria-pressed="{H("vk_on")}" onClick="{H("vk_go")}">Kanban</button></div>')
+    # VIS-08 (proprietário, 18/10/2026: o modo de visão "pelo ícone igual os demais"): o seletor da VISOES-1, só ícone (visoes.REGISTRO['ben'])
+    vis = E.visoes_locais('bn', 'ben', 'Visão das ordens')
     nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">Criar ordem</button>'
     kb = (f'<style>@media (max-width:479px){{.bn-kb>div{{flex-direction:column!important}}.bn-kb>div>div{{width:100%!important}}}}</style>'
           f'<div class="bn-kb" style="overflow-x: auto;">{_kanban()}</div>')
@@ -253,8 +253,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[];
   /* DS VIS-05 (15/10/2026): Lista | Cartões | Kanban; Cartões é a mesma grade g_ob em cartões (g2lib.g2modosFim, gancho g2modoExterno) */
-  const vis=st.bn_vis||'l'; v.vl=vis==='l'||vis==='c'; v.vk=vis==='k'; v.vl_on=String(vis==='l'); v.vc_on=String(vis==='c'); v.vk_on=String(vis==='k');
-  v.vl_go=()=>self.setState({bn_vis:'l'}); v.vc_go=()=>self.setState({bn_vis:'c'}); v.vk_go=()=>self.setState({bn_vis:'k'}); self.g2modoExterno=(gid)=>(gid==='g_ob'&&(self.state.bn_vis||'l')==='c')?'cartoes':'tabela';
+  const vis=st.bn_vis||'l'; v.vl=vis==='l'||vis==='c'; v.vk=vis==='k'; [['lista','l'],['cartoes','c'],['kanban','k']].forEach(([k,x])=>{ v['bn_lv_'+k+'_p']=String(vis===x); v['bn_lv_'+k+'_go']=()=>self.setState({bn_vis:x}); }); self.g2modoExterno=(gid)=>(gid==='g_ob'&&(self.state.bn_vis||'l')==='c')?'cartoes':'tabela';
   v.kb=bnKanban(self,c,ords);
   v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN'),bn_rasc:null});
   v.cards_ob=prCards(self,v,'g_ob',id=>{ const o=c.ordens[id]; if(!benEh(o)) return null; const nx=benProx(c,o);

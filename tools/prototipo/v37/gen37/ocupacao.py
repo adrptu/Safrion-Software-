@@ -5,6 +5,9 @@ Livre × A conferir, Situação do talhão, filhas visíveis, trava (só o certo
 Datas são dias inteiros desde 01/01/1970 (o mesmo número no JS); INF = sem fim. Sem dependência de dados: quem chama passa
 culturas, cultivares, planos, safras, talhões e cultivos. ocupacao_unit.py confere JS = Python e os números da especificação."""
 import datetime as _dt
+import json
+from functools import lru_cache
+from datas_atividade import calcular_lote
 
 INF = 10 ** 8
 _EPOCH = _dt.date(1970, 1, 1)
@@ -58,34 +61,34 @@ def antecedencia(ctx, pid):
     return max([0] + [-a['g']['dias'] for a in pl['atividades'] if a['g']['tipo'] == 'DAP' and (a['g']['dias'] or 0) < 0])
 
 
-def _colheita_plano(pl, plantio):
-    ca = next((a for a in pl['atividades'] if str(a['op']).startswith('Colheita')), None)
-    if ca and ca['g']['tipo'] == 'DAP': return plantio + ca['g']['dias']
-    if ca and ca['g']['tipo'] == 'DATA': return dia(ca['g']['data'])
-    return plantio
+@lru_cache(maxsize=2048)
+def _datas_plano(chave):
+    """Recibos imutáveis; chave por conteúdo invalida edições, limite evita crescimento livre."""
+    pl, cultivo = json.loads(chave)
+    recibos = calcular_lote([dict(atividade=a, cultivo=cultivo,
+                                contexto=dict(variante='canonica', plano=pl))
+                             for a in pl['atividades']])
+    return tuple((a['nome'], a['g']['tipo'], dia(r['data']))
+                 for a, r in zip(pl['atividades'], recibos))
 
 
 def atividades(ctx, plantio, pid, colheita=None):
-    """[(nome, tipo, dia)] das atividades do plano para um plantio (mesma regra de dataAtv/colheitaDe do safra.js)."""
+    """Datas canônicas em lote; None preserva a ausência da âncora."""
     pl = ctx['planos'].get(pid)
     if not pl: return []
-    out = []
-    for a in pl['atividades']:
-        g = a['g']; t = g['tipo']
-        if t == 'DAP': d = plantio + g['dias']
-        elif t == 'DATA': d = dia(g['data'])
-        else:
-            col = colheita if colheita is not None else _colheita_plano(pl, plantio)
-            d = col + (g['dias'] if t == 'DAPC' else -g['dias'])
-        out.append((a['nome'], t, d))
-    return out
+    cultivo = dict(plantio=iso(plantio), colheita=iso(colheita))
+    chave = json.dumps([pl, cultivo], sort_keys=True, ensure_ascii=False, allow_nan=False)
+    return list(_datas_plano(chave))
 
 
-def datas_validas(ctx, plantio, pid, safini, safim, colheita=None):
+def datas_validas(ctx, plantio, pid, safini, safim, colheita=None, pendentes=None):
     """R-03/R-04: DATA só conta dentro da safra do cultivo e a partir de plantio − antecedência; o resto vira aviso."""
     ok, fora = [], []
     ant = antecedencia(ctx, pid)
     for n, tp, d in atividades(ctx, plantio, pid, colheita):
+        if d is None:
+            if pendentes is not None: pendentes.append(('ancora_ausente', n, tp))
+            continue
         if tp == 'DATA' and not (safini <= d <= safim and d >= plantio - ant): fora.append((n, d))
         else: ok.append((n, tp, d))
     return ok, fora
@@ -98,7 +101,7 @@ def fim_estimado(ctx, cult, var, plantio):
     if k in ctx['cic']: cands.append(plantio + ctx['cic'][k])
     for p in ctx['pub']:
         if p['cultura'] != cult: continue
-        ds = [d for n, tp, d in atividades(ctx, plantio, p['id']) if tp != 'DATA']
+        ds = [d for n, tp, d in atividades(ctx, plantio, p['id']) if tp != 'DATA' and d is not None]
         if ds: cands.append(max(ds))
     return max(cands) if cands else None
 
@@ -123,7 +126,7 @@ def mk(ctx, c, s):
              colh_inf=colh, colh_real=real, origem=c.get('origem') or '', avisos=[], folga=folga, ini=pl)
     dfim = None
     if pid:
-        ok, fora = datas_validas(ctx, pl, pid, o['safini'], o['safim'], colh)
+        ok, fora = datas_validas(ctx, pl, pid, o['safini'], o['safim'], colh, o['avisos'])
         ini_c = [pl] + [d for n, tp, d in ok if tp in ('DAP', 'DATA')]
         o['ini'] = min(ini_c)
         if fora: o['avisos'].append(('datas_fixas', pid, fora[0][1]))
@@ -131,7 +134,9 @@ def mk(ctx, c, s):
     classe = ctx['classe'].get(o['cult'], 'Anual')
     if classe == 'Perene': o['fim'], o['classe'] = INF, 'perene'
     elif real is not None: o['fim'], o['classe'] = real, 'observado'
-    elif pid: o['fim'], o['classe'] = dfim, 'plano'
+    elif pid:
+        incompleto = any(a[0] == 'ancora_ausente' for a in o['avisos'])
+        o['fim'], o['classe'] = (None, 'semdata') if incompleto else (dfim, 'plano')
     elif colh is not None: o['fim'], o['classe'] = colh, 'informada'
     else:
         e = fim_estimado(ctx, o['cult'], o['var'], pl)

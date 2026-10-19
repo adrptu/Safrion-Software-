@@ -1,0 +1,4 @@
+OK: quantidade preservada; sem evento fictício; paridade; memória parcial; situação sem falsa cobertura; null/vazio
+OK: data pendente preserva solicitação; falta datada e redução após resolução preservadas
+OK: outra safra sem data não infla solicitação; resolução antes/depois disputa estoque pela cronologia; paridade JS/Python
+OK: mapa conserva demanda sem âncora e rateio; exclui passado/outra safra; resolução mantém soma fazenda

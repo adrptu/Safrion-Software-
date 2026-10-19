@@ -5,6 +5,7 @@ rápido e fácil." Painel largo, do mesmo desenho do "Dividir": uma linha por ta
 Os valores e as regras vêm de safra_lote.js (slVals, slGravar); este módulo só monta o HTML. Sem tabela própria (role=table): é uma grade
 de edição, sem ordenar nem filtrar, como o Dividir; sem CSS sobre classe do motor (.g2…)."""
 from engine import INK, MUTED, LINE, BG, SURF, RED, REDS, YEL, YELS, DISP, BTN_ST, _MINI, _MINIP
+import engine as _E
 H = lambda s: '{{' + s + '}}'
 F = lambda: H('false')
 # desktop: seleção | talhão ou parcela | área | cultura | variedade | plantio | meta | unidade | plano | situação
@@ -201,8 +202,9 @@ def painel():
             f'<aside role="dialog" aria-label="{H("sl_titulo")}" id="sl-painel" class="sl-pn" onKeyDown="{H("sl_key")}" style="position: relative; width: 1240px; max-width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;">'
             f'<div style="display: flex; gap: 10px; align-items: flex-start;"><div style="flex-grow: 1; min-width: 0;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px;">{H("sl_titulo")}</h2>'
             f'<div style="font-size: 12.5px; color: {MUTED};">{H("sl_sub")}</div></div>'
-            # SAF-MAPA (18/10): a mesma edição em Tabela ou Mapa (um estado só: seleção, rascunho e gravação)
-            f'<div role="group" aria-label="Visão" style="display: flex; gap: 6px; flex-shrink: 0;"><sc-for list="{H("sl_vistas")}" as="w" hint-placeholder-count="2"><button type="button" class="sm-bt" aria-pressed="{H("w.on")}" aria-label="{H("w.al")}" onClick="{H("w.go")}" style="{H("w.st")}">{H("w.t")}</button></sc-for></div>'
+            # SAF-MAPA (18/10): a mesma edição em Tabela ou Mapa (um estado só: seleção, rascunho e gravação). VIS-08 (18/10): a escolha é pelo
+            # ícone, no seletor da VISOES-1 (engine.visoes_locais; visoes.REGISTRO['saf_tal']), como na O.S., Pragas e doenças e Irrigação
+            f'<div style="flex-shrink: 0; align-self: center;">{_E.visoes_locais("sl", "saf_tal", "Visão dos talhões")}</div>'
             f'<button type="button" aria-label="Fechar" onClick="{H("sl_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 12px; border-radius: 10px; background: {BG}; font-size: 13px;"><b>{H("sl_n")}</b><span style="color: {MUTED};">{H("sl_resumo")}</span><span role="status" id="sl-selo" style="{H("sl_selost")}">{H("sl_selo")}</span></div>'
             f'<sc-if value="{H("sl_hasg")}" hint-placeholder-val="{F()}"><div role="alert" id="sl-gerr" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("sl_gerr")}</div></sc-if>'

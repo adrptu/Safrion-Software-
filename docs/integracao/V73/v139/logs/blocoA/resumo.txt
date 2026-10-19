@@ -1,0 +1,13 @@
+painel03_test rc=0 RESULTADO: 48 ok · 0 falhas
+painel_agricola_test rc=0 RESULTADO 81/81
+ds_test rc=0 RESULTADO: OK 72/72
+ds_padrao_test rc=0 RESULTADO: 17 ok · 0 falhas
+saf_mapa_test rc=0 RESULTADO: 10/10 ok
+cmptest rc=0 FALHAS: nenhuma
+saf_cmp_continuidade_test rc=0 RESULTADO: 31 ok · 0 falhas
+visual_corte rc=1 RESULTADO: 145 achado(s) em 154 páginas + 7 visões × 3 tamanhos
+paginas_scan_test rc=0 RESULTADO: 5 ok · 0 falhas (146 páginas)
+BASE ben_fluxo rc=1 RESULTADO: FALHOU 222/224
+BASE visual_corte rc=1 RESULTADO: 145 achado(s) em 154 páginas + 7 visões × 3 tamanhos
+ben_fluxo_test rc=1 RESULTADO: FALHOU 222/224
+FIM

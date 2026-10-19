@@ -16,6 +16,7 @@ function soloNum(x) {   /* texto pt-BR ou ponto → texto decimal; vazio → nul
   const t = String(x).trim().replace(/\s/g, ''); const s = t.indexOf(',') >= 0 ? t.replace(/\./g, '').replace(',', '.') : t;
   return /^-?\d+(\.\d+)?$/.test(s) ? s : NaN; }
 function soloBr(iso) { const a = String(iso || '').slice(0, 10).split('-'); return a.length === 3 ? a[2] + '/' + a[1] + '/' + a[0] : '—'; }
+function soloDataTexto(dt, atv) { if(dt) return soloBr(dt); const tp=((atv||{}).g||{}).tipo; return 'aguarda '+(tp==='DAP'?'plantio':(['DAPC','DANC'].includes(tp)?'colheita':'data válida')); }
 function soloDdMm(iso) { const a = String(iso || '').slice(0, 10).split('-'); return a.length === 3 ? a[2] + '/' + a[1] : '—'; }
 function soloF(x, d) { return (x === null || x === undefined) ? 'não calculável' : prFmtT(x, d === undefined ? 2 : d); }
 function soloDoseTxt(d, un) { return (un === 't' ? prFmt(d, 2) : prFmtT(d, 2)) + ' ' + un + '/ha'; }
@@ -422,11 +423,8 @@ function soloAcDaChave(c, ck, prod) { const A = Object.values(((c && c.solo) || 
   return (x && /^(voltou ao padrão|retirada) pelo /.test(x.st)) ? Object.assign({}, x, { dose: /^retirada/.test(x.st) ? '-' : x.padrao, laudo: x.st.split(' pelo ')[1] }) : null; }
 
 /* ---------- contexto a partir dos dados gravados (AG-02 e testes): cultivos e planos do SOLO0 e aceites do cenário, sem a sessão do Planejar safra ---------- */
-function soloDataAtv(x, a, pl) { const g = a.g || {}; if (g.tipo === 'DAP') return soloMaisDias(x.plantio, g.dias); if (g.tipo === 'DATA') return g.data;   /* a mesma regra de safra.js dataAtv */
-  let col = x.colheita; if (!col) { const ca = (pl.atividades || []).find(q => /^Colheita/.test(q.op)); col = (ca && ca.g.tipo === 'DAP') ? soloMaisDias(x.plantio, ca.g.dias) : ((ca && ca.g.tipo === 'DATA') ? ca.g.data : x.plantio); }
-  return soloMaisDias(col, g.tipo === 'DAPC' ? g.dias : -g.dias); }
 function soloCultivoBase(S0, x) { const pl = (S0.planos || {})[x.plano]; if (!pl || pl.cultura !== x.cultura) return null;
-  return Object.assign({}, x, { plano: pl, dt: a => soloDataAtv(x, a, pl) }); }
+  return Object.assign({}, x, { plano: pl, dt: a => daDataAtividade(a, x, {variante:'canonica', plano:pl}).data }); }
 /* R17 (D-19): a correção de um laudo vai para os cultivos do talhão na primeira safra aberta que o tem, pela data de plantio */
 /* o cultivo do talhão na primeira safra aberta, pela data de plantio (R17; também a cultura do V₂ no Mapa) */
 function soloCultivoAlvo(cults, safras, faz, tal) { return (cults || []).filter(x => x.faz === faz && x.tal === tal && !((safras || {})[x.saf] || {}).ro).sort((a, b) => a.plantio < b.plantio ? -1 : (a.plantio > b.plantio ? 1 : 0))[0] || null; }

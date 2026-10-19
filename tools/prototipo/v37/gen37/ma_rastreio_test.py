@@ -47,7 +47,8 @@ try:
     etp = 0
     for a in ('vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos', 'plano=PM-01'):
         m.ir(a); etp += J("document.querySelectorAll('.etp-ind,nav[aria-label=\"Telas da manutenção\"]').length") or 0
-    m.ir('vis=ordens'); m.clk('Kanban'); kan = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"]>*')].filter(e=>e.getClientRects().length).length")
+    # VIS-08 (18/10/2026): o seletor comum só tem ícone; o nome do botão é "Ver em kanban" (aria-label e dica)
+    m.ir('vis=ordens'); m.clk('Ver em kanban'); kan = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"]>*')].filter(e=>e.getClientRects().length).length")
     m.ir('vis=semordem'); m.clk('Gerar 3 ordens preventivas'); m.ir('vis=semordem'); so2 = m.body(); m.ir('ativo=a03')
     for _ in range(3):   # TAB-12 (17/10/2026): os blocos do ativo nascem recolhidos (antes abria o da situação); a pessoa abre para ver as ordens
         if not J(ABRE): break

@@ -15,7 +15,7 @@ Prompt: `prompt-safrion-varredura-final.md` (sha256 `6c8b788e…`). O EX-56 é o
 | EX-43 Raio-X do alvo | RX-0 em fechamento (C2.2 aceito em 6253895754). RX-1, RX-2, a marcação do RT e o risco ainda não começaram | Codex (RX) e Claude (revisão) |
 | EX-44 a EX-51 | Desenhos confrontados; implantação parcial (ex.: DRILL-RECOLHIDO, Mapa sem Lista, KMZ, EX-50 LO-02det) | Codex registra o que falta por item |
 | EX-50: portal do parceiro, onboarding e backoffice | Decisão do proprietário (§5 do prompt de excelência) | Proprietário |
-| EX-52 e EX-53 | Classificação independente pedida ao Codex. As do Claude estão lacradas | Codex, depois confronto |
+| EX-52 e EX-53 | Classificação independente pedida ao Codex. A do Claude ainda não existia quando esta linha dizia "lacradas"; correção de 19/10 (6257310093): o Claude escreve e lacra a sua antes de ler a do Codex | Claude e Codex, depois confronto |
 | EX-54 Frentes | F1 em bateria na v135. F2 em diante pendentes, com pacote Gemini (calda contínua, lavagem, clima) | Claude implanta; Codex revisa |
 | EX-55 Mapa nas telas | Desenho aceito (§6). F1 em implantação dividida: Codex `mapa_camadas.js`, Claude `mapa_emb.js` e adaptadores | Claude e Codex |
 | EX-57 Perenes | Novo. Validação independente, Gemini real obrigatório e RT valida os parâmetros por cultura antes do código | Claude e Codex; Gemini; RT |

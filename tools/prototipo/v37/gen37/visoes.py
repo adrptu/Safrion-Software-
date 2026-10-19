@@ -80,6 +80,51 @@ REGISTRO = {
             'kanban': 'A situação do setor já é a coluna Situação e o filtro rápido (DESENHO 1.4).',
         },
     },
+    # VIS-08 (proprietário, 18/10/2026: "O modo de visão em mapa em planejar safra tem que ser pelo ícone igual os demais"):
+    # Cadastros › Fazendas e talhões (CD-01, árvore fazenda › talhão) com Tabela, Cartões e Mapa no seletor da VISOES-1
+    'tal': {
+        'ativas': {
+            'lista': {},
+            'cartoes': {},   # DS VIS-05: as linhas da Tabela em cartões
+            'mapa': {'geometria': 'polígonos do cadastro (areas/cad_fazendas.py GEO_MAPA, Santa Rita) e pivôs do KML (dados_lagoa_fonte LG_PIVOS, Lagoa Grande)'},
+        },
+        'cortes': {
+            'kanban': 'O talhão não tem fluxo de etapas; a situação é a coluna Situação e o filtro rápido (DESENHO 1.4).',
+            'calendario': 'Cadastro sem data que decida algo na lista (DESENHO 1.4).',
+        },
+    },
+    # VIS-08: Agrícola › Beneficiamento (BEN): Lista | Cartões | Kanban pelo ícone (engine.visoes_locais; o estado segue o bn_vis da tela)
+    'ben': {
+        'ativas': {
+            'lista': {},
+            'cartoes': {},   # DS VIS-05: as linhas da Tabela em cartões (g2modoExterno da tela)
+            'kanban': {'fluxo': 'fases da ordem de beneficiamento no Kanban da O.S. (areas/processo_os.py _kanban; FASES com 5 etapas)'},
+        },
+        'cortes': {
+            'mapa': 'A ordem de beneficiamento é da unidade de beneficiamento, sem talhão próprio no desenho (DESENHO 1.4).',
+        },
+    },
+    # VIS-08: Manutenção › Ordens (MA): Lista | Cartões | Kanban pelo ícone (engine.visoes_locais; antes, uma cópia da barra com outro ícone de Tabela)
+    'ma_om': {
+        'ativas': {
+            'lista': {},
+            'cartoes': {},   # DS VIS-05: as linhas da Tabela em cartões (g2modoExterno da tela)
+            'kanban': {'fluxo': 'fases da ordem no Kanban da O.S. (areas/processo_os.py _kanban, usado pela Manutenção em areas/maquinas.py)'},
+        },
+        'cortes': {
+            'mapa': 'A ordem de manutenção é do ativo (oficina ou campo), sem contorno de talhão (DESENHO 1.4).',
+        },
+    },
+    # VIS-08: Planejar safra › "Editar talhões…" (painel de edição em lote; engine.visoes_locais, a visão é do painel aberto)
+    'saf_tal': {
+        'ativas': {
+            'lista': {},
+            'mapa': {'geometria': 'contornos dos talhões do Mapa (geo_talhoes.mapa(), a mesma fonte do IN-04); seleção e rótulo de safra_mapa.js'},
+        },
+        'cortes': {
+            'cartoes': 'Painel de edição em lote célula a célula (Tab entre colunas, colar do Excel); cartão não edita em lote. A listagem da etapa tem Tabela e Cartões.',
+        },
+    },
     'os': {
         'ativas': {
             'lista': {},

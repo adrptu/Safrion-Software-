@@ -2,7 +2,7 @@
 """SAF-MAPA F1 · Planejar safra no mapa (proprietário, 18/10/2026: "Em planejar safra coloque o modo de visão mapa para ver geograficamente como
 está o plano da safra e permita clicar nos talhões e fazer o todo o trabalho"). A visão Mapa é a segunda visão do mesmo estado do "Editar
 talhões…" (EDL-01, safra_lote.js): mesma seleção, mesma aplicação com as mesmas recusas e mesma gravação. No Chrome a 1440 × 1000 e 390 × 844.
-  M1  "Planejar no mapa ›" na faixa da fazenda abre o Editar talhões na visão Mapa (Tabela · Mapa), com os 8 talhões da Santa Rita e a legenda
+  M1  "Planejar no mapa ›" na faixa da fazenda abre o Editar talhões na visão Mapa (seletor pelo ícone), com os 8 talhões da Santa Rita e a legenda
   M2  tocar em 3 talhões marca os 3: contagem com área, painel "Planejar 3 talhões" e o mesmo número na visão Tabela
   M3  aplicar cultura e plano aos 3: o rótulo de cada talhão muda ao vivo, com a marca de alterado, e "Salvar alterações (n)" conta as mudanças
   M4  "Colorir por" Plano muda a legenda
@@ -63,10 +63,11 @@ try:
     c.goto(U('Main.dc.html'), .3); J("localStorage.clear()")
     # ---------- M1 ----------
     acts, ok = abrir_mapa()
-    ts = J("TS()") or []; vis = J("[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].map(b=>[N(b.innerText),b.getAttribute('aria-pressed')])") or []
+    # VIS-08 (18/10): o seletor é o da VISOES-1, só ícone (svg, sem texto visível), com o nome "Ver em …" no aria-label
+    ts = J("TS()") or []; vis = J("[...document.querySelectorAll('#sl-painel [data-visoes-local=sl].g2visoes button')].map(b=>[b.dataset.visao,b.getAttribute('aria-pressed'),b.getAttribute('aria-label'),!!b.querySelector('svg')&&!N(b.innerText)])") or []
     leg = J("TXT('.sm-leg')")
-    chk('M1 "Planejar no mapa ›" abre a visão Mapa (Tabela · Mapa) com os 8 talhões da Santa Rita e a legenda',
-        acts and ok and len(ts) == 8 and ['Mapa', 'true'] in vis and ['Tabela', 'false'] in vis and leg, [acts, ok, len(ts), vis, leg])
+    chk('M1 "Planejar no mapa ›" abre a visão Mapa (seletor pelo ícone: Ver em tabela · Ver em mapa) com os 8 talhões da Santa Rita e a legenda',
+        acts and ok and len(ts) == 8 and vis == [['lista', 'false', 'Ver em tabela', True], ['mapa', 'true', 'Ver em mapa', True]] and leg, [acts, ok, len(ts), vis, leg])
     # ---------- M2 ----------
     # talhões de um cultivo só (sem parcelas) e disponíveis: a cultura nova é escolhida diferente da atual de cada um, para todos mudarem
     cand = [x for x in ts if not any(k in ' '.join(x['l']) for k in ('Indisponível', 'parcelas'))]
@@ -121,7 +122,7 @@ try:
     e1 = J("window.__e") or []
     # ---------- M9 ----------
     c.goto(U('Main.dc.html'), .3); J("localStorage.clear()"); acts9, ok9 = abrir_mapa()
-    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Tabela'); b&&b.click();})()"); time.sleep(.5); J(LIB)
+    J("(()=>{const b=document.querySelector('#sl-painel [data-visoes-local=sl] [data-visao=lista]'); b&&b.click();})()"); time.sleep(.5); J(LIB)
     labs = J("[...document.querySelectorAll('#sl-painel input[type=checkbox]')].map(i=>i.getAttribute('aria-label')||'')") or []
     par = sorted(x[7:] for x in labs if re.match(r'^Marcar T1-[A-Z]$', x)); inteiro = next((x[7:] for x in labs if re.match(r'^Marcar T[2-9]$', x)), '')
     pa, pb = (par + ['', ''])[:2]
@@ -129,14 +130,14 @@ try:
     AREA = "(rot=>{const i=[...document.querySelectorAll('#sl-painel input')].find(x=>{const l=x.getAttribute('aria-label')||''; return l==='Área de '+rot||l.startsWith('Área de '+rot+' (');}); return i?Number(String(i.value).replace(/\\./g,'').replace(',','.')):null;})"
     m0 = {r: J(f"{META}({json.dumps(r)})") for r in (pa, pb, inteiro)}; a9 = {r: J(f"{AREA}({json.dumps(r)})") for r in (pa, inteiro)}
     for r in (pa, inteiro): J("(()=>{const i=[...document.querySelectorAll('#sl-painel input[type=checkbox]')].find(i=>i.getAttribute('aria-label')==='Marcar '+%s); i&&i.click();})()" % json.dumps(r)); time.sleep(.3)
-    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Mapa'); b&&b.click();})()"); time.sleep(.6); J(LIB)
+    J("(()=>{const b=document.querySelector('#sl-painel [data-visoes-local=sl] [data-visao=mapa]'); b&&b.click();})()"); time.sleep(.6); J(LIB)
     t1 = next((x for x in (J("TS()") or []) if x['t'] == 'T1'), {}); cont9 = J("TXT('.sm-cont')"); lst9 = J("TXT('.sm-pn')"); apT9 = J("N((document.getElementById('sm-aplicar')||{}).innerText||'')")
     ha9 = sum(v for v in a9.values() if v); ha_txt = ('%.2f' % ha9).rstrip('0').rstrip('.').replace('.', ',')
     novo = '71' if m0.get(pa) != '71' else '72'
     J(f"SEL('Meta para os talhões marcados',{json.dumps(novo)})"); time.sleep(.3)
     J("(()=>{const b=document.getElementById('sm-aplicar'); b&&b.click();})()"); time.sleep(.6); J(LIB)
     st9 = ' '.join(J("[...PN().querySelectorAll('[role=status]')].map(x=>N(x.innerText))") or [])
-    J("(()=>{const b=[...document.querySelectorAll('#sl-painel [role=group][aria-label=\"Visão\"] button')].find(b=>N(b.innerText)==='Tabela'); b&&b.click();})()"); time.sleep(.5); J(LIB)
+    J("(()=>{const b=document.querySelector('#sl-painel [data-visoes-local=sl] [data-visao=lista]'); b&&b.click();})()"); time.sleep(.5); J(LIB)
     m1 = {r: J(f"{META}({json.dumps(r)})") for r in (pa, pb, inteiro)}
     chk('M9 seleção parcial da Tabela no Mapa: T1 "em parte" (mixed, 1 de 2), contagem "(1 em parte)" com a área só das linhas marcadas e a parcela na lista; "Aplicar" muda só as 2 linhas anunciadas',
         ok9 and pa and pb and inteiro and t1.get('sel') == 'mixed' and any('Em parte · 1 de 2' in z for z in t1.get('l', [])) and '(1 em parte)' in cont9 and cont9.startswith('2 talhões')
