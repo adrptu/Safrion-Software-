@@ -421,7 +421,9 @@ try:
         r3 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan()
         t.chk('390 px · Autorizar e liberar recusado por 1 causa (540 un livres para 584 un) com atalho de devolução; nada gravado', 'Liberação recusada · 1 causa' in p and '540 un disponíveis para 584 un' in p and rev() == r3, p[-400:])
         shot('celular_fluxo')
-        ir('PROD.dc.html', w=390, h=844); m = J("({lado:document.documentElement.scrollWidth>innerWidth+1, cards:[...document.querySelectorAll('.pr-card')].filter(VIS).length})")
+        # A visão é explícita: o motor compartilha a preferência tabela/cartões e agrupa os lotes.
+        ir('PROD.dc.html?view=cartoes', w=390, h=844)
+        m = J("({lado:document.documentElement.scrollWidth>innerWidth+1, cards:[...document.querySelectorAll('[role=list][aria-label=\"Lista em cartões\"] [role=listitem]')].filter(VIS).length})")
         t.chk('Estoque de produto a 390 px com os lotes do packing: sem rolagem lateral, cartões', m and not m['lado'] and m['cards'] > 0, m)
         t.chk('celular sem erro de JS', not t.errs(), t.errs())
     if 'revisao' in MODOS:
@@ -837,7 +839,13 @@ try:
             time.sleep(.1)
         time.sleep(.6); lib(); loc = J("location.pathname.split('/').pop()+location.hash"); b = J("N(document.body.innerText)") or ''
         t.chk('M3 · "Ver na Manutenção" abre a Packing linha 1 na tela única da Manutenção (MA.dc.html#ativo=a13), com o bloqueio à vista',
-              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Esteira da embaladora travada' in b, [hr, loc, b[:300]])
+              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Bloqueado' in b, [hr, loc, b[:300]])
+        # TAB-12: o resumo mostra a condição; o motivo pertence à seção Situação, inicialmente recolhida.
+        abriu = J("(()=>{ const s=document.querySelector('section[aria-label=\"Situação\"]'); const b=s&&s.querySelector('button[aria-expanded]'); if(!b||!VIS(b)) return false; if(b.getAttribute('aria-expanded')==='false') b.click(); return true; })()")
+        time.sleep(.3)
+        motivo = J("(()=>{ const s=document.querySelector('section[aria-label=\"Situação\"]'); return s&&N(s.innerText); })()") or ''
+        t.chk('M4 · abrir Situação revela o motivo do bloqueio da Packing linha 1',
+              abriu and 'Esteira da embaladora travada' in motivo, motivo)
         shot('manutencao')
         t.chk('manutencao sem erro de JS', not t.errs(), t.errs())
     def conferencia(W):
