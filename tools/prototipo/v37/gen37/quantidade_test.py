@@ -2,6 +2,8 @@
 """Regressão focal SINT-C03 (comentário 5974993475) e PRE-REV-20261004: regra única de quantidade de insumo (quantidade.py ⇄
 cenQtd/cenQtdTrecho do cenario.js), o apontamento com custódia e todo produtor de total de insumo (O.S., MIP, fertirrigação).
 Roda o JS real do protótipo (cenario.js + núcleo da O.S. + mip.js + irrigacao_estado.js) no jsc (macOS) ou node (Linux), sem navegador.
+LEVE-1 (leve, proprietário 19/10: "leve e fluido"): o caso 15 deixa de esperar a recusa do término sem hidrômetro; agora o término sem
+leitura é aceito, o volume fica nulo (não zero), a ordem fica "Sem leitura" e nada é creditado no balanço (o crédito segue só com o medido).
 Uso (de gen37/): python3 quantidade_test.py"""
 import json, os, random, re, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -152,7 +154,8 @@ R.tempo={};
   R.tempo.intacto=JSON.stringify(s)===before;
   const o=irrO(s,idL); s.agora=Math.max(s.agora,irrFimP(o,irrPassAtual(o))); const atFim=JSON.stringify(s);
   try{ irrTerminar(s,idL,20.28,null); R.tempo.semMedicao='aceitou'; }catch(e){ R.tempo.semMedicao=e.message; }
-  R.tempo.semBaixa=JSON.stringify(s)===atFim;
+  { const o2=irrO(s,idL); const p2=o2.passadas.find(p=>p.st==='Feita'||p.st==='Parcial'); R.tempo.vol=p2?p2.vol:'sem passada'; R.tempo.et=o2.etapa; R.tempo.st=(o2.conf||{}).st||'';
+    R.tempo.credito=s.setores[o2.setor].bal.ap.some(a=>a.os===idL); }
 }
 
 { cenReset(); irrReset(); const s=irrGet(); irrIniciar(s,idL); irrAvanco(s,idL,s.setores[s.ordens[idL].setor].ha); irrSave(s);
@@ -273,8 +276,9 @@ EXC_LINHAS = {
     ('areas/custo_dominio.py', "const prHa=(o.ins||[]).reduce((s,x)=>{ const p=cusPreco(D,x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);"): 'custo por hectare: dose × preço; extraído do Mapa',
     ('cenario.js', "if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');"): 'validação de finitude do preparo, sem baixa de custódia',
 }
-chk('15 guardas de término: cedo e sem hidrômetro recusam sem alterar o estado',
-    'Antes do fim previsto' in F['tempo']['cedo'] and F['tempo']['intacto'] and 'volume medido' in F['tempo']['semMedicao'] and F['tempo']['semBaixa'], F['tempo'])
+chk('15 guardas de término: cedo recusa sem alterar o estado; sem hidrômetro (LEVE-1) termina com volume nulo, "Sem leitura" e nada creditado',
+    'Antes do fim previsto' in F['tempo']['cedo'] and F['tempo']['intacto'] and F['tempo']['semMedicao'] == 'aceitou' and F['tempo']['vol'] is None
+    and F['tempo']['credito'] is False and (F['tempo']['et'] != 'Em conferência' or F['tempo']['st'] == 'Sem leitura'), F['tempo'])
 chk('16 calda: cargas fecham a regra única, sem quantidade negativa, nas unidades originais e convertidas; prévia não altera cenário',
     all(x['ok'] and x['intacto'] and abs(x['soma']-x['esperado'])<1e-9 and all(q>=0 for q in x['qs']) for x in R['calda'])
     and R['calda'][0]['qs']==[6.67,6.66,6.67,4.66] and R['calda'][0]['cheia']==6.67
