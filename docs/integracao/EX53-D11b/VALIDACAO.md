@@ -28,3 +28,7 @@ Aplicado: lista/detalhe, estado, horas explícitas, motivo/recibo, recuperação
 ## Contraprova adicional do cadastro
 
 Node `pessoas_concorrencia_test.cjs` executa c4fonte/c4grava e g2persiste extraídos das fontes: edição externa com formulário aberto não apaga rascunho; salvar versão antiga recusa, restaura formulário e preserva o valor externo; fechar permite atualizar a fonte. PASS. cenMudar e setState adaptados explicitamente: não é teste de UI. A conferência adicional de navegador desta retomada não ocorreu: a interface informou Mac bloqueado após timeout. Nenhum controle foi contornado.
+
+## Correção da revisão 4310770407
+
+Achado confirmado: CD04 não assinava eventos do cenário. Lista ociosa podia permanecer antiga até abrir um formulário e encontrar conflito na gravação. `c4fonte` agora chama `cenOuvir(self)` antes de ler a fonte. Contraprova focal falhou antes (zero listeners, esperado um) e passou depois: evento da chave correta atualiza lista ociosa, chave alheia é ignorada, listener não duplica e rascunho aberto permanece intacto. Geração CD04 passou. Janela/evento/render adaptados no Node; reteste de navegador desta correção continua pendente com Mac bloqueado. Revisor deve avaliar o novo HEAD; parecer do HEAD anterior não se transfere automaticamente.

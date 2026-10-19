@@ -441,7 +441,7 @@ def cd04():
     dados=dict(qf=QF,habil=[[a,k] for a,k,_ in HABIL],calda=CALDA,agro=AGRO)
     import cenario
     js({},cenario.js_prefixo()+ALOC_JS+'const C4='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
-function c4fonte(self){ const x=pessoasLer(cenGet());
+function c4fonte(self){ cenOuvir(self); const x=pessoasLer(cenGet());
   if(self.__c4rev===x.rev&&self.__c4ver===x.v)return;
   if(self.__c4ver&&(g2st(self,'g_pes').fm||g2st(self,'g_eq').fm))return;
   const all=Object.assign({},self.state.g2||{});
