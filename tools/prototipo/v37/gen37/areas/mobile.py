@@ -1238,7 +1238,8 @@ v.dp_ini=()=>run('iniciar',{}); v.dp_con=()=>conc(false);'''
          prim=[('dp_pIni','b','Iniciar serviço','dp_ini'),('dp_pCon','b','Concluir serviço','dp_con'),('dp_pApt','b',H('dp_aptl'),'dp_apto'),('dp_pVolta','a','Voltar à fila','MB-01.dc.html')])
 
     # ================= MB-10 · Cargas e entregas (nome e papéis do PRD; aba Colheita no estado · colheita P6, D-16) =================
-    # Aba Colheita: um cartão por O.S. de colheita Em execução; "Apontar área" pelo mesmo cenApontar da web (origem app, chave do aparelho)
+    # Aba Colheita: um cartão por O.S. de colheita Em execução; "Apontar colheita" pelo mesmo cenApontar da web (origem app, chave do aparelho).
+    # COLH-APONT (GESTAO-1810 §2, 19/10/2026): o nome da ação e o botão de gravar são os mesmos da web (Colheita › "Apontar colheita" › "Apontar")
     # e "Registrar carga" (prCarga: veículo por toque, caixas ou kg estimados opcionais, talhões e %). Pesar e receber ficam na web (CARGA),
     # um lugar só: Balança, Recebedor e MB-10det saíram. Aba Motorista: igual (logística, fora do escopo).
     tabs=('<div role="tablist" aria-label="Papel" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: '+GRAYS+'; gap: 2px; align-self: flex-start;">'
@@ -1298,9 +1299,9 @@ v.ords=ords.map((o,i)=>{{ const cg=prCargas(c,g=>(g.origem||[]).some(x=>x.os===o
   return {{id:o.id,tal:o.talhao,feito:'Feito '+cenNum(o.realizado,2)+' de '+cenNum(o.area,2)+' ha · saldo '+cenNum(o.saldo,2)+' ha'+(pend?' · +'+cenNum(pend,2)+' ha no aparelho':''),
     cargas:(ap.length?ap.length+(ap.length>1?' cargas a pesar: ':' carga a pesar: ')+ap.map(g=>g.id+(g.est_cx?' (~'+g.est_cx+' cx)':'')+(g.sinc===false?' · no aparelho':'')).join(', '):'Nada a pesar')+(rc.length?' · '+rc.length+' recebida(s) hoje':''),
     car:!!cb,car_t:cb?((cb.fim?'Carência até '+carAte(cb.fim):'Carência sem dados')+': não colha agora · '+cb.q):'',
-    bA:!F,bC:!F&&i>0,bD:!F&&ap.some(g=>g.via==='app'),tA:'Apontar área · '+o.id,tC:'Registrar carga · '+o.id,tD:'Descartar carga a pesar',ttA:'Apontar hectares e horas do turno na '+o.id,ttC:'Registrar uma carga que saiu do '+o.talhao,ttD:'Descartar carga registrada por engano na '+o.id,
+    bA:!F,bC:!F&&i>0,bD:!F&&ap.some(g=>g.via==='app'),tA:'Apontar colheita · '+o.id,tC:'Registrar carga · '+o.id,tD:'Descartar carga a pesar',ttA:'Apontar hectares e horas do turno na '+o.id,ttC:'Registrar uma carga que saiu do '+o.talhao,ttD:'Descartar carga registrada por engano na '+o.id,
     ga:()=>abre(o,'area'),gc:()=>abre(o,'carga'),gd:()=>abre(o,'desc')}}; }});
-v.f_on=!!F; v.fa=!!F&&F.k==='area'; v.fc=!!F&&F.k==='carga'; v.fd=!!F&&F.k==='desc'; v.f_tt=F?((F.k==='area'?'Apontar área · ':(F.k==='carga'?'Registrar carga · ':'Descartar carga a pesar · '))+F.os+' · '+((c.ordens[F.os]||{{}}).talhao||'')):'';
+v.f_on=!!F; v.fa=!!F&&F.k==='area'; v.fc=!!F&&F.k==='carga'; v.fd=!!F&&F.k==='desc'; v.f_tt=F?((F.k==='area'?'Apontar colheita · ':(F.k==='carga'?'Registrar carga · ':'Descartar carga a pesar · '))+F.os+' · '+((c.ordens[F.os]||{{}}).talhao||'')):'';
 /* carência na O.S. do formulário (revisão A-14): registrar o que já foi colhido nunca é impedido, mas pede confirmação explícita */
 const oFc=F&&c.ordens[F.os]; const cbF=(F&&F.k!=='desc'&&oFc&&typeof carBloqColheita==='function')?carBloqColheita(c,oFc,'iniciar'):null;
 v.f_car=!!cbF; v.f_cart=cbF?((cbF.fim?'Carência até '+carAte(cbF.fim):'Carência sem dados')+': confirme que é colheita já feita (o lote fica fora da venda até a conferência).'):'';
@@ -1327,7 +1328,7 @@ v.grava=()=>{{ if(!F) return; let r;
     if(f.os2&&!(mbNum(f.pct)>0&&mbNum(f.pct)<100)){{ self.setState({{m10e:'Informe a participação do talhão desta O.S. (entre 0 e 100 %).'}}); return; }}
     r=cenMudar(null,cc=>{{ cc.app.ncg=Math.max(cc.app.ncg||0,F.n); return prCarga(cc,{{os:F.os,mix,cx:mbNum(f.cx)||0,kg:mbNum(f.kg)||0,veic:f.veic,via:'app',quem:cc.app.operador,chave:F.chave,dcol:CEN_DIA_OP}}); }}); }}
   if(r.erro){{ self.setState({{m10e:r.erro}}); return; }} self.setState({{m10:null,f10:{{}},m10e:'',cenrev:Date.now(),g2toast:r.msg}}); }};
-v.p_grava=!!F&&r===0; v.p_gt=F?(F.k==='area'?'Gravar área':(F.k==='carga'?'Gravar carga':'Descartar carga')):''; v.p_carga=!F&&r===0&&ords.length>0; v.p_ct=ords.length?'Registrar carga · '+ords[0].id:''; v.p_cgo=()=>{{ if(ords[0]) abre(ords[0],'carga'); }};
+v.p_grava=!!F&&r===0; v.p_gt=F?(F.k==='area'?'Apontar':(F.k==='carga'?'Gravar carga':'Descartar carga')):''; v.p_carga=!F&&r===0&&ords.length>0; v.p_ct=ords.length?'Registrar carga · '+ords[0].id:''; v.p_cgo=()=>{{ if(ords[0]) abre(ords[0],'carga'); }};
 v.p_volta=!F&&r===0&&!ords.length; v.p_prev=r===1;
 const ap=[].concat(...ords.map(o=>prAPesar(c,o.id)));
 if(r===1) DCH(v,'hdr','atrasado · prev. '+(s.np?'10:20':'09:10'),'red'); else DCH(v,'hdr',ords.length?(ords.length+(ords.length>1?' colheitas em execução':' colheita em execução')+(ap.length?' · '+ap.length+' a pesar':'')):'nenhuma colheita em execução',ords.length?'green':'gray');'''

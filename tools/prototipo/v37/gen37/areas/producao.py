@@ -512,7 +512,13 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
       sec:ap.map(g=>({t:'Pesar a '+g.id,go:()=>self.setState({pr_pan:{g:'g_cg',id:g.id},pr_sel:{g:'g_cg',id:g.id},pr_form:null,pr_err:'',pr_modo:null})}))}; }
   else if(pan&&P.cargas[pan.id]) PP=prPanCarga(self,c,P.cargas[pan.id]);
   prPainel(self,v,PP); }
-function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const P=prP(cenGet());
+function prHash(self){ if(self.__prh) return; self.__prh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const c=cenGet(); const P=prP(c);
+  /* COLH-APONT (GESTAO-1810 §2): "Registrar carga ›" da Colheita abre a pesagem nova com a O.S. e o dia herdados, à vista e corrigíveis; o
+     endereço é consumido (recarregar não reabre o formulário) e a chave nasce aqui, com o formulário (R-07) */
+  const nm=/^nova:(OS-\d+):(\d{4}-\d\d-\d\d)$/.exec(h); if(nm){ const o=(c.ordens||{})[nm[1]]; if(!o||!prEhColheita(o)) return;
+    const st={pr_pan:{g:'nova'},pr_sel:null,pr_form:{os:o.id,dcol:prDdMm(nm[2])},pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:prChave('W-REC')};
+    const fz=prFazDaOS(c,o), cu=(PRDC.cult[prCultDaOS(c,o)]||{}).cultura||''; if(!prFazOk(self,fz)) st.mf_faz=fz; if(!prCultOk(self,cu)) st.mf_cult='Todas';
+    try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} setTimeout(()=>self.setState(st),0); return; }
   if(P.cargas[h]&&P.cargas[h].sinc!==false) setTimeout(()=>self.g2pick('g_cg',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
 const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ prHash(self); _EXV(self,v); };
 '''
@@ -564,7 +570,7 @@ function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.
   if(pd) return prIndTxt(prUnpInd(cu,pd,op))+' ponderada sobre '+prFmtT(pd.area,2)+' ha'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':'');
   return nap?prPrtvResTxt(cu,{apurar:true},op)+' · '+n:n; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
-  self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
+  self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:prChave('W-COLH')}); };   /* COLH-APONT: a chave nasce quando o painel abre (R-07) */
   const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf)&&prCultOk(self,k.cultura)&&prTalOk(self,k.local); });
   const X=cids.map(id=>prTal(c,id)); self._X=X; const por={};
   X.forEach(x=>{ (por[x.k.cultura]=por[x.k.cultura]||[]).push(x); });
@@ -626,8 +632,13 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
       {l:'Custo R$/'+R.u.un,v:'sem custo realizado · Controle'},{l:'Unidade de produtividade',v:unT}],
     secs:(k.semanal?[{t:'Contagens de frutos',rows:cnts,vazio:'Nenhuma contagem: colete no app (MB-07).'}]:[]).concat([{t:'Rascunho (não publicado)',rows:ras,vazio:'Sem rascunho.'},{t:'Versões publicadas',rows:vers,vazio:'Nenhuma versão publicada.'},
       {t:k.semanal?'Passes (O.S. de colheita por semana)':'Ordens de colheita',rows:pas,vazio:'Nenhuma O.S. de colheita.'},{t:'Cargas do talhão',rows:cgs,vazio:'Nenhuma carga.'},{t:'Resultado',rows:res}]),err:self.state.pr_err};
-  const ac=X.ac; if(ac){ if(ac.h) PPx.prim={t:ac.t,h:ac.h};
-    else if(ac.k==='publicar'){ const par0=prParam(c,k.id);
+  /* COLH-APONT (GESTAO-1810 §2): com O.S. de colheita liberada ou em execução a primária é apontar; o passo da previsão (fc) vira secundária */
+  const ac=X.ac, ap=!!(ac&&ac.k==='apontar'), fc=ap?X.ac0:ac; const modoPub=ap&&self.state.pr_modo==='publicar'&&fc&&fc.k==='publicar';
+  PPx.secs.unshift(prSecAp(self,c,X));
+  if(ap&&!modoPub) prPanAp(self,c,X,PPx,fc);
+  else if(fc){ if(ap){ PPx.next=fc.x.charAt(0).toUpperCase()+fc.x.slice(1)+' · '+fc.q+'.'; PPx.sec=[{t:'Apontar colheita',go:()=>self.setState({pr_modo:null,pr_form:null,pr_err:'',pr_ferr:null})}]; }
+    if(fc.h) PPx.prim={t:fc.t,h:fc.h};
+    else if(fc.k==='publicar'){ const par0=prParam(c,k.id);
       const fs=k.semanal?[prFld(self,'ph','Plantas vivas por hectare',{t:'txt',im:'numeric',v:par0.plantas_ha,u:'plantas/ha',h:'Do talhão (sintético, D-10); mude se a contagem de estande mostrar outro número.'}),
                            prFld(self,'pe','Perda esperada',{t:'txt',v:prFmtT(prMul(par0.perda,100),2),u:'%',h:'Descarte e queda até a colheita.'})]:[];
       PPx.form={t:'Publicar previsão · '+prQuem('ag'),h:k.semanal?'Congela a versão nova só das semanas que ainda não começaram: '+Object.keys(X.pub.sem||{}).map(prSemTxt).join(' e ')+'. A semana em curso orienta a O.S. aberta.':'Publica a previsão da safra pela meta × área.',fields:fs};
@@ -637,8 +648,45 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
           if(!prNumOk(pe)||prNum(pe)<0||prNum(pe)>=100) fe.pe='Número de 0 a 99 (ex.: 5).';
           if(Object.keys(fe).length){ self.setState({pr_ferr:fe,pr_err:'Corrija o campo marcado: nada foi publicado.'}); return; }
           par={plantas_ha:prNum(ph),perda:prDiv(prNum(pe),100)}; }
-        prRun(self,x=>prPublicar(x,k.id,g2perfil(),par),{pr_form:null}); }}; } }
+        prRun(self,x=>prPublicar(x,k.id,g2perfil(),par),{pr_form:null,pr_modo:null}); }}; } }
   return PPx; }
+/* ---------- COLH-APONT · apontar colheita no painel do talhão (GESTAO-1810 §2, F1) ----------
+   Regras e comando em producao.js (prApValida, prApontarColheita → cenApontar, origem web): a tela só monta o formulário e a lista.
+   Leve e fluido (proprietário, 19/10/2026): só área e data obrigatórias, data já com hoje (atalhos Hoje e Ontem), área sem valor anterior,
+   um clique em "Apontar" grava, sem confirmação extra. Duplo clique: o 2º clique repete a mesma chave e o mesmo conteúdo (R-07) */
+function prPorTxt(p){ if(!p) return ''; if(typeof p==='string') return p; const pp=Object.keys(p.papeis||{})[0]; return (pp&&typeof g2ator==='function'?g2ator(p,pp):'')||p.k||''; }
+function prApDiaForm(self){ const d=prIsoDe(prFval(self,'d',prDdMm(prHoje()))); return (d&&d<=prHoje())?d:prHoje(); }
+function prSecAp(self,c,X){ const k=X.k; const un=prUn(k.cultura).prtv;
+  const rows=prApLista(c,k.id).map(x=>{ const a=x.a, r=x.r; const st=a.sinc===false?'no aparelho':a.st; const cor=a.st==='Conferido'?'ok':((a.st===CEN_AP_DUP||a.sinc===false)?'red':'');
+    const quem=a.origem==='app'?'pelo app · '+(a.quem||'campo'):'pela web'+((r&&r.por)?' · '+r.por:'');   /* quem apontou: no app, o operador; na web, o perfil que registrou */
+    return {c:[[a.d,'b'],x.o.id+' · dia '+a.dia,prFmtT(a.ha,2)+' ha',a.h?prFmtT(a.h,1)+' h':'',[st,cor],quem,(r&&r.umid!==null&&r.umid!==undefined)?'umidade '+prFmtT(r.umid,1)+' %':'',
+      (r&&r.perda!==null&&r.perda!==undefined)?'perdas '+prFmtT(r.perda,2)+' '+un:'',a.obs?'obs.: '+a.obs:''].filter(Boolean)}; });
+  if(!X.apo){ const m=prApMotivo(c,X); const dup=m.l&&X.ac&&X.ac.h===m.l.h;   /* o mesmo caminho da primária não se repete no painel */
+    rows.unshift({c:[[m.t,'mut']].concat(m.sem?[[m.sem,'mut']]:[]),l:(m.l&&!dup)?m.l:null}); }
+  return {t:'Apontamentos da colheita',rows,vazio:'Nenhum apontamento.'}; }
+function prPanAp(self,c,X,PPx,fc){ const k=X.k, o=X.apo; const u=prUn(k.cultura);
+  const secF=fc?[{t:fc.t,go:fc.h?(()=>{ location.href=fc.h; }):(()=>self.setState({pr_modo:'publicar',pr_form:null,pr_err:'',pr_ferr:null}))}]:[];
+  if(o.etapa!=='Em execução'){   /* cenApontar soma só em ordem em execução: a regra não muda; o próximo passo leva à ordem */
+    PPx.next='A '+o.id+' está liberada e ainda não começou: inicie a execução para apontar a colheita · '+prResp(o)+'.'; PPx.prim={t:'Iniciar a '+o.id,h:'OS.dc.html#'+o.id}; PPx.sec=secF; return; }
+  if(!self.state.pr_ch) self.state.pr_ch=prChave('W-COLH');   /* painel aberto sem passar pelo g2pick: a chave nasce aqui e fica até o sucesso */
+  const hj=prDdMm(prHoje()), on=prDdMm(prDiaMais(prHoje(),-1)); const sd=prApSaldo(o);
+  const fd=prFld(self,'d','Data',{t:'txt',im:'numeric',v:hj,u:'dd/mm',ph:'dd/mm',opts:[{v:hj,t:'Hoje '+hj},{v:on,t:'Ontem '+on}]}); fd.isOpts=true;
+  const fs=[fd,prFld(self,'ha','Área colhida',{t:'txt',u:'ha',h:'Saldo a colher: '+prFmtT(sd,2)+' ha ('+o.id+' · feito '+prFmtT(o.realizado||0,2)+' de '+prFmtT(o.area||0,2)+' ha)'}),
+    prFld(self,'h','Horas de colhedora (opcional)',{t:'txt',u:'h'})];
+  if(u.grao||u.campo) fs.push(prFld(self,'umid','Umidade média (opcional)',{t:'txt',u:'%',h:'Só registro: o desconto é o da pesagem.'}));
+  fs.push(prFld(self,'perda','Perdas na colheita (opcional)',{t:'txt',u:u.prtv,h:'Só registro, por amostragem.'}));
+  fs.push(prFld(self,'obs','Observação (opcional)',{t:'txt',im:'text'}));
+  const F={os:o.id,d:prFval(self,'d',hj),ha:prFval(self,'ha',''),h:prFval(self,'h',''),umid:prFval(self,'umid',''),perda:prFval(self,'perda',''),obs:prFval(self,'obs',''),chave:self.state.pr_ch,por:prPorTxt(g2perfil())};   /* lidos no desenho (R-07) */
+  let conf=''; try{ conf=CEN_CONF_AP(); }catch(e){ conf=''; }
+  PPx.form={t:'Apontar colheita · '+o.id,h:'Entra provisório'+(conf?'; '+conf+' confere no dia':'')+'.',fields:fs};
+  PPx.prim={t:'Apontar',go:()=>{ const fe=prApValida(F); if(Object.keys(fe).length){ self.setState({pr_ferr:fe,pr_err:'Corrija o campo marcado: nada foi gravado.'}); return; }
+    prRun(self,x=>prApontarColheita(x,F),{pr_form:null,pr_ch:prChave('W-COLH')}); }};   /* a chave morre no sucesso; o próximo apontamento abre outra */
+  PPx.sec=secF;
+  /* cargas do dia (o da data do formulário) e o caminho para registrar a carga no Recebimento, com a O.S. e o dia preenchidos */
+  const dia=prApDiaForm(self); const cg=prCargas(c,g=>g.sinc!==false&&g.dcol===dia&&(g.origem||[]).some(x=>x.cult===k.id)).sort((a,b)=>a.id.localeCompare(b.id));
+  const rows=cg.map(g=>{ const x=g.origem.find(y=>y.cult===k.id); return {c:[[g.id,'b'],g.st,(g.st==='A pesar'||g.st==='Descartada')?(g.est_cx?'~'+g.est_cx+' caixas (não soma)':'—'):prFmtT(x.kg,2)+' kg',g.lote||''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+g.id}}; });
+  rows.push({c:[[cg.length?cg.length+(cg.length>1?' cargas':' carga')+' em '+prDdMm(dia):'Nenhuma carga em '+prDdMm(dia),'mut']],l:{t:'Registrar carga',h:'CARGA.dc.html#nova:'+o.id+':'+dia}});
+  PPx.secs.unshift({t:'Cargas do dia '+prDdMm(dia),rows}); }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});
   const XS=self._X||[]; const byId={}; XS.forEach(x=>{ byId[x.k.id]=x; });
@@ -657,7 +705,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   /* ação primária: do talhão selecionado; sem seleção, a do 1º talhão da lista em que a regra dá passo */
   const sel=st.pr_sel; let X=sel&&sel.g==='g_tal'?byId[sel.id]:null; let suf='';
   if(!X){ const ord=[].concat(...(GR('g_tal').rows||[]).map(r=>r.kids||[])).map(r=>byId[r.id]).filter(Boolean); X=ord.find(x=>x.ac)||null; if(X) suf=' do '+X.k.local; }
-  const ac=X&&X.ac; prPrim(v,ac?(ac.h?{t:ac.t+suf,h:ac.h}:{t:ac.t+suf,go:()=>self.setState({pr_sel:{g:'g_tal',id:X.k.id},pr_pan:{g:'g_tal',id:X.k.id},pr_form:null,pr_err:''})}):null);
+  const ac=X&&X.ac; prPrim(v,ac?(ac.h?{t:ac.t+suf,h:ac.h}:{t:ac.t+suf,go:()=>self.g2pick('g_tal',X.k.id)}):null);   /* COLH-APONT: o mesmo caminho do clique na linha (chave nova) */
   const nc=XS.filter(x=>x.sit==='Em colheita'), ap=[].concat(...XS.map(x=>x.R.aPesar)).length;   /* déficit de oferta: Painel comercial (P7) */
   prStatus(v,[nc.length?nc.map(x=>x.k.local).join(', ')+' em colheita':'nenhum talhão em colheita',ap?ap+(ap>1?' cargas a receber':' carga a receber'):''].filter(Boolean).join(' · '),ap?'yellow':'green');
   const pan=st.pr_pan; prPainel(self,v,pan&&pan.g==='g_tal'&&byId[pan.id]?prPanTal(self,c,byId[pan.id]):null); }

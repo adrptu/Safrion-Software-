@@ -606,7 +606,7 @@ function prCancelarReserva(c, id, motivo, ator) { const P = prP(c, 1); const r =
   prMov(c, { tipo: 'cancelamento de reserva', lote: r.lote, kg: -r.kg, fis: false, reserva: id, pedido: r.pedido, quem: r.canc.quem, obs: mot });
   const L = P.lotes[r.lote]; return { msg: id + ' cancelada (' + mot + '): ' + prLoteTxt(L, r.kg) + ' voltam ao disponível do ' + r.lote + '.' }; }
 /* gancho de teste/inspeção (o script da tela roda isolado) */
-try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prCancelarReserva, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga }; } catch (e) {}
+try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prCancelarReserva, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga, prApontarColheita, prApLista }; } catch (e) {}
 
 /* ---------- situação do talhão na colheita (COLH, spec §3.1) · fonte única da tela Previsão e colheita e da camada Colheita do Mapa (14/10/2026) ---------- */
 const PR_SITORD={'Em colheita':0,'Programada':1,'Prevista':2,'Colhida':3,'Sem previsão':4};
@@ -628,10 +628,55 @@ function prTal(c,cid){ const k=PRDC.cult[cid]; const R=prResultado(c,cid); const
     if(pub&&!(R.comecou)) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar a previsão da safra pela meta'};
     else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:'acompanhar a '+(exec||prog).id};
     else if(perto&&atv) ac={k:'programar',t:'Programar colheita',h:'OS.dc.html#nova:'+cid+':'+atv+':'+jan,q:agO,x:'emitir a O.S. de colheita'}; }
+  /* COLH-APONT (GESTAO-1810 §2, C1): com O.S. de colheita Em execução (ou só Liberada) a primária do talhão é "Apontar colheita"; o passo da
+     previsão que valeria (contar, publicar, programar) fica em ac0, como secundária do painel. Dano evitado: colheita do dia sem registro */
+  const apo=abertas.find(o=>o.etapa==='Em execução')||abertas.find(o=>o.etapa==='Liberadas')||null; let ac0=null;
+  if(apo){ ac0=ac&&ac.k!=='abrir'?ac:null; ac={k:'apontar',t:'Apontar colheita',os:apo.id,q:prResp(apo),x:apo.etapa==='Em execução'?'apontar a colheita do dia na '+apo.id:'iniciar a '+apo.id+' para apontar a colheita'}; }
   const nx=ac?(ac.x.charAt(0).toUpperCase()+ac.x.slice(1)+' · '+ac.q):(k.semanal?'acompanhar':(prJanAnual(k)?'colheita a partir de '+prBr(prJanAnual(k))+'/'+prJanAnual(k).slice(2,4)+' · nada a fazer agora':'sem janela de colheita'));
-  return {k,R,sit,ac,nx,ult,cnt,pub,exec,prog,oss}; }
+  return {k,R,sit,ac,ac0,apo,nx,ult,cnt,pub,exec,prog,oss}; }
 /* previsão vigente na linha: semana em curso ou a próxima publicada; anual, a safra */
 function prPrevTxt(c,X){ const k=X.k; const vs=prP(c).previsoes[k.id]||[];
   if(!k.semanal){ const v=vs.filter(x=>x.safra!==undefined).slice(-1)[0]; return v?{t:prUnTxt(k.cultura,v.safra,0)+' · safra (v'+v.v+')',v:v.safra}:{t:'sem previsão publicada',v:null}; }
   const s0=prSem(prHoje()); const ws=[...new Set([].concat(...vs.map(v=>Object.keys(v.sem||{}))))].sort(); const w=ws.find(x=>x>=s0)||ws[ws.length-1];
   if(!w) return {t:X.cnt?'rascunho pela contagem':'sem previsão publicada',v:null}; const v=prVersaoSem(c,k.id,w); return {t:prUnTxt(k.cultura,v.sem[w],1)+' · '+prSemTxt(w)+' (v'+v.v+')',v:v.sem[w]}; }
+
+/* ---------- COLH-APONT · apontamento da colheita pela web (docs/gestao/GESTAO-1810.md §2, F1) ----------
+   Área, data, horas e observação gravam pelo comando único do apontamento (cenApontar, origem web, chave do formulário): a mesma duplicidade,
+   o mesmo saldo da ordem e a mesma conferência do app (R-02, R-07; ENG-021). Umidade média e perdas são só registro da colheita: ficam em
+   c.producao.apont, pela chave do apontamento, nunca por cima do ap. Quantidade nunca vem do último valor (AGENTS §3.3). */
+/* saldo a colher da ordem: o mesmo do app (MB-10) e do comando, descontando o que ainda está no aparelho sem sinal */
+function prApSaldo(o) { return Math.max(0, (o.saldo || 0) - (typeof cenApPend === 'function' ? cenApPend(o) : 0)); }
+/* validação do formulário (uma regra, dois usos: o erro junto do campo na tela e a recusa do comando). Devolve {campo: mensagem} */
+function prApValida(k, hoje) { const e = {}; const h0 = hoje || prHoje(); const vazio = x => x === undefined || x === null || String(x).trim() === '';
+  const iso = prIsoDe(k.d, h0); const real = iso && new Date(iso + 'T12:00:00Z').toISOString().slice(0, 10) === iso;
+  if (!real) e.d = 'Informe a data (dd/mm) ou toque num atalho.'; else if (iso > h0) e.d = 'Data futura: aponte só o que já foi colhido (hoje é ' + prDdMm(h0) + ').';
+  if (vazio(k.ha) || !prNumOk(k.ha) || !(prNum(k.ha) > 0)) e.ha = 'Informe a área colhida (maior que 0 ha).';
+  if (!vazio(k.h) && !(prNumOk(k.h) && prNum(k.h) > 0)) e.h = 'Horas: número maior que 0 (ex.: 8).';
+  if (!vazio(k.umid) && !(prNumOk(k.umid) && prNum(k.umid) > 0 && prNum(k.umid) < 100)) e.umid = 'Umidade: número entre 0 e 100 (ex.: 14,5).';
+  if (!vazio(k.perda) && !(prNumOk(k.perda) && prNum(k.perda) >= 0)) e.perda = 'Perdas: número igual ou maior que 0.';
+  return e; }
+/* k = {os, d (dd/mm), ha, h?, umid?, perda?, obs?, chave, por (quem registrou)} · mesma chave e mesmo conteúdo = o mesmo registro; outro = conflito */
+function prApontarColheita(c, k) { const o = (c.ordens || {})[k.os]; if (!o || !prEhColheita(o)) throw new Error('O.S. de colheita não encontrada.');
+  const e = prApValida(k); const m = Object.keys(e); if (m.length) throw new Error(e[m[0]]);
+  const num = x => (x === undefined || x === null || String(x).trim() === '') ? null : prNum(x); const reg = { umid: num(k.umid), perda: num(k.perda) };
+  const R = cenApontar(c, { os: k.os, d: k.d, ha: prNum(k.ha), h: num(k.h) === null ? undefined : num(k.h), obs: String(k.obs || '').trim(), origem: 'web', chave: k.chave });
+  const P = prP(c, 1); P.apont = P.apont || {}; const ja = P.apont[k.chave];
+  if (R.repetido) { if (ja && (ja.umid !== reg.umid || ja.perda !== reg.perda)) throw prConflito(k.chave, 'dia ' + R.ap.dia + ' da ' + k.os);
+    return { msg: 'Apontamento já registrado (' + k.os + ' · ' + prFmtT(R.ap.ha, 2) + ' ha em ' + R.ap.d + '): nada somado de novo.', ap: R.ap, repetido: true }; }
+  P.apont[k.chave] = { os: k.os, dia: R.ap.dia, d: k.d, umid: reg.umid, perda: reg.perda, por: k.por || '', at: R.ap.at };
+  let conf = ''; try { conf = CEN_CONF_AP(); } catch (x) { conf = ''; }
+  if (R.ap.st === CEN_AP_DUP) return { msg: 'Retido como duplicidade a conferir: a ' + k.os + ' já tem apontamento em ' + k.d + ' (' + cenApDupTxt(cenApDupVivos(o, R.ap)) + '). Nada somado' + (conf ? ' até a decisão de ' + conf : '') + '.', ap: R.ap };
+  return { msg: 'Colheita apontada: ' + prFmtT(R.ap.ha, 2) + ' ha em ' + k.d + ' na ' + k.os + ', provisório' + (conf ? ' até a conferência de ' + conf : '') + '. Saldo a colher: ' + prFmtT(prApSaldo(o), 2) + ' ha. A produção só muda com a carga pesada.', ap: R.ap }; }
+/* apontamentos do cultivo, do dia mais recente ao mais antigo: todo relato das O.S. de colheita menos o previsto (plano, não fato), com o
+   registro da colheita (umidade, perdas, quem registrou na web) pela chave */
+function prApLista(c, cid) { const A = prP(c).apont || {}; const out = [];
+  prOsCult(c, cid).forEach(o => (o.ap || []).filter(a => a.st !== 'Previsto').forEach(a => out.push({ o, a, iso: prIsoDe(a.d), r: (a.chave && A[a.chave]) || null })));
+  return out.sort((x, y) => (x.iso < y.iso ? 1 : (x.iso > y.iso ? -1 : (y.a.dia - x.a.dia)))); }
+/* por que o talhão não aponta agora e o próximo passo com verbo (C3): sem O.S. de colheita liberada ou em execução */
+function prApMotivo(c, X) { const k = X.k; const ab = X.oss.filter(o => o.etapa !== 'Encerradas'); const alib = ab.find(o => o.etapa === 'A liberar'), conf = ab.find(o => o.etapa === 'Em conferência');
+  if (alib) return { t: alib.id + ' ainda a liberar: libere a ordem para apontar a colheita.', l: { t: 'Abrir ' + alib.id, h: 'OS.dc.html#' + alib.id } };
+  const atv = (PRDC.colhAtv || {})[k.plano]; let h = '';
+  if (atv) { let jan; if (k.semanal) { let w = prSemMais(prSem(prHoje()), 1); while (X.oss.some(o => prSemDaOS(o) === w)) w = prSemMais(w, 1); jan = prSemIni(w); } else jan = prJanAnual(k) || prHoje();
+    h = 'OS.dc.html#nova:' + k.id + ':' + atv + ':' + jan; }
+  const t = (conf ? conf.id + ' em conferência: a colheita dela terminou. ' : '') + 'Sem O.S. de colheita liberada ou em execução neste talhão: programe a colheita para apontar.';
+  return { t, l: h ? { t: 'Programar colheita', h } : null, sem: !h ? 'O plano do cultivo não tem atividade de colheita: inclua-a no plano agronômico.' : '' }; }
