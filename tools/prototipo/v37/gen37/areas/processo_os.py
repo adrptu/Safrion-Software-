@@ -197,10 +197,12 @@ def _gatilho(g):  # gatilho da atividade do plano no formato das ordens do regis
 def _nova_ordem_dados():
     safs=[s for s in D2.SAFRAS if not s['ro']]
     import cenario
-    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'],cultura=c['cultura'])
+    from areas.processo_planos import VER_APLICADA as _VA   # PA-OPER F1: o cultivo fica na versão dele (40.3); a O.S. lê a instrução dessa versão
+    cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'],cultura=c['cultura'],
+                        ver=_VA.get(c['id'],(D2.PLANO.get(c['plano']) or {}).get('versao')))
                    for c in D2.CULTIVOS.get(s['id'],[])] for s in safs}
     # atividade do plano com seus insumos (grupo, produto, dose/ha): a ordem nova leva dose × área, como as ordens do registro
-    planos={p['id']:dict(nome=p['nome'],versao=p['versao'],atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
+    planos={p['id']:dict(nome=p['nome'],versao=p['versao'],params=p.get('params') or {},atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
                    ins=[dict(g=x['grupo'],p=x['prod'],dose=x['dose'],un=x['un']) for x in a['prods']]) for a in p['atividades']]) for p in D2.PLANOS}
     prods={}
     for pl in D2.PLANOS:
@@ -705,7 +707,24 @@ function osOrigem(o,x){ if(o.ajv&&(x.d0===undefined||Math.abs(Number(x.d0)-Numbe
 function osc_nova(c,no){ if(c.ordens[no.id]) throw new Error(no.id+' já existe.');
   const ins=(no.ins||[]).map(x=>({g:x.g||'',p:x.p,dose:x.dose,un:x.un,tot:x.tot,emb:(OSD.nova.emb||{})[x.p]||'',orig:x.orig||''}));   /* g: o grupo vai junto (A4: corretivo fora da trava de agrotóxico) */
   c.ordens[no.id]={id:no.id,tipo:no.tipo,talhao:no.talhao,area:no.area,etapa:'A liberar',versao:no.versao,realizado:0,saldo:no.area,resp:no.resp,ins,req:null,selos:no.selos,ap:[],reservado:false,osc:{novo:no}};
+  if(no.instrucao) c.ordens[no.id].instrucao=Object.assign({},no.instrucao);   /* PA-OPER F1: retrato da instrução da versão do plano */
   return {msg:no.id+' emitida em A liberar. Não foi liberada: '+osLibQuemT()+' para execução.'}; }
+/* PA-OPER F1 (decisão 10, transporte mínimo): a versão do plano publicada no cenário (c.pa, gravada pela PA) ou a semente; o cultivo fica na
+   versão dele (40.3) e a O.S. nova lê a instrução dessa versão */
+function osPlanoVer(cc,pid,ver){ const b=OSD.nova.planos[pid]; if(!b) return null; const pa=((cc||{}).pa||{})[pid]; const vs=(pa&&pa.versoes)||{};
+  if(vs[ver]) return {versao:Number(ver),params:vs[ver].params||{},atividades:vs[ver].atividades||[]};
+  // a semente só responde pela versão dela: pedir uma versão que não está guardada nem é a da semente devolve nada (calda pendente),
+  // nunca os parâmetros de outra versão com o número da pedida (revisão Codex 6271563229, item 3)
+  if(Number(ver)===Number(b.versao)) return {versao:b.versao,params:b.params||{},atividades:null};
+  return null; }
+function osPlanoVig(cc,pid){ const b=OSD.nova.planos[pid]; const pa=((cc||{}).pa||{})[pid]; return pa&&pa.versao?Number(pa.versao):(b?b.versao:null); }
+function osCaldaPlano(cc,pid,ver,op,aid){ const pv=osPlanoVer(cc,pid,ver); if(!pv||typeof opParam!=='function') return {valor:null,origem:'pendente'};
+  const at=(pv.atividades||[]).find(x=>x.id===aid)||{}; return opParam(at,(pv.params||{})[op]||{},'calda'); }
+// O.S. em A liberar emitida de versão anterior: o plano vigente difere? (P13; só informação: a O.S. não muda sozinha, 39.7)
+function osPlanoDif(cc,o){ const ins=o&&o.instrucao; if(!ins||!ins.plano||o.etapa!=='A liberar') return ''; const vig=osPlanoVig(cc,ins.plano);
+  if(!(vig>Number(ins.planoVer))) return ''; const k=((o.osc||{}).novo||{}).keys||[]; const aid=String(k[0]||'').split('|')[1]||''; const op=(((o.osc||{}).novo||{}).atv||{}).op||'Pulverização';
+  const n=osCaldaPlano(cc,ins.plano,vig,op,aid).valor; if(n===ins.vazao||(n===null&&!ins.vazao)) return '';
+  return 'Plano v'+vig+' difere: volume de calda '+(ins.vazao?nd(ins.vazao)+' L/ha':'pendente')+' nesta O.S. (v'+ins.planoVer+') × '+(n===null?'pendente':nd(n)+' L/ha')+' na v'+vig+'. A O.S. não muda sozinha.'; }
 function nvAtvs(c,pl){ const plO={id:c.plano,versao:pl.versao,atividades:pl.atv.map(a=>({id:a.id,nome:a.nome,op:a.op,gat:a.gat,prods:(a.ins||[]).map(x=>({grupo:x.g,prod:x.p,dose:x.dose,un:x.un}))}))};
   const SA=soloAtividades({id:c.id,plano:plO},{},((cenGet().solo)||{}).aceites||{});
   return SA.atvs.map(x=>({id:String(x.a.id),nome:x.a.nome,op:x.a.op,gat:x.incl?('data '+soloBr(x.a.g.data)):(x.a.gat||''),incl:!!x.incl,laudo:x.ac?x.ac.laudo:'',
@@ -900,6 +919,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_prep=prep; v.pan_hasPrep=!!prep&&['Liberadas','Em execução'].indexOf(o.etapa)>=0;
   if(a.op==='Pulverização'){ const p=cenPreparoOrdem(rcC,o); v.pan_prep=cenPreparoTxt(p); v.pan_hasPrep=['Liberadas','Em execução'].indexOf(o.etapa)>=0; }
   v.pan_fichas=o.id==='OS-0424';
+  { const dif=osPlanoDif(rcC,rcC.ordens[o.id]||o); v.pan_pldif=dif; v.pan_hasPldif=!!dif; }   /* PA-OPER F1 (P13) */
   // retirada: o link ao almoxarifado só enquanto houver saldo a entregar; entregue e confirmado, ficam só as fichas de carga
   const exe=(o.ins||[]).length>0&&['Liberadas','Em execução'].indexOf(o.etapa)>=0;
   v.pan_retLink=exe&&(!o.r||!o.r.itens.length||o.r.itens.some(i=>cenSaldoEntregar(i)>1e-6));
@@ -1603,7 +1623,11 @@ function EXTRAVALS(self,v){
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar',orig:x.orig}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
-      const no={id,novo:true,jan:cur.jan,keys:[semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
+      let instrucao=null; if(typeof opFamilia==='function'&&opFamilia(a.op)==='pulverizacao'&&!a.incl){ const ver=c.ver||pl.versao; const cal=osCaldaPlano(cenGet(),c.plano,ver,a.op,a.id);
+        const aidP=cj&&typeof cenPulvDoConj==='function'?cenPulvDoConj(cj.conj):null; const tq=aidP?cenCadTanque(aidP):null;
+        instrucao={versao:'v1',plano:c.plano,planoVer:Number(ver),origem:'plano '+pl.nome+' v'+ver+' · '+a.op+' ('+cal.origem+')'};
+        if(cal.valor!==null) instrucao.vazao=cal.valor; if(tq) Object.assign(instrucao,{tanque:tq,conjunto:cj.conj}); }
+      const no={id,novo:true,instrucao,jan:cur.jan,keys:[semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
         faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO(),prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:a.incl?('Análise de solo · '+a.laudo):(pl.nome+' v'+pl.versao),conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
@@ -1835,6 +1859,7 @@ def _painel():
       + passo
       + sec('ins','Insumos e doses',f'<sc-if value="{H("pan_hasIns")}" hint-placeholder-val="{T()}">{inshead}<sc-for list="{H("pan_ins")}" as="i" hint-placeholder-count="2">{insrow}</sc-for></sc-if>'
       f'<sc-if value="{H("pan_semIns")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; color: {MUTED}; padding: 6px 0;">{H("pan_semInsT")}</div></sc-if>'
+      f'<sc-if value="{H("pan_hasPldif")}" hint-placeholder-val="{F()}"><div role="note" style="font-size: 12.8px; line-height: 1.45; padding: 6px 10px; border-radius: 8px; background: #FFF3D6; color: #8A5A00; font-weight: 600;">{H("pan_pldif")}</div></sc-if>'
       f'<sc-if value="{H("pan_hasRet")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px; padding-top: 6px;">{lab(H("pan_retT"))}'
       f'<sc-if value="{H("pan_hasPrep")}" hint-placeholder-val="{F()}"><div style="font-size: 13px; line-height: 1.45;">{H("pan_prep")}</div></sc-if>'
       f'<div style="display: flex; gap: 8px; flex-wrap: wrap;"><sc-if value="{H("pan_retLink")}" hint-placeholder-val="{T()}"><a href="EST.dc.html" style="{_MINI} text-decoration: none;">Retirar no almoxarifado ›</a></sc-if>'

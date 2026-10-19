@@ -1,0 +1,14 @@
+R1 pa_oper_unit rc=0 0s :: 44/44 OK
+R1 pa_regras_test rc=1 0s :: RESULTADO 19/19
+R1 pa_oper_versao_test rc=0 0s :: 3/3 OK
+R1 pa_oper_cen_test rc=0 3s :: 7/7 OK
+R1 pa_oper_test rc=0 382s :: RESULTADO: 24 ok · 0 falhas
+R1 os_cenario_test rc=0 124s :: RESULTADO: 22/22 ok
+R1 FIM
+R3 ex38_test rc=1 0s :: 16/17 cenários Node; P3: 400 combinações
+R3 carencia_test rc=0 144s :: RESULTADO: 90/90 verificações
+R3 ficha_pivo_test rc=0 77s :: RESULTADO: OK 21/21
+R3 demanda_unica_test rc=0 11s :: RESULTADO: 71 ok · 0 falhas
+R3 FIM
+R1 pa_regras_test: rc=1 no resumo vinha da contagem fixa 18 no teste (corrigida para 19); reexecutado: rc=0, 19/19
+R2 pa_lista_test: 24 ok · 0 falhas (faixa R2 interrompida depois dele para manter menos de 4 navegadores; o restante rodou em R3)

@@ -1,0 +1,6 @@
+OK    P15a demanda igual antes e depois nas 4 safras (S2627, S27SF, S2526, LG2627), todos os insumos e campos, inclusive por data 
+OK    P15b impressão digital do conteúdo dos 8 planos igual (sem o campo novo "params"): 9c2698f58486 
+OK    P15c ajuste c2 preservado: a6|0 = 0,60 L/ha antes e depois 
+OK    P15d campos novos sem valor de código: só a semente de demonstração (SOJA-AT · Pulverização · 100 L/ha); nenhuma atividade com calda ou alvo 
+OK    M1 contraprova: calda por código em todos os planos reprova o P15d (a demanda segue igual: a calda não entra na demanda de produto) 
+RESULTADO: 5 ok · 0 falhas

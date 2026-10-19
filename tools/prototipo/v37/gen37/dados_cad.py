@@ -71,7 +71,7 @@ ATIVOS=[
  dict(id='a02',nome='Trator 02',modelo='MF 7719',classe='Trator',pot=190,custo_h=180,cont=2988,exige='Não',local='Santa Rita · T4',fonte='Fabricante'),
  dict(id='a03',nome='Trator 03',modelo='MF 4292',classe='Trator',pot=110,custo_h=150,cont=5120,exige='Não',local='Galpão 1',fonte='Fabricante'),
  dict(id='a04',nome='Trator 04',modelo='JD 5078E',classe='Trator',pot=78,custo_h=150,cont=3410,exige='Não',local='Galpão 1',fonte='Fabricante'),
- dict(id='a05',nome='Pulverizador PJ-3030',modelo='Uniport 3030',classe='Pulverizador',barra=36,tanque=3000,custo_h=95,cont=1542,exige='Sim',calib='2026-09-15',interv=90,local='Santa Rita · T1',fonte='Ensaio da fazenda'),
+ dict(id='a05',nome='Pulverizador PJ-3030',modelo='Uniport 3030',classe='Pulverizador',barra=36,tanque=3000,esp_bicos=0.5,ponta='leque 110-015',pressao=3,custo_h=95,cont=1542,exige='Sim',calib='2026-09-15',interv=90,local='Santa Rita · T1',fonte='Ensaio da fazenda'),
  dict(id='a06',nome='Plantadeira 24 linhas',modelo='PD-12',classe='Plantadeira',linhas=24,esp=0.5,custo_h=140,cont=886,exige='Sim',calib='2026-09-10',interv=180,local='Galpão 1',fonte='Ensaio da fazenda'),
  dict(id='a07',nome='Distribuidor 3 t',modelo='Lancer 3000',classe='Distribuidor',larg=24,carga=3000,custo_h=45,cont=640,exige='Sim',calib='2026-08-01',interv=90,local='Galpão 1',fonte='Fabricante'),
  dict(id='a08',nome='Colhedora Axial-Flow 7250',modelo='Case IH 7250',classe='Colhedora',plat=10,custo_h=950,cont=2150,exige='Não',local='Galpão 1',fonte='Fabricante'),
@@ -228,3 +228,8 @@ ESTR=[('d1','Empresa','01','Santa Rita Agro','','','2024-07-01','','Conta do ERP
 from dados_lagoa_fonte import LG_FONTE, LG_GEO, LG_PIVOS, LG_PERIMETROS, LG_AMBIENTAL, LG_AGUA
 FAZENDAS.append(dict(id='LG',nome='Lagoa Grande',empresa='',mun='Lagoa Grande/MG',fuso=FUSOS[0],area=LG_PERIMETROS[0]['area'],posse='',arrend='',fim='',custo='',
      car=LG_PERIMETROS[0]['car'],matr='',pend='',sit='Ativa',mf=LG_PERIMETROS[0]['mf']))
+
+# PA-OPER F1 (P18, EX-38 R10): curva ponta × pressão, fonte distinta da vazão alvo. Demonstração: valor de catálogo de ponta de jato plano
+# 110-015 a 3 bar (0,59 L/min); não é medição da fazenda. No software real vem do cadastro da ponta, com fonte e vigência.
+CURVA_PONTA = {'leque 110-015': [dict(bar=3, lmin=0.59)]}
+CURVA_ORIGEM = 'catálogo de ponta (demonstração)'

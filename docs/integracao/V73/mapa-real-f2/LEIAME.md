@@ -81,6 +81,12 @@ O contrato está em `../MAPA-REAL/contrato.md`, de autoria do Codex. É cópia b
    - v146: versão 164 (`1792414809-c42a`), 10 páginas trocadas, leitura de volta 10/10 por sha256; `paginas_scan` 5/5 no build com os dados reais.
 6. **Teste sintético:** `python3 -m unittest tools.geo.s2_l2a_test -v` deu 15/15.
 
+## Zoom até a fazenda inteira (proprietário, 19/10)
+Pedido: "O mapa tem que permitir mais zoom out para ter a visão da fazenda toda".
+- **Defeito:** o `lgLimites` (`areas/inicio.py`) só deixava afastar até a imagem de satélite ainda cobrir a tela inteira. Numa tela larga (1440 × 900) a fazenda ficava cortada em cima e embaixo; no celular (390 px), dos lados.
+- **Correção:** o menor zoom passa a ser o que faz a imagem inteira caber na tela, com meio nível de folga. Ao abrir, o enquadramento continua o de antes. Abrir já afastado deixava os rótulos pequenos e sobrepostos: na 1ª tentativa, 4 testes de rótulo reprovaram (`colheita_mapa`, `mapa_rotulo_real`, `mapa_solo_texto` e `solo_mapa_calor`), todos verdes na base (`base_*.log`). Com o enquadramento mantido, voltaram ao verde. Fora da imagem fica o fundo neutro do mapa. O arraste vai até uma imagem de distância de cada lado. Os botões "+" e "−" e o gesto usam o mesmo limite. As outras fazendas (desenho) e os mapas dentro das telas já mostram a fazenda inteira e não mudam.
+- **Teste novo:** `mapa_zoom_test.py`, 4/4 no build sintético; `mapa_mux_f1` 43/43 e os quatro de rótulo verdes. Verifica a fazenda inteira no menor zoom a 1440 e a 390, e o botão "−" chegando lá. A contraprova no render da `cbe4cd38` dá 1/4: Z1, Z2 e Z3 reprovam. Brutos em `brutos/zoom/`.
+
 ## Observações para o proprietário (sem valores aqui)
 - **Pivôs:** em alguns, a área declarada (HECTARE) diverge do círculo desenhado no KML ou falta o círculo. A lista vai ao proprietário no canal dele, não ao repositório.
 - **Escopo do mapa real:** a imagem e os pivôs são reais; as O.S. e a safra continuam sendo do cenário de demonstração.

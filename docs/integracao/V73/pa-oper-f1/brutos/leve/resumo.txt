@@ -1,0 +1,14 @@
+L1 pa_oper_unit rc=0 0s :: 42/42 OK
+L3 frota_unit rc=0 0s :: RESULTADO: 57/57 ok
+L1 pa_regras_test rc=0 0s :: RESULTADO 18/18
+L2 pa_lista_test rc=0 295s :: RESULTADO: 24 ok · 0 falhas
+L1 pa_oper_test rc=0 379s :: RESULTADO: 24 ok · 0 falhas
+L1 pa_oper_p15_test rc=0 28s :: RESULTADO: 5 ok · 0 falhas
+L1 FIM
+L3 mapa_frota_test rc=0 506s :: RESULTADO: 23/23 ok
+L3 mapa_real_semdado_test rc=0 17s :: RESULTADO: 3 ok · 0 falhas
+L3 pa_oper_cen_test rc=0 3s :: 7/7 OK
+L3 FIM
+L2 ds_1610_test rc=0 268s :: RESULTADO: 16 ok · 0 falhas
+L2 paginas_scan_test rc=0 396s :: RESULTADO: 5 ok · 0 falhas (147 páginas)
+L2 FIM

@@ -69,9 +69,30 @@ def _dados():
         for a in p['atividades']:
             l = atvs.setdefault(a['op'], [])
             if a['nome'] not in l: l.append(a['nome'])
-    return dict(planos=D2.PLANOS, cat=cat, ops=ops, atvs=atvs, culturas=culturas, cultivos=cults, hoje=D2.HOJE,
+    bula, alvos = _bula(cat)
+    return dict(planos=D2.PLANOS, cat=cat, ops=ops, atvs=atvs, culturas=culturas, cultivos=cults, hoje=D2.HOJE, bula=bula, alvos=alvos,
                 hist={k: [dict(v=v, at=at) for v, at in vs] for k, vs in HIST.items()},
                 popts=[dict(v='', t='Escolha o produto')] + [dict(v=k, t=f"{c['grupo']} · {k} ({c['un']})") for k, c in popts])
+
+
+def _bula(cat):
+    """PA-OPER F1 · bula de referência da AG-07 (agrofit_dados, demonstração marcada) por produto do plano: cultura × alvo → dose máxima,
+    unidade, carência e máximo de aplicações (dados_mip.uso, a derivação única). Dose por 100 L fica por 100 L: o plano converte pela calda dele."""
+    import agrofit_dados as A, dados_mip as M
+    bula, alvos = {}, {}
+    for nome in cat:
+        q = A.por_nome(nome)
+        if not q: continue
+        b = bula.setdefault(nome, dict(grupos=list(q['grupos']), usos={}))
+        if not q['grupos']: continue                       # adjuvante: sem modo de ação, a bula do plano não o confere
+        for u in q['usos']:
+            x = M.uso(q, u)
+            if not x: continue
+            dmax, un = x['dmax'], x['un'] + '/ha'
+            if x['calda']: dmax, un = round(x['dmax'] / 10, 6), x['un'] + '/100 L'   # uso() levou a 1.000 L/ha; volta ao "por 100 L" da bula
+            b['usos'].setdefault(u['cultura'], {})[u['alvo']] = dict(dmax=dmax, un=un, car=x['car'], mx=x['mx'], porCalda=bool(x['calda']), conf=bool(x['conf']))
+            alvos.setdefault(u['cultura'], set()).add(u['alvo'])
+    return bula, {k: sorted(v) for k, v in alvos.items()}
 
 
 JS = r'''
@@ -100,8 +121,24 @@ const PA_GRP={DAP:{t:'Dias após o plantio (DAP)',d:'Confira as atividades pela 
   DATA:{t:'Data do calendário',d:'Confira as atividades de data fixa, em ordem cronológica.'}};
 function paCa(a){ return (a.prods||[]).reduce((s,p)=>s+Number(p.dose||0)*Number(p.preco||0),0); }
 function paCt(atvs){ return (atvs||[]).reduce((s,a)=>s+paCa(a),0); }
-const PA_BASE=PA0.planos.map(p=>({id:p.id,nome:p.nome,cultura:p.cultura,versao:p.versao,atividades:p.atividades,rasc:null,hist:(PA0.hist[p.id]||[{v:p.versao,at:'—'}])}));
-function paPlans(self){ return self.state.pl||PA_BASE; }
+const PA_BASE=PA0.planos.map(p=>({id:p.id,nome:p.nome,cultura:p.cultura,versao:p.versao,atividades:p.atividades,params:p.params||{},rasc:null,hist:(PA0.hist[p.id]||[{v:p.versao,at:'—'}])}));
+/* PA-OPER F1 (decisão 9): o rascunho e as versões publicadas ficam no cenário compartilhado (c.pa); sair, voltar e recarregar
+   reabrem o mesmo rascunho, inclusive incompleto ou inválido. Sem cenário (página isolada), vale a semente. */
+function paCarrega(){ let sv={}; try{ const c=(typeof cenGet==='function')?cenGet():null; sv=(c&&c.pa)||{}; }catch(e){}
+  const base=PA_BASE.map(p=>sv[p.id]?Object.assign({},p,paClone(sv[p.id])):p);
+  return base.concat(Object.keys(sv).filter(k=>!PA_BASE.some(p=>p.id===k)&&sv[k]&&sv[k].nome).map(k=>paClone(sv[k]))); }
+function paPlans(self){ if(self.state.pl) return self.state.pl; if(!self.__paPl0) self.__paPl0=paCarrega(); return self.__paPl0; }
+function paSalvavel(p){ return {id:p.id,nome:p.nome,cultura:p.cultura,versao:p.versao,atividades:p.atividades,params:p.params||{},rasc:p.rasc||null,hist:p.hist||[],versoes:p.versoes||{},pubPor:p.pubPor||''}; }
+// só marca o estado como guardado depois do recibo; se a gravação falhar, o selo diz e a próxima renderização tenta de novo, sem editar
+// outra vez (revisão Codex 6271563229, item 2)
+function paGuarda(self){ const pl=self.state.pl; if(!pl||pl===self.__paPlGrav||typeof cenMudar!=='function') return;
+  const r=cenMudar(null,c=>{ c.pa=Object.assign({},c.pa||{}); pl.forEach(p=>{ const b=PA_BASE.find(x=>x.id===p.id);
+      if(b&&JSON.stringify(paSalvavel(p))===JSON.stringify(paSalvavel(b))) delete c.pa[p.id]; else c.pa[p.id]=paSalvavel(p); });
+    Object.keys(c.pa).forEach(k=>{ if(!pl.some(p=>p.id===k)) delete c.pa[k]; }); return {msg:''}; });
+  if(r&&r.erro){ self.__paErroGrav=String(r.erro); return; }
+  self.__paPlGrav=pl; self.__paErroGrav=''; self.__paRecibo=(typeof cenAgora==='function')?cenAgora():''; }
+function paNovoRasc(p){ return {v:p.versao+1,atividades:paClone(p.atividades),params:paClone(p.params||{})}; }
+function paWorkParams(p){ return p.rasc?(p.rasc.params||{}):(p.params||{}); }
 function paPlan(self,id){ return paPlans(self).find(p=>p.id===id)||null; }
 function paWork(p){ return p.rasc?p.rasc.atividades:p.atividades; }
 function paShown(p){ return p.versao?p.atividades:paWork(p); }
@@ -109,7 +146,7 @@ function paCults(pid){ return PA0.cultivos.filter(c=>c.plano===pid); }
 function paByVer(pid){ const m={}; paCults(pid).forEach(c=>{ (m[c.ver]||(m[c.ver]=[])).push(c); }); return m; }
 function paApl(pid){ const m=paByVer(pid); const vs=Object.keys(m).map(Number).sort((a,b)=>b-a); if(!vs.length) return '';
   return vs.map((v,i)=>{ const n=m[v].length; return (i===0?(n+(n>1?' cultivos':' cultivo')):String(n))+' na v'+v+(m[v].every(c=>c.ro)?' (safra encerrada)':''); }).join(' e '); }
-function paNorm(a){ return JSON.stringify({n:a.nome,o:a.op,g:paGkey(a.g),p:a.prods.map(x=>x.prod+'='+Number(x.dose))}); }
+function paNorm(a){ return JSON.stringify({n:a.nome,o:a.op,g:paGkey(a.g),p:a.prods.map(x=>x.prod+'='+Number(x.dose)),al:a.alvo||'',c:(a.calda===undefined||a.calda===null||a.calda==='')?null:Number(a.calda)}); }
 function paDiff(p){ if(!p||!p.rasc) return []; const pub={}; p.atividades.forEach(a=>{ pub[a.id]=a; }); const out=[]; const seen={};
   const pl=(x)=>x.prod+' '+paQ(x.dose)+' '+x.un+'/ha';
   p.rasc.atividades.forEach(a=>{ seen[a.id]=1; const o=pub[a.id];
@@ -118,13 +155,21 @@ function paDiff(p){ if(!p||!p.rasc) return []; const pub={}; p.atividades.forEac
     const om={}; o.prods.forEach(x=>{ om[x.prod]=x; }); const am={}; a.prods.forEach(x=>{ am[x.prod]=x; });
     a.prods.forEach(x=>{ const y=om[x.prod]; if(!y) ch.push('inclui '+pl(x)); else if(Number(y.dose)!==Number(x.dose)) ch.push(x.prod+': '+paQ(y.dose)+' → '+paQ(x.dose)+' '+x.un+'/ha'); });
     o.prods.forEach(y=>{ if(!am[y.prod]) ch.push('retira '+y.prod); });
+    if((o.alvo||'')!==(a.alvo||'')) ch.push('alvo: '+(o.alvo||'sem alvo')+' → '+(a.alvo||'sem alvo'));
+    const cO=paCaldaPropria(o), cA=paCaldaPropria(a); if(cO!==cA) ch.push('calda própria: '+(cO===null?'da operação':paQ(cO)+' L/ha')+' → '+(cA===null?'da operação':paQ(cA)+' L/ha'));
     if(ch.length) out.push({k:'Alterada',c:'y',n:a.nome,t:ch.join(' · ')}); });
+  /* PA-OPER F1 (P3): parâmetro da operação mudado no rascunho, com o número de atividades herdeiras */
+  const p0=p.params||{}, p1=p.rasc.params||{}; Object.keys(Object.assign({},p0,p1)).forEach(op=>{
+    const sec={op,atividades:p.rasc.atividades.filter(x=>x.op===op)}; const t=opAlteracaoParam(sec,p0[op]||{},p1[op]||{},'calda','volume de calda','L/ha');
+    if(t) out.push({k:'Alterada',c:'y',n:op,t}); });
   p.atividades.forEach(o=>{ if(!seen[o.id]) out.push({k:'Excluída',c:'r',n:o.nome,t:paGat(o.g).t+' · '+o.op}); });
   return out; }
+function paCaldaPropria(a){ return (a.calda===undefined||a.calda===null||a.calda==='')?null:Number(a.calda); }
 // ---------- lista → detalhe (NAV-1 · SEL-02): endereço #plano=<id>, voltar com posição e foco ----------
 // endereço: lido ao carregar e no hashchange, gravado ao abrir (replaceState, como a MA da PCM); id inexistente abre a lista, sem erro
 function paHashId(h){ const m=/[#&]plano=([^&]*)/.exec(String(h||'')); if(!m||!m[1]) return ''; try{ return decodeURIComponent(m[1]); }catch(e){ return m[1]; } }
-function paHashSet(id){ try{ const h=id?'#plano='+encodeURIComponent(id):''; if((location.hash||'')!==h) history.replaceState(null,'',location.pathname+location.search+h); }catch(e){} }
+function paHashSet(id,op){ try{ const h=id?'#plano='+encodeURIComponent(id)+(op?'&op='+encodeURIComponent(op):''):''; if((location.hash||'')!==h) history.replaceState(null,'',location.pathname+location.search+h); }catch(e){} }
+function paHashOp(h){ const m=/[#&]op=([^&]*)/.exec(String(h||'')); if(!m||!m[1]) return ''; try{ return decodeURIComponent(m[1]); }catch(e){ return m[1]; } }
 // abrir um plano guarda a posição da biblioteca; ao voltar, a rolagem volta e o foco vai ao cartão aberto por último (ult)
 function paOpen(self,id,o){ o=o||{}; const p=paPlan(self,id); if(!p) return;
   if(!self.state.pid){ try{ self.__paPos=[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>[e,e.scrollTop]); }catch(e){} }
@@ -144,24 +189,26 @@ function paSaiNao(self){ self.setState({saiAv:null}); const st=self.state; if(st
 // Fase de bolha, depois de quem fecha a própria camada (painel, filtro da grade e o menu do g2glob chamam preventDefault ou param o
 // evento): o Esc fecha só a camada de cima (revisão NAV-1, R6)
 function paEsc(self,e){ if(e.key!=='Escape'||e.defaultPrevented||!self.state.pid) return; const st=self.state;
-  if(st.fm||st.np||st.ied||st.iadd||st.disc||st.del||st.g2ac||st.saiAv) return; const t=e.target; const vis=(x)=>!!x&&x.getClientRects().length>0;
+  if(st.fm||st.np||st.ied||st.iadd||st.disc||st.del||st.g2ac||st.saiAv||st.opcal||st.atcal||st.desl) return; const t=e.target; const vis=(x)=>!!x&&x.getClientRects().length>0;
   if(t&&t.closest&&(t.closest('[role=dialog]')||t.closest('[role=listbox]')||t.closest('[role=menu]')||t.closest('.menu-lat')||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
   if([...document.querySelectorAll('[role=dialog],[role=listbox],[role=menu]')].some(vis)) return;
   const m=document.querySelector('.menu-lat:not(.rec)'); if(m&&getComputedStyle(m).position==='absolute') return;
-  e.preventDefault(); paLista(self); }
+  e.preventDefault(); if(st.opf||st.opcal){ self.setState({opf:'',opcal:null,desl:null}); return; } paLista(self); }
 function paHashIni(self){ if(self.__paHash) return; self.__paHash=1;
   // trocar o endereço com o painel aberto não troca de plano (o endereço volta; R4); com a dose ou a inclusão digitadas, avisa antes (R8);
   // id inexistente abre a lista com um aviso sem o id interno (R7)
-  const aplica=()=>{ let h=''; try{ h=location.hash||''; }catch(e){} let id=paHashId(h); const cur=self.state.pid||''; if(id===cur) return;
+  const aplica=()=>{ let h=''; try{ h=location.hash||''; }catch(e){} let id=paHashId(h); const cur=self.state.pid||''; const ok=paHashOp(h);
+    /* PA-OPER F1 (P2): a operação do endereço entra em foco ao abrir o plano (também no F5) */
+    if(ok) setTimeout(()=>{ const pp=id?paPlan(self,id):null; if(!pp) return; const sc=paOper(pp).secs.find(x=>x.chave===ok); if(sc&&self.state.opf!==sc.op) self.setState({opf:sc.op}); },0);
+    if(id===cur) return;
     const st=self.state; if(st.fm||st.np){ paHashSet(cur); self.setState({g2toast:'Feche o painel antes de trocar de plano.'}); return; }
-    let msg=''; if(id&&!paPlan(self,id)){ msg='Plano do endereço não encontrado (no protótipo, um plano criado aqui não fica guardado ao recarregar): escolha um plano da biblioteca.'; id=''; paHashSet(cur); }
+    let msg=''; if(id&&!paPlan(self,id)){ msg='Plano do endereço não encontrado: escolha um plano da biblioteca.'; id=''; paHashSet(cur); }
     if(id||cur) paSair(self,{pid:id||null,hash:false}); if(msg) self.setState({g2toast:msg}); };
   setTimeout(aplica,0);
   try{ window.addEventListener('hashchange',aplica); document.addEventListener('keydown',(e)=>paEsc(self,e));
     /* gesto que começa com "Publicar" desabilitado (dose ou inclusão abertas) não publica, mesmo que o botão se habilite no meio do
        clique (o blur da dose grava ao apertar o botão; revisão NAV-1, R1); teclado zera a marca */
-    window.addEventListener('pointerdown',(e)=>{ const b=e.target&&e.target.closest&&e.target.closest('[data-acoes] [data-acao=comando]'); self.__paPubDis=!!(b&&b.disabled); },true);
-    window.addEventListener('keydown',()=>{ self.__paPubDis=false; },true); }catch(e){} }
+  }catch(e){} }
 // ---------- biblioteca ----------
 // Filtro rápido por cultura: "Todas" ou uma cultura; tocar de novo na cultura escolhida volta a "Todas".
 const PA_QCH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
@@ -170,32 +217,63 @@ function paCuf(self,cu){ const f=self.state.cuf||''; return cu.indexOf(f)<0?'':f
 function paQf(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu);
   const ch=(t,n,on,go)=>({t:t,n:String(n),on:String(!!on),go:go,st:PA_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   return [ch('Todas',ps.length,!f,()=>self.setState({cuf:''}))].concat(cu.map(c=>ch(c,ps.filter(p=>p.cultura===c).length,f===c,()=>self.setState({cuf:f===c?'':c})))); }
+function paSelo(p,recibo,erro){ const vig=(p.hist||[]).find(h=>h.v===p.versao);
+  if(p.rasc&&erro) return ['Rascunho v'+p.rasc.v+' não guardado ('+erro+') · nova tentativa a seguir','r'];
+  if(p.versao===0) return ['Rascunho v1 · ainda não publicado','y'];
+  if(p.rasc) return ['Rascunho v'+p.rasc.v+(recibo?' guardado '+recibo:'')+' · v'+p.versao+' em vigor','y'];
+  return ['Publicada v'+p.versao+(p.pubPor?' · por '+p.pubPor:'')+(vig&&vig.at&&vig.at!=='—'?' em '+vig.at:''),'g']; }
 function paLib(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu); const sel=self.state.ult;
   return cu.filter(c=>!f||c===f).map(c=>{ const cs=ps.filter(p=>p.cultura===c);
     return {t:c, n:cs.length+(cs.length>1?' planos':' plano'), cards:cs.map(p=>{ const atv=paShown(p); const tp=[];
       atv.forEach(a=>{ const t=PA_TAG[a.g.tipo]; if(tp.indexOf(t)<0) tp.push(t); }); tp.sort((a,b)=>PA_TORD.indexOf(a)-PA_TORD.indexOf(b));
       /* 14/10 (proprietário: "coloque abrir plano na parte de cima do card e elimina da linha para baixo"): sem o rodapé dos cultivos;
          a versão entra no selo, o mesmo texto do cabeçalho do plano */
-      const est=p.versao===0?['Rascunho v1','y']:(p.rasc?['Rascunho v'+p.rasc.v+' · v'+p.versao+' em vigor','y']:['Publicado · v'+p.versao,'g']);
-      return {nome:p.nome, est:est[0], est_st:paChip(est[1]), natv:String(atv.length), custo:paRS(paCt(atv)),
+      const est=paSelo(p,'');
+      /* PA-OPER F1 (Telas): o cartão diz o estado das operações só quando há algo a fazer */
+      const sc=paOper(p).secs, ni=sc.filter(x=>x.estado.cod==='impedida').length, np=sc.filter(x=>x.estado.cod==='pendente').length;
+      const opx=ni?[ni+(ni>1?' operações impedidas':' operação impedida'),'r']:(np?[np+(np>1?' operações pendentes':' operação pendente'),'y']:null);
+      return {nome:p.nome, est:est[0], est_st:paChip(est[1]), temOpx:!!opx, opx:opx?opx[0]:'', opx_st:opx?paChip(opx[1]):'', natv:String(atv.length), custo:paRS(paCt(atv)),
         gats:tp.map(t=>({t})), semgat:!tp.length,
         st:'display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-radius:12px;text-align:left;font-family:inherit;color:#15201A;min-width:0;width:100%;box-sizing:border-box;cursor:pointer;',
         cur:String(p.id===sel), lab:'Abrir plano '+p.nome, open:()=>paOpen(self,p.id)}; })}; }); }
 // ---------- detalhe · filtro rápido por operação: "Todas" ou uma operação; tocar de novo volta a "Todas" ----------
 // as operações seguem a ordem do catálogo (PA0.ops); a escolha vale entre planos e cai para "Todas" se o plano não tiver a operação
-function paOps(atv){ const tem={}; atv.forEach(a=>{ tem[a.op]=(tem[a.op]||0)+1; }); const ord=PA0.ops.filter(o=>tem[o]).concat(Object.keys(tem).filter(o=>PA0.ops.indexOf(o)<0).sort()); return ord.map(o=>({op:o,n:tem[o]})); }
+/* PA-OPER F1 (decisões 1, 5 e 8): seções na ordem do ciclo, estado calculado e bula pelo serviço único (operacoes.js). Dia relativo t: DAP;
+   data em dias; antes/depois da colheita contados da 1ª colheita do plano. Perenes colhem várias vezes: a carência vale contra a próxima. */
+function paT(g,col){ const d=Number(g.dias), c=(col===null||col===undefined)?0:col; if(g.tipo==='DAP') return d;
+  if(g.tipo==='DATA'){ const x=Date.parse(g.data); return isNaN(x)?0:Math.round(x/864e5); } return g.tipo==='DANC'?c-d:c+d; }
+function paColT(atv){ return atv.filter(a=>/^Colheita/i.test(a.op)&&(a.g.tipo==='DAP'||a.g.tipo==='DATA')).map(a=>paT(a.g,null)).sort((x,y)=>x-y); }
+const PA_BCULT=Object.keys(Object.values(PA0.bula||{}).reduce((m,b)=>{ Object.keys(b.usos||{}).forEach(k=>{ m[k]=1; }); return m; },{}));
+function paBulaCult(c){ return PA_BCULT.find(k=>c===k||String(c).indexOf(k+' ')===0)||c; }
+const PA_OPC=new WeakMap();
+function paOper(p){ if(PA_OPC.has(p)) return PA_OPC.get(p); const atv=paWork(p), par=paWorkParams(p), cols=paColT(atv), c0=cols.length?cols[0]:null;
+  const at=atv.map(a=>Object.assign({},a,{dap:paT(a.g,c0),t:paT(a.g,c0),produtos:a.prods}));
+  const secs=opSecoes(at).map(sc=>{ const pp=par[sc.op]||{}; const conf=sc.familia==='pulverizacao'?opBula(sc.atividades,PA0.bula||{},{cultura:paBulaCult(p.cultura),colheitasT:cols,params:pp}):[];
+    const pend=opPendencias(sc,pp); return Object.assign(sc,{params:pp,conf,pend,estado:opEstado(pend,conf)}); });
+  const r={secs, imp:secs.flatMap(sc=>sc.conf.filter(c=>c.nivel==='impede').map(c=>Object.assign({op:sc.op,nome:(sc.atividades.find(a=>a.id===c.ativ)||{}).nome||''},c)))};
+  PA_OPC.set(p,r); return r; }
+function paOps(atv){ const cols=paColT(atv), c0=cols.length?cols[0]:null; return opSecoes(atv.map(a=>Object.assign({},a,{dap:paT(a.g,c0)}))).map(s=>({op:s.op,n:s.atividades.length})); }
+const PA_ECOR={pronta:'g',pendente:'y',aviso:'y',impedida:'r'};
+function paOpFoco(self,op){ self.setState({opf:op,opcal:null,desl:null}); }
+// carência da atividade (a menor dos produtos com modo de ação, pelo alvo quando há), só para leitura na linha
+function paCarAtv(p,a){ const cu=paBulaCult(p.cultura); let m=null; (a.prods||[]).forEach(x=>{ const b=(PA0.bula||{})[x.prod]; if(!b||!(b.grupos||[]).length) return; const us=(b.usos||{})[cu]||{};
+    (a.alvo?[us[a.alvo]]:Object.values(us)).filter(Boolean).forEach(u=>{ if(u.car!==null&&u.car!==undefined) m=Math.max(m===null?0:m,u.car); }); }); return m; }
 function paOpf(self,ops){ const f=self.state.opf||''; return ops.some(o=>o.op===f)?f:''; }
 // VISOES-2 §3.5 (exemplo "hoje × passa a ser" do proprietário): o tipo da operação vira ícone, o mesmo no chip e na atividade (Lucide, ISC)
 function paOpIco(op){ const s=String(op||'').toLowerCase(); const k=/pulveriz|dessec|herbic|fungic|inset/.test(s)?'pulv':(/plant/.test(s)?'plant':(/adub|calag|gess|fertil/.test(s)?'adub':(/semente/.test(s)?'sem':(/colheit/.test(s)?'colh':(/irriga|água|agua/.test(s)?'agua':'outra')))));
   const o={}; ['pulv','plant','adub','sem','colh','agua','outra'].forEach(x=>{ o['io_'+x]=(x===k); }); return o; }
+/* PA-OPER F1 (decisão 6, P1): a faixa traz "Visão geral" e as operações na ordem do ciclo, cada uma com o número de atividades e o estado
+   em texto visível (também no toque), repetido na dica; tocar entra em foco e grava a operação no endereço */
 function paOpChips(self,todas,ops,f){
-  const ch=(t,n,on,go,lab,op)=>Object.assign({t:t,n:String(n),on:String(!!on),go:go,lab:lab,temIco:!!op,st:PA_QCH+'display:inline-flex;align-items:center;gap:6px;'+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')},paOpIco(op||''));
-  return [ch('Todas',todas.length,!f,()=>self.setState({opf:''}),'Mostrar todas as operações')].concat(ops.map(o=>ch(o.op,o.n,f===o.op,()=>self.setState({opf:f===o.op?'':o.op}),(f===o.op?'Mostrar todas as operações':'Mostrar só '+o.op),o.op))); }
+  const ch=(t,n,on,go,lab,op)=>Object.assign({t:t,n:String(n),on:String(!!on),go:go,lab:lab,temIco:!!op,st:PA_QCH+'display:inline-flex;align-items:center;gap:6px;min-height:36px;'+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')},paOpIco(op||''));
+  return [ch('Visão geral',todas.length,!f,()=>paOpFoco(self,''),'Visão geral: todas as operações')].concat(ops.map(o=>ch(o.op,o.n+(o.est?' · '+o.est.marca+' '+o.est.texto:''),f===o.op,()=>paOpFoco(self,f===o.op?'':o.op),
+    (f===o.op?'Voltar à visão geral':'Abrir só '+o.op)+(o.est?' · '+o.est.texto+(o.mot?': '+o.mot:''):''),o.op))); }
 // ---------- detalhe · gatilho e atividade na mesma linha; expansão direta dos insumos ----------
 function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]; const del=self.state.del===a.id; const o=pub[a.id];
   let chg=''; if(p.rasc&&p.versao){ if(!o) chg='Nova'; else if(paNorm(o)!==paNorm(a)) chg='Alterada'; }
   const gat=paGat(a.g); const np=a.prods.length; const nv=p.rasc?p.rasc.v:p.versao+1; const fl=self.state.flash===a.id;
   const d0=Number(a.g.dias), gatC=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):gat.t;   /* só o número: a seção já diz DAP; o texto inteiro fica na dica e no leitor */
+  const inf=paInfoAtv(p,a,self);
   return Object.assign({aid:a.id, nome:a.nome, op:a.op, gatilho:gatC, gatlab:gat.t+(gat.full?' · '+gat.full:''), gatilhoFull:gat.full, hasFull:false, detalhesId:'pa-insumos-'+p.id+'-'+a.id, detalhesLab:'Insumos de '+a.nome, np:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(paCa(a))+'/ha':'—', open, lab:g2seta(open,'insumos de '+a.nome).lab,
     tog:()=>{ const n=Object.assign({},self.state.xa||{}); n[a.id]=!open; self.setState({xa:n}); },
     edit:()=>paEdit(self,a.id), rst:fl?'background:#E4F3E9;':'',
@@ -205,19 +283,33 @@ function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]
     asking:del, notAsking:!del, ask:()=>self.setState({del:a.id}), no:()=>self.setState({del:null}), yes:()=>paDel(self,p.id,a.id), dlab:'Excluir atividade '+a.nome,
     delmsg:'Excluir “'+a.nome+'”'+(p.versao?' do rascunho v'+nv+'? A v'+p.versao+' publicada e os cultivos que a usam não mudam.':' do rascunho?'),
     semProd:!np, temProd:!!np,
-    prods:a.prods.map((x,i)=>paProdV(self,p,a,x,i,(p.rasc&&p.versao&&o)?o:null)) }, paAddV(self,a), paRmvV(self,p,a)); }
+    prods:a.prods.map((x,i)=>paProdV(self,p,a,x,i,(p.rasc&&p.versao&&o)?o:null)) }, inf, paAddV(self,a), paRmvV(self,p,a)); }
+function paInfoAtv(p,a,self){ const v={temInfo:false,info:'',temImarca:false,imarca:'',imarcaT:'',imarcaSt:'',cal_t:'',cal_lab:'',cal_ler:true,cal_ed:false,info2:''}; if(opFamilia(a.op)!=='pulverizacao') return v;
+  const sc=paOper(p).secs.find(x=>x.op===a.op), pp=(sc&&sc.params)||{}, c=opParam(a,pp,'calda'), car=paCarAtv(p,a);
+  v.temInfo=true; v.info='Alvo: '+(a.alvo||'pendente')+' ·'; v.info2=(car!==null?'· carência '+car+(car===1?' dia':' dias'):'');
+  /* K3: a calda própria da atividade se edita no lugar (tocar → campo → Enter); vazio volta a herdar a da operação */
+  v.cal_t='Calda '+(c.valor===null?'pendente':paQ(c.valor)+' L/ha '+c.origem); v.cal_lab='Alterar a calda de '+a.nome+', hoje '+(c.valor===null?'pendente':paQ(c.valor)+' L/ha '+c.origem);
+  const ed=self&&self.state.atcal&&self.state.atcal.aid===a.id?self.state.atcal:null; v.cal_ler=!ed; v.cal_ed=!!ed; v.cal_fid='pa-calda-'+a.id; v.cal_val=ed?ed.val:'';
+  v.cal_err=ed?ed.err:''; v.cal_temErr=!!(ed&&ed.err); v.cal_ist=PA_DOSE_ST+'border:1px solid '+(ed&&ed.err?'#B42318':'#1E7A4C')+';'; v.cal_ph=pp.calda?('da operação: '+paQ(pp.calda)):'L/ha';
+  if(self){ v.cal_ini=()=>{ self.__paAcEsc=false; self.setState({atcal:{aid:a.id,val:paCaldaPropria(a)===null?'':paQ(a.calda),err:''},ied:null,iadd:null,opcal:null}); paFoco('pa-calda-'+a.id,true); };
+    v.cal_set=(e)=>self.setState({atcal:Object.assign({},self.state.atcal,{val:e.target.value,err:''})});
+    v.cal_key=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); paAtCalOk(self,a.id); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); self.__paAcEsc=true; self.setState({atcal:null}); } };
+    v.cal_sai=()=>paAtCalOk(self,a.id); }
+  const cf=sc?sc.conf.filter(x=>x.ativ===a.id):[], imp=cf.filter(x=>x.nivel==='impede'), av=cf.filter(x=>x.nivel==='aviso');
+  if(imp.length||av.length){ v.temImarca=true; v.imarca=imp.length?'⛔ Impede publicar':'⚠ Aviso'; v.imarcaT=cf.map(x=>x.motivo).join(' · '); v.imarcaSt=paChip(imp.length?'r':'y')+'padding:0 8px;font-size:11px;line-height:16px;'; }
+  return v; }
 // ---------- drill-down editável: dose, retirar e incluir insumo direto na tabela ----------
 // grava no rascunho como o formulário (cria a v(n+1) na primeira mudança); o formulário continua para gatilho, operação e nome
 const PA_DOSE_ST='font-family:inherit;font-size:12.8px;font-variant-numeric:tabular-nums;text-align:right;width:78px;padding:4px 6px;border-radius:8px;box-sizing:border-box;background:#fff;color:#15201A;';
 function paRascNo(ps0,pid,aid,fn){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); const novo=!p.rasc;
-  if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)}; fn(p.rasc.atividades.find(x=>x.id===aid)); const nc=paCults(p.id).length;
+  if(novo) p.rasc=paNovoRasc(p); fn(p.rasc.atividades.find(x=>x.id===aid)); const nc=paCults(p.id).length;
   return {ps, novo, v:p.rasc.v, fim:(novo&&p.versao)?(' Rascunho v'+p.rasc.v+' criado; a v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.'):' Gravado no rascunho v'+p.rasc.v+'.'}; }
 function paRasc(self,aid,fn){ return paRascNo(paPlans(self),self.state.pid,aid,fn); }
 function paFoco(id,sel){ setTimeout(()=>{ const el=document.getElementById(id); if(el){ el.focus(); if(sel&&el.select) el.select(); } },0); }
 function paDoseId(aid,prod){ return 'pa-dose-'+aid+'-'+String(prod).replace(/[^A-Za-z0-9]/g,'_'); }
 function paDoseIni(self,a,x){ self._paEsc=false; self.setState({ied:{aid:a.id,prod:x.prod,val:paQ(x.dose),err:''},iadd:null}); paFoco(paDoseId(a.id,x.prod),true); }
 // Enter ou sair do campo grava; Esc cancela (a marca evita que o blur da saída grave o que foi cancelado). Gravar pela saída do campo
-// marca a hora (__paSaiT): um "Publicar" no mesmo gesto é recusado (paPub), porque a pessoa não viu essa dose nas alterações (R1)
+// marca a hora (__paSaiT): o "Salvar e publicar" do mesmo gesto publica com ela e o aviso diz qual dose entrou (leve, proprietário 19/10)
 function paDoseOk(self,o){ o=o||{}; if(self._paEsc){ self._paEsc=false; return; } const ed=self.state.ied; if(!ed) return; const n=paNum(ed.val);
   if(String(ed.val).trim()===''||isNaN(n)||n<=0){ self.setState({ied:Object.assign({},ed,{err:'Informe a dose por hectare, maior que zero.'})}); return; }
   const a0=paWork(paPlan(self,self.state.pid)).find(y=>y.id===ed.aid); const x0=a0&&a0.prods.find(y=>y.prod===ed.prod);
@@ -265,7 +357,9 @@ function paAddV(self,a){ const ad=self.state.iadd; const on=!!ad&&ad.aid===a.id;
 function paTbCols(atv){ return [{k:'gat',l:(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho',t:'num',a:'r'},{k:'atv',l:'Atividade',t:'txt'},{k:'ins',l:'Insumos',t:'num',a:'r',hcls:'pa-tb-ins'},{k:'custo',l:'Custo/ha',t:'num',a:'r',hcls:'pa-tb-num'}]; }   /* hcls: no celular o cabeçalho some com a coluna (TAB-10) */
 function paTbLinha(a){ const np=a.prods.length, ca=np?paCa(a):null, d0=Number(a.g.dias), gat=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):paGat(a.g).t, o=paOrd(a.g);
   return {id:a.id, v:{gat:(typeof o==='number'?o:null), atv:a.nome, ins:np, custo:ca}, s:{gat, atv:a.nome, ins:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(ca)+'/ha':'—'}}; }
-function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of=paOpf(self,ops); const atv0=of?todas.filter(a=>a.op===of):todas; const pub={};
+function paS2(self,v,p){ const todas=paWork(p); const oper=paOper(p); const ops=oper.secs.map(x=>({op:x.op,n:x.atividades.length,est:x.estado,mot:x.conf.concat(x.pend).map(c=>c.motivo).slice(0,2).join(' · ')})); const of=paOpf(self,ops); const atv0=of?todas.filter(a=>a.op===of):todas; const pub={};
+  paHashSet(p.id,of?opChave(of):'');
+  paFocoVals(self,v,p,oper.secs.find(x=>x.op===of)||null);
   const tbSp={id:'pa_tb', cols:paTbCols(atv0)}, tbRows=atv0.map(paTbLinha), tbTab=g2mdLer(self,{id:'pa_atv',padrao:'cartoes',url:true})==='tabela';
   let atv=atv0, ordem=null;
   if(tbTab){ const ok=g2cabAplica(self,tbSp,tbRows), ids=ok.map(r=>r.id); atv=ids.map(id=>atv0.find(a=>a.id===id)).filter(Boolean); if((g2st(self,'pa_tb').so||{}).k) ordem=ids; }
@@ -288,7 +382,8 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
   // um só botão: "Expandir tudo" até todas as atividades visíveis estarem abertas; aí vira "Recolher tudo"
   const xa0=self.state.xa||{}; const todasAb=atv.length>0&&atv.every(a=>xa0[a.id]); v.x_lab=todasAb?'Recolher tudo':'Expandir tudo'; v.x_tog=todasAb?v.x_none:v.x_all; v.x_up=todasAb; v.x_down=!todasAb;
   // 14/10 (Versões saiu do detalhe): com rascunho, o selo diz também a versão que segue valendo para as O.S.
-  const est=p.versao===0?['Rascunho v1 · ainda não publicado','y']:(p.rasc?['Rascunho v'+p.rasc.v+' · v'+p.versao+' em vigor','y']:['Publicado · v'+p.versao,'g']);
+  // PA-OPER F1 (decisão 9): o rascunho se guarda sozinho, com o recibo; ele e a versão publicada ficam no mesmo selo
+  const est=paSelo(p,self.__paRecibo,self.__paErroGrav);
   v.p_nome=p.nome; v.p_est=est[0]; v.p_est_st=paChip(est[1]);
   const tp=[]; todas.forEach(a=>{ const t=PA_TAG[a.g.tipo]; if(tp.indexOf(t)<0) tp.push(t); }); tp.sort((a,b)=>PA_TORD.indexOf(a)-PA_TORD.indexOf(b));
   v.k2=p.cultura+' · '+todas.length+(todas.length===1?' atividade':' atividades')+' · '+paRS(paCt(todas))+'/ha de insumos'+(tp.length?' · gatilhos: '+tp.join(', '):'');
@@ -308,7 +403,7 @@ function paDescartaNo(ps0,pid){ const ps=paClone(ps0); const i=ps.findIndex(x=>x
 function paDiscard(self,pid){ const r=paDescartaNo(paPlans(self),pid); if(r.erro) return; self.setState({pl:r.ps,disc:false,paUndo:null});
   if(r.saiu) paLista(self,r.msg); else self.setState({g2toast:r.msg}); }
 function paDel(self,pid,aid){ const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===pid); const novo=!p.rasc;
-  if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)}; const a=p.rasc.atividades.find(x=>x.id===aid); p.rasc.atividades=p.rasc.atividades.filter(x=>x.id!==aid);
+  if(novo) p.rasc=paNovoRasc(p); const a=p.rasc.atividades.find(x=>x.id===aid); p.rasc.atividades=p.rasc.atividades.filter(x=>x.id!==aid);
   self.setState({pl:ps,del:null,g2toast:'“'+a.nome+'” excluída do rascunho v'+p.rasc.v+(novo&&p.versao?' (criado agora)':'')+'.'+(p.versao?' A v'+p.versao+' publicada não muda.':'')}); }
 // VISOES-2 §3.5/§8.6: excluir do rascunho sem janela de confirmação, com "Desfazer" por 5 s (o rascunho também pode ser descartado inteiro)
 function paDelDesf(self,pid,aid){ const ps0=paPlans(self), p0=ps0.find(x=>x.id===pid), lista=paWork(p0), idx=lista.findIndex(x=>x.id===aid); if(idx<0) return;
@@ -328,8 +423,8 @@ function paDesfaz(self){ const u=self.state.paUndo; if(!u) return; const ps=paCl
 function paEdit(self,aid){ const p=paPlan(self,self.state.pid); if(!p) return; const a=aid?paWork(p).find(x=>x.id===aid):null;
   // DAP negativo abre como "Dias antes do plantio" com o número positivo: o sentido fica no tipo, nunca no sinal
   const antes=!!a&&a.g.tipo==='DAP'&&Number(a.g.dias)<0;
-  const d=a?{op:a.op,nome:a.nome,outra:(PA0.atvs[a.op]||[]).indexOf(a.nome)<0,tipo:(antes?'DAPA':a.g.tipo),dias:(a.g.tipo==='DATA'?'':String(Math.abs(Number(a.g.dias)))),data:(a.g.data||'')}
-           :{op:paOpf(self,paOps(paWork(p))),nome:'',outra:false,tipo:'DAP',dias:'',data:''};
+  const d=a?{op:a.op,nome:a.nome,outra:(PA0.atvs[a.op]||[]).indexOf(a.nome)<0,tipo:(antes?'DAPA':a.g.tipo),dias:(a.g.tipo==='DATA'?'':String(Math.abs(Number(a.g.dias)))),data:(a.g.data||''),alvo:a.alvo||'',calda:paCaldaPropria(a)===null?'':paQ(a.calda)}
+           :{op:paOpf(self,paOps(paWork(p))),nome:'',outra:false,tipo:'DAP',dias:'',data:'',alvo:'',calda:''};
   self.setState({fm:{pid:p.id,aid:aid||null,draft:d,orig:JSON.stringify(d),errs:{},warn:false,rm:null},del:null,ied:null,iadd:null}); paFoco('fm_op'); }
 function paFmUpd(self,patch,errk){ const cur=self.state.fm; const nd=Object.assign({},cur.draft,patch); const ne=Object.assign({},cur.errs||{}); (errk||Object.keys(patch)).forEach(k=>{ delete ne[k]; });
   self.setState({fm:Object.assign({},cur,{draft:nd,errs:ne,warn:false})}); }
@@ -354,6 +449,12 @@ function paFm(self,v){ const fm=self.state.fm; v.fm_open=!!fm; if(!fm) return; c
   v.fm_atv=d.outra?'__outra':(lst.indexOf(d.nome)>=0?d.nome:''); v.fm_atvdis=!d.op; v.fm_outra=!!d.outra;
   v.fm_ast=paIst(er.nome&&!d.outra)+(d.op?'':'background:#F4F6F3;color:#8A968E;');
   v.fm_setatv=(e)=>{ const x=e.target.value; if(x==='__outra') paFmUpd(self,{outra:true,nome:''},['nome']); else paFmUpd(self,{outra:false,nome:x},['nome']); };
+  // PA-OPER F1 (Telas · Atividade): na Pulverização, o alvo (da AG-07 para a cultura) e a calda própria (vazio = da operação)
+  v.fm_pulv=opFamilia(d.op)==='pulverizacao'; const al=(PA0.alvos||{})[paBulaCult(p.cultura)]||[];
+  v.fm_alvos=[{v:'',t:'Sem alvo'}].concat((d.alvo&&al.indexOf(d.alvo)<0?[d.alvo]:[]).concat(al).map(x=>({v:x,t:x}))); v.fm_alvo=d.alvo||'';
+  v.fm_setalvo=(e)=>paFmUpd(self,{alvo:e.target.value}); v.fm_alst=paIst(false);
+  const pc=(paWorkParams(p)[d.op]||{}).calda; v.fm_calda=d.calda||''; v.fm_setcalda=(e)=>paFmUpd(self,{calda:e.target.value},['calda']);
+  v.fm_cph=pc?('vazio = da operação ('+paQ(pc)+' L/ha)'):'vazio = da operação (pendente)'; v.fm_ec=er.calda||''; v.fm_hec=!!er.calda; v.fm_cst=paIst(er.calda,'120px')+'text-align:right;';
   // insumos e doses ficam só na tabela da atividade; aqui só o resumo, para quem procurar
   v.fm_temIns=!!a0; v.fm_nova=!a0; v.fm_ins=a0?(a0.prods.length?(a0.prods.length+(a0.prods.length>1?' insumos':' insumo')+' · '+paRS(paCa(a0))+'/ha'):'Só operação, sem insumos'):'';
   v.fm_warn=!!fm.warn; v.fm_nerr=Object.keys(er).length>0;
@@ -370,15 +471,18 @@ function paSave(self){ const fm=self.state.fm; const d=fm.draft; const er={}; le
     else if(n<0) er.g='Use zero ou mais: o sentido já está no tipo.'; else if(n>lim) er.g='Use de 0 a '+lim+' dias.'; else dias=((d.tipo==='DAPA'&&n>0)?-n:n); }
   if(!String(d.nome||'').trim()) er.nome=d.outra?'Informe o nome da nova atividade.':(d.op?'Escolha a atividade.':'Escolha a operação e depois a atividade.');
   if(!d.op) er.op='Escolha a operação.';
+  const pulv=opFamilia(d.op)==='pulverizacao', cr=String(d.calda||'').trim(), cn=cr===''?null:paNum(cr);
+  if(pulv&&cn!==null&&(isNaN(cn)||cn<=0)) er.calda='Informe a calda em L/ha, maior que zero, ou deixe vazio para usar a da operação.';
   if(fm.pid!==self.state.pid){ self.setState({fm:null,g2toast:'O painel era de outro plano: nada foi gravado.'}); return; }
   const a0=fm.aid?paWork(paPlan(self,self.state.pid)).find(x=>x.id===fm.aid):null; const prods=a0?paClone(a0.prods):[];
   if(fm.aid&&!a0){ self.setState({fm:null,g2toast:'A atividade não existe mais neste plano: nada foi gravado.'}); return; }
   if(Object.keys(er).length){ self.setState({fm:Object.assign({},fm,{errs:er,warn:false})}); return; }
   const atv={id:fm.aid||('n'+Date.now().toString(36)),nome:String(d.nome).trim(),op:d.op,g:{tipo:(d.tipo==='DAPA'?'DAP':d.tipo),dias,data},prods};
+  if(pulv){ if(d.alvo) atv.alvo=d.alvo; if(cn!==null) atv.calda=cn; }
   /* salvar sem mudar nada não cria rascunho (seria um rascunho igual à versão publicada; revisão NAV-1, R3) */
   if(a0&&paNorm(atv)===paNorm(a0)){ self.setState({fm:null,g2toast:'Nada mudou em “'+a0.nome+'”: o plano continua como estava.'}); return; }
   const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===self.state.pid); const novo=!p.rasc;
-  if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)};
+  if(novo) p.rasc=paNovoRasc(p);
   const L=p.rasc.atividades; const ix=L.findIndex(a=>a.id===fm.aid); if(ix>=0) L[ix]=atv; else L.push(atv);
   const xg=Object.assign({},self.state.xg||{}); xg[paGkey(atv.g)]=true; const xa=Object.assign({},self.state.xa||{}); xa[atv.id]=true;
   const nc=paCults(p.id).length;
@@ -413,7 +517,7 @@ function paNovoErro(ps,dd){ const e={}; const nome=String(dd.nome||'').trim();
   if(!dd.cultura) e.cultura='Escolha a cultura.'; return e; }
 function paNovoFaz(ps,dd,id){ const nome=String(dd.nome||'').trim(); const base=dd.base?(ps.find(p=>p.id===dd.base)||null):null;
   const atv=base?paClone(base.atividades).map((a,i)=>Object.assign(a,{id:id+'_'+i})):[];
-  return {id,nome,base,ps:ps.concat([{id,nome,cultura:dd.cultura,versao:0,atividades:[],rasc:{v:1,atividades:atv},hist:[]}])}; }
+  return {id,nome,base,ps:ps.concat([{id,nome,cultura:dd.cultura,versao:0,atividades:[],params:{},rasc:{v:1,atividades:atv,params:base?paClone(base.params||{}):{}},hist:[]}])}; }
 // ---------- publicar ----------
 // Próximo passo do detalhe (BOT-01/02): "Publicar versão vN" só com rascunho; sem rascunho, nenhuma primária. Desabilitado com o
 // motivo (VIS-04) quando publicar sairia diferente do que a pessoa vê (a versão publicada é imutável):
@@ -425,12 +529,21 @@ function paNovoFaz(ps,dd,id){ const nome=String(dd.nome||'').trim(); const base=
 // 14/10/2026 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar (as mudanças)"): a primária é
 // "Salvar alterações" (cria a versão vN, imutável; os cultivos não mudam) e, habilitada, vem sem nota; o que mudou fica na própria
 // atividade (selo Alterada/Incluída) e no aviso depois de salvar. Desabilitada, segue com o motivo (VIS-04).
-function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const v=p.rasc.v; const t='Salvar alterações';
+/* PA-OPER F1 (decisão 9, P7, P12): o rascunho já está guardado; a primária publica, e só quem tem o papel de agrônomo (AG-05, CMD-02).
+   O rótulo mantém "Salvar" (proprietário, 14/10) e diz que publica (achado 1 do Codex: publicação explícita). ⛔ de lei ou bula impede
+   publicar, nunca guardar; pendência não impede. */
+/* leve (proprietário 19/10, "não quero um sistema travado e burocrático"): sem ciclo de submeter e devolver. O rascunho se guarda
+   sozinho; quem tem o papel de agrônomo publica quando abrir o plano, e quem não tem vê só que o rascunho está guardado */
+function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const pode=ui.papel!==false;
+  const v=p.rasc.v;
+  if(!pode) return {prim:null,nota:'Rascunho v'+v+' guardado. O agrônomo publica ao abrir o plano.'};
+  const t='Salvar e publicar v'+v;
   const no=(w)=>({prim:{t,dis:w},nota:w});
   if(!p.rasc.atividades.length) return no('Inclua ao menos uma atividade para salvar.');
-  if(ui.ied) return no('Confirme (Enter) ou cancele (Esc) a dose de '+ui.ied.prod+' para salvar.');
   if(ui.iadd) return no('Conclua ou cancele a inclusão do insumo para salvar.');
   if(p.versao>0&&!paDiff(p).length) return no('O rascunho v'+v+' está igual à v'+p.versao+': altere algo ou descarte o rascunho.');
+  const imp=(ui.imp!==undefined)?ui.imp:paOper(p).imp;
+  if(imp.length){ const x=imp[0]; return no('⛔ '+x.op+' · '+x.nome+': '+x.motivo+(imp.length>1?' (e mais '+(imp.length-1)+')':'')+'. O rascunho continua guardado.'); }
   return {prim:{t,dis:''},nota:''}; }
 // resumo das alterações na nota do Próximo passo, ao lado de "Publicar" (R1): até 2 itens e "e mais N"; o bloco "Alterações" tem todas,
 // o custo e o impacto nos cultivos
@@ -439,31 +552,88 @@ function paResumo(p){ const d=paDiff(p); if(!p||!p.rasc||!d.length) return ''; c
   const it=d.map(x=>x.k==='Alterada'?(x.n+' ('+x.t+')'):((x.k==='Incluída'?'inclui ':'exclui ')+x.n));
   return n+(n>1?' alterações':' alteração')+' na v'+p.rasc.v+': '+it.slice(0,2).join('; ')+(n>2?'; e mais '+(n-2):'')+'.'; }
 // publicar (puro): a versão do rascunho vira a vigente e entra no histórico; os cultivos (PA0.cultivos) não mudam (PRD 40.3)
-function paPubFaz(ps0,pid,hoje){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); if(!p||!p.rasc) return {erro:'Sem rascunho para publicar.'};
+function paPubFaz(ps0,pid,hoje,por){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); if(!p||!p.rasc) return {erro:'Sem rascunho para publicar.'};
   const w=paAcoes(p).prim.dis; if(w) return {erro:w};
-  p.versao=p.rasc.v; p.atividades=p.rasc.atividades; p.rasc=null; p.hist=[{v:p.versao,at:hoje}].concat(p.hist||[]); return {ps,p}; }
-// clique em "Publicar" (R1): recusa se o gesto começou com o botão desabilitado (__paPubDis) ou se a saída do campo acabou de gravar uma
-// dose (__paSaiT, até 1 s: o mesmo clique). A dose fica no rascunho e aparece na nota; a pessoa confere e clica de novo
-const PA_SAI_MS=1000;
-function paPubAgora(self,agora){ const tarde=!self.__paSaiT||(agora-self.__paSaiT)>=PA_SAI_MS; if(!self.__paPubDis&&tarde) return '';
-  const txt=self.__paSaiTxt; self.__paPubDis=false; self.__paSaiT=0; self.__paSaiTxt='';
-  return (txt?'A dose de '+txt+' entrou no rascunho agora':'O rascunho mudou neste clique')+': confira e clique em Salvar alterações de novo.'; }
-function paPub(self){ const pid=self.state.pid; const st=self.state; const ac=paAcoes(paPlan(self,pid),{iadd:!!st.iadd,ied:st.ied}); if(!ac.prim||ac.prim.dis) return;
-  const ag=paPubAgora(self,Date.now()); if(ag){ self.setState({g2toast:ag}); return; }
-  const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
+  p.versao=p.rasc.v; p.atividades=p.rasc.atividades; p.params=p.rasc.params||p.params||{}; p.rasc=null; p.pubPor=por||'';
+  p.hist=[{v:p.versao,at:hoje,por:por||''}].concat(p.hist||[]);
+  /* a versão publicada é imutável e vai para o cenário: a geração da O.S. lê dela (transporte mínimo, decisão 10) */
+  p.versoes=Object.assign({},p.versoes||{}); p.versoes[p.versao]={atividades:paClone(p.atividades),params:paClone(p.params),em:hoje,por:por||''}; return {ps,p}; }
+/* leve (proprietário 19/10): a dose digitada e ainda aberta no campo entra no rascunho no mesmo clique de "Salvar e publicar" e publica
+   junto; o aviso diz qual dose entrou. Dose inválida não publica (o campo mostra o motivo); a bula é conferida com a dose nova */
+function paDoseAplica(ps,pid,ed){ if(!ed) return {ps,mud:''}; const n=paNum(ed.val);
+  if(String(ed.val).trim()===''||isNaN(n)||n<=0) return {erro:'Informe a dose por hectare, maior que zero.'};
+  const p=ps.find(x=>x.id===pid); const a0=p?paWork(p).find(y=>y.id===ed.aid):null; const x0=a0&&a0.prods.find(y=>y.prod===ed.prod);
+  if(!x0||Math.abs(x0.dose-n)<1e-9) return {ps,mud:''};
+  const r=paRascNo(ps,pid,ed.aid,(a)=>{ const x=a.prods.find(y=>y.prod===ed.prod); if(x) x.dose=n; });
+  return {ps:r.ps,mud:ed.prod+': '+paQ(x0.dose)+' → '+paQ(n)+' '+x0.un+'/ha'}; }
+// a saída do campo grava a dose ao apertar o botão (o blur vem antes do clique): até 1,5 s depois, o aviso da publicação cita essa dose
+const PA_SAI_MS=1500;
+function paPapel(){ try{ return (typeof g2papel==='function'&&typeof g2perfil==='function')?g2papel(g2perfil(),'agronomo'):true; }catch(e){ return true; } }
+function paQuem(){ try{ return (typeof g2perfil==='function')?(g2perfil().k||''):''; }catch(e){ return ''; } }
+function paPub(self){ const pid=self.state.pid; const st=self.state; const pode=paPapel();
+  const d=paDoseAplica(paPlans(self),pid,st.ied); if(d.erro){ self.setState({ied:Object.assign({},st.ied,{err:d.erro})}); return; }
+  const ac=paAcoes(d.ps.find(x=>x.id===pid),{iadd:!!st.iadd,papel:pode}); if(!ac.prim) return;
+  if(ac.prim.dis){ if(d.mud) self.setState({pl:d.ps,ied:null,g2toast:ac.nota}); return; }
+  const sai=(self.__paSaiT&&(Date.now()-self.__paSaiT)<PA_SAI_MS)?self.__paSaiTxt:''; self.__paSaiT=0; self.__paSaiTxt=''; const mud=d.mud||sai;
+  const r=paPubFaz(d.ps,pid,PA0.hoje,paQuem()); if(r.erro){ self.setState({pl:d.ps,ied:null,g2toast:r.erro}); return; } const apl=paApl(pid);
   /* o aviso diz o que foi salvo (o bloco de alterações saiu) e que os cultivos não mudam */
-  self.setState({pl:r.ps,disc:false,del:null,paUndo:null,g2toast:'Plano salvo · v'+r.p.versao+(apl?' · cultivos seguem na versão deles':'')});   /* 15/10 (proprietário: "caixa pequena, pouco texto"): só a versão salva; o resumo das doses saiu do aviso */
+  self.setState({pl:r.ps,ied:null,disc:false,del:null,paUndo:null,g2toast:'Publicada v'+r.p.versao+(r.p.pubPor?' · por '+r.p.pubPor:'')+(mud?' · inclui '+mud:'')+(apl?' · cultivos seguem na versão deles':'')});   /* 15/10 (proprietário: "caixa pequena, pouco texto"): só a versão salva; o resumo das doses saiu do aviso */
   /* o comando sai da tela com o rascunho: o foco vai ao nome do plano (o aviso diz que os cultivos continuam como estavam) */
   setTimeout(()=>{ try{ const h=document.getElementById('pa-det-tit'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); h.scrollIntoView({block:'start'}); } }catch(e){} },40); }
-// R5: a troca de versão por cultivo (PRD 40.3) ainda não existe no Planejar safra do protótipo, e a PA não grava no cenário: o texto
-// diz isso em vez de prometer a adoção (pendência da frente Planejar safra, docs/navegacao/ESPECIFICACAO.md §4)
-const PA_PROTO='No protótipo, a versão publicada aqui ainda não chega ao Planejar safra.';
 // situação do cultivo no plano (X-AGR-6): versão aplicada × publicada; o link abre o próprio cultivo no Planejar safra
 function paSitCult(c,p){ const lk=(!c.ro&&c.ver<p.versao)?[{k:'link',t:'Abrir cultivo no Planejar safra ›',h:'SAF.dc.html#saf='+c.safra+'&passo=cultivos&cult='+c.id}]:[];
   if(c.ro) return [{k:'chip',t:'Safra encerrada · fica na v'+c.ver,c:'gray'}];
   if(p.rasc) return [{k:'chip',t:'Continua na v'+c.ver+' ao publicar',c:'yellow'}].concat(lk);
   if(c.ver<p.versao) return [{k:'chip',t:'Na v'+c.ver+' · v'+p.versao+' publicada',c:'yellow'}].concat(lk);
   return [{k:'chip',t:'Na versão em vigor',c:'green'}]; }
+// ---------- PA-OPER F1 · operação em foco (sub-detalhe): parâmetros da operação e conferências ----------
+function paFocoVals(self,v,p,sec){ v.op_foco=!!sec; v.op_pulv=!!sec&&sec.familia==='pulverizacao'; v.op_tit=sec?('Parâmetros de '+sec.op):'';
+  v.op_est=sec?(sec.estado.marca+' '+sec.estado.texto):''; v.op_est_st=sec?paChip(PA_ECOR[sec.estado.cod]):'';
+  v.op_semcampos=!!sec&&!v.op_pulv; v.op_semcampos_t=sec?('Os campos próprios de '+sec.op+' chegam numa próxima fatia; aqui ficam as atividades da operação.'):'';
+  /* leve (proprietário 19/10): a lista só traz o que impede ou avisa; a calda pendente já aparece no campo Volume de calda, e o alvo,
+     opcional, vira uma linha cinza (sem alvo, a bula é conferida pelo uso mais permissivo) */
+  const semAlvo=v.op_pulv?sec.atividades.filter(a=>!a.alvo).length:0;
+  const c=(sec?sec.conf.map(x=>({n:x.nivel,t:((sec.atividades.find(a=>a.id===x.ativ)||{}).nome||'Seção')+' · '+x.motivo})):[])
+    .concat(semAlvo?[{n:'dica',t:(semAlvo===sec.atividades.length?'Sem alvo':'Sem alvo em '+semAlvo+(semAlvo>1?' atividades':' atividade'))+': a dose é conferida pelo uso mais permissivo da bula; com o alvo, pelo uso dele'}]:[]);
+  v.op_conf=c.map(x=>({t:(x.n==='impede'?'⛔ ':(x.n==='aviso'?'⚠ ':''))+x.t, st:'font-size:12.5px;font-weight:'+(x.n==='dica'?'500':'600')+';color:'+(x.n==='impede'?'#B42318':(x.n==='aviso'?'#8A5A00':'#5B6660'))+';'})); v.op_tem_conf=c.length>0;
+  const ed=self.state.opcal, pp=(sec&&sec.params)||{};
+  v.op_cal_ler=!ed; v.op_cal_ed=!!ed; v.op_cal_txt=pp.calda?paQ(pp.calda)+' L/ha':'Pendente';
+  v.op_cal_ori=pp.calda?('vale para as atividades sem valor próprio'+(pp.origem?' · '+pp.origem:'')):'sem valor: as atividades sem calda própria ficam pendentes';
+  v.op_cal_lab='Alterar o volume de calda da operação, hoje '+v.op_cal_txt;
+  v.op_cal_ini=()=>{ self.__paCalEsc=false; self.setState({opcal:{val:pp.calda?paQ(pp.calda):'',err:''},ied:null,iadd:null}); paFoco('pa-calda-op',true); };
+  v.op_cal_val=ed?ed.val:''; v.op_cal_set=(e)=>self.setState({opcal:Object.assign({},self.state.opcal,{val:e.target.value,err:''})});
+  v.op_cal_key=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); paCaldaOk(self,sec.op); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); self.__paCalEsc=true; self.setState({opcal:null}); } };
+  v.op_cal_sai=()=>paCaldaOk(self,sec&&sec.op); v.op_cal_err=ed?ed.err:''; v.op_cal_temErr=!!(ed&&ed.err);
+  v.op_cal_ist=PA_DOSE_ST+'border:1px solid '+(ed&&ed.err?'#B42318':'#1E7A4C')+';';
+  /* K7: deslocar os gatilhos de todas as atividades da operação de uma vez (no rascunho; publicar continua explícito) */
+  const dl=self.state.desl, na=sec?sec.atividades.length:0; v.op_desl_ler=!!sec&&!dl&&na>0; v.op_desl_ed=!!sec&&!!dl;
+  v.op_desl_lab='Deslocar os gatilhos das '+na+(na===1?' atividade':' atividades')+' de '+(sec?sec.op:'');
+  v.op_desl_t='Deslocar '+(na===1?'a atividade de ':'as '+na+' atividades de ')+(sec?sec.op:'')+' em';
+  v.op_desl_ini=()=>{ self.__paDlEsc=false; self.setState({desl:{val:'',err:''},opcal:null,atcal:null,ied:null,iadd:null}); paFoco('pa-desl',true); };
+  v.op_desl_val=dl?dl.val:''; v.op_desl_set=(e)=>self.setState({desl:Object.assign({},self.state.desl,{val:e.target.value,err:''})});
+  v.op_desl_key=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); paDeslOk(self,sec.op); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); self.__paDlEsc=true; self.setState({desl:null}); } };
+  v.op_desl_ok=()=>paDeslOk(self,sec&&sec.op); v.op_desl_nao=()=>{ self.__paDlEsc=true; self.setState({desl:null}); };
+  v.op_desl_err=dl?dl.err:''; v.op_desl_temErr=!!(dl&&dl.err); v.op_desl_ist=PA_DOSE_ST+'width:72px;border:1px solid '+(dl&&dl.err?'#B42318':'#1E7A4C')+';'; }
+// K7: desloca n dias os gatilhos das atividades da operação no rascunho (cria a vN+1 na primeira mudança); a regra fica em opDeslocar
+function paDeslOk(self,op){ if(self.__paDlEsc){ self.__paDlEsc=false; return; } const dl=self.state.desl; if(!dl||!op) return;
+  const raw=String(dl.val).trim().replace('−','-').replace(/^\+/,''); const n=/^-?\d+$/.test(raw)?Number(raw):NaN;
+  if(!Number.isInteger(n)||n===0){ self.setState({desl:Object.assign({},dl,{err:'Informe os dias em número inteiro: 5 adia, −5 antecipa.'})}); return; }
+  const ps=paClone(paPlans(self)); const q=ps.find(x=>x.id===self.state.pid); const novo=!q.rasc; if(novo) q.rasc=paNovoRasc(q);
+  const at=q.rasc.atividades.filter(a=>a.op===op); at.forEach(a=>{ a.g=opDeslocar(a.g,n); });
+  self.setState({pl:ps,desl:null,g2toast:op+' · gatilhos '+(n>0?'adiados ':'antecipados ')+paDias(n)+' em '+at.length+(at.length===1?' atividade.':' atividades.')+(novo&&q.versao?' Rascunho v'+q.rasc.v+' criado; a v'+q.versao+' segue em vigor.':' Guardado no rascunho v'+q.rasc.v+'.')}); }
+function paAtCalOk(self,aid){ if(self.__paAcEsc){ self.__paAcEsc=false; return; } const ed=self.state.atcal; if(!ed||ed.aid!==aid) return; const raw=String(ed.val).trim(); const n=raw===''?null:paNum(raw);
+  if(n!==null&&(isNaN(n)||n<=0)){ self.setState({atcal:Object.assign({},ed,{err:'Informe a calda em L/ha, maior que zero, ou deixe vazio para usar a da operação.'})}); return; }
+  const p=paPlan(self,self.state.pid); const a0=paWork(p).find(x=>x.id===aid); if(!a0){ self.setState({atcal:null}); return; } if(paCaldaPropria(a0)===n){ self.setState({atcal:null}); return; }
+  const r=paRasc(self,aid,(a)=>{ if(n===null) delete a.calda; else a.calda=n; });
+  self.setState({pl:r.ps,atcal:null,g2toast:a0.nome+' · calda '+(n===null?'da operação':paQ(n)+' L/ha própria')+'.'+r.fim}); }
+// grava o volume de calda da operação no rascunho (cria a vN+1 na primeira mudança); vazio volta a "pendente"; nunca publica (decisão 9)
+function paCaldaOk(self,op){ if(self.__paCalEsc){ self.__paCalEsc=false; return; } const ed=self.state.opcal; if(!ed||!op) return; const raw=String(ed.val).trim(); const n=raw===''?null:paNum(raw);
+  if(n!==null&&(isNaN(n)||n<=0)){ self.setState({opcal:Object.assign({},ed,{err:'Informe o volume de calda em L/ha, maior que zero, ou deixe vazio.'})}); return; }
+  const p=paPlan(self,self.state.pid); const a0=(paWorkParams(p)[op]||{}).calda; if((a0===undefined||a0===null?null:Number(a0))===n){ self.setState({opcal:null}); return; }
+  const ps=paClone(paPlans(self)); const q=ps.find(x=>x.id===p.id); const novo=!q.rasc; if(novo) q.rasc=paNovoRasc(q);
+  const pr=q.rasc.params=q.rasc.params||{}; const antes=paClone(pr[op]||{}); pr[op]=Object.assign({},pr[op]||{}); if(n===null) delete pr[op].calda; else pr[op].calda=n; delete pr[op].origem;
+  const txt=opAlteracaoParam({op,atividades:q.rasc.atividades.filter(x=>x.op===op)},antes,pr[op],'calda','volume de calda','L/ha');
+  self.setState({pl:ps,opcal:null,g2toast:txt+'.'+(novo&&q.versao?' Rascunho v'+q.rasc.v+' criado; a v'+q.versao+' segue em vigor.':' Guardado no rascunho v'+q.rasc.v+'.')}); }
 // ---------- detalhe · com rascunho, as alterações acima do Próximo passo ----------
 function paDet(self,v,p){ const nd=paDiff(p); v.alt_tem=!!p.rasc;
   v.dif=nd.map(d=>({k:d.k,st:paChip(d.c),n:d.n,t:d.t})); v.dif_vazio=!!p.rasc&&!nd.length;
@@ -485,7 +655,8 @@ function paDet(self,v,p){ const nd=paDiff(p); v.alt_tem=!!p.rasc;
 function PREVALS(self,v){ const G=GRIDS.find(g=>g.id==='g_cv'); if(!G) return; const pid=self.state.pid; const p=pid?paPlan(self,pid):null;
   G.rows=p?paCults(pid).map(c=>{ const sit=paSitCult(c,p);
     return {id:c.id,ro:true,v:{saf:c.safraNome,local:c.local,cult:c.cultura+' '+c.variedade,area:c.area,ver:'v'+c.ver},s:{sit:sit[0].t},p:{local:[{k:'b',t:c.local}],ver:[{k:'tag',t:'v'+c.ver}],sit}}; }):[]; }
-function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.pid||null; const p=pid?paPlan(self,pid):null;
+function EXTRAVALS(self,v){ paHashIni(self); paGuarda(self); try{ if(typeof cenOuvir==='function') cenOuvir(self); }catch(e){}
+  const st=self.state; const pid=st.pid||null; const p=pid?paPlan(self,pid):null;
   v.lista=!p; v.det=!!p;
   v.lib=paLib(self); v.pa_qf=paQf(self);
   // volta à lista: a rolagem volta à posição guardada e o foco vai ao cartão aberto por último (sem ele, ao "Criar plano")
@@ -495,13 +666,13 @@ function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.p
   paFm(self,v); paNp(self,v);
   // Criar plano (lista, cabeçalho) e Incluir atividade (bloco Atividades) são as entradas dos painéis; Publicar é o Próximo passo do detalhe
   v.pa_novo=()=>paNewPlan(self); v.pa_incl=()=>paEdit(self,null);
-  let A={}; const ac=p?paAcoes(p,{iadd:!!st.iadd,ied:st.ied}):null; const sa=(p&&st.saiAv&&paPend(st))?st.saiAv:null;
+  const pode=paPapel(); let A={}; const ac=p?paAcoes(p,{iadd:!!st.iadd,papel:pode}):null; const sa=(p&&st.saiAv&&paPend(st))?st.saiAv:null;
   if(p){ A={volta:{t:'‹ Biblioteca de planos',fn:()=>paSair(self,{pid:null}),a:'voltar'},nota:ac.nota,prim:ac.prim?{t:ac.prim.t,fn:()=>paPub(self),a:'comando'}:null};
     /* aviso de saída (R8) no lugar da nota, ao lado do botão que levou a sair; sem ele, com alterações, o atalho para o bloco completo */
     if(sa){ const pd=paPend(st); const pp=sa.pid?paPlan(self,sa.pid):null; A.nota=pd.charAt(0).toUpperCase()+pd.slice(1)+' não foi concluída: o que foi digitado se perde ao sair.';
       A.lnks=[{t:pp?'Descartar e abrir '+pp.nome:'Descartar e voltar à biblioteca',fn:()=>paSaiOk(self)},{t:'Continuar editando',fn:()=>paSaiNao(self)}]; A.decide=true; }   // decisão do momento: fica à vista
   }
-  if(ac&&ac.prim&&ac.prim.dis) A.decide=true;   // principal travado: o motivo fica à vista (estado sempre visível, PRD 4.3)
+  if(ac&&((ac.prim&&ac.prim.dis)||(!ac.prim&&ac.nota))) A.decide=true;   // principal travado, ou sem principal para quem não publica: o motivo fica à vista (PRD 4.3)
   g2acoes(v,'aa',A); v.aa_pdis=!!(ac&&ac.prim&&ac.prim.dis); v.aa_pwhy=(ac&&ac.prim&&ac.prim.dis)||''; }
 '''
 
@@ -562,7 +733,7 @@ PA_TB_CSS = ('.pa-tb{display:grid;grid-template-columns:88px minmax(0,1fr) 110px
              '.pa-tb-l>.pa-tb-gat{grid-column:1;grid-row:1/3}.pa-tb-l>.pa-tb-atv{grid-column:2;grid-row:1;padding-bottom:0!important;flex-wrap:nowrap;align-items:flex-start}.pa-tb-atv .pa-op-ico{padding-top:7px}'
              '.pa-tb-l>.pa-tb-num{grid-column:2;grid-row:2;text-align:left;padding-top:0!important;font-size:12.5px}.pa-tb-l>.pa-mais-w{grid-column:3;grid-row:1/3}'
              '.pa-tb-grpc{flex-wrap:wrap}.pa-tb-grpc>span:first-child{flex-basis:calc(100% - 40px)}.pa-tb-gtot{width:auto;padding-right:0}.pa-tb-detc .pa-insumos{padding-left:12px}}')
-PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:max(38px,var(--g2seta-alvo)) 56px minmax(0,1fr) 80px 115px 44px;gap:10px;align-items:center;padding:8px 10px;font-size:13px;cursor:pointer}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-titulo{border:0;background:transparent;padding:6px 0;min-height:32px;font:inherit;font-size:13.5px;font-weight:700;color:#15201A;cursor:pointer;text-align:left}.pa-op-ico{display:inline-flex;color:#4B5A51;flex-shrink:0}.pa-gatilho b{font-variant-numeric:tabular-nums;text-align:right}.pa-mais-w{position:relative;display:flex;justify-content:center}.pa-mais{width:44px;height:44px;border:0;background:transparent;border-radius:8px;font-size:18px;color:#4B5A51;cursor:pointer;opacity:.35}.pa-atividade:hover .pa-mais,.pa-atividade:focus-within .pa-mais,.pa-mais[aria-expanded=true]{opacity:1}@media (hover:none){.pa-mais{opacity:1}}.pa-grp-tot{width:115px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding-right:64px}.pa-grp{container-type:inline-size}.pa-opf{white-space:nowrap}@media (pointer:coarse){.pa-desfaz{min-height:44px}}@container (max-width:760px){.pa-grp-cab{flex-wrap:wrap;row-gap:2px}.pa-grp-cab>div:first-child{flex-basis:100%}.pa-grp-tot{width:auto;padding-right:0}}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:max(38px,var(--g2seta-alvo)) minmax(36px,64px) minmax(0,1fr) 44px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 4}.pa-gatilho{grid-column:2;grid-row:1 / 4}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir,.pa-mais-w{grid-column:4;grid-row:1 / 4}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n@container (max-width:480px){.pa-atividade-linha{grid-template-columns:max(32px,var(--g2seta-alvo)) auto auto minmax(0,1fr) 44px;grid-template-areas:"e n n n m" "e g c k m";gap:2px 10px;padding:6px 6px 8px}.pa-expandir{grid-area:e}.pa-atividade-nome{grid-area:n}.pa-gatilho{grid-area:g}.pa-gatilho b{text-align:left}.pa-contagem{grid-area:c;text-align:left}.pa-custo{grid-area:k;text-align:right;white-space:nowrap}.pa-excluir,.pa-mais-w{grid-area:m}}\n'
+PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:max(38px,var(--g2seta-alvo)) 56px minmax(0,1fr) 80px 115px 44px;gap:10px;align-items:center;padding:8px 10px;font-size:13px;cursor:pointer}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-titulo{border:0;background:transparent;padding:6px 0;min-height:32px;font:inherit;font-size:13.5px;font-weight:700;color:#15201A;cursor:pointer;text-align:left}.pa-op-ico{display:inline-flex;color:#4B5A51;flex-shrink:0}.pa-gatilho b{font-variant-numeric:tabular-nums;text-align:right}.pa-mais-w{position:relative;display:flex;justify-content:center}.pa-mais{width:44px;height:44px;border:0;background:transparent;border-radius:8px;font-size:18px;color:#4B5A51;cursor:pointer;opacity:.35}.pa-atividade:hover .pa-mais,.pa-atividade:focus-within .pa-mais,.pa-mais[aria-expanded=true]{opacity:1}@media (hover:none){.pa-mais{opacity:1}}.pa-grp-tot{width:115px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding-right:64px}.pa-grp{container-type:inline-size}.pa-opf{white-space:nowrap}@media (pointer:coarse){.pa-opf,.pa-desl,.pa-op-foco input,.pa-op-foco .pa-dose,input[id^="pa-calda-"]{min-height:44px!important}}@media (pointer:coarse){.pa-desfaz{min-height:44px}}@container (max-width:760px){.pa-grp-cab{flex-wrap:wrap;row-gap:2px}.pa-grp-cab>div:first-child{flex-basis:100%}.pa-grp-tot{width:auto;padding-right:0}}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:max(38px,var(--g2seta-alvo)) minmax(36px,64px) minmax(0,1fr) 44px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 4}.pa-gatilho{grid-column:2;grid-row:1 / 4}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir,.pa-mais-w{grid-column:4;grid-row:1 / 4}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n@container (max-width:480px){.pa-atividade-linha{grid-template-columns:max(32px,var(--g2seta-alvo)) auto auto minmax(0,1fr) 44px;grid-template-areas:"e n n n m" "e g c k m";gap:2px 10px;padding:6px 6px 8px}.pa-expandir{grid-area:e}.pa-atividade-nome{grid-area:n}.pa-gatilho{grid-area:g}.pa-gatilho b{text-align:left}.pa-contagem{grid-area:c;text-align:left}.pa-custo{grid-area:k;text-align:right;white-space:nowrap}.pa-excluir,.pa-mais-w{grid-area:m}}\n'
 
 # ícones do tipo de operação (Lucide, ISC; LICENSES/lucide-ISC.txt): o mesmo no chip e na atividade (VISOES-2 §3.5)
 _OPI = {'pulv': 'M3 3h.01M7 5h.01M11 7h.01M3 7h.01M7 9h.01M3 11h.01M15 5h4v4h-4zM19 9l2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2M13 14l8-2M13 19l8-2',   # spray-can
@@ -583,7 +754,7 @@ def build():
     card = (f'<button type="button" class="g2card" aria-current="{H("c.cur")}" onClick="{H("c.open")}" aria-label="{H("c.lab")}" style="{H("c.st")}">'
             f'<span style="display: flex; align-items: flex-start; gap: 8px; width: 100%;"><b style="font-size: 14.5px; flex-grow: 1; line-height: 1.3;">{H("c.nome")}</b>'
             f'<span class="g2card-cta" aria-hidden="true" style="padding-top: 1px;">Abrir plano <span style="font-size: 14px; line-height: 1;">→</span></span></span>'
-            f'<span style="display: flex; width: 100%;"><span style="{H("c.est_st")}">{H("c.est")}</span></span>'
+            f'<span style="display: flex; width: 100%; gap: 6px; flex-wrap: wrap;"><span style="{H("c.est_st")}">{H("c.est")}</span>' + IF('c.temOpx', f'<span style="{H("c.opx_st")}">{H("c.opx")}</span>') + '</span>'
             f'<span style="display: flex; gap: 18px; font-size: 12.5px; color: {MUTED};"><span><b style="font-size: 15px; color: {INK};">{H("c.natv")}</b> atividades</span>'
             f'<span><b style="font-size: 15px; color: {INK};">{H("c.custo")}</b> insumos/ha</span></span>'
             f'<span style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;"><span style="font-size: 11.5px; color: {MUTED}; margin-right: 2px;">Gatilhos</span>'
@@ -643,7 +814,8 @@ def build():
            f'<span class="pa-gatilho" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
            f'<span class="pa-atividade-nome"><span style="display: flex; align-items: center; gap: 8px; min-width: 0;"><span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
            f'<button type="button" class="pa-titulo" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
-           + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span></span>'
+           + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span>'
+           + IF('a.temInfo', f'<span class="pa-op-info" style="font-size: 12px; color: {MUTED}; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">{H("a.info")}' + IF('a.cal_ler', f'<button type="button" class="pa-dose" aria-label="{H("a.cal_lab")}" title="Alterar a calda desta atividade" onClick="{H("a.cal_ini")}" style="font-size: 12px;">{H("a.cal_t")}</button>', True) + IF('a.cal_ed', f'<span style="display: inline-flex; align-items: center; gap: 5px;"><input id="{H("a.cal_fid")}" aria-label="{H("a.cal_lab")}" placeholder="{H("a.cal_ph")}" value="{H("a.cal_val")}" onChange="{H("a.cal_set")}" onKeyDown="{H("a.cal_key")}" onBlur="{H("a.cal_sai")}" inputMode="decimal" style="{H("a.cal_ist")}"><span>L/ha</span></span>') + f'<span>{H("a.info2")}</span>' + IF('a.cal_temErr', f'<span role="alert" style="color: {RED};">{H("a.cal_err")}</span>') + IF('a.temImarca', f'<span title="{H("a.imarcaT")}" style="{H("a.imarcaSt")}">{H("a.imarca")}</span>') + '</span>') + '</span>'
            f'<span class="pa-contagem">{H("a.np")}</span><span class="pa-custo">{H("a.custo")}</span>'
            f'<span class="pa-mais-w">' + E.mais(H('a.nome'), [('Editar atividade', H('a.edit')), ('Excluir atividade', H('a.excluir'), True)], linha=True, cls='pa-mais') + '</span></div>'
            + f'<div id="{H("a.detalhesId")}" role="region" aria-label="{H("a.detalhesLab")}">'
@@ -659,7 +831,7 @@ def build():
               f'<span role="cell" class="pa-tb-atv">'
               f'<span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
               f'<button type="button" class="pa-titulo" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
-              + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span>'
+              + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + IF('a.temInfo', f'<span class="pa-op-info" style="font-size: 12px; color: {MUTED}; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">{H("a.info")}' + IF('a.cal_ler', f'<button type="button" class="pa-dose" aria-label="{H("a.cal_lab")}" title="Alterar a calda desta atividade" onClick="{H("a.cal_ini")}" style="font-size: 12px;">{H("a.cal_t")}</button>', True) + IF('a.cal_ed', f'<span style="display: inline-flex; align-items: center; gap: 5px;"><input id="{H("a.cal_fid")}" aria-label="{H("a.cal_lab")}" placeholder="{H("a.cal_ph")}" value="{H("a.cal_val")}" onChange="{H("a.cal_set")}" onKeyDown="{H("a.cal_key")}" onBlur="{H("a.cal_sai")}" inputMode="decimal" style="{H("a.cal_ist")}"><span>L/ha</span></span>') + f'<span>{H("a.info2")}</span>' + IF('a.cal_temErr', f'<span role="alert" style="color: {RED};">{H("a.cal_err")}</span>') + IF('a.temImarca', f'<span title="{H("a.imarcaT")}" style="{H("a.imarcaSt")}">{H("a.imarca")}</span>') + '</span>') + '</span>'
               f'<span role="cell" class="pa-tb-ins">{H("a.np")}</span><span role="cell" class="pa-tb-num">{H("a.custo")}</span>'
               f'<span role="cell" class="pa-mais-w">' + E.mais(H('a.nome'), [('Editar atividade', H('a.edit')), ('Excluir atividade', H('a.excluir'), True)], linha=True, cls='pa-mais') + '</span></div>'
               f'<div role="row" class="pa-tb-det" id="{H("a.detalhesId")}" aria-label="{H("a.detalhesLab")}">' + IF('a.open', '<div role="cell" class="pa-tb-detc">' + insumos + '</div>') + '</div>')
@@ -699,8 +871,23 @@ def build():
     # cabeçalho da seção, à direita, separado do avanço
     barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 280px; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn
              + E.modos_html('pa_atv', 'Visão das atividades: tabela ou cartões') + '</div>')   # modo Tabela | Cartões (15/10/2026), depois do Expandir tudo
+    foco = IF('op_foco', f'<div class="pa-op-foco" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px; background: #FBFCFA;">'
+              f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><b style="font-size: 13.5px;">{H("op_tit")}</b><span style="{H("op_est_st")}">{H("op_est")}</span>'
+              + IF('op_desl_ler', f'<button type="button" class="pa-desl" aria-label="{H("op_desl_lab")}" title="Adiar ou antecipar os gatilhos de todas as atividades da operação" onClick="{H("op_desl_ini")}" style="{_MINI} margin-left: auto;">Deslocar gatilhos</button>') + '</div>'
+              + IF('op_desl_ed', f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px;"><label for="pa-desl">{H("op_desl_t")}</label>'
+                   f'<input id="pa-desl" type="text" inputMode="numeric" aria-describedby="pa-desl-d" value="{H("op_desl_val")}" onChange="{H("op_desl_set")}" onKeyDown="{H("op_desl_key")}" style="{H("op_desl_ist")}"><span id="pa-desl-d" style="font-size: 12px; color: {MUTED};">dias (5 adia, −5 antecipa)</span>'
+                   f'<button type="button" onClick="{H("op_desl_ok")}" style="{_MINIP}">Aplicar</button><button type="button" onClick="{H("op_desl_nao")}" style="{_MINI}">Cancelar</button></div>'
+                   + IF('op_desl_temErr', f'<div role="alert" style="font-size: 12px; color: {RED};">{H("op_desl_err")}</div>'))
+              + IF('op_pulv', f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px;"><span style="{LBL}">Volume de calda</span>'
+                   + IF('op_cal_ler', f'<button type="button" class="pa-dose" aria-label="{H("op_cal_lab")}" title="Alterar o volume de calda" onClick="{H("op_cal_ini")}">{H("op_cal_txt")}</button>', True)
+                   + IF('op_cal_ed', f'<span style="display: inline-flex; align-items: center; gap: 5px;"><input id="pa-calda-op" aria-label="Volume de calda da operação (L/ha)" value="{H("op_cal_val")}" onChange="{H("op_cal_set")}" onKeyDown="{H("op_cal_key")}" onBlur="{H("op_cal_sai")}" inputMode="decimal" style="{H("op_cal_ist")}"><span style="font-size: 12px; color: {MUTED};">L/ha</span></span>')
+                   + f'<span style="font-size: 12px; color: {MUTED};">{H("op_cal_ori")}</span></div>'
+                   + IF('op_cal_temErr', f'<div role="alert" style="font-size: 12px; color: {RED};">{H("op_cal_err")}</div>'))
+              + IF('op_semcampos', f'<div style="font-size: 12.5px; color: {MUTED};">{H("op_semcampos_t")}</div>')
+              + IF('op_tem_conf', '<div role="list" aria-label="Conferências da operação" style="display: flex; flex-direction: column; gap: 3px;">' + FOR('op_conf', 'cf', f'<span role="listitem" style="{H("cf.st")}">{H("cf.t")}</span>', 2) + '</div>')
+              + '</div>')
     atividades = bloco('Atividades do plano', 'Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.',
-                       IF('pa_undo', f'<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("pa_undo_t")}</span><button type="button" class="pa-desfaz" onClick="{H("pa_desfaz")}" style="{_MINI}">Desfazer</button></div>') + IF('vazio', vazio) + IF('tem_atv', barra + IF('pa_md_c', f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True) + IF('pa_md_t', tabela), True), acao=incl_sec)
+                       IF('pa_undo', f'<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("pa_undo_t")}</span><button type="button" class="pa-desfaz" onClick="{H("pa_desfaz")}" style="{_MINI}">Desfazer</button></div>') + IF('vazio', vazio) + IF('tem_atv', barra + foco + IF('pa_md_c', f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True) + IF('pa_md_t', tabela), True), acao=incl_sec)
 
     # ---------- detalhe · com rascunho, as alterações logo acima do Próximo passo ----------
     # 14/10/2026 (proprietário: "tire cultivos que usam esse plano e versões. não agregam quase nada"): os blocos saíram do detalhe.
@@ -730,6 +917,10 @@ def build():
                + IF('fm_isDias', f'<input id="fm_dias" aria-label="Dias" value="{H("fm_dias")}" onChange="{H("fm_setdias")}" inputMode="numeric" style="{H("fm_gst")} text-align: right;"><span style="font-size: 13px; color: {MUTED};">{H("fm_diasl")}</span>', True)
                + IF('fm_isData', f'<input id="fm_data" type="date" aria-label="Data" value="{H("fm_data")}" onChange="{H("fm_setdata")}" style="{H("fm_dst")}">')
                + '</div>' + err('fm_heg', 'fm_eg') + f'<span style="font-size: 11.5px; color: {MUTED};">{H("fm_ghelp")}</span></div>'
+               + IF('fm_pulv', f'<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid {LINE};"><span style="{SEC}">Pulverização</span>'
+                    f'<label for="fm_alvo" style="{LBL}">Alvo</label><select id="fm_alvo" value="{H("fm_alvo")}" onChange="{H("fm_setalvo")}" style="{H("fm_alst")}">' + FOR('fm_alvos', 'o', f'<option value="{H("o.v")}">{H("o.t")}</option>', 3) + '</select>'
+                    f'<label for="fm_calda" style="{LBL}">Calda própria (L/ha)</label><span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><input id="fm_calda" value="{H("fm_calda")}" onChange="{H("fm_setcalda")}" inputMode="decimal" style="{H("fm_cst")}">'
+                    f'<span style="font-size: 12px; color: {MUTED};">{H("fm_cph")}</span></span>' + err('fm_hec', 'fm_ec') + '</div>')
                + IF('fm_temIns', f'<div style="display: flex; flex-direction: column; gap: 3px; padding-top: 10px; border-top: 1px solid {LINE};"><span style="{SEC}">Insumos</span>'
                     f'<span style="font-size: 13px;">{H("fm_ins")}</span><span style="font-size: 11.5px; color: {MUTED};">Altere doses e insumos na tabela da atividade.</span></div>')
                + IF('fm_nova', f'<div style="font-size: 12px; color: {MUTED}; padding-top: 10px; border-top: 1px solid {LINE};">Depois de salvar, a atividade abre na lista para você incluir os insumos.</div>'))
@@ -741,7 +932,8 @@ def build():
                     + FOR('np_bases', 'o', f'<option value="{H("o.v")}">{H("o.t")}</option>', 2) + f'</select><span style="font-size: 11.5px; color: {MUTED};">Copiar só traz as atividades; o plano de origem não muda.</span></div>'))
     EXTRA.append(aside('np', 'np_titulo', 'np_sub', np_body, w=460))
 
-    EXTRAJS[0] = 'const PA0 = ' + json.dumps(dd, ensure_ascii=False) + ';\n' + JS
+    import cenario
+    EXTRAJS[0] = cenario.js_prefixo() + 'const PA0 = ' + json.dumps(dd, ensure_ascii=False) + ';\n' + JS
     HEIGHTS37[fname] = 1000   # tela de trabalho com rolagem interna (mesma altura de quando tinha a faixa de etapas), como a MA da PCM
     shell37('PA', 'Planos agronômicos', corpo, fname=fname,
             subtitle='Mantenha os planos padrão por cultura: gatilho, atividades, produtos e doses. Cada alteração vira uma nova versão; cultivos já aplicados não mudam sozinhos.',

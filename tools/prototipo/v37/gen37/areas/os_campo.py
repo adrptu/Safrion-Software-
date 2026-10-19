@@ -68,7 +68,9 @@ a{{color:{ACC}}}
 
 
 # ---------- app de campo (390 px): retirada → preparo carga a carga → aplicação ----------
-PREPARO_JS = 'const FICHA0424 = '+json.dumps(OS,ensure_ascii=False)+';\n'+r'''
+_PJ = next(a for a in __import__('dados_cad').ATIVOS if a['id'] == 'a05')
+FICHA_EQ = dict(vel=CJ['vel'], esp=_PJ.get('esp_bicos'), ponta=_PJ.get('ponta'), bar=_PJ.get('pressao'), curva=__import__('dados_cad').CURVA_PONTA, origem=__import__('dados_cad').CURVA_ORIGEM)
+PREPARO_JS = 'const FICHA0424 = '+json.dumps(OS,ensure_ascii=False)+';\nconst FICHA_EQ = '+json.dumps(FICHA_EQ,ensure_ascii=False)+';\n'+r'''
 function oscPreparo(c,v){ const o=c.ordens['OS-0424'], p=cenPreparoOrdem(c,o);
   v.preparo=cenPreparoTxt(p); v.preparoOk=p.ok&&p.n>0; v.preparoBloq=!v.preparoOk;
   v.versao=o?o.versao:'Ordem indisponível';
@@ -77,6 +79,10 @@ function oscPreparo(c,v){ const o=c.ordens['OS-0424'], p=cenPreparoOrdem(c,o);
   v.totalProds=p.ok?o.ins.map(x=>x.p+' '+cenNum(cenQtd(x.dose,p.area))+' '+x.un).join(' · '):'—';
   v.vazao=p.ok?cenNum(p.vazao)+' L/ha':'Não informada';
   v.hacarga=p.ok?cenNum(p.haCarga,3)+' ha':'Não calculável';
+  /* PA-OPER F1 (P18, EX-38 R10): vazão por bico alvo (volume × velocidade do REND × espaçamento ÷ 600) × disponível (curva ponta × pressão,
+     outra fonte); sem velocidade, espaçamento ou curva: desconhecido, nunca padrão (serviço único operacoes.js) */
+  const vz=(typeof opVazao==='function'&&p.ok)?opVazao(p.vazao,FICHA_EQ.vel,FICHA_EQ.esp,FICHA_EQ.curva,FICHA_EQ.ponta,FICHA_EQ.bar):null;
+  v.vazbico=(!vz||vz.alvo===null)?'Alvo desconhecido (sem volume, velocidade ou espaçamento)':('alvo '+cenNum(vz.alvo,2)+' L/min · disponível '+(vz.disp===null?'desconhecido':cenNum(vz.disp,2)+' L/min ('+FICHA_EQ.ponta+' a '+cenNum(FICHA_EQ.bar)+' bar, '+FICHA_EQ.origem+')')+(vz.difPct===null?'':' · diferença '+(vz.difPct>0?'+':'')+cenNum(vz.difPct,1)+' %')+' · faça o teste de calibração antes da 1ª carga');
   v.conjunto=p.ok?p.conjunto:p.motivo;
   v.doses=o?(o.ins||[]).map(x=>x.p+' '+cenNum(x.dose,3)+' '+x.un+'/ha').join(' · '):'';
   v.cargas=p.cargas.map(x=>({n:x.n,rotulo:x.n+(x.parcial?' · parcial':''),parcial:x.parcial,volt:cenNum(x.vol,3)+' L de calda',areat:cenNum(x.area,3)+' ha',
@@ -131,7 +137,7 @@ def app():
                 f'<div style="font-size: 12px; color: {MUTED};">{H("feitas_t")}</div>'
                 f'<sc-for list="{H("lista")}" as="l" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; {H("l.st")}"><span>{H("l.t")}</span><span>{H("l.s")}</span></div></sc-for>')
     opr = card('Operador · aplicação', kv('Vazão', H('vazao')) + kv('Velocidade', f"{nf(EQ['vel'])} km/h") + kv('Barra', f"{nf(EQ['barra'])} m")
-               + kv('Bicos · pressão', EQ['bicos']) + kv('Área por carga', H('hacarga')) + kv('Dose', H('doses')))
+               + kv('Bicos · pressão', EQ['bicos']) + kv('Vazão por bico', H('vazbico')) + kv('Área por carga', H('hacarga')) + kv('Dose', H('doses')))
     # SEP-20261015 (a): a barra de ação fixa no pé, branca sobre o fundo cinza, separa-se por sombra (como a faixa de etapas), sem linha
     body = (f'<div data-mroot="1" style="position: relative; width: 100%; height: 1030px; --mw: 390px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; overflow: clip;">'
             f'<header style="padding: 44px 20px 12px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 5px;">'
@@ -192,7 +198,7 @@ def ficha():
             + f'<div role="status" style="font-size: 12.5px;">{H("preparo")}</div><div>{H("saldoIns")}</div>'
             + f'<div role="table" aria-label="Cargas de preparo"><div role="row" class="g2thr" style="{rowst}">{headers}</div><div role="rowgroup">{rows}</div><div role="row" style="{rowst}">{totals}</div></div>'
             + sec('Operador · aplicação')
-            + f'<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">{kv("Vazão", H("vazao"))}{kv("Velocidade", nf(EQ["vel"])+" km/h")}{kv("Barra", nf(EQ["barra"])+" m")}{kv("Bicos · pressão", EQ["bicos"])}{kv("Conjunto", H("conjunto"))}</div>'
+            + f'<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">{kv("Vazão", H("vazao"))}{kv("Velocidade", nf(EQ["vel"])+" km/h")}{kv("Barra", nf(EQ["barra"])+" m")}{kv("Bicos · pressão", EQ["bicos"])}{kv("Vazão por bico", H("vazbico"))}{kv("Conjunto", H("conjunto"))}</div>'
             + sec('Apontamento (lance no app quando houver sinal)')
             + f'<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">{linha("Data")}{linha("Início")}{linha("Fim")}{linha("Área feita (ha)")}{linha("Sobra (L)")}{linha("Ocorrência")}</div>'
             + f'<div style="margin-top: auto; padding-top: 14px; border-top: 1px solid {LINE}; font-size: 11px; color: {MUTED};">Ficha da versão exibida acima. Antes de preparar, confira a versão vigente na O.S.; se mudou, reemita a ficha. O QR desta demonstração não consulta versões. Calda preparada não é área aplicada.</div></div>')

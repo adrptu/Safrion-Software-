@@ -172,6 +172,11 @@ def demanda(safra,ajustes=None,planos_extra=None,osd=None,cen=None):
 # ---- Fazenda Lagoa Grande (dados_lagoa_safra.py): safra de mamão nos 23 pivôs reais, planos, conjuntos e estoque ----
 import dados_lagoa_safra as _DL
 _DL.SAFRA['periodo']=periodo_txt(_DL.SAFRA['ini'],_DL.SAFRA['fim']); SAFRAS.append(_DL.SAFRA); CULTIVOS[_DL.SAFRA['id']]=_DL.CULTIVOS; PLANOS.extend(_DL.PLANOS); PLANO.update({p['id']:p for p in _DL.PLANOS}); CONJ.extend(_DL.CONJ)
+# PA-OPER F1 (docs/integracao/V71/PA-OPER.md, migração): parâmetros por operação da versão vigente de cada plano. Só a semente de
+# demonstração traz valor (SOJA-AT v6 com calda de 100 L/ha, para a OS-0421 manter os números); os demais planos ficam "pendente".
+# Dado, não regra: o código não preenche nenhum parâmetro por padrão.
+PARAMS_DEMO={'SOJA-AT':{'Pulverização':{'calda':100,'origem':'demonstração'}}}
+for _p in PLANOS: _p.setdefault('params',PARAMS_DEMO.get(_p['id'],{}))
 EST_FAZ={'Santa Rita':dict(ESTOQUE),'Lagoa Grande':dict(_DL.ESTOQUE)}   # DEM-07: o físico de cada fazenda (ESTOQUE junta os dois para as telas de estoque)
 ESTOQUE.update(_DL.ESTOQUE); RECEB.update(_DL.RECEB)
 # ---- REND-MULTICONJUNTOS-20261003 · configurações por atividade (etapa 3 · Defina os rendimentos) e espelho do cálculo da etapa 4 ----

@@ -1,0 +1,6 @@
+FALHA V1 v5 pedida, ausente do cenário, semente na v6: nada volta e a calda fica pendente (nunca 100 L/ha da v6 rotulada v5) · [{"versao":6,"params":{"Pulverização":{"calda":100}},"atividades":null},{"valor":100,"origem":"da operação"}]
+OK    V2 v6 (a da semente): 100 L/ha da operação
+OK    V3 v5 histórica guardada (80 L/ha): a calda dela, não a da semente
+
+2/3 OK
+rc=1

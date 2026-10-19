@@ -83,6 +83,10 @@ function alTrocar(c,os,de,para,pf){ const co=c&&c.ordens&&c.ordens[os]; if(!co) 
   if(!cand.ok) throw new Error('Troca recusada: '+cand.nome+' '+cand.motivo+'. Nada foi alterado.');
   const orig=atual.de||de, hr=cenAgora(); co.rec=Object.assign({},co.rec||{}); if(para===orig) delete co.rec[orig]; else co.rec[orig]=para;
   co.recHist=(co.recHist||[]).concat([{de,para,por:quem,at:hr,t:'Recurso trocado: '+AL0.nome[de]+' → '+cand.nome+' por '+quem+' às '+hr}]);
+  /* PA-OPER F1 (P4, P19): trocar o pulverizador refaz o retrato do tanque na instrução vigente (a troca só vale antes da execução, então
+     nenhuma carga foi preparada); a vazão, as doses e a versão da instrução não mudam */
+  const aidN=AL0.ativo&&AL0.ativo[para]; if(co.instrucao&&co.instrucao.versao===co.versao&&typeof cenCadTanque==='function'&&typeof CEN_PREP_ATIVOS!=='undefined'&&CEN_PREP_ATIVOS[aidN]){
+    const tq=cenCadTanque(aidN); if(tq) co.instrucao=Object.assign({},co.instrucao,{tanque:tq,conjunto:cand.nome}); }
   return {msg:AL0.nome[de]+' → '+cand.nome+' na '+os+(cand.aviso?' · '+cand.aviso:'')+'.'}; }
 """
 
