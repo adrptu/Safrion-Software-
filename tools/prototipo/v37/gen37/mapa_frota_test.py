@@ -59,10 +59,26 @@ MK = "JSON.stringify([...document.querySelectorAll('[data-frota-os]')].filter(b=
 PAINEL = "(document.querySelector('[data-frota-painel]')||{}).innerText||''"
 def foto_estado():   # todo o armazenamento local (cenário, preferências) mais o cenário em memória da página
     return J("JSON.stringify([Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)]), window.__frotaTeste.cenario()])")
+class Pare(Exception): pass
+def m12():   # "Ver no mapa" na OS-0421 com o contexto salvo na Lagoa Grande
+    c.aparelho(1440, 900); c.goto('about:blank', .1); c.goto(U('Main.dc.html'), .3)
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana'); sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Lagoa Grande'})); 1")
+    c.goto(U('OS.dc.html#OS-0421'), 1.5)
+    lk = J("(()=>{ const a=document.querySelector('a[data-frota-link]'); return a&&a.getClientRects().length?a.getAttribute('href'):null; })()")
+    if lk: J("document.querySelector('a[data-frota-link]').click()"); time.sleep(2.0)
+    ctx = J("sessionStorage.getItem('mapa-ctx')"); rec = J("(document.querySelector('.fr-recorte')||{}).innerText||''"); h2 = J("(document.querySelector('[data-frota-painel] h2')||{}).innerText||''")
+    chk('M12 "Ver no mapa" (1 clique) abre o Mapa com o conjunto selecionado; faixa "Recorte temporário" e mapa-ctx inalterado',
+        lk == 'IN-04.dc.html#frota=OS-0421' and 'Recorte temporário: OS-0421' in rec and 'Trator 03' in h2 and json.loads(ctx or '{}').get('mf_faz') == 'Lagoa Grande', [lk, rec, h2, ctx])
 try:
     # ---------------- Santa Rita, Ana
     abre()
     tem = J("!!document.querySelector('[data-frota-tog]')")
+    if not tem:   # contraprova (M22): render de antes da F1, sem alternador; reprova caso a caso em vez de parar com exceção
+        chk('M1 Santa Rita: "Máquinas (2)"; 1 marcador (OS-0421)', False, 'sem o alternador Máquinas')
+        chk('M2 1 clique liga e o seguinte desliga', False, 'sem o alternador Máquinas')
+        chk('M3 1 toque no marcador abre o painel', False, 'sem marcador: ' + str(J("document.querySelectorAll('[data-frota-os]').length")))
+        m12()
+        raise Pare
     t0 = J("(document.querySelector('[data-frota-tog]')||{}).innerText||''")
     liga(); mk = json.loads(J(MK) or '[]'); ls = lista()
     em_exec = J("JSON.stringify(Object.values(window.__frotaTeste.cenario().ordens).filter(o=>o.etapa==='Em execução').map(o=>o.id).sort())")
@@ -74,7 +90,8 @@ try:
     campos = ['O.S. e versão', 'Operação', 'Talhão', 'Conjunto', 'Estado', 'Posição', 'Quanto falta', 'Operador']
     chk('M3 1 toque no marcador abre o painel com os campos da decisão 9; "Abrir O.S." vai à OS-0421',
         all(x in pn for x in campos) and 'Trator 03 + Pulverizador PJ-3030' in pn and '190 de 350 ha apontados · saldo 160 ha' in pn and '≈ 7,4 h' in pn
-        and '6 cargas de 30 ha, a última com 10 ha' in pn and 'Marcos' in pn and href == 'OS.dc.html#OS-0421', [pn, href])
+        and '6 cargas de 30 ha, a última com 10 ha' in pn and 'Marcos' in pn and href == 'OS.dc.html#OS-0421'
+        and 'OS-0421 · v2' in pn and not re.search(r'\bvv\d', pn), [pn, href])   # versão sem prefixo duplicado ('vv2', achado da foto de 19/10)
     # M15 mesma fonte e idade no mapa, lista e painel
     al = (json.loads(J(MK) or '[]') or [{}])[0].get('al', '')
     ida = re.search(r'leitura (há [^·]+?)(?: ·|$)', al); ida = ida.group(1).strip() if ida else '?'
@@ -134,15 +151,7 @@ try:
     J("window.__frotaTeste.cenario(c=>{ c.ordens['OS-0421'].etapa='Em conferência'; }); window.__frotaTeste.render(); 1"); time.sleep(.8)
     p9 = J(PAINEL)
     chk('M9 enviada para conferência com o painel aberto: o marcador sai e o painel avisa', 'saiu de Em execução (agora Em conferência)' in p9 and not J("!!document.querySelector('[data-frota-os=\"OS-0421\"]')"), p9)
-    # M12 Ver no mapa (OS) com contexto salvo na Lagoa Grande
-    c.aparelho(1440, 900); c.goto('about:blank', .1); c.goto(U('Main.dc.html'), .3)
-    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana'); sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Lagoa Grande'})); 1")
-    c.goto(U('OS.dc.html#OS-0421'), 1.5)
-    lk = J("(()=>{ const a=document.querySelector('a[data-frota-link]'); return a&&a.getClientRects().length?a.getAttribute('href'):null; })()")
-    if lk: J("document.querySelector('a[data-frota-link]').click()"); time.sleep(2.0)
-    ctx = J("sessionStorage.getItem('mapa-ctx')"); rec = J("(document.querySelector('.fr-recorte')||{}).innerText||''"); h2 = J("(document.querySelector('[data-frota-painel] h2')||{}).innerText||''")
-    chk('M12 "Ver no mapa" (1 clique) abre o Mapa com o conjunto selecionado; faixa "Recorte temporário" e mapa-ctx inalterado',
-        lk == 'IN-04.dc.html#frota=OS-0421' and 'Recorte temporário: OS-0421' in rec and 'Trator 03' in h2 and json.loads(ctx or '{}').get('mf_faz') == 'Lagoa Grande', [lk, rec, h2, ctx])
+    m12()
     # M13 Rui
     abre(perfil='Rui'); liga(); ls13 = lista()
     tudo = J("document.body.innerText+' '+[...document.querySelectorAll('[aria-label],[title],[data-dica]')].map(e=>(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('data-dica')||'')).join(' ')")
@@ -168,6 +177,8 @@ try:
         lat = J("document.documentElement.scrollWidth>innerWidth+1"); res16[w] = (al, lat); erros.extend(J("window.__e") or [])
     chk('M16 alternador, Lista e marcador com alvo ≥ 44 px a 390 (toque); sem rolagem lateral a 1440 e 390', all(x and x[0] >= 44 and x[1] >= 44 for x in res16[390][0]) and not res16[390][1] and not res16[1440][1], res16)
     chk('M16 nenhum erro de JavaScript', not erros, erros[:5])
+except Pare:
+    pass
 finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {OK}/{OK+FAIL} ok')

@@ -1,0 +1,21 @@
+OK    M1 Santa Rita: "Máquinas (2)"; lista OS-0420 e OS-0421 (os Em execução do cenário nesta fazenda); 1 marcador (OS-0421)
+OK    M3 1 toque no marcador abre o painel com os campos da decisão 9; "Abrir O.S." vai à OS-0421
+OK    M15 marcador e painel com a mesma fonte (simulação) e a mesma idade
+OK    M10 Esc fecha o painel e devolve o foco ao marcador de origem
+OK    M4 a posição simulada da OS-0421 está dentro do T2; a OS-0420, sem fonte, não tem marcador
+OK    M18 marcador com ícone, rótulo curto e selo com palavra; legenda com ícones e estados
+OK    M19 "Posições simuladas · demonstração" na legenda e nenhuma posição chamada de telemetria
+OK    M2 nas nove funções: 1 clique liga e o seguinte desliga (aria-pressed acompanha)
+OK    M20 cores, seleção do talhão (T4) e números da faixa iguais antes, com e depois de Máquinas, nas nove funções
+OK    M5 fronteira: 60 s Atual (sólido); 61 s "Sem sinal há 1 min", vazado, sem seta, sem "parada"
+OK    M7 sem leitura: a O.S. fica na lista, sem marcador; a impedida mostra o selo e "estado desconhecido"
+OK    M24 leitura "Trabalhando" numa O.S. impedida: aviso para conferir; o selo da O.S. continua
+OK    M8 iniciar a OS-0424: o PJ-3030 nas duas O.S.; as linhas dizem "Conflito · também na OS-…"
+OK    M9 enviada para conferência com o painel aberto: o marcador sai e o painel avisa
+OK    M12 "Ver no mapa" (1 clique) abre o Mapa com o conjunto selecionado; faixa "Recorte temporário" e mapa-ctx inalterado
+OK    M13 Rui: só a lista, "Posição restrita ao seu perfil", sem marcador, operador, idade ou coordenada
+OK    M14 30 s de leituras, ligar e desligar 10 vezes e recarregar: o cenário gravado fica igual byte a byte
+OK    M1 Lagoa Grande: lista OS-0505, OS-0506 e OS-0507 (ativos fixos "ver na Irrigação"); 1 marcador (OS-0505, conjunto de demonstração)
+OK    M16 alternador, Lista e marcador com alvo ≥ 44 px a 390 (toque); sem rolagem lateral a 1440 e 390
+OK    M16 nenhum erro de JavaScript
+RESULTADO: 20/20 ok

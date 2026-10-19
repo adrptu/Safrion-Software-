@@ -1,0 +1,5 @@
+FALHA M1 Santa Rita: "Máquinas (2)"; 1 marcador (OS-0421) · sem o alternador Máquinas
+FALHA M2 1 clique liga e o seguinte desliga · sem o alternador Máquinas
+FALHA M3 1 toque no marcador abre o painel · sem marcador: 0
+FALHA M12 "Ver no mapa" (1 clique) abre o Mapa com o conjunto selecionado; faixa "Recorte temporário" e mapa-ctx inalterado · [None, '', '', '{"mf_faz":"Lagoa Grande"}']
+RESULTADO: 0/4 ok

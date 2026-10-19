@@ -87,7 +87,7 @@ function frVals(self, v) {
   v.fr_st = 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;min-height:var(--g2-alvo,0px);min-width:var(--g2-alvo,0px);box-sizing:border-box;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;box-shadow:0 1px 3px rgba(21,32,26,.18);'
     + (on ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;');
   v.fr_tog = () => { const s = self.state, liga = !s.frOn; frOrigem(null);
-    self.setState({frOn: liga, frLista: false, frSel: null, g2toast: liga ? 'Máquinas: toque numa máquina para ver a O.S.' : 'Máquinas desligadas.'}); };   // função, filtros, seleção e zoom ficam (M2)
+    self.setState({frOn: liga, frLista: false, frSel: null}); };   // função, filtros, seleção e zoom ficam (M2); o modo e o aria-pressed dizem o estado, sem aviso repetido
   v.fr_lon = st.frLista ? 'true' : 'false'; v.fr_lt = 'Lista (' + md.n + ')'; v.fr_lst = v.fr_st.replace(on ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;', st.frLista ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;');
   v.fr_lis = () => { const s = self.state; frOrigem(null); self.setState({frLista: !s.frLista, frSel: null, frGrupo: null});
     if (!s.frLista) setTimeout(() => { const t = document.querySelector('[data-frota-painel] h2'); if (t) t.focus(); }, 60); };
@@ -154,20 +154,23 @@ function frDesenha() {
   const foco = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-frota-os');
   const [grupos] = frAgrupar(pts.map(p => [p[0], p[1], p[2]]), foco, st.frSel);
   const emGrupo = {}; grupos.filter(g => g.length > 1).forEach(g => g.forEach(id => { emGrupo[id] = g; }));
+  const tb = document.querySelector('[data-frota-tog]'), tbB = tb && tb.getClientRects().length ? tb.getBoundingClientRect().bottom : -1;
+  const topo = x => { const c = x.geo.modo === 'svg' ? R : (lgOn ? LGI.map.getContainer().getBoundingClientRect() : null); return c ? c.top : 0; };
   pts.forEach(([os, px, py, x]) => {
     if (emGrupo[os]) return; vivos.add(os);
+    const baixo = topo(x) + py - 22 < tbB + 8;   // o rótulo ficaria sob a barra de ferramentas: vai para baixo do disco
     const html = frMarcadorHtml(x), aria = frAria(x, md.pf);
     if (x.geo.modo === 'svg') {
       let b = FRUI.mk[os]; if (b && !b.isConnected) { delete FRUI.mk[os]; b = null; }
       if (!b && cam) { b = document.createElement('button'); b.type = 'button'; b.className = 'fr-m'; b.setAttribute('data-frota-os', os); b.onclick = () => frAbre(os, 'mapa'); cam.appendChild(b); FRUI.mk[os] = b; }
       if (!b) return; if (b.__h !== html) { b.innerHTML = html; b.__h = html; } if (b.getAttribute('aria-label') !== aria) b.setAttribute('aria-label', aria);
-      b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); b.style.transform = 'translate(' + Math.round(px - 22) + 'px,' + Math.round(py - 22) + 'px)';
+      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); b.style.transform = 'translate(' + Math.round(px - 22) + 'px,' + Math.round(py - 22) + 'px)';
     } else if (lgOn && window.maplibregl) {
       let mk = FRUI.lg[os];
       if (!mk) { const b = document.createElement('button'); b.type = 'button'; b.className = 'fr-m fr-m-lg'; b.setAttribute('data-frota-os', os); b.onclick = (e) => { e.stopPropagation(); frAbre(os, 'mapa'); };
         mk = new maplibregl.Marker({element: b, anchor: 'center'}).setLngLat([x.at.lon, x.at.lat]).addTo(LGI.map); FRUI.lg[os] = mk; }
       const b = mk.getElement(); if (b.__h !== html) { b.innerHTML = html; b.__h = html; } if (b.getAttribute('aria-label') !== aria) b.setAttribute('aria-label', aria);
-      b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); mk.setLngLat([x.at.lon, x.at.lat]);
+      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); mk.setLngLat([x.at.lon, x.at.lat]);
     }
   });
   // grupos: um botão "N máquinas" (44 px) que abre a lista
@@ -214,7 +217,7 @@ function frPainel(on, md) {
       acoes = '<a class="fr-prim" href="OS.dc.html#' + frEsc(st.frSel) + '">Abrir O.S.</a>';
     } else {
       const cj = x.cj; chave = 'cj|' + cj.os + '|' + (st.frLista ? 'l' : '');
-      cab = '<h2 tabindex="-1">' + frEsc(frNomeConj(cj)) + '</h2><div class="fr-sub">' + frEsc(cj.fam.curto + ' · ' + cj.os + (cj.versao ? ' · v' + cj.versao : '') + ' · ' + frTals(cj)) + '</div>';
+      cab = '<h2 tabindex="-1">' + frEsc(frNomeConj(cj)).replace(/(\d) (m|ha)\b/g, '$1&nbsp;$2') + '</h2><div class="fr-sub">' + frEsc(cj.fam.curto + ' · ' + cj.os + (cj.versao ? ' · ' + (/^v/.test(cj.versao) ? '' : 'v') + cj.versao : '') + ' · ' + frTals(cj)) + '</div>';
       const kv = [['O.S. e versão', cj.os + (cj.versao ? ' · versão ' + cj.versao : '')], ['Operação', cj.tipo], ['Talhão', frTals(cj)],
         ['Conjunto', frNomeConj(cj) + (cj.vinculo === 'programacao' ? ' · pela programação' + (cj.condicional ? ' (condicional)' : '') : (cj.vinculo === 'fixture' ? ' · conjunto de demonstração' : ''))],
         ['Estado', frEstTxt(x, pf) + (pf.pos && x.at ? ' · ' + x.hora : '')], ['Posição', frPosTxt(x, pf) + (pf.pos && x.at ? ' · precisão não informada' : '')],
