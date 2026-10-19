@@ -192,7 +192,7 @@ teste('precisão insuficiente não comprova ausência de interferência', () => 
   for (const talhao of ['T', 'C1']) {
     const d = fixture(); d.aplicacoes.push(aplicacao('dia', talhao, 1, {alvo:'A2', precisao:'dia', evento:'2025-12-30T00:00:00.000Z', disponivelEm:'2025-12-30T00:00:00.000Z'}));
     const r=executar(d).comparacao;
-    assert.equal(talhao==='T' ? r.motivo : r.controles[0].motivo, talhao==='T' ? 'interferencia_no_tratado' : 'interferencia_no_controle');
+    assert.equal(talhao==='T' ? r.motivo : r.controles[0].motivo, 'precisao_do_manejo_insuficiente');
   }
 });
 teste('limite residual inclusivo e um milissegundo fora em ambos os talhões', () => {
@@ -204,4 +204,44 @@ teste('limite residual inclusivo e um milissegundo fora em ambos os talhões', (
     else assert.equal(talhao==='T'?r.motivo:r.controles[0].motivo,talhao==='T'?'interferencia_no_tratado':'interferencia_no_controle');
   }
 });
-console.log(passou + '/' + passou + ' PASS — dados e parâmetros exclusivamente sintéticos.');
+teste('dias e meses fora do período permanecem elegíveis; sobreposição tem motivo próprio', () => {
+ for(const talhao of ['T','C1']) for(const [evento,precisao,toca] of [
+ ['2025-12-29','dia',false],['2025-12-22','dia',false],['2025-11-02','dia',false],
+ ['2026-01-15','dia',false],['2026-01-11','dia',true],['2025-11','mes',false],
+ ['2025-12-30','dia',true],['2025-12','mes',true],['2025-11','desconhecida',true],
+ ['2025-11',undefined,true],['2025-11-02T00:00:00.000Z',undefined,true],['2025-12-01T00:00:00.000Z','mes',true],['2025-02-30','dia',true]]) {
+  const d=fixture();d.aplicacoes.push(aplicacao('X',talhao,1,{alvo:'A2',evento,precisao}));
+  const r=executar(d).comparacao;
+  if(toca) assert.equal(talhao==='T'?r.motivo:r.controles[0].motivo,'precisao_do_manejo_insuficiente',evento);
+  else assert.equal(r.quantidadeElegivel,2,evento);
+ }
+});
+teste('limites civis explícitos UTC e fim exclusivo; limites inválidos não liberam',()=>{
+ for(const talhao of ['T','C1']) for(const [de,ate,toca] of [
+ ['2025-12-29T12:00:00.000Z','2025-12-30T12:00:00.000Z',false],
+ ['2025-12-30T03:00:00.000Z','2025-12-31T03:00:00.000Z',true],
+ ['2025-12-30T03:00:00.000Z','invalido',true],
+ ['2026-01-11T03:00:00.000Z','2026-01-12T03:00:00.000Z',false]]) {
+  const d=fixture(),evento=de.slice(0,10);d.aplicacoes.push(aplicacao('X',talhao,1,{alvo:'A2',evento,precisao:'dia',de,ate}));
+  const r=executar(d).comparacao;
+  if(toca)assert.equal(talhao==='T'?r.motivo:r.controles[0].motivo,'precisao_do_manejo_insuficiente');
+  else assert.equal(r.quantidadeElegivel,2);
+ }
+});
+teste('borda superior inclusiva e um milissegundo depois em tratado e controle',()=>{
+ for(const talhao of ['T','C1'])for(const fora of [false,true]){
+  const d=fixture(),evento=new Date(Date.parse(dia(10))+(fora?1:0)).toISOString();
+  d.aplicacoes.push(aplicacao('X',talhao,10,{alvo:'A2',evento,disponivelEm:evento}));
+  const r=executar(d).comparacao;
+  if(fora)assert.equal(r.quantidadeElegivel,2);
+  else assert.equal(talhao==='T'?r.motivo:r.controles[0].motivo,talhao==='T'?'interferencia_no_tratado':'interferencia_no_controle');
+ }
+});
+teste('seguimento não atribui retorno quando manejo de dia ou mês pode suceder M',()=>{
+ for(const [evento,precisao,bloqueia] of [['2026-01-02','dia',true],['2026-01-03','dia',true],['2026-01','mes',true],['2025-11','mes',false],['2025-11',undefined,true],['2025-11-02T00:00:00.000Z',undefined,true],['2025-12-01T00:00:00.000Z','mes',false]]){
+ const d=fixture();d.leituras.push(leitura('c','T',18,11));d.aplicacoes.push(aplicacao('X','T',1,{alvo:'A2',evento,precisao}));
+ const r=executar(d).seguimento;
+ if(bloqueia)assert.equal(r.motivo,'ordem_ou_confirmacao_da_proxima_aplicacao_pendente');else assert.equal(r.estado,'S1');
+ }
+});
+console.log(passou+'/'+passou+' PASS — dados e parâmetros exclusivamente sintéticos.');
