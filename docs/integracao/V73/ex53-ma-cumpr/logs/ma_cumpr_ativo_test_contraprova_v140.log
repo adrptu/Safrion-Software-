@@ -1,0 +1,6 @@
+FALHA W1 16 ativos: o detalhe mostra o KPI-PCM-05 do ativo no mês (oráculo independente) · [['a01', 'não calculável', 'sem base no período'], ['a02', 'não calculável', 'sem base no período'], ['a03', 'não calculável', '0 de 1 (0 %) · set/2026'], ['a04', 'não calculável', 'sem base no período'], ['a05', 'não calculável', '0 de 1 (0 %) · set/2026'], ['a06', 'não calculável', '0 de 1 (0 %) · set/2026']]
+FALHA W2 nenhum ativo com o texto da conta antiga ("não calculável") · [['a01', 'não calculável', 'sem base no período'], ['a02', 'não calculável', 'sem base no período'], ['a03', 'não calculável', '0 de 1 (0 %) · set/2026'], ['a04', 'não calculável', 'sem base no período'], ['a05', 'não calculável', '0 de 1 (0 %) · set/2026'], ['a06', 'não calculável', '0 de 1 (0 %) · set/2026']]
+      valores na tela: ['não calculável']
+FALHA W3 a soma por ativo é igual ao total (mês e 12 m): o filtro reparte a base sem perder nem repetir · [{'erro': 'manCumprimento fora do __man'}, {'erro': 'manCumprimento fora do __man'}]
+OK    W4 nenhum erro de JavaScript
+RESULTADO: 1/4 ok

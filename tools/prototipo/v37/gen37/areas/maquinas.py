@@ -428,7 +428,7 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
   v.at_agenda=ma_agenda(c,a.id).map(t=>({t})); v.at_semAgenda=!v.at_agenda.length;
   v.at_hist=(a.condHist||[]).slice(-4).reverse().map(h=>({t:manBr(h.em)+' · '+h.cond+' · '+h.motivo+(h.por?' · '+h.por:'')}));
   v.at_mudar=()=>ma_abrir(self,'cond',a.id); v.at_mudar_dis=!!manPode(c,pf,'condicao',{aid:a.id}); v.at_mudar_why=manPode(c,pf,'condicao',{aid:a.id});
-  const per=st.per||'mes'; const n=ma_custoNat(c,a.id,per); const cons=ma_consumo(c,a); const cu=(()=>{ const os=Object.values(c.oms).filter(o=>o.aid===a.id&&o.tipo==='Preventiva'&&o.etapa==='Encerradas'&&o.vencOrig); return os.length?(os.filter(o=>o.exec&&o.exec.data<=o.vencOrig).length+' de '+os.length):'não calculável'; })();
+  const per=st.per||'mes'; const n=ma_custoNat(c,a.id,per); const cons=ma_consumo(c,a); const cu=(()=>{ const r=manCumprimento(c,per,a.id); return r?r.ok+' de '+r.n+' ('+r.pct+' %) · '+manPeriodo(c,per).t:'sem base no período'; })();   /* KPI-PCM-05 pela regra única do domínio (EX-53, achado do Codex 6258683205): conta as vencidas abertas e sem ordem, não só as encerradas */
   v.at_cn=[{l:'Peças (3.1.05)',v:manRS(n.pecas)},{l:'Lubrificantes (3.1.04)',v:manRS(n.lub)},{l:'Oficina (Custo R$/h da oficina '+c.custoh+')',v:manRS(n.ofi)},{l:'Terceiros',v:manRS(n.terc)},
     {l:'Custo por hora operada',v:'não calculável (KPI-PCM-10)'},{l:'Consumo',v:cons?(cons.t+(cons.desvio!==null?' · desvio '+(cons.desvio>0?'+':'')+cons.desvio+' %':'')):'— sem método'},
     {l:'Disponibilidade 30 d',v:'não calculável'},{l:'MTBF · MTTR',v:'não estimável'},{l:'Cumprimento de preventiva',v:cu}];
