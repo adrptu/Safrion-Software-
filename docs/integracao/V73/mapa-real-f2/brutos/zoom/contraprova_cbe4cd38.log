@@ -1,0 +1,5 @@
+FALHA Z1 1440 × 900: no menor zoom, a fazenda inteira (caixa dos pivôs) cabe na área visível do mapa · {'z': 12.95, 'zmin': 12.95, 'cabe': False, 'vis': [-47.2156, -34.6457, -47.0994, -34.6014], 'faz': [-47.1994, -34.6478, -47.1157, -34.5992]}
+FALHA Z3 o botão "−" chega ao menor zoom e a fazenda inteira fica à vista · [3, {'z': 12.95, 'zmin': 12.95, 'cabe': False, 'vis': [-47.2156, -34.6457, -47.0994, -34.6014], 'faz': [-47.1994, -34.6478, -47.1157, -34.5992]}]
+FALHA Z2 390 × 844: no menor zoom, a fazenda inteira cabe na área visível do mapa · {'z': 12.01, 'zmin': 12.01, 'cabe': False, 'vis': [-47.1823, -34.6601, -47.1327, -34.5869], 'faz': [-47.1994, -34.6478, -47.1157, -34.5992]}
+OK    Z4 sem erro de JavaScript
+RESULTADO: 1 ok · 3 falhas

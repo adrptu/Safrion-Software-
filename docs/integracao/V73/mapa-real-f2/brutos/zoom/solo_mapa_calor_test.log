@@ -1,0 +1,10 @@
+OK    S1 Laudo e Indicador como seletores (Mais recente + laudos da camada; ≥ 12 indicadores com pH, P e MO); Camada e Contraste segmentados
+OK    S2 rótulo dos 5 pivôs com laudo = P do laudo; faixa: média ponderada 14,1 mg/dm³ e 77 pontos; canvas pintado
+OK    S3 Santa Rita · V % · Talhão: T1, T2 e T4 com manchas (≥ 4 cores) e 90 pontos (30 por talhão)
+OK    S4 painel do T2: áreas por classe somam 298 ha ([9.5, 288.5]); pontos com coordenada; LAU-2063 seleciona o T2 e o T1 fica "fora do laudo escolhido"
+OK    S5 Camada 20–40 cm: só o T4 com laudo
+OK    I1 Pivô 5: "déficit 13,2 mm → 2× 7,8 mm a 90 %" (ficha 7.02 mm a 100 %); painel com ETc, lâmina recomendada e percentímetro
+OK    A1 AG-02: pH, P e MO no padrão; LAU-2061 pH 5,5 e P 18,5 mg/dm³; clicar abre o laudo
+OK    M1 Planos da Manutenção: "Agrupar por" com o grupo de máquina (coluna Grupo)
+OK    J sem erro de JS
+RESULTADO: 9/9

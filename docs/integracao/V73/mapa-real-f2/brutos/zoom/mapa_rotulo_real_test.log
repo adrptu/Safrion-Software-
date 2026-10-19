@@ -1,0 +1,10 @@
+      estado: ['ok', True] origens do Pivô 19 marcadas como estimada: 3
+      1440: ({'txt': 'em colheita · 484,89 kg/ha · estimativa', 'corte': False, 'nome': 'P19, 75 ha, Mamão Formosa Tainung 1 · produção, em colheita · 484,89 kg/ha · estimativa, dado de 23/09 (hoje)', 'sobre': [], 'dentro': True, 'r': [684, 546, 140, 58]}, {'txt': 'em colheita · 484,89 kg/ha · estimativa', 'corte': False, 'nome': 'P19, 75 ha, Mamão Formosa Tainung 1 · produção, em colheita · 484,89 kg/ha · estimativa, dado de 23/09 (hoje)', 'sobre': [], 'dentro': True, 'r': [492, 546, 140, 58]}, [['em colheita · kg/ha a apurar · 1.200,00 kg/ha de Café da roça · +1', False, 51], ['em colheita · 1.484,89 kg/ha · estimativa · +1', False, 38]])
+      390: ({'txt': 'em colheita · 484,89 kg/ha · estimativa', 'corte': False, 'nome': 'P19, 75 ha, Mamão Formosa Tainung 1 · produção, em colheita · 484,89 kg/ha · estimativa, dado de 23/09 (hoje)', 'sobre': [], 'dentro': True, 'r': [159, 714, 140, 58]}, {'txt': 'em colheita · 484,89 kg/ha · estimativa', 'corte': False, 'nome': 'P19, 75 ha, Mamão Formosa Tainung 1 · produção, em colheita · 484,89 kg/ha · estimativa, dado de 23/09 (hoje)', 'sobre': [], 'dentro': True, 'r': [159, 174, 140, 58]}, [['em colheita · kg/ha a apurar · 1.200,00 kg/ha de Café da roça · +1', False, 51], ['em colheita · 1.484,89 kg/ha · estimativa · +1', False, 38]])
+OK    E1 1440 px: o Pivô 19 mostra "em colheita · <n> kg/ha · estimativa" inteiro, pela cadeia real
+OK    E2 390 px com toque: o mesmo
+OK    E3 o nome acessível do pivô traz o mesmo indicador, com "estimativa" (1440 e 390)
+OK    E4 o rótulo do Pivô 19, dentro da tela, não se sobrepõe a outro rótulo visível, antes e depois de selecionar (1440 e 390)
+OK    E5 sonda de texto (identificada; não é a cadeia real): os compostos do café a apurar e da estimativa cabem no rótulo a 1440 e a 390
+OK    E6 nenhum erro de JavaScript
+RESULTADO: 6/6 ok
