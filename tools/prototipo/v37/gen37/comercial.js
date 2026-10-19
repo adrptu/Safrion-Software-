@@ -221,17 +221,22 @@ function comVender(c, k) { const P = comP(c);
   return { msg: id + ' registrada: ' + v.cliente + ' · ' + comTxtV(v, v.qtd) + ' de ' + v.prod + ' a ' + comPrecoTxtV(v) + ' = ' + comRS(comValorQc(v)) + ' · '
     + (tipo === 'futura' ? 'venda futura ' + janela + ' (não desconta o estoque)' : 'pronta entrega ' + janela) + ' · ' + cond + '.' + (av.length ? ' ' + av.join(' ') : ''), v }; }
 
-/* encerrar saldo (R-C11): motivo; recusa com carga programada; cancela as reservas ativas na mesma transação; quantidade vigente = expedido */
+/* encerrar saldo (R-C11): quantidade vigente = expedido; cancela as reservas ativas na mesma transação.
+   LEVE-1 (proprietário 19/10: "leve e fluido"): o motivo é opcional (quem e quando ficam gravados) e a carga programada, que ainda não saiu, é
+   cancelada no mesmo comando, com o aviso dizendo qual; carga que já saiu (saída pesada) não é tocada: o expedido fica como quantidade vigente.
+   Dano avaliado: nenhum (a carga programada não baixou estoque nem gerou título; as reservas já voltavam ao disponível no encerramento). */
 function comEncerrar(c, k) { const P = comP(c); const v = P.pedidos[k.venda]; if (!v) throw new Error('Escolha a venda.');
   if (v.enc) { if (k.chave && v.enc.chave === k.chave) return { msg: v.id + ' já encerrada: nada foi alterado.', repetido: true }; throw new Error(v.id + ' já está encerrada.'); }
   const quem = cenExigeUm(k.ator, ['comercial', 'gestor'], 'Encerrar saldo do ' + v.id);
-  const mot = String(k.motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do encerramento.');
-  const pg = comRmsVenda(c, v.id).filter(r => r.st === 'Programada'); if (pg.length) throw new Error('Encerrar recusado: ' + pg.map(r => r.id).join(', ') + ' programada para o ' + v.id + '. Cancele a carga antes.');
-  const rs = prResPed(c, v.id).map(r => r.id); rs.forEach(id => prCancelarReserva(c, id, 'saldo do ' + v.id + ' encerrado: ' + mot, k.ator));
+  const mot = String(k.motivo || '').trim();
+  const pg = comRmsVenda(c, v.id).filter(r => r.st === 'Programada' && !r.saida);
+  pg.forEach(rm => { rm.st = 'Cancelada'; rm.canc = { motivo: 'saldo do ' + v.id + ' encerrado' + (mot ? ': ' + mot : ''), quem, d: prHoje(), at: cenAgora(), chave: k.chave ? k.chave + '/' + rm.id : '', enc: v.id }; });
+  const rs = prResPed(c, v.id).map(r => r.id); rs.forEach(id => prCancelarReserva(c, id, 'saldo do ' + v.id + ' encerrado' + (mot ? ': ' + mot : ''), k.ator));
   const exp = prExpedido(c, v.id); const era = comQtdTxt(v);
-  v.enc = { motivo: mot, quem, d: prHoje(), at: cenAgora(), qtd0: v.qtd, qc0: v.qc, chave: k.chave || '' }; v.qtd = prCmp(exp, 0) > 0 ? exp : 0;
+  v.enc = { motivo: mot, quem, d: prHoje(), at: cenAgora(), qtd0: v.qtd, qc0: v.qc, chave: k.chave || '', cargas: pg.map(r => r.id) }; v.qtd = prCmp(exp, 0) > 0 ? exp : 0;
   if (comFat(v)) v.qc = prDiv(v.qtd, comFat(v));
-  return { msg: v.id + ' encerrada (' + mot + ') por ' + quem + ': quantidade vigente ' + comTxtV(v, v.qtd) + ' (era ' + era + ')' + (rs.length ? '; reservas canceladas: ' + rs.join(', ') : '') + '.' }; }
+  return { msg: v.id + ' encerrada' + (mot ? ' (' + mot + ')' : '') + ' por ' + quem + ': quantidade vigente ' + comTxtV(v, v.qtd) + ' (era ' + era + ')'
+    + (pg.length ? '; carga programada cancelada: ' + pg.map(r => r.id).join(', ') + ' (não tinha saído)' : '') + (rs.length ? '; reservas canceladas: ' + rs.join(', ') : '') + '.' }; }
 
 /* aprovar crédito (R-C08): só a gestora; vale até o valor coberto (a receber + reservado não expedido da venda, ou a saída pesada que a
    aprovação anterior não cobria, k.kg: excesso de peso, KC18); antecipado = pagamento conferido */
@@ -306,9 +311,9 @@ function comCancelarCarga(c, k) { const P = comP(c); const rm = P.expedicoes[k.r
   if (rm.st === 'Cancelada' && k.chave && (rm.canc || {}).chave === k.chave) return { msg: rm.id + ' já cancelada: nada foi alterado.', repetido: true };
   if (rm.st !== 'Programada') throw new Error('Só carga programada é cancelada (' + rm.id + ' está ' + rm.st.toLowerCase() + ').');
   const quem = cenExigeUm(k.ator, ['comercial', 'expedicao', 'gestor'], 'Cancelar a ' + rm.id);
-  const mot = String(k.motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do cancelamento da carga.');
+  const mot = String(k.motivo || '').trim();   /* LEVE-1 (proprietário 19/10): motivo opcional; quem e quando ficam gravados */
   rm.st = 'Cancelada'; rm.canc = { motivo: mot, quem, d: prHoje(), at: cenAgora(), chave: k.chave || '' };
-  return { msg: rm.id + ' cancelada (' + mot + ') por ' + quem + ': as reservas do ' + rm.pedido + ' continuam; nada saiu do estoque.' }; }
+  return { msg: rm.id + ' cancelada' + (mot ? ' (' + mot + ')' : '') + ' por ' + quem + ': as reservas do ' + rm.pedido + ' continuam; nada saiu do estoque.' }; }
 
 /* confirmar saída (R-C07): uma vez, com pesagem; lote apto e destino conforme; até a reserva da venda no lote; excesso só do disponível com a gestora */
 function comSair(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
