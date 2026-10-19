@@ -74,3 +74,36 @@ Em todas as camadas, o rótulo do pivô mostra o valor inteiro: número, unidade
 - **`depois_pragas_1440`:** os nomes do MIP em até 3 linhas, sem corte, e nenhum rótulo sobre o vizinho.
 - **`depois_integrado_1440`:** as O.S. em 2 linhas.
 - **`depois_colheita_390`:** a 390 px o rótulo segue só com o número do pivô (tamanho pequeno), sem rolagem lateral.
+
+## Revisão do Codex no HEAD 77544fe2 (6262164118 e 4311323857): achado S3 aceito e corrigido
+- **Achado:** o `split(' · ')[0]` em `colhNum` jogava fora as qualificações obrigatórias do `prPrtvResTxt`:
+  - "· estimativa" (R-U03);
+  - no café a apurar, a produtividade medida do campo (R-U07). A Previsão e colheita mostra "kg/ha a apurar · 1.200,00 kg/ha de Café da roça", e o Mapa mostrava só "kg/ha a apurar".
+- **Correção:**
+  - o rótulo leva o indicador inteiro, e o nome acessível também (vem do mesmo texto);
+  - o rótulo em até 3 linhas (MUX-CORTE) comporta o texto.
+- **Regressão:** `mapa_colheita_unid_unit_test.py` (novo), no node, com as regras reais (`cenario.js_prefixo()`) e o `colhNum` extraído do gerador:
+
+| Caso | O que confere |
+|---|---|
+| C1 | Mamão estimado em kg/ha |
+| C2 | Café a apurar em kg/ha |
+| C3 | Mamão medido na unidade padrão |
+| C4 | A mesma função do painel do talhão |
+
+| Execução | Resultado |
+|---|---|
+| Com a correção | 6/6 |
+| Contraprova com o `inicio.py` do 77544fe2 | 4/6 (C1 e C2 reprovam, com os mesmos textos do achado) |
+
+Depois da correção, no render (`logs/revisao_codex/`):
+
+| Teste | Resultado |
+|---|---|
+| `mapa_rotulo_corte` | 4/4 |
+| `producao_fluxo unid` | 25/25 |
+| `colheita_mapa` | 7/7 |
+| `mapa_mux_f0` | 17/17 |
+| `mapa_mux_f1` | 43/43 |
+| `mapa_mux_f2` | 29/29 |
+| `map_decisoes` | 18/18 |

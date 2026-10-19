@@ -1,0 +1,20 @@
+OK    F0-1a 1440: "Nova O.S. neste talhão" e "Abrir ordens" (com o T4 escolhido) levam #tal=Santa Rita|T4
+OK    F0-1b a O.S. abre com o talhão já escolhido (Filtrar por talhão = Santa Rita|T4)
+OK    F0-2a 1440: com o contexto na Santa Rita, #talhao=PV05 abre a Lagoa Grande com o P5 escolhido (aria-pressed e painel)
+OK    F0-2b 1440: #talhao=PV99 mostra o aviso visível e acessível (role=status) e não escolhe nenhum talhão
+OK    F0-3 1440: Satélite sem link para o AG-06 na faixa e no painel do P1
+OK    F0-4 1440: Colheita › Situação com o link do módulo (Abrir Previsão e colheita › COLH); Solo leva ao AG-02 pelo painel do T1 e a faixa do Solo não corta os números (a 1440)
+OK    F0-5 1440: as ações de Colheita e produtividade levam o ícone da barra (engine.ICONS[Colheita])
+OK    F0-6 1440: o pivô se chama P5 no marcador, no título do painel e no nome acessível; "Pivô 5" fora do painel
+OK    F0-7 1440: sem erro de JavaScript
+OK    F0-1a 390: "Nova O.S. neste talhão" e "Abrir ordens" (com o T4 escolhido) levam #tal=Santa Rita|T4
+OK    F0-2a 390: com o contexto na Santa Rita, #talhao=PV05 abre a Lagoa Grande com o P5 escolhido (aria-pressed e painel)
+OK    F0-2b 390: #talhao=PV99 mostra o aviso visível e acessível (role=status) e não escolhe nenhum talhão
+OK    F0-3 390: Satélite sem link para o AG-06 na faixa e no painel do P1
+OK    F0-4 390: Colheita › Situação com o link do módulo (Abrir Previsão e colheita › COLH); Solo leva ao AG-02 pelo painel do T1 e a faixa do Solo não corta os números (a 1440)
+OK    F0-5 390: as ações de Colheita e produtividade levam o ícone da barra (engine.ICONS[Colheita])
+OK    F0-6 390: o pivô se chama P5 no marcador, no título do painel e no nome acessível; "Pivô 5" fora do painel
+OK    F0-7 390: sem erro de JavaScript
+MEDIDAS {"destinos_os_1440": {"nova": ["OS.dc.html#tal=Santa%20Rita%7CT4"], "abrir_ordens": ["OS.dc.html#tal=Santa%20Rita%7CT4"]}, "ag06_1440": [], "colheita_sem_icone_1440": [0, 7], "nomes_pivo_1440": ["P5"], "destinos_os_390": {"nova": ["OS.dc.html#tal=Santa%20Rita%7CT4"], "abrir_ordens": ["OS.dc.html#tal=Santa%20Rita%7CT4"]}, "ag06_390": [], "colheita_sem_icone_390": [0, 7], "nomes_pivo_390": ["P5"]}
+
+RESULTADO: 17 ok · 0 falha(s)

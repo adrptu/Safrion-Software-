@@ -1396,8 +1396,9 @@ function colhLeit(t){ const S=colhMap(); if(S.m[t]) return S.m[t];
   const xs=colhCults(t).map(id=>prTal(S.c,id)).sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
   return (S.m[t]={xs,x:xs[0]||null,c:S.c}); }
 // UNID-PROD P5 (AC-h): o rótulo mostra a produtividade na unidade escolhida para a cultura, pela mesma função do painel do talhão (colhKv) e da
-// Previsão e colheita; antes mostrava a produção em t, outra grandeza, e a camada não comparava talhões de áreas diferentes
-function colhNum(L,x){ return x.R.comecou?prPrtvResTxt(x.k.cultura,x.R,g2unidPref(x.k.cultura)).split(' · ')[0]:(x.sit==='Prevista'?prPrevTxt(L.c,x).t.split(' · ')[0]:''); }
+// Previsão e colheita; antes mostrava a produção em t, outra grandeza, e a camada não comparava talhões de áreas diferentes. O indicador vai
+// inteiro, com as qualificações obrigatórias (R-U03 "estimativa"; R-U07 "a apurar" com a produtividade medida do campo; achado do Codex no PR #133)
+function colhNum(L,x){ return x.R.comecou?prPrtvResTxt(x.k.cultura,x.R,g2unidPref(x.k.cultura)):(x.sit==='Prevista'?prPrevTxt(L.c,x).t.split(' · ')[0]:''); }
 function colhCls(t){ const L=colhLeit(t); const x=L.x; if(!x) return {c:'none',l:'sem colheita'}; const n=colhNum(L,x);
   return {c:COLHCOR[x.sit]||'gray',l:x.sit.toLowerCase()+(n?' · '+n:'')+(L.xs.length>1?' · +'+(L.xs.length-1):'')}; }
 function colhLegend(){ return Object.keys(COLHCOR).map(k=>Lc(COLH_L,COLHCOR[k],k.toLowerCase())).concat([Lc(COLH_L,'none','sem colheita')]); }
