@@ -348,8 +348,8 @@ def _lg_key(c): y,m,d=c['dt'].split('-'); return f'{d}/{m}'
 def _lg_hora(c): h,mi=map(int,c['hora_utc'].split(':')); return f'{(h-3)%24:02d}:{mi:02d}'
 for _c in LG['cenas']:   # cenas reais entram no mesmo registro de cenas do mapa (chaves dd/mm), depois das demonstrativas
     _y,_m,_d=_c['dt'].split('-')
-    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc=(_LGROT+' · imagem e índices gerados, sem dado real') if _LGROT else 'processamento L2A da ESA (Copernicus) · catálogo Earth Search',
-        v={p:[_c['est'][p][n]['med'] for n in IDXN] for p in LG_IDS},nt={p:_c['est'][p]['nuvem'] for p in LG_IDS},manchas=[],png=_c['png'],real=True)
+    SAT[_lg_key(_c)]=dict(nuvem=_c['nuvem'],aq=f"{_d}/{_m}/{_y} {_lg_hora(_c)} (Brasília)",proc=(_LGROT+' · imagem e índices gerados, sem dado real') if _LGROT else 'processamento L2A da ESA (Copernicus) · catálogo Earth Search · índices em pixel de 10 m (NDRE e NDMI vêm de bandas de 20 m)',
+        v=__import__('lagoa_sat').sat_v(_c,LG_IDS,IDXN),nt={p:_c['est'][p]['nuvem'] for p in LG_IDS},manchas=[],png=_c['png'],real=True)   # sem dado fica null (lagoa_sat)
 _LGC={DLS.PID_DE[c['local']]:c for c in DLS.CULTIVOS}
 def _lav_lg(p,c):
     n=p['nome'].split()[-1]
@@ -666,7 +666,7 @@ function flt(self,l){ const gs=fopts(l); const d={}; gs.forEach(g=>{ d[g.k]=g.o[
 // irrigação só com água: mc_irrAgua (os_mapa.js). O nome irrAgua é do irrigacao_estado.js (água no solo do setor): declarar outro aqui
 // sobrescrevia aquele e desligava o balanço com CAD na camada Irrigação do Mapa (EX-55 F1, achado do integrador)
 function ordsOf(t,fase){ return M.ord.filter(o=>!mc_irrAgua(o) && osSaf(o) && o.tal.indexOf(t)>=0 && (!fase||fase==='Todas'||o.fase===fase)); }
-function satVal(dt,t,ix){ if(M.semcult[t]) return null; const s=M.sat[dt]; const x=s.v[t]; if(x===undefined) return null; if(x==='cloud') return 'cloud'; return x[IDXN.indexOf(ix)]; }
+function satVal(dt,t,ix){ if(M.semcult[t]) return null; const s=M.sat[dt]; const x=s.v[t]; if(x===undefined) return null; if(x==='cloud') return 'cloud'; const r=x[IDXN.indexOf(ix)]; return (r===null||r===undefined)?'semdado':r; }   // 'semdado': leitura mascarada ou inválida, nunca zero (MAPA-REAL)
 function satPrev(dt,t,ix){ const ds=Object.keys(M.sat); const i=ds.indexOf(dt); for(let j=i+1;j<ds.length;j++){ const v=satVal(ds[j],t,ix); if(typeof v==='number') return [ds[j],v]; } return null; }
 function money(n){ return 'R$ '+nfx(n,0); }
 function mil(n){ return Math.abs(n)>=100000?('R$ '+nfx(n/1000,0)+' mil'):money(n); }
@@ -731,6 +731,7 @@ function pxCoord(c){ const y=c[1]+M.cs/2, x=c[0]+M.cs/2; const la=-15.5612-(y-55
 function satEstado(t,f){ const v=satVal(f.dt,t,f.idx); const nt=(M.sat[f.dt].nt||{})[t]||0;
   if(v===null) return ['Sem leitura · sem cultura','gray'];
   if(v==='cloud'||nt>20) return ['Nuvem · aguardar próxima cena','gray'];
+  if(v==='semdado') return ['Sem dado · leitura mascarada ou inválida','gray'];
   const pv=satPrev(f.dt,t,f.idx); const dv=pv?(v-pv[1])/pv[1]*100:null; const ms=M.sat[f.dt].manchas.filter(m=>m.t===t);
   if(ms.some(m=>m.ha>1)||(dv!==null&&dv<-15)) return ['Crítico','red'];
   if(ms.length||(dv!==null&&dv<-10)) return ['Atenção','yellow'];
@@ -786,6 +787,7 @@ function cls0(l,f,t){
   if(l===COLH_L) return colhCls(t);   // Colheita (14/10/2026)
   if(l==='Integrado'){ const x=integ(t); if(f.mostrar==='Só pendências' && ['ok','gray','blue','none'].indexOf(x[0])>=0) return {c:'none',l:'sem pendência'}; return {c:x[0],l:x[1]}; }
   if(l==='Satélite'){ const v=satVal(f.dt,t,f.idx); if(v===null) return {c:'gray',l:M.semcult[t]||'sem cultura'}; if(v==='cloud') return {c:'cloud',l:'nuvem · sem leitura'};
+    if(v==='semdado') return {c:'gray',l:'sem dado de '+f.idx};
     const k=kOf(v,satLims(f,t)); return {c:'sat',hex:satCor(f.idx,k),k,ka:kOf(v,M.idx[f.idx].lim),l:f.idx+' '+nfx(v,2)}; }
   if(l==='Lavoura'){ const x=lavOf(t); return {c:x.c,l:x.l}; }
   if(l===OS_L&&!isIns(l,f)) return osCls(t,f);
@@ -958,8 +960,10 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=la
     let items=[], sum='', note='', acts=[];
     if(v===null){ sum=(M.semcult[t]||'sem cultura')+' · o índice não indica vigor'; note='Sem cultura com dossel: o índice não mede vigor aqui e não aciona compra nem prescrição.'; }
     else if(v==='cloud'){ sum='Nuvem na cena '+fs.dt+' · sem leitura'; note='Nuvem não recebe cor de condição. Escolha outra cena no filtro da camada Satélite.'; }
+    else if(v==='semdado'){ sum='Sem dado de '+fs.idx+' na cena '+fs.dt; note='Leitura mascarada ou inválida neste índice: fica sem valor, não vira zero e não aciona inspeção nem compra. Os outros índices seguem na lista abaixo.';
+      items=IDXN.map(ix=>{ const x=satVal(fs.dt,t,ix); return typeof x==='number'?{t:ix+' '+nfx(x,2),sub:M.idx[ix].o,ch:[],acts:[],on:false}:{t:ix+' · sem dado',sub:M.idx[ix].o+' · leitura mascarada ou inválida',ch:[],acts:[],on:ix===fs.idx}; }); }
     else { const k=kOf(v,M.idx[fs.idx].lim); sum=fs.idx+' '+nfx(v,2)+' · '+satNome(fs.idx,k).toLowerCase()+' · cena '+fs.dt+' · '+es[0].toLowerCase();
-      items=IDXN.map(ix=>{ const x=satVal(fs.dt,t,ix); const kk=kOf(x,M.idx[ix].lim); const pv=satPrev(fs.dt,t,ix); const dv=pv?(x-pv[1])/pv[1]*100:null;
+      items=IDXN.map(ix=>{ const x=satVal(fs.dt,t,ix); if(typeof x!=='number') return {t:ix+' · sem dado',sub:M.idx[ix].o+' · leitura mascarada ou inválida',ch:[],acts:[],on:ix===fs.idx}; const kk=kOf(x,M.idx[ix].lim); const pv=satPrev(fs.dt,t,ix); const dv=pv?(x-pv[1])/pv[1]*100:null;
         const dif=(ix==='NDMI'||Math.abs(pv?pv[1]:1)<0.1)?(pv?' · '+(x-pv[1]>=0?'+':'−')+nfx(Math.abs(x-pv[1]),2)+' vs '+pv[0]:''):(pv?' · '+(dv>=0?'+':'−')+nfx(Math.abs(dv),0)+' % vs '+pv[0]:'');
         return {t:ix+' '+nfx(x,2),sub:M.idx[ix].o+(pv?dif:' · sem cena anterior válida'),ch:[CHs(satNome(ix,kk),satChipSt(ix,kk))],acts:[],on:ix===fs.idx}; });
       const pxs=self.state.px; if(pxs&&pxs.t===t&&pxs.lg!==undefined&&LGI.px){ const q=(LGI.px.cen[fs.dt]||{})[fs.idx]; if(q&&q[pxs.lg]!==255){ const val=lgDeq(q[pxs.lg]); const kk=kOf(val,M.idx[fs.idx].lim);
