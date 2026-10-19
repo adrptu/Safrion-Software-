@@ -1183,11 +1183,11 @@ function manCustoPeriodo(c,k,aid){ const P=manPeriodo(c,k); let enc=0, and=0;
 /* KPI-PCM-05 · cumprimento de preventiva (EX-53 M5; confronto 6257865753): base = preventivas com vencimento ORIGINAL no período, até o corte
    (hoje): encerradas no prazo (numerador), encerradas com atraso, abertas já vencidas e vencidas sem ordem (manSemOrdem, sem OM, então sem
    contar duas vezes). Encerrada atrasada fica só no denominador; aberta que vence hoje ainda não conta; base vazia = null (nunca 100%). */
-function manCumprimento(c,k){ const P=manPeriodo(c,k), corte=P.ate<c.hoje?P.ate:c.hoje, dentro=d=>!!d&&d>=P.de&&d<=corte;
-  const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa!=='Canceladas'&&dentro(o.vencOrig)&&(o.etapa==='Encerradas'||o.vencOrig<corte));
+function manCumprimento(c,k,aid){ const P=manPeriodo(c,k), corte=P.ate<c.hoje?P.ate:c.hoje, dentro=d=>!!d&&d>=P.de&&d<=corte, doAtivo=x=>!aid||x.aid===aid;   /* aid: só o ativo (detalhe do ativo na MA) */
+  const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa!=='Canceladas'&&doAtivo(o)&&dentro(o.vencOrig)&&(o.etapa==='Encerradas'||o.vencOrig<corte));
   const ok=os.filter(o=>o.etapa==='Encerradas'&&o.exec&&o.exec.data&&o.exec.data<=o.vencOrig).length;
   const atrasadas=os.filter(o=>o.etapa==='Encerradas').length-ok, abertas=os.filter(o=>o.etapa!=='Encerradas').length;
-  let semOrdem; try{ semOrdem=manSemOrdem(c).venc.filter(l=>l.x.sit==='Vencida'&&dentro(l.x.prev)&&l.x.prev<corte).length; }catch(e){ return null; }
+  let semOrdem; try{ semOrdem=manSemOrdem(c).venc.filter(l=>doAtivo(l)&&l.x.sit==='Vencida'&&dentro(l.x.prev)&&l.x.prev<corte).length; }catch(e){ return null; }
   const n=os.length+semOrdem; if(!n) return null;
   return {ok,n,pct:Math.round(ok*100/n),atrasadas,abertas,semOrdem,de:P.de,ate:corte}; }
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
@@ -1262,7 +1262,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
+try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manCumprimento, manPeriodo, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
   manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot,
   manVincular, manDesvincular, manVincCompat, manPubSemGatilho, manVincSug, manVincBase, manVincRef, manVincPrev, manAplicaNova, manPlSit, manSemPlano, manPlanosDe }; } catch (e) {}

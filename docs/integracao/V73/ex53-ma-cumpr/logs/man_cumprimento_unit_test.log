@@ -1,0 +1,15 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    C0 · há preventiva na semente para servir de molde
+OK    C1 · composição: n = encerradas no prazo + atrasadas + abertas vencidas + vencidas sem ordem; pct = ok ÷ n
+OK    C2 · vencida sem ordem não tem OM (não conta duas vezes)
+OK    C3 · base vazia = null (nunca 100%)
+OK    C4 · uma encerrada antes do vencimento: 1 de 1, 100%
+OK    C5 · encerrada com atraso fica só no denominador: 1 de 2, 50%, 1 atrasada
+OK    C6 · aberta já vencida entra no denominador: 1 de 3, 33%
+OK    C7 · aberta que vence hoje ainda não conta
+OK    C8 · cancelada fora da base
+OK    C9 · vencimento original fora do período (12 m) não entra
+OK    C10 · contraprova: a regra antiga ignora a aberta vencida (1 de 2 = 50%); a nova dá 1 de 3 = 33%
+OK    C11 · aid filtra o ativo: o total vê 1 de 2; o ativo 1 vê 1 de 1; o ativo 2 vê 0 de 1 (a aberta vencida dele)
+OK    C12 · contraprova: a conta antiga do detalhe do ativo (só encerradas) dava "não calculável" ao ativo 2 com a preventiva vencida em aberto
+RESULTADO: 14/14 ok

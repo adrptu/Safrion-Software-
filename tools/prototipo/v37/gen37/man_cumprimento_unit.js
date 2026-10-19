@@ -44,4 +44,15 @@ caso('regras', () => {
   ok('C10 · contraprova: a regra antiga ignora a aberta vencida (1 de 2 = 50%); a nova dá 1 de 3 = 33%', a && a.n === 2 && a.pct === 50 && r.pct === 33, [a, r]);
 });
 
+caso('por ativo', () => {
+  const c = S(); soPrev(c); c.planos = {}; c.vinc = {};
+  const a1 = MOLDE.aid, a2 = Object.keys(c.ativos).find(k => k !== a1);
+  nova(c, 'P1', 'Encerradas', dia(c, -10), dia(c, -12));
+  const o2 = nova(c, 'P2', 'Liberadas', dia(c, -5), null); o2.aid = a2;
+  const t = manCumprimento(c, '12m'), r1 = manCumprimento(c, '12m', a1), r2 = manCumprimento(c, '12m', a2);
+  ok('C11 · aid filtra o ativo: o total vê 1 de 2; o ativo 1 vê 1 de 1; o ativo 2 vê 0 de 1 (a aberta vencida dele)', t && t.n === 2 && r1 && r1.ok === 1 && r1.n === 1 && r2 && r2.ok === 0 && r2.n === 1, [t, r1, r2]);
+  const velha = (c, aid) => { const os = Object.values(c.oms).filter(o => o.aid === aid && o.tipo === 'Preventiva' && o.etapa === 'Encerradas' && o.vencOrig); return os.length ? os.filter(o => o.exec && o.exec.data <= o.vencOrig).length + ' de ' + os.length : 'não calculável'; };
+  ok('C12 · contraprova: a conta antiga do detalhe do ativo (só encerradas) dava "não calculável" ao ativo 2 com a preventiva vencida em aberto', velha(c, a2) === 'não calculável' && r2.n === 1, [velha(c, a2), r2]);
+});
+
 print(JSON.stringify(R));   // print: o jsc do Mac não tem console; no node o prelúdio do teste define print (Codex 6258137889)
