@@ -33,6 +33,10 @@ assert.equal(pgPreventiva(c).v,'33%');
 console.log('PASS M5: base vazia, domínio real 1/3, período, cor, destino e mutante 1/2');
 '''
 src = cenario.perfis_js()+DM.js_prefixo()+js+probe
-r=subprocess.run([os.environ.get('NODE_BINARY','node'),'-e',src],capture_output=True,text=True,timeout=120)
+# o código passa por arquivo temporário: no Linux, -e com o prelúdio inteiro estoura o limite de argumentos (E2BIG)
+import tempfile
+with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as tf: tf.write(src)
+try: r=subprocess.run([os.environ.get('NODE_BINARY','node'),tf.name],capture_output=True,text=True,timeout=120)
+finally: os.unlink(tf.name)
 print(r.stdout, end='');print(r.stderr,end='')
 raise SystemExit(r.returncode)
