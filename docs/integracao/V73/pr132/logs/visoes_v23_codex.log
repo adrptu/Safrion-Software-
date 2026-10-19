@@ -1,0 +1,354 @@
+OK Quadro completo: Abre com na ordem e nenhuma grade omitida []
+OK CD04 padrão renderizado ["pessoa", "equipe", "validade da habilitação", "habilidades"]
+OK Mostrar coluna preserva registros ["pessoa", "equipe", "validade da habilitação", "habilidades", "vínculo"]
+OK Escolha volta no próximo acesso ["pessoa", "equipe", "validade da habilitação", "habilidades", "vínculo"]
+OK Novo perfil recebe seu padrão, sem escolha alheia ["pessoa", "equipe", "validade da habilitação", "habilidades"]
+OK Perfil original recupera escolha ["pessoa", "equipe", "validade da habilitação", "habilidades", "vínculo"]
+OK Restaurar padrão mantém registros ["pessoa", "equipe", "validade da habilitação", "habilidades"]
+OK Filtro de coluna oculta preserva recorte e chip {"rows": ["p1", "p11"], "labels": ["Agronomia\n2", "Beneficiamento e qualidade\n2", "Campo 1\n4", "Campo 2\n2", "Comercial\n1", "Irrigação\n1", "Oficina\n2", "Suprimentos\n1"]}
+OK Grupos CPF/CNPJ conservam contagem [{"id": "grp@08.604.771/0001-08", "text": "08.604.771/0001-08\n1 item", "n": "1"}, {"id": "grp@11.000.222/0001-20", "text": "11.000.222/0001-20\n1 item", "n": "1"}, {"id": "grp@12.345.678/0001-95", "text": "12.345.678/0001-95\n1 item", "n": "1"}, {"id": "grp@15.332.907/0001-25", "text": "15.332.907/0001-25\n1 item", "n": "1"}, {"id": "grp@19.880.214/0001-28", "text": "19.880.214/0001-28\n1 item", "n": "1"}, {"id": "grp@22.456.789/0001-22", "text": "22.456.789/0001-22\n1 item", "n": "1"}, {"id": "grp@23.114.560/0001-72", "text": "23.114.560/0001-72\n1 item", "n": "1"}, {"id": "grp@27.815.440/0001-53", "text": "27.815.440/0001-53\n1 item", "n": "1"}, {"id": "grp@29.644.083/0001-33", "text": "29.644.083/0001-33\n1 item", "n": "1"}, {"id": "grp@31.402.118/0001-70", "text": "31.402.118/0001-70\n1 item", "n": "1"}, {"id": "grp@33.567.890/0001-77", "text": "33.567.890/0001-77\n1 item", "n": "1"}, {"id": "grp@36.207.915/0001-10", "text": "36.207.915/0001-10\n1 item", "n": "1"}, {"id": "grp@40.581.337/0001-54", "text": "40.581.337/0001-54\n1 item", "n": "1"}, {"id": "grp@44.222.111/0001-18", "text": "44.222.111/0001-18\n1 item", "n": "1"}, {"id": "grp@44.678.901/0001-02", "text": "44.678.901/0001-02\n1 item", "n": "1"}, {"id": "grp@55.789.012/0001-39", "text": "55.789.012/0001-39\n1 item", "n": "1"}, {"id": "grp@66.890.123/0001-53", "text": "66.890.123/0001-53\n1 item", "n": "1"}, {"id": "grp@77.901.234/0001-34", "text": "77.901.234/0001-34\n1 item", "n": "1"}, {"id": "grp@98.765.432/0001-98", "text": "98.765.432/0001-98\n1 item", "n": "1"}, {"id": "grp@123.456.789-09", "text": "123.456.789-09\n1 item", "n": "1"}]
+OK Multivalor conta cada membro exatamente uma vez [7, 8, 3, 1, 2]
+OK Grupos Papéis conservam contagem [{"id": "grp@Cliente", "text": "Cliente\n7 itens", "n": "7"}, {"id": "grp@Fornecedor", "text": "Fornecedor\n8 itens", "n": "8"}, {"id": "grp@Parceiro de crédito", "text": "Parceiro de crédito\n3 itens", "n": "3"}, {"id": "grp@Prestador", "text": "Prestador\n1 item", "n": "1"}, {"id": "grp@Transportador", "text": "Transportador\n2 itens", "n": "2"}]
+OK Agrupamento volta sem depender da URL null
+OK Agrupamento não atravessa perfil null
+OK Perfil recupera seu agrupamento null
+OK CD05 papel Clientes preserva marcas essenciais disponíveis ["parceiro", "papéis", "contato"]
+OK CD05 papel Fornecedores preserva marcas essenciais disponíveis ["parceiro", "contato"]
+OK CD05 papel Todos preserva marcas essenciais disponíveis ["parceiro", "papéis", "contato"]
+OK IR fazenda única preserva padrão ["setor", "déficit hoje", "próximo passo", "próxima passada"]
+OK Unidades mistas sem soma declarada não viram total numérico {"aggregate": null, "children": [[2, "kg"], [3, "L"]]}
+OK 390 padrão usa três primeiras colunas ["pessoa", "equipe", "validade da habilitação"]
+OK 390 teclado abre seletor e foca opção null
+OK 390 Escape fecha e devolve foco null
+OK 390 toque abre Agrupar por dentro da janela null
+[
+  {
+    "name": "Quadro completo: Abre com na ordem e nenhuma grade omitida",
+    "ok": true,
+    "detail": []
+  },
+  {
+    "name": "CD04 padrão renderizado",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades"
+    ]
+  },
+  {
+    "name": "Mostrar coluna preserva registros",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades",
+      "vínculo"
+    ]
+  },
+  {
+    "name": "Escolha volta no próximo acesso",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades",
+      "vínculo"
+    ]
+  },
+  {
+    "name": "Novo perfil recebe seu padrão, sem escolha alheia",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades"
+    ]
+  },
+  {
+    "name": "Perfil original recupera escolha",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades",
+      "vínculo"
+    ]
+  },
+  {
+    "name": "Restaurar padrão mantém registros",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação",
+      "habilidades"
+    ]
+  },
+  {
+    "name": "Filtro de coluna oculta preserva recorte e chip",
+    "ok": true,
+    "detail": {
+      "rows": [
+        "p1",
+        "p11"
+      ],
+      "labels": [
+        "Agronomia\n2",
+        "Beneficiamento e qualidade\n2",
+        "Campo 1\n4",
+        "Campo 2\n2",
+        "Comercial\n1",
+        "Irrigação\n1",
+        "Oficina\n2",
+        "Suprimentos\n1"
+      ]
+    }
+  },
+  {
+    "name": "Grupos CPF/CNPJ conservam contagem",
+    "ok": true,
+    "detail": [
+      {
+        "id": "grp@08.604.771/0001-08",
+        "text": "08.604.771/0001-08\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@11.000.222/0001-20",
+        "text": "11.000.222/0001-20\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@12.345.678/0001-95",
+        "text": "12.345.678/0001-95\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@15.332.907/0001-25",
+        "text": "15.332.907/0001-25\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@19.880.214/0001-28",
+        "text": "19.880.214/0001-28\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@22.456.789/0001-22",
+        "text": "22.456.789/0001-22\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@23.114.560/0001-72",
+        "text": "23.114.560/0001-72\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@27.815.440/0001-53",
+        "text": "27.815.440/0001-53\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@29.644.083/0001-33",
+        "text": "29.644.083/0001-33\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@31.402.118/0001-70",
+        "text": "31.402.118/0001-70\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@33.567.890/0001-77",
+        "text": "33.567.890/0001-77\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@36.207.915/0001-10",
+        "text": "36.207.915/0001-10\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@40.581.337/0001-54",
+        "text": "40.581.337/0001-54\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@44.222.111/0001-18",
+        "text": "44.222.111/0001-18\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@44.678.901/0001-02",
+        "text": "44.678.901/0001-02\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@55.789.012/0001-39",
+        "text": "55.789.012/0001-39\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@66.890.123/0001-53",
+        "text": "66.890.123/0001-53\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@77.901.234/0001-34",
+        "text": "77.901.234/0001-34\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@98.765.432/0001-98",
+        "text": "98.765.432/0001-98\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@123.456.789-09",
+        "text": "123.456.789-09\n1 item",
+        "n": "1"
+      }
+    ]
+  },
+  {
+    "name": "Multivalor conta cada membro exatamente uma vez",
+    "ok": true,
+    "detail": [
+      7,
+      8,
+      3,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "Grupos Papéis conservam contagem",
+    "ok": true,
+    "detail": [
+      {
+        "id": "grp@Cliente",
+        "text": "Cliente\n7 itens",
+        "n": "7"
+      },
+      {
+        "id": "grp@Fornecedor",
+        "text": "Fornecedor\n8 itens",
+        "n": "8"
+      },
+      {
+        "id": "grp@Parceiro de crédito",
+        "text": "Parceiro de crédito\n3 itens",
+        "n": "3"
+      },
+      {
+        "id": "grp@Prestador",
+        "text": "Prestador\n1 item",
+        "n": "1"
+      },
+      {
+        "id": "grp@Transportador",
+        "text": "Transportador\n2 itens",
+        "n": "2"
+      }
+    ]
+  },
+  {
+    "name": "Agrupamento volta sem depender da URL",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "Agrupamento não atravessa perfil",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "Perfil recupera seu agrupamento",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "CD05 papel Clientes preserva marcas essenciais disponíveis",
+    "ok": true,
+    "detail": [
+      "parceiro",
+      "papéis",
+      "contato"
+    ]
+  },
+  {
+    "name": "CD05 papel Fornecedores preserva marcas essenciais disponíveis",
+    "ok": true,
+    "detail": [
+      "parceiro",
+      "contato"
+    ]
+  },
+  {
+    "name": "CD05 papel Todos preserva marcas essenciais disponíveis",
+    "ok": true,
+    "detail": [
+      "parceiro",
+      "papéis",
+      "contato"
+    ]
+  },
+  {
+    "name": "IR fazenda única preserva padrão",
+    "ok": true,
+    "detail": [
+      "setor",
+      "déficit hoje",
+      "próximo passo",
+      "próxima passada"
+    ]
+  },
+  {
+    "name": "Unidades mistas sem soma declarada não viram total numérico",
+    "ok": true,
+    "detail": {
+      "aggregate": null,
+      "children": [
+        [
+          2,
+          "kg"
+        ],
+        [
+          3,
+          "L"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "390 padrão usa três primeiras colunas",
+    "ok": true,
+    "detail": [
+      "pessoa",
+      "equipe",
+      "validade da habilitação"
+    ]
+  },
+  {
+    "name": "390 teclado abre seletor e foca opção",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "390 Escape fecha e devolve foco",
+    "ok": true,
+    "detail": null
+  },
+  {
+    "name": "390 toque abre Agrupar por dentro da janela",
+    "ok": true,
+    "detail": null
+  }
+]
+RESULTADO: 23/23

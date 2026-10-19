@@ -55,7 +55,13 @@ def setv(sel, val):
 def tabela(i): return J(f"(()=>{{const t=document.querySelectorAll('main [role=table]')[{i}]; return t?t.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def linha(i, txt): return J(f"(()=>{{const t=document.querySelectorAll('main [role=table]')[{i}]; const r=t&&[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def abre_linha(i, txt):
-    r = J(f"(()=>{{const t=document.querySelectorAll('main [role=table]')[{i}]; const r=t&&[...t.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); if(!r) return 'sem linha'; (r.querySelector('[role=cell]')||r).click(); return 'ok';}})()")
+    q = f"(()=>{{const t=document.querySelectorAll('main [role=table]')[{i}]; const r=t&&[...t.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); if(!r) return 'sem linha'; (r.querySelector('[role=cell]')||r).click(); return 'ok';}})()"
+    r = J(q)
+    if r == 'sem linha':
+        # base verde 19/10/2026: desde a v129 (DRILL-RECOLHIDO) o CD-01 abre em árvore recolhida (só as fazendas); a linha do talhão (B1) aparece
+        # depois de "Expandir tudo", como o usuário faria. Só a navegação muda; nenhuma asserção muda
+        J("(()=>{ const b=[...document.querySelectorAll('button')].find(b=>b.getClientRects().length&&b.innerText.trim()==='Expandir tudo'); if(b) b.click(); })()"); time.sleep(.8)
+        r = J(q)
     time.sleep(.5); return r
 def incluir_talhao():   # 16/10/2026 (CAD-03): o talhão se inclui de dentro da fazenda (painel da Santa Rita › Incluir talhão)
     abre_linha(0, 'Santa Rita'); return clk('Incluir talhão', 'aside[role=dialog]')

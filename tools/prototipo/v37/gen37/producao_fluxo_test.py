@@ -18,7 +18,7 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
   unid     UNID-PROD (docs/unidades-produtividade/ESPECIFICACAO.md §7): seletor "Unidade de produtividade" por teclado e a 390 px;
            20 trocas sem mudar o estado (localStorage igual byte a byte depois de um comando real) com filtro rápido, filtro por valor,
            ordem, rascunho e foco preservados; preferência por perfil × cultura restaurada ao voltar; a mesma unidade na linha, no
-           painel e no cartão; café da roça sem peso (massa indisponível, com o motivo); Mapa PENDENTE da DEC-0910-36 (não conta OK).
+           painel e no cartão; café da roça sem peso (massa indisponível, com o motivo); Mapa: o rótulo da camada Colheita e produtividade na unidade escolhida (P5).
 Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 producao_fluxo_test.py [os|fluxo|erros|celular|revisao|unid]
 Capturas em _probe/producao_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
@@ -483,10 +483,14 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         t.chk('R-U05 recusa: sem o peso do fruto, a célula mostra só "2.400 L/ha de Café da roça" e a nota diz "kg/ha indisponível para Café da roça: falta peso ou conversão medida"',
               cs0.startswith('kg/ha a apurar · 2.400 L/ha de Café da roça') and 'kg/ha indisponível para Café da roça: falta peso ou conversão medida' in us0.get('nota', '') and us0.get('v') == 'kg', [cs0, us0])
         shot('unid_cafe')
-        # 9 · Mapa: a camada Colheita e produtividade é da DEC-0910-36 (D-U02); sem ela na barra, PENDENTE (não conta como OK)
-        ir('IN-04.dc.html'); tem = J("[...document.querySelectorAll('button,[role=tab]')].filter(VIS).some(b=>/Colheita\\/produtividade|Colheita e produtividade/.test(N(b.innerText)))")
-        if tem: t.chk('AC-h Mapa: a camada Colheita e produtividade mostra a mesma unidade', False, 'camada na barra: falta ligar ao conversor (P5)')
-        else: print('PENDENTE (DEC-0910-36) AC-h Mapa: a camada Colheita e produtividade não está na barra; não conta como OK')
+        # 9 · Mapa (P5, base verde de 19/10/2026): o rótulo do Pivô 19 na camada Colheita e produtividade mostra a produtividade na unidade escolhida
+        # (kg/ha do Mamão para a Ana, desde o passo 4), com o mesmo número da coluna Produtividade da Previsão e colheita
+        ir('COLH.dc.html'); ul(); n19m = cel('Pivô 19').split(' · ')[0]
+        ir('IN-04.dc.html'); J("(()=>{ const b=[...document.querySelectorAll('[role=tab]')].filter(VIS).find(b=>/Colheita e produtividade/.test(N(b.innerText))); if(b) b.click(); })()"); time.sleep(1.2)
+        r19 = J("(()=>{ const e=[...document.querySelectorAll('body *')].filter(x=>VIS(x)&&x.children.length<=3).map(x=>N(x.textContent)).find(t=>/^P19\\s*(em colheita|colhida|prevista|programada)/i.test(t)&&t.length<60); return e||''; })()") or ''
+        t.chk('AC-h Mapa: o rótulo do Pivô 19 na camada Colheita e produtividade mostra a produtividade em kg/ha, o mesmo número da Previsão e colheita',
+              bool(n19m) and n19m.endswith('kg/ha') and n19m in r19, [n19m, r19])
+        shot('unid_mapa')
         t.chk('unid: nenhuma página com erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()

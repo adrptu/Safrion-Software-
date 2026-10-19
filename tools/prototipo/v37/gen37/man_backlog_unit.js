@@ -30,7 +30,8 @@ caso('semente', () => {
   const e = manClone(c), k0 = Object.keys(e.itens)[0], i0 = e.itens[k0]; e.oms['OM-0234'].pecas = [{ item: k0, nome: 'peça', qtd: i0.saldo - i0.reservado + 10, un: 'un' }];
   ok('B13 · conflito e peça em falta juntos: vale a ordem do §5.2, pendência técnica (não falta de peça); as duas pendências são reais',
      manFalta(e, e.oms['OM-0234']).length === 1 && !!manConflito(e, e.oms['OM-0234']) && manBacklogSit(e, e.oms['OM-0234']) === 'tecnica' && manBacklog(e).sit.peca.n === 0, manBacklog(e).sit);
-  ok('B2 · sem capacidade configurada não há semanas equivalentes', r.semanas === null, r.semanas);
+  // D11b (19/10/2026): r.semanas deixou de ser null e passou a ser por especialidade (manSemanas); a propriedade é a mesma: sem capacidade, nenhum número
+  ok('B2 · sem capacidade configurada não há semanas equivalentes', !!r.semanas && Object.keys(r.semanas).length > 0 && Object.values(r.semanas).every(x => x.semanas === null), r.semanas);
 });
 
 caso('regras', () => {
@@ -69,5 +70,28 @@ caso('regras', () => {
   r = manBacklog(c, a1);
   const oa = oraculo(c, a1);
   ok('B10 · filtro por ativo: só as ordens daquele ativo (a X2 movida para outro ativo sai)', r.n === oa.n && igual(r.hh, oa.hh) && r.n === manBacklog(c).n - 1, [r.n, r.hh, oa]);
+});
+// EX-53 D11b · semanas equivalentes = HH ÷ capacidade semanal (P10); sem capacidade, sem hora ou sem especialidade: null com o motivo, nunca 0
+caso('semanas', () => {
+  const c = S(), o = oraculo(c), espe = Object.keys(o.esp).sort((a, b) => o.esp[b] - o.esp[a])[0];
+  const chamadas = []; const cap = e => { chamadas.push(e); return e === espe ? { hhSemana: 30, pessoas: 2 } : null; };
+  const r = manBacklog(c, null, cap), w = r.semanas[espe];
+  ok('B15 · com capacidade: semanas = HH da especialidade ÷ HH/semana (oráculo sobre os dados crus), com a capacidade e as pessoas',
+     !!w && igual(w.semanas, o.esp[espe] / 30) && w.cap === 30 && w.pessoas === 2 && w.motivo === '' && !w.parcial, [espe, w, o.esp]);
+  const outras = Object.keys(r.semanas).filter(k => k !== espe);
+  ok('B16 · sem capacidade: semanas null e motivo "capacidade", nunca 0', outras.length > 0 && outras.every(k => r.semanas[k].semanas === null && r.semanas[k].motivo === 'capacidade'), r.semanas);
+  const r0 = manBacklog(c);
+  ok('B17 · sem leitor de capacidade (tela sem a CF-06): todas null com o motivo, e o resto do backlog igual', Object.values(r0.semanas).every(x => x.semanas === null && x.motivo === 'capacidade')
+     && r0.n === r.n && igual(r0.hh, r.hh), r0.semanas);
+  const d = manClone(c); nova(d, 'Y1', 'Liberadas', undefined, { esp: espe });
+  const rd = manBacklog(d, null, cap).semanas[espe];
+  ok('B18 · ordem da especialidade sem tempo previsto: as semanas viram mínimo (parcial), com o mesmo número', rd.parcial && rd.semTempo === 1 && igual(rd.semanas, o.esp[espe] / 30), rd);
+  const e = manClone(c); nova(e, 'Y2', 'Liberadas', undefined, { esp: 'Especialidade nova' }); nova(e, 'Y3', 'Liberadas', 2, { esp: '' });
+  const re = manBacklog(e, null, x => ({ hhSemana: 40, pessoas: 1 }));
+  ok('B19 · especialidade só com ordem sem tempo: "sem estimativa" (sem número); ordem sem especialidade não consulta capacidade',
+     re.semanas['Especialidade nova'].semanas === null && re.semanas['Especialidade nova'].motivo === 'sem estimativa'
+     && re.semanas['sem especialidade'].semanas === null && re.semanas['sem especialidade'].motivo === 'ordem sem especialidade', re.semanas);
+  ok('B20 · capacidade zero ou inválida não vira divisão: null com o motivo', manBacklog(c, null, () => ({ hhSemana: 0, pessoas: 1 })).semanas[espe].semanas === null, '');
+  ok('B21 · o leitor de capacidade é chamado por especialidade, nunca para "sem especialidade"', chamadas.indexOf('sem especialidade') < 0 && chamadas.indexOf(espe) >= 0, chamadas);
 });
 print(JSON.stringify(R));

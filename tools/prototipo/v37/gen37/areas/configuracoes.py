@@ -439,6 +439,35 @@ function EXTRAVALS(self,v){ const c=cenGet(),st=self.state,K=confLer(c),P=confAt
 }
 '''
 
+CF6_CAP_JS = r'''
+function capFecha(self){ if(self.state.c6id){ (self.__c6drafts||(self.__c6drafts={}))[self.state.c6id]=Object.fromEntries(Object.entries(self.state).filter(([k])=>k.startsWith('c6'))); } self.setState({c6id:null,c6error:''}); }
+// dedicação ativa de quem saiu da CD-04 (capacidadeOrfas, PR #134): aparece para retirada versionada; o nome vem da semente, senão o id
+function capNomeOrfa(id){ const p=(PESSOAS0.pessoas||[]).find(x=>x.id===id); return (p&&p.v&&p.v.nome)||('Pessoa '+id); }
+function capAbre(self,id){ if(self.__c6drafts&&self.__c6drafts[id]){self.setState(self.__c6drafts[id]);return;} const c=cenGet(),r=capacidadeRegistro(c,id),p=pessoasCapacidade(c)[id],o=p?null:capacidadeOrfas(c)[id]; if(!p&&!o)return;
+ self.setState({c6id:id,c6horas:p&&r&&r.ativa!==false?Object.fromEntries(Object.entries(r.alocacoes).map(([k,v])=>[k,String(v)])):{},c6motivo:'',c6error:'',c6v:r?r.v:0,c6pv:p?p.v:o.pessoaV,c6chave:confChave('cap')}); }
+function capSalvar(self,retira){ const st=self.state,novo=retira?null:Object.fromEntries(CAP_ESPECIALIDADES.filter(k=>String((st.c6horas||{})[k]||'').trim()).map(k=>[k,cf6Numero(st.c6horas[k])]));
+ const r=cenMudar(null,c=>capacidadeGravar(c,st.c6id,novo,st.c6motivo,st.c6v,st.c6pv,st.c6chave,g2perfil()),{estrito:true});
+ if(r.erro){self.setState({c6error:r.erro});return;} if(self.__c6drafts)delete self.__c6drafts[st.c6id];self.setState({c6id:null,c6error:'',cenrev:Date.now(),g2toast:r.msg}); }
+function PREVALS(self,v){ m6Pre(self,v);const c=cenGet(),ps=pessoasCapacidade(c);
+ aGrid('g_cap').rows=Object.entries(ps).map(([id,p])=>{const r=capacidadeRegistro(c,id),ativo=r&&r.ativa!==false,teto=capacidadeJornada(p.calendario),ok=ativo&&r.fonteV===p.fonteV&&p.sit==='Ativa'&&p.disponivel&&r.pessoaV===p.v&&capacidadePartilha(r.alocacoes,teto);
+ const t=ativo?(ok?'Configurada':'Rever dedicação'):'Não configurada',horas=ativo?Object.entries(r.alocacoes).map(([k,h])=>k+': '+h+' HH/semana').join(' · '):'—';
+ return {id,dr:'c6_'+id,v:{nome:p.nome,sit:t,horas},s:{nome:p.nome,sit:t,horas},p:{nome:[{k:'b',t:p.nome},{k:'mut',t:p.sit}],sit:[aCh(t,ok?'green':'gray')],horas:[{k:'txt',t:horas}]}}; })
+ .concat(Object.entries(capacidadeOrfas(c)).map(([id,r])=>{ const nome=capNomeOrfa(id),t='Rever dedicação',horas=Object.entries(r.alocacoes).map(([k,h])=>k+': '+h+' HH/semana').join(' · ');
+  return {id,dr:'c6_'+id,v:{nome,sit:t,horas},s:{nome,sit:t,horas},p:{nome:[{k:'b',t:nome},{k:'mut',t:'Saiu do cadastro'}],sit:[aCh(t,'gray')],horas:[{k:'txt',t:horas}]}}; })); }
+function EXTRAVALS(self,v){ m6Extra(self,v);const c=cenGet(),st=self.state,ps=pessoasCapacidade(c),p=ps[st.c6id],orf=capacidadeOrfas(c),o=p?null:orf[st.c6id],r=capacidadeRegistro(c,st.c6id),K=confLer(c),P=confAtor(K,g2perfil()),pode=!!(P&&P.papeis.gestor),teto=p&&capacidadeJornada(p.calendario);
+ Object.keys(ps).concat(Object.keys(orf)).forEach(id=>v['c6_'+id]=()=>capAbre(self,id));aPainel(self,v,'c6painel',!!(p||o),p?'Dedicação · '+p.nome:(o?'Dedicação · '+capNomeOrfa(st.c6id):''),()=>capFecha(self));
+ v.c6edita=pode&&!o;v.c6pode=pode;v.c6semPoder=!pode;v.c6erro=st.c6error||'';v.c6temErro=!!v.c6erro;v.c6retira=!!r&&r.ativa!==false&&pode;
+ v.c6contexto=o?'Saiu do cadastro de pessoas (CD-04). A dedicação suspende o total da especialidade até ser retirada.':p?p.sit+(p.disponivel?'':' · contrato fora da vigência')+' · '+(p.calendario||'Calendário ausente')+(teto?' · teto nominal '+teto.hhSemana+' h/semana':' · semana sem base definida'):'';
+ const valida=!!p&&!!r&&r.fonteV===p.fonteV&&p.sit==='Ativa'&&p.disponivel&&r.pessoaV===p.v&&capacidadePartilha(r.alocacoes,teto);
+ v.c6vigente=r&&r.ativa!==false?(valida?'Vigente: ':'Rever dedicação: ')+Object.entries(r.alocacoes).map(([k,h])=>k+' '+h+' HH/semana').join(' · ')+' · v'+r.v+' · '+r.quem:'Dedicação não configurada';
+ const total=Object.values(st.c6horas||{}).filter(x=>String(x).trim()).map(cf6Numero);v.c6soma=total.every(Number.isFinite)?total.reduce((a,b)=>a+b,0)+' HH/semana informadas':'Confira as horas informadas';
+ CAP_ESPECIALIDADES.forEach((k,i)=>{v['c6h'+i]=(st.c6horas||{})[k]||'';v['c6set'+i]=e=>self.setState({c6horas:Object.assign({},self.state.c6horas||{},{[k]:e.target.value}),c6error:''});});
+ v.c6motivo=st.c6motivo||'';v.c6motset=e=>self.setState({c6motivo:e.target.value,c6error:''});v.c6salvar=()=>capSalvar(self,false);v.c6retirar=()=>capSalvar(self,true);
+ const pv=p?p.v:(o?o.pessoaV:null);v.c6conflito=!!(p||o)&&(st.c6pv!==pv||st.c6v!==(r?r.v:0));v.c6atualizar=()=>{self.setState({c6pv:pv,c6v:r?r.v:0,c6chave:confChave('cap'),c6error:''});setTimeout(()=>{const el=document.getElementById('c6_h0');if(el)el.focus();},0);};
+ v.c6versoes=(p||o)?(K.ev||[]).filter(e=>e.tipo==='capacidade'&&e.alvo===st.c6id).slice().reverse().map(e=>({t:e.id+' · '+confBr(e.d)+' '+e.at,v:e.quem+' · '+(e.depois?Object.entries(e.depois).map(([k,h])=>k+' '+h+' HH/semana').join(' · '):'Retirada')+' · '+e.motivo,st:''})):[];
+ if(!v.c6versoes.length)v.c6versoes=[{t:'Nenhuma versão ainda',v:'',st:''}]; }
+'''
+
 def cf06():
     fname='CF-06.dc.html'; E._reset_screen(fname)
     ui37.CAT['CF-06']=dict(titulo='Metas e limites',grupo='Configurações')
@@ -455,6 +484,17 @@ def cf06():
     detalhe=f'<p role="status">{H("m6estado")}</p>'+_sc('m6semPoder','<p>Somente gestor ativo configura as metas. O histórico permanece disponível.</p>')+_sc('m6pode','<div style="display:grid;gap:8px">'+campos+'</div>')+_sc('m6temErro',f'<p role="alert" style="color:{RED}">{H("m6erro")}</p>')+_sc('m6conflito','<p>A meta mudou. Compare os valores vigentes acima com seu rascunho antes de salvar.</p>'+f'<button type="button" style="{SEC}" onClick="{H("m6atualizar")}">Atualizar versão e manter rascunho</button>')+titulo('Versões')+_lin('m6versoes')
     rod=_sc('m6pode','<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">'+_sc('m6temMeta',f'<button type="button" style="{SEC}" onClick="{H("m6retirar")}">Retirar meta</button>')+f'<button type="button" style="{PRI}" onClick="{H("m6salvar")}">Salvar meta</button></div>')
     E.EXTRA.append(painel('m6painel',detalhe,rod,540,foco=True))
-    EXTRAJS[0]=cenario.js_prefixo()+A_JS+CF6_JS
+    import dados_manutencao as DM
+    capgrid=grid([dict(k='nome',l='Pessoa',w=220),dict(k='horas',l='Dedicação por especialidade',w=380),dict(k='sit',l='Estado',w=180)],[],gid='g_cap',search=True,total=False,so={'k':'nome'},edit=dict(m='ro',title='Dedicação semanal',fields=[]))
+    corpo+=section('Capacidade semanal da manutenção','Selecione a pessoa e informe somente as horas dedicadas à manutenção.','','<p class="conf-nota">A jornada é um teto, não uma dedicação automática. A mesma pessoa pode dividir horas entre especialidades. <a href="CD-04.dc.html">Abrir pessoas e equipes</a></p>'+capgrid)
+    capcampos=''  # horas e soma só para quem está no cadastro (c6edita); a dedicação órfã só se retira
+    for i,esp in enumerate(DM.ESPECIALIDADES):
+        capcampos+=f'<label for="c6_h{i}">{esp} (HH/semana)</label><input id="c6_h{i}" inputmode="decimal" value="{H("c6h"+str(i))}" onChange="{H("c6set"+str(i))}" style="{estilo}" />'
+    capcampos=_sc('c6edita','<div style="display:grid;gap:8px">'+capcampos+f'<p role="status">{H("c6soma")}</p><p class="conf-nota">Deixe em branco as especialidades sem dedicação. A soma não pode ultrapassar a jornada conhecida. Alterar calendário ou situação exige conferir novamente a dedicação; não muda automaticamente as horas.</p></div>')
+    capcampos+=f'<label for="c6_motivo">Motivo (obrigatório)</label><textarea id="c6_motivo" value="{H("c6motivo")}" onChange="{H("c6motset")}" style="{estilo}"></textarea><p class="conf-nota">Retirar preserva as versões.</p>'
+    capdet=f'<p>{H("c6contexto")}</p><p role="status">{H("c6vigente")}</p>'+_sc('c6semPoder','<p>Somente gestor ativo configura a dedicação.</p>')+_sc('c6pode','<div style="display:grid;gap:8px">'+capcampos+'</div>')+_sc('c6temErro',f'<p role="alert" style="color:{RED}">{H("c6erro")}</p>')+_sc('c6conflito',f'<p>A fonte mudou. Compare o registro vigente e o calendário com seu rascunho.</p><button type="button" style="{SEC}" onClick="{H("c6atualizar")}">Atualizar versão e manter rascunho</button>')+titulo('Versões')+_lin('c6versoes')
+    caprod=_sc('c6pode','<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">'+_sc('c6retira',f'<button type="button" style="{SEC}" onClick="{H("c6retirar")}">Retirar dedicação</button>')+_sc('c6edita',f'<button type="button" style="{PRI}" onClick="{H("c6salvar")}">Salvar dedicação</button>')+'</div>')
+    E.EXTRA.append(painel('c6painel',capdet,caprod,540,foco=True))
+    EXTRAJS[0]=cenario.js_prefixo()+A_JS+CF6_JS.replace('function PREVALS(', 'function m6Pre(').replace('function EXTRAVALS(', 'function m6Extra(')+CF6_CAP_JS
     HEIGHTS37[fname]=1000
     shell37('CF-06','Metas e limites',corpo,fname=fname,search=False,subtitle='Configurações do grupo · limites explícitos e histórico de mudanças.',footer='Demonstração: configuração salva neste navegador. Perfil de demonstração não substitui autorização no servidor.')
