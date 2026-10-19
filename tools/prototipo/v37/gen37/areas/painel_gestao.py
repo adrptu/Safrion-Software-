@@ -110,12 +110,13 @@ function pgBacklog(m){ const r=m&&m.oms?manBacklog(m):null, dica='Horas prevista
   const v=!r.n?'0 HH':(r.n>r.semTempo?manN(r.hh,1)+' HH':'Sem estimativa');
   const sub=!r.n?'nenhuma ordem pendente':[esp,sit].filter(Boolean).join('\u00a0— ');
   return pgK('Hoje','Backlog da oficina',v,sub,null,dica+' Semanas equivalentes: capacidade semanal não configurada.','MA.dc.html#vis=ordens'); }
-function pgPreventiva(m){
+function pgPreventiva(m,c){
   const temBase=!!(m&&m.oms&&m.hoje), r=temBase?manCumprimento(m,'12m'):null, p=r||(temBase?manPeriodo(m,'12m'):null);
   const periodo=p?'12 m · '+p.de.split('-').reverse().join('/')+' a '+p.ate.split('-').reverse().join('/'):'12 m';
+  const aval=typeof metaAvaliar==='function'?metaAvaliar(c,'KPI-PCM-05',r?r.pct:null,'%'): {cor:'gray',texto:'Meta não configurada'};
   return pgK('Plano','Cumprimento de preventiva',r?r.pct+'%':'Sem base no período',
-    pgSemMeta((r?r.ok+' de '+r.n+' preventivas · ':'')+periodo),pgCor(),
-    'Encerradas no prazo ÷ preventivas com vencimento original no período até hoje. A base inclui abertas vencidas e preventivas vencidas sem ordem. Adiamentos preservam o vencimento original. Abrir ordens de manutenção.',
+    (r?r.ok+' de '+r.n+' preventivas · ':'')+periodo+' · '+aval.texto,aval.cor,
+    'Encerradas no prazo ÷ preventivas com vencimento original no período até hoje. A base inclui abertas vencidas e preventivas vencidas sem ordem. Adiamentos preservam o vencimento original. Abrir ordens de manutenção. '+(typeof metaDica==='function'?metaDica(c,'KPI-PCM-05'):''),
     'MA.dc.html#vis=ordens');
 }
 function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=c&&c.man;
@@ -123,7 +124,7 @@ function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=
   B.oms=[pgK('Hoje','Ordens abertas',pm.vals[1],'',null,'Ordens não encerradas nem canceladas. Fonte: manAberta.','MA.dc.html#vis=ordens'),
     pgK('Hoje','Em execução',pm.vals[2],'',null,'Ordens na etapa Em execução. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')]
     .concat(pm.labels.slice(0,2).map((l,i)=>pgK('Hoje',l,pm.bars[i],'',null,'Ordens de manutenção na fase '+l+'. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')));
-  B.oms.push(pgPreventiva(m));
+  B.oms.push(pgPreventiva(m,c));
   B.oms.push(pgBacklog(m));
   const at=m&&m.ativos&&typeof m.ativos==='object'?Object.values(m.ativos).filter(a=>a&&typeof a.cond==='string'):null;
   const disp=at&&at.length?Math.round(at.filter(a=>a.cond!=='Bloqueado').length/at.length*100):null;

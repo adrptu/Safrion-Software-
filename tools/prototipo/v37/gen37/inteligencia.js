@@ -19,8 +19,9 @@ function intFreteUn(massaKg) { return prMulDiv(INT_FRETE_T, massaKg || 0, 1000);
 function intPontualidade(ents) { const n = (ents || []).length; if (!n) return null; return prDiv(ents.filter(e => !(e.atraso > 0)).length, n); }
 function intRsHa(itens, area) { return intOk(area) ? prDiv(prSoma((itens || []).map(i => prMul(i.qtd, i.preco))), area) : null; }
 function intPct(f, d) { if (f === null || f === undefined) return '—'; const t = prFmt(prMul(f, 100), d === undefined ? 1 : d); return (prCmp(f, 0) > 0 ? '+' : '') + t + '%'; }
-function intAbaixo(f) { return false; } // sem meta configurada; preserva contrato dos consumidores
-function intAcima(f) { return false; } // sem meta configurada; não confundir comparação com alerta
+function intMeta(c,id,f,parcial){ return metaAvaliar(c,id,f===null||f===undefined||f===''||!Number.isFinite(Number(f))?null:Number(prMul(f,100)),'%',parcial); }
+function intAbaixo(f) { return false; } // compatibilidade: alertas legados não classificam metas
+function intAcima(f) { return false; } // consumidores de metas usam intMeta com cenário explícito
 
 /* ---------- Vendas ---------- */
 function intVendas(c, hoje) { hoje = hoje || prHoje(); const P = prP(c);
