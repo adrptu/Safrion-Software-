@@ -78,15 +78,26 @@ try:
         b0 = botoes(PAN_OS); clk('Iniciar execução', PAN_OS); tt = toast(); b1 = botoes(PAN_OS); et = cen("c.ordens['OS-0424'].etapa")
         chk('I1a Iniciar execução grava no clique: OS-0424 Em execução, recibo "OS-0424 em execução: insumos com Marcos", sem bloco "Confirmar início"',
             'Iniciar execução' in b0 and et == 'Em execução' and 'OS-0424 em execução: insumos com Marcos, confirmados no app' in tt and 'Confirmar início' not in b1, [b0, et, tt, b1])
-        rr = J("(()=>{const r=window.__cen.cenMudar(null,osDireto('OS-0424','iniciar','Liberadas')); return r.erro||r.msg;})()") if J("typeof osDireto==='function'") else 'sem osDireto'
-        chk('I1b toque duplo (2ª chamada do mesmo clique): "já está em Em execução: nada foi feito de novo", sem erro', 'já está em Em execução: nada foi feito de novo' in (rr or ''), rr)
+        # I1b toque duplo de verdade: dois cliques no mesmo botão, na mesma tarefa (a 2ª chamada usa a fase de antes do 1º clique). osDireto
+        # vive no escopo da página (não é global); a guarda da função é coberta por leve1_unit (U1b/U1c). Oráculo: uma ordem em execução,
+        # nenhum erro "não está liberada" no painel nem alerta; o aviso é o recibo ou "já está em Em execução: nada foi feito de novo".
+        ir('OS.dc.html', limpa=True); espera("!!(window.__cen&&window.__cen.cenGet)")
+        cen_mudar("const X=window.__cen; X.cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos','Rui'); return X.cenConfirmarRecebimento(c,'REQ-039');")
+        ir('OS.dc.html#OS-0424'); time.sleep(.4)
+        rd = J(f"(()=>{{const e=[...document.querySelectorAll({json.dumps(PAN_OS + ' button')})].find(b=>b.getClientRects().length&&{N}(b.innerText)==='Iniciar execução'); if(!e) return 'NÃO ACHEI'; e.click(); e.click(); return 'ok';}})()")
+        time.sleep(.6); td = toast(); pd = pan_os(); ad = alertas(); etd = cen("c.ordens['OS-0424'].etapa")
+        chk('I1b toque duplo em "Iniciar execução": uma vez em execução, sem erro ("não está liberada") no painel nem alerta; aviso = recibo ou "nada foi feito de novo"',
+            rd == 'ok' and etd == 'Em execução' and 'não está liberada' not in pd and 'não está liberada' not in ad
+            and ('OS-0424 em execução: insumos com Marcos' in td or 'já está em Em execução: nada foi feito de novo' in td), [rd, etd, td, ad, pd[:300]])
         cen_mudar("const o=c.ordens['OS-0424']; o.realizado=o.area; o.saldo=0; return {msg:'saldo zero (roteiro do teste)'};"); time.sleep(.5)
         ir('OS.dc.html#OS-0424'); time.sleep(.4)
         b2 = botoes(PAN_OS); clk('Enviar para conferência', PAN_OS); tt = toast(); b3 = botoes(PAN_OS); et = cen("c.ordens['OS-0424'].etapa"); fim = cen("JSON.stringify((c.ordens['OS-0424'].osc||{}).fim||[])")
         chk('I1c Enviar para conferência grava no clique: Em conferência, recibo com quem enviou (CMD-08 gravado), sem "Confirmar envio"',
             'Enviar para conferência' in b2 and et == 'Em conferência' and 'OS-0424 enviada para conferência por' in tt and 'Confirmar envio' not in b3 and 'CMD-08' in (fim or ''), [b2, et, tt, b3, fim])
-        clk('Conferir e encerrar', PAN_OS); b4 = botoes(PAN_OS); et4 = cen("c.ordens['OS-0424'].etapa")
-        chk('I1d Encerrar continua pedindo confirmação ("Confirmar encerramento"; nada encerrado antes dela)', 'Confirmar encerramento' in b4 and et4 == 'Em conferência', [b4, et4])
+        # I1d na OS-0508 (Em conferência no cenário-semente e sem impedimento, a mesma do config_test): a OS-0424 do roteiro fica com a
+        # sobra do Fungicida em custódia, e aí o painel mostra "Encerrar bloqueado" em vez do botão (trava que fica, AGENTS §4).
+        ir('OS.dc.html#OS-0508'); time.sleep(.4); b4a = botoes(PAN_OS); r4 = clk('Conferir e encerrar', PAN_OS); b4 = botoes(PAN_OS); et4 = cen("c.ordens['OS-0508'].etapa")
+        chk('I1d Encerrar continua pedindo confirmação ("Confirmar encerramento"; OS-0508 segue Em conferência antes dela)', r4 == 'ok' and 'Confirmar encerramento' in b4 and et4 == 'Em conferência', [r4, b4a, b4, et4])
         ir('OS.dc.html#OS-0430'); time.sleep(.3); clk('Liberar para execução', PAN_OS); b5 = botoes(PAN_OS); et5 = cen("c.ordens['OS-0430'].etapa")
         chk('I1e Liberar continua pedindo confirmação ("Confirmar liberação"; a ordem segue A liberar)', 'Confirmar liberação' in b5 and et5 == 'A liberar', [b5, et5])
     with secao('I1 Mapa · Iniciar grava no clique'):
@@ -133,7 +144,7 @@ try:
         chk('I2f colheita: sem turno, horas vazias (pede); com turno aberto na OS-0505, horas = 2,7 (editáveis)', h0 == '' and h1 == '2,7', [h0, h1])
     # ======================================================================================== I3 · Nova ordem
     with secao('I3 O.S. › Nova ordem: início da janela preenchido'):
-        ir('OS.dc.html', limpa=True); espera("!!(window.__cen&&window.__cen.cenGet)"); hoje = J("CEN_DIA_OP")
+        ir('OS.dc.html', limpa=True); espera("!!(window.__cen&&window.__cen.cenGet)"); hoje = cen("c.diaOperacional")   # CEN_DIA_OP = CEN0.diaOperacional (a constante não é global na página)
         r = clk('Criar ordem', 'header'); r = r if r == 'ok' else clk('Nova ordem')
         setv('#nv_saf', 'S2627'); setv('#nv_cult', 'c1'); setv('#nv_atv', 'a7'); j7 = val('#nv_jan'); d7 = J("(()=>{const i=document.querySelector('#nv_jan'); return i?i.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''
         setv('#nv_atv', 'a1'); j1 = val('#nv_jan'); d1 = J("(()=>{const i=document.querySelector('#nv_jan'); return i?i.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''
@@ -141,7 +152,8 @@ try:
             j7 == '2026-12-14' and 'gatilho do plano' in d7 and j1 == hoje and 'já passou' in d1, [j7, d7, j1, d1, hoje])
         setv('#nv_jan', '2026-12-20'); setv('#nv_atv', 'a7'); je = val('#nv_jan')
         chk('I3b data escolhida à mão vale ao trocar a atividade (editável, não volta ao padrão)', je == '2026-12-20', je)
-        setv('#nv_jan', '2026-12-14'); clk('Emitir ordem', 'aside[role=dialog]'); tt = toast()
+        clk('Cancelar', 'aside[role=dialog]'); clk('Descartar alterações', 'aside[role=dialog]')
+        clk('Criar ordem', 'header'); setv('#nv_saf', 'S2627'); setv('#nv_cult', 'c1'); setv('#nv_atv', 'a7'); clk('Emitir ordem', 'aside[role=dialog]'); tt = toast()
         no = cen("(()=>{const k=Object.keys(c.ordens).filter(k=>c.ordens[k].osc&&c.ordens[k].osc.novo); const o=k.length?c.ordens[k[k.length-1]].osc.novo:null; return o?[o.id,o.jan,o.janela]:null;})()")
         chk('I3c Emitir sem escolher data grava a janela do gatilho ("a partir de 14/12/2026")', bool(no) and no[1] == '2026-12-14' and no[2] == 'a partir de 14/12/2026', [no, tt])
         clk('Criar ordem', 'header'); setv('#nv_saf', 'S2627'); setv('#nv_cult', 'c1'); setv('#nv_atv', 'a6'); setv('#nv_jan', ''); clk('Emitir ordem', 'aside[role=dialog]'); al = alertas()
@@ -150,15 +162,17 @@ try:
     with secao('I4 Manutenção › Liberar OM com executante e tempo preenchidos'):
         ir('MA.dc.html', 1440, 1000, limpa=True, perfil='Otávio'); espera("!!(window.__man&&window.__man.manGet)")
         man_mudar("return window.__man.manGerarTodas(m,null,'Otávio');"); ir('MA.dc.html#om=OM-0234', perfil='Otávio'); espera("!!document.querySelector('#ma-painel')")
-        ex = val('#om-exe'); tp = val('#om-tempo'); lib = J("(()=>{const b=[...document.querySelectorAll('#ma-painel button')].find(b=>b.innerText.trim()==='Liberar serviço'); return b?!b.disabled&&b.getAttribute('aria-disabled')!=='true':null;})()")
-        chk('I4 (já na base) OM-0234: executante Zé (única pessoa habilitada) e tempo do serviço 5 h já preenchidos; "Liberar serviço" ligado', ex == 'Zé' and tp == '5' and lib is True, [ex, tp, lib])
+        ex = val('#om-exe'); tp = val('#om-tempo')
+        # OM-0234 tem conflito de janela no cenário (OS-0420 em 28/09): a primária é "Mover janela" e o liberar vem como "Liberar mesmo assim";
+        # "Liberar serviço" e "Liberar mesmo assim" usam o mesmo desligamento ("Falta: executante" / "Falta: tempo previsto"), que é o que o item prova
+        lib = J("(()=>{const b=[...document.querySelectorAll('#ma-painel button')].find(b=>['Liberar serviço','Liberar mesmo assim'].indexOf(b.innerText.trim())>=0); return b?[b.innerText.trim(),!b.disabled&&b.getAttribute('aria-disabled')!=='true']:null;})()")
+        chk('I4 (já na base) OM-0234: executante Zé (única pessoa habilitada) e tempo do serviço 5 h já preenchidos; o botão de liberar ligado (sem "Falta: …")', ex == 'Zé' and tp == '5' and bool(lib) and lib[1] is True, [ex, tp, lib])
     with secao('I9 Manutenção · motivo opcional'):
         r = man_mudar("return window.__man.manCancelar(m,'OM-0234','','Otávio','T-LEVE-CANC');"); cc = man("m.oms['OM-0234'].canc||{}") or {}
         chk('I9a cancelar OM sem motivo: cancela, grava quem e quando (motivo vazio) e devolve a reserva', man("m.oms['OM-0234'].etapa") == 'Canceladas' and cc.get('motivo') == '' and 'Otávio' in (cc.get('por') or '') and bool(cc.get('em')), [r, cc])
         ir('MA.dc.html', 1440, 1000, limpa=True, perfil='Otávio'); espera("!!(window.__man&&window.__man.manGet)")
-        r = man_mudar("return window.__man.manAchRegistrar ? (function(){ const q=Object.values(m.achados).find(x=>x.estado==='Sem ordem'); m.__q=q&&q.id; return {msg:q?q.id:'nenhum'}; })() : {msg:'x'};")
-        qid = man("Object.values(m.achados).filter(x=>x.estado==='Sem ordem').map(x=>x.id)[0]")
-        ir(f'MA.dc.html#ach={qid}', perfil='Otávio'); espera("!!document.querySelector('#ma-painel')")
+        qid = 'SM-0150'   # colhedora sem OM e sem vencimento devido: "Fechar sem serviço" entre as secundárias (AC-PCM-09)
+        ir(f'MA.dc.html#achado={qid}', perfil='Otávio'); espera("!!document.querySelector('#ma-painel')")
         clk('Fechar sem serviço', '#ma-painel'); clk('Fechar sem serviço', '#ma-painel'); time.sleep(.3); q = man(f"m.achados[{json.dumps(qid)}]") or {}
         chk(f'I9b achado {qid}: Fechar sem serviço sem motivo fecha, com quem e quando', q.get('estado') == 'Fechado sem serviço' and 'Otávio' in ((q.get('dec') or {}).get('por') or ''), [qid, q.get('estado'), q.get('dec'), alertas(), toast()])
     with secao('I9 App · checklist fora de OK sem motivo'):
@@ -215,13 +229,18 @@ try:
         bt = ' | '.join(botoes('aside[role=dialog]')); clk('Aceitar divergência', 'aside[role=dialog]'); time.sleep(.4)
         o = J(f"(()=>{{const s={IRR}; const o=s&&s.ordens['OS-0394']; return o?{{et:o.etapa,conf:o.conf}}:null;}})()") or {}
         chk('I9g aceitar a divergência do hidrômetro sem motivo: encerra, hidrômetro prevalece, quem gravado', o.get('et') == 'Encerradas' and (o.get('conf') or {}).get('st') == 'Hidrômetro prevaleceu' and bool((o.get('conf') or {}).get('quem')), [bt, o, alertas()])
-        r = J("(()=>{ try{ const s=irrClone(irrGet()); const id=Object.keys(s.ordens).find(k=>['A liberar','Liberadas'].indexOf(s.ordens[k].etapa)>=0&&!s.ordens[k].fert); irrReclassificar(s,id,{prod:'Ureia 45%',dose:10,mot:''}); return 'ok:'+id; }catch(e){ return 'erro:'+e.message; } })()")
-        chk('I9h fertirrigação (Adicionar produtos) sem motivo agronômico: o comando aceita (o agrônomo libera a v2 na O.S.)', str(r).startswith('ok:'), r)
+        # I9h pela tela: OS-0419 antes de iniciar, "Adicionar produtos" com o motivo em branco (o formulário abre com Ureia 45% e 12 kg/ha)
+        ir('IR-03det.dc.html#OS-0419', limpa=True, espera_s=1.6); r1 = clk('Adicionar produtos'); time.sleep(.3); r2 = clk('Criar versão v2'); time.sleep(.4)
+        f = J(f"(()=>{{const s={IRR}; const o=s&&s.ordens['OS-0419']; return o?{{v:o.versao,fert:o.fert?{{prod:o.fert.prod,dose:o.fert.dose,mot:o.fert.mot}}:null}}:null;}})()") or {}
+        chk('I9h fertirrigação (Adicionar produtos) sem motivo agronômico: cria a v2 (o agrônomo libera na O.S.), motivo vazio gravado',
+            r1 == 'ok' and r2 == 'ok' and f.get('v') == 'v2' and bool(f.get('fert')) and (f.get('fert') or {}).get('mot') == '', [r1, r2, f, alertas(), toast()])
     # ======================================================================================== I10 · Fazendas
     with secao('I10 Cadastros › Fazendas: área acima da fazenda vira aviso'):
         ir('CD-01.dc.html', limpa=True); time.sleep(.3)
-        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/^T4\\b/.test(r.innerText.replace(/\\s+/g,' ').trim())||r.innerText.replace(/\\s+/g,' ').indexOf('T4 ')===0); r&&((r.querySelector('.g2pw')||r).click());})()"); time.sleep(.5)
-        aberto = J("!!document.querySelector('aside[role=dialog]')")
+        # a árvore abre recolhida (DRILL-RECOLHIDO, como no cadf_test): o T4 da Santa Rita aparece depois do "Expandir tudo"
+        J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.4)
+        J("(()=>{const r=[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].find(r=>{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==='T4';}); r&&((r.querySelector('[role=cell] span')||r).click());})()"); time.sleep(.5)
+        aberto = J("!!document.querySelector('aside[role=dialog]')") and val("aside[role=dialog] [id$='_faz']") == 'Santa Rita'
         setv("aside[role=dialog] [id$='_decl']", '2000'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3); tt = toast(); al = alertas(); ainda = J("!!document.querySelector('aside[role=dialog]')")
         chk('I10 talhão T4 com 2.000 ha (acima da Santa Rita): salva e o recibo traz o aviso da soma; nada barrado', aberto and not ainda and 'Aviso:' in tt and 'talhões ativos da' in tt, [aberto, ainda, tt, al])
     err = J("window.__err||''") or ''
