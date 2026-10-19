@@ -145,7 +145,7 @@ O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigo
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
 - **Design system único** (PRD cap. 74 e [`docs/design-system/`](docs/design-system/), padrões do proprietário de 09/10/2026): botões BOT-01 a BOT-09 (um verde por contexto; lugar, verbo, tamanho e ícone fixos; componente comum), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04). Vale para toda tela nova e para a correção das existentes, no protótipo e no software real.
-- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41 e 73.9).
+- **Toda O.S. agrícola exige aprovação agronômica registrada por O.S.**, inclusive operação mecânica (PRD 41 e 73.9). A confirmação pode ser individual ou em lote por decisão expressa do proprietário de 18/10/2026 (DEC-1810-01). Requisitos do lote e fonte literal estão em DEC-1810-01.
   - Exceções expressas: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
   - Aprovar não libera; liberar é o CMD-06.
 - **O servidor é a autoridade** para saldo, reserva, custódia, aprovação e encerramento (PRD 24).
