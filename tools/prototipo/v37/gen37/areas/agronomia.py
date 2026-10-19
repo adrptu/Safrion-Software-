@@ -383,31 +383,43 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_bib') retur
 
     # ================= AG-06 · Eficácia e histórico =================
     fname='AG-06.dc.html'; E._reset_screen(fname)
-    c6=[dict(k='id',l='Avaliação'),dict(k='rec',l='Recomendação → execução',w=170),dict(k='met',l='Método pré/pós',w=130),dict(k='datas',l='Datas',w=130),
-        dict(k='res',l='Resultado',w=150),dict(k='conf',l='Confiança',chips={'Alta':'green','Média':'yellow','Baixa':'yellow'}),
-        dict(k='custo',l='Custo',t='num',a='r'),dict(k='acao',l='Ação')]
-    rs=lambda n:(n,[Pt.txt(f'R$ {n}/ha')])
-    rows6=[
-      R('EF-021',id=[Pt.b('EF-021')],rec=[Pt.link('REC-016','AG-04.dc.html'),Pt.txt('→'),Pt.link('OS-0421','CA-01det.dc.html'),Pt.br(),Pt.mut('fungicida T1+T2')],
-        met='% folíolos com ferrugem',datas='pré 19/09 · pós 27/09 (7 DAA)',res=[Pt.chip('Pós em 27/09','yellow')],conf='—',custo=rs(96),acao=[Pt.cta('Programar pós','AG-01.dc.html')]),
-      R('EF-020',id=[Pt.b('EF-020')],rec=[Pt.link('REC-014','AG-04det.dc.html'),Pt.txt('→'),Pt.link('OS-0420',DET0420),Pt.br(),Pt.mut('plantio T4')],
-        met='cistos/200 cm³ (pré = VIS-011)',datas='pré 15/09 · pós em V4',res=[Pt.chip('Sem leitura pós','red'),Pt.br(),Pt.mut('O.S. impedida')],conf='—',custo=rs(328),acao=[Pt.cta('Ver O.S.',DET0420)]),
-      R('EF-019',ro=True,id=[Pt.b('EF-019')],rec=[Pt.txt('REC-012 →'),Pt.link('OS-0415','CA-01.dc.html'),Pt.br(),Pt.mut('dessecação T3')],
-        met='% cobertura verde',datas='pré 08/09 · pós 22/09',res=[Pt.chip('Controle 96 %','green')],conf='Alta',custo=rs(82),acao=[Pt.cta('Abrir aplicação','CA-01.dc.html')]),
-      R('EF-018',id=[Pt.b('EF-018')],rec=[Pt.txt('REC-011 → inseticida P2')],met='lagartas/m',datas='pré 02/09 · pós 16/09',
-        res=[Pt.chip('Redução 62 %','yellow'),Pt.br(),Pt.mut('observada · chuva de 48 mm')],conf='Baixa',custo=rs(54),
-        acao=[Pt.act('Registrar parecer','Parecer registrado: redução observada não atribuída ao produto (chuva de 48 mm entre pré e pós) · o caso entra no histórico sem crédito de eficácia causal.')]),
-      R('EF-017',ro=True,id=[Pt.b('EF-017')],rec=[Pt.txt('REC-009 → herbicida T2')],met='plantas/m²',datas='pré 10/08 · pós 24/08 · recorrência 05/09',
-        res=[Pt.chip('Recorreu','red'),Pt.br(),Pt.mut('alvo voltou em 12 dias')],conf='Alta',custo=rs(61),acao=[Pt.cta('Propor revisão','AG-05.dc.html',u=True)]),
-    ]
-    for r in rows6:
-        if r['v'].get('conf') in ('Alta','Baixa'):
-            r['p']['conf']=[Pt.chip(r['v']['conf'],'green' if r['v']['conf']=='Alta' else 'yellow')]
-    g6=grid(c6,rows6,edit=dict(m='form',title='Avaliação de eficácia',
-             sub='Compare a leitura pós com a pré no mesmo método e unidade; redução observada não é eficácia causal. Avaliação concluída fica em consulta.',
-             fields=[F('met','Método pré/pós','txt',req=True),F('datas','Datas','txt',req=True,help='Ex.: pré 19/09 · pós 27/09 (7 DAA)'),
-                     F('conf','Confiança','sel',opts=['—','Alta','Média','Baixa'],req=True),F('parecer','Parecer técnico','area')]),
+    c6=[dict(k='id',l='Avaliação'),dict(k='rec',l='Fontes pré e pós',w=230),dict(k='met',l='Unidade',w=130),
+        dict(k='datas',l='Datas',w=160),dict(k='res',l='Estado da comparação',w=260),dict(k='conf',l='Origem'),
+        dict(k='custo',l='Custo',agg=None),dict(k='acao',l='Próximo passo')]
+    # IDs preservados; fontes e estado vêm do MIP. Sem percentuais fixos ou parecer fictício.
+    rows6=[R(i,ro=True,id=[Pt.b(i)],rec=r,met='—',datas='—',res='Fonte não vinculada',
+             conf='Demonstração',custo='—',acao=[Pt.cta('Conferir fonte','AG-04.dc.html')])
+           for i,r in [('EF-021','REC-016'),('EF-020','REC-014'),('EF-019','REC-012'),('EF-018','REC-011'),('EF-017','REC-009')]]
+    g6=grid(c6,rows6,edit=consulta(c6,'Fontes da comparação',
+             'Consulte a vistoria e a aplicação de origem. Data sem hora e registro planejado não comprovam ordem ou execução.'),
              gid='g_ef',total=False)
+    EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+'''
+
+function ag6Rows(s,c) {
+ const ids=[['EF-021','REC-016'],['EF-020','REC-014'],['EF-019','REC-012'],['EF-018','REC-011'],['EF-017','REC-009']];
+ return ids.map(([id,rid])=>{
+  const rec=s.rec&&s.rec[rid], vis=rec&&rec.vis&&s.vis[rec.vis];
+  const f=vis&&vis.dec&&vis.dec.rec===rid ? mipRaioxFontes(s,vis.id,c) : null;
+  const pre=f&&f.antes, pos=f&&f.depois;
+  const estado=!f?'Fonte não vinculada':!pos?'Sem leitura pós':!pos.completa?'Leitura pós pendente':'Histórico indisponível';
+  const h=pre?pre.href:'AG-04.dc.html';
+  const origem=pre?pre.id+' · '+pre.talhao:rid+' · conferir vínculo';
+  const observacao=x=>!x?'—':x.valorObservado===null?'Sem observação':mipN(x.valorObservado)+' '+x.unidade;
+  const dados={id,rec:rid,met:pre?pre.unidade:'—',datas:pre?pre.data+(pos?' → '+pos.data:''):'—',res:estado,conf:'Demonstração',custo:null,acao:'Conferir fonte'};
+  const fontes=pre?[{k:'link',t:origem,h:pre.href},{k:'br'},{k:'mut',t:'Pré: '+observacao(pre)}]:[{k:'txt',t:origem}];
+  if(pos)fontes.push({k:'br'},{k:'link',t:'Pós: '+observacao(pos),h:pos.href});
+  return {id,ro:true,v:dados,s:{...dados},p:{id:[{k:'b',t:id}],rec:fontes,
+   res:[{k:'chip',t:estado,c:'gray'},{k:'br'},{k:'mut',t:'Contraste indisponível: não há histórico temporal completo nem execução comprovada.'}],
+   conf:[{k:'mut',t:'Observações demonstrativas'}],custo:[{k:'mut',t:'Sem custo vinculado'}],
+   acao:[{k:'cta',t:'Conferir fonte',h}]}};
+ });
+}
+function PREVALS(self,v) {
+ cenOuvir(self); mipOuvir(self);
+ const g=GRIDS.find(x=>x.id==='g_ef');
+ if(g)g.rows=ag6Rows(mipGet(),cenGet());
+}
+'''
     c6b=[dict(k='tipo',l='Economia'),dict(k='val',l='Valor',t='num',a='r',pre='R$ ',u='mil',agg='sum'),dict(k='oque',l='O que entra',w=420),dict(k='sit',l='Situação',w=190)]
     g6b=grid(c6b,[
         R('ev',tipo=[Pt.b('Efetivamente evitada')],val=41,oque='2 aplicações dispensadas por contagem abaixo do NC confirmada no ciclo (P2 e T3)',sit=[Pt.chip('Janela do alvo encerrada','green')],
@@ -1888,4 +1900,5 @@ def _agf_pos(fname):
     # trilhas da grade = colunas à vista (g2lib, VISOES-2 §3.6): por produto ou por uso, com ou sem as colunas do painel "Colunas"
     assert s.count('grid-template-columns: var(--g2cols, repeat('+H(AGF_ID+'_ncols')+', auto));')==1, 'trilhas da grade não seguem as colunas à vista em '+fname
     open(p,'w',encoding='utf-8').write(s)
+
 
