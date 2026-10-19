@@ -11,3 +11,8 @@ s.vis.V.dec.rec='REC-014';s.vis.V.dec.pos='POS';s.vis.POS={...s.vis.V,id:'POS',p
 rows=c.ag6Rows(s,null);assert.equal(rows.find(x=>x.id==='EF-020').v.res,'Leitura pós pendente');
 s.vis.POS.est='concluida';s.vis.POS.pts[0].v=2;assert.equal(c.ag6Rows(s,null).find(x=>x.id==='EF-020').v.res,'Histórico indisponível');
 console.log('PASS AG06: cinco IDs preservados, vínculo atual, origem navegável, zero, pós pendente/concluído, ausência sem percentual, imutabilidade');
+
+s.vis.V.est='coleta';rows=c.ag6Rows(s,null);assert.equal(rows.find(x=>x.id==='EF-020').v.res,'Leitura pré pendente');
+s.vis.V.est='concluida';s.vis.POS.est='programada';rows=c.ag6Rows(s,null);assert.equal(rows.find(x=>x.id==='EF-020').p.acao[0].h,'AG-01.dc.html#POS');
+assert.equal(rows.find(x=>x.id==='EF-020').p.acao[0].t,'Conferir leitura pós');
+console.log('PASS recuperação: pré incompleta tem prioridade e pós pendente abre a própria fonte');

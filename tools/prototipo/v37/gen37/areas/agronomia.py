@@ -401,17 +401,19 @@ function ag6Rows(s,c) {
   const rec=s.rec&&s.rec[rid], vis=rec&&rec.vis&&s.vis[rec.vis];
   const f=vis&&vis.dec&&vis.dec.rec===rid ? mipRaioxFontes(s,vis.id,c) : null;
   const pre=f&&f.antes, pos=f&&f.depois;
-  const estado=!f?'Fonte não vinculada':!pos?'Sem leitura pós':!pos.completa?'Leitura pós pendente':'Histórico indisponível';
-  const h=pre?pre.href:'AG-04.dc.html';
+  const estado=!f?'Fonte não vinculada':!pre.completa?'Leitura pré pendente':!pos?'Sem leitura pós':!pos.completa?'Leitura pós pendente':'Histórico indisponível';
+  const fonte=pre&&!pre.completa?pre:pos&&!pos.completa?pos:pre;
+  const h=fonte?fonte.href:'AG-04.dc.html';
+  const acao=pre&&!pre.completa?'Conferir leitura pré':pos&&!pos.completa?'Conferir leitura pós':'Conferir fonte';
   const origem=pre?pre.id+' · '+pre.talhao:rid+' · conferir vínculo';
   const observacao=x=>!x?'—':x.valorObservado===null?'Sem observação':mipN(x.valorObservado)+' '+x.unidade;
-  const dados={id,rec:rid,met:pre?pre.unidade:'—',datas:pre?pre.data+(pos?' → '+pos.data:''):'—',res:estado,conf:'Demonstração',custo:null,acao:'Conferir fonte'};
+  const dados={id,rec:rid,met:pre?pre.unidade:'—',datas:pre?pre.data+(pos?' → '+pos.data:''):'—',res:estado,conf:'Demonstração',custo:null,acao};
   const fontes=pre?[{k:'link',t:origem,h:pre.href},{k:'br'},{k:'mut',t:'Pré: '+observacao(pre)}]:[{k:'txt',t:origem}];
   if(pos)fontes.push({k:'br'},{k:'link',t:'Pós: '+observacao(pos),h:pos.href});
   return {id,ro:true,v:dados,s:{...dados},p:{id:[{k:'b',t:id}],rec:fontes,
    res:[{k:'chip',t:estado,c:'gray'},{k:'br'},{k:'mut',t:'Contraste indisponível: não há histórico temporal completo nem execução comprovada.'}],
    conf:[{k:'mut',t:'Observações demonstrativas'}],custo:[{k:'mut',t:'Sem custo vinculado'}],
-   acao:[{k:'cta',t:'Conferir fonte',h}]}};
+   acao:[{k:'cta',t:acao,h}]}};
  });
 }
 function PREVALS(self,v) {
