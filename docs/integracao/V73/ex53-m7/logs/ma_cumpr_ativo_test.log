@@ -1,0 +1,6 @@
+OK    W1 16 ativos: o detalhe mostra o KPI-PCM-05 do ativo no mês (oráculo independente)
+OK    W2 nenhum ativo com o texto da conta antiga ("não calculável")
+      valores na tela: ['0 de 1 (0 %) · set/2026', 'sem base no período']
+OK    W3 a soma por ativo é igual ao total (mês e 12 m): o filtro reparte a base sem perder nem repetir
+OK    W4 nenhum erro de JavaScript
+RESULTADO: 4/4 ok

@@ -1,0 +1,8 @@
+      oráculo: {'n': 3, 'hh': 14.5, 'sem': 0, 'v': '14,5 HH', 'esp': ['Eletricista 3 HH', 'Mecânico 11,5 HH']}
+      cartão : None
+FALHA K1 cartão "Backlog da oficina": total e especialidades do oráculo, "capacidade semanal não configurada" e destino MA › Ordens · [None, {'n': 3, 'hh': 14.5, 'sem': 0, 'v': '14,5 HH', 'esp': ['Eletricista 3 HH', 'Mecânico 11,5 HH']}]
+FALHA K2 a 1440 e 390 px o cartão cabe na largura e a página não rola de lado · [[1440, False, True], [390, False, True]]
+OK    K3 a carga das colunas Liberadas e Em execução do Kanban bate com o oráculo da coluna
+FALHA K4 ordem Liberada sem tempo não vira 0: "1 sem estimativa" no cartão e na coluna Liberadas; o total segue o oráculo · ['OM-0228', None, {'n': 3, 'hh': 11.5, 'sem': 1, 'v': '11,5 HH', 'esp': ['Mecânico 11,5 HH']}, '0 HH']
+OK    K5 nenhum erro de JavaScript
+RESULTADO: 2/5 ok

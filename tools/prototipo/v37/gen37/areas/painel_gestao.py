@@ -99,6 +99,17 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
         'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.','GE-03.dc.html'); });
 }
 // EX-53 M5 · janela acordada em 6258424058; cálculo pertence à Manutenção.
+/* KPI-PCM-08 · backlog por especialidade (EX-53 M7a, PRD 8662): HH previstas das ordens abertas ainda não executadas (manBacklog), por especialidade e
+   situação. Ordem sem tempo previsto não vira 0. Sem capacidade semanal configurada não há semanas equivalentes nem cor. */
+function pgBacklog(m){ const r=m&&m.oms?manBacklog(m):null, dica='Horas previstas das ordens abertas ainda não executadas: Liberadas (pronto), A liberar (falta de peça ou a liberar) e Em execução. Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade, que ainda não é configurável. Fonte: manBacklog.';
+  if(!r) return pgK('Hoje','Backlog da oficina',null,'',null,dica,'MA.dc.html#vis=ordens');
+  const S={pronto:'pronto',peca:'falta de peça',liberar:'a liberar',execucao:'em execução'};
+  // dois grupos (travessão): especialidades, maior carga primeiro, e situação; "HH" só no total; a capacidade vai na dica (TEXTO-2; fotos de 19/10)
+  const esp=Object.keys(r.porEsp).sort((a,b)=>r.porEsp[b]-r.porEsp[a]||(a<b?-1:1)).map(k=>k+' '+manN(r.porEsp[k],1)).concat(r.semTempo?[r.semTempo+' sem estimativa']:[]).join(' · ');
+  const sit=Object.keys(S).filter(k=>r.sit[k].n).map(k=>{ const g=r.sit[k]; return S[k]+' '+(g.n>g.semTempo?manN(g.hh,1):'sem estimativa'); }).join(' · ');
+  const v=!r.n?'0 HH':(r.n>r.semTempo?manN(r.hh,1)+' HH':'Sem estimativa');
+  const sub=!r.n?'nenhuma ordem pendente':[esp,sit].filter(Boolean).join('\u00a0— ');
+  return pgK('Hoje','Backlog da oficina',v,sub,null,dica+' Semanas equivalentes: capacidade semanal não configurada.','MA.dc.html#vis=ordens'); }
 function pgPreventiva(m){
   const temBase=!!(m&&m.oms&&m.hoje), r=temBase?manCumprimento(m,'12m'):null, p=r||(temBase?manPeriodo(m,'12m'):null);
   const periodo=p?'12 m · '+p.de.split('-').reverse().join('/')+' a '+p.ate.split('-').reverse().join('/'):'12 m';
@@ -113,6 +124,7 @@ function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=
     pgK('Hoje','Em execução',pm.vals[2],'',null,'Ordens na etapa Em execução. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')]
     .concat(pm.labels.slice(0,2).map((l,i)=>pgK('Hoje',l,pm.bars[i],'',null,'Ordens de manutenção na fase '+l+'. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')));
   B.oms.push(pgPreventiva(m));
+  B.oms.push(pgBacklog(m));
   const at=m&&m.ativos&&typeof m.ativos==='object'?Object.values(m.ativos).filter(a=>a&&typeof a.cond==='string'):null;
   const disp=at&&at.length?Math.round(at.filter(a=>a.cond!=='Bloqueado').length/at.length*100):null;
   B.atv=[pgK('Hoje','Ativos bloqueados',pm.vals[3],'',pm.vals[3]>0?'red':'green','Ativos com condição Bloqueado. Fonte: cenário da Manutenção. Dono: PCM.','MA.dc.html#vis=ativos'),

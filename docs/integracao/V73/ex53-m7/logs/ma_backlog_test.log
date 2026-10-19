@@ -1,0 +1,8 @@
+      oráculo: {'n': 3, 'hh': 14.5, 'sem': 0, 'v': '14,5 HH', 'esp': ['Mecânico 11,5', 'Eletricista 3']}
+      cartão : {'v': '14,5 HH', 'sub': 'Mecânico 11,5 · Eletricista 3 — pronto 3 · a liberar 5 · em execução 6,5', 'dica': 'Horas previstas das ordens abertas ainda não executadas: Liberadas (pronto), A liberar (falta de peça ou a liberar) e Em execução. Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade, que ainda não é configurável. Fonte: manBacklog. Semanas equivalentes: capacidade semanal não configurada.', 'href': 'MA.dc.html#vis=ordens', 'right': 1391, 'vw': 1440}
+OK    K1 cartão "Backlog da oficina": total e especialidades do oráculo, "capacidade semanal não configurada" na dica e destino MA › Ordens
+OK    K2 a 1440 e 390 px o cartão cabe na largura e a página não rola de lado
+OK    K3 a carga das colunas Liberadas e Em execução do Kanban bate com o oráculo da coluna
+OK    K4 ordem Liberada sem tempo não vira 0: "1 sem estimativa" no cartão e na coluna Liberadas; o total segue o oráculo
+OK    K5 nenhum erro de JavaScript
+RESULTADO: 5/5 ok

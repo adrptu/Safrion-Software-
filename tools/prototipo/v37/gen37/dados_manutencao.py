@@ -1190,6 +1190,19 @@ function manCumprimento(c,k,aid){ const P=manPeriodo(c,k), corte=P.ate<c.hoje?P.
   let semOrdem; try{ semOrdem=manSemOrdem(c).venc.filter(l=>doAtivo(l)&&l.x.sit==='Vencida'&&dentro(l.x.prev)&&l.x.prev<corte).length; }catch(e){ return null; }
   const n=os.length+semOrdem; if(!n) return null;
   return {ok,n,pct:Math.round(ok*100/n),atrasadas,abertas,semOrdem,de:P.de,ate:corte}; }
+/* KPI-PCM-08 · backlog por especialidade (EX-53 M7a; PRD 8662): HH estimadas das ordens abertas ainda não executadas, por especialidade e situação
+   (pronto = Liberadas; falta de peça e a liberar = A liberar; em execução). Em conferência a execução terminou e sai do backlog. Ordem sem tempo
+   previsto não vira 0: conta em semTempo. Semanas equivalentes pedem a capacidade semanal da especialidade, ainda não configurável (semanas: null).
+   manHH é a soma única de horas previstas (carga "Esta semana" e Kanban da MA leem daqui). */
+function manHH(os){ const r={hh:0,n:0,semTempo:0,porEsp:{}}; os.forEach(o=>{ const t=Number(o.tempo), e=o.esp||'sem especialidade'; r.n++;
+  if(!(t>0)){ r.semTempo++; return; } r.hh+=t; r.porEsp[e]=(r.porEsp[e]||0)+t; }); return r; }
+function manHHTxt(r,porEsp){ const sem=r.semTempo?r.semTempo+' sem estimativa':'';
+  const hh=porEsp?Object.keys(r.porEsp).sort().map(k=>k+' '+manN(r.porEsp[k],1)+' HH').join(' · '):(r.n>r.semTempo?manN(r.hh,1)+' HH':'');
+  return [hh,sem].filter(Boolean).join(' · '); }
+function manBacklogSit(c,o){ if(!manAberta(o)) return null; if(o.etapa==='Liberadas') return 'pronto'; if(o.etapa==='Em execução') return 'execucao';
+  if(o.etapa==='A liberar') return manFalta(c,o).length?'peca':'liberar'; return null; }
+function manBacklog(c,aid){ const os=Object.values(c.oms).filter(o=>(!aid||o.aid===aid)&&manBacklogSit(c,o)); const r=manHH(os); r.sit={};
+  ['pronto','peca','liberar','execucao'].forEach(k=>{ r.sit[k]=manHH(os.filter(o=>manBacklogSit(c,o)===k)); }); r.semanas=null; return r; }
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
@@ -1262,7 +1275,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manCumprimento, manPeriodo, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
+try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manCumprimento, manPeriodo, manHH, manBacklog, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
   manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot,
   manVincular, manDesvincular, manVincCompat, manPubSemGatilho, manVincSug, manVincBase, manVincRef, manVincPrev, manAplicaNova, manPlSit, manSemPlano, manPlanosDe }; } catch (e) {}
