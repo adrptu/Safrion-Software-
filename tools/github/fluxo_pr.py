@@ -162,7 +162,8 @@ def avaliar(pedido, s, agora_utc=None):
                    'recibo/revogação ambíguo: comentário ' + str(comentario['id']))
             if da_candidata:
                 recentes[r['agent']] = comentario['id']
-        exigir(not atos or max(atos)[2] == FAVORAVEL, 'último ato do revisor retirou o parecer')
+        exigir(bool(atos), 'sem parecer favorável dedicado no HEAD')
+        exigir(max(atos)[2] == FAVORAVEL, 'último ato do revisor retirou o parecer')
         vistos, papeis = set(), set()
         for referencia in pedido['receipts']:
             c = s['receipts'][str(referencia['comment_id'])]

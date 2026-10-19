@@ -59,7 +59,10 @@ def fixture():
                      'head_sha': HEAD, 'status': 'completed', 'conclusion': 'success'} for c in required],
                 'identity': {'login': 'adrptu', 'type': 'User'},
                 'threads_complete': True, 'threads': [], 'reviews': [], 'receipts': receipts,
-                'comments_complete': True, 'comments': list(receipts.values())}
+                'comments_complete': True, 'comments': list(receipts.values()) + [
+                    {'id': 90, 'body': 'Parecer favorável do revisor: ' + HEAD,
+                     'author_association': 'OWNER', 'user': {'login': 'adrptu'},
+                     'updated_at': '2026-10-04T21:00:00Z'}]}
     return request, snapshot
 
 
@@ -91,7 +94,7 @@ class GateTests(unittest.TestCase):
 
     def pair_only(self):
         self.request['receipts'] = self.request['receipts'][:2]
-        self.snapshot['comments'] = self.snapshot['comments'][:2]
+        self.snapshot['comments'] = [c for c in self.snapshot['comments'] if c['id'] != 102]
         del self.snapshot['receipts']['102']
 
     def test_author_evidence_and_independent_reviewer_are_sufficient(self):
@@ -129,6 +132,10 @@ class GateTests(unittest.TestCase):
                 self.request, self.snapshot = fixture()
                 self.reviewer_act(body, login=login)
                 self.assertIn('fora do formato', self.blocked()['reasons'][0])
+
+    def test_deleted_favorable_blocks_even_with_green_check(self):
+        self.snapshot['comments'] = [c for c in self.snapshot['comments'] if c['id'] != 90]
+        self.assertIn('parecer favorável dedicado', self.blocked()['reasons'][0])
 
     def test_counterproof_cannot_replace_the_other_implementer(self):
         self.request['receipts'].pop(1)
