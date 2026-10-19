@@ -175,7 +175,7 @@ function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice
 // DEM-05 · necessidade por talhão no Mapa: os eventos desta safra de hoje em diante; a O.S. de vários talhões é rateada pela área dos cultivos
 // da safra em cada talhão (areaT[talhão]), e a soma dos talhões fecha com a fazenda. tid: local → talhão do mapa.
 function demPorLocal(m, tid, areaT, hoje){ const out={};
-  Object.values(m||{}).forEach(d=>d.evs.forEach(e=>{ if(e.tipo!=='dem'||!e.own||!(e.dt>=hoje)) return; const ls=e.loc||[]; if(!ls.length) return;
+  Object.values(m||{}).forEach(d=>d.evs.forEach(e=>{ if(e.tipo!=='dem'||!e.own||(e.dt&&e.dt<hoje)) return; const ls=e.loc||[]; if(!ls.length) return;
     const ar=ls.map(t=>Number((areaT||{})[tid(t)])||1); const s=ar.reduce((a,b)=>a+b,0);
     ls.forEach((t,i)=>{ const k=tid(t); (out[k]||(out[k]=[])).push({p:d.nome,q:e.q*ar[i]/s,un:d.un,dt:e.dt,orig:e.t}); }); }));
   return out; }

@@ -46,3 +46,21 @@ for data,liquida,parcial in [(None,0,True),('2026-11-01',3,False),('2026-11-03',
     assert (js['bruta'],js['liq'],js['parcial'])==(3,liquida,parcial),(data,js)
     assert js['semData']==0
 print('OK: outra safra sem data não infla solicitação; resolução antes/depois disputa estoque pela cronologia; paridade JS/Python')
+
+# PR121/P2: necessidade por talhão fecha com a fazenda mesmo sem âncora.
+map_code=Path('cal01.js').read_text()+'''\nconst dt=JSON.parse(process.argv[1]);const evs=[
+{dt,q:100,tipo:'dem',own:true,loc:['A','B'],t:'Plano pendente'},
+{dt:'2026-11-01',q:20,tipo:'dem',own:true,loc:['A'],t:'Plano datado'},
+{dt:'2026-09-01',q:999,tipo:'dem',own:true,loc:['A']},
+{dt,q:999,tipo:'dem',own:false,loc:['B']}];
+const m={x:{nome:'Teste',un:'kg',est:0,evs}};
+console.log(JSON.stringify({loc:demPorLocal(m,t=>t,{A:1,B:3},'2026-10-01'),sit:demSituacao(m,null,'2026-10-01','2026-10-08')}));'''
+for dt in [None,'','2026-11-02']:
+    x=json.loads(subprocess.check_output([node,'-e',map_code,json.dumps(dt)],text=True))
+    a,b=x['loc']['A'],x['loc']['B']
+    assert sum(e['q'] for e in a+b)==120,x
+    assert sum(e['q'] for e in a)==45 and sum(e['q'] for e in b)==75,x
+    assert a[0]['dt']==dt and b[0]['dt']==dt
+    assert a[0]['orig']=='Plano pendente'
+    assert '120 kg' in x['sit']['Teste'][2]
+print('OK: mapa conserva demanda sem âncora e rateio; exclui passado/outra safra; resolução mantém soma fazenda')
