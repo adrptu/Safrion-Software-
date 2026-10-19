@@ -81,5 +81,11 @@ Rodada na ponta antes da F1, `e32ada5e` (`ANTES=<_render dessa ponta>`, árvore 
 ## Fora desta fatia (PA-OPER decisão 10)
 F2: Plantio e Tratamento de sementes (população, PMS, germinação), etapa 2 do Planejar safra com o resumo por operação e o ajuste por talhão, aplicar a vN nova ao cultivo. F3: Adubação e correção, fertirrigação. F4: Colheita, tratos, poda e preparo.
 
+## Artefato (executado)
+**v148**, versões 166 e 167 (`1792425796-a2a8` e `1792425816-955b`).
+- Publicadas as 60 páginas que mudam com esta frente: o `operacoes.js` entra no prefixo comum. A lista saiu da comparação do render da base com o desta branch.
+- As páginas foram montadas da árvore com os dados reais da Lagoa Grande, fora do Git, como na v147. A varredura nessa árvore deu 5/5 nas 147 páginas.
+- As 60 foram lidas de volta e são idênticas, byte a byte, às enviadas.
+
 ## Brutos
 `brutos/`: saídas completas dos comandos acima e da contraprova.

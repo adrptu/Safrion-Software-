@@ -1,7 +1,7 @@
 # Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 19/10 (UTC)
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v147 (versão 165, `1792415686-e0bb`; recibos `artefato-v139/` a `artefato-v144/` e `mapa-real-f2/LEIAME.md`).
+**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v148 (versões 166–167, `1792425816-955b`; recibos `artefato-v139/` a `artefato-v144/`, `mapa-real-f2/LEIAME.md` e `pa-oper-f1/LEIAME.md`).
 
 **Conferência do artefato (executada):**
 - v144: 147 páginas que mudaram (a regra comum do "×" de 44 px está em todas as telas), enviadas em 3 lotes (versões 158, 159 e 160);
@@ -12,7 +12,7 @@
 |---|---|---|---|
 | 16/10 12:01 | Barra de ícones do mapa longe da barra lateral dos módulos | **Publicado** (v98/v99): barra horizontal no alto do mapa | Mapa |
 | 16/10 14:06 | Planejar safra no mapa, clicando nos talhões, com aplicar a todos | **Publicado na v135** (SAF-MAPA F1; ver a linha de 18/10) | Planejar safra › Editar talhões… › Mapa |
-| 16/10 14:27 | Planos agronômicos por operação, uma coisa bem feita por vez | **Não implantado** (PA-OPER: especificação R3 com parecer favorável do Codex) | — |
+| 16/10 14:27 | Planos agronômicos por operação, uma coisa bem feita por vez | **F1 publicada na v148** (versões 166–167; `pa-oper-f1/LEIAME.md`; PR #142, aguarda a revisão do Codex). Pulverização por inteiro: faixa de operações com estado, foco, calda da operação e própria, alvo, bula na versão, rascunho guardado, "Salvar e publicar", deslocar gatilhos, versão do plano levada à O.S. com retrato e vazão por bico na ficha. F2 (plantio e sementes), F3 (adubação e fertirrigação) e F4 (colheita e tratos) a seguir | Agrícola › Planos agronômicos › Soja alta tecnologia › Pulverização |
 | 16/10 16:18 | Correlação de variáveis no mapa: causa, efeito e alavancas da produtividade | **Não implantado** (MAPA-MIP-PROD só especificado) | — |
 | 16/10 17:17 e 23:35 | Raio-X do alvo e pragas no tempo | **Não implantado** (RAIOX-ALVO: contrato RX-0 em discussão) | — |
 | 16/10 19:34 e 19:36 | Máquinas em execução andando no mapa, com 1 clique e ícones; telemetria na mesma filosofia | **F1 publicada na v145** (versões 161–163; `mapa-frota-f1/LEIAME.md`; PR #138). Saiu antes da revisão do Codex, que no protótipo não bloqueia (AGENTS §3.5); achado dele vira correção. Posições simuladas e rotuladas, botão Máquinas no Mapa e "Ver no mapa" na O.S. em execução. Fora da F1: movimento suave e rastro (F2) e telemetria real (F3) | Mapa › Máquinas · O.S. em execução › Ver no mapa |
@@ -39,7 +39,7 @@
 | 18/10 | Importar KMZ/KML no Mapa e tirar a Lista de dentro do Mapa | **Publicado na v133** | Mapa |
 | 18/10 | Cadastro de ativos em dois lugares (Manutenção e Cadastros) | **Publicado na v135** (versões 143–145; ATIVO-UNICO): o cadastro é só em Cadastros › Máquinas e instalações; a Manutenção lê dele. A gravação junta o que a outra tela mudou e recusa, com o motivo, o mesmo ativo mudado nas duas (S2 do Codex corrigido, `ativo_unico_unit` 6/6) | Cadastros › Máquinas e instalações; Manutenção |
 | 18/10 | Planejar safra no mapa, clicando nos talhões | **Publicado na v135** (SAF-MAPA F1): visão Tabela · Mapa no "Editar talhões…". Talhão com parte das linhas marcadas aparece "Em parte · k de n", e Aplicar recebe exatamente o anunciado (S2 corrigido, `saf_mapa_test` M9) | Planejar safra › Editar talhões… › Mapa |
-| 18/10 | Plano agronômico por etapa e por operação; manter as especificidades ao editar o talhão | **Não implantado** (PA-OPER F1 é a próxima frente; os ajustes de insumo já sobrevivem à edição do talhão) | — |
+| 18/10 | Plano agronômico por etapa e por operação; manter as especificidades ao editar o talhão | **Por operação: F1 publicada na v148** (ver a linha de 16/10 14:27). O cultivo fica na versão dele, e a O.S. nova lê os parâmetros dessa versão. Aplicar uma versão nova ao cultivo e o ajuste por talhão são da F2. Os ajustes de insumo já sobreviviam à edição do talhão | Planos agronômicos; Ordens de serviço › Criar ordem |
 | 18/10 | Apontamento da colheita; orçamento; nível de controle por alvo (MIP); composição de custos e fechamento | **Especificado** (`docs/gestao/GESTAO-1810.md`), enviado ao Codex; implantação por fatias depois da v134 | — |
 | 18/10 | Água no solo no submenu Irrigação, com a capacidade de campo nos cálculos | **Publicado na v135** (AGUA-SOLO-IRR): bloco Água no solo no IR-01. Com a CAD, o balanço é dia a dia (FAO-56: 0 ≤ Dr ≤ CAD), e a série, o déficit de hoje e a necessidade usam a mesma conta (S2 corrigido, `agua_irr_unit` 7/7) | Irrigação › IR-01 |
 | 18/10 | Laudos georreferenciados, taxa variável com arquivo para máquinas e visão de todos os talhões × indicadores | **Especificado** (`docs/analise-solo/SOLO-GEO.md`): o mapa de calor atual usa pontos sintéticos; F1 = matriz mín/méd/máx e pontos com coordenada no laudo | — |
