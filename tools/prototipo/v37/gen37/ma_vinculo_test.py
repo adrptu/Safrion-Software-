@@ -13,7 +13,8 @@ Uso (de gen37/, depois do build e do montar_render): python3 ma_vinculo_test.py 
 Contraprova: na pasta de symlinks com o _render da base, A e B reprovam (não há filtro, link, painel nem coluna Plano).
 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): sem execução registrada, o painel abre com "Contar de agora" marcado (marco
 estimado, com selo) e a primária ligada; "Informar a última execução" segue a um toque. A2 e B2 trocam o oráculo "desligada até escolher" pelo
-padrão marcado; o caminho do celular passa de 3 para 2 toques (link e Vincular)."""
+padrão marcado; o caminho do celular passa de 3 para 2 toques (link e Vincular). A8: desvincular não pede mais o motivo antes (fica opcional;
+quem e quando seguem no vínculo): o oráculo "primária desligada até o motivo" vira "primária ligada sem motivo"; o motivo escolhido continua gravado."""
 import os, sys, json, time, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 FAIL = []; N = [0]
@@ -188,7 +189,7 @@ def parte_A():
         u0 = vinc(m, 'PM-01|a02'); m.ir('plano=PM-01')
         J("(()=>{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==='PM-01|a02'); const b=r&&r.querySelector('button.g2mais'); if(b) b.click(); return !!b;})()"); time.sleep(.4)
         m.clk('Desvincular'); d = J_texto(m, '#dv-painel'); dp = J("(()=>{const b=document.querySelector('#dv-painel .ma-rod button:last-child'); return b?{t:b.innerText.trim(),dis:b.disabled}:null;})()")
-        ok('OM-0234' in d and 'continua aberta' in d and 'ficam guardadas' in d and dp and dp['dis'], 'A8 · Desvincular (⋯ da linha) avisa da OM-0234 aberta e pede o motivo antes', [d[:300], dp])
+        ok('OM-0234' in d and 'continua aberta' in d and 'ficam guardadas' in d and dp and not dp['dis'], 'A8 · Desvincular (⋯ da linha) avisa da OM-0234 aberta; a primária fica ligada sem motivo (LEVE-1: motivo opcional)', [d[:300], dp])
         m.clk('Vínculo feito por engano', '#dv-painel'); J("document.querySelector('#dv-painel .ma-rod button:last-child').click()"); time.sleep(.9); td = m.toast(); u1 = vinc(m, 'PM-01|a02')
         ok('desvinculado do PM-01' in td and 'OM-0234 continua aberta' in td and m.man("m.oms['OM-0234'].etapa") == 'A liberar' and u1['fim']['mot'] == 'Vínculo feito por engano'
            and u1['ult'] == u0['ult'] and u1['marco'] == u0['marco'], 'A8 · desvinculado com motivo; OM-0234 continua em A liberar; marco e últimas execuções guardados', [td[:160], u1])

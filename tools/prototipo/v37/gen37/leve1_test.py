@@ -195,10 +195,12 @@ try:
         chk('I6 digitar o preço preenche a data do preço com hoje (2026-09-23), editável', d0 == '' and d1 == '2026-09-23', [d0, d1])
     # ======================================================================================== I8 · Prévias sem efeito
     with secao('I8 botões "Prévia · nada foi alterado" saem'):
-        ir('GE-03.dc.html', limpa=True); b = ' | '.join(botoes()); tx = J("document.body.innerText") or ''
-        chk('I8a GE-03 sem "Conferir reabertura de 08/2026"; "Conciliar diesel do tanque" segue', 'Conferir reabertura de 08/2026' not in b and 'Conciliar diesel do tanque' in b, b[:400])
-        ir('CA-02.dc.html'); b = ' | '.join(botoes()); bl = ' | '.join(J("[...document.querySelectorAll('a')].filter(a=>a.getClientRects().length).map(a=>a.innerText.trim())") or [])
-        chk('I8b CA-02 sem "Conferir reabertura do saldo"; o atalho "Abrir O.S." segue', 'Conferir reabertura do saldo' not in b and 'Abrir O.S.' in bl, [b[:300], bl[:300]])
+        # todos os botões do DOM, inclusive os do menu "⋯" (role=menuitem, fechado = sem caixa): na base o "Conferir reabertura" morava lá
+        TODOS = "[...document.querySelectorAll('button')].map(b=>(b.textContent||'').replace(/\\s+/g,' ').trim()).join(' | ')"
+        ir('GE-03.dc.html', limpa=True); b = ' | '.join(botoes()); bt = J(TODOS) or ''
+        chk('I8a GE-03 sem "Conferir reabertura de 08/2026" (nem no menu ⋯); "Conciliar diesel do tanque" segue', 'Conferir reabertura de 08/2026' not in bt and 'Conciliar diesel do tanque' in b, [b[:300], bt.count('Conferir reabertura')])
+        ir('CA-02.dc.html'); b = ' | '.join(botoes()); bt = J(TODOS) or ''; bl = ' | '.join(J("[...document.querySelectorAll('a')].filter(a=>a.getClientRects().length).map(a=>a.innerText.trim())") or [])
+        chk('I8b CA-02 sem "Conferir reabertura do saldo" (nem no menu ⋯); o atalho "Abrir O.S." segue', 'Conferir reabertura do saldo' not in bt and 'Abrir O.S.' in bl, [b[:300], bl[:300], bt.count('Conferir reabertura')])
     # ======================================================================================== I9 · Logística, Configurações, Irrigação
     with secao('I9 Logística · reordenar a fila sem motivo'):
         ir('LO-02.dc.html', limpa=True)
