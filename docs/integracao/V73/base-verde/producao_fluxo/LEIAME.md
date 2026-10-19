@@ -20,8 +20,11 @@ O mesmo vale para o Estoque de produto, os cartões a 390 px e a etapa 2 do Plan
 - **Antes:** 15/20, com o teste parando no meio.
 - **Depois:** **92/93**, com os seis modos executados até o fim (`producao_fluxo_final.log`). O AC-17 fica em 14 cliques e 5 campos.
 
-## Vermelho que fica, e por quê
-**AC-h Mapa:** a camada "Colheita e produtividade" não segue a unidade de produtividade escolhida (P5 da UNID-PROD).
-- **Classificação:** pendência real do produto, não do teste. O teste foi escrito para reprovar assim que a camada aparecesse na barra sem estar ligada ao conversor, e a camada entrou com a DEC-0910-36.
-- **Severidade:** S3. O Mapa mostra a produtividade na unidade padrão da cultura enquanto a Previsão e colheita mostra a unidade escolhida; o número está certo em cada unidade.
-- **Fica como item da base verde**, sem esconder o teste.
+## Último vermelho: AC-h Mapa (P5 da UNID-PROD), corrigido no mesmo dia
+- **Defeito:** a camada "Colheita e produtividade" mostrava a produção em t ("48,47 t"), não a produtividade na unidade escolhida.
+- **Classificação:** pendência real do produto, não do teste. S3.
+- **Antes:** o teste trazia um marcador que sempre reprovava, para não sumir da lista.
+- **Agora:**
+  - o teste confere o rótulo do Pivô 19 contra a coluna Produtividade da Previsão e colheita, na unidade escolhida;
+  - a correção está em `docs/integracao/V73/p5-mapa/`;
+  - resultado: **93/93**. A contraprova, `unid` no render da v143, reprova o AC-h com "48,47 t".

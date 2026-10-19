@@ -104,7 +104,9 @@ try:
     n = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).ordens).filter(o=>o.setor==='PV02').length")
     chk('18 PV02 continua com uma só ordem', n == 1, n)
     goto('IR-01.dc.html')
-    nlg = J("[...document.querySelectorAll('[role=row].g2ed')].length"); r = ROW('Pivô 2 ')
+    # base verde 19/10/2026: conta só a tabela dos setores (g_set); desde a AGUA-SOLO-IRR (18/10) a Água no solo (g_agua) fica na mesma tela
+    # e a medição do Pivô 2 somava uma 24ª linha (oráculo obsoleto na forma de contar; a asserção de 23 pivôs não muda)
+    nlg = J("[...document.querySelectorAll('[data-g2g=g_set] [role=row].g2ed')].length"); r = ROW('Pivô 2 ')
     f2 = painel('Pivô 2 ', 'defT')
     chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor)', nlg == 23 and 'OS-0601' in r and 'Programada' in r and 'hoje 21:00' in r and 'demonstrativo' in f2, [nlg, r, f2])
     # 7 · correções da verificação v43 (03/10): estado limpo
@@ -186,4 +188,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
-
+sys.exit(1 if FAIL else 0)   # base verde 19/10/2026: com falha, a saída 0 escondia o vermelho do runner (a falha 19 passou como rc=0)
