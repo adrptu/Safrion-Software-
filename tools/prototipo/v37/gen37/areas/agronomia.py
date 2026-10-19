@@ -384,8 +384,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_bib') retur
     # ================= AG-06 · Eficácia e histórico =================
     fname='AG-06.dc.html'; E._reset_screen(fname)
     c6=[dict(k='id',l='Avaliação'),dict(k='rec',l='Fontes pré e pós',w=230),dict(k='met',l='Unidade',w=130),
-        dict(k='datas',l='Datas',w=160),dict(k='res',l='Estado da comparação',w=260),dict(k='conf',l='Origem'),
-        dict(k='custo',l='Custo',agg=None),dict(k='acao',l='Próximo passo')]
+        dict(k='datas',l='Datas',w=160),dict(k='res',l='Estado da comparação',w=210),dict(k='acao',l='Próximo passo')]
     # IDs preservados; fontes e estado vêm do MIP. Sem percentuais fixos ou parecer fictício.
     rows6=[R(i,ro=True,id=[Pt.b(i)],rec=r,met='—',datas='—',res='Fonte não vinculada',
              conf='Demonstração',custo='—',acao=[Pt.cta('Conferir fonte','AG-04.dc.html')])
@@ -397,8 +396,9 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_bib') retur
 
 function ag6Rows(s,c) {
  const ids=[['EF-021','REC-016'],['EF-020','REC-014'],['EF-019','REC-012'],['EF-018','REC-011'],['EF-017','REC-009']];
- return ids.map(([id,rid])=>{
-  const rec=s.rec&&s.rec[rid], vis=rec&&rec.vis&&s.vis[rec.vis];
+ const rows=ids.map(([id,rid])=>{
+  const rec=s.rec&&s.rec[rid], atalho=rec&&rec.vis&&s.vis[rec.vis];
+  const vis=atalho&&atalho.dec&&atalho.dec.rec===rid?atalho:Object.values(s.vis||{}).find(v=>v.dec&&v.dec.rec===rid);
   const f=vis&&vis.dec&&vis.dec.rec===rid ? mipRaioxFontes(s,vis.id,c) : null;
   const pre=f&&f.antes, pos=f&&f.depois;
   const estado=!f?'Fonte não vinculada':!pre.completa?'Leitura pré pendente':!pos?'Sem leitura pós':!pos.completa?'Leitura pós pendente':'Histórico indisponível';
@@ -407,15 +407,19 @@ function ag6Rows(s,c) {
   const acao=pre&&!pre.completa?'Conferir leitura pré':pos&&!pos.completa?'Conferir leitura pós':'Conferir fonte';
   const origem=pre?pre.id+' · '+pre.talhao:rid+' · conferir vínculo';
   const observacao=x=>!x?'—':x.valorObservado===null?'Sem observação':mipN(x.valorObservado)+' '+x.unidade;
-  const dados={id,rec:rid,met:pre?pre.unidade:'—',datas:pre?pre.data+(pos?' → '+pos.data:''):'—',res:estado,conf:'Demonstração',custo:null,acao};
+  const dados={id,rec:rid,met:pre?pre.unidade:'—',datas:pre?ag6Data(pre.data)+(pos?' → '+ag6Data(pos.data):''):'—',res:estado,conf:'Demonstração',custo:null,acao};
   const fontes=pre?[{k:'link',t:origem,h:pre.href},{k:'br'},{k:'mut',t:'Pré: '+observacao(pre)}]:[{k:'txt',t:origem}];
   if(pos)fontes.push({k:'br'},{k:'link',t:'Pós: '+observacao(pos),h:pos.href});
   return {id,ro:true,v:dados,s:{...dados},p:{id:[{k:'b',t:id}],rec:fontes,
-   res:[{k:'chip',t:estado,c:'gray'},{k:'br'},{k:'mut',t:'Contraste indisponível: não há histórico temporal completo nem execução comprovada.'}],
-   conf:[{k:'mut',t:'Observações demonstrativas'}],custo:[{k:'mut',t:'Sem custo vinculado'}],
+   res:[{k:'chip',t:estado,c:'gray'}],
    acao:[{k:'cta',t:acao,h}]}};
  });
+ const vinculadas=rows.filter(r=>r.v.res!=='Fonte não vinculada'), ausentes=rows.filter(r=>r.v.res==='Fonte não vinculada');
+ if(ausentes.length){const r=ausentes[0], rotulo=ausentes.length+' avaliações sem fonte vinculada';
+  vinculadas.push({...r,id:'EF-sem-fonte',v:{...r.v,id:rotulo},s:{...r.s,id:rotulo},p:{...r.p,id:[{k:'b',t:rotulo}],rec:ausentes.map(x=>({k:'txt',t:x.id+' · '+x.v.rec+'; '}))}});}
+ return vinculadas;
 }
+function ag6Data(data){const m=/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(data||'');return m?m[3]+'/'+m[2]:(data||'—');}
 function PREVALS(self,v) {
  cenOuvir(self); mipOuvir(self);
  const g=GRIDS.find(x=>x.id==='g_ef');
@@ -431,15 +435,15 @@ function PREVALS(self,v) {
       ],edit=dict(m='origin',title='Economia estimada',sub='Estimativa a custo orçado; adiar não é evitar.',fields=[F('oque','O que entra',ro=True),F('sit','Situação',ro=True)]),
       search=False,gid='g_eco',total=False)
     corpo=(
-      bloco('Intervenção × observação posterior','Compare a recomendação executada com a leitura pós e registre o parecer; clique na linha para completar a avaliação.',g6,
+      bloco('Intervenção × observação posterior','',E.dica_i('Sobre o estado da comparação','Contraste indisponível: não há histórico temporal completo nem execução comprovada. Observações demonstrativas, sem custo vinculado.')+g6,
           ilink('Abrir aplicações','CA-01.dc.html','lista','Abrir as ordens de campo executadas')
           + ilink('Propor melhoria','GE-07.dc.html','trend','Levar um desvio recorrente para melhoria contínua'))
       + bloco('Economia adiada × efetivamente evitada','Separe o que foi evitado do que só foi adiado; clique na linha para ver a origem.',g6b))
     HEIGHTS37[fname]=900
     shell37('AG-06','Eficácia e histórico',corpo,fname=fname,
       subtitle='Intervenções comparadas com observações posteriores: desvio, recorrência, confiança e custo por hectare.',
-      status=('1 pós vence em 27/09','yellow'),
-      footer='Redução observada não equivale a eficácia causal; a EF-020 fecha a cadeia da demonstração quando a OS-0420 tiver leitura pós.')
+      status=('Demonstração','gray'),
+      footer='Redução observada não equivale a eficácia causal; confira as fontes vinculadas.')
 
     ag07()   # AG-07 · Consulta Agrofit (função própria, abaixo)
 
@@ -599,7 +603,7 @@ function agTopo(self,v){ const s=mipGet(), f=agFaz(self), cu=self.state.mf_cult|
   v.mf_setfaz=(e)=>{ const faz=e.target.value, t=MIPD.tal[self.state.mf_tal||'']; const sai=!!t&&faz!=='Todas'&&t.faz!==faz;
     self.setState(Object.assign({mf_faz:faz,g2toast:'Fazenda: '+faz},sai?{mf_tal:'',g2toast:'Fazenda: '+faz+' · o talhão '+t.rot+' ('+t.faz+') saiu do filtro.'}:{})); }; }
 // abrir a vistoria pelo hash (#VIS-xxx): painel aberto e fazenda do filtro trocada para a da vistoria
-function agHash(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-\d+)(?::(decidir|programar))?$/.exec(h); if(!m) return;
+function agHash(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-[0-9]+)(?::(decidir|programar))?$/.exec(h); if(!m) return;
   const v=mipGet().vis[m[1]]; if(!v){ self.setState({g2toast:m[1]+' não encontrada.'}); return; }
   // miprev: a navegação por hash na mesma página sempre redesenha com o estado atual (MIP e O.S. podem ter mudado em outra tela)
   const f=agFaz(self); self.setState(Object.assign({pan:v.id,dec:null,pv:null,mf_faz:(f==='Todas'||f===v.faz)?f:v.faz,miprev:Date.now()},agInclui(self,v)));
@@ -770,7 +774,7 @@ function agPv(self,v){ const pv=self.state.pv; v.pv_open=!!pv; const fecha=()=>{
   v.pv_hasErr=!!pv.err; v.pv_err=pv.err; v.pv_hasAb=!!pv.ab; v.pv_ab=pv.ab; v.pv_abrir=()=>{ const id=self.state.pv.ab; self.setState({pv:null}); agOpen(self,id); };
   v.pv_save=()=>{ const cur=self.state.pv; if(cur.data&&cur.data<MIPD.hoje){ self.setState({pv:Object.assign({},cur,{err:'Data no passado: programe a partir de hoje ('+mipBr(MIPD.hoje)+').'})}); return; }
     const r=mipMudar(null,s2=>mipNovaVis(s2,cur.tal,cur.prot,cur.data,cur.resp,'ag01'));
-    if(r.erro){ const m=/^(VIS-\d+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
+    if(r.erro){ const m=/^(VIS-[0-9]+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
     agSetHash(r.id); self.setState(Object.assign({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)},agInclui(self,{tal:cur.tal}))); agFoco(); }; }
 // EX-55 F1 · visão Mapa de Pragas e doenças: a camada MIP do Mapa da fazenda (mcMIP, mapa_camadas.js) com as vistorias de mip.js (mipDoTal, a
 // mesma fonte do IN-04) no período, sobre o recorte da lista (fazenda, cultura, talhão, situação, busca e filtros da Tabela). Talhão do recorte sem vistoria no período fica
@@ -899,7 +903,7 @@ def ag01():
 
 JS_AG01DET=r'''
 // ===== AG-01det · Rota e evidências da vistoria (#VIS-xxx; padrão VIS-011): rota em W, pontos, série do alvo e fotos =====
-function dtVid(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-\d+)$/.exec(h); const s=mipGet();
+function dtVid(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-[0-9]+)$/.exec(h); const s=mipGet();
   return (m&&s.vis[m[1]])?m[1]:'VIS-011'; }
 function dtIni(self){ if(self.__dt) return; self.__dt=1; try{ window.addEventListener('hashchange',()=>self.setState({dtrev:Date.now()})); }catch(e){} }
 function dtCor(R,x,rec){ if(rec) return ['#C9CFCB','#5B6660']; if(x===null||x===undefined) return ['#FFFFFF','#8A968E']; if(R.crit==='presenca') return Number(x)>0?['#D98A4E','#FFFFFF']:['#7FAE68','#FFFFFF'];
