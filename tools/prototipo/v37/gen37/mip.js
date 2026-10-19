@@ -456,8 +456,8 @@ function mipRaioxFontes(s, vid, c) {
     if (!x) return null;
     const R = mipRes(x);
     return { id: x.id, talhao: x.tal, protocolo: x.prot, data: x.data,
-      estado: x.est, valorObservado: R.media, unidade: R.un,
-      completa: x.est === 'concluida' && R.val === R.tot && !R.pend,
+      estado: x.est, valorObservado: Number.isFinite(R.media) ? R.media : null, unidade: R.un,
+      completa: x.est === 'concluida' && Number.isInteger(R.tot) && R.tot > 0 && R.val === R.tot && Number.isFinite(R.media) && !R.pend,
       versao: Number.isSafeInteger(x.versao) && x.versao > 0 ? x.versao : null,
       disponivelEm: typeof x.disponivelEm === 'string' ? x.disponivelEm : null,
       precisao: 'dia', historico: 'indisponivel', href: 'AG-01.dc.html#' + encodeURIComponent(x.id) };

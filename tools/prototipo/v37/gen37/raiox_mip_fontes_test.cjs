@@ -17,3 +17,11 @@ a.equal(ctx.mipRaioxFontes(s,'AUSENTE',{ordens}).estado,'fonte_ausente');
 s.vis.V.versao=3;s.vis.V.disponivelEm='2026-10-19T15:24:00.000Z';r=ctx.mipRaioxFontes(s,'V',{ordens});
 a.equal(r.antes.versao,3);a.equal(r.antes.historico,'indisponivel');a.equal(r.antes.precisao,'dia');a.equal(r.variacao,null);
 console.log('PASS: zero/ausência, pós programado, planejamento não comprova execução, cancelamento, isolamento, legado, versão sem histórico e imutabilidade');
+
+for (const bad of [{npts:0,pts:[]},{pts:[{n:1,v:Infinity,ok:true}]},{pts:[{n:1,v:'inválido',ok:true}]}]) {
+ const z={vis:{V:vis('V',bad)},apl:[]};
+ const f=ctx.mipRaioxFontes(z,'V',null);
+ a.equal(f.antes.completa,false,'fonte vazia ou não finita não está completa');
+ a.equal(f.antes.valorObservado,null,'valor não finito permanece ausente');
+}
+console.log('PASS fontes vazias/não finitas');
