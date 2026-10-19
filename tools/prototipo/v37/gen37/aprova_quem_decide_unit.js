@@ -2,6 +2,7 @@
 // Cada caso parte do cenário inicial e grava pelo cenMudar (atômico: erro não grava nada), como a tela faz. NEGATIVO = a decisão é recusada.
 // Padrão (2) adotado em 05/10/2026 (o proprietário pode mudar): o gestor aprova ajuste e consumo acima da custódia; se quem decide registrou a
 // contagem, a decisão vale e fica "revisão posterior pendente" (PRD 2.1). Nenhum registro grava o nome de quem não agiu.
+// 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): motivo opcional em desvincular, fechar achado sem serviço, cancelar OM e resposta fora de OK do checklist; quem e quando continuam gravados. O caso "Não feito sem motivo não conclui" vira "conclui com a resposta e quem/quando gravados".
 let nfail = 0;
 function ok(t, c, got) { if (c) console.log('OK    ' + t); else { nfail++; console.log('FALHA ' + t + (got === undefined ? '' : ' · ' + JSON.stringify(got).slice(0, 400))); } }
 const caso = (t, f) => { try { f(); } catch (e) { ok('ERRO no caso "' + t + '": ' + String(e.message || e), false); } };
@@ -165,8 +166,10 @@ caso('checklist', () => {   // PCM simplificado (05/10, D-33/D-18): só o execut
   ok('cada resposta grava quem (Zé (mecânico)) e a hora', o.chk[0].por === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(o.chk[0].em || '') && o.chk[2].por === 'Zé (mecânico)', o.chk.map(t => t.por));
   let e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
   ok('NEGATIVO 4 de 5 respondidas: não conclui', e === 'Falta: responder “Lubrificar pontos de graxa”.' && o.etapa === 'Em execução', e);
-  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
-  ok('NEGATIVO "Não feito" sem motivo: não conclui', e === 'Falta: motivo de “Lubrificar pontos de graxa”.', e);
+  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; const cx = manClone(c); try { manConcluir(cx, id, String(cx.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
+  /* LEVE-1 (proprietário 19/10): fora de OK sem motivo não segura a conclusão; a resposta e quem/quando ficam, e o "Não feito" abre a Pendência */
+  ok('"Não feito" sem motivo (LEVE-1): conclui, com a resposta, quem e quando gravados e a Pendência aberta sem motivo solto', e === '' && cx.oms[id].etapa === 'Em conferência' && cx.oms[id].chk[4].r === 'Não feito' && cx.oms[id].chk[4].por === 'Zé (mecânico)'
+     && (cx.oms[id].pend || []).length === 1 && !/ · $/.test(cx.oms[cx.oms[id].pend[0]].origem), [e, cx.oms[id].etapa, (cx.oms[id].pend || []).map(p => cx.oms[p].origem)]);
   manResp(c, id, 1, '', undefined, ZE); ok('desmarcar apaga quem e hora (resposta volta a pendente)', o.chk[1].r === '' && o.chk[1].por === '' && o.chk[1].em === '', o.chk[1]);
   manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 4, 'Feito', undefined, ZE);
   const r = manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); ok('respondidas as 5, uma a uma: conclui e vai Em conferência', o.etapa === 'Em conferência' && /^OM-0234 em conferência/.test(r.msg), r.msg);

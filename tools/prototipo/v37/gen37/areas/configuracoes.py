@@ -157,7 +157,7 @@ function EXTRAVALS(self,v){ const K=self._cf1.K; const st=self.state; const PF=g
     if(b.id==='AL-10') af=(c.confs||[]).filter(x=>x.estado==='Em conferência').map(x=>({t:x.id+' · '+x.os,v:cenConfTxt(x,c),h:'EST.dc.html'}));
     v.cf1_aaf=af; v.cf1_taf=['AL-01','AL-05','AL-09','AL-10'].indexOf(b.id)>=0; v.cf1_aafnada=!af.length; v.cf1_aaft='Ordens e registros afetados agora ('+af.length+')';
     const PFk=confAtor(K,PF); const podeAlt=confPodeA(PFk,g2alcDe(K,'AL-14'));
-    if(pd){ v.cf1_apend=true; v.cf1_apendt='v'+pd.v+' proposta por '+pd.por+' em '+confBr(pd.d)+' '+pd.at+': '+confAlcMudT(b,a,pd.mud)+' · motivo: '+pd.motivo+'. Até a confirmação vale a v'+a.v+'.';
+    if(pd){ v.cf1_apend=true; v.cf1_apendt='v'+pd.v+' proposta por '+pd.por+' em '+confBr(pd.d)+' '+pd.at+': '+confAlcMudT(b,a,pd.mud)+(pd.motivo?' · motivo: '+pd.motivo:'')+'. Até a confirmação vale a v'+a.v+'.';
       const pode=cf1PodeConf(K,PF,b.id); const pv=pd.v; const FLA=[['g_alc','al_'+b.id]]; v.cf1_aprim=pode; v.cf1_aprimt='Confirmar mudança'; v.cf1_aprimdis=false;
       v.cf1_aprimfn=()=>cf1Run(self,c=>confAlcConfirmar(c,b.id,K1,g2perfil(),pv),{cf1_a:null},FLA);
       v.cf1_apendq=pode?'':(PF&&PF.k===pd.k?'Você propôs: confirma '+confQuemConf(K,pd)+'.':'Confirma ou recusa: '+confQuemConf(K,pd)+'.');
@@ -186,7 +186,7 @@ function EXTRAVALS(self,v){ const K=self._cf1.K; const st=self.state; const PF=g
           {t:'Quando vale',v:amplia?'aguarda 2º aprovador: amplia o seu poder (outra pessoa com gestor ou direção confirma)':'vale na hora, para os comandos novos',st:amplia?'color:#8A5A00;font-weight:700;':''}];
         if(b.edita==='lim'){ const o=Object.values(c.ordens).filter(x=>x.etapa==='Em execução'&&x.area>0).sort((x,y)=>y.area-x.area)[0];   /* exemplo: a maior ordem em execução */ if(o) pv.push({t:'Exemplo: '+o.id+' ('+cenNum(o.area)+' ha)',v:cenNum(cenQtd(cur.lim/100,o.area),2)+' ha → '+cenNum(cenQtd(n2.lim/100,o.area),2)+' ha'}); } }
       v.cf1_apv=pv.map(x=>Object.assign({st:''},x)); v.cf1_tapv=pv.length>0; v.cf1_aerrm=erro; v.cf1_taerrm=!!erro;
-      v.cf1_aprim=podeAlt; v.cf1_aprimt=amplia?'Enviar para confirmação':'Salvar alçada'; v.cf1_aprimdis=!nv||String(st.cf1_mot||'').trim().length<3;
+      v.cf1_aprim=podeAlt; v.cf1_aprimt=amplia?'Enviar para confirmação':'Salvar alçada'; v.cf1_aprimdis=!nv;   /* LEVE-1 (proprietário 19/10): motivo opcional */
       const mud0=Object.assign({},mud), mot0=st.cf1_mot||'', v0=cur.v; v.cf1_aprimfn=()=>cf1Run(self,c=>confAlcMudar(c,b.id,mud0,mot0,K1,g2perfil(),v0),{cf1_a:null,cf1_mud:null,cf1_mot:''},[['g_alc','al_'+b.id]]);
       v.cf1_aeditq=podeAlt?'':'Alterar alçada: decisão de '+confQuemA(K,g2alcDe(K,'AL-14'))+'.'; }
     v.cf1_temq=!!(v.cf1_apendq||v.cf1_asemq||v.cf1_aeditq); v.cf1_aq=v.cf1_apendq||v.cf1_asemq||v.cf1_aeditq||'';
@@ -257,7 +257,7 @@ def cf01():
                            + _sc('cf1_alim', f'<label for="cf1_lim" style="font-size: 12px; font-weight: 700; color: {MUTED};">Limite (% da área da ordem)</label>'
                                  f'<div style="display: flex; align-items: center; gap: 8px;"><input id="cf1_lim" type="text" inputMode="numeric" value="{H("cf1_alimv")}" onChange="{H("cf1_aset")}" '
                                  f'style="width: 110px; font-family: inherit; font-size: 14px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; box-sizing: border-box;"><span style="font-size: 13px; color: {MUTED};">%</span></div>')
-                           + f'<label for="cf1_mot" style="font-size: 12px; font-weight: 700; color: {MUTED};">Motivo (obrigatório)</label>'
+                           + f'<label for="cf1_mot" style="font-size: 12px; font-weight: 700; color: {MUTED};">Motivo (opcional)</label>'
                            f'<textarea id="cf1_mot" value="{H("cf1_amot")}" onChange="{H("cf1_asetm")}" style="font-family: inherit; font-size: 13.5px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; min-height: 56px; resize: vertical;"></textarea>'
                            + _sc('cf1_taerrm', f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("cf1_aerrm")}</span>')
                            + _sc('cf1_tapv', titulo('Prévia') + _lin('cf1_apv')))

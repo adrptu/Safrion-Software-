@@ -483,9 +483,9 @@ function ma_panV(self,v,c,pf){ const st=self.state; const pan=st.pan;
 /* ---------- painel da OM: o único detalhe da ordem (web e app) ---------- */
 /* cancelar sem execução (D5): secundária em A liberar e Liberadas, com motivo; a reserva volta ao livre, com registro (manCancelar) */
 function ma_omPrim(self,c,o,pf,f){ const r=ma_omPrim0(self,c,o,pf,f); if(o.etapa!=='A liberar'&&o.etapa!=='Liberadas') return r;
-  const canc=()=>self.setState({paviso:{t:'Cancelar a '+o.id+': informe o motivo. A reserva da ordem volta ao estoque livre, com registro.',campo:'canc',lab:'Motivo do cancelamento',
+  const canc=()=>self.setState({paviso:{t:'Cancelar a '+o.id+': a reserva da ordem volta ao estoque livre, com registro de quem e quando. O motivo é opcional.',campo:'canc',lab:'Motivo do cancelamento (opcional)',
     ok:{t:'Cancelar a '+o.id,fn:()=>{ const mt=(self.state.pf||{}).canc; ma_cmd(self,c2=>manCancelar(c2,o.id,mt,g2perfil(),self.state.pchave),(x)=>ma_rec(self,x)); }},no:'Voltar'}});
-  return {P:r.P,S:r.S.concat([ma_btn('Cancelar ordem · motivo',canc,manPode(c,pf,'cancelar'),false)])}; }
+  return {P:r.P,S:r.S.concat([ma_btn('Cancelar ordem',canc,manPode(c,pf,'cancelar'),false)])}; }   /* LEVE-1: motivo opcional */
 function ma_omPrim0(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
   const run=(fn,prox)=>ma_cmd(self,fn,(r)=>ma_rec(self,r,prox===undefined?ma_proxOm(manGet(),g2perfil(),o.id,self.state.gerados):prox));
   if(o.etapa==='A liberar'){ const fl=manFalta(c,o); const cf=manConflito(c,o);
@@ -527,7 +527,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
   v.om_veio=o.de?('Pendência da '+o.de):(o.pid?(o.pid+' v'+o.ver+' · '+o.serv):(o.origAch?o.origAch+' · achado':String(o.origem||'').split(' · ')[0]));
-  v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+' · '+o.canc.motivo):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
+  v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+(o.canc.motivo?' · '+o.canc.motivo:'')):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
   // TAB-12 (17/10/2026): o painel da ordem é o detalhe de UM registro, como o painel da O.S. (exceção da TAB-12): abre o bloco da fase, o que faz a
   // ordem andar (Janela e equipe, Tarefas e Conclusão, Peças, Custo); recolher os blocos daqui custava 2 cliques a cada ordem concluída (AC-PCM-28)
   const ab=o.etapa==='A liberar'||o.etapa==='Liberadas'?'jan':(o.etapa==='Em execução'?'tk':(o.etapa==='Em conferência'?(o.trata&&!o.aptidao?'tk':'pc'):'cus')); const bo=st.oblk||{};
@@ -592,7 +592,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     const rr=(p.rsv||[]).reduce((a,x)=>a+x.qtd,0); const dv=o.etapa==='Canceladas'?((o.canc||{}).dev||[]).find(x=>x.item===p.item&&p.item):null;
     /* D5: o chip curto diz a situação; a linha de baixo, a origem (pedido › recebimento › reserva › ordem) ou o motivo */
     let orig=(p.rsv||[]).map(x=>(x.pc?x.pc+' › ':'')+'recebimento '+x.rec+' ('+manBr(x.em)+') › reserva '+manN(x.qtd,1)+' '+p.un+' › '+o.id).join(' · ');
-    if(dv){ s='Devolvida ao livre'; cc='gray'; orig='Reserva de '+manN(dv.qtd,1)+' '+p.un+' devolvida ao livre em '+manBr(o.canc.em)+' (cancelada: '+o.canc.motivo+')'+(dv.orig?' · recebimento '+dv.orig:''); }
+    if(dv){ s='Devolvida ao livre'; cc='gray'; orig='Reserva de '+manN(dv.qtd,1)+' '+p.un+' devolvida ao livre em '+manBr(o.canc.em)+' (cancelada'+(o.canc.motivo?': '+o.canc.motivo:'')+')'+(dv.orig?' · recebimento '+dv.orig:''); }
     else if(o.etapa==='Canceladas'){ s='Sem reserva (cancelada)'; cc='gray'; }
     else if(p.sob>0){ s='Sobra '+manN(p.sob,1)+' '+p.un+' a devolver'; cc='yellow'; } else if(p.dev){ s='Aplicado '+manN(p.apl,1)+' · devolvido '+manN(p.dev,1)+' '+p.un; cc='green'; }
     else if(p.apl&&o.exec){ s='Aplicado '+manN(p.apl,1)+' '+p.un; cc='green'; }
@@ -639,7 +639,7 @@ function ma_panAch(self,v,c,q,pf){ const st=self.state; const f=st.pf||{}; const
   const exe=(x)=>{ if(x.k==='vincular') return ()=>ma_cmd(self,c2=>manAchVincular(c2,q.id,x.om,g2perfil()),vai);
     if(x.k==='gerar') return ()=>ma_cmd(self,c2=>manAchGerar(c2,q.id,g2perfil(),self.state.pchave),vai);
     if(x.k==='corretiva') return ()=>ma_cmd(self,c2=>manAchCorretiva(c2,q.id,g2perfil(),self.state.pchave),vai);
-    return ()=>self.setState({paviso:{t:'Fechar '+q.id+' sem serviço: informe o motivo (PRD 54.4).',campo:'fmot',lab:'Motivo',ok:{t:'Fechar sem serviço',fn:()=>{ const m=(self.state.pf||{}).fmot; ma_cmd(self,c2=>manAchFechar(c2,q.id,m,g2perfil()),(r)=>ma_rec(self,r)); }},no:'Voltar'}}); };
+    return ()=>self.setState({paviso:{t:'Fechar '+q.id+' sem serviço: quem e quando ficam registrados; o motivo é opcional (LEVE-1, proprietário 19/10).',campo:'fmot',lab:'Motivo (opcional)',ok:{t:'Fechar sem serviço',fn:()=>{ const m=(self.state.pf||{}).fmot; ma_cmd(self,c2=>manAchFechar(c2,q.id,m,g2perfil()),(r)=>ma_rec(self,r)); }},no:'Voltar'}}); };
   return {P:ma_btn(op.prim.t,exe(op.prim),pd,true),S:op.sec.map(x=>ma_btn(x.t,exe(x),pd,false))}; }
 /* ---------- painel do vencimento ---------- */
 function ma_panVenc(self,v,c,id,pf){ const q=String(id).split('|'); const l=manLinhas(c,q[0]).find(x=>x.aid===q[1]&&x.sid===q[2]);
@@ -1022,7 +1022,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
   const IN='font-family:inherit;font-size:13.5px;padding:7px 9px;border-radius:8px;box-sizing:border-box;background:#fff;color:#15201A;min-height:var(--g2-alvo,36px);';
   v.vl_ls=L.map(r=>{ const a=r.a, id=a.id; const ok=!r.ja&&!r.cp.erro; const marcado=!!on[id]; const isOn=marcado&&ok; const b0=p&&ok?manVincBase(c,p,a):{modo:''}; const bb=vlB(st,id);
     const x=isOn&&b0.modo!=='hist'?manVincRef(c,p,a,bb):null; const ref=x&&x.ref; let orig='', inp=false, temCorr=false, corrT='';
-    if(b0.modo==='hist'){ const f=b0.v.fim; orig='Retoma a contagem de antes (desvinculado em '+manBr(f.em)+' · '+f.mot+'): base '+manVincDeTxt(a,b0.v.marco)+(Object.keys(b0.v.ult||{}).length?' e as últimas execuções guardadas.':'.'); }
+    if(b0.modo==='hist'){ const f=b0.v.fim; orig='Retoma a contagem de antes (desvinculado em '+manBr(f.em)+(f.mot?' · '+f.mot:'')+'): base '+manVincDeTxt(a,b0.v.marco)+(Object.keys(b0.v.ult||{}).length?' e as últimas execuções guardadas.':'.'); }
     else if(b0.modo==='om'){ const t0=b0.om+' · '+manBr(b0.data)+(a.un&&b0.leit!==null&&b0.leit!==undefined?' · '+manQ(b0.leit,a.un):''); orig=bb.corr?('Corrigindo a base da '+t0+':'):('Última execução registrada: '+t0+'.'); temCorr=true; corrT=bb.corr?('Usar a da '+b0.om):'Corrigir'; inp=bb.corr; }
     else if(st.d.bmodo==='agora') orig=ref?('Sem execução registrada · contando de agora: '+manVincDeTxt(a,ref)+' (marco estimado).'):'Sem execução registrada · contar de agora:';
     else if(st.d.bmodo==='ult'){ orig='Última execução (sem registro no sistema):'; inp=true; }
@@ -1047,7 +1047,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
 /* ---------- Desvincular (com motivo; histórico guardado; a OM aberta continua) ---------- */
 function dvAbrir(self,k){ pmRet(self); const q=String(k).split('|'); const d={mot:''};
   self.setState({dv:{pid:q[0],aid:q[1],d,orig:JSON.stringify(d),errs:{},warn:false,chave:manChave(),falha:''},sv:null,np:null,vl:null,pan:null}); pmFoco('dv_mot','dv-painel'); }
-function dvSalvar(self){ const st=self.state.dv; if(!st) return; if(manVazio(st.d.mot)){ self.setState({dv:Object.assign({},st,{errs:{mot:'Informe o motivo.'}})}); return; }
+function dvSalvar(self){ const st=self.state.dv; if(!st) return;   /* LEVE-1 (proprietário 19/10): motivo opcional; quem e quando ficam no vínculo */
   const r=manMudar(self,c2=>manDesvincular(c2,st.pid,st.aid,st.d.mot,g2perfil(),st.chave),{estrito:true});
   if(r.erro){ self.setState({dv:Object.assign({},self.state.dv||st,{falha:r.erro})}); return; } self.setState({dv:null}); vlVolta(self,[]); }
 function dvP(self,v,c,pf){ const st=self.state.dv; const p=st?c.planos[st.pid]:null, a=st?c.ativos[st.aid]:null;
@@ -1058,7 +1058,7 @@ function dvP(self,v,c,pf){ const st=self.state.dv; const p=st?c.planos[st.pid]:n
   v.dv_oms=ab.map(o=>({t:o.id+' · '+o.serv+' · '+o.etapa,h:'#om='+o.id})); v.dv_temOm=ab.length>0;
   v.dv_omT=ab.length>1?'Estas ordens continuam abertas (desvincular não apaga ordem; se não for fazer, cancele na própria ordem):':'Esta ordem continua aberta (desvincular não apaga ordem; se não for fazer, cancele na própria ordem):';
   v.dv_ef=a&&p?(a.nome+' deixa de gerar vencimentos do '+p.id+'. A base de contagem e as últimas execuções ficam guardadas: vincular de novo retoma a mesma contagem.'):'';
-  const pp=manPode(c,pf,'plano'); const why=pp||(manVazio(st.d.mot)?'Informe o motivo':'');
+  const pp=manPode(c,pf,'plano'); const why=pp||'';
   v.dv_rot='Desvincular'; v.dv_sdis=!!why; v.dv_swhy=why; v.dv_temWhy=!!why; v.dv_sst=MA_SEC+'color:#B42318;border-color:#B42318;';
   v.dv_temFalha=!!st.falha; v.dv_falha=st.falha?(st.falha+' O motivo continua aqui.'):''; }
 '''

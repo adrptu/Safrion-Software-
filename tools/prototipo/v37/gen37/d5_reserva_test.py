@@ -9,6 +9,7 @@ No navegador (CDP), como a pessoa faz, com o estado lido do cenário único. Dad
  4 · Outra ordem (OM-0236 com o mesmo filtro) não usa a reserva: "Falta" com o motivo e a liberação recusada; nada muda.
  5 · Cancelar a OM-0235 devolve a reserva ao livre, com registro na ordem e em Compras; a OM-0236 deixa de ter falta.
  6 · Reposição (Graxa EP2, sem ordem) continua indo ao estoque livre.
+LEVE-1 (proprietário 19/10): o botão passa a "Cancelar ordem" (motivo opcional); o teste ainda informa o motivo e confere que ele fica.
 Uso (de gen37/): env CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico python3 -B d5_reserva_test.py
 Contraprova: D5_RENDER=<pasta do _render da base> serve outra montagem (na base df7de98 a peça entra no livre: 1b reprova com livre 3)."""
 import os, sys, time, json, subprocess
@@ -83,7 +84,7 @@ def parte4():
          '4 · outra ordem (OM-0236) não usa a reserva: "Falta 1 un · 3 un reservadas para a OM-0235" e a liberação é recusada com o motivo; nada muda', [po[:500], lb, fil()])
 
 def parte5():
-    f0 = fil(); m.ir('om=OM-0235', perfil='Otávio'); m.clk('Cancelar ordem · motivo', '#ma-painel'); m.setv('#ma-av-in', 'trator vendido')
+    f0 = fil(); m.ir('om=OM-0235', perfil='Otávio'); m.clk('Cancelar ordem', '#ma-painel'); m.setv('#ma-av-in', 'trator vendido')
     m.clk('Cancelar a OM-0235', '#ma-painel'); t = m.toast() + ' ' + m.pan(); f1 = fil(); cc = m.man("m.oms['OM-0235'].canc") or {}
     m.ok(m.man("m.oms['OM-0235'].etapa") == 'Canceladas' and f1['res'] == f0['res'] - 3 and f1['livre'] == f0['livre'] + 3 and f1['om'] == 0
          and cc.get('motivo') == 'trator vendido' and (cc.get('dev') or [{}])[0].get('qtd') == 3 and 'PC-202/1' in (cc.get('dev') or [{}])[0].get('orig', '') and 'reserva devolvida ao estoque livre' in t,

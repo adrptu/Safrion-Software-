@@ -723,12 +723,11 @@ function manReceber(c,id,pf){ const o=c.oms[id]; if(!o||!o.sc) throw new Error('
 function manCancelar(c,id,motivo,pf,chave){ return manCmd(c,chave,'cancelar',()=>{ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'cancelar');
     if(o.etapa==='Canceladas') return {nada:true,msg:id+' já cancelada em '+manBr((o.canc||{}).em)+' · nada devolvido de novo.'};
     if(['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error(id+' está '+o.etapa+': trabalho iniciado não se cancela; conclua e encerre.');
-    if(manVazio(motivo)) throw new Error('Informe o motivo do cancelamento.');
-    const por=manPor(pf), dev=[];
+    const por=manPor(pf), dev=[];   /* LEVE-1 (proprietário 19/10): motivo opcional; quem e quando ficam em o.canc */
     (o.pecas||[]).forEach(p=>{ const q=p.res||0; if(!p.item||!(q>1e-9)) return; const it=c.itens[p.item]; it.reservado=Math.max(0,it.reservado-q); p.res=0;
       dev.push({item:p.item,nome:p.nome,un:p.un,qtd:q,orig:(p.rsv||[]).map(x=>x.rec).join(', ')}); });
-    const de=o.etapa; o.etapa='Canceladas'; o.canc={por,em:c.hoje,motivo:String(motivo).trim(),de,dev}; const volta=manVolta(c,o); manToca(o);
-    return {msg:id+' cancelada por '+por+' · motivo: '+String(motivo).trim()+(dev.length?' · reserva devolvida ao estoque livre: '+dev.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un+(x.orig?' (recebimento '+x.orig+')':'')).join(', '):' · nada estava reservado')
+    const mt=String(motivo||'').trim(); const de=o.etapa; o.etapa='Canceladas'; o.canc={por,em:c.hoje,motivo:mt,de,dev}; const volta=manVolta(c,o); manToca(o);
+    return {msg:id+' cancelada por '+por+(mt?' · motivo: '+mt:'')+(dev.length?' · reserva devolvida ao estoque livre: '+dev.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un+(x.orig?' (recebimento '+x.orig+')':'')).join(', '):' · nada estava reservado')
       +(o.sc&&!o.sc.rec?' · a '+o.sc.id+' segue em Compras; o que chegar entra no estoque livre':'')+(volta.length?' · '+volta.join(', ')+' voltou a Sem ordem':'')+'.'}; }); }
 function manIniciar(c,id,pf){ const o=c.oms[id]; if(!o||o.etapa!=='Liberadas') throw new Error(id+' não está em Liberadas.'); if(pf!==undefined) manExige(c,pf,'executar',{o});
   o.etapa='Em execução'; o.ini=c.hoje; o.iniPor=manPor(pf); manToca(o);
@@ -783,7 +782,7 @@ function manFaltaConcluir(c,o,leit,horas){ const f=[]; const a=c.ativos[o.aid];
     if(tp==='Teste'){ const ul=(t.tent||[]).slice(-1)[0]; if(!ul||ul.r!=='Aprovado') f.push('teste aprovado · '+t.t); return; }
     if(!t.r){ f.push('responder “'+t.t+'”'); return; }
     if(tp==='Medição'&&(t.val===''||t.val===undefined||t.val===null)) f.push('valor de “'+t.t+'”');
-    if(MAN_OK.indexOf(t.r)<0&&manVazio(t.mot)) f.push('motivo de “'+t.t+'”'); });
+    /* LEVE-1 (proprietário 19/10): resposta fora de OK sem motivo não segura a conclusão (a resposta, quem e quando ficam gravados) */ });
   if(a&&a.un&&manVazio(leit)) f.push('leitura do '+(a.un==='km'?'odômetro':'horímetro'));
   if(manVazio(horas)) f.push('horas de oficina');
   return f; }
@@ -833,7 +832,7 @@ function manConcluir(c,id,leit,horas,forcar,apl,pf){ const o=c.oms[id]; if(!o||o
   res.forEach(x=>{ const q=c.achados[x]; if(q&&q.estado!=='Fechado sem serviço'){ q.estado='Resolvido'; q.res={om:id,em:c.hoje}; q.rv=(q.rv||0)+1; } });
   const nf=o.chk.filter(t=>t.r==='Não feito'); o.pend=[];
   nf.forEach(t=>{ const pid='OM-'+String(c.seq).padStart(4,'0'); c.seq++; o.pend.push(pid); const j=manAdd(c.hoje,1);
-    c.oms[pid]={id:pid,tipo:'Pendência',aid:o.aid,serv:t.t,crit:'Média',etapa:'A liberar',origem:'Pendência da '+id+' · '+t.mot,de:id,jan:manBr(j),janIso:j,ret:'—',esp:o.esp,tempo:1,executante:o.executante||'',
+    c.oms[pid]={id:pid,tipo:'Pendência',aid:o.aid,serv:t.t,crit:'Média',etapa:'A liberar',origem:'Pendência da '+id+(t.mot?' · '+t.mot:''),de:id,jan:manBr(j),janIso:j,ret:'—',esp:o.esp,tempo:1,executante:o.executante||'',
       chk:[{t:t.t,tipo:'Serviço',r:'',mot:''}],pecas:[],exec:null,selos:[],achados:[],rv:0}; });
   manToca(o);
   return {msg:id+' em conferência'+prox+(o.pend.length?' · '+o.pend.join(', ')+' aberta para o que não foi feito':'')+(novosAch.length?' · achado '+novosAch.join(', ')+' em Sem ordem':'')+(res.length?' · resolvido: '+res.join(', '):'')+(o.trata&&a&&a.cond!=='Apto'?' · '+a.nome+' segue '+a.cond.toLowerCase()+' até a decisão de aptidão':'')+'.'}; }
@@ -942,9 +941,9 @@ function manAchCorretiva(c,id,pf,chave){ return manCmd(c,chave,'achCorretiva',()
     q.estado='Na OM'; q.om=oid; q.nova=false; q.voltou=''; q.dec={k:'corretiva',por:manPor(pf),em:c.hoje}; q.rv=(q.rv||0)+1;
     return {id:oid,msg:oid+' criada em A liberar · '+manNome(a)+' · '+q.comp+' · '+q.crit+' · janela '+manBr(pj)+(trata?' · trata a condição ('+a.cond+'): Teste do reparo incluído':'')+' · informe o tempo previsto para liberar.'}; }); }
 function manAchFechar(c,id,mot,pf){ const q=c.achados[id]; if(!q) throw new Error('Achado não encontrado.'); if(pf!==undefined) manExige(c,pf,'decidir');
-  if(q.estado!=='Sem ordem') throw new Error(id+' está '+q.estado.toLowerCase()+'.'); if(manVazio(mot)) throw new Error('Informe o motivo para fechar sem serviço.');
-  q.estado='Fechado sem serviço'; q.mot=String(mot).trim(); q.nova=false; q.dec={k:'fechar',por:manPor(pf),em:c.hoje}; q.rv=(q.rv||0)+1;
-  return {msg:id+' fechado sem serviço · '+q.mot+'.'}; }
+  if(q.estado!=='Sem ordem') throw new Error(id+' está '+q.estado.toLowerCase()+'.');   /* LEVE-1 (proprietário 19/10): motivo opcional; quem e quando em q.dec */
+  q.estado='Fechado sem serviço'; q.mot=String(mot||'').trim(); q.nova=false; q.dec={k:'fechar',por:manPor(pf),em:c.hoje}; q.rv=(q.rv||0)+1;
+  return {msg:id+' fechado sem serviço por '+q.dec.por+(q.mot?' · '+q.mot:'')+'.'}; }
 function manAchCrit(c,id,crit,pf){ const q=c.achados[id]; if(!q) throw new Error('Achado não encontrado.'); if(pf!==undefined) manExige(c,pf,'decidir'); if(['Alta','Média','Baixa'].indexOf(crit)<0) throw new Error('Criticidade inválida.');
   if(q.crit===crit) return {nada:true}; q.critHist=(q.critHist||[]).concat([{de:q.crit,para:crit,por:manPor(pf),em:c.hoje}]); q.crit=crit; q.nova=false; q.rv=(q.rv||0)+1; return {msg:id+' · criticidade '+crit+'.'}; }
 /* corretiva pela condição (detalhe do ativo Bloqueado sem OM que trate, ex.: depois de "Manter"): herda o motivo e ganha o Teste do reparo */
@@ -1049,8 +1048,7 @@ function manVincular(c,pid,itens,pf,chave){ return manCmd(c,chave,'vincular',()=
       +(voltas.length?' · retoma a contagem de antes ('+voltas.map(a=>a.nome).join(', ')+')':'')+(jas.length?' · já estava: '+jas.map(a=>a.nome).join(', '):'')+'.',ids:fe.map(a=>a.id)}; }); }
 function manDesvincular(c,pid,aid,motivo,pf,chave){ return manCmd(c,chave,'desvincular',()=>{ if(pf!==undefined) manExige(c,pf,'plano'); const p=c.planos[pid], a=c.ativos[aid], v=c.vinc[pid+'|'+aid];
   if(!p||!a) throw new Error('Plano ou ativo não encontrado.'); if(!manVincVale(v)) return {nada:true,msg:a.nome+' não está vinculado ao '+pid+' · nada mudou.'};
-  if(manVazio(motivo)) throw new Error('Informe o motivo para desvincular.');
-  v.fim={em:c.hoje,por:manPor(pf),mot:String(motivo).trim()};
+  v.fim={em:c.hoje,por:manPor(pf),mot:String(motivo||'').trim()};   /* LEVE-1 (proprietário 19/10): motivo opcional; quem e quando ficam */
   const ap=p.aplica; const lst=ap.t==='ativos'?ap.v:(ap.x||[]); const i=lst.indexOf(aid); if(i>=0) lst.splice(i,1);
   const ab=Object.values(c.oms).filter(o=>o.pid===pid&&o.aid===aid&&manAberta(o));
   return {msg:manNome(a)+' desvinculado do '+pid+' · histórico guardado'+(ab.length?' · '+ab.map(o=>o.id).join(', ')+(ab.length>1?' continuam abertas':' continua aberta'):'')+'.'}; }); }

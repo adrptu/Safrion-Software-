@@ -1,5 +1,6 @@
 // PCM simplificado v2 · regras da manutenção sem navegador (ma_regras_test.py monta: perfis do g2lib + dados_manutencao.JS + este arquivo).
 // Cada caso parte do seed (MAN0) e confere o observável do aceite (AC-PCM-nn da ESPECIFICACAO §9). Saída: uma linha JSON por execução.
+// 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): motivo opcional em desvincular, fechar achado sem serviço, cancelar OM e resposta fora de OK do checklist; quem e quando continuam gravados. AC-PCM-09 "Fechar sem serviço exige motivo" vira "fecha sem motivo, com quem e quando".
 const R = []; const ok = (n, cond, info) => R.push({ n, ok: !!cond, info: cond ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 600) });
 const caso = (n, fn) => { try { fn(); } catch (e) { R.push({ n: n + ' (exceção)', ok: false, info: String(e && e.stack || e).slice(0, 600) }); } };
 const S = () => manClone(MAN0);
@@ -78,9 +79,10 @@ caso('AC-PCM-09 achado', () => {
   // Gerar com o achado: 1 OM + vínculo numa transação
   const c3 = S(); const g = run(c3, x => manAchGerar(x, 'NC-0912', OT, 'k3'));
   ok('AC-PCM-09 · Gerar com o achado: 1 OM preventiva + vínculo (NC-0912 vira Verificação da OM-0235)', g.id === 'OM-0235' && c3.oms['OM-0235'].pid === 'PM-05' && c3.achados['NC-0912'].om === 'OM-0235' && c3.oms['OM-0235'].chk.some(t => t.tipo === 'Verificação' && /Disco de corte/.test(t.t)), [g, c3.oms['OM-0235'] && c3.oms['OM-0235'].chk.slice(-1)]);
-  // Fechar sem serviço exige motivo
-  const f0 = run(c3, x => manAchFechar(x, 'SM-0150', '', OT)); const f1 = run(c3, x => manAchFechar(x, 'SM-0150', 'ruído normal do elevador novo', OT));
-  ok('AC-PCM-09 · Fechar sem serviço exige motivo', /motivo/.test(f0.erro || '') && !f1.erro && c3.achados['SM-0150'].estado === 'Fechado sem serviço', [f0, f1]);
+  // Fechar sem serviço: motivo opcional (LEVE-1, proprietário 19/10); quem e quando ficam em q.dec
+  const c3b = manClone(c3); const f0 = run(c3b, x => manAchFechar(x, 'SM-0150', '', OT)); const f1 = run(c3, x => manAchFechar(x, 'SM-0150', 'ruído normal do elevador novo', OT));
+  ok('AC-PCM-09 · Fechar sem serviço sem motivo (LEVE-1): fecha, com quem e quando; com motivo, guarda o motivo', !f0.erro && c3b.achados['SM-0150'].estado === 'Fechado sem serviço' && c3b.achados['SM-0150'].mot === '' && /Otávio/.test(c3b.achados['SM-0150'].dec.por) && !!c3b.achados['SM-0150'].dec.em
+     && !f1.erro && c3.achados['SM-0150'].estado === 'Fechado sem serviço' && c3.achados['SM-0150'].mot === 'ruído normal do elevador novo', [f0, f1, c3b.achados['SM-0150']]);
   // Somar: mesmo ativo e componente oferece Somar; componente diferente não
   const c4 = S(); const s1 = run(c4, x => manAchRegistrar(x, { aid: 'a02', origem: 'Relato', comp: 'Hidráulico', sint: 'Mangueira molhada', crit: 'Média', sug: 'Apto' }, ZE));
   const s2 = run(c4, x => manAchRegistrar(x, { aid: 'a02', origem: 'Relato', comp: 'Elétrico', sint: 'Farol queimado', crit: 'Baixa', sug: 'Apto' }, ZE));

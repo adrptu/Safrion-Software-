@@ -1,5 +1,6 @@
 // MA-VINCULO (16/10/2026) · regras do vínculo ativo × plano sem navegador (ma_vinculo_test.py parte U monta: perfis do g2lib + dados_manutencao + este arquivo).
 // Cada caso parte do seed (MAN0). Saída: uma linha JSON por execução. Inclui as contraprovas da revisão do Codex 6226249749.
+// 19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): motivo opcional em desvincular, fechar achado sem serviço, cancelar OM e resposta fora de OK do checklist; quem e quando continuam gravados. V4 (sem escolha conta de agora) e V6 (desvincular sem motivo grava quem e quando) trocam o oráculo antigo.
 const R = []; const ok = (n, cond, info) => R.push({ n, ok: !!cond, info: cond ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 600) });
 const caso = (n, fn) => { try { fn(); } catch (e) { R.push({ n: n + ' (exceção)', ok: false, info: String(e && e.stack || e).slice(0, 600) }); } };
 const S = () => manClone(MAN0);
@@ -111,9 +112,11 @@ caso('V5 lote, idempotência e permissão', () => {
 
 caso('V6 desvincular com OM aberta', () => {
   const c = S(); const v0 = JSON.stringify(c.vinc['PM-01|a02']);
-  let em = ''; try { manDesvincular(manClone(c), 'PM-01', 'a02', '  ', OT); } catch (e) { em = e.message; }
+  const cs = manClone(c); let em = ''; try { manDesvincular(cs, 'PM-01', 'a02', '  ', OT); } catch (e) { em = e.message; }
   const r = run(c, x => manDesvincular(x, 'PM-01', 'a02', 'Vínculo feito por engano', OT, 'kv6a'));
-  ok('V6 · desvincular pede motivo; com motivo, avisa que a OM-0234 continua aberta e não a apaga', /Informe o motivo/.test(em) && /OM-0234 continua aberta/.test(r.msg || '') && c.oms['OM-0234'] && c.oms['OM-0234'].etapa === 'A liberar', [em, r]);
+  /* LEVE-1 (proprietário 19/10): sem motivo também desvincula, com quem e quando */
+  ok('V6 · desvincular sem motivo (LEVE-1) grava quem e quando; com motivo, avisa que a OM-0234 continua aberta e não a apaga', em === '' && cs.vinc['PM-01|a02'].fim && cs.vinc['PM-01|a02'].fim.mot === '' && /Otávio/.test(cs.vinc['PM-01|a02'].fim.por)
+     && /OM-0234 continua aberta/.test(r.msg || '') && c.oms['OM-0234'] && c.oms['OM-0234'].etapa === 'A liberar', [em, cs.vinc['PM-01|a02'], r]);
   const v = c.vinc['PM-01|a02'];
   ok('V6 · histórico preservado: marco e últimas execuções intactos, fim com quem, quando e motivo', v.fim && v.fim.mot === 'Vínculo feito por engano' && v.fim.em === c.hoje && JSON.stringify(v.marco) === JSON.stringify(JSON.parse(v0).marco) && JSON.stringify(v.ult) === JSON.stringify(JSON.parse(v0).ult), v);
   let eg = ''; try { manGerar(manClone(c), 'PM-01|a02', 's1', OT); } catch (e) { eg = e.message; }

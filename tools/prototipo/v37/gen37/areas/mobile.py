@@ -1180,7 +1180,7 @@ const nf=manAppFila(c).filter(x=>x.om===o.id); v.dp_hasFila=nf.length>0; v.dp_fi
 const cf=manAppConfAbertos(c.man,o.id); v.dp_hasConf=cf.length>0; v.dp_confs=cf.map(x=>({t:'Conflito a resolver · Otávio',s:x.desc+' · por '+x.por+' às '+x.at+' · '+x.mot}));
 v.dp_why=o.etapa==='A liberar'?'A liberar: o Otávio (responsável de manutenção) libera a ordem.':((o.etapa==='Liberadas'||exe)&&pE?pE+' · você vê a ordem, sem alterar.':''); v.dp_hasWhy=!!v.dp_why;
 v.dp_rec=!!s.dp_rec; v.dp_rect=s.dp_rec?s.dp_rec.t:''; v.dp_recst=s.dp_rec&&s.dp_rec.fila?'background: '+MBTX.yels+'; color: '+MBTX.yel+';':'background: '+MBTX.accs+'; color: '+MBTX.acc+';';
-/* tarefas pelo tipo: OK grava num toque; fora de OK pede o motivo; Teste com tentativa e foto (D-36); nada vem marcado */
+/* tarefas pelo tipo: OK grava num toque; fora de OK abre o motivo, opcional (LEVE-1, proprietário 19/10); Teste com tentativa e foto (D-36); nada vem marcado */
 const nr=o.chk.filter(t=>t.tipo==='Teste'?((t.tent||[]).slice(-1)[0]||{}).r==='Aprovado':!!t.r).length; v.dp_tkn=nr+' de '+o.chk.length+' respondidas';
 const pst=(on,ok,dis)=>'font-family: inherit; font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: '+(dis?'not-allowed':'pointer')+'; white-space: nowrap;'+(dis?' opacity: .55;':'')
   +(on?(ok?' border: 1px solid '+MBTX.acc+'; background: '+MBTX.acc+'; color: #fff;':' border: 1px solid '+MBTX.yel+'; background: '+MBTX.yels+'; color: '+MBTX.yel+';'):' border: 1px solid '+MBTX.line+'; background: '+MBTX.surf+'; color: '+MBTX.ink+';');
@@ -1196,8 +1196,9 @@ v.dp_tks=o.chk.map((t,i)=>{ const tp=t.tipo||'Serviço'; const isT=tp==='Teste';
     r:rr||'Sem resposta',rst:mbChs(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),rdot:mbDot(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),
     por:t.por&&!isT?('por '+t.por+(t.em?' às '+t.em:'')):'',hasPor:!!t.por&&!isT,
     hasVal:ed&&isM,val:mval,un:t.un||'',vlab:'Valor · '+t.t+(t.un?' ('+t.un+')':''),setval:(e)=>setF('mv'+i,e.target.value),hasValTx:!ed&&isM&&t.val!==''&&t.val!==undefined,valTx:t.val!==''&&t.val!==undefined?manN(t.val,2)+' '+(t.un||''):'',
-    hasMot:ed&&!!cfr,mot:ff['mt'+i]!==undefined?ff['mt'+i]:(t.mot||''),motlab:'Motivo · '+t.t,setmot:(e)=>setF('mt'+i,e.target.value),motgot:'Registrar '+(ff['tr'+i]||'')+' com o motivo',
-    motgo:()=>{ const f2=self.state.dp||{}; const mt=String(f2['mt'+i]||'').trim(); if(!mt) return TOAST(self,'Informe o motivo de “'+t.t+'”.'); run('resp',isM?{i,r:f2['tr'+i],mot:mt,val:mval}:{i,r:f2['tr'+i],mot:mt},['tr'+i,'mt'+i]); },
+    hasMot:ed&&!!cfr,mot:ff['mt'+i]!==undefined?ff['mt'+i]:(t.mot||''),motlab:'Motivo (opcional) · '+t.t,setmot:(e)=>setF('mt'+i,e.target.value),motgot:'Registrar '+(ff['tr'+i]||''),
+    /* LEVE-1 (proprietário 19/10): fora de OK, o motivo é opcional; a resposta, quem e quando ficam gravados */
+    motgo:()=>{ const f2=self.state.dp||{}; const mt=String(f2['mt'+i]||'').trim(); run('resp',isM?{i,r:f2['tr'+i],mot:mt,val:mval}:{i,r:f2['tr'+i],mot:mt},['tr'+i,'mt'+i]); },
     hasMotTx:!!t.mot&&!cfr,motTx:t.mot||'',
     tents:(t.tent||[]).map((x,j)=>({t:(j+1)+'ª tentativa · '+x.r+' · '+x.evid+' · '+x.por+' · '+x.em,st:mbChs(x.r==='Aprovado'?'green':'red').replace('white-space: nowrap;','white-space: normal; line-height: 1.35; align-items: flex-start;'),dot:mbDot(x.r==='Aprovado'?'green':'red')})),hasTents:isT&&(t.tent||[]).length>0,
     treg:isT&&ed&&!!pend,tgot:'Anexar foto e registrar '+pend,tgo:()=>run('tentativa',{i,r:pend,evid:'foto (simulada)'},['tr'+i]),
