@@ -1,0 +1,44 @@
+OK    P1 · ordem do ciclo e contagens 4/1/1/1/1
+OK    P1b · famílias da migração
+OK    P1c · chave do endereço sem acento
+OK    P1d · operação desconhecida exige família (null)
+OK    P1e · empate de início resolvido pela fase do CD-08
+OK    P3a · herdeiras mostram 120 "da operação"; a própria mantém 150
+OK    P3b · alteração do rascunho em texto
+OK    P3c · sem valor na operação nem próprio: pendente, nenhum padrão
+OK    P18a · 100 L/ha, 0,5 m, 6 km/h → 0,5 L/min; 12 km/h → 1,0 L/min
+OK    P18b · sem velocidade: desconhecido (mutante com velocidade padrão reprova)
+OK    P18c · disponível da curva ponta × pressão e diferença em %
+OK    P18d · sem curva: disponível desconhecido, sem diferença
+OK    P7a · carência de 30 dias na DAP 100 com colheita na 118 → ⛔ 12 dias depois
+OK    P7b · na DAP 85 a carência cabe
+OK    P7c · terceira aplicação com máximo 2 → ⛔
+OK    P7d · dose acima da bula → ⛔
+OK    P7e · volume fora da faixa da bula (quando definida) → ⛔
+OK    P7f · mesmo grupo FRAC em sequência → só ⚠
+OK    P7g · sem registro para cultura × alvo → ⛔
+OK    P7h · sem registro para a cultura → ⛔
+OK    P7i · sem alvo, 0,45 L/ha cabe em algum uso (o mais permissivo, 0,5) → sem ⛔
+OK    P7j · com alvo mancha-alvo, 0,45 > 0,4 → ⛔
+OK    P7k · dose por 100 L vira dose/ha pela calda (0,06 × 100/100 = 0,06 L/ha < 0,07) → ⛔
+OK    P7l · adjuvante sem modo de ação não é conferido
+OK    P7m · várias colheitas: vale a próxima depois da aplicação (DAP 100 + 30 = 130 ≤ 140)
+OK    P7n · DAP 120 + 30 = 150 passa da colheita da DAP 140 em 10 dias → ⛔
+OK    P7o · unidade da bula (kg/ha) diferente da do plano (L): ⚠ "dose não conferida", sem ⛔ inventado
+OK    E1 · pendência sem impedimento → Pendente
+OK    E2 · impedimento vence pendência → Impedida
+OK    E3 · só aviso → Com aviso; nada → Pronta
+OK    E4 · pendência da Pulverização é só a calda; alvo é opcional (leve, proprietário 19/10)
+OK    P12a · Ana publica v7
+OK    P12b · mesma chave não cria v8
+OK    P12c · Caio sem o papel não publica
+OK    P12d · submeter não existe: ato desconhecido, v6 segue vigente e nada é criado
+OK    P12e · com a v7 publicada, publicar de novo cria a v8 (numeração segue a última publicada)
+OK    P12f · impedimento recusa publicar
+OK    K7a · DAP −20 adiado 5 dias → DAP −15; DAP 25 → 30
+OK    K7b · data fixa 30/10/2026 + 5 → 04/11/2026 (vira o mês); − 31 → 29/09/2026
+OK    K7c · 3 dias antes da colheita + 5 → 2 dias após a colheita; 2 após − 5 → 3 antes
+OK    K7d · 10 dias antes da colheita + 5 → 5 dias antes (adiar aproxima da colheita)
+OK    K7e · n não inteiro, zero ou vazio: o gatilho não muda; nada é alterado no original
+
+42/42 OK

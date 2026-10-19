@@ -85,6 +85,20 @@ Rodada na ponta antes da F1, `e32ada5e` (`ANTES=<_render dessa ponta>`, árvore 
    - **Continua travado, com o dano:** dose, carência e número de aplicações fora da bula impedem publicar (lei e resultado técnico); publicar é do papel de agrônomo (AG-05, CMD-02); a O.S. segue com aprovação agronômica individual (PRD 41/73.9). A PA-OPER §Pulverização pede "receituário sem alvo" travado na aprovação da O.S.; essa conferência ainda não existe no protótipo, nem antes desta mudança, e fica registrada para a O.S.
    - **Oráculos trocados, com motivo:** `pa_oper_test` P1 (Pulverização do SOJA-AT passa de "• Pendente" a "⚠ Com aviso": restam os avisos de grupo de modo de ação e de unidade da bula), P12a (Caio sem primária e sem "Submeter") e P12b (Ana publica, sem "Devolver"); `pa_oper_unit` E4 (só a calda é pendência), P12d (submeter é recusado) e P12e (publicar segue a numeração da última publicada); `pa_lista_test` L14a/b/c (um clique publica com a dose aberta; dose 0 não publica); `pa_regras_test` U5 (dose aberta não desabilita) e U14 (publicar com a dose aberta, válida, inválida e acima da bula).
 
+## Rodada "leve" (19/10, executada no build de `cbe4cd38`: PA leve + MAPA-REAL F2 + correção K4, dados sintéticos)
+Brutos em `brutos/leve/` (`resumo.txt` e um log por teste).
+
+| Teste | Resultado |
+|---|---|
+| `pa_oper_unit.js` | 42/42 |
+| `pa_regras_test.py` | 18/18; contraprova na `ccda8c8d` 16/18 (U5 e U14 reprovam) |
+| `pa_oper_test.py` | 24/24; contraprova no build da `ccda8c8d` 22/24 (P1 e P12a reprovam) |
+| `pa_lista_test.py` | 24/24 (L14 com o publicar num clique) |
+| `pa_oper_p15_test.py` · `pa_oper_cen_test.py` | 5/5 · 7/7 |
+| `ds_1610_test.py` · `paginas_scan_test.py` | 16/16 · 5/5 (147 páginas) |
+| `frota_unit.js` · `mapa_frota_test.py` (K4 juntado) | 57/57 · 23/23 |
+| `mapa_real_semdado_test.py` · `tools/geo` (`s2_l2a_test` e `s2_l2a_montagem_test`) | 3/3 · 18/18 |
+
 ## Fora desta fatia (PA-OPER decisão 10)
 F2: Plantio e Tratamento de sementes (população, PMS, germinação), etapa 2 do Planejar safra com o resumo por operação e o ajuste por talhão, aplicar a vN nova ao cultivo. F3: Adubação e correção, fertirrigação. F4: Colheita, tratos, poda e preparo.
 
