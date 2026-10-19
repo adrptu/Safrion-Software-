@@ -24,3 +24,7 @@ CD-04 persiste pessoas/equipes no cenário compartilhado, separado dos usuários
 Claude revisa este HEAD e integra; Codex não integra o próprio PR. Consumidores manBacklog/pgBacklog são de autoria Claude e ainda não estão nesta entrega. Não há aceite integral EX53 nem gatilho de auditoria integral/PRD/Next. Revisor deve reproduzir fonte CD04 e impactos na composição, inclusive cenários de cadastro concorrente; proteção real permanece responsabilidade da aplicação futura.
 
 Aplicado: lista/detalhe, estado, horas explícitas, motivo/recibo, recuperação com rascunho e foco. Fora: consumidor do painel/manutenção, por autoria separada. Cortado: valor semanal presumido e dedicação automática; ausência permanece desconhecida.
+
+## Contraprova adicional do cadastro
+
+Node `pessoas_concorrencia_test.cjs` executa c4fonte/c4grava e g2persiste extraídos das fontes: edição externa com formulário aberto não apaga rascunho; salvar versão antiga recusa, restaura formulário e preserva o valor externo; fechar permite atualizar a fonte. PASS. cenMudar e setState adaptados explicitamente: não é teste de UI. A conferência adicional de navegador desta retomada não ocorreu: a interface informou Mac bloqueado após timeout. Nenhum controle foi contornado.
