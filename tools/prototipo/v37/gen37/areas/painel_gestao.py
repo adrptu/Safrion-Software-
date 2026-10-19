@@ -92,7 +92,7 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
   let cu=null; try{ cu=agrCustoRef(c,{}); }catch(e){ cu=null; }
   const cc=(cu&&cu.cultivos)||[]; R.custos=cc;
   B.cus=cu===null?[pgK('Resultado','Custo das O.S.',null,'','','Custo das O.S. por cultura. Fonte: agrCustoRef (camada Custos do Mapa).','GE-03.dc.html')]:
-    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.orcado_rs>0?Math.round(g.real_total_rs/g.orcado_rs*100):null;
+    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct;
       return pgK('Resultado',g.cultura+' · '+g.faz+' '+g.saf,d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',
         pgSemMeta('execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),g.parcial),pgCor(),
         'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.','GE-03.dc.html'); });
@@ -169,7 +169,7 @@ function pgDados(c){ const R={blocos:{agr:{},man:{},sup:{},com:{},cre:{}},itens:
   return R; }
 /* alavancas do resultado (estratégico): por cultivo do custo, o desvio da execução e o consumo do orçado; o preço médio da cultura (empresa) */
 function pgAlavancas(R){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) pc[x.cu]=x; });
-  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.orcado_rs>0?Math.round(g.real_total_rs/g.orcado_rs*100):null, p=pc[g.cultura]||null;
+  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct, p=pc[g.cultura]||null;
     return {id:g.id,cult:g.cultura,ctx:g.faz+' · '+g.saf+' · '+pgNf(g.area_ha,1)+' ha',
       cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:pgCor(),cons:pgSemMeta(cons===null?'—':cons+'% do orçado',g.parcial),
       pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:pgSemMeta(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',p&&(p.amb||[]).length>0),prec:pgCor()}; }); }

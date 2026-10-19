@@ -32,6 +32,8 @@ function cusTalhao(D,t,osn){ const R={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,pre
 //   orcado_rs: previsto do plano dos talhões (talhão sem plano em sem_orc; R$/ha orçado null);
 //   real_total_rs = real_prov_rs (apontamentos aceitos ainda não conferidos) + real_conf_rs (conferidos): confirmar move de um para o outro sem mudar o total;
 //   real_rs_ha = real_total_rs / area_ha (custo acumulado por hectare PLANTADO, comparável ao orçado por ha); null com área 0 ou ausente;
+//   consumo_orc_pct = real_total_rs ÷ orcado_rs × 100: quanto do orçado do ciclo já foi gasto (fonte única do "% do orçado" do Painel, ENG-011);
+//     não é desvio no tempo (custo agrícola concentra no plantio); null sem orçado; com talhão sem plano o grupo é parcial;
 //   ha_exec e desvio_exec_pct: execução (soma das passagens apontadas) contra o previsto da mesma área executada, a conta da camada Custos do Mapa;
 //     não é o comparativo da safra; null quando parcial (preço ausente ou ordem fora da cobertura);
 //   fora: ordens emitidas na tela sem vínculo de talhão no custo (fora da cobertura, com o realizado delas), nunca somadas caladas;
@@ -58,6 +60,7 @@ function agrCustoRef(c,rec) { rec=rec||{};
   return {id:g.id,cultura:g.cultura,faz:g.faz,saf:g.saf,talhoes:g.talhoes,area_ha:r2(g.area_ha),
    orcado_rs:g.sem_orc.length&&!g.orcado_rs?null:r2(g.orcado_rs),orcado_rs_ha:g.sem_orc.length||!(g.area_ha>0)?null:r2(g.orcado_rs/g.area_ha),sem_orc:g.sem_orc,
    real_total_rs:r2(g.tot),real_prov_rs:r2(g.tot-g.conf),real_conf_rs:r2(g.conf),real_rs_ha:g.area_ha>0?r2(g.tot/g.area_ha):null,
+   consumo_orc_pct:g.orcado_rs>0&&!(g.sem_orc.length&&!g.orcado_rs)?Math.round(g.tot/g.orcado_rs*100):null,
    ha_exec:r2(g.ha_exec),prev_exec_rs:r2(g.prev_exec_rs),desvio_exec_pct:(!parcial&&g.prev_exec_rs>0)?Math.round((g.tot-g.prev_exec_rs)/g.prev_exec_rs*1000)/10:null,
    parcial,pend}; });
  return {cultivos,sem_rateio:Object.values(sem),fora,cobertura_incerta};

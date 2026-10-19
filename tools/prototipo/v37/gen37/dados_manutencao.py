@@ -1180,8 +1180,16 @@ function manPeriodo(c,k){ const h=c.hoje; if(k==='30d') return {de:manAdd(h,-30)
 function manCustoPeriodo(c,k,aid){ const P=manPeriodo(c,k); let enc=0, and=0;
   Object.values(c.oms).forEach(o=>{ if(aid&&o.aid!==aid) return; if(o.etapa==='Encerradas'&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate) enc+=manCustoFinal(c,o);
     else if(manAberta(o)&&o.etapa!=='A liberar') and+=manCusto(c,o,'est'); }); return {enc,and,P}; }
-function manCumprimento(c,k){ const P=manPeriodo(c,k); const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa==='Encerradas'&&o.vencOrig&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate);
-  if(!os.length) return null; const ok=os.filter(o=>o.exec.data<=o.vencOrig).length; return {ok,n:os.length,pct:Math.round(ok*100/os.length)}; }
+/* KPI-PCM-05 · cumprimento de preventiva (EX-53 M5; confronto 6257865753): base = preventivas com vencimento ORIGINAL no período, até o corte
+   (hoje): encerradas no prazo (numerador), encerradas com atraso, abertas já vencidas e vencidas sem ordem (manSemOrdem, sem OM, então sem
+   contar duas vezes). Encerrada atrasada fica só no denominador; aberta que vence hoje ainda não conta; base vazia = null (nunca 100%). */
+function manCumprimento(c,k){ const P=manPeriodo(c,k), corte=P.ate<c.hoje?P.ate:c.hoje, dentro=d=>!!d&&d>=P.de&&d<=corte;
+  const os=Object.values(c.oms).filter(o=>o.tipo==='Preventiva'&&o.etapa!=='Canceladas'&&dentro(o.vencOrig)&&(o.etapa==='Encerradas'||o.vencOrig<corte));
+  const ok=os.filter(o=>o.etapa==='Encerradas'&&o.exec&&o.exec.data&&o.exec.data<=o.vencOrig).length;
+  const atrasadas=os.filter(o=>o.etapa==='Encerradas').length-ok, abertas=os.filter(o=>o.etapa!=='Encerradas').length;
+  let semOrdem; try{ semOrdem=manSemOrdem(c).venc.filter(l=>l.x.sit==='Vencida'&&dentro(l.x.prev)&&l.x.prev<corte).length; }catch(e){ return null; }
+  const n=os.length+semOrdem; if(!n) return null;
+  return {ok,n,pct:Math.round(ok*100/n),atrasadas,abertas,semOrdem,de:P.de,ate:corte}; }
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
