@@ -35,3 +35,23 @@
 - semanas equivalentes, que pedem a capacidade semanal por especialidade.
 
 Os dois são itens seguintes da D11.
+
+## Correção do achado 4310518316 (app do Codex, P2; retenção do Codex 6260208540)
+**Achado:** o cartão repartia o backlog em quatro grupos (pronto, falta de peça, a liberar, em execução). A especificação (`docs/pcm-suprimentos/ESPECIFICACAO.md` §7, l.432) pede três componentes. Uma ordem A liberar sem peça caía em "a liberar" mesmo bloqueada por conflito.
+
+**Correção (`manBacklogSit`):**
+- **pronto:** Liberadas, Em execução e A liberar sem impedimento ("Pronta para liberar");
+- **falta de peça:** `manFalta`, selos 4-5 do §5.2;
+- **pendência técnica:** conflito ainda não aceito (`manConflito`, selo 3) e os pré-requisitos que o `manLiberar` já exige (executante e tempo previsto). Usa as mesmas funções da liberação, sem regra nova;
+- **impedimentos juntos:** vale a ordem do §5.2, pendência técnica antes da peça.
+
+Na semente, a OM-0234 (A liberar, "Conflito · OS-0420 28/09") passa de "a liberar" a pendência técnica. O cartão mostra "Mecânico 11,5 · Eletricista 3 — pronto 9,5 · pendência técnica 5". O total não muda: 14,5 HH.
+
+| Teste (render do novo HEAD) | Resultado |
+|---|---|
+| `man_backlog_unit` (B11 semente, B12 conflito aceito, B13 precedência, B14 pronta × bloqueada, B1 soma dos três) | 16/16 |
+| Contraprova: o mesmo teste com o `dados_manutencao.py` do `daf1e5af` | 8/12, com exceção na semente (`logs/tres-componentes/contraprova_unit_daf1e5af.log`) |
+| `man_cumprimento_unit` · `ex53_m5_cartao` · `ex53_metas` | 14/14 · PASS · PASS |
+| `ma_backlog` · `painel03` (navegador) | 5/5 · 54/54 |
+
+Fotos conferidas: `fotos/pg_backlog_3comp_1440.png` e `fotos/pg_backlog_3comp_390.png`.

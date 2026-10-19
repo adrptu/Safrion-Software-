@@ -1199,10 +1199,15 @@ function manHH(os){ const r={hh:0,n:0,semTempo:0,porEsp:{}}; os.forEach(o=>{ con
 function manHHTxt(r,porEsp){ const sem=r.semTempo?r.semTempo+' sem estimativa':'';
   const hh=porEsp?Object.keys(r.porEsp).sort().map(k=>k+' '+manN(r.porEsp[k],1)+' HH').join(' · '):(r.n>r.semTempo?manN(r.hh,1)+' HH':'');
   return [hh,sem].filter(Boolean).join(' · '); }
-function manBacklogSit(c,o){ if(!manAberta(o)) return null; if(o.etapa==='Liberadas') return 'pronto'; if(o.etapa==='Em execução') return 'execucao';
-  if(o.etapa==='A liberar') return manFalta(c,o).length?'peca':'liberar'; return null; }
+/* KPI-PCM-08 em três componentes (docs/pcm-suprimentos/ESPECIFICACAO.md §7, l.432; achado 4310518316): pronto = "Pronta para liberar", Liberadas e
+   Em execução; falta de peça = selos 4-5 do §5.2 (manFalta); pendência técnica = selos 1-3 (conflito ainda não aceito, manConflito) e o que o
+   manLiberar exige antes de liberar (executante, tempo previsto). As mesmas funções da liberação, sem regra nova. Impedimentos juntos: a ordem
+   do §5.2 (pendência técnica antes da peça) */
+function manBacklogSit(c,o){ if(!manAberta(o)) return null; if(o.etapa==='Liberadas'||o.etapa==='Em execução') return 'pronto'; if(o.etapa!=='A liberar') return null;
+  const cf=manConflito(c,o); if((cf&&!o.conflitoAceito)||!manExecSug(o)||!(Number(o.tempo)>0)) return 'tecnica';
+  return manFalta(c,o).length?'peca':'pronto'; }
 function manBacklog(c,aid){ const os=Object.values(c.oms).filter(o=>(!aid||o.aid===aid)&&manBacklogSit(c,o)); const r=manHH(os); r.sit={};
-  ['pronto','peca','liberar','execucao'].forEach(k=>{ r.sit[k]=manHH(os.filter(o=>manBacklogSit(c,o)===k)); }); r.semanas=null; return r; }
+  ['pronto','peca','tecnica'].forEach(k=>{ r.sit[k]=manHH(os.filter(o=>manBacklogSit(c,o)===k)); }); r.semanas=null; return r; }
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;

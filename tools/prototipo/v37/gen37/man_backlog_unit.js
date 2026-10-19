@@ -8,7 +8,9 @@ const oraculo = (c, aid) => { const os = Object.values(c.oms).filter(o => PEND.i
   os.forEach(o => { const t = Number(o.tempo); if (t > 0) { hh += t; const e = o.esp || 'sem especialidade'; esp[e] = (esp[e] || 0) + t; } else sem++; }); return { n: os.length, hh, sem, esp }; };
 const igual = (a, b) => Math.abs(a - b) < 1e-9;
 const MOLDE = Object.values(MAN0.oms).find(o => o.tipo === 'Corretiva') || Object.values(MAN0.oms)[0];
-const nova = (c, id, etapa, tempo, extra) => { const o = manClone(MOLDE); Object.assign(o, { id, etapa, tempo, pecas: [] }, extra || {}); c.oms[id] = o; return o; };
+// ordem de teste sem janela (sem conflito possível) e com executante: só o que o caso muda decide a situação
+const nova = (c, id, etapa, tempo, extra) => { const o = manClone(MOLDE); Object.assign(o, { id, etapa, tempo, pecas: [], janIso: '', executante: 'Zé', conflitoAceito: false }, extra || {}); c.oms[id] = o; return o; };
+const SIT = ['pronto', 'peca', 'tecnica'];
 // a soma anterior da carga do Kanban da MA (até 262662af): tempo ausente vira 0 e não aparece
 const antiga = os => os.reduce((s, o) => s + (Number(o.tempo) || 0), 0);
 
@@ -16,8 +18,18 @@ caso('semente', () => {
   const c = S(), r = manBacklog(c), o = oraculo(c);
   ok('B0 · semente: total, ordens e horas por especialidade batem com o oráculo independente', r.n === o.n && igual(r.hh, o.hh) && r.semTempo === o.sem
      && Object.keys(o.esp).length === Object.keys(r.porEsp).length && Object.keys(o.esp).every(k => igual(o.esp[k], r.porEsp[k])), [r.n, r.hh, r.semTempo, r.porEsp, o]);
-  const soma = ['pronto', 'peca', 'liberar', 'execucao'].reduce((s, k) => s + r.sit[k].n, 0);
-  ok('B1 · as situações repartem o backlog sem perder nem repetir ordem', soma === r.n && igual(['pronto', 'peca', 'liberar', 'execucao'].reduce((s, k) => s + r.sit[k].hh, 0), r.hh), r.sit);
+  const soma = SIT.reduce((s, k) => s + r.sit[k].n, 0);
+  ok('B1 · os três componentes (pronto, falta de peça, pendência técnica) repartem o backlog sem perder nem repetir ordem nem hora', Object.keys(r.sit).length === 3 && soma === r.n
+     && igual(SIT.reduce((s, k) => s + r.sit[k].hh, 0), r.hh) && SIT.reduce((s, k) => s + r.sit[k].semTempo, 0) === r.semTempo, r.sit);
+  // oráculo de dados (sonda de 19/10 na semente): OM-0228 Liberadas 3 h e OM-0233 Em execução 6,5 h prontas; OM-0234 A liberar 5 h em conflito com a OS-0420
+  ok('B11 · semente: OM-0234 (A liberar com "Conflito · OS-0420") é pendência técnica, 5 HH; pronto = OM-0228 + OM-0233 = 9,5 HH',
+     manBacklogSit(c, c.oms['OM-0234']) === 'tecnica' && /OS-0420/.test((manConflito(c, c.oms['OM-0234']) || {}).t || '') && igual(r.sit.tecnica.hh, 5) && r.sit.tecnica.n === 1
+     && igual(r.sit.pronto.hh, 9.5) && r.sit.pronto.n === 2 && r.sit.peca.n === 0, r.sit);
+  const d = manClone(c); d.oms['OM-0234'].conflitoAceito = true;
+  ok('B12 · o mesmo conflito aceito pelo PCP não bloqueia: OM-0234 passa a "Pronta para liberar" (pronto)', manBacklogSit(d, d.oms['OM-0234']) === 'pronto' && igual(manBacklog(d).sit.pronto.hh, 14.5), manBacklog(d).sit);
+  const e = manClone(c), k0 = Object.keys(e.itens)[0], i0 = e.itens[k0]; e.oms['OM-0234'].pecas = [{ item: k0, nome: 'peça', qtd: i0.saldo - i0.reservado + 10, un: 'un' }];
+  ok('B13 · conflito e peça em falta juntos: vale a ordem do §5.2, pendência técnica (não falta de peça); as duas pendências são reais',
+     manFalta(e, e.oms['OM-0234']).length === 1 && !!manConflito(e, e.oms['OM-0234']) && manBacklogSit(e, e.oms['OM-0234']) === 'tecnica' && manBacklog(e).sit.peca.n === 0, manBacklog(e).sit);
   ok('B2 · sem capacidade configurada não há semanas equivalentes', r.semanas === null, r.semanas);
 });
 
@@ -31,7 +43,7 @@ caso('regras', () => {
   nova(c, 'X5', 'Canceladas', 3, { esp: 'Mecânico' });
   let r = manBacklog(c);
   ok('B4 · em conferência, encerrada e cancelada ficam fora: 6,5 HH (Mecânico 4, Eletricista 2,5)', r.n === 2 && igual(r.hh, 6.5) && igual(r.porEsp['Mecânico'], 4) && igual(r.porEsp['Eletricista'], 2.5), r);
-  ok('B5 · Liberadas = pronto; Em execução = em execução', r.sit.pronto.n === 1 && r.sit.execucao.n === 1 && r.sit.peca.n === 0, r.sit);
+  ok('B5 · Liberadas e Em execução = pronto', r.sit.pronto.n === 2 && igual(r.sit.pronto.hh, 6.5) && r.sit.peca.n === 0 && r.sit.tecnica.n === 0, r.sit);
   nova(c, 'X6', 'Liberadas', undefined, { esp: 'Mecânico' });
   r = manBacklog(c);
   ok('B6 · ordem aberta sem tempo previsto não vira 0: conta em sem estimativa e não muda o total', r.n === 3 && r.semTempo === 1 && igual(r.hh, 6.5) && /1 sem estimativa/.test(manHHTxt(r)), [r, manHHTxt(r)]);
@@ -41,7 +53,15 @@ caso('regras', () => {
   nova(c, 'X7', 'A liberar', 3, { esp: 'Mecânico', pecas: [{ item: k, nome: 'peça', qtd: it.saldo - it.reservado + 10, un: 'un' }] });
   nova(c, 'X8', 'A liberar', 1, { esp: 'Mecânico' });
   r = manBacklog(c);
-  ok('B8 · A liberar com peça em falta fica em falta de peça, não em pronto; sem falta fica em a liberar', manFalta(c, c.oms.X7).length === 1 && r.sit.peca.n === 1 && igual(r.sit.peca.hh, 3) && r.sit.liberar.n === 1 && r.sit.pronto.n === 2, r.sit);
+  ok('B8 · A liberar com peça em falta fica em falta de peça; sem impedimento, "Pronta para liberar" entra em pronto', manFalta(c, c.oms.X7).length === 1 && r.sit.peca.n === 1 && igual(r.sit.peca.hh, 3)
+     && manBacklogSit(c, c.oms.X8) === 'pronto' && r.sit.pronto.n === 4 && r.sit.tecnica.n === 0, r.sit);
+  nova(c, 'X9', 'A liberar', 2, { esp: 'Especialidade sem pessoa', executante: '' });
+  nova(c, 'X10', 'A liberar', undefined, { esp: 'Mecânico' });
+  r = manBacklog(c);
+  ok('B14 · pronta × bloqueada: A liberar sem executante possível (X9) e sem tempo previsto (X10) são pendência técnica, como no manLiberar; a X8 continua pronta',
+     manExecSug(c.oms.X9) === '' && manBacklogSit(c, c.oms.X9) === 'tecnica' && manBacklogSit(c, c.oms.X10) === 'tecnica' && manBacklogSit(c, c.oms.X8) === 'pronto'
+     && r.sit.tecnica.n === 2 && igual(r.sit.tecnica.hh, 2) && r.sit.tecnica.semTempo === 1 && SIT.reduce((s, k) => s + r.sit[k].n, 0) === r.n && igual(SIT.reduce((s, k) => s + r.sit[k].hh, 0), r.hh), r.sit);
+  delete c.oms.X9; delete c.oms.X10;
   const s = manClone(c); Object.values(s.oms).forEach(o => { o.tempo = undefined; });
   const t = manBacklog(s);
   ok('B9 · todas sem tempo: o texto é "N sem estimativa", nunca "0 HH"', manHHTxt(t) === t.n + ' sem estimativa' && !/0 HH/.test(manHHTxt(t)), manHHTxt(t));

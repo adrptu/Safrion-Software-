@@ -101,9 +101,9 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
 // EX-53 M5 · janela acordada em 6258424058; cálculo pertence à Manutenção.
 /* KPI-PCM-08 · backlog por especialidade (EX-53 M7a, PRD 8662): HH previstas das ordens abertas ainda não executadas (manBacklog), por especialidade e
    situação. Ordem sem tempo previsto não vira 0. Sem capacidade semanal configurada não há semanas equivalentes nem cor. */
-function pgBacklog(m){ const r=m&&m.oms?manBacklog(m):null, dica='Horas previstas das ordens abertas ainda não executadas: Liberadas (pronto), A liberar (falta de peça ou a liberar) e Em execução. Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade, que ainda não é configurável. Fonte: manBacklog.';
+function pgBacklog(m){ const r=m&&m.oms?manBacklog(m):null, dica='Horas previstas das ordens abertas ainda não executadas, em três partes: pronto (A liberar sem impedimento, Liberadas e Em execução), falta de peça e pendência técnica (conflito, executante ou tempo previsto a definir). Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade, que ainda não é configurável. Fonte: manBacklog.';
   if(!r) return pgK('Hoje','Backlog da oficina',null,'',null,dica,'MA.dc.html#vis=ordens');
-  const S={pronto:'pronto',peca:'falta de peça',liberar:'a liberar',execucao:'em execução'};
+  const S={pronto:'pronto',peca:'falta de peça',tecnica:'pendência técnica'};
   // dois grupos (travessão): especialidades, maior carga primeiro, e situação; "HH" só no total; a capacidade vai na dica (TEXTO-2; fotos de 19/10)
   const esp=Object.keys(r.porEsp).sort((a,b)=>r.porEsp[b]-r.porEsp[a]||(a<b?-1:1)).map(k=>k+' '+manN(r.porEsp[k],1)).concat(r.semTempo?[r.semTempo+' sem estimativa']:[]).join(' · ');
   const sit=Object.keys(S).filter(k=>r.sit[k].n).map(k=>{ const g=r.sit[k]; return S[k]+' '+(g.n>g.semTempo?manN(g.hh,1):'sem estimativa'); }).join(' · ');

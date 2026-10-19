@@ -1,0 +1,20 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    B0 · semente: total, ordens e horas por especialidade batem com o oráculo independente
+FALHA semente (exceção) · TypeError: Cannot read properties of undefined (reading 'n')
+    at /tmp/claude-0/f1a/tools/prototipo/v37/gen37/_probe/man_backlog_unit_all.js:4220:50
+    at Array.reduce (<anonymous>)
+    at /tmp/claude-0/f1a/tools/prototipo/v37/gen37/_probe/man_backlog_unit_all.js:4220:20
+    at caso (/tmp/claude-0/f1a/tools/prototipo/v37/gen37/_probe/man_backlog_unit_all.js:4203:33)
+    at Object.<anonymous> (/tmp/claude-0/f1a/tools/prototipo/v37/gen37/_probe/man_backlog_unit_all.js:4216:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:
+OK    B3 · sem ordem pendente: n = 0 e 0 HH
+OK    B4 · em conferência, encerrada e cancelada ficam fora: 6,5 HH (Mecânico 4, Eletricista 2,5)
+FALHA B5 · Liberadas e Em execução = pronto · {"pronto":{"hh":4,"n":1,"semTempo":0,"porEsp":{"Mecânico":4}},"peca":{"hh":0,"n":0,"semTempo":0,"porEsp":{}},"liberar":{"hh":0,"n":0,"semTempo":0,"porEsp":{}},"execucao":{"hh":2.5,"n":1,"semTempo":0,"porEsp":{"Eletricista":2.5}}}
+OK    B6 · ordem aberta sem tempo previsto não vira 0: conta em sem estimativa e não muda o total
+OK    B7 · contraprova: a soma antiga da carga (tempo ausente = 0) dá o mesmo total sem avisar que falta estimativa
+FALHA B8 · A liberar com peça em falta fica em falta de peça; sem impedimento, "Pronta para liberar" entra em pronto · {"pronto":{"hh":4,"n":2,"semTempo":1,"porEsp":{"Mecânico":4}},"peca":{"hh":3,"n":1,"semTempo":0,"porEsp":{"Mecânico":3}},"liberar":{"hh":1,"n":1,"semTempo":0,"porEsp":{"Mecânico":1}},"execucao":{"hh":2.5,"n":1,"semTempo":0,"porEsp":{"Eletricista":2.5}}}
+FALHA B14 · pronta × bloqueada: A liberar sem executante possível (X9) e sem tempo previsto (X10) são pendência técnica, como no manLiberar; a X8 continua pronta · {"pronto":{"hh":4,"n":2,"semTempo":1,"porEsp":{"Mecânico":4}},"peca":{"hh":3,"n":1,"semTempo":0,"porEsp":{"Mecânico":3}},"liberar":{"hh":3,"n":3,"semTempo":1,"porEsp":{"Mecânico":1,"Especialidade sem pessoa":2}},"execucao":{"hh":2.5,"n":1,"semTempo":0,"porEsp":{"Eletricista":2.5}}}
+OK    B9 · todas sem tempo: o texto é "N sem estimativa", nunca "0 HH"
+OK    B10 · filtro por ativo: só as ordens daquele ativo (a X2 movida para outro ativo sai)
+RESULTADO: 8/12 ok · FALHAS: semente (exceção); B5 · Liberadas e Em execução = pronto; B8 · A liberar com peça em falta fica em falta de peça; sem impedimento, "Pronta para liberar" entra em pronto; B14 · pronta × bloqueada: A liberar sem executante possível (X9) e sem tempo previsto (X10) são pendência técnica, como no manLiberar; a X8 continua pronta
