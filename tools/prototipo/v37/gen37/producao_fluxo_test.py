@@ -42,6 +42,8 @@ window.CLK=(t,root)=>{ const r=root?document.querySelector(root):document; if(!r
 window.SETV=(sel,val,conta)=>{ const i=document.querySelector(sel); if(!i) return 'sem '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype);
   Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); if(conta) window.__tx++; return 'ok'; };
 window.ROW=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).indexOf(t)>=0); if(!r) return 'sem linha '+t; window.__cl++; (r.querySelector('.g2pw')||r).click(); return 'ok'; };
+// DRILL-RECOLHIDO (v129): a tabela agrupada abre recolhida; como o usuário, "Expandir tudo" (1 clique, contado) quando a linha está num grupo fechado
+window.EXPANDE=()=>{ const ex=[...document.querySelectorAll('button')].filter(VIS).find(b=>N(b.innerText)==='Expandir tudo'); if(!ex) return false; window.__cl++; ex.click(); return true; };
 window.ROWTXT=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf(t)>=0); return r?N(r.innerText):''; };
 window.PAN=()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
@@ -55,6 +57,11 @@ def ir(pg, limpa=False, w=1440, h=1000):
         t.c.goto(f'http://127.0.0.1:{t.p}/Main.dc.html', wait=.4); J("localStorage.clear(); sessionStorage.clear()")
     cl, tx = (J("[window.__cl||0, window.__tx||0]") or [0, 0]) if not limpa else (0, 0)
     t.goto(pg); time.sleep(.5); lib(); J(f"window.__cl={cl}; window.__tx={tx};")
+    expande()
+def expande():
+    """DRILL-RECOLHIDO (v129): a tabela agrupada abre recolhida e o teste foi escrito com ela aberta; como o usuário, "Expandir tudo" (clique contado)
+    e espera o botão virar "Recolher tudo" (render assíncrono), não um tempo fixo. Vale ao abrir a tela e ao mudar de etapa"""
+    if J("EXPANDE()"): espera("![...document.querySelectorAll('button')].filter(VIS).some(b=>N(b.innerText)==='Expandir tudo')", 5.0); time.sleep(.2)
 def espera(js, ate=20.0):
     """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e o chk seguinte falha"""
     t0 = time.time()
@@ -74,7 +81,11 @@ def volta_pro():
     r = clk('Voltar para Agrícola', w=0); ok = espera(pronta('MOD-AGR.dc.html', HUB)); lib(); return r == 'ok' and ok
 def clk(x, root=None, w=.45): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def setv(sel, val, conta=True): r = J(f"SETV({json.dumps(sel)},{json.dumps(val)},{'true' if conta else 'false'})"); time.sleep(.25); return r
-def row(x): r = J(f"ROW({json.dumps(x)})"); time.sleep(.45); return r
+def row(x):
+    r = J(f"ROW({json.dumps(x)})")
+    if r.startswith('sem linha') and J("EXPANDE()"):   # grupo recolhido: espera a linha aparecer (render assíncrono), não um tempo fixo
+        espera(f"[...document.querySelectorAll('[role=row]')].filter(VIS).some(x=>N(x.innerText).indexOf({json.dumps(x)})>=0)", 5.0); r = J(f"ROW({json.dumps(x)})")
+    time.sleep(.45); return r
 def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def shot(n): t.c.shot(os.path.join(PR, 'producao_' + n + '.png'))
@@ -421,7 +432,7 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         def rowc(tal): r = J(f"ROWCLK({json.dumps(tal)})"); time.sleep(.5); return r
         def fv(k): return J(f"(()=>{{ const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null; }})()")
         def fset(k, val): r = J(f"SETV('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.3); return r
-        ir('SAF.dc.html'); clk('Continuar'); time.sleep(.6); ul(); u7 = ui(); m7 = cel('T1-A', 'Meta'); L0 = J("LS()")
+        ir('SAF.dc.html'); clk('Continuar'); time.sleep(.6); lib(); expande(); ul(); u7 = ui(); m7 = cel('T1-A', 'Meta'); L0 = J("LS()")
         t.chk('AC-h entre telas: a Soja em kg/ha escolhida no COLH aparece em kg/ha no Planejar safra ("3.840 kg/ha" na Meta do T1-A; seletor "Unidade de produtividade · Soja")',
               u7.get('lab') == 'Unidade de produtividade · Soja' and u7.get('v') == 'kg' and m7 == '3.840 kg/ha', [u7, m7])
         M0 = J("SAFM('S2627')"); J("USEL().focus()")
@@ -453,7 +464,7 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         t.chk('R-U06 T1-B (62 sc/ha) aberto em kg/ha mostra "3720"; trocar a cultura para Mamão mantém "3720" com "kg/ha/ano"; salvar grava {3720, kg/ha/ano} (não t/ha/ano)',
               f5 == ['3720', 'kg/ha · Padrão da cultura: sc/ha (60 kg)'] and f6 == ['3720', 'kg/ha/ano · Padrão da cultura: t/ha/ano'] and a5 == [3720, 'kg/ha/ano'] and m5 in ('3.720 kg/ha/ano', '3,72 t/ha/ano'),
               [f5, f6, a5, m5])
-        ir('SAF.dc.html', w=390, h=844); clk('Continuar'); time.sleep(.6); ul(); u9 = ui(); sw9 = J("[document.documentElement.scrollWidth, innerWidth]")
+        ir('SAF.dc.html', w=390, h=844); clk('Continuar'); time.sleep(.6); lib(); expande(); ul(); u9 = ui(); sw9 = J("[document.documentElement.scrollWidth, innerWidth]")
         t.chk('AC-g SAF a 390 px: seletor com alvo ≥ 44 px e sem rolagem horizontal', u9.get('h', 0) >= 44 and sw9 and sw9[0] <= sw9[1], [u9, sw9])
         shot('unid_saf')
         # recusa (R-U05): café da roça só em L não vira massa; com o peso do fruto, kg/ha de Café da roça (nunca café beneficiado)
