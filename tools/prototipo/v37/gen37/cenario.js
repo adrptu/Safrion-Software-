@@ -739,6 +739,7 @@ function cenApontar(c, k) {
   // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
   const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
     chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
+  ap.reciboAplicacao = cenReciboAplicacao(c, o, ap, true);
   { ap.ant = (o.realizado || 0) + pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; }   // B-R8: antes da baixa (que tira a linha 0 de ap.cons); ant = base do planejado
   const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
   const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
@@ -1167,4 +1168,40 @@ function cenPerdaNova(c, key, qtd, motivo, ator) {
   const aj = cenAjusteNovo(c, key, l.fisico, contado, (c.movs || []).length, cenDia() + ' às ' + cenAgora());
   aj.tipo = 'perda'; aj.motivo = mot; aj.reg = por;
   return {id: aj.id, alerta: dc.alerta, msg: aj.id + ' aguarda aprovação do gestor. O saldo não foi alterado.'};
+}
+
+// Recibo do relato, antes da baixa alterar cons. Não prova execução conferida:
+// o consumidor deve exigir ap.sinc !== false e ap.st === 'Conferido' no estado atual.
+// Legados não são reconstruídos; HH:mm e DD/MM não viram instantes nem ganham ano.
+function cenReciboAplicacao(c, o, ap, capturar = false) {
+  if (ap.reciboAplicacao) return cenClone(ap.reciboAplicacao);
+  if (!capturar) return null; // leitura de legado não cria recibo retroativo
+  const t = c.app && c.app.turno;
+  const turno = ap.origem === 'app' && t && t.os === o.id && t.chave === ap.chave ? t : null;
+  const capturadoEm = new Date().toISOString();
+  const iso = x => typeof x === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(x)
+    && Number.isFinite(Date.parse(x)) && new Date(x).toISOString() === x;
+  let fuso = null;
+  if (turno && typeof turno.fuso === 'string') {
+    try { new Intl.DateTimeFormat('pt-BR', { timeZone: turno.fuso }); fuso = turno.fuso; } catch (_) {}
+  }
+  const instante = !!(turno && fuso && iso(turno.inicioISO) && turno.inicioISO <= capturadoEm);
+  const r = o.req && c.reqs[o.req];
+  const produtos = Object.keys(ap.cons || {}).sort().map(prod => {
+    const itens = r ? (r.itens || []).filter(it => it.prod === prod) : [];
+    const lotes = [...new Set(itens.map(it => it.lote).filter(Boolean))];
+    const unidades = [...new Set(itens.map(it => it.un).filter(Boolean))];
+    return { produto: prod, quantidade: ap.cons[prod], informada: !!(ap.inf || {})[prod],
+      unidade: unidades.length === 1 ? unidades[0] : null,
+      lote: lotes.length === 1 && itens.every(it => !!it.lote) ? lotes[0] : null,
+      lotesCandidatos: lotes, atribuicaoLote: lotes.length === 1 && itens.every(it => !!it.lote)
+        ? 'requisicao_univoca' : 'nao_demonstrada' };
+  });
+  return { versao: 1, tipo: 'relato_aplicacao', chave: ap.chave, os: o.id,
+    versaoOS: o.versao || null, talhao: o.talhao || null,
+    areaHa: ap.ha, ator: ap.quem || null, origem: ap.origem, capturadoEm,
+    tempo: instante ? { precisao: 'instante', inicio: turno.inicioISO, fim: capturadoEm, fuso,
+      fonte: 'relogio_app' } : { precisao: 'incompleta', dataInformada: ap.d, inicio: null, fim: null,
+      fuso, motivo: 'Sem intervalo completo capturado; DD/MM não informa ano.' },
+    produtos };
 }
