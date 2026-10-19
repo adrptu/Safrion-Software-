@@ -11,7 +11,7 @@ const HOJE = '2026-09-26';
 
 /* ---------- fórmulas (F) ---------- */
 caso('F1', () => { const s = intSpread('2.90', '3.10');
-  ok('F1 diferença à referência: (2,90 − 3,10) ÷ 3,10 = −6,45% e vira alerta (pior que −5%)', perto(s, -0.0645161, 1e-6) && intAbaixo(s) && intPct(s) === '−6,5%', [s, intPct(s)]); });   /* sinal de menos tipográfico, como na tela */
+  ok('F1 diferença à referência: (2,90 − 3,10) ÷ 3,10 = −6,45% sem alerta sem meta', perto(s, -0.0645161, 1e-6) && !intAbaixo(s) && intPct(s) === '−6,5%', [s, intPct(s)]); });   /* sinal de menos tipográfico, como na tela */
 caso('F2', () => ok('F2 ausente ≠ zero: sem referência a diferença é null, sem alerta e "—" na tela', intSpread('2.90', null) === null && intSpread('2.90', '0') === null && !intAbaixo(null) && intPct(null) === '—', [intSpread('2.90', null)]));
 caso('F3', () => ok('F3 posição: 25 ÷ 100 = 25%; oferta zero ou ausente não vira 0% (null)', perto(intPosicao(25, 100), 0.25) && intPosicao(30000, 0) === null && intPosicao(10, null) === null, [intPosicao(25, 100), intPosicao(30000, 0)]));
 caso('F4', () => { const a = intLiquido('3.00', '0.19', 30, '0.012'), b = intLiquido('3.00', '0.19', 0, '0.012');
@@ -19,7 +19,7 @@ caso('F4', () => { const a = intLiquido('3.00', '0.19', 30, '0.012'), b = intLiq
 caso('F5', () => ok('F5 frete por unidade = R$ 190/t × kg da unidade ÷ 1000: caixa de 20 kg R$ 3,80; kg R$ 0,19', perto(intFreteUn(20), 3.8) && perto(intFreteUn(1), 0.19), [intFreteUn(20), intFreteUn(1)]));
 caso('F6', () => ok('F6 pontualidade = no prazo ÷ entregas: 2 de 3 = 66,7%; sem entrega é null (não 0% nem 100%)', perto(intPontualidade([{ atraso: 0 }, { atraso: 3 }, { atraso: 0 }]), 2 / 3, 1e-5) && intPontualidade([]) === null, intPontualidade([{ atraso: 0 }, { atraso: 3 }, { atraso: 0 }])));
 caso('F7', () => ok('F7 R$/ha = Σ(qtd × preço) ÷ área: (100 × 2,5 + 10 × 30) ÷ 50 = 11; área zero é null', perto(intRsHa([{ qtd: '100', preco: '2.5' }, { qtd: '10', preco: '30' }], '50'), 11) && intRsHa([{ qtd: '1', preco: '1' }], '0') === null));
-caso('F8', () => ok('F8 limites de 5%: exatamente +5% ou −5% não alerta; +5,01% e −5,01% alertam', !intAcima('0.05') && intAcima('0.0501') && !intAbaixo('-0.05') && intAbaixo('-0.0501')));
+caso('F8', () => ok('F8 sem meta: nenhum limiar percentual classifica desempenho', [null,undefined,'-0.9','-0.0501','0','0.05','0.0501','9'].every(x=>!intAcima(x)&&!intAbaixo(x))));
 
 /* ---------- Vendas (V) sobre a semente ---------- */
 caso('V1', () => { const I = intVendas(NOVO(), HOJE); const s = I.posicao.find(p => p.prod === 'Soja em grão'); const pr = I.prods.find(p => p.prod === 'Soja em grão');
@@ -52,7 +52,7 @@ caso('C6', () => { const I = intCompras(INTC, '2026-10-13'); const comCot = I.it
 caso('C7', () => { const nome = INTC.itens[0].nome; const D2 = JSON.parse(JSON.stringify(INTC)); delete D2.cot[nome]; const i = intCompras(D2, HOJE).itens.find(x => x.nome === nome);
   ok('C7 insumo sem cotação: melhor, diferença e economia null (ausente ≠ zero) e não conta como vencida', i && i.melhor === null && i.vRef === null && i.economia === null && i.nVenc === 0, i); });
 caso('C8', () => { const it = INTC.itens[0]; const mk = f => { const D2 = JSON.parse(JSON.stringify(INTC)); D2.cot[it.nome] = [{ f: 'F01', nome: 'Teste', preco: String(Number(it.ref) * f), prazo: 5, frete: 'CIF', pag: '30 dias', validade: '30/12/2026' }]; return intCompras(D2, HOJE).itens.find(x => x.nome === it.nome); };
-  const a = mk(1.06), b = mk(1.05); ok('C8 cotação 6% acima da referência alerta; exatamente 5% acima não', a.acima && !b.acima, [a.vRef, b.vRef]); });
+  const a = mk(1.06), b = mk(1.05); ok('C8 sem meta: 6% e 5% preservados sem alerta', !a.acima && !b.acima && perto(a.vRef,0.06) && perto(b.vRef,0.05), [a.vRef, b.vRef]); });
 caso('C9', () => { intCompras(INTC, '2026-10-13'); const algum = Object.values(INTC.cot).some(cs => cs.some(x => 'venc' in x));
   ok('C9 a conta não altera os dados de entrada (INTC sem campo novo depois de duas chamadas)', !algum); });
 

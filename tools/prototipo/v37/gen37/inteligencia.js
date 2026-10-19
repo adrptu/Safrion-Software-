@@ -3,7 +3,7 @@
    não vira zero: o indicador fica null e a tela diz "sem cotação" ou "sem previsão". Só sinal com fonte e regra; a decisão
    de vender ou comprar é de quem vende ou compra. Dados sintéticos. */
 const INT_TAXA_MES = '0.012';    // custo financeiro do prazo de recebimento: 1,2% ao mês (parâmetro sintético do proprietário)
-const INT_LIM = '0.05';          // alerta: venda 5% abaixo da referência; cotação 5% acima da referência
+// EX-53 F1c: referência de preço não é meta configurada; sem meta, não há alerta percentual.
 const INT_FRETE_T = '190';       // frete de referência R$/t (Rota Sul, contrato vigente sintético; dados_comercial.FRETE)
 function intOk(x) { return x !== null && x !== undefined && x !== '' && prCmp(x, 0) > 0; }
 /* diferença relativa: (a − b) ÷ b; null se b ausente */
@@ -19,8 +19,8 @@ function intFreteUn(massaKg) { return prMulDiv(INT_FRETE_T, massaKg || 0, 1000);
 function intPontualidade(ents) { const n = (ents || []).length; if (!n) return null; return prDiv(ents.filter(e => !(e.atraso > 0)).length, n); }
 function intRsHa(itens, area) { return intOk(area) ? prDiv(prSoma((itens || []).map(i => prMul(i.qtd, i.preco))), area) : null; }
 function intPct(f, d) { if (f === null || f === undefined) return '—'; const t = prFmt(prMul(f, 100), d === undefined ? 1 : d); return (prCmp(f, 0) > 0 ? '+' : '') + t + '%'; }
-function intAbaixo(f) { return f !== null && prCmp(f, prSub(0, INT_LIM)) < 0; }   // pior que −5%
-function intAcima(f) { return f !== null && prCmp(f, INT_LIM) > 0; }               // pior que +5%
+function intAbaixo(f) { return false; } // sem meta configurada; preserva contrato dos consumidores
+function intAcima(f) { return false; } // sem meta configurada; não confundir comparação com alerta
 
 /* ---------- Vendas ---------- */
 function intVendas(c, hoje) { hoje = hoje || prHoje(); const P = prP(c);
