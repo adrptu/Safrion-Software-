@@ -33,6 +33,7 @@ c=setup();c.reqs.R.itens.push({prod:'P',lote:'L2',un:'L',custodia:10});
 r=run('cenApontar',c,input).ap.reciboAplicacao;
 assert.equal(r.produtos[0].lote,null);assert.equal(r.produtos[0].atribuicaoLote,'nao_demonstrada');
 assert.equal(r.produtos[0].quantidade,1);assert.equal(r.produtos[0].lotesCandidatos.length,2);
+c=setup();c.reqs.R.itens[0].lote='—';r=run('cenApontar',c,input).ap.reciboAplicacao;assert.equal(r.produtos[0].lote,null);
 c=setup();c.ordens['OS-X'].etapa='Liberada';assert.throws(()=>run('cenApontar',c,input),/execução/);
 assert.equal(c.ordens['OS-X'].ap.length,0);
 assert.equal(JSON.stringify(JSON.parse(saved)),saved);

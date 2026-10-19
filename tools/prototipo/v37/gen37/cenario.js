@@ -1189,12 +1189,13 @@ function cenReciboAplicacao(c, o, ap, capturar = false) {
   const r = o.req && c.reqs[o.req];
   const produtos = Object.keys(ap.cons || {}).sort().map(prod => {
     const itens = r ? (r.itens || []).filter(it => it.prod === prod) : [];
-    const lotes = [...new Set(itens.map(it => it.lote).filter(Boolean))];
+    const loteValido = x => typeof x === 'string' && x.trim() !== '' && x !== '—';
+    const lotes = [...new Set(itens.map(it => it.lote).filter(loteValido))];
     const unidades = [...new Set(itens.map(it => it.un).filter(Boolean))];
     return { produto: prod, quantidade: ap.cons[prod], informada: !!(ap.inf || {})[prod],
       unidade: unidades.length === 1 ? unidades[0] : null,
-      lote: lotes.length === 1 && itens.every(it => !!it.lote) ? lotes[0] : null,
-      lotesCandidatos: lotes, atribuicaoLote: lotes.length === 1 && itens.every(it => !!it.lote)
+      lote: lotes.length === 1 && itens.every(it => loteValido(it.lote)) ? lotes[0] : null,
+      lotesCandidatos: lotes, atribuicaoLote: lotes.length === 1 && itens.every(it => loteValido(it.lote))
         ? 'requisicao_univoca' : 'nao_demonstrada' };
   });
   return { versao: 1, tipo: 'relato_aplicacao', chave: ap.chave, os: o.id,
