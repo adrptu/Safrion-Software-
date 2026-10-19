@@ -45,6 +45,7 @@ const RaioxComparacao = (() => {
     const p = parametros;
     if (!p || !texto(p.id) || !Number.isInteger(p.versao) || p.versao < 1 || p.origem !== 'demonstrativo') throw Error('Este núcleo só aceita parâmetros demonstrativos identificados.');
     if (!Number.isFinite(instante(p.publicadoEm)) || instante(p.publicadoEm) > corte) throw Error('Parâmetros não publicados até o corte.');
+    if (p.agregacao !== undefined && p.agregacao !== 'mediana_razoes_talhao_v1') throw Error('Método de agregação desconhecido.');
     if (!texto(p.protocolo) || !texto(p.unidade) || !numero(p.nc) || p.nc <= 0) throw Error('Protocolo, unidade ou NC inválido.');
     for (const k of ['antesMaxDias', 'depoisMinDias', 'depoisMaxDias', 'toleranciaDias', 'residualDias', 'pisoAntes', 'diferencaRelativaAntes']) {
       if (!numero(p[k]) || p[k] < 0) throw Error('Parâmetro inválido: ' + k);
@@ -114,11 +115,23 @@ const RaioxComparacao = (() => {
       return {...out, estado: 'elegivel', razao, variacao, fontes: [fonte(ca), fonte(cb)], mudouAvaliador: ca.avaliador !== cb.avaliador};
     }).sort((a, b) => a.talhao.localeCompare(b.talhao) || JSON.stringify(a).localeCompare(JSON.stringify(b)));
     const elegiveis = controles.filter(c => c.estado === 'elegivel');
-    return {estado: elegiveis.length < p.minControles ? 'insuficiente' : 'agregacao_pendente',
+    const resumo = {estado: elegiveis.length < p.minControles ? 'insuficiente' : 'agregacao_pendente',
       motivo: elegiveis.length < p.minControles ? 'controles_elegiveis_insuficientes' : 'metodo_de_agregacao_nao_adotado',
       fontes: [fonte(a), fonte(b)], mudouAvaliador: a.avaliador !== b.avaliador,
       zeroObservadoDepois: b.valor === 0, controles, quantidadeElegivel: elegiveis.length,
       variacao: null};
+    if (elegiveis.length < p.minControles || p.agregacao === undefined) return resumo;
+    const fatores = elegiveis.map(c => c.razao).sort((a, b) => a - b), meio = Math.floor(fatores.length / 2);
+    const interpolada = fatores.length % 2 === 0;
+    // Média dos dois centrais sem somar números que possam exceder o limite finito.
+    const fator = interpolada ? fatores[meio - 1] + (fatores[meio] - fatores[meio - 1]) / 2 : fatores[meio];
+    const variacao = 1 - (b.valor / a.valor) / fator;
+    if (!Number.isFinite(variacao)) return {...resumo, estado: 'indisponivel', motivo: 'resultado_nao_finito'};
+    const faixa = elegiveis.reduce((v, c) => ({minimo: Math.min(v.minimo, c.variacao), maximo: Math.max(v.maximo, c.variacao)}), {minimo: Infinity, maximo: -Infinity});
+    return {...resumo, estado: 'disponivel', motivo: '', variacao, metodo: p.agregacao,
+      rotulo: 'Contraste frente ao fator mediano dos controles', fatorTratado: b.valor / a.valor,
+      fatorControles: fator, medianaInterpolada: interpolada, faixaEntreControles: faixa,
+      avisoMetodo: 'Faixa entre contrastes individuais; não é intervalo de confiança. Não demonstra eficácia causal.'};
   }
   function seguir(s, aplicacao) {
     const t = instante(aplicacao.evento);

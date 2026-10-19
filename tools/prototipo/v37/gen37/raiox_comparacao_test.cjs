@@ -125,4 +125,54 @@ teste('A2 outros alvos futuros continuam invisíveis e outras fazendas isoladas'
 teste('A2 leitura de outro alvo não entra no seguimento', () => {
   const d = fixture(), r = executar(d); d.leituras.push(leitura('OUTRA', 'T', 15, 100, {alvo: 'A2'})); assert.deepEqual(executar(d), r);
 });
+const pAgregado = {...p, agregacao: 'mediana_razoes_talhao_v1'};
+function exemploPar() {
+  const d = fixture(); Object.assign(d.leituras.find(x => x.talhao === 'C1' && x.id === 'a'), {valor: 5});
+  for (const x of d.leituras.filter(x => x.talhao === 'C2')) x.valor = 15;
+  return d;
+}
+const perto = (a, b) => assert.ok(Math.abs(a - b) < 1e-12, `${a} != ${b}`);
+teste('método explícito calcula contraste com mediana dos fatores, não mediana dos contrastes', () => {
+  const r = executar(exemploPar(), contexto, pAgregado).comparacao;
+  assert.equal(r.estado, 'disponivel'); assert.equal(r.metodo, pAgregado.agregacao); assert.equal(r.fatorControles, 1.5); perto(r.variacao, 2/3);
+  assert.notEqual(r.variacao, 3/5); assert.notEqual(r.variacao, 5/8); assert.equal(r.medianaInterpolada, true);
+  assert.deepEqual(r.faixaEntreControles, {minimo: 0.5, maximo: 0.75});
+});
+teste('n ímpar preserva fator central sem peso implícito pelo nível inicial', () => {
+  const d = exemploPar(); d.leituras.push(leitura('a', 'C3', 1, 10), leitura('b', 'C3', 10, 10));
+  const r = executar(d, contexto, pAgregado, {...pedido, controles: [...pedido.controles, {talhao: 'C3', antes: 'a', depois: 'b'}]}).comparacao;
+  assert.equal(r.variacao, 0.5); assert.equal(r.fatorControles, 1); assert.equal(r.medianaInterpolada, false); assert.notEqual(r.variacao, 4/7);
+});
+teste('contraprova Gemini ajustada ao pareamento: fatores divergentes mantêm faixa visível', () => {
+  const d = exemploPar(); d.leituras.find(x => x.talhao === 'T' && x.id === 'b').valor = 2;
+  d.leituras.find(x => x.talhao === 'C1' && x.id === 'b').valor = 25;
+  d.leituras.find(x => x.talhao === 'C2' && x.id === 'a').valor = 10;
+  d.leituras.find(x => x.talhao === 'C2' && x.id === 'b').valor = 5;
+  const r = executar(d, contexto, pAgregado).comparacao;
+  assert.equal(r.quantidadeElegivel, 2); assert.equal(r.fatorControles, 2.75); perto(r.variacao, 51/55);
+  assert.deepEqual(r.faixaEntreControles, {minimo: 0.6, maximo: 0.96}); assert.notEqual(r.variacao, 0.78);
+});
+teste('agregado sem mínimo ou denominador válido continua null', () => {
+  const d = exemploPar(); d.leituras.find(x => x.talhao === 'C1' && x.id === 'b').valor = 0;
+  const r = executar(d, contexto, pAgregado).comparacao; assert.equal(r.estado, 'insuficiente'); assert.equal(r.variacao, null); assert.equal(r.fatorControles, undefined);
+  const rep = executar(exemploPar(), contexto, pAgregado, {...pedido, controles: [...pedido.controles, pedido.controles[0]]}).comparacao;
+  assert.equal(rep.estado, 'insuficiente'); assert.equal(rep.variacao, null);
+});
+teste('zero observado e aumento continuam explícitos no agregado', () => {
+  const d = exemploPar(); d.leituras.find(x => x.talhao === 'T' && x.id === 'b').valor = 0;
+  let r = executar(d, contexto, pAgregado).comparacao; assert.equal(r.variacao, 1); assert.equal(r.zeroObservadoDepois, true);
+  d.leituras.find(x => x.talhao === 'T' && x.id === 'b').valor = 30;
+  r = executar(d, contexto, pAgregado).comparacao; assert.equal(r.variacao, -1); assert.equal(r.zeroObservadoDepois, false);
+});
+teste('agregado é invariante à ordem e à escala comum da unidade', () => {
+  const d = exemploPar(), r = executar(d, contexto, pAgregado).comparacao;
+  d.leituras.reverse(); assert.deepEqual(executar(d, contexto, pAgregado, {...pedido, controles: [...pedido.controles].reverse()}).comparacao, r);
+  for (const x of d.leituras) x.valor *= 100;
+  const escalado = executar(d, contexto, {...pAgregado, pisoAntes: p.pisoAntes * 100, nc: p.nc * 100}).comparacao;
+  assert.equal(escalado.variacao, r.variacao); assert.deepEqual(escalado.faixaEntreControles, r.faixaEntreControles);
+});
+teste('método não declarado permanece pendente; nome desconhecido falha', () => {
+  assert.equal(executar(exemploPar()).comparacao.estado, 'agregacao_pendente');
+  assert.equal(executar(exemploPar(), contexto, {...p, agregacao: 'automatico'}).motivo, 'contrato_invalido');
+});
 console.log(`${passou}/${passou} PASS — dados e parâmetros exclusivamente sintéticos.`);
