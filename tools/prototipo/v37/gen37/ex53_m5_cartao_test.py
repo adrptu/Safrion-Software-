@@ -30,9 +30,12 @@ manCumprimento=()=>({ok:1,n:2,pct:50,de:manPeriodo(c,'12m').de,ate:c.hoje});
 assert.throws(()=>assert.equal(pgPreventiva(c).v,'33%'),'contador antigo deve reprovar');
 manCumprimento=real;
 assert.equal(pgPreventiva(c).v,'33%');
+const cfg={conf:{metas:{'KPI-PCM-05':{valor:90,atencao:80,sentido:'maior',un:'%',escopo:'organizacao'}}}};
+assert.equal(pgPreventiva(c,cfg).cor,'red');assert.match(pgPreventiva(c,cfg).sub,/Fora da meta/);
+cfg.conf.metas['KPI-PCM-05'].ativa=false;assert.equal(pgPreventiva(c,cfg).cor,'gray');
 console.log('PASS M5: base vazia, domínio real 1/3, período, cor, destino e mutante 1/2');
 '''
-src = cenario.perfis_js()+DM.js_prefixo()+js+probe
+src = cenario.perfis_js()+DM.js_prefixo()+(p/'metas.js').read_text()+js+probe
 # o código passa por arquivo temporário: no Linux, -e com o prelúdio inteiro estoura o limite de argumentos (E2BIG)
 import tempfile
 with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as tf: tf.write(src)

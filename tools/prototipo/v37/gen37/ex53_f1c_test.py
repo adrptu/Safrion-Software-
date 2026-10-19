@@ -10,7 +10,7 @@ def read(f):
 s=read('areas/inicio.py'); fn=s[s.index('function cls0('):s.index('// MUX-F2 (17/10/2026): cada classe')]
 u=read('areas/inteligencia.py'); fs='\n'.join(l for l in u.splitlines() if l.startswith(('function ivSit(', 'function icSit(', 'function ivAbaixoRef(')))
 probe=r'''
-const assert=require('node:assert/strict');
+const assert=require('node:assert/strict');let cfg={};const cenGet=()=>cfg;
 const isCar=()=>false,isIns=()=>false,SOLO_L='solo',COLH_L='colheita',OS_L='ordens';
 let real={ha:1,shared:[],rs:100,prevExec:100};
 const prevOf=()=>({fonte:true,base:1,tot:100}),cusReal=()=>real,mil=String,nfx=(v,d)=>v.toFixed(d),money=String;
@@ -25,8 +25,13 @@ assert.equal(ivAbaixoRef({spread:null}),false);
 assert.equal(icSit({melhor:{},vRef:.5,acima:false}),'Cotação acima da referência');
 assert.equal(icSit({melhor:null,nVenc:1}),'Cotação vencida');
 assert.equal(ivSit({medC:null,amb:['x']}),'Saca a conferir');
+cfg={conf:{metas:{'custo-desvio':{valor:0,atencao:5,sentido:'menor',un:'%',escopo:'organizacao'}}}};
+real={ha:1,shared:[],pend:[],rs:110,prevExec:100};assert.equal(cls0('Custos',{},'T').c,'red');
+real.pend=['preço ausente'];assert.equal(cls0('Custos',{},'T').c,'gray');
+real.pend=[];real.rs=100;assert.equal(cls0('Custos',{},'T').c,'ok');
+cfg.conf.metas['custo-desvio'].ativa=false;assert.equal(cls0('Custos',{},'T').c,'gray');
 console.log('PASS F1c: custos neutros, valor/ausência, comparação descritiva e cotação vencida');
 '''
 assert u.count('I.prods.filter(ivAbaixoRef)') == 2
 assert "rk ? 'yellow' : 'gray'" in u
-raise SystemExit(subprocess.run([os.environ.get('NODE_BINARY','node'),'-e',fn+'\n'+fs+'\n'+probe]).returncode)
+raise SystemExit(subprocess.run([os.environ.get('NODE_BINARY','node'),'-e',read('metas.js')+'\n'+fn+'\n'+fs+'\n'+probe]).returncode)

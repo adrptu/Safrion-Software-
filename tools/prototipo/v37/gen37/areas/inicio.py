@@ -800,7 +800,8 @@ function cls0(l,f,t){
   if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
     const R=cusReal(t); if(!R.ha) return {c:'none',l:R.shared.length?('só '+R.shared.map(x=>x.o.id).join(', ')+' compartilhada'):'sem execução'}; const dv=R.prevExec>0?(R.rs-R.prevExec)/R.prevExec*100:null;
-    return {c:'gray',l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1).replace('-', '−')+' %')}; }
+    const a=metaAvaliar(cenGet(),'custo-desvio',dv,'%',!!((R.pend||[]).length||(R.shared||[]).length));
+    return {c:({green:'ok',yellow:'yellow',red:'red',gray:'gray'})[a.cor],l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1).replace('-', '−')+' %')+' · '+a.texto+(metaDe(cenGet(),'custo-desvio')?' · '+metaDica(cenGet(),'custo-desvio'):'')}; }
   return {c:'none',l:''}; }
 // MUX-F2 (17/10/2026): cada classe da legenda leva a chave da cor (k) ou o hex (hx) para contar talhões e área, realçar e filtrar (legenda que trabalha);
 // "não se aplica" (none) ganha contorno tracejado no quadradinho, o mesmo do talhão no mapa (D14: a cor do fundo sozinha tinha contraste 1,0:1)
@@ -822,7 +823,7 @@ function legend(self,l,f,sel){
     return f.ver==='Balanço hídrico'?[Lc(l,'ok','déficit < 5 mm'),Lc(l,'yellow','5–10 mm'),Lc(l,'orange','10–15 mm'),Lc(l,'red','≥ 15 mm'),Lc(l,'gray','sequeiro ou preparo'),ETQ]
     :[Lc(l,'blue','irrigando'),Lc(l,'lime','programada'),Lc(l,'yellow','pendente: janela, conferência ou liberação'),Lc(l,'red','impedida ou conflito'),Lc(l,'ok','sem necessidade hoje'),Lc(l,'gray','sequeiro ou preparo'),ETQ]; }
   if(isIns(l,f)) return [Lc(l,'ok','estoque cobre'),Lc(l,'yellow','pedido a receber'),Lc(l,'red','falta comprar'),Lc(l,'gray','sem plano na safra'),Lc(l,'none','sem necessidade no período')];
-  if(l==='Custos') return f.most==='Previsto R$/ha'?[Lc(l,'blue','com previsto'),Lc(l,'gray','sem previsto')]:[Lc(l,'gray','Meta não configurada'),Lc(l,'none','sem execução')];
+  if(l==='Custos') return f.most==='Previsto R$/ha'?[Lc(l,'blue','com previsto'),Lc(l,'gray','sem previsto')]:(metaDe(cenGet(),'custo-desvio')?[Lc(l,'ok','Meta atendida'),Lc(l,'yellow','Atenção à meta'),Lc(l,'red','Fora da meta'),Lc(l,'gray','Sem base suficiente'),Lc(l,'none','sem execução')]:[Lc(l,'gray','Meta não configurada'),Lc(l,'none','sem execução')]);
   return []; }
 function fonte(l,f){
   if(isCar(l,f)) return carFonte(f);   // MAPA-CARENCIA-LMR-20261003

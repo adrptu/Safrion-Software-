@@ -404,3 +404,56 @@ def build():
     cf01()
     cf03()
     cf04()
+    cf06()
+
+# EX-53 D11 · metas do grupo: lista → detalhe → histórico. Não duplica meta do cultivo.
+CF6_JS = r'''
+function cf6Fecha(self){ if(self.state.m6id){ self.__m6rascunhos=self.__m6rascunhos||{}; self.__m6rascunhos[self.state.m6id]=Object.fromEntries(Object.entries(self.state).filter(([k])=>k.startsWith('m6'))); } self.setState({m6id:null,m6erro:''}); }
+function cf6Abre(self,id){ if(self.__m6rascunhos&&self.__m6rascunhos[id]){ self.setState(self.__m6rascunhos[id]); return; } const c=cenGet(), m=metaRegistro(c,id), a=metaDe(c,id);
+  self.setState({m6id:id,m6valor:a?String(a.valor):'',m6atencao:a?String(a.atencao):'',m6sentido:metaDef(id).sentido,m6motivo:'',m6erro:'',m6versao:m?m.v:0,m6chave:confChave('meta')}); }
+function cf6Numero(x){ const t=String(x).trim().replace(',','.'); return /^-?\d+(\.\d+)?$/.test(t)?Number(t):NaN; }
+function cf6Salvar(self,retira){ const st=self.state, id=st.m6id, d=metaDef(id); if(!d) return;
+  const novo=retira?null:{valor:cf6Numero(st.m6valor),atencao:cf6Numero(st.m6atencao),sentido:st.m6sentido,un:d.un};
+  const r=cenMudar(null,c=>metaGravar(c,id,novo,st.m6motivo,st.m6versao,st.m6chave,g2perfil()),{estrito:true});
+  if(r.erro){ self.setState({m6erro:r.erro}); return; }
+  if(self.__m6rascunhos) delete self.__m6rascunhos[id];
+  self.setState({m6id:null,m6erro:'',cenrev:Date.now(),g2toast:r.msg}); }
+function PREVALS(self,v){ cenOuvir(self); const c=cenGet();
+  aGrid('g_metas').rows=META_CATALOGO.map(d=>{ const m=metaDe(c,d.id), r=metaRegistro(c,d.id);
+    const estado=m?'Configurada · v'+m.v:'Meta não configurada';
+    return {id:d.id,dr:'m6_'+d.id,v:{nome:d.nome,meta:m?m.valor:null,sit:estado},s:{nome:d.nome,meta:m?String(m.valor):'',sit:estado},
+      p:{nome:[{k:'b',t:d.nome},{k:'mut',t:d.id}],meta:[{k:'txt',t:m?m.valor+' '+m.un+' · '+(m.sentido==='maior'?'maior':'menor')+' é melhor':'—'}],sit:[aCh(estado,'gray'),{k:'mut',t:r?r.quem+' · '+confBr(r.d)+' '+r.at:''}]}}; }); }
+function EXTRAVALS(self,v){ const c=cenGet(),st=self.state,K=confLer(c),P=confAtor(K,g2perfil()),pode=!!(P&&P.papeis.gestor);
+  META_CATALOGO.forEach(d=>v['m6_'+d.id]=()=>cf6Abre(self,d.id));
+  const d=metaDef(st.m6id),m=d?metaDe(c,d.id):null;
+  aPainel(self,v,'m6painel',!!d,d?d.nome:'',()=>cf6Fecha(self));
+  v.m6pode=pode;v.m6semPoder=!pode;v.m6erro=st.m6erro||'';v.m6temErro=!!v.m6erro;
+  v.m6valor=st.m6valor||'';v.m6atencao=st.m6atencao||'';v.m6sentido=st.m6sentido||'';v.m6motivo=st.m6motivo||'';
+  ['valor','atencao','sentido','motivo'].forEach(k=>v['m6set_'+k]=e=>self.setState({['m6'+k]:e.target.value,m6erro:''}));
+  v.m6salvar=()=>cf6Salvar(self,false);v.m6retirar=()=>cf6Salvar(self,true);v.m6temMeta=!!m&&pode;
+  v.m6estado=m?'Vigente: '+m.valor+' '+m.un+' · atenção '+m.atencao+' · v'+m.v+' · '+m.quem+' · '+confBr(m.d)+' '+m.at:'Meta não configurada';
+  const vigente=d?metaRegistro(c,d.id):null; v.m6conflito=!!d&&st.m6versao!==(vigente?vigente.v:0); v.m6atualizar=()=>self.setState({m6versao:vigente?vigente.v:0,m6chave:confChave('meta'),m6erro:''});
+  v.m6un=d?d.un:''; v.m6sentidoTxt=d?(d.sentido==='maior'?'Maior é melhor':'Menor é melhor'):'';
+  v.m6versoes=d?(K.ev||[]).filter(e=>e.tipo==='meta'&&e.alvo===d.id).slice().reverse().map(e=>({t:e.id+' · '+confBr(e.d)+' '+e.at,v:e.quem+' · '+(e.depois?e.depois.valor+' '+e.depois.un+'; atenção '+e.depois.atencao+'; '+e.depois.sentido+' é melhor':'Meta retirada')+' · motivo: '+e.motivo,st:''})):[];
+}
+'''
+
+def cf06():
+    fname='CF-06.dc.html'; E._reset_screen(fname)
+    ui37.CAT['CF-06']=dict(titulo='Metas e limites',grupo='Configurações')
+    tabela=grid([dict(k='nome',l='Indicador',w=300),dict(k='meta',l='Meta',w=220),dict(k='sit',l='Estado e autoria',w=300)],[],gid='g_metas',search=True,total=False,so={'k':'nome'},edit=dict(m='ro',title='Meta',fields=[]))
+    corpo=CF1_CSS+section('Metas e limites','Limites do grupo para os indicadores existentes. Selecione um indicador para configurar ou retirar a meta.','','<p class="conf-nota">Sem meta ou sem base suficiente, a comparação permanece cinza. Meta de produtividade continua no cultivo.</p>'+tabela)
+    estilo=f'font:inherit;padding:10px;border:1px solid {LINE};border-radius:8px;width:100%;box-sizing:border-box;'
+    campos=''
+    for k,t in [('valor','Valor da meta (%)'),('atencao','Limite de atenção (%)')]:
+        campos+=f'<label for="m6_{k}">{t}</label><input id="m6_{k}" inputmode="decimal" value="{H("m6"+k)}" onChange="{H("m6set_"+k)}" style="{estilo}" />'
+    campos+=(f'<p>Sentido: {H("m6sentidoTxt")} · Organização</p>'
+             '<p class="conf-nota">Maior: atenção entre o limite e a meta. Menor: atenção entre a meta e o limite. Além da atenção: fora da meta. Limites iguais não criam faixa amarela.</p>'
+             f'<label for="m6_motivo">Motivo (obrigatório, inclusive para retirar)</label><textarea id="m6_motivo" value="{H("m6motivo")}" onChange="{H("m6set_motivo")}" style="{estilo}"></textarea>'
+             '<p class="conf-nota">Salvar aplica o limite às próximas comparações do grupo; não altera valores, cálculos ou aprovações. Períodos passados também usam a meta vigente. Retirar devolve a comparação ao cinza e preserva as versões.</p>')
+    detalhe=f'<p role="status">{H("m6estado")}</p>'+_sc('m6semPoder','<p>Somente gestor ativo configura as metas. O histórico permanece disponível.</p>')+_sc('m6pode','<div style="display:grid;gap:8px">'+campos+'</div>')+_sc('m6temErro',f'<p role="alert" style="color:{RED}">{H("m6erro")}</p>')+_sc('m6conflito','<p>A meta mudou. Compare os valores vigentes acima com seu rascunho antes de salvar.</p>'+f'<button type="button" style="{SEC}" onClick="{H("m6atualizar")}">Atualizar versão e manter rascunho</button>')+titulo('Versões')+_lin('m6versoes')
+    rod=_sc('m6pode','<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">'+_sc('m6temMeta',f'<button type="button" style="{SEC}" onClick="{H("m6retirar")}">Retirar meta</button>')+f'<button type="button" style="{PRI}" onClick="{H("m6salvar")}">Salvar meta</button></div>')
+    E.EXTRA.append(painel('m6painel',detalhe,rod,540,foco=True))
+    EXTRAJS[0]=cenario.js_prefixo()+A_JS+CF6_JS
+    HEIGHTS37[fname]=1000
+    shell37('CF-06','Metas e limites',corpo,fname=fname,search=False,subtitle='Configurações do grupo · limites explícitos e histórico de mudanças.',footer='Demonstração: configuração salva neste navegador. Perfil de demonstração não substitui autorização no servidor.')
