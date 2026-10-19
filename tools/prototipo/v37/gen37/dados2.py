@@ -760,7 +760,7 @@ def outras_safras(safra):
     return [s['id'] for s in SAFRAS if s['id']!=safra and not s['ro'] and s['fazenda']==me['fazenda']]
 def classe_oc(dt,mi,ini,fim):
     """Espelho do classeOc (safra.js): antes do início, depois do fim, fora do calendário ou no calendário ('cal')."""
-    if dt is None: return 'fora'
+    if dt is None or dt == '': return 'semdata'
     d=dt.isoformat() if hasattr(dt,'isoformat') else str(dt)
     if ini and d<ini: return 'antes'
     if fim and d>fim: return 'depois'

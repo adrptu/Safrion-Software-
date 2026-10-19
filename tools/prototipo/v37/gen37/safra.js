@@ -292,7 +292,7 @@ function cargaItens(i){ const o=[]; ((i.rp&&i.rp.itens)||[]).forEach((x,j)=>{ co
   Object.keys(rc).forEach(k=>{ const u=Number(rc[k])||0; if(u<=0) return; o.push({k,j,u,h:(Number(x.nh)||0)*u,ha:(Number(x.h)||0)*u,sim:(Number(x.nq)||0)>1e-12?u:0,semRec:!!x.semRec,nome:x.nome}); }); }); return o; }
 function cargaRec(i,k){ return cargaItens(i).filter(c=>c.k===k).reduce((a,c)=>a+c.h,0); }
 // etiqueta do calendário de uma ocorrência (uma só): antes do início, depois do fim ou fora do calendário; conta no custo, não na capacidade
-function classeOc(dt,mi,ini,fim){ if(!dt) return 'fora'; if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim) return 'depois'; if(mi<0) return 'fora'; return 'cal'; }
+function classeOc(dt,mi,ini,fim){ if(!dt) return 'semdata'; if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim) return 'depois'; if(mi<0) return 'fora'; return 'cal'; }
 // texto único da ocupação (célula, aria-label, filtro, atalhos e espelho): "<1 %" abaixo de 1 %; "—" sem demanda; null = não calculável
 function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
 // atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
@@ -339,6 +339,7 @@ function capForaOutras(G){ const by={}, ord=[]; Object.values(G).forEach(g=>(g.f
 // fora/depois/cal), ini e fim (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
 function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
   const fora=[]; if(x.semPlano.length) fora.push(capNomes(x.semPlano.map(c=>c.local))+' ('+nfa0(x.semPlano.reduce((a,c)=>a+(Number(c.area)||0),0))+' ha), sem plano');
+  if(oc.some(i=>!i.dt)) fora.push('atividades sem data · projeção parcial');
   if(x.cls.antes) fora.push(x.cls.antes+(x.cls.antes>1?' ocorrências':' ocorrência')+' antes do início da safra ('+x.ini+')');
   if(x.cls.fora) fora.push(x.cls.fora+(x.cls.fora>1?' ocorrências':' ocorrência')+' fora do calendário');
   if(x.cls.depois) fora.push(x.cls.depois+(x.cls.depois>1?' ocorrências':' ocorrência')+' depois do fim da safra');
@@ -347,6 +348,7 @@ function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR
   const jn=capJanelas(oc); const prazo=jn.J?' Prazo por talhão não verificado: '+jn.J+' de '+jn.M+(jn.M>1?' atividades':' atividade')+' sem janela.':'';
   if(!x.aPlano) return {R:'R0',cor:'',txt:''};
   // R1: o motivo sai das etiquetas (verificação SAF-C02): todas fora do calendário, ou nenhuma no período da safra (antes, depois e fora contadas)
+  if(!x.cls.cal&&oc.some(i=>!i.dt)) return {R:'R3',cor:'yellow',txt:'Capacidade pendente: informe as datas das atividades. Projeção parcial.'+foraTxt};
   if(!x.cls.cal) return {R:'R1',cor:'gray',txt:(oc.length&&x.cls.fora===oc.length)?'Capacidade não calculada: '+(oc.length>1?'as '+oc.length+' ocorrências desta safra ficam':'a ocorrência desta safra fica')+' fora do calendário do protótipo ('+x.periodoCal+').'
     :'Capacidade não calculada: nenhuma ocorrência desta safra cai no período dela'+(x.fim?' ('+x.ini+' a '+x.fim+')':'')+(x.cls.fora?' dentro do calendário do protótipo ('+x.periodoCal+')':'')+'.'+foraTxt};
   const aperto=(g)=>{ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); };
@@ -357,6 +359,7 @@ function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR
     const pend=x.pend?' Inclui '+x.pend+(x.pend>1?' ocorrências ainda sem alocação.':' ocorrência ainda sem alocação.'):'';
     const sh=x.semHoras>1e-9?' '+nfa0(x.semHoras)+' ha sem horas calculáveis ficam fora: a falta pode ser maior.':'';
     return {R:'R2',cor:'red',txt:'Falta recurso: '+tr.join('; ')+'.'+pend+sh+foraTxt}; }
+  if(oc.some(i=>!i.dt)) return {R:'R3',cor:'yellow',txt:'Capacidade parcial: há atividades sem data; informe as datas para concluir a projeção.'+foraTxt};
   if(x.incompleto) return {R:'R3',cor:'yellow',txt:'Cálculo incompleto: '+x.incompleto+'.'+foraTxt};
   if(fora.length) return {R:'R4',cor:'yellow',txt:'Na estimativa mensal, cabe nos '+nfa0(x.aPlano)+' ha com plano.'+foraTxt+prazo};
   return {R:'R5',cor:'green',txt:'Na estimativa mensal, cabe com o que você tem.'+prazo}; }
@@ -1310,7 +1313,7 @@ function e3Aperto(g){ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g
 function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); const me=S[saf]||{}; const E=capCalc(self,saf); const oc=E.oc, G=E.G;
   const outN={}; E.outras.forEach(o=>{ outN[o.id]=o.nome; });
   const cs=cultRows(self,saf), sp=semPlano(cs); const aPlano=cs.filter(c=>sp.indexOf(c)<0).reduce((a,c)=>a+(Number(c.v.area)||0),0);
-  const cls={antes:0,fora:0,depois:0,cal:0}; oc.forEach(i=>{ cls[i.cls]++; });
+  const cls={antes:0,fora:0,depois:0,cal:0,semdata:0}; oc.forEach(i=>{ cls[i.cls]++; });
   const ver=capVeredito(G,oc,{semPlano:sp.map(c=>({local:c.v.local,area:c.v.area})),aPlano,cls,ini:br(me.ini),fim:me.fim?br(me.fim):'',outras:outN,pend:oc.filter(i=>i.pend).length,
     semHoras:oc.reduce((a,i)=>a+(i.rp.falta.semHoras||0),0),incompleto:e3Incompleto(oc),periodoCal:D2.meses[0][1]+' – '+D2.meses[D2.meses.length-1][1]});
   self.__e3={saf,oc,G,outras:E.outras,outN,pools:E.pools,recs:E.recs,ver};
@@ -1369,7 +1372,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
   const custo=(its)=>its.every(i=>i.pend)?null:its.reduce((a,i)=>a+(Number(i.cop)||0),0);   // pendente sem custo: vazio, não R$ 0 (ausente ≠ zero)
   const rend=(x)=>{ const n=rpNum(x); return (n===null||isNaN(n)||!(n>0))?null:n; };
   // Situação (§3.4): chips de problema onde ocorrem; "Janela não informada" e "Cabe na janela" só quando diferem do pai; etiqueta do calendário
-  const avisos=(its)=>{ const o=[]; const pc={}; its.forEach(i=>{ if(i.pend){ const c=i.rp.causa||'pendente'; (pc[c]||(pc[c]=[])).push(i); } });
+  const avisos=(its)=>{ const o=[]; if(its.some(i=>!i.dt)) o.push({k:'chip',t:'Data pendente · capacidade parcial',c:'yellow'}); const pc={}; its.forEach(i=>{ if(i.pend){ const c=i.rp.causa||'pendente'; (pc[c]||(pc[c]=[])).push(i); } });
     Object.keys(pc).forEach(c=>{ const n=pc[c].length; const sr=c==='sem recurso na fazenda'?e3SemRec(pc[c][0],pools):'';
       o.push({k:'chip',t:c+(sr?' · '+sr:'')+(its.length>1?' · '+n+(n>1?' pendentes':' pendente'):(sr?'':' · pendente')),c:'red'}); });
     const sal=its.reduce((a,i)=>a+(i.rp.causa==='sem recurso na fazenda'?0:i.saldo),0); if(sal>1e-9) o.push({k:'chip',t:nfa(sal)+' ha sem conjunto',c:'red'});
@@ -1379,7 +1382,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
         const q=cap[c.k]||(cap[c.k]={g,cel,ms:{}}); q.ms[i.mi]=1; if((cel.ocup===null?1e9:cel.ocup)>(q.cel.ocup===null?1e9:q.cel.ocup)) q.cel=cel; }); });
     Object.values(cap).forEach(q=>{ const n=Object.keys(q.ms).length; o.push({k:'chip',t:q.g.nome+' '+fmtOcup(q.cel.ocup)+' · '+q.cel.mes+(n>1?' (+'+(n-1)+(n>2?' meses)':' mês)'):''),c:'red'}); });
     return o; };
-  const ETQ={antes:'antes do início da safra',fora:'fora do calendário',depois:'depois do fim da safra'};
+  const ETQ={semdata:'data pendente',antes:'antes do início da safra',fora:'fora do calendário',depois:'depois do fim da safra'};
   const etq=(its,um)=>{ const n={}; its.forEach(i=>{ if(i.cls&&i.cls!=='cal') n[i.cls]=(n[i.cls]||0)+1; }); return Object.keys(n).map(k=>({k:'chip',t:ETQ[k]+(um?'':' · '+n[k]),c:'gray'})); };
   const sitDe=(its,av)=>av.length?'Com pendência':(its.some(i=>i.rp.itens.some(e3SemJan))?'Janela não informada':'Cabe na janela');
   const sitP=(sit,pai,av,eq)=>{ let p=av.slice(); if(sit!=='Com pendência'&&sit!==pai) p.push(sit==='Cabe na janela'?{k:'chip',t:'Cabe na janela',c:'green'}:{k:'mut',t:'Janela não informada'});
@@ -1531,7 +1534,7 @@ function areaFisica(its){ const v={}; return its.reduce((a,i)=>{ if(v[i.c.id]) r
 function resumoCultura(oc,ini){ const by={}, ord=[];
   oc.forEach(i=>{ const cu=i.c.v.cult; let b=by[cu]; if(!b){ b=by[cu]={cult:cu,area:0,cop:0,cins:0,npend:0,ntar:0,copAntes:0,cinsAntes:0,its:[]}; ord.push(b); }
     b.its.push(i); b.cop+=Number(i.cop)||0; b.cins+=Number(i.cins)||0;
-    if(i.pend) b.npend++; else if(!i.rp.custoOk) b.ntar++; if(ini&&i.dt<ini){ b.copAntes+=Number(i.cop)||0; b.cinsAntes+=Number(i.cins)||0; } });
+    if(i.pend) b.npend++; else if(!i.rp.custoOk) b.ntar++; if(ini&&i.dt&&i.dt<ini){ b.copAntes+=Number(i.cop)||0; b.cinsAntes+=Number(i.cins)||0; } });
   ord.forEach(b=>{ b.area=areaFisica(b.its); b.tot=b.cop+b.cins; b.rha=(b.npend||b.ntar)?null:(b.area?b.tot/b.area:null); }); return ord; }
 function resumoVals(self,v){ const st=self.state; const saf=st.saf; const e=self.__e3;
   v.rs_abrir=()=>{ self.setState({rsOpen:true}); setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label="Resumo da safra"]'); const b=a&&a.querySelector('button[aria-label=Fechar]'); if(b) b.focus(); }catch(x){} },80); };
@@ -1545,9 +1548,9 @@ function resumoVals(self,v){ const st=self.state; const saf=st.saf; const e=self
       return {cult:b.cult,area:nfa(b.area)+' ha',cop:rs(b.cop),cins:rs(b.cins),rha:b.rha===null?'parcial':rs(b.rha)+'/ha',temNota:nota.length>0,nota:nota.join(' · ')}; });
   const T=(f)=>L.reduce((a,b)=>a+b[f],0); lin.push({cult:'Total',area:nfa(T('area'))+' ha',cop:rs(T('cop')),cins:rs(T('cins')),rha:'—',temNota:false,nota:''}); v.rs_lin=lin;
   // CTL-4 (DEM-06): data antes de hoje não é "realizado" (RN-003); a etapa 4 troca a parte do plano já emitida em O.S. pelo que elas ainda tiram do estoque
-  const Z=oc.filter(i=>i.dt&&i.dt>=D2.hoje).reduce((a,i)=>a+(Number(i.cins)||0),0); const Y=T('cins')-Z;
-  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+(Y>0.005?'Deles, '+rs(Y)+' têm data antes de hoje ('+br(D2.hoje)+') e '+rs(Z)+' de hoje em diante.'
-    :'Todos de hoje em diante ('+br(D2.hoje)+').')+' A etapa 4 troca a parte já emitida em O.S. pelo que elas ainda vão tirar do estoque e calcula a necessidade líquida.';
+  const somaIns=(xs)=>xs.reduce((a,i)=>a+(Number(i.cins)||0),0);
+  const Z=somaIns(oc.filter(i=>i.dt&&i.dt>=D2.hoje)), Y=somaIns(oc.filter(i=>i.dt&&i.dt<D2.hoje)), U=somaIns(oc.filter(i=>!i.dt));
+  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+rs(Y)+' com data antes de hoje ('+br(D2.hoje)+'); '+rs(Z)+' de hoje em diante.'+(oc.some(i=>!i.dt)?' '+rs(U)+' sem data · projeção parcial.':'')+' A etapa 4 troca a parte já emitida em O.S. pelo que elas ainda vão tirar do estoque e calcula a necessidade líquida.';
   const S=(lst,f)=>lst.reduce((a,i)=>a+(Number(f(i))||0),0); const tr=(lst)=>nfa(S(lst,i=>i.area))+' ha-op · '+nf(S(lst,i=>i.horas),2)+' horas-conjunto · '+nf(S(lst,i=>i.hh),2)+' horas-homem · '+nf(S(lst,i=>i.diesel),2)+' L';
   const semL=oc.filter(i=>!e3Dinf(i)).length; const an=oc.filter(i=>i.cls==='antes');
   v.rs_trab=nfa(S(oc,i=>i.area))+' ha-op (hectares-operação) · '+nf(S(oc,i=>i.horas),2)+' horas-conjunto · '+nf(S(oc,i=>i.hh),2)+' horas-homem · '+nf(S(oc,i=>i.diesel),2)+' L de diesel estimado'+(semL?' ('+semL+(semL>1?' ocorrências sem L/h)':' ocorrência sem L/h)'):'')
