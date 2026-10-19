@@ -33,3 +33,13 @@
 `fotos/`: as 4 telas em 1440 e 390 px, conferidas uma a uma.
 - Em 390 px, na Manutenção › Ordens, o seletor fica no fim da linha dos filtros de fase, que rola na horizontal. Isso já era assim antes.
 - A foto `cd01_lista_390` abre no Mapa porque guarda a última visão escolhida, por perfil (VISOES-1).
+
+## Publicação (19/10/2026)
+
+A v139 publicada (versões 149–151, recibo em `../artefato-v139/LEIAME.md`) leva, além da VIS-08:
+- o PR #121 (EX-57 F0c) e o PR #122 (EX-53 F1a parte 1), ambos do Codex;
+- o PR #125 (EX-53 F1a parte 2, do Claude).
+
+Provas e aceites:
+- **Bloco A** (VIS-08 + #121 + #122): brutos em `logs/blocoA/`. O `visual_corte` e o `ben_fluxo` são iguais à base, e o aceite do Codex está em 6258622734.
+- **F1a parte 2:** provas em `../ex53-f1a2/`. A revisão e a integração foram do Codex (PR #125, `f44ab371`).
