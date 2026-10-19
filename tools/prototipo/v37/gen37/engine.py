@@ -1314,7 +1314,10 @@ def recolhe_cabecalho(contexto,acoes):
 ALVO_CSS=("@media (pointer:coarse){:root{--g2-alvo:"+DS_ALVO['toque']+"}"
           "main :is(button,a)[aria-pressed][style*='border-radius: 999px']{min-height:"+DS_ALVO['toque']+";box-sizing:border-box}"
           "a[style*='--g2-alvo'][style*='display: inline-block']{display:inline-flex!important;align-items:center;justify-content:center}"
-          "a[style*='--g2-alvo'][style*='display: block']{display:flex!important;align-items:center;justify-content:center}}")
+          "a[style*='--g2-alvo'][style*='display: block']{display:flex!important;align-items:center;justify-content:center}"
+          # F3 da base verde (19/10/2026): o "×" de fechar dos painéis laterais é desenhado à mão em ~20 telas com 32 × 32 px; com ponteiro grosso
+          # ganha os 44 px do alvo aqui, na fonte comum (o fundo escuro que também fecha não tem largura no estilo e fica de fora)
+          "button[aria-label^='Fechar'][style*='width: 32px'][style*='height: 32px']{min-width:"+DS_ALVO['toque']+";min-height:"+DS_ALVO['toque']+"}}")
 def area_acoes(pre='aa',rotulo='Ações da etapa'):
     """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
     Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
