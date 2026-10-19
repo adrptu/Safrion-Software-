@@ -1,0 +1,6 @@
+f1c_focal rc=0 RESULTADO 4 falha(s)
+inteligencia_nav_test rc=1 RESULTADO: 27/28 ok · FALHAS: IV: os 3 indicadores (0 abaixo, 1 sem oferta: mamão, melho
+intel03_nav_test rc=0 RESULTADO: 37 ok · 0 falhas
+mapa_mux_f2_test rc=0 RESULTADO: 29 ok · 0 falha(s)
+mapa_filtros_test rc=0 RESULTADO: 7/7
+ds_test rc=0 RESULTADO: OK 72/72

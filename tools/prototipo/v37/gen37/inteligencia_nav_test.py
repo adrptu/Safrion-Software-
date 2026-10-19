@@ -71,7 +71,8 @@ try:
     m.ok('preço por mês no histórico' in p.lower() and 'últimos 12 meses' in p.lower() and 'sintética' in p and (J(SAZ) or 0) == 12, 'INTEL-02 IV painel da soja: 12 meses de sazonalidade em barras, últimos 12 meses e o rótulo de série sintética', [p[:300], J(SAZ)])
     m.clk('Fechar painel', w=.4)
     k = J(KPI) or ''
-    m.ok('vendas abaixo da referência 0' in k and 'venda sem oferta que cubra 1' in k and 'mamão: vendido sem previsão' in k and 'melhor recebimento líquido r$ 2,88/kg' in k, 'IV: os 3 indicadores (0 abaixo, 1 sem oferta: mamão, melhor líquido R$ 2,88/kg)', k)
+    # EX-53 F1c (PR #124): sem meta configurada não há limite de −5%; "abaixo da referência" é a diferença negativa (o Mamão a −1,6%)
+    m.ok('vendas abaixo da referência 1 mamão −1,6%' in k and 'venda sem oferta que cubra 1' in k and 'mamão: vendido sem previsão' in k and 'melhor recebimento líquido r$ 2,88/kg' in k, 'IV: os 3 indicadores (1 abaixo da referência: mamão −1,6%; 1 sem oferta: mamão; melhor líquido R$ 2,88/kg)', k)
     s = m.linha('s:Soja em grão'); mm = m.linha('s:Mamão Formosa · fruta de campo')
     m.ok('Suspenso' in s and '0%' not in s and 'saca a conferir' in s, 'IV safra comercializada: soja "Suspenso" (saca a conferir), nunca 0%', s)
     m.ok('Sem previsão' in mm and 'déficit' in mm.lower(), 'IV safra comercializada: mamão "Sem previsão" com o déficit à vista', mm)

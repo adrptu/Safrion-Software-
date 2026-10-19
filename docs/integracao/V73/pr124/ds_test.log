@@ -1,0 +1,73 @@
+OK  A1 separador abaixo do cabeçalho da página (título + ação do topo à direita) nas 153 páginas a 1440 px
+OK  A2 linha abaixo do título do bloco com conteúdo solto logo abaixo (24 de 141 blocos com título)
+OK  A2c sem linha do título quando o corpo começa por tabela, barra de visões, gráfico, caixa ou cartões, borda no topo ou faixa com fundo (SEP-20261015 b)
+OK  A2b sem linha dupla: a linha do título não fica sobre outra borda larga até 14 px abaixo (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
+OK  A7 barra da tabela (busca, Agrupar por, Colunas) sem linha sobre o cabeçalho da tabela, que já tem fundo (SEP-20261015 c)
+OK  A8 tabela dentro de caixa com borda sem moldura própria (caixa dentro de caixa, SEP-20261015 d)
+OK  A3 a 390 px (8 telas): separador do cabeçalho e dos blocos (com a mesma regra do título), sem linha dupla nem linha de barra de tabela
+OK  A4 painel "Nova safra": linha abaixo do título e do × do topo à direita
+OK  A5 painel do registro (Cadastros): linha abaixo do título
+OK  A6 sem erro de execução nas telas da varredura do separador
+OK  B0 pré-condição: a janela do teste tem mouse com hover ((hover:hover) e (pointer:fine))
+OK  B1 linha da grade da O.S.: hover verde #F2F8F4
+OK  B2 botão secundário (Criar safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer
+OK  B3 opção de visão (Kanban): camada verde, sem cinza
+OK  B4 primária (Criar ordem): só escurece (brightness .92), sem camada clara sobre o texto branco
+OK  B5 linha da grade dos Cadastros (T1): hover verde #F2F8F4, não o cinza #F4F6F3
+OK  B6 linha de grupo da árvore dos Cadastros: hover verde do motor (#F2F8F4), não cinza
+OK  B7 sem erro de execução
+OK  C1 tela nova: o título da tela é realçado e o novo contexto é anunciado (aria-live polite)
+OK  C2 clicar num link de outra tela liga a barra fina de carga no topo já no clique
+OK  C3 tela aberta pelo link (ícone Agrícola da barra): foco no título da tela nova, título realçado e anúncio só do estado (sem repetir o título que o foco já lê)
+OK  C2b a barra de carga termina depois que a tela nova monta (sem ini/chega, opacidade 0)
+OK  C2c voltar pelo navegador (a O.S. volta da memória, pageshow persisted): a barra não fica presa (sem ini, opacidade 0) e a marca de navegação sai
+OK  C4 Planejar safra · escolher a safra leva à etapa 2: o bloco da etapa nova é realçado e a etapa é anunciada
+OK  C5 avançar (área de ações) para a etapa 3: realce, anúncio "Etapa 3 de 4" e foco no título do bloco novo
+OK  C6 voltar para a etapa 2: realce e anúncio "Etapa 2 de 4"
+OK  C7 Kanban com exatamente 5 fases antes e depois
+OK  C8 liberar a OS-0430: o cartão passa de A liberar para Liberadas e é realçado; o novo estado é anunciado (o aviso)
+OK  C9 o aviso visível não é lido em dobro (aria-live=off; a região viva anuncia)
+OK  C10 normal: conciliar realça o que mudou e anuncia o resultado
+OK  C11 repetição: o clique duplo grava um só recibo (CON-0001)
+OK  C12 recusa: clicar de novo no botão indisponível não roda o comando; a dica no próprio botão (role=tooltip) diz o porquê e a recusa é anunciada
+OK  C12b a recusa para o clique antes do botão: o ouvinte do próprio botão (onde o comando de uma tela nova estaria) não recebe o clique
+OK  C13 prefers-reduced-motion: sem animação; realce estático curto (#EDF7F0 e anel verde)
+OK  C14 o realce estático sai sozinho (≈600 ms)
+OK  C15 sem a preferência: o realce é a animação g2realce de 0,52 s
+OK  C17 CMP · Enter em "Abrir compra" no ⋯ da linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY
+OK  C17 SAF · Enter em "Continuar" no ⋯ da linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY
+OK  C16 sem erro de execução
+OK  D1 botão indisponível com motivo continua focável (aria-disabled="true", sem disabled) e traz o motivo em data-dica
+OK  D2 hover: a dica abre (role=tooltip) com o porquê; o leitor de tela recebe aria-describedby; a dica nativa (title) sai de cima
+OK  D3 tirar o ponteiro fecha a dica e devolve o title
+OK  D4 foco de teclado: a dica abre e descreve o botão (aria-describedby="g2-dica")
+OK  D5 Esc fecha a dica sem tirar o foco do botão
+OK  D6 Enter no botão indisponível: o comando não roda (1 recibo), a dica mostra o porquê e a recusa é anunciada
+OK  D7 ícone sem texto (ícone "Mapa" da barra recolhida): a dica mostra o nome do módulo e não vira descrição repetida; a dica nativa sai enquanto ela está aberta e volta quando o ponteiro sai
+OK  D8 título igual ao rótulo visível (rótulo cortado no IN-04): sem dica
+OK  D8b ponteiro no rótulo cortado (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai
+OK  D9 selo de estado (coluna A liberar do Kanban): significado e próximo passo (Aprovar e liberar)
+OK  D10 selo da lista (Falta insumo · …): o que falta e quem resolve
+OK  D11 unidade no cabeçalho da coluna (R$/ha): a dica explica a conta no foco do botão de ordenar
+OK  D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar
+OK  D13 Tab até a linha da OS-0418: a dica do selo "Falta insumo" (o que falta e quem resolve) abre e descreve a linha (aria-describedby)
+OK  D13b o clique do ponteiro na linha não abre a dica do selo (só o foco de teclado)
+OK  D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão
+OK  D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)
+OK  D12 sem erro de execução
+OK  F1 capturas em _probe/ds/ (12: 6 telas × 1440 e 390 px)
+OK  E1 390 px · Planejar safra: etapa 2 realçada e anunciada
+OK  E2 390 px · liberar a OS-0430 pela lista: a ordem passa a Liberadas (painel; chips de fase A liberar −1, Liberadas +1), o que mudou é realçado e o aviso é anunciado
+OK  E3 390 px · toque: conciliar; toque longo no botão indisponível mostra a dica sem acionar o comando
+OK  E4 390 px · tocar fora fecha a dica
+OK  E5 390 px · sem erro de execução e a dica cabe na tela
+OK  G1 1440 px · normal: com evento a conciliar, a primária está disponível e não há motivo de bloqueio
+OK  G2 1440 px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela
+OK  G2b 1440 px · a dica do botão (foco) abre fora do par botão + motivo: não cobre o motivo visível
+OK  G3 1440 px · recusa: ativar o botão indisponível realça o motivo visível e anuncia "Indisponível: …"
+OK  G1 390 px · normal: com evento a conciliar, a primária está disponível e não há motivo de bloqueio
+OK  G2 390 px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela
+OK  G2b 390 px · a dica do botão (foco) abre fora do par botão + motivo: não cobre o motivo visível
+OK  G3 390 px · recusa: ativar o botão indisponível realça o motivo visível e anuncia "Indisponível: …"
+OK  G4 sem erro de execução
+RESULTADO: OK 72/72

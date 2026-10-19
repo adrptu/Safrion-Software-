@@ -1,0 +1,29 @@
+  ok  IV 1440: sem erro de JS
+  ok  IV na tela de entrada do Comercial, que começa pelo Painel (PAINEL-01) (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS)
+  ok  INTEL-02 IV + TAB-07: sem cartões acima da lista; "Vender agora 1" no filtro rápido e no selo do cabeçalho
+  ok  INTEL-02 IV: soja R$ 129,40/sc em alta, melhor mês set, "Vender agora"
+  ok  INTEL-02 IV: milho em queda; o melhor mês depois do custo do dinheiro é nov (+8,0% na época, 5,6% líquido)
+  ok  INTEL-02 IV: mamão perecível vende na colheita (a época orienta o plano)
+  ok  INTEL-02 IV: feijão sem fonte de preço fica sem série (ausente ≠ zero)
+  ok  INTEL-02 IV painel da soja: 12 meses de sazonalidade em barras, últimos 12 meses e o rótulo de série sintética
+  ok  IV: os 3 indicadores (1 abaixo da referência: mamão −1,6%; 1 sem oferta: mamão; melhor líquido R$ 2,88/kg)
+  ok  IV safra comercializada: soja "Suspenso" (saca a conferir), nunca 0%
+  ok  IV safra comercializada: mamão "Sem previsão" com o déficit à vista
+  ok  IV preço × mercado: soja "Saca a conferir" (fora da média, não zero)
+  ok  IV painel da soja: motivo e um "Abrir venda" para cada uma das 4 vendas de saca a conferir
+  ok  IV painel do mamão: vendido sem previsão e o próximo passo
+  ok  IV recebimento líquido: o painel mostra a conta (preço − frete − custo do prazo)
+  ok  IC 1440: sem erro de JS
+  ok  IC na tela de entrada do Suprimentos (ícone Suprimentos marcado; "‹ Suprimentos" → cartão "Inteligência" abre a IC sem erro de JS)
+  ok  INTEL-02 IC + TAB-07: sem cartões acima da lista; "Comprar agora 4" no filtro rápido (oráculo); a economia esperando o mês certo abre os indicadores, depois da lista, = oráculo R$ 37.353,87 (± R$ 1: o motor guarda 6 casas)
+  ok  INTEL-02 IC: a recomendação de cada um dos 19 insumos = oráculo em Decimal (índice único do INTEL-03)
+  ok  INTEL-02 IC: semente 58 W "Comprar até a necessidade" (oráculo), até 05/10 (necessidade 15/10 − 10 dias de entrega)
+  ok  INTEL-02 IC: glifosato com uso em 28/09 compra agora
+  ok  INTEL-02 IC painel: sazonalidade em 12 meses e a necessidade do Planejar safra
+  ok  IC: economia pela melhor cotação R$ 41.363 e R$ 1.277,84/ha (oráculo do inteligencia_unit C3/C4)
+  ok  IC painel do insumo: melhor cotação, validade de cada uma e o próximo passo
+  ok  IV.dc.html 390: sem erro de JS
+  ok  IV.dc.html 390: sem rolagem lateral da página
+  ok  IC.dc.html 390: sem erro de JS
+  ok  IC.dc.html 390: sem rolagem lateral da página
+RESULTADO: 28/28 ok
