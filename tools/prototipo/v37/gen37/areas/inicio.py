@@ -574,11 +574,15 @@ function lgClick(self,id,ll){ const s=self.state; if(s.dw) return;   // desenhan
   if(s.selm){ const ss=(s.tsel||[]).filter(isLG); const i=ss.indexOf(id); if(i>=0) ss.splice(i,1); else ss.push(id); self.setState({tsel:ss,px:null}); return; }
   if(lay(self)==='Satélite'&&LGI.px){ const k=lgPixelAt(ll,id); if(k>=0){ self.setState({tsel:[id],px:{t:id,lg:k,ll:[ll.lng,ll.lat]},mpa:null}); return; } }
   const ss=s.tsel||[]; self.setState({tsel:(ss.length===1&&ss[0]===id)?[]:[id],px:null,mpa:null}); }
-// a imagem sempre cobre a área do mapa: limita o arraste à imagem e o afastamento ao zoom que ainda a preenche
-function lgLimites(m){ const C=M.lg.rgb.cantos; const x0=Math.max(C[0][0],C[3][0]), x1=Math.min(C[1][0],C[2][0]), y0=Math.max(C[2][1],C[3][1]), y1=Math.min(C[0][1],C[1][1]);
+// 19/10 (proprietário: "O mapa tem que permitir mais zoom out para ter a visão da fazenda toda"): o afastamento vai até a imagem inteira
+// caber na tela, com meio nível de folga (antes parava quando a imagem ainda cobria a tela, e a fazenda ficava cortada em cima e embaixo
+// na tela larga, ou dos lados no celular). Fora da imagem fica o fundo neutro; o arraste vai até uma imagem de distância de cada lado.
+// Ao abrir sem câmera guardada (inicial), o enquadramento continua o de antes (a imagem cobrindo a tela): só o limite de afastar mudou
+function lgLimites(m,inicial){ const C=M.lg.rgb.cantos; const x0=Math.max(C[0][0],C[3][0]), x1=Math.min(C[1][0],C[2][0]), y0=Math.max(C[2][1],C[3][1]), y1=Math.min(C[0][1],C[1][1]);
   const el=m.getContainer(); const W=el.clientWidth||1, H=el.clientHeight||1; const my=(l)=>Math.log(Math.tan(Math.PI/4+l*Math.PI/360));
-  const zw=Math.log2(W*360/(512*(x1-x0))), zh=Math.log2(H*2*Math.PI/(512*Math.abs(my(y1)-my(y0)))); const zmin=Math.max(zw,zh)+0.02;
-  try{ m.setMinZoom(zmin); m.setMaxBounds([[x0,y0],[x1,y1]]); if(m.getZoom()<zmin) m.setZoom(zmin); }catch(e){} }
+  const zw=Math.log2(W*360/(512*(x1-x0))), zh=Math.log2(H*2*Math.PI/(512*Math.abs(my(y1)-my(y0)))); const zmin=Math.min(zw,zh)-0.5, zcobre=Math.max(zw,zh)+0.02;
+  const dx=x1-x0, dy=y1-y0;
+  try{ m.setMinZoom(zmin); m.setMaxBounds([[x0-dx,y0-dy],[x1+dx,y1+dy]]); const z=m.getZoom(); if(inicial&&z<zcobre) m.setZoom(zcobre); else if(z<zmin) m.setZoom(zmin); }catch(e){} }
 function lgEnsure(self){ const el=document.getElementById('mapa-real'); if(!el) return; if(LGI.map&&LGI.el===el) return; if(LGI.carregando&&LGI.el===el) return; if(LGI.erro&&LGI.el===el) return;
   if(LGI.map){ try{ LGI.map.remove(); }catch(e){} LGI.map=null; LGI.pronto=false; LGI.markers={}; LGI.png=''; LGI.pxKey=''; }
   LGI.carregando=true; LGI.el=el; lgCss(); try{ window.__LGI=LGI; }catch(e){}   // inspeção nos testes
@@ -591,7 +595,7 @@ function lgEnsure(self){ const el=document.getElementById('mapa-real'); if(!el) 
     m.on('moveend',()=>muxCamGrava(m)); m.on('move',()=>{ if(MUX.cartaoOn) muxCartaoPos(); }); m.on('zoom',()=>muxLgTam());
     m.on('load',()=>{ const c0=M.lg.cenas[0]; const p0=M.lg.rgb.png[c0.k];
       m.addSource('rgb',{type:'image',url:p0,coordinates:M.lg.rgb.cantos}); m.addLayer({id:'rgb',type:'raster',source:'rgb',paint:{'raster-fade-duration':0}}); LGI.png=p0;
-      lgLimites(m); m.on('resize',()=>lgLimites(m));
+      lgLimites(m,!cam); m.on('resize',()=>lgLimites(m));
       LGI.cv=document.createElement('canvas'); LGI.cv.width=M.lg.W; LGI.cv.height=M.lg.H;
       m.addSource('px',{type:'canvas',canvas:LGI.cv,coordinates:M.lg.cantos,animate:false}); m.addLayer({id:'px',type:'raster',source:'px',paint:{'raster-resampling':'nearest','raster-fade-duration':0}}); LGI.pxKey='none';
       m.addSource('pv',{type:'geojson',data:M.lg.geo});

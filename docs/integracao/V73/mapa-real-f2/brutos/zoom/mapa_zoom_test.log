@@ -1,0 +1,5 @@
+OK    Z1 1440 × 900: no menor zoom, a fazenda inteira (caixa dos pivôs) cabe na área visível do mapa
+OK    Z3 o botão "−" chega ao menor zoom e a fazenda inteira fica à vista
+OK    Z2 390 × 844: no menor zoom, a fazenda inteira cabe na área visível do mapa
+OK    Z4 sem erro de JavaScript
+RESULTADO: 4 ok · 0 falhas
