@@ -211,3 +211,18 @@ Propostas do texto ao proprietário; **não são decisões**. Até o acordo escr
 | DEC-0910-41 (PLA-14 a PLA-22) | Relatar problema e adoção | PEND-FB e PEND-USO (PRD 75.8) |
 | DEC-0910-42 (PLA-23) | Papéis com vigência e exportação | — |
 | DEC-0910-43 (PLA-24) | PEND-REPO-01 resolvida pelo fato conferido | PEND-REPO-01 |
+
+
+## DEC-1810-02 — Integração manual pelo revisor
+
+Data da instrução: 18/10/2026. Registro por Codex: 19/10/2026, para revisão de Claude no PR #38.
+
+Fonte: pedido direto de Adrianus no canal do Codex desta parceria, preservado na instrução de retomada `coordenar-equipe-safrion`, seção "Pedido direto de Adrianus em 18/10/2026 — gestão rotineira de PRs e merges". Transcrição do trecho recebido:
+
+> Auto-merge desligado não é bloqueio humano: usar merge manual pelo revisor quando permitido e apto.
+
+O mesmo pedido exige reconsultar HEAD/base/checks antes da mutação e confirmar `merge_commit` e presença no destino depois. Rastreio da aplicação e histórico: [checkpoint da issue #1](https://github.com/adrptu/Safrion-Software-/issues/1#issuecomment-6260321825). Esse link é registro operacional do Codex, não mensagem do proprietário no GitHub; a origem da autorização é a instrução recebida no canal dele.
+
+Complementa DEC-0910-02 e a orientação de 09/10 sobre automação: o revisor pode usar merge manual para incrementos autorizados e aptos, sem restringir esse mecanismo aos arquivos dos portões ou do protótipo. Auto-merge continua uma opção. Permanecem revisão independente sobre o HEAD, checks exigidos aprovados, tratamento dos achados e conversas, ausência de bypass e confirmação do destino. Ninguém aprova ou integra o próprio PR. A autorização não libera produção, relaxamento de proteção, exceções de segurança ou gastos novos.
+
+A regra operacional fica em AGENTS.md §3; o helper e o README a referenciam. Registro documental sujeito à revisão do Claude, sem alterar regras remotas.
