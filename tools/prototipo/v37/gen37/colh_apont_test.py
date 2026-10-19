@@ -138,7 +138,7 @@ try:
     m = json.loads(J("JSON.stringify((()=>{ const b=BTN('Apontar'); const q=b?b.getBoundingClientRect():null; const t=q?document.elementFromPoint(q.left+q.width/2,q.top+q.height/2):null;"
                      " return {lado:document.documentElement.scrollWidth>innerWidth+1, ok:!!t&&(t===b||b.contains(t)), dentro:!!q&&q.right<=innerWidth+1&&q.left>=-1}; })())") or '{}')
     foto('colh_390_painel')
-    n0 = len(os5().get('ap', [])); J("SETV('#pf_ha','5')"); J("BTN('Apontar').click()"); espera("OS5().ap.length===%d" % (n0 + 1), 8); J(LIB); n1 = len(os5().get('ap', []))
+    n0 = len(os5().get('ap', [])); J("SETV('#pf_ha','5')"); J("(BTN('Apontar')||{click(){}}).click()"); espera("OS5().ap.length===%d" % (n0 + 1), 8); J(LIB); n1 = len(os5().get('ap', []))
     J("(()=>{ const s=[...document.querySelectorAll('aside[role=dialog] section')].find(x=>/Apontamentos da colheita/i.test(x.getAttribute('aria-label')||'')); if(s) s.scrollIntoView({block:'start'}); })()"); time.sleep(.3); foto('colh_390_lista')
     lin = J("(()=>{ const s=[...document.querySelectorAll('aside[role=dialog] section')].find(x=>/Apontamentos da colheita/i.test(x.getAttribute('aria-label')||'')); return s?N(s.innerText):''; })()") or ''
     chk('M 390 px: apontar 5 ha pelo toque grava uma vez e a lista mostra 26/09 provisório no topo', n1 == n0 + 1 and lin.find('26/09') >= 0 and lin.find('26/09') < lin.find('22/09'), [n0, n1, lin[:200]])
