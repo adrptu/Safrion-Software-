@@ -86,7 +86,7 @@ function soEfeito(s,cu){ const out=[]; const area=Number((cu&&cu.area)||0);
   else out.push('Dose: '+(s.ef===null||s.ef==='-'?(s.tipo==='incluir'?'—':soloDoseTxt(s.padrao,s.un)):soloDoseTxt(s.ef,s.un))+' → '+soloDoseTxt(s.sug,s.un)+(s.padrao!==null&&s.padrao!==undefined&&s.tipo!=='incluir'?' (padrão '+soloDoseTxt(s.padrao,s.un)+')':''));
   out.push('Quantidade no '+((cu&&cu.local)||'talhão')+' ('+cenNum(area)+' ha): '+soloQtdTxt(s.dif,s.un,true));
   out.push('Custo de insumos: '+(s.custo>0?'+':(s.custo<0?'−':''))+'R$ '+cenNum(Math.abs(s.custo),2)+' (preço R$ '+cenNum(s.preco,2)+'/'+s.un+')');
-  out.push('Data: '+soloBr(s.dt)+(s.nega?' · não aplicável: '+s.nega:''));
+  out.push('Data: '+soloDataTexto(s.dt,s.atv)+(s.nega?' · não aplicável: '+s.nega:''));
   return out; }
 /* opts: {cu, prim:{t,go}|null, ver:href|'', fechar()} */
 function soloPqVals(self,v,s,o){ v.pq_open=!!s; if(!s) return; o=o||{}; const L=s.laudo||{};
