@@ -1,0 +1,11 @@
+OK    M0 pgCapMotivo existe no gerador
+OK    motor JS (node) executou sem erro
+OK    M1 nada configurado: "capacidade semanal não configurada"
+OK    M2 30 HH/semana de Mecânico para o Zé: capacidadeDe = 30
+OK    M3 calendário da Oficina mudou: sem capacidade e o motivo é "a revisar"
+FALHA M4 o Zé saiu da CD-04 com a dedicação ativa: sem capacidade e o motivo é "a revisar (pessoa saiu do cadastro…)" · [null,"capacidade semanal não configurada"]
+OK    M5 dedicação retirada: o motivo volta a "não configurada"
+OK    M6 Zé 30 + Otávio 20; o Zé sai da CD-04: capacidadeOrfas lista o Zé e o total fica suspenso (null)
+OK    M7 retirada versionada da órfã: capacidadeDe = 20 HH/semana (1 pessoa), nenhuma órfã e sem "a revisar"
+OK    M8 o histórico da órfã continua: definida e retirada, com motivo e recibo
+RESULTADO: FALHOU 9/10

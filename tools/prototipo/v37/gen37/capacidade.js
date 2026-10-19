@@ -10,6 +10,15 @@ function capacidadeDe(c, esp) {
   if(typeof CONF0!=='undefined'&&c&&c.conf&&c.conf.v!==CONF0.v) return null;
   return capacidadeSomar(c&&c.conf&&c.conf.capacidadePessoas,pessoasCapacidade(c),esp);
 }
+/* Leitor público (PR #134, autorizado pelo Codex em 6262533728): dedicações ativas de quem saiu da CD-04.
+   Suspendem o total da especialidade (capacidadeSomar) e aparecem na CF-06 só para retirada versionada. */
+function capacidadeOrfas(c) {
+  const out=Object.create(null);
+  if(typeof pessoasCapacidade!=='function'||(typeof CONF0!=='undefined'&&c&&c.conf&&c.conf.v!==CONF0.v)) return out;
+  const rs=c&&c.conf&&c.conf.capacidadePessoas, ps=pessoasCapacidade(c);
+  if(rs) Object.keys(rs).forEach(id=>{ const r=rs[id]; if(r&&r.ativa!==false&&!Object.prototype.hasOwnProperty.call(ps,id)) out[id]=r; });
+  return out;
+}
 function capacidadeGravar(c,id,novo,motivo,versao,pessoaV,chave,ator) {
   const K=confLer(c),quem=confExigeA(K,ator,{modo:'um',papeis:['gestor']},'Configurar capacidade');
   motivo=String(motivo||'').trim();if(!motivo)throw Error('Informe o motivo da dedicação, mudança ou retirada.');

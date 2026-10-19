@@ -112,8 +112,11 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
 /* KPI-PCM-08 · backlog por especialidade (EX-53 M7a, PRD 8662): HH previstas das ordens abertas ainda não executadas (manBacklog), por especialidade e
    situação. Ordem sem tempo previsto não vira 0. Semanas equivalentes (D11b) = HH ÷ capacidade semanal da CF-06 (capacidadeDe), calculadas em
    manSemanas; sem capacidade válida não há número, e a dica diz o motivo. Sem meta inicial (ESPECIFICACAO §7): sem cor. */
-// motivo de não haver capacidade, pelos leitores públicos da D11b: há dedicação ativa na especialidade que deixou de valer (a revisar) ou não há nenhuma
-function pgCapMotivo(c,esp){ try{ const ps=pessoasCapacidade(c); return Object.keys(ps).some(id=>{ const r=capacidadeRegistro(c,id); return !!(r&&r.ativa!==false&&r.alocacoes&&Object.prototype.hasOwnProperty.call(r.alocacoes,esp)); })?'capacidade a revisar (calendário, situação ou contrato mudou)':'capacidade semanal não configurada'; }catch(e){ return 'capacidade semanal não configurada'; } }
+// motivo de não haver capacidade, pelos leitores públicos da D11b: dedicação ativa de quem saiu da CD-04 (capacidadeOrfas; achado do Codex
+// no PR #134), dedicação ativa que deixou de valer (a revisar) ou nenhuma
+function pgCapMotivo(c,esp){ try{ const tem=r=>!!(r&&r.ativa!==false&&r.alocacoes&&Object.prototype.hasOwnProperty.call(r.alocacoes,esp));
+  if(Object.values(capacidadeOrfas(c)).some(tem)) return 'capacidade a revisar (pessoa saiu do cadastro; retire a dedicação na CF-06)';
+  return Object.keys(pessoasCapacidade(c)).some(id=>tem(capacidadeRegistro(c,id)))?'capacidade a revisar (calendário, situação ou contrato mudou)':'capacidade semanal não configurada'; }catch(e){ return 'capacidade semanal não configurada'; } }
 function pgSemTxt(s){ return s.semanas===null?'':' ('+(s.parcial?'≥\u00a0':'')+manN(s.semanas,1)+'\u00a0'+(s.semanas<2?'semana':'semanas')+')'; }
 function pgBacklog(m,c){ const cap=(typeof capacidadeDe==='function'&&c)?(e=>capacidadeDe(c,e)):null, r=m&&m.oms?manBacklog(m,null,cap):null,
     dica='Horas previstas das ordens abertas ainda não executadas, em três partes: pronto (A liberar sem impedimento, Liberadas e Em execução), falta de peça e pendência técnica (conflito, executante ou tempo previsto a definir). Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade (Configurações › Metas e limites)';
