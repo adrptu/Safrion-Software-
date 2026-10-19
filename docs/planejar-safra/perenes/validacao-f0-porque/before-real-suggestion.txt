@@ -1,0 +1,47 @@
+7/7 ocupação: ausência não vira plantio/zero; âncora informada/plano canônica
+4/4 rótulos de análise do solo preservam data ou explicam ausência
+3/3 plano sem âncora não inventa fim nem liberação confirmada
+2/2 informar âncora restaura fim canônico do plano
+7/7 painel Por quê: âncora ausente/real, negação, dose/quantidade/custo e imutabilidade
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'Dose: 1,00 t/ha → 1,25 t/ha (padrão 1,00 t/ha)',
+    'Quantidade no T (10 ha): +2,5 t',
+    'Custo de insumos: +R$ 250 (preço R$ 100/t)',
++   'Data: aguarda data válida'
+-   'Data: aguarda plantio'
+  ]
+
+    at Object.<anonymous> (tools/prototipo/v37/gen37/datas_consumidores_ocupacao_test.cjs:82:10)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'Dose: 1,00 t/ha → 1,25 t/ha (padrão 1,00 t/ha)',
+    'Quantidade no T (10 ha): +2,5 t',
+    'Custo de insumos: +R$ 250 (preço R$ 100/t)',
+    'Data: aguarda data válida'
+  ],
+  expected: [
+    'Dose: 1,00 t/ha → 1,25 t/ha (padrão 1,00 t/ha)',
+    'Quantidade no T (10 ha): +2,5 t',
+    'Custo de insumos: +R$ 250 (preço R$ 100/t)',
+    'Data: aguarda plantio'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

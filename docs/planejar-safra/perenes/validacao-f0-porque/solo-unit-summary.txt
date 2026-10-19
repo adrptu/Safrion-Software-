@@ -1,0 +1,4 @@
+Comando: SAFRION_DADOS=sintetico python3 tools/prototipo/v37/gen37/solo_unit_test.py
+Runtime: Python 3.12.14; Node v24.19.0
+RESULTADO: OK 129/129
+Exit: 0
