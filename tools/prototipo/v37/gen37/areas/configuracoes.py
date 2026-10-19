@@ -432,7 +432,7 @@ function EXTRAVALS(self,v){ const c=cenGet(),st=self.state,K=confLer(c),P=confAt
   ['valor','atencao','sentido','motivo'].forEach(k=>v['m6set_'+k]=e=>self.setState({['m6'+k]:e.target.value,m6erro:''}));
   v.m6salvar=()=>cf6Salvar(self,false);v.m6retirar=()=>cf6Salvar(self,true);v.m6temMeta=!!m&&pode;
   v.m6estado=m?'Vigente: '+m.valor+' '+m.un+' · atenção '+m.atencao+' · v'+m.v+' · '+m.quem+' · '+confBr(m.d)+' '+m.at:'Meta não configurada';
-  const vigente=d?metaRegistro(c,d.id):null; v.m6conflito=!!d&&st.m6versao!==(vigente?vigente.v:0); v.m6atualizar=()=>self.setState({m6versao:vigente?vigente.v:0,m6chave:confChave('meta'),m6erro:''});
+  const vigente=d?metaRegistro(c,d.id):null; v.m6conflito=!!d&&st.m6versao!==(vigente?vigente.v:0); v.m6atualizar=()=>{ self.setState({m6versao:vigente?vigente.v:0,m6chave:confChave('meta'),m6erro:''}); setTimeout(()=>{ const el=document.getElementById('m6_valor'); if(el) el.focus(); },0); };
   v.m6un=d?d.un:''; v.m6sentidoTxt=d?(d.sentido==='maior'?'Maior é melhor':'Menor é melhor'):'';
   v.m6versoes=d?(K.ev||[]).filter(e=>e.tipo==='meta'&&e.alvo===d.id).slice().reverse().map(e=>({t:e.id+' · '+confBr(e.d)+' '+e.at,v:e.quem+' · '+(e.depois?e.depois.valor+' '+e.depois.un+'; atenção '+e.depois.atencao+'; '+e.depois.sentido+' é melhor':'Meta retirada')+' · motivo: '+e.motivo,st:''})):[];
 }

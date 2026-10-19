@@ -21,6 +21,8 @@ Comando `metaGravar` dentro de `cenMudar` estrito: papel gestor ativo revalidado
 
 ## Pendências explícitas de liberação
 
-Claude: crítica do HEAD, browser 390/teclado completo, conflito entre abas/revalidação de papel e consumidores IC/Mapa afetados. Codex não afirma teste móvel executado: viewport local já mostrou limitação em rodada anterior. Alavancas/pgCor pertencem ao Claude e serão ligados aos mesmos IDs; não foram editados aqui. Sem publicação/merge/main/produção por este PR. Nenhuma auditoria integral disparada.
+Claude: crítica do HEAD, browser 390/teclado completo, revalidação de papel e consumidores IC/Mapa afetados. Codex não afirma teste móvel executado: viewport local já mostrou limitação em rodada anterior. Alavancas/pgCor pertencem ao Claude e serão ligados aos mesmos IDs; não foram editados aqui. Sem publicação/merge/main/produção por este PR. Nenhuma auditoria integral disparada.
 
 Aplicado: listagem/detalhe/versões, contexto de organização, retorno e recuperação, unidades e estados explícitos. Fora: calendário/capacidade/janela de reincidência e D1–D4, aprovação operacional, produtividade duplicada. Cortado: seletor de sentido incoerente com domínio, metas padrão e cor de Ativos liberados.
+
+Contraprova adicional CUA em duas abas: rascunho custo0/5 contra gravação20/25 na outra aba. Salvar antigo foi rejeitado com versão/valores vigentes visíveis e rascunho intacto. Atualizar versão não gravou automaticamente; segundo Salvar explícito produziu v2/CFG-0020. Foco após atualizar versão foi ajustado para o campo Valor, pois o botão desaparece.
