@@ -85,6 +85,8 @@ Todos em `tools/prototipo/v37/gen37`. Build: `SAFRION_DADOS=sintetico python3 -W
 | `ap_unico_test.py` | 6/13 no node e parada no navegador, **igual à base** (a montagem do motor JS do teste põe um comentário Python `#` dentro do JS: erro de montagem do teste) | `ap_unico_test.log`, `ap_unico_test_BASE.log` |
 | `reserva_duplo_clique_test.py` | parada no início (`CLK` sem definição na página), **igual à base** | `reserva_duplo_clique_test.log`, `reserva_duplo_clique_test_BASE.log` |
 
+O `colh_apont_test.py` e o `producao_unit_test.py` rodaram no build final. Os demais rodaram no build anterior. Entre os dois builds mudou só o texto do aviso de sucesso de `prApontarColheita` ("provisório até <quem confere> conferir"), que nenhum outro teste lê.
+
 ### Contraprova
 O render da base `bf84dcf8` foi montado de uma árvore separada da mesma base. Nele, o `colh_apont_test.py` reprova nos 13 itens de tela:
 - a primária é "Publicar previsão do Pivô 19";
