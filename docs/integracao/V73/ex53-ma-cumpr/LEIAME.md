@@ -15,13 +15,11 @@
 | `man_cumprimento_unit_test` (C11 filtro por ativo; C12 contraprova da conta antiga) | 14/14 | `logs/man_cumprimento_unit_test.log` |
 | `ex53_m5_cartao_test` | PASS | `logs/ex53_m5_cartao_test.log` |
 | `ma_cumpr_ativo_test` (novo, navegador, 16 ativos) | 4/4 | `logs/ma_cumpr_ativo_test.log` |
-| Contraprova: `ma_cumpr_ativo_test` no render da v140 | 1/4: W1 e W2 reprovam (16 ativos "não calculável", 3 com preventiva vencida em aberto); W3 reprova porque a v140 não expõe a função | `logs/ma_cumpr_ativo_test_contraprova_v140.log` |
-| Impacto: `ma_vinculo` 101/101, `ma_unica` 23/23, `ma_rastreio` 58/58, `ma_planos` 18/18, `man_limpa` 9/9, `ativo_unico` 7/7, `ds_man` 99/99, `painel03` 54/54, `ex53_metas` PASS | verdes | `logs/*_test.log` |
+| Contraprova: `ma_cumpr_ativo_test` no render da v140 | 1/4: W1 e W2 reprovam. Os 16 ativos mostram "não calculável", e 3 deles têm preventiva vencida no mês (a05 com ordem aberta; a03 e a06 sem ordem); W3 reprova porque a v140 não expõe a função | `logs/ma_cumpr_ativo_test_contraprova_v140.log` |
+| Impacto: `ma_vinculo` 101/101, `ma_unica` 23/23, `ma_rastreio` 58/58, `ma_planos` 18/18, `man_limpa` 9/9, `ativo_unico` 7/7, `ds_man` 99/99, `painel03` 54/54, `ex53_metas` PASS, `paginas_scan` 5/5 (146 páginas) | verdes | `logs/*_test.log` |
 
 **`ma_cumpr_ativo_test`:**
 - W1: o oráculo é a definição do KPI-PCM-05 refeita no teste sobre os dados crus. Não usa a função do produto.
 - W3: a soma por ativo é igual ao total, no mês e em 12 m. O filtro reparte a base sem perder nem repetir.
 
 **Não executado:** `ds_test` (varredura geral). A mudança é texto de uma célula do detalhe do ativo, coberto pelo `ds_man` e pelo novo teste.
-
-**Em execução neste commit:** `paginas_scan`. O bruto entra no commit seguinte.
