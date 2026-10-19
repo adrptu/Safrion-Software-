@@ -44,3 +44,10 @@ f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03
 f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03det.dc.html:generic-api-key:3648
 f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3591
 f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3648
+
+# HML-SECRET-07: duas fingerprints triadas por Codex/Claude; autorização específica do proprietário
+# registrada em 6257438021/6258052688 e confirmada diretamente ao Claude em 6265042151 (19/10/2026).
+# Chave de localStorage em sup_politicas.js e reprodução no relatório antigo já mascarado; não credenciais.
+# Só commit, arquivo, regra e linha abaixo. .gitleaks.toml, canários e varredura integral permanecem inalterados.
+6cd9919ac5ede6e43a60e877463bb0f6bd7b7785:tools/prototipo/v37/gen37/sup_politicas.js:generic-api-key:2
+0a9c4a70180c9fcf2ea9f79f2b492ed389b5eae4:docs/integracao/V71/ex38-codex/r2/gitleaks.txt:generic-api-key:1

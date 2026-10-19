@@ -1,7 +1,8 @@
 """As exceções do .gitleaks.toml continuam estreitas: HML-SECRET-03 (um literal exato em 25 arquivos exatos do protótipo)
 e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo e em dois arquivos de especificação).
-O .gitleaksignore tem só os achados exatos da HML-SECRET-05 e da HML-SECRET-06 (DEC-1610-15: 31 nomes de chave de
-localStorage em commits antigos de branches de frente), cada um com commit, arquivo, regra e linha, sem curinga."""
+O .gitleaksignore tem só os achados exatos da HML-SECRET-05, HML-SECRET-06 (DEC-1610-15: 31 nomes de chave de
+localStorage em commits antigos) e HML-SECRET-07 (duas fingerprints autorizadas no recibo6265042151),
+cada um com commit, arquivo, regra e linha, sem curinga."""
 from pathlib import Path
 import re
 import json
@@ -122,12 +123,17 @@ HML_SECRET_06 = [
 # Só os dois commits antigos listados no PR #73 (comentário 6217016316); nenhum é ponta de branch ativa.
 COMMITS_06 = {'f6d7486eb732c259bdf89cfbaaf26ef269299b8d', '207f3623cdfb9059b46774f64245bc4ef735993f'}
 
+HML_SECRET_07 = [
+    '6cd9919ac5ede6e43a60e877463bb0f6bd7b7785:tools/prototipo/v37/gen37/sup_politicas.js:generic-api-key:2',
+    '0a9c4a70180c9fcf2ea9f79f2b492ed389b5eae4:docs/integracao/V71/ex38-codex/r2/gitleaks.txt:generic-api-key:1',
+]
+
 
 class IgnoreSoComAchadoExato(unittest.TestCase):
-    def test_gitleaksignore_so_com_os_achados_exatos_da_hml_secret_05_e_06(self):
+    def test_gitleaksignore_so_com_os_achados_exatos_autorizados(self):
         linhas = [l.strip() for l in (RAIZ / '.gitleaksignore').read_text(encoding='utf-8').splitlines()]
         efetivas = [l for l in linhas if l and not l.startswith('#')]
-        self.assertEqual(efetivas, HML_SECRET_05 + HML_SECRET_06)
+        self.assertEqual(efetivas, HML_SECRET_05 + HML_SECRET_06 + HML_SECRET_07)
         self.assertEqual(len(set(efetivas)), len(efetivas))
         self.assertEqual({l.split(':')[0] for l in HML_SECRET_06}, COMMITS_06)
         for l in efetivas:
