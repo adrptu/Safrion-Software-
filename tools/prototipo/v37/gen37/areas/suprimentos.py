@@ -213,7 +213,7 @@ def _origens():
             for i,p in enumerate(a['prods']):
                 dose=D2.AJUSTES.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 nm=D2.prod_nome(p['prod'],c)
-                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat(),q=dose*c['area'],
+                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat() if dt is not None else None,q=dose*c['area'],
                     memo=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha",
                     o=[dict(t=f"Cultivo {c['local']} · {c['cultura']} {c['variedade']} · {nf(c['area'])} ha"),
                        dict(t=f"Plano {pl['nome']} v{pl['versao']} · {a['nome']} · {a['g']['tipo']} {a['g']['dias'] if a['g']['dias'] is not None else ''}".strip()),
@@ -246,13 +246,16 @@ def su01():
         firm=D2.RECEB.get(nm,0); ped=next((p for p in D2.PEDIDOS if p['item']==nm and p['a_entregar']>0),None)
         oo=org.get(nm,[]); tot=sum(x['q'] for x in oo); falta=max(0.0,tot-disp-firm)
         if not oo: continue   # CTL-4: insumo que só uma O.S. usa (Ureia da OS-0418) não tem origem do plano nesta tela antiga (oculta)
-        data=min(x['dt'] for x in oo); lead=_lead(o['grupo'])+SEG
+        sem_data=any(x['dt'] is None for x in oo)
+        data=min((x['dt'] for x in oo if x['dt'] is not None),default=None); lead=_lead(o['grupo'])+SEG
         if falta>0.001:
             nfalta+=1
-            if _faixa((_dt.date.fromisoformat(data)-_dt.timedelta(days=lead)).isoformat())=='atrasada': natr+=1
-        pf=([ch(f'{nq(falta)} {un}','red')] if falta>0.001 else [ch('Coberta','green')])+([BR,mut(f'{nq(min(cond,falta))} {un} coberto se o laudo aprovar')] if cond and falta>0.001 else [])
+            if data and not sem_data and _faixa((_dt.date.fromisoformat(data)-_dt.timedelta(days=lead)).isoformat())=='atrasada': natr+=1
+        pf=([ch(f'{nq(falta)} {un}','red')] if falta>0.001 else [ch('Cobertura a conferir · sem data','yellow')] if sem_data else [ch('Coberta','green')])+([BR,mut(f'{nq(min(cond,falta))} {un} coberto se o laudo aprovar')] if cond and falta>0.001 else [])
+        if sem_data: pf += [BR,mut('Projeção parcial · há origem sem data')]
         acao=([lk('Ver contrato','SU-05det.dc.html')] if cond else [lk('Em cotação','CMP.dc.html')]) if falta>0.001 else ([lk('Ver laudo','SU-06.dc.html')] if cond else [mut('—')])
-        kids=[R(f'{nm}|{i}',dict(item=x['t'],data=x['dt'],dem=round(x['q'],1)),dict(item=[txt(x['t'])],dem=[txt(f"{nq(x['q'])} {un}"),BR,mut(x['memo'])]),o=x['o']) for i,x in enumerate(oo)]
+        if sem_data: acao=[lk('Conferir datas no plano','SAF.dc.html')]
+        kids=[R(f'{nm}|{i}',dict(item=x['t'],data=x['dt'],dem=round(x['q'],1)),dict(item=[txt(x['t'])],pedir=[mut('Sem data · conferir âncora no plano')] if x['dt'] is None else [],dem=[txt(f"{nq(x['q'])} {un}"),BR,mut(x['memo'])]),o=x['o']) for i,x in enumerate(oo)]
         memo=[dict(t=f'Demanda {nf(tot,d)} {un} = soma de {len(oo)} origens (expanda a linha)'),
               dict(t=f'Utilizável {nf(util,d)} {un} · reservado {nf(res,d)} · disponível {nf(disp,d)} {un}'+(f' · lotes {", ".join(l["lote"] for l in lots)}' if lots else '')),
               dict(t=f'Recebimento firme {nf(firm,d)} {un}'+(f' · {ped["id"]} ({FORN[ped["f"]]}) · {ped["previsao"][:5]}' if ped else '')),
@@ -260,8 +263,9 @@ def su01():
               *([dict(t=f'Se o laudo de 27/09 aprovar: {nf(min(cond,falta),d)} {un} cobertos e a falta firme cai para {nf(falta-min(cond,falta),d)} {un} (carga 4 do CT-2026-11)',h='SU-06.dc.html')] if cond and falta>0.001 else []),
               dict(t=f'Falta firme = {nf(tot,d)} − {nf(disp,d)} − {nf(firm,d)} = {nf(falta,d)} {un}' if falta>0.001 else f'Sem falta firme · sobra {nf(disp+firm-tot,d)} {un}'),
               dict(t=f'Pedir até = data necessária − prazo do fornecedor ({lead-SEG} d) − segurança ({SEG} d)')]
+        if sem_data: memo.append(dict(t='Projeção parcial: quantidade preservada; origens sem data fora da cronologia. Confira a âncora no plano antes de confirmar cobertura ou atraso.',h='SAF.dc.html'))
         if falta>0.001: memo.append(dict(t='Liberar a carga 4 do CT-2026-11 · abrir o contrato',h='SU-05det.dc.html') if cond else dict(t=f'Na SOL-2026-07 · abrir em Compra de insumos',h='CMP.dc.html'))
-        rows.append(R(nm,dict(item=nm,data=data,dem=round(tot,1),disp=disp,firm=firm,cond=cond,falta=round(falta,1),un=un),
+        rows.append(R(nm,dict(item=nm,data=data,dem=round(tot,1),disp=disp,firm=firm,cond=cond,falta=round(falta,1),un=un,semData=sem_data),
             dict(item=[b(nm),mut(f"{o['grupo']} · {len(oo)} {'origem' if len(oo)==1 else 'origens'}")],dem=[txt(f'{nq(tot)} {un}')],
                  disp=[txt(f'{nq(disp)} {un}')]+([mut(f'res. {nq(res)}')] if res else []),
                  firm=([txt(f'{nq(firm)} {un}'),mut(ped["id"])] if firm else [mut('—')])+([BR,mut(f'+{nq(cond)} {un} condicionado ao laudo de 27/09')] if cond else []),falta=pf,acao=acao),
@@ -278,7 +282,7 @@ def su01():
             dict(k='acao',l='Próxima ação')],
         rows,gid='g_nec',tree=True,total=False,so={'k':'pedir','d':False},
         edit=dict(m='origin',leafOnly=False,title='Necessidade',fields=[fs('item','Item ou origem',ro=True),fs('data','Data necessária','date',ro=True)]))
-    faltas=[r['v']['item'] for r in rows if r['v']['falta']>0.001]
+    faltas=[r['v']['item'] for r in rows if r['v']['falta']>0.001 and not r['v'].get('semData')]
     valor=sum(o['valor'] for o in dem.values())
     pn={'rep':dict(title='Reprogramar proposta de reposição',sub='Muda a data necessária e recalcula o “pedir até”. Nenhuma cotação nova é enviada.',ok='Reprogramar',
         fields=[fs('item','Item','sel',opts=faltas,req=True,**{'def':faltas[0]}),fs('data','Nova data necessária','date',req=True),fs('motivo','Motivo','txt',req=True,help='Ex.: janela de plantio deslocada pela chuva.')])}
@@ -286,8 +290,9 @@ def su01():
 CHECK.rep=(self,d)=>(d.data<HOJE?{data:'A data não pode ser anterior a hoje (23/09).'}:null);
 RUN.rep=(self,d)=>{ let lead=0; setRows(self,'g_nec',rows=>{ const r=rows.find(x=>x.v.item===d.item); if(r){ r.v.data=d.data; lead=r.lead; } });
   return d.item+' reprogramado para '+dm(d.data)+' · pedir até '+dm(addd(d.data,-lead))+' · nenhuma cotação nova enviada'; };
-function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
+function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M(k.v.data?'necessária '+dm(k.v.data):'Sem data · conferir âncora no plano')]; });
   if(!r.lead) return; const pa=supPedirAte(V.data,{prazo:r.lead,seguranca:0}); V.pedir=pa;
+  if(V.semData || !V.data){ V.pedir=null; r.p.pedir=[M('Sem data · projeção parcial'),M(V.data?'primeira data conhecida '+dm(V.data):'Conferir âncora no plano')]; r.s.pedir=''; return; }
   r.p.pedir=((V.falta>0.001)?[faixa(pa)]:[M('—')]).concat([BRK,M('necessária '+dm(V.data))]); r.s.pedir=(V.falta>0.001)?pa:''; }); }
 function EXTRAVALS(self,v){ pnVals(self,v); }''')
     painel()

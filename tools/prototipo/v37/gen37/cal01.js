@@ -11,13 +11,14 @@
 function cal01(fis, evs, seg, opt){
   seg=Number(seg)||0; opt=opt||{}; const hoje=opt.hoje||'', via=opt.viavel||''; const ks={};
   (evs||[]).forEach(e=>{ if(e.tipo!=='dem') return; if(e.chave) ks[e.chave]=1; (e.chaves||[]).forEach(k=>{ ks[k]=1; }); });
-  let real=0, nreal=0; const E0=[];
-  (evs||[]).forEach((e,i)=>{ if(e.tipo==='dem'&&hoje&&e.dt&&e.dt<hoje){ if(e.own){ real+=Number(e.q)||0; nreal++; } return; } E0.push(Object.assign({i:i},e)); });
+  let real=0, nreal=0; const E0=[], pendentes=[];
+  (evs||[]).forEach((e,i)=>{ if(e.tipo==='dem'&&!e.dt){ pendentes.push(Object.assign({},e)); return; } if(e.tipo==='dem'&&hoje&&e.dt&&e.dt<hoje){ if(e.own){ real+=Number(e.q)||0; nreal++; } return; } E0.push(Object.assign({i:i},e)); });
   if(via) E0.push({i:1e9,dt:via,q:0,tipo:'via',ord:0});
   const pri=(e)=>e.tipo==='rec'?0:(e.tipo==='via'?1:(e.tipo==='res'?2:3));
   const E=E0.sort((a,b)=>(a.dt<b.dt?-1:(a.dt>b.dt?1:0))||(pri(a)-pri(b))||((a.ord||0)-(b.ord||0))||(a.i-b.i));
   let ult=''; E.forEach(e=>{ if(e.tipo==='dem'&&e.own&&e.dt>ult) ult=e.dt; });
-  let saldo=Number(fis)||0, bruta=0, rec=0, liq=0, tot=0, antes=0, falta=null, faltaTot=null, saldoUlt=null, rup=0, rupVia=0, cob=null; const L=[]; const bk=[];
+  const semData=pendentes.filter(e=>e.own).reduce((s,e)=>s+(Number(e.q)||0),0);
+  let saldo=Number(fis)||0, bruta=semData, rec=0, liq=0, tot=0, antes=0, falta=null, faltaTot=null, saldoUlt=null, rup=0, rupVia=0, cob=null; const L=[]; const bk=[];
   const def=()=>Math.max(0,seg-saldo);
   E.forEach(e=>{ const q=Number(e.q)||0;
     if(e.tipo==='via'){ const d=def(); if(d<=1e-9) return; let own=0; bk.forEach(b=>{ if(b.own) own+=b.q; }); bk.length=0;
@@ -36,7 +37,7 @@ function cal01(fis, evs, seg, opt){
   const lim=(cob&&cob>ult)?cob:ult; L.forEach(l=>{ l.ate=l.dt<=lim; });
   const tarde=falta?E.filter(e=>e.tipo==='rec'&&e.dt>falta).reduce((a,e)=>a+(Number(e.q)||0),0):0;
   return {fis:Number(fis)||0,bruta:bruta,rec:rec,liq:liq,tot:tot,falta:falta,faltaTot:faltaTot,antes:antes,tarde:tarde,saldo:saldo,saldoUlt:saldoUlt,
-    real:real,nreal:nreal,hoje:hoje,via:via,rup:rup,rupRec:Math.max(0,rup-rupVia),cob:cob,linhas:L};
+    semData:semData,parcial:pendentes.length>0,pendentes:pendentes,real:real,nreal:nreal,hoje:hoje,via:via,rup:rup,rupRec:Math.max(0,rup-rupVia),cob:cob,linhas:L};
 }
 // falta condicionada à qualidade (PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02) · o mesmo texto na memória do Planejar safra e da Compra, no aviso
 // da Compra e no Mapa › Insumos: motivo (lote, documento e o motivo registrado na entrada), responsável (o gestor decide com o laudo no Estoque),
@@ -61,6 +62,7 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
     +(qc>1e-9?' + '+n(qc)+u+' em quarentena, cobertura condicionada à qualidade ('+(qd(false)||'laudo pendente')+': laudo pendente)':'')+((cu>1e-9||qc>1e-9)?' = '+n(r.fis)+u:'')
     +(!qc&&quarNaoVencida?' · '+n(quarNaoVencida)+u+' em quarentena não contam até o laudo':'')];
   (o.quarRef||[]).filter(x=>x.vencido).forEach(x=>out.push('Vencido: '+n(x.q)+u+' em quarentena no lote '+x.lote+' (validade '+x.validade+')'+(x.doc?' · '+x.doc:'')+(x.mot?' · '+x.mot:'')+' · não cobre a demanda e não pode ser liberado por laudo; físico e quarentena preservados.'));
+  if(r.parcial){ out.push('Projeção datada parcial · há demanda sem data: aguarda âncora'); (r.pendentes||[]).forEach(e=>out.push('Sem data: aguarda âncora · '+(e.t||'Uso')+' · '+n(e.q)+u+' · quantidade preservada no planejamento')); }
   if(r.real>1e-9) out.push('Antes de '+d(r.hoje)+' sem O.S. · '+r.nreal+(r.nreal>1?' usos':' uso')+' · '+n(r.real)+u+' · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)');   // DEM-06 (RN-003)
   r.linhas.filter(l=>l.ate).forEach(l=>{ const sx=' → saldo '+n(l.saldo)+u; const t=d(l.dt)+' · '+(l.t||'Uso')+' · ';
     if(l.tipo==='rec') out.push(t+'+'+n1(l.q)+u+sx+(l.cobre>1e-9?' · cobre a ruptura':''));
@@ -77,7 +79,7 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
       +' · segregado para devolução ao fornecedor, não cobre: a falta é firme'); });
   out.push(r.liq>1e-9?('Necessidade líquida = soma das faltas desta safra = '+n(r.liq)+u+' · falta a partir de '+d(r.falta))
     :(r.rupRec>1e-9?('Sem compra nova · ruptura de '+n(r.rupRec)+u+' de '+d(r.falta)+' a '+d(r.cob)+', coberta pelo recebimento')
-    :('Sem falta nesta safra'+((Number(o.cond)||0)>1e-9?' se o laudo liberar os '+n(qc)+u+' em quarentena (a falta condicionada está acima)':'')+' · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));
+    :((r.parcial?'Sem falta na parcela datada (projeção parcial)':'Sem falta nesta safra')+((Number(o.cond)||0)>1e-9?' se o laudo liberar os '+n(qc)+u+' em quarentena (a falta condicionada está acima)':'')+' · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));
   return out;
 }
 
@@ -156,7 +158,7 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
 // aparece à parte (4º item e detalhe, com quem decide), fora da compra e sem segunda ação (dano evitado: o Mapa esconder 40 kg aguardando laudo
 // e o comprador decidir sem saber que eles podem virar falta).
 function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice(8,10)+'/'+s.slice(5,7):''; const d4=(s)=>s?dm(s)+'/'+s.slice(0,4):'';
-  Object.values(m||{}).forEach(d=>{ const evs=lim?d.evs.filter(e=>e.dt<=lim):d.evs; const own=evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt>=hoje); if(!own.length) return;
+  Object.values(m||{}).forEach(d=>{ const evs=lim?d.evs.filter(e=>!e.dt||e.dt<=lim):d.evs; const own=evs.filter(e=>e.tipo==='dem'&&e.own&&(!e.dt||e.dt>=hoje)); if(!own.length) return;
     const s0=d.est+(Number(d.cust)||0), qc=Number(d.quarC)||0; const r=cal01(s0+qc,evs,0,{hoje,viavel}), r0=cal01(s0+qc,evs.filter(e=>e.tipo!=='rec'),0,{hoje,viavel}); const u=' '+d.un;
     const rF=qc>1e-9?cal01(s0,evs,0,{hoje,viavel}):r;   // sem a quarentena: falta condicionada à qualidade (revisão do 853a6a8, achado 2)
     const cq=qc>1e-9?Math.max(0,calR2(calR2(rF.liq)-calR2(r.liq))):0;   // a parte da falta que só existe se o laudo reprovar (a mesma conta de d.cond, no período)
@@ -167,12 +169,13 @@ function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice
       +(cq>0.001?' · se o laudo reprovar, faltam mais '+calNf(cq)+u+' · '+ctx:''),cq>0.001?'Qualidade pendente · '+calNf(cq)+u:''];
     else if(rF.liq>1e-9) st[d.nome]=['Qualidade pendente · '+calNf(rF.liq)+u,'yellow',base+' · se o laudo reprovar, falta a partir de '+d4(rF.falta)+' · '+ctx];
     else if(r0.liq>1e-9||r0.rupRec>1e-9) st[d.nome]=['Pedido a receber'+(rc?(rc.ref?' · '+rc.ref:'')+' · '+dm(rc.dt):''),'yellow',base+' · a receber '+calNf(ar)+u];
-    else st[d.nome]=['Estoque cobre','ok',base]; });
+    else st[d.nome]=r.parcial?['Data pendente','yellow',base]:['Estoque cobre','ok',base];
+    if(r.parcial) st[d.nome][2]+=' · projeção datada parcial · sem data: aguarda âncora · '+calNfa(r.pendentes.reduce((s,e)=>s+(Number(e.q)||0),0))+u; });
   return st; }
 // DEM-05 · necessidade por talhão no Mapa: os eventos desta safra de hoje em diante; a O.S. de vários talhões é rateada pela área dos cultivos
 // da safra em cada talhão (areaT[talhão]), e a soma dos talhões fecha com a fazenda. tid: local → talhão do mapa.
 function demPorLocal(m, tid, areaT, hoje){ const out={};
-  Object.values(m||{}).forEach(d=>d.evs.forEach(e=>{ if(e.tipo!=='dem'||!e.own||!(e.dt>=hoje)) return; const ls=e.loc||[]; if(!ls.length) return;
+  Object.values(m||{}).forEach(d=>d.evs.forEach(e=>{ if(e.tipo!=='dem'||!e.own||(e.dt&&e.dt<hoje)) return; const ls=e.loc||[]; if(!ls.length) return;
     const ar=ls.map(t=>Number((areaT||{})[tid(t)])||1); const s=ar.reduce((a,b)=>a+b,0);
     ls.forEach((t,i)=>{ const k=tid(t); (out[k]||(out[k]=[])).push({p:d.nome,q:e.q*ar[i]/s,un:d.un,dt:e.dt,orig:e.t}); }); }));
   return out; }
@@ -182,7 +185,9 @@ function demPorLocal(m, tid, areaT, hoje){ const out={};
 // só avisa (cancelar pedido é decisão da Compra). Quantidades na unidade do insumo; tolerância de 0,01 (a mesma do complemento).
 // d: {liq, rup} da demanda (ou nada, se ela não pede o insumo); sent: o que a solicitação pede. Devolve {t, c, dif, pend, sol}.
 function demSolSit(d, sent, temSol, pedEmit){ const liq=Number(d&&d.liq)||0, rup=Number(d&&d.rup)||0, cond=Number(d&&d.cond)||0; sent=Number(sent)||0;
-  if(temSol&&sent>liq+0.01) return {t:'Acima da demanda',c:'red',dif:sent-liq,pend:!pedEmit,sol:true};
+  const parcial=!!(d&&d.cal&&d.cal.parcial);
+  if(parcial&&liq<=sent+0.01) return {t:'Data pendente',c:'yellow',dif:0,pend:false,sol:!!temSol};
+  if(!parcial&&temSol&&sent>liq+0.01) return {t:'Acima da demanda',c:'red',dif:sent-liq,pend:!pedEmit,sol:true};
   if(liq<=0.001&&cond>0.001) return {t:'Qualidade pendente',c:'yellow',dif:0,pend:false,sol:false,cond};   // PRD 65.4: falta condicionada, sem compra automática
   if(liq<=0.001&&rup>0.001) return {t:'Coberto pelo recebimento',c:'yellow',dif:0,pend:false,sol:false};
   if(liq<=0.001) return {t:'Coberto pelo estoque',c:'green',dif:0,pend:false,sol:false};
@@ -193,7 +198,7 @@ function demSolSit(d, sent, temSol, pedEmit){ const liq=Number(d&&d.liq)||0, rup
 // emitido nada baixa. itens {insumo: quantidade}; dm {insumo: {liq}}. Devolve {it, novos, menos} (novos e menos: nomes dos insumos).
 function demSolRevisar(itens, dm, pedEmit){ const it=Object.assign({},itens||{}); const novos=[], menos=[]; const L=(n)=>Number(((dm||{})[n]||{}).liq)||0;
   Object.keys(dm||{}).forEach(n=>{ if(L(n)>0.001&&L(n)>(Number(it[n])||0)+0.01){ novos.push(n); it[n]=L(n); } });
-  if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if((Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
+  if(!pedEmit) Object.keys(itens||{}).forEach(n=>{ if(!((dm||{})[n]&&dm[n].cal&&dm[n].cal.parcial)&&(Number(itens[n])||0)>L(n)+0.01){ menos.push(n); if(L(n)>0.001) it[n]=L(n); else delete it[n]; } });
   return {it,novos,menos}; }
 // DEM-09 na Compra (revisão do CTL-4, achado 2) · insumos que a solicitação pede acima da demanda de agora, pela mesma regra do Planejar safra
 // (demSolSit), para a Compra avisar nas etapas 2, 4 e 5 — sem trava: quem atualiza a solicitação é o Planejar safra (dano evitado: aprovar a

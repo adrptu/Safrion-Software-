@@ -122,15 +122,35 @@ def prod_nome(p,cult):
         return f'{base} {var}'
     return p
 def ddate(s): return _dt.date.fromisoformat(s)
-def data_atividade(cult,atv):
-    g=atv['g']
-    if g['tipo']=='DAP': return ddate(cult['plantio'])+_dt.timedelta(days=g['dias'])
-    if g['tipo']=='DATA': return ddate(g['data'])
-    col=ddate(cult['colheita']) if cult.get('colheita') else None
-    if col is None:  # colheita prevista pela atividade de colheita do plano
-        pl=PLANO[cult['plano']]; ca=next((a for a in pl['atividades'] if a['op'].startswith('Colheita')),None)
-        col=ddate(cult['plantio'])+_dt.timedelta(days=ca['g']['dias']) if ca and ca['g']['tipo']=='DAP' else ddate(cult['plantio'])
-    return col+_dt.timedelta(days=(g['dias'] if g['tipo']=='DAPC' else -g['dias']))
+_DATAS_ATIVIDADE = {}
+def _entrada_data(cult, atv):
+    return dict(atividade=atv,
+                cultivo=dict(plantio=cult.get('plantio'), colheita=cult.get('colheita')),
+                contexto=dict(variante='canonica', plano=PLANO[cult['plano']]))
+def _chave_data(entrada):
+    return json.dumps(entrada, sort_keys=True, ensure_ascii=False)
+def preparar_datas(cultivos):
+    """Um lote por conjunto de cultivos; cache por conteúdo não mascara edições."""
+    from datas_atividade import calcular_lote
+    faltantes = {}
+    for c in cultivos:
+        pl = PLANO.get(c.get('plano'))
+        if not pl: continue
+        for a in pl['atividades']:
+            entrada = _entrada_data(c, a); chave = _chave_data(entrada)
+            if chave not in _DATAS_ATIVIDADE: faltantes[chave] = entrada
+    if faltantes:
+        recibos = calcular_lote(list(faltantes.values()))
+        _DATAS_ATIVIDADE.update(zip(faltantes, recibos))
+def data_atividade(cult, atv):
+    """Adaptador de retorno date/None. A regra vive somente no núcleo JS."""
+    entrada = _entrada_data(cult, atv); chave = _chave_data(entrada)
+    if chave not in _DATAS_ATIVIDADE:
+        preparar_datas([c for cs in CULTIVOS.values() for c in cs] + [cult])
+    if chave not in _DATAS_ATIVIDADE:
+        raise ValueError('Atividade fora do plano: prepare o lote com o plano vigente')
+    data = _DATAS_ATIVIDADE[chave]['data']
+    return ddate(data) if data else None
 def _ocorr_py(safra,ajustes,planos_extra):
     """Ocorrências de insumo da safra na ordem do JS (cultivo → atividade → produto): (cultivo, atividade, produto, dose, quantidade)."""
     for c in CULTIVOS[safra]:
@@ -675,6 +695,7 @@ def _cfgs_safra(safra,op,atv,cfg_override,atvs_em_uso):
         out.append(c)
     return out
 def _mes_idx(dt):
+    if dt is None: return -1
     k=dt.isoformat()[:7]
     return next((i for i,(m,_) in enumerate(MESES) if m==k),-1)
 def _pools(recursos): return {r['id']:dict(un=r['un'],nome=r['nome']) for r in (recursos or RECURSOS)}
@@ -683,6 +704,7 @@ def ocorr_op(safra,planos=None,cfg_override=None,recursos=None,ajustes=None):
     custo de operação e insumos (dose × área, com os ajustes '-' e '+'). planos: {cultivo: plano} sobrescreve o plano do cultivo."""
     pools=_pools(recursos); aj=AJUSTES if ajustes is None else ajustes; out=[]
     cults=[c for c in CULTIVOS.get(safra,[])]
+    preparar_datas([dict(c,plano=(planos or {}).get(c['id'],c['plano'])) for c in cults])
     usados={}
     for c in cults:
         pid=(planos or {}).get(c['id'],c['plano']); pl=PLANO.get(pid) if pid else None
@@ -738,6 +760,7 @@ def outras_safras(safra):
     return [s['id'] for s in SAFRAS if s['id']!=safra and not s['ro'] and s['fazenda']==me['fazenda']]
 def classe_oc(dt,mi,ini,fim):
     """Espelho do classeOc (safra.js): antes do início, depois do fim, fora do calendário ou no calendário ('cal')."""
+    if dt is None or dt == '': return 'semdata'
     d=dt.isoformat() if hasattr(dt,'isoformat') else str(dt)
     if ini and d<ini: return 'antes'
     if fim and d>fim: return 'depois'
@@ -823,7 +846,7 @@ def resumo_cultura(safra,ajustes=None,planos_extra=None,cfg_override=None):
         b['cop']+=o['cop'] or 0; b['cins']+=o['cins']
         if o['pend']: b['npend']+=1
         elif not o['rp']['custoOk']: b['ntar']+=1
-        if ini and o['dt'].isoformat()<ini: b['copAntes']+=o['cop'] or 0; b['cinsAntes']+=o['cins']
+        if ini and o['dt'] is not None and o['dt'].isoformat()<ini: b['copAntes']+=o['cop'] or 0; b['cinsAntes']+=o['cins']
     for b in by.values():
         b['tot']=b['cop']+b['cins']; b['rha']=None if (b['npend'] or b['ntar']) else (b['tot']/b['area'] if b['area'] else None)
     return by
@@ -920,7 +943,7 @@ def demanda_datada(safra,ajustes=None,planos_extra=None):
         pid=(planos_extra or {}).get(c['id'],c['plano'])
         if not pid: continue
         for a in PLANO[pid]['atividades']:
-            dt=data_atividade(c,a).isoformat()
+            dt=(lambda d: d.isoformat() if d else None)(data_atividade(dict(c,plano=pid),a))
             for i,p in enumerate(a['prods']):
                 dose=ajustes.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 out.setdefault(prod_nome(p['prod'],c),[]).append(dict(data=dt,local=c['local'],atv=a['nome'],dose=dose,area=c['area'],q=dose*c['area']))
@@ -930,7 +953,7 @@ def falta_a_partir(ocorr,estoque,entradas):
     """Primeira data (ISO) em que a demanda acumulada supera o estoque apto + as entradas previstas até essa data; None se não falta.
     ocorr e entradas: listas de (data ISO, quantidade)."""
     acum=0.0
-    for d in sorted({x for x,_ in ocorr}):
+    for d in sorted({x for x,_ in ocorr if x}):
         acum+=sum(q for x,q in ocorr if x==d)
         if acum>estoque+sum(q for x,q in entradas if x<=d)+1e-9: return d
     return None
@@ -1168,7 +1191,7 @@ def occ_faz(safra,ajustes=None,planos_extra=None):
                     prods.append(dict(nome=prod_nome(p['prod'],c),grupo=p['grupo'],un=p['un'],preco=p['preco'],dose=dose,q=dose*c['area'],
                                       orig=('sessão' if f"{a['id']}|{i}" in aj.get(c['id'],{}) else ''),laudo=''))
                 out.append(dict(saf=s['id'],k=f"{c['id']}|{a['id']}",a=a['id'],local=c['local'],tal=_tal_de(c),area=c['area'],
-                                dt=data_atividade(c,a).isoformat(),nome=a['nome'],prods=prods))
+                                dt=(lambda d: d.isoformat() if d else None)(data_atividade(dict(c,plano=pid),a)),nome=a['nome'],prods=prods))
     return out
 def dem_entradas(safra,ajustes=None,planos_extra=None,cen=None):
     """Entradas de demFazenda para a safra (sem as ordens): as mesmas que as telas montam (cenDemEntradas), com o estoque do cenário cen (None = semente)."""
@@ -1277,8 +1300,10 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
         if e['tipo']!='dem': continue
         if e.get('chave'): ks.add(e['chave'])
         ks.update(e.get('chaves') or [])
-    real=0.0; nreal=0; E0=[]
+    real=0.0; nreal=0; E0=[]; pendentes=[]
     for i,e in enumerate(evs):
+        if e['tipo']=='dem' and not e.get('dt'):
+            pendentes.append(dict(e)); continue
         if e['tipo']=='dem' and hoje and e['dt'] and e['dt']<hoje:
             if e.get('own'): real+=float(e['q']); nreal+=1
             continue
@@ -1287,7 +1312,8 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
     pri=lambda e: {'rec':0,'via':1,'res':2}.get(e['tipo'],3)
     E=[e for _,e in sorted(E0,key=lambda x:(x[1]['dt'],pri(x[1]),x[1].get('ord',0) or 0,x[0]))]
     ult=max([e['dt'] for e in E if e['tipo']=='dem' and e.get('own')] or [''])
-    saldo=float(fis); bruta=rec=liq=tot=antes=rup=rup_via=0.0; falta=falta_tot=cob=None; bk=[]
+    sem_data=sum(float(e['q']) for e in pendentes if e.get('own'))
+    saldo=float(fis); bruta=sem_data; rec=liq=tot=antes=rup=rup_via=0.0; falta=falta_tot=cob=None; bk=[]
     deficit=lambda: max(0.0,seg-saldo)
     for e in E:
         q=float(e['q'])
@@ -1318,7 +1344,7 @@ def cal01(fis,evs,seg=0.0,hoje='',viavel=''):
         if (nec>1e-9 or rp>1e-9) and not falta_tot: falta_tot=e['dt']
     tarde=sum(float(e['q']) for e in E if e['tipo']=='rec' and falta and e['dt']>falta)
     return dict(fis=float(fis),bruta=bruta,rec=rec,liq=liq,tot=tot,falta=falta,faltaTot=falta_tot,antes=antes,tarde=tarde,saldo=saldo,
-                real=real,nreal=nreal,rup=rup,rupRec=max(0.0,rup-rup_via),cob=cob)
+                semData=sem_data,parcial=bool(pendentes),pendentes=pendentes,real=real,nreal=nreal,rup=rup,rupRec=max(0.0,rup-rup_via),cob=cob)
 def checa_reservas():
     """Reservas da demanda (est_dem, nas duas fazendas) fecham com o reservado dos lotes da semente por insumo."""
     rs=[r for f in EST_FAZ for r in est_dem(None,f)['reservas']]; lt=_seed()['lotes'].values()

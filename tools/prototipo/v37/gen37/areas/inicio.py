@@ -234,13 +234,6 @@ def _nome(p,c):  # nome do insumo no cultivo (a semente leva a variedade)
     return p
 _CJ={c['op']:c for c in D2.CONJ}
 COP={op:round(D2.custo_h(c)/c['rend'],2) for op,c in _CJ.items()}   # R$/ha da operação (conjunto e rendimento da safra)
-def _data_atv(c,a):
-    g=a.get('g') or {}; t=g.get('tipo')
-    if t=='DAP': return _iso(c['plantio'])+_dt.timedelta(days=g['dias'])
-    if t=='DATA' and g.get('data'): return _iso(g['data'])
-    if t in ('DAPC','DANC') and c.get('colheita'): return _iso(c['colheita'])+_dt.timedelta(days=(g['dias'] if t=='DAPC' else -g['dias']))
-    return None
-
 # ---- previsto por talhão: plano da safra (dose × preço × área + operação); sem plano, as O.S. emitidas no talhão ----
 ORD_REG={o['id']:o for o in _ordens_os()}
 def _prev():
@@ -269,6 +262,12 @@ def _prev():
     return out
 def _somar_plano(P,cs,orig):
     P['fonte']='plano'; P['base']=sum(c['area'] for c in cs); P['orig']=orig
+    from datas_atividade import calcular_lote
+    entradas = [dict(atividade=a, cultivo=c,
+                     contexto=dict(variante='canonica', plano=pl))
+                for c in cs for pl in D2.PLANOS if pl['id']==c['plano']
+                for a in pl['atividades']]
+    datas = iter(calcular_lote(entradas))
     for c in cs:
         pl=next(p for p in D2.PLANOS if p['id']==c['plano'])
         for a in pl['atividades']:
@@ -279,8 +278,9 @@ def _somar_plano(P,cs,orig):
                 vi+=x['dose']*pr*c['area']
             co=COP.get(a['op']); vo=(co*c['area']) if co is not None else 0
             if co is None: P['pend'].append('Operação '+a['op']+' sem rendimento na safra (não somada)')
-            P['ins']+=vi; P['op']+=vo; d=_data_atv(c,a)
-            P['lin'].append([c['local']+' · '+a['nome'],(d.isoformat() if d else ''),round(vi+vo,2)])
+            P['ins']+=vi; P['op']+=vo; d=next(datas)['data']
+            if d is None: P['pend'].append(a['nome']+' · aguarda '+('plantio' if a['g']['tipo']=='DAP' else ('colheita' if a['g']['tipo'] in ('DAPC','DANC') else 'data válida')))
+            P['lin'].append([c['local']+' · '+a['nome'],(d or ''),round(vi+vo,2)])
     return P
 def _fechar(P):
     P['tot']=round(P['ins']+P['op'],2); P['ins']=round(P['ins'],2); P['op']=round(P['op'],2); P['pend']=list(dict.fromkeys(P['pend'])); return P
@@ -742,8 +742,12 @@ function insFaz(){ const D=M.dem; const F=D.faz[safK()]; if(!F) return {nec:{},s
   const k=safK()+'|'+JSON.stringify([X.occ,X.osd,X.fisico,X.reservas,X.recebDt,X.sobra,X.quar,X.quarRep]); if(insFaz._k===k) return insFaz._v;   /* custódia sem uso e quarentena (revisão do 853a6a8) também mudam a conta */ const m=demFazenda(X); const tid=(t)=>D.tid[t]||demTal(t);
   const v={nec:demPorLocal(m,tid,F.areaT,F.hoje),st:{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,M.lim30,F.hoje,F.viavel)}};
   insFaz._k=k; insFaz._v=v; return v; }
-function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
-  return Object.values(m).sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0)); }
+function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).forEach(x=>{
+  const sem=!x.dt; if(!sem&&per!=='Safra toda'&&x.dt>M.lim30) return;
+  const a=m[x.p]||(m[x.p]={p:x.p,q:0,datada:0,semData:0,un:x.un,dt:null,orig:[]});
+  if(sem) a.semData+=x.q; else { a.datada+=x.q; if(!a.dt||x.dt<a.dt) a.dt=x.dt; }
+  a.q=a.datada+(per==='Safra toda'?a.semData:0); a.orig.push(x.orig); });
+  return Object.values(m).sort((a,b)=>(a.dt||'9999')<(b.dt||'9999')?-1:((a.dt||'9999')>(b.dt||'9999')?1:0)); }
 function brIso(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]; }
 // ---- custos: previsto (plano ou O.S.) × realizado provisório (apontamentos aceitos) × conferido; preço ausente não vira zero ----
 // custo: as regras moram em custo_dominio.py (fonte única do Mapa e do Painel Agrícola); aqui só o atalho com os dados do Mapa (M) e a projeção OSN
@@ -791,8 +795,8 @@ function cls0(l,f,t){
   if(l==='Irrigação') return mcIrr(M.irr[t],f.ver);
   if(isIns(l,f)){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
     if(!its.length) return semPlanoOf(t)?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
-    const c=mc_worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
-    return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(c==='yellow'?'aguardando pedido':'estoque cobre')}; }
+    const pend=its.some(x=>x.semData>0); const c=mc_worstC(its.map(x=>(st[x.p]||[])[1]==='red'?'red':(x.semData>0?'yellow':(st[x.p]||['','none'])[1]))); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
+    return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(pend?'sem data · projeção parcial':(c==='yellow'?'aguardando pedido':'estoque cobre'))}; }
   if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
     const R=cusReal(t); if(!R.ha) return {c:'none',l:R.shared.length?('só '+R.shared.map(x=>x.o.id).join(', ')+' compartilhada'):'sem execução'}; const dv=R.prevExec?(R.rs-R.prevExec)/R.prevExec*100:0; const c=dv<=0.5?'ok':(dv<=10?'yellow':'red');
@@ -969,12 +973,12 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=la
     P.secs.push(SEC(self,l,'sat','Satélite',sum,{kv,items,note})); }
   // insumos
   { const fi=flt(self,OS_L); const its=necAgg(t,fi.per); const st=insFaz().st[fi.per]||{};
-    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])].concat(s[3]?[CH(s[3],'yellow')]:[]),   /* falta firme + qualidade pendente: os dois à vista, uma ação (revisão do 16fb55e, ajuste 1) */
+    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un+(fi.per==='Safra toda'?' na safra':' datados no período'),sub:(x.dt?'a partir de '+brIso(x.dt):'Sem data conhecida')+(x.semData>0?' · '+nfx(x.semData)+' '+x.un+' sem data · projeção parcial':'')+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(x.semData>0&&s[1]!=='red'?'Data pendente':s[0],x.semData>0&&s[1]!=='red'?'yellow':(s[1]==='ok'?'green':s[1]))].concat(s[3]?[CH(s[3],'yellow')]:[]),   /* falta firme + qualidade pendente: os dois à vista, uma ação (revisão do 16fb55e, ajuste 1) */
       acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html',ic:'cart',tt:'Abrir Compra de insumos'})]:[]}; });
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
       o.r.itens.forEach(i=>reqs.push({t:o.r.id+' · '+o.id+' · '+i.prod,sub:'reservado '+nd(i.solicitado)+' '+i.un+' · lote '+i.lote+' · entregue '+nd(i.entregue)+' · em custódia '+nd(i.custodia)+' · consumido '+nd(i.consumido),ch:[CH(i.custodia>0.001?'em custódia':(i.entregue>0?'entregue':'reservado'),i.custodia>0.001?'yellow':'gray')],acts:[]})); });
     const fal=items.filter(x=>x.ch[0].t.indexOf('Falta')===0).length;
-    const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):'sem falta')+' · '+fi.per.toLowerCase()):(semPlanoOf(t)?'Sem plano na safra '+SAF:'Sem necessidade no período');
+    const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):(its.some(x=>x.semData>0)?'projeção parcial · sem data':'sem falta'))+' · '+fi.per.toLowerCase()):(semPlanoOf(t)?'Sem plano na safra '+SAF:'Sem necessidade no período');
     P.secs.push(SEC(self,l,'ins','Insumos',sum,{items:items.concat(reqs),kv:[{l:'Período',t:fi.per+' (filtro Insumos das Ordens de serviço)'},{l:'Estoque',t:'compartilhado da fazenda · não é dividido por talhão'}],
       note:semPlanoOf(t)?'Cultivo da safra '+SAF+' sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html',lkt:'Abrir Compra de insumos'})); }
   // custos

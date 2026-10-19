@@ -33,7 +33,7 @@ NOVAS = {'caso5': NV('N5', 'Nova (caso 5)', '2027-01-10', '2027-08-30'), '2027/2
 
 # ---------- JS (node) ----------
 JS_RUN = r"""
-const fs=require('fs'); eval(fs.readFileSync(process.argv[1],'utf8')+'\n;globalThis.OCX={ocCtx,ocOcupacoes,ocTabela,ocChips,ocFaixaTxt,ocChecar,ocPlantioMin,ocMsgTrava,ocMsgPend,ocMsgAviso,ocMsgSemJanela,ocPendCurta,ocP,ocLib,ocDia,ocBr,ocIso};');
+const fs=require('fs'); eval(fs.readFileSync(require('path').join(require('path').dirname(process.argv[1]),'datas_atividade.js'),'utf8')+'\n'+fs.readFileSync(process.argv[1],'utf8')+'\n;globalThis.OCX={ocCtx,ocOcupacoes,ocTabela,ocChips,ocFaixaTxt,ocChecar,ocPlantioMin,ocMsgTrava,ocMsgPend,ocMsgAviso,ocMsgSemJanela,ocPendCurta,ocP,ocLib,ocDia,ocBr,ocIso};');
 const X=globalThis.OCX; const jobs=JSON.parse(fs.readFileSync(0,'utf8')); const out=[];
 const ser=(o,ctx)=>({id:o.id,ciclo:o.ciclo,saf:o.saf,safs:o.safs,t:o.t,faixa:o.faixa,ini:o.ini,plantio:o.plantio,fim:o.fim,classe:o.classe,nuc:o.nuc,P:X.ocP(ctx,o),avisos:o.avisos});
 for(const j of jobs){ const ctx=X.ocCtx(j.ctx.culturas,j.ctx.cultivares,j.ctx.planos,j.ctx.folga);

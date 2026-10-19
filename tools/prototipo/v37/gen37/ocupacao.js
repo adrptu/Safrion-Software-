@@ -21,14 +21,13 @@ function ocCtx(culturas,cultivares,planos,folga){ const cic={}, mn={}, mx={};
   const pl={}; (planos||[]).forEach(p=>{ pl[p.id]=p; });
   return {classe:Object.assign({},culturas||{}),cic,cicmin:mn,cicmax:mx,planos:pl,pub:(planos||[]).filter(p=>(p.estado||'Publicado')==='Publicado'),folga:Number(folga===undefined?1:folga)}; }
 function ocAntecedencia(ctx,pid){ const pl=ctx.planos[pid]; if(!pl) return 0; let m=0; pl.atividades.forEach(a=>{ if(a.g.tipo==='DAP'&&(a.g.dias||0)<0) m=Math.max(m,-a.g.dias); }); return m; }
-function ocColheitaPlano(pl,plantio){ const ca=pl.atividades.find(a=>String(a.op).indexOf('Colheita')===0); if(ca&&ca.g.tipo==='DAP') return plantio+ca.g.dias; if(ca&&ca.g.tipo==='DATA') return ocDia(ca.g.data); return plantio; }
 function ocAtividades(ctx,plantio,pid,colheita){ const pl=ctx.planos[pid]; if(!pl) return [];
-  return pl.atividades.map(a=>{ const g=a.g, t=g.tipo; let d; if(t==='DAP') d=plantio+g.dias; else if(t==='DATA') d=ocDia(g.data);
-    else { const col=(colheita!==null&&colheita!==undefined)?colheita:ocColheitaPlano(pl,plantio); d=col+(t==='DAPC'?g.dias:-g.dias); } return [a.nome,t,d]; }); }
-function ocDatasValidas(ctx,plantio,pid,safini,safim,colheita){ const ok=[], fora=[]; const ant=ocAntecedencia(ctx,pid);
-  ocAtividades(ctx,plantio,pid,colheita).forEach(([n,tp,d])=>{ if(tp==='DATA'&&!(safini<=d&&d<=safim&&d>=plantio-ant)) fora.push([n,d]); else ok.push([n,tp,d]); }); return [ok,fora]; }
+  const cultivo={plantio:ocIso(plantio),colheita:ocIso(colheita)};
+  return pl.atividades.map(a=>[a.nome,a.g.tipo,ocDia(daDataAtividade(a,cultivo,{variante:'canonica',plano:pl}).data)]); }
+function ocDatasValidas(ctx,plantio,pid,safini,safim,colheita,pendentes){ const ok=[], fora=[]; const ant=ocAntecedencia(ctx,pid);
+  ocAtividades(ctx,plantio,pid,colheita).forEach(([n,tp,d])=>{ if(d===null){ if(pendentes) pendentes.push(['ancora_ausente',n,tp]); return; } if(tp==='DATA'&&!(safini<=d&&d<=safim&&d>=plantio-ant)) fora.push([n,d]); else ok.push([n,tp,d]); }); return [ok,fora]; }
 function ocFimEstimado(ctx,cult,vr,plantio){ const cands=[]; const k=cult+'|'+vr; if(k in ctx.cic) cands.push(plantio+ctx.cic[k]);
-  ctx.pub.forEach(p=>{ if(p.cultura!==cult) return; const ds=ocAtividades(ctx,plantio,p.id,null).filter(x=>x[1]!=='DATA').map(x=>x[2]); if(ds.length) cands.push(ocMax(ds)); });
+  ctx.pub.forEach(p=>{ if(p.cultura!==cult) return; const ds=ocAtividades(ctx,plantio,p.id,null).filter(x=>x[1]!=='DATA'&&x[2]!==null).map(x=>x[2]); if(ds.length) cands.push(ocMax(ds)); });
   return cands.length?ocMax(cands):null; }
 // ---------- ocupação ----------
 function ocTalhaoDe(local,tipo){ return tipo!=='Parcela'?local:String(local).replace(/-[^-]*$/,''); }
@@ -39,13 +38,13 @@ function ocMk(ctx,c,s){ const folga=ctx.folga; let pid=c.plano||null;
   const o={id:c.id,ciclo:c.ciclo||c.id,saf:c.saf,safs:[c.saf],safnome:s.nome||c.saf,faz:c.faz,t:c.talhao||ocTalhaoDe(c.faixa,c.tipo),faixa:c.faixa,tipo:c.tipo,area:Number(c.area||0),
     cult:c.cult,var:c.var||'',plantio:pl,plano:pid,safini:ocDia(s.ini),safim:ocDia(s.fim),ro:!!s.ro,colh_inf:colh,colh_real:real,origem:c.origem||'',avisos:[],folga,ini:pl};
   let dfim=null;
-  if(pid){ const [ok,fora]=ocDatasValidas(ctx,pl,pid,o.safini,o.safim,colh); const iniC=[pl].concat(ok.filter(x=>x[1]==='DAP'||x[1]==='DATA').map(x=>x[2])); o.ini=ocMin(iniC);
+  if(pid){ const [ok,fora]=ocDatasValidas(ctx,pl,pid,o.safini,o.safim,colh,o.avisos); const iniC=[pl].concat(ok.filter(x=>x[1]==='DAP'||x[1]==='DATA').map(x=>x[2])); o.ini=ocMin(iniC);
     if(fora.length) o.avisos.push(['datas_fixas',pid,fora[0][1]]);
     dfim=ocMax([pl].concat(ok.map(x=>x[2])).concat(colh!==null?[colh]:[])); }
   const classe=ctx.classe[o.cult]||'Anual';
   if(classe==='Perene'){ o.fim=OC_INF; o.classe='perene'; }
   else if(real!==null){ o.fim=real; o.classe='observado'; }
-  else if(pid){ o.fim=dfim; o.classe='plano'; }
+  else if(pid){ const incompleto=o.avisos.some(a=>a[0]==='ancora_ausente'); o.fim=incompleto?null:dfim; o.classe=incompleto?'semdata':'plano'; }
   else if(colh!==null){ o.fim=colh; o.classe='informada'; }
   else { const e=ocFimEstimado(ctx,o.cult,o.var,pl); if(e!==null){ o.fim=e; o.classe='estimado'; } else { o.fim=null; o.classe='semdata'; } }
   const cm=ctx.cicmin[o.cult];
