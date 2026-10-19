@@ -1,0 +1,18 @@
+OK    T1 390 px com toque: botão do componente, ação de célula da grade e chip de filtro rápido com alvo ≥ 44 px (6 telas)
+OK    T2 1440 px com mouse: nada cresce (ação de célula e chip continuam compactos, < 44 px)
+OK    T3 ação de célula da grade (g2cta) com o desenho do _MINI do engine: 5px 10px, raio 8 px, 12 px/700
+OK    M1 ⋯ com nome e dica "Mais ações de <contexto>", aria-haspopup=menu, aria-expanded=false, menu fechado escondido, itens com verbo (Manutenção, Biblioteca de planos, Capacidade, Orçamento)
+OK    M2 nenhum ⋯ antigo sem contexto (aria-label "Mais ações") nas mesmas telas
+OK    M3 abrir o ⋯ (PL-03 · Cenários): aria-expanded=true, menu à vista, foco no 1º item; ↓ vai ao 2º; Esc fecha e devolve o foco ao ⋯
+OK    M4 clicar fora fecha; escolher "Planejar pessoal" no ⋯ mostra o resultado e fecha o menu, com o foco de volta no ⋯
+OK    M5 Manutenção: ⋯ › Restaurar demonstração pede confirmação fora do menu (Restaurar / Manter); Manter fecha sem restaurar
+OK    M6 390 px com toque: ⋯ com 44 × 44 px, itens com 44 px e o menu inteiro dentro da tela
+OK    M7 MAIS-01: nenhuma fileira de ações com 2+ secundárias à vista (PL-02, PL-03, GE-02, CA-01, CO-02det, Manutenção › Sem ordem)
+OK    V1 um verde por contexto, sem verde que só navega, sem "Novo/Nova" e sem botão local de raio 9 px (O.S., Planejar safra, Capacidade, Ofertas, Cadastro de fazendas, Crédito)
+OK    V2 O.S.: "Criar ordem" é a primária do cabeçalho (antes "Nova ordem" com estilo local no bloco)
+OK    F1 TAB-01 1440 px: Fase, Rotina e Prazo na área da visão (O.S., Manutenção › Ordens e Sem ordem), nenhum deles na faixa do topo
+OK    F2 TAB-01 390 px: Manutenção › Ordens com Fase e Rotina na área da visão, fora da faixa do topo
+OK    X1 rótulo dos indicadores (engine.kpis) em caixa normal (CA-01, GE-04, GE-01)
+OK    X2 o histórico da v3 (CA-01x) e o porquê do ajuste (PL-02det) estão na dica ⓘ, não no texto à vista; o número que importa continua à vista
+OK    Z sem erro de JS nas telas abertas
+RESULTADO: 17 ok · 0 falhas

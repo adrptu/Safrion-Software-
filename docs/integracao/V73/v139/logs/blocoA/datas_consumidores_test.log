@@ -1,0 +1,7 @@
+OK catálogo inteiro usa um lote; leituras seguintes usam recibo por conteúdo [296]
+OK ausência não vira plantio/data; edição invalida cache; falta datada exclui ausência
+OK ocupação Python: pendências explícitas, ausência fora da ordenação, datas canônicas
+OK cache ocupação: 20 consultas/1 lote, edição invalida, saída isolada, limite2048
+OK plano sem âncora não inventa fim nem liberação confirmada
+OK percurso compra: override sem âncora preserva quantidade; resolução atualiza data sem alterar dose/área
+OK SU01 _origens real: DAPC+2 sem colheita mantém quantidade/memória/origens; resolver só muda data

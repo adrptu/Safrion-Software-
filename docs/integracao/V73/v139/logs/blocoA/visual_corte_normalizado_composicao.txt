@@ -1,0 +1,145 @@
+C1 | AG-07.dc.html | 390px | acetamida + alquilenobis(ditiocarbamato) · FRAC 27 + FRAC M3
+C1 | CO-03.dc.html | 1024px | Terreiro/armazém
+C1 | CO-03.dc.html | 390px | Terreiro/armazém
+C1 | GE-01.dc.html | 390px | apontamentos + preço de compra
+C1 | GE-02det.dc.html | 390px | lançamento de custo
+C1 | GE-02det.dc.html | 390px | recebimento NF 8842
+C1 | GE-07.dc.html | 390px | R$ 48,40/ha · feijão P1
+C1 | GE-07.dc.html | 390px | sensores · salto de 18 p.p.
+C1 | MA-01.dc.html | 1024px | Em dia: Inspeção trimestral · 10/10
+C1 | MA-01.dc.html | 1024px | Em dia: Preventiva mensal · 08/10
+C1 | MA-01.dc.html | 1024px | Em dia: Preventiva mensal · 15/10
+C1 | MA-01.dc.html | 1024px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA-01.dc.html | 1024px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA-01.dc.html | 1024px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA-01.dc.html | 1024px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA-01.dc.html | 1024px | Em dia: Revisão 500 h · 15/10
+C1 | MA-01.dc.html | 1024px | Leitura de 12/09: mais de 7 dias
+C1 | MA-01.dc.html | 1024px | Leitura de 15/09: mais de 7 dias
+C1 | MA-01.dc.html | 1024px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA-01.dc.html | 1024px | Revisão 250 h · Vencida · 30 h além
+C1 | MA-01.dc.html | 1024px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA-01.dc.html | 1024px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA-01.dc.html | 1024px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA-01.dc.html | 1024px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA-01.dc.html | 1024px | Vencida: Revisão pré-plantio · 20/09
+C1 | MA-01.dc.html | 1440px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA-01.dc.html | 1440px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA-01.dc.html | 1440px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA-01.dc.html | 1440px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA-01.dc.html | 1440px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA-01.dc.html | 1440px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA-01.dc.html | 1440px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA-01.dc.html | 1440px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA-01.dc.html | 390px | Preventiva mensal · 01/10
+C1 | MA-01.dc.html | 390px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA-01.dc.html | 390px | Revisão 250 h · Vencida · 30 h além
+C1 | MA-01.dc.html | 390px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA-02.dc.html | 1024px | Baixa · desde 21/09
+C1 | MA-02.dc.html | 1024px | Em breve · janela abre em 5 d
+C1 | MA-02.dc.html | 1024px | Média · desde 20/09
+C1 | MA-02.dc.html | 1024px | Média · desde 23/09
+C1 | MA-02.dc.html | 1024px | Vencida desde 20/09
+C1 | MA-02.dc.html | 1024px | Vencida · 30 h além
+C1 | MA-02.dc.html | 1440px | Em breve · janela abre em 5 d
+C1 | MA-03.dc.html | 1024px | Baixa · desde 21/09
+C1 | MA-03.dc.html | 1024px | Em breve · janela abre em 5 d
+C1 | MA-03.dc.html | 1024px | Média · desde 20/09
+C1 | MA-03.dc.html | 1024px | Média · desde 23/09
+C1 | MA-03.dc.html | 1024px | Vencida desde 20/09
+C1 | MA-03.dc.html | 1024px | Vencida · 30 h além
+C1 | MA-03.dc.html | 1440px | Em breve · janela abre em 5 d
+C1 | MA.dc.html | 1024px | Em dia: Inspeção trimestral · 10/10
+C1 | MA.dc.html | 1024px | Em dia: Preventiva mensal · 08/10
+C1 | MA.dc.html | 1024px | Em dia: Preventiva mensal · 15/10
+C1 | MA.dc.html | 1024px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA.dc.html | 1024px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA.dc.html | 1024px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA.dc.html | 1024px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA.dc.html | 1024px | Em dia: Revisão 500 h · 15/10
+C1 | MA.dc.html | 1024px | Leitura de 12/09: mais de 7 dias
+C1 | MA.dc.html | 1024px | Leitura de 15/09: mais de 7 dias
+C1 | MA.dc.html | 1024px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA.dc.html | 1024px | Revisão 250 h · Vencida · 30 h além
+C1 | MA.dc.html | 1024px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA.dc.html | 1024px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA.dc.html | 1024px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA.dc.html | 1024px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA.dc.html | 1024px | Vencida: Revisão pré-plantio · 20/09
+C1 | MA.dc.html | 1440px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA.dc.html | 1440px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA.dc.html | 1440px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA.dc.html | 1440px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA.dc.html | 1440px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA.dc.html | 1440px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA.dc.html | 1440px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA.dc.html | 1440px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA.dc.html | 390px | Preventiva mensal · 01/10
+C1 | MA.dc.html | 390px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA.dc.html | 390px | Revisão 250 h · Vencida · 30 h além
+C1 | MA.dc.html | 390px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Inspeção trimestral · 10/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Preventiva mensal · 08/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Preventiva mensal · 15/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA.dc.html#vis=ativos | 1024px | Em dia: Revisão 500 h · 15/10
+C1 | MA.dc.html#vis=ativos | 1024px | Leitura de 12/09: mais de 7 dias
+C1 | MA.dc.html#vis=ativos | 1024px | Leitura de 15/09: mais de 7 dias
+C1 | MA.dc.html#vis=ativos | 1024px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA.dc.html#vis=ativos | 1024px | Revisão 250 h · Vencida · 30 h além
+C1 | MA.dc.html#vis=ativos | 1024px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA.dc.html#vis=ativos | 1024px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA.dc.html#vis=ativos | 1024px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA.dc.html#vis=ativos | 1024px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA.dc.html#vis=ativos | 1024px | Vencida: Revisão pré-plantio · 20/09
+C1 | MA.dc.html#vis=ativos | 1440px | Em dia: Revisão 10.000 km · 50.000 km ≈ 15/10
+C1 | MA.dc.html#vis=ativos | 1440px | Em dia: Revisão 250 h · 1.790 h ≈ 20/10 · +1 serviço
+C1 | MA.dc.html#vis=ativos | 1440px | Em dia: Revisão 250 h · 3.550 h ≈ 17/10
+C1 | MA.dc.html#vis=ativos | 1440px | Em dia: Revisão 250 h · 4.450 h ≈ 08/10
+C1 | MA.dc.html#vis=ativos | 1440px | Revisão pré-plantio · Vencida desde 20/09
+C1 | MA.dc.html#vis=ativos | 1440px | Vence em breve: Preventiva mensal · 01/10
+C1 | MA.dc.html#vis=ativos | 1440px | Vence em breve: Revisão 250 h · 3.043 h ≈ 28/09 · +1 serviço
+C1 | MA.dc.html#vis=ativos | 1440px | Vencida: Revisão 250 h · 5.090 h · passou ≈ 19/09
+C1 | MA.dc.html#vis=ativos | 390px | Preventiva mensal · 01/10
+C1 | MA.dc.html#vis=ativos | 390px | Revisão 250 h · 3.043 h ≈ 28/09
+C1 | MA.dc.html#vis=ativos | 390px | Revisão 250 h · Vencida · 30 h além
+C1 | MA.dc.html#vis=ativos | 390px | Revisão pré-plantio · Vencida desde 20/09
+C1 | PCOM.dc.html | 1024px | fora da média: PV-030, CT-203 (saca a conferir)
+C1 | PCOM.dc.html | 1440px | fora da média: PV-030, CT-203 (saca a conferir)
+C1 | PL-03.dc.html | 390px | reaproveitamento entre setores
+C1 | PT-04det.dc.html | 390px | Exclusivo para esta finalidade · proibido revender ou repass
+C1 | PT-07.dc.html | 390px | cotacoes@fertisul.com.br
+C1 | VE-04det.dc.html | 390px | Conversão na confirmação
+C1 | VE-04det.dc.html | 390px | Reserva provisória RT-0107
+C4 | CA-04.dc.html | 1024px | ·
+C4 | CA-04.dc.html | 1440px | ·
+C4 | CA-04.dc.html | 390px | ·
+C4 | CARGA.dc.html | 1024px | ·
+C4 | CARGA.dc.html | 1440px | ·
+C4 | EXPED.dc.html | 1024px | ·
+C4 | EXPED.dc.html | 1440px | ·
+C4 | LO-01.dc.html | 1024px | ·
+C4 | LO-01.dc.html | 1440px | ·
+C4 | LO-01.dc.html | 390px | ·
+C4 | MA-02.dc.html | 1024px | ·
+C4 | MA-02.dc.html | 1440px | ·
+C4 | MA-02.dc.html | 390px | ·
+C4 | MA-03.dc.html | 1024px | ·
+C4 | MA-03.dc.html | 1440px | ·
+C4 | MA-03.dc.html | 390px | ·
+C4 | MA-04det.dc.html | 1024px | ·
+C4 | MA-04det.dc.html | 1440px | ·
+C4 | MA-04det.dc.html | 390px | ·
+C4 | PL-04.dc.html | 1024px | ·
+C4 | PL-04.dc.html | 1440px | ·
+C4 | VE-04.dc.html | 1024px | ·
+C4 | VE-04.dc.html | 1440px | ·
+C4 | VE-04.dc.html | 390px | ·
+C4 | VE-04det.dc.html | 1024px | ·
+C4 | VE-04det.dc.html | 1440px | ·
+C4 | VE-04det.dc.html | 390px | ·
+C4 | VEN.dc.html | 1024px | ·
+C4 | VEN.dc.html | 1440px | ·
