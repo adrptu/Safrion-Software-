@@ -1,0 +1,41 @@
+OK    mapa real da Lagoa Grande pronto
+OK    Carência e destino é filtro (Mostrar) de Colheita e produtividade, fora da barra
+OK    link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)
+OK    painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização
+OK    uma ação primária no estado: Ver restrição → OS-0508
+OK    faixa de números e aviso "prazo cumprido não é conformidade"
+OK    painel sem parágrafo explicativo (nenhum texto com 14 palavras ou mais num elemento)
+OK    consultado em 30/09: prazo cumprido e destino a avaliar (sem selo de conforme/exportar)
+OK    PV06: OS-0504 liberada aparece como previsão (não conta) com a colheita impedida até 07/10 se aplicada em 24/09
+OK    PV06: painel sem parágrafo explicativo (previsão e lotes em frases curtas)
+OK    PV06: lotes colhidos com a avaliação do destino (LC-0510-1 conforme no escopo do mercado interno; LC-0510-2 não conforme no mercado sintético)
+OK    Integrado: linha "Carência e destino" com Ver carência
+OK    Ver carência abre a camada sem perder o talhão
+OK    mapa sem erro de JavaScript
+OK    colheita OS-0440 (Pivô 23, a partir de 25/09): Liberar bloqueado com motivo (OS-0508, carência até 26/09) e quem resolve (colheita a partir de 27/09)
+OK    sem botão Liberar; Rever programação junto ao impedimento; selo "Carência até 26/09"
+OK    o próprio comando recusa a liberação (não é só a cor do mapa)
+OK    mapa: com a colheita impedida, a ação primária do Pivô 23 vira Rever programação → OS-0440
+OK    reprogramar para 26/09 ainda cai na carência: continua impedida
+OK    recuperação: colheita a partir de 27/09 libera o comando e a origem guarda a reprogramação
+OK    OS-0440 liberada depois de reprogramada
+OK    colheita OS-0466 após azoxistrobina (7 dias não conferidos, 05/09): Liberar bloqueado e o formulário "Registrar carência conferida"
+OK    recuperação: carência conferida (10 dias, até 14/09) registrada no cenário e a colheita pode ser liberada
+OK    OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início
+OK    OS-0504 executada: apontamento de 24/09 em 62,79 ha
+OK    colheita apontada em carência no Pivô 19 (app): registrada, com selo "Colhido em carência · conferir" e dono Ana
+OK    PV06 após aplicar a OS-0504: carência até 07/10; o lote LC-0510-1 (colhido em 16/09) não é contaminado retroativamente
+OK    PV19: carência até 05/10 e o lote de 24/09 aparece Não conforme
+OK    mapa e O.S. sem erro de JavaScript
+OK    CO-06 abre o lote do link: Não conforme por colheita em carência, com aplicação, prazo e quem resolve
+OK    LC-0510-1: conforme só no escopo do mercado interno (aplicação posterior não conta)
+OK    liberação comercial do LC-0510-1 registrada só para o mercado interno, no escopo avaliado
+OK    troca de destino reavalia (UE: regra não carregada → Pendente) e preserva a avaliação anterior no histórico
+OK    destino UE: a liberação anterior fica suspensa e o comando de liberar não aparece (impedido com motivo)
+OK    mistura LM-39-01: genealogia com as duas origens, pós-colheita herdado e requisito do comprador separado da lei
+OK    CO-06 sem erro de JavaScript
+OK    link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)
+OK    link #car sem erro de JavaScript
+OK    celular: mapa abre a camada no Pivô 23 (texto presente)
+OK    celular: a avaliação do lote não transborda o contêiner (sem largura fixa) e sem erro
+RESULTADO: 40/40 verificações

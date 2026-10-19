@@ -1,0 +1,119 @@
+— R-D0 · perfil de demonstração (g2lib.js) e decisão com papel
+OK    sem escolha: Ana (padrão de hoje, "Ana · Gestora")
+OK    escolha gravada no navegador: Rui
+OK    perfil desconhecido volta a Ana
+OK    quem aprova ajuste, quarentena e excedente: Ana (gestora)
+OK    agrônomo: Ana (agrônoma), o mesmo rótulo das telas da O.S. (OS_AGRO)
+OK    dispensa: os dois papéis (só Ana)
+OK    almoxarifes: Rui ou Paula
+OK    mesma pessoa pelo nome (Ana × "Ana (gestora)")
+OK    papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale
+OK    menu lateral: seletor com todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada; o único extra é "Proprietário · todos os papéis (teste)"
+OK    trocar para Caio grava e avisa que não é segurança
+OK    revisão do CTL-3, achado 1: trocar o perfil fecha o que a tela declarou em g2perfilFecha (a confirmação aberta pela Ana)
+
+— R-D1 · ajuste de estoque (INV-2611: Glifosato 480 G26-14, sistema 1.200 L, contado 1.180 L por Paula)
+OK    NEGATIVO Rui (almoxarife) não aprova; físico segue 1.200 L, ajuste aguardando e nenhum movimento de ajuste
+OK    NEGATIVO Paula (almoxarife), quem contou não aprova; físico segue 1.200 L, ajuste aguardando e nenhum movimento de ajuste
+OK    NEGATIVO Caio (PCP) não aprova; físico segue 1.200 L, ajuste aguardando e nenhum movimento de ajuste
+OK    NEGATIVO sem ator não aprova; físico segue 1.200 L, ajuste aguardando e nenhum movimento de ajuste
+OK    NEGATIVO Caio forjado como gestor não aprova; físico segue 1.200 L, ajuste aguardando e nenhum movimento de ajuste
+OK    Ana (gestora) aprova: físico 1.200 → 1.180 L
+OK    ajuste grava aprovador, hora, contador e quem registrou (Rui); sem revisão posterior
+OK    movimento de ajuste −20 L por Ana (gestora), documento INV-2611
+OK    trilha: "ajuste de inventário INV-2611 aprovado por Ana (gestora): −20 L"
+OK    mensagem da tela
+OK    NEGATIVO repetir a aprovação não aplica de novo (1.180 L)
+OK    acúmulo: Ana registra 1.185 L (declarando Paula) e aprova: a decisão vale (físico 1.185 L)
+OK    acúmulo grava a revisão posterior no ajuste e no movimento (declarar outro contador não esconde o acúmulo)
+OK    acúmulo aparece na mensagem e na trilha
+OK    Rui registra a contagem de Paula, Ana aprova: sem revisão posterior
+OK    recontar limpa quem registrou e passa a outro contador
+OK    Recontar (sem papel de gestor) recusa o ajuste pendente sem mudar o saldo
+OK    NEGATIVO INV-2609 (contagem de base): Rui não aprova; nenhum ajuste criado; MAP segue 90.000 kg
+OK    INV-2609: Ana aprova −600 kg, MAP 90.000 → 89.400 kg; contador Rui; sem revisão
+OK    contadores do seed: Paula e Rui (almoxarife), lidos de Configurações (est_fix1_test.py:56)
+
+— R-D2 · quarentena (KCl 60% K26-11: 10.000 kg em quarentena, disponível 50.000 kg)
+OK    NEGATIVO Rui (almoxarife) não libera, mesmo com laudo; disponível segue 50.000 kg
+OK    NEGATIVO Paula (almoxarife) não libera, mesmo com laudo; disponível segue 50.000 kg
+OK    NEGATIVO Caio (PCP) não libera, mesmo com laudo; disponível segue 50.000 kg
+OK    NEGATIVO sem ator não libera, mesmo com laudo; disponível segue 50.000 kg
+OK    NEGATIVO Ana sem laudo (""): continua bloqueado
+OK    NEGATIVO Ana sem laudo ("   "): continua bloqueado
+OK    NEGATIVO Ana sem laudo (undefined): continua bloqueado
+OK    Ana com o laudo LAB-0917: quarentena 10.000 → 0; disponível 50.000 → 60.000 kg
+OK    movimento grava laudo, quem e quantidade
+OK    trilha com laudo e quem
+OK    mensagem
+OK    NEGATIVO repetir não soma de novo (60.000 kg)
+OK    devolução bloqueada de 10 L (REQ-035): F26-02 físico 555, quarentena 10, disponível 480 L
+OK    NEGATIVO Rui, que recebeu a devolução, não libera (480 L)
+OK    Ana libera com INSP-0042: disponível 480 → 490 L
+
+— R-D3 · dispensa de saldo (OS-0421: 350 ha, realizado 190, saldo 160; limite 20 % = 70 ha)
+OK    NEGATIVO Caio (PCP) não dispensa; saldo segue 160 ha
+OK    NEGATIVO Rui (almoxarife) não dispensa; saldo segue 160 ha
+OK    NEGATIVO Zé (mecânico) não dispensa; saldo segue 160 ha
+OK    NEGATIVO sem ator não dispensa; saldo segue 160 ha
+OK    Ana (gestora e agrônoma) dispensa 40 ha: saldo 160 → 120; realizado 190 preservado
+OK    grava quem decidiu e a hora
+OK    texto da ordem nomeia a decisão e a validação
+OK    mensagem
+OK    NEGATIVO comando direto com 71 ha (> 70 ha = 20 % de 350): exige Direção; saldo segue 160 (antes: passava)
+OK    NEGATIVO acumulado 40 + 31 = 71 ha: exige Direção; saldo segue 120
+OK    limite exato 40 + 30 = 70 ha: aceita (saldo 90)
+OK    NEGATIVO OS-0424 (Liberadas): não dispensa
+
+— R-D5 · consumo acima da custódia (OS-0421 · REQ-035 · Fungicida A: custódia 65 L; lote F26-02 físico 545 L)
+OK    NEGATIVO Rui (almoxarife) não aceita os 20 L acima da custódia; F26-02 segue 545 L (antes: baixava para 525 e gravava Rui)
+OK    NEGATIVO Caio (PCP) não aceita os 20 L acima da custódia; F26-02 segue 545 L (antes: baixava para 525 e gravava Rui)
+OK    NEGATIVO sem ator (chamada direta) não aceita os 20 L acima da custódia; F26-02 segue 545 L (antes: baixava para 525 e gravava Rui)
+OK    Ana (gestora) aceita: F26-02 545 → 525 L; caso Aceito por Ana (gestora)
+OK    movimentos com quem decidiu
+OK    Rui recusa o relato (sem efeito no saldo): vale e grava Rui
+OK    NEGATIVO recusa sem perfil de quem age: recusada e nada gravado (antes: gravava "Rui (almoxarife)" sem Rui agir)
+OK    coberto pela custódia (nada sai do lote): Rui aceita e fica gravado Rui
+
+— R-D4 · checklist da manutenção (OM-0234 Revisão 250 h, 5 tarefas)
+OK    Manutenção (MA) sem a ação "Marcar pendentes como feitas" (pan_todas removido)
+OK    NEGATIVO Ana (gestora) não responde a tarefa do Zé (executante): recusado e nada gravado
+OK    cada resposta grava quem (Zé (mecânico)) e a hora
+OK    NEGATIVO 4 de 5 respondidas: não conclui
+OK    "Não feito" sem motivo (LEVE-1): conclui, com a resposta, quem e quando gravados e a Pendência aberta sem motivo solto
+OK    desmarcar apaga quem e hora (resposta volta a pendente)
+OK    respondidas as 5, uma a uma: conclui e vai Em conferência
+
+— Revisão do CTL-3 (achados 2, 3, 4, 6 e 7)
+OK    NEGATIVO Caio (PCP) não aceita os 75 L cobertos pela custódia: custódia 75 L e consumido 95 L sem mudança, caso Em conferência (antes: aceitava, baixava 75 → 0 e gravava quem clicou)
+OK    NEGATIVO Zé (mecânico) não aceita os 75 L cobertos pela custódia: custódia 75 L e consumido 95 L sem mudança, caso Em conferência (antes: aceitava, baixava 75 → 0 e gravava quem clicou)
+OK    NEGATIVO sem ator não aceita os 75 L cobertos pela custódia: custódia 75 L e consumido 95 L sem mudança, caso Em conferência (antes: aceitava, baixava 75 → 0 e gravava quem clicou)
+OK    NEGATIVO Caio forjado como almoxarife não aceita os 75 L cobertos pela custódia: custódia 75 L e consumido 95 L sem mudança, caso Em conferência (antes: aceitava, baixava 75 → 0 e gravava quem clicou)
+OK    Paula aceita o coberto pela custódia: custódia 75 → 0, consumido 95 → 170, caso Aceito por Paula (almoxarife)
+OK    Ana aceita o coberto pela custódia: custódia 75 → 0, consumido 95 → 170, caso Aceito por Ana (gestora)
+OK    Recusar relato segue aberto (não mexe no saldo): Zé recusa e fica gravado Zé (mecânico)
+OK    Paula entrega 100 L de Glifosato 480: o movimento grava "Paula (almoxarife) → Marcos" (antes: "Rui (almoxarife) → Marcos" com qualquer perfil)
+OK    Paula recebe a devolução de 20 L: o movimento grava "Paula (almoxarife)"
+OK    entrega segue aberta e grava quem agiu: "Caio (PCP) → Marcos"
+OK    NEGATIVO entrega e devolução sem o perfil de quem age: recusadas e nada gravado
+OK    recebimento grava quem conferiu ("Paula (almoxarife)"); sem perfil é recusado e o lote fica com 100 kg
+OK    Ana registra o recebimento bloqueado e libera a quarentena: a decisão vale e fica revisão posterior (padrão 2; antes a entrada gravava "Rui (almoxarife)" e o acúmulo não aparecia)
+OK    Rui recebe bloqueado e Ana libera: sem revisão posterior
+OK    NEGATIVO Caio (PCP) não cancela a OS-0430 aprovada e liberada (CMD-46, AL-04): segue Liberadas, 320 L reservados (antes: cancelava sem autor e soltava a reserva)
+OK    NEGATIVO Rui (almoxarife) não cancela a OS-0430 aprovada e liberada (CMD-46, AL-04): segue Liberadas, 320 L reservados (antes: cancelava sem autor e soltava a reserva)
+OK    NEGATIVO sem ator não cancela a OS-0430 aprovada e liberada (CMD-46, AL-04): segue Liberadas, 320 L reservados (antes: cancelava sem autor e soltava a reserva)
+OK    Ana (gestora) cancela: Canceladas, reserva solta, e grava quem cancelou e a hora
+OK    NEGATIVO Beto (só agrônomo) não dispensa: exige os dois papéis; saldo segue 160 ha
+OK    NEGATIVO Gil (só gestor) não dispensa: exige os dois papéis; saldo segue 160 ha
+OK    cadastro restaurado: 10 perfis
+OK    Ana (gestora) não edita o motivo da resposta do Zé (não é a executante): recusado; resposta e motivo seguem de Zé (antes: o autor virava Ana)
+OK    editar só o motivo não troca o autor da resposta; a edição fica à parte, com quem e hora
+OK    o próprio Zé escreve o motivo: autor e editor iguais
+OK    fechar o turno com 85 L (65 L em custódia): "· Rui (almoxarife) confere; Ana (gestora) aceita o excedente." (antes: "· Rui (almoxarife) concilia.")
+OK    encerramento impedido: "No Estoque: Rui (almoxarife) confere; Ana (gestora) aceita o excedente."
+OK    coberto pela custódia (75 L relatados com 75 L em custódia): "Rui (almoxarife) concilia"
+OK    apontamento da web com 80 L (65 L em custódia): o mesmo texto
+OK    Paula soma o dia 6 com 60 L (40 L em custódia): "Consumo em conferência: Rui (almoxarife) confere; Ana (gestora) aceita o excedente." (antes: "com Rui (almoxarife)")
+
+TOTAL · falhas 0
+RESULTADO 103/103

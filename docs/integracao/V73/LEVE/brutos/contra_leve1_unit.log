@@ -1,0 +1,24 @@
+--- parte os
+FALHA U2a cenHorasTurno: 06:10 → 15:00 com pausa de 20 min = 8,5 h · "sem cenHorasTurno"
+FALHA U2b virada de dia: 22:00 → 01:30 = 3,5 h; pausa ainda aberta (14:00) conta até agora: 12:00 → 15:00 = 2 h · ["sem cenHorasTurno","sem cenHorasTurno"]
+FALHA U2c sem início registrado (ou ilegível): NaN, nada inventado · ["sem cenHorasTurno"]
+FALHA U2d cenFecharTurno sem horas: o comando calcula as do turno (2,7 h) e grava o apontamento · "Informe as horas trabalhadas."
+OK    U2e sem início, ou com horas 0 informadas, continua pedindo "Informe as horas trabalhadas."
+FALHA U1a Iniciar (osDireto → osc_iniciar): OS-0424 Em execução e o recibo diz com quem estão os insumos · [false,{"msg":"OS-0424 em execução. Registre o apontamento de cada turno."}]
+FALHA U1b toque duplo: a 2ª chamada do mesmo clique não faz nada de novo e não vira erro · {"erro":"sem osDireto"}
+FALHA U1c Enviar para conferência no clique grava CMD-08 com quem e quando uma vez; o toque duplo não grava de novo · [{"erro":"sem osDireto"},{"erro":"sem osDireto"},[]]
+OK    U1d o comando continua validando: OS-0424 liberada sem o insumo entregue e confirmado não inicia ("Iniciar bloqueado") e nada muda
+FALHA U9a AL-05 20 → 15 % sem motivo: vale na hora (v2), o evento grava quem e não tem "motivo:" vazio · [{"erro":"Informe o motivo da mudança da AL-05."},[]]
+FALHA U9b ampliar o próprio poder sem motivo continua aguardando o 2º aprovador (segurança mantida) · {"erro":"Informe o motivo da mudança da AL-05."}
+TOTAL 11 · falhas 9
+--- parte man
+FALHA U9c cancelar a OM-0234 sem motivo: Canceladas, quem e quando gravados, motivo vazio e o recibo sem "motivo:" · [{"erro":"Informe o motivo do cancelamento."},null]
+FALHA U5 vincular o Gotejo T7 (sem execução registrada) sem escolher a base: conta de agora, marco estimado (selo) · [{"erro":"Nada foi vinculado: Gotejo T7: Escolha como contar: informe a última execução ou conte de agora."},{"ref":null,"errs":{"modo":"Escolha como contar: informe a última execução ou conte de agora."},"modo":""}]
+OK    U4 (regressão) OM-0234 libera com a sugestão (Zé, única pessoa habilitada) e o tempo do serviço (5 h)
+FALHA U9d manFaltaConcluir não pede "motivo de" para resposta fora de OK · ["motivo de “Lubrificar”"]
+TOTAL 4 · falhas 3
+--- parte mapa
+FALHA U10a desenho de 9.000 ha declarados (polígono de 61,20 ha) na Santa Rita: sem erro de área nem de motivo; os dois viram aviso · [{"motivo":"Diferença de 99,3 % entre a área cultivável e o contorno: escolha o motivo.","decl":"Os talhões ativos da Santa Rita somariam 10.165,00 ha; a fazenda tem 1.480,00 ha."},null]
+OK    U10b contorno que cruza a si mesmo continua barrado (integridade da área)
+TOTAL 2 · falhas 1
+RESULTADO 4/17 · FALHOU

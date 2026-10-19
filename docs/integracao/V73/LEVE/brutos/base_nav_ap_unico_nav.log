@@ -1,0 +1,37 @@
+  OK  AP-01/02/04 formulário: 26/09, "Turno de Marcos · quem está com os insumos", usado de Fungicida A 25 L sugerido, adjuvante vazio, sem aviso: ['2026-09-26', '25', ''] · Data do turno Área feita (ha) Saldo da ordem: 160 ha Turno de Marcos · quem está com os insumos Usado de Fungicida A (L) 0,5 L/ha × área · em custódia 65 L Usado de Adjuvante espalhante (L) Fora da RE
+  OK  AP-03/04 usado 27 L e duplo clique: 240 ha, 122 L / 38 L, um só registro: [240, 122, 38] · 1
+  OK  ENG-021 chave do formulário W-OS-0421-1792438463990: reenvio igual "já registrado", outro consumo = conflito, 240 ha / 122 L: Apontamento do dia 5 já registrado (50 ha): nada foi somado de novo. · Este registro (W-OS-0421-1792438463990) já foi gravado como dia 5 (50 ha em 26/09) com out
+  OK  a web grava o movimento de consumo com Marcos (não "web"): ['Marcos|Fungicida A 27']
+  OK  AP-05/06 app retido: recibo "Em conferência · duplicidade", nada baixado (240 ha, 122 L): Turno fechado: 50 ha em 8 h, em conferência: já há dia 5, 50 ha pela web em 26/09. Nada foi somado nem baixado; Paula (conferência) decide se é outro turno.
+  FALHA aviso no formulário antes de salvar (sem clique): 
+  FALHA CTL-3: perfil Ana não vê as três saídas da duplicidade; a linha diz "Quem decide: Paula (conferência).": 
+  FALHA AP-06/07 painel: selo na lista e no painel, Paula decide, três saídas, acumulado 240/350: 
+  FALHA AP-07 "vale o dia 5": dia 6 = Duplicidade a conferir, selo fora, 240 ha / 122 L
+  FALHA AP-07 "vale este" (DEMO-11): 240 ha, 122 L / 38 L; dia 5 estornado, movimento sem item: [240, 120, 40] · ['Provisório', 'Fungicida A 25', '']
+  FALHA EST · movimentos: o consumo estornado do dia 5 (MV-1001) é "Consumo apontado na web", origem Web, sem item nem quantidade: 19:34 MV-1001 Consumo apontado na web — REQ-035 OS-0421 Fungicida A — 25 L Marcos Web —
+  FALHA AP-07 "outro turno: somar": 280 ha, 140 L: [230, 115, 45]
+  OK  AP-06 sem sinal + web: 240 ha, 120 L / 40 L; o turno do app fica retido, baixa desfeita, movimento sem item: [240, 120, 40] · [5, '', 'Retido: mesma data do dia 6; nada baixado até a decisão de Paula (conferência).'] · 1 registro enviado ao voltar o sinal. Em conferência de duplicidade: OS-0421 dia 5 (mesma data do dia 6, 50 ha pela web)
+6/13 ok · FALHAS: 7
+ - aviso no formulário antes de salvar (sem clique): 
+ - CTL-3: perfil Ana não vê as três saídas da duplicidade; a linha diz "Quem decide: Paula (conferência).": 
+ - AP-06/07 painel: selo na lista e no painel, Paula decide, três saídas, acumulado 240/350: 
+ - AP-07 "vale o dia 5": dia 6 = Duplicidade a conferir, selo fora, 240 ha / 122 L
+ - AP-07 "vale este" (DEMO-11): 240 ha, 122 L / 38 L; dia 5 estornado, movimento sem item: [240, 120, 40] · ['Provisório', 'Fungicida A 25', '']
+ - EST · movimentos: o consumo estornado do dia 5 (MV-1001) é "Consumo apontado na web", origem Web, sem item nem quantidade: 19:34 MV-1001 Consumo apontado na web — REQ-035 OS-0421 Fungicida A — 25 L Marcos Web —
+ - AP-07 "outro turno: somar": 280 ha, 140 L: [230, 115, 45]
+Traceback (most recent call last):
+  File "<base cbe4cd38>/gen37/ap_unico_test.py", line 41, in <module>
+    FALHAS += ap_unico_nav.rodar()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/ap_unico_nav.py", line 113, in rodar
+    restaurar(); a.mudar("return cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui');"); web_apontar('50'); app_turno('50'); web_apontar('110', data='2026-09-27')
+                                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/ap_unico_nav.py", line 34, in web_apontar
+    if data: setin('Data do turno', data)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/ap_unico_nav.py", line 26, in setin
+    J(f"""(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] input')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)});
+  File "<base cbe4cd38>/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

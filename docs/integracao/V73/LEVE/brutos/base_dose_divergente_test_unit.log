@@ -1,0 +1,51 @@
+REPRO B-R8 {"esperado":{"Glifosato 480":20,"2,4-D 806":10,"Óleo mineral":5},"retorno":{"r":{"msg":"Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma)."}},"realizado":10,"saldo":150,"st":"Provisório","div":[{"p":"2,4-D 806","un":"L","plan":10,"inf":0},{"p":"Óleo mineral","un":"L","plan":5,"inf":0}],"selos":[{"t":"Divergência de consumo/dose · 2,4-D 806, Óleo mineral","c":"red"}]}
+OK    D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha
+OK    D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)
+OK    D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)
+OK    D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"
+OK    D01e revisão técnica pendente do agrônomo (uma, do dia 1)
+OK    D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"
+OK    D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho
+OK    D03 sugestão dose × área não editada: sem divergência nem selo
+OK    D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)
+OK    D04b 9,995 L = 10,00 L (cenQtd) não diverge do planejado 10 L; 10,005 L = 10,01 L diverge e o texto mostra 10,01 L; 10,0049 L não diverge
+OK    D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda
+OK    D05b aceitar sem motivo é recusado, nada muda
+OK    D05c dia sem divergência em revisão é recusado
+OK    D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está
+OK    D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda
+OK    D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai
+OK    D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa
+OK    D07b encerrar é recusado e nada muda
+OK    D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"
+OK    D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão
+OK    D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez
+OK    D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa
+OK    D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão
+OK    D11a app (OS-0421, campo do Adjuvante sem edição): selo "Divergência de consumo/dose · Adjuvante espalhante", planejado 2,5 L × informado 0 L, revisão de Ana; a sugestão do Fungicida não diverge
+OK    D11b a baixa não muda: só o Fungicida sai da custódia, sem conferência nem linha 0 do Adjuvante
+OK    D11c web (formulário sem edição): a mesma divergência do Adjuvante e a mensagem diz quem revisa
+OK    D12a recusado o relato de 15 L (CC-301): a divergência do dia 2 vira "2,4-D 806 planejado 10 L × baixado 0 L (informado 15 L, relato CC-301 recusado no Estoque)", selo e revisão seguem
+OK    D12b revisada sobre os 15 L e depois recusado o relato: a revisão anterior vai para o histórico (reaberta, com quem recusou) e a do dia volta a pendente
+OK    D12c a Origem da O.S. guarda a revisão reaberta
+OK    D12d informado igual ao planejado mas acima da custódia: sem divergência; recusado o relato, nada foi baixado e a divergência abre (planejado 10 L × baixado 0 L)
+OK    D12e aceito o relato (baixa os 15 L): a divergência continua a do informado
+OK    D13 produto fora da ordem (Adjuvante 5 L): divergência planejado 0 L × informado 5 L, com unidade
+OK    D14 sugestão retida sem divergência; somada por Paula com o usado de 2,4-D 5 L (planejado 10 L), a divergência abre
+OK    D15 dois turnos de 0,333 ha sem sinal, cada um com o trecho exato (Óleo 0,17 e 0,16 L): nenhuma divergência; base do 2º = 0,333 ha no aparelho
+OK    D16 Em execução: selo, dona Ana (agrônoma) e próxima ação "revisar a divergência de dose do dia 1"
+RESULTADO unit: 35/35
+Traceback (most recent call last):
+  File "<base cbe4cd38>/gen37/dose_divergente_test.py", line 82, in <module>
+    if 'unit' in MODOS: FALHAS += unit() + mapa()
+                                           ^^^^^^
+  File "<base cbe4cd38>/gen37/dose_divergente_test.py", line 54, in mapa
+    fns = fatia(I.JS_COMUM, 'nfx') + ''.join(fatia(I.MAP_JS, n) for n in ['mapSc', 'inPendLib', 'mapItVis', 'mapOrdsCen'])
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/dose_divergente_test.py", line 54, in <genexpr>
+    fns = fatia(I.JS_COMUM, 'nfx') + ''.join(fatia(I.MAP_JS, n) for n in ['mapSc', 'inPendLib', 'mapItVis', 'mapOrdsCen'])
+                                             ^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/dose_divergente_test.py", line 40, in fatia
+    i = js.index('function ' + nome + '(')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: substring not found

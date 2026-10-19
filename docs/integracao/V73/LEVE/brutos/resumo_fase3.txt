@@ -1,0 +1,10 @@
+/dev/vda        252G   34G  4.7G  88% /
+irr_estado rc=0 14s 19:37 :: 38 ok · 0 falhas []
+contra_irr_estado rc=1 14s 19:37 :: 37 ok · 1 falhas ['18 ausência de leitura (LEVE-1): termina Em conferência "Sem leitura", volume nulo (não zero) e nada creditado; a leitura informada na co
+base_irr_estado rc=0 14s 19:37 :: 38 ok · 0 falhas []
+base_comercial_fluxo rc=1 77s 19:38 :: RESULTADO: FALHOU 22/24
+base_comercial_revisao rc=1 342s 19:44 :: RESULTADO: FALHOU 32/33
+base_lotest rc=1 36s 19:45 :: 
+base_ostela rc=1 49s 19:45 :: 
+/dev/vda        252G   34G  4.8G  88% /
+FIM

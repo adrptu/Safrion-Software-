@@ -1,0 +1,35 @@
+== menu · AC-01
+OK  AC-01 ícone Comercial logo depois de Suprimentos (antes de Configurações) na barra; na VEN o Comercial marcado e "‹ Comercial" · {'mods': ['Mapa', 'Painel', 'Cadastros', 'Agrícola', 'Manutenção', 'Suprimentos', 'Comercial', 'Crédito', 'Configurações', 'Outros acessos'], 'cur': ['Comercial'], 'volta': ['MOD-COM.dc.html', '‹ Comercial']}
+FALHOU AC-01 "‹ Comercial" abre a tela de entrada com os cartões Painel · Contratos e pedidos · Expedição (+ Inteligência, INTEL-01), na ordem do menu, sem erro de JS · [True, [['PG.dc.html#mod=com', 'Painel'], ['VEN.dc.html', 'Contratos e pedidos'], ['PCOM.dc.html', 'Oferta e compromissos'], ['EXPED.dc.html', 'Expedição'], ['IV.dc.html', 'Inteligência']], '']
+FALHOU AC-01 cartão "Painel" abre PCOM sem erro de JS e com dados do estado · ['ok', False, '/PG.dc.html', '']
+OK  AC-01 PCOM sem elo para tela oculta (VE-*, LO-*, CO-*)
+OK  AC-01 cartão "Contratos e pedidos" abre VEN sem erro de JS e com dados do estado · ['ok', True, '/VEN.dc.html', '']
+OK  AC-01 VEN sem elo para tela oculta (VE-*, LO-*, CO-*)
+OK  AC-01 cartão "Expedição" abre EXPED sem erro de JS e com dados do estado · ['ok', True, '/EXPED.dc.html', '']
+OK  AC-01 EXPED sem elo para tela oculta (VE-*, LO-*, CO-*)
+OK  AC-01 cartão "Inteligência" abre IV sem erro de JS e com dados do estado · ['ok', True, '/IV.dc.html', '']
+OK  AC-01 IV sem elo para tela oculta (VE-*, LO-*, CO-*)
+== tarefa · AC-14 tarefa do proprietário (§8.1), perfil Ana, cliques e campos medidos
+OK  §8.1 sem seleção, a primária é "Registrar venda" · ['Registrar venda']
+OK  (0) A-17 PV-030 "Saca a conferir" (VE-05 oculto sc 50 kg × Colheita 60 kg): o painel pede a massa da saca com a fonte; primária "Registrar a saca" no painel, sem verde repetido no cabeçalho (A6) · ['ok', [], ['Registrar a saca'], 'PV-030 · Coop Grão Sul Saca a conferir Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Saca do contrato a conferir (50 kg ou 60 kg): até registrar a massa com a fonte, falta, oferta, saída e crédito ficam suspensos. Nada é convertido sem
+OK  (0) escolhida a massa, o painel mostra a conta antes de gravar: 4.000 sc × 60 kg = 240.000 kg · PV-030 · Coop Grão Sul Saca a conferir Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Saca do contrato a conferir (50 kg ou 60 kg): até registrar a massa com a fonte, falta, oferta, saída e crédito ficam suspensos. Nada é convertido sem esse registro. QUANTIDADE 4.000 s
+OK  (0) saca de 60 kg registrada por Ana (gestora) com a fonte "Contrato CT-201": 4.000 sc = 240.000 kg; falta 125 sc · PV-030: saca de 60 kg registrada por Ana (gestora) (Contrato CT-201): 4.000 sc = 240.000 kg; falta 125 sc.
+OK  (1) PV-030 Parcial: o painel abre a reserva com a sugestão L10-031 · 125 sc; a primária é "Reservar" no painel (cabeçalho sem verde, A6) · ['ok', '125', [], ['Reservar'], 'PV-030 · Coop Grão Sul Parcial Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Falta 125 sc: reservar lote apto (L10-031 34.545 sc). Depois, programar a carga de 4.000 sc. QUANTIDADE 4.000 sc PREÇO R$ 128,00/sc VALOR R$ 512.000,00 UNIDADE
+OK  (1) Reservar: RS-0002 de 125 sc do L10-031 para o PV-030 (Coberto) · ['RS-0002: 125 sc do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 34.420 sc · PV-030 coberto.', 'PV-030 · Coop Grão Sul Soja em grão Padrão 2025/26 Pronta entrega set–out/26 · saldo 4.000 sc do CT-201 (8.000 sc já expedidos) 4.000 sc R$ 128,00/sc 0 sc 4.000 sc 0 sc Coberto Pr
+OK  (2) a primária passa a "Programar carga do PV-030" (no painel aberto; cabeçalho sem verde repetido, A6) · [[], ['Programar carga do PV-030']]
+OK  (2) "Programar carga do PV-030" abre a Expedição com a venda herdada (cliente retira) · Programar carga Nova carga PV-030 · Coop Grão Sul · Cliente retira na fazenda · Armazém Sede (FOB) × PROGRAMAR CARGA · COMERCIAL OU EXPEDIÇÃO Toque nas opções; digite só a placa. Previsto pré-preenchido: o menor entre a reserva sem carga e a capacidade do veículo. Venda com reserva sem carga PV-030 
+OK  (2) previsto pré-preenchido: 37.000 kg (mín da reserva sem carga e da capacidade do bitrem, KC11) e data Hoje · ['37000', 'Programar carga Nova carga PV-030 · Coop Grão Sul · Cliente retira na fazenda · Armazém Sede (FOB) × PROGRAMAR CARGA · COMERCIAL OU EXPEDIÇÃO Toque nas opções; digite só a placa. Previsto pré-preenchido: o menor entre a reserva sem carga e a capacidade do veículo. Venda com reserva sem ca
+OK  (2) RM-0002 programada: 37.000 kg, bitrem QZA1B23, cliente retira · RM-0002 programada por Ana (gestora): PV-030 (Coop Grão Sul) · L10-031 37.000 kg = 616,67 sc · Bitrem graneleiro 37 t QZA1B23 · cliente retira · 26/09. Próximo passo: confirmar a saída com a pesagem.
+OK  (3) a carga fica selecionada e a primária é "Confirmar saída da RM-0002" no painel (cabeçalho sem verde repetido, A6) · [[], ['Confirmar saída da RM-0002'], 'RM-0002 · PV-030 · Coop Grão Sul Programada Cliente retira na fazenda · Armazém Sede (FOB) · Bitrem graneleiro 37 t QZA1B23 × PRÓXIMO PASSO Pese o caminhão e confirme a saída: baixa o lote uma vez, só o reservado do PV-030. VENDA PV-030 · Coop Grão Sul PRODUTO S
+OK  (3) o painel mostra o líquido antes de gravar: 36.960 kg = 616 sc · RM-0002 · PV-030 · Coop Grão Sul Programada Cliente retira na fazenda · Armazém Sede (FOB) · Bitrem graneleiro 37 t QZA1B23 × PRÓXIMO PASSO Pese o caminhão e confirme a saída: baixa o lote uma vez, só o reservado do PV-030. VENDA PV-030 · Coop Grão Sul PRODUTO Soja em grão DESTINO Mercado interno · 
+OK  (3) dois cliques seguidos em "Confirmar saída": um só MP de expedição; 36.960 kg (616 sc) saem; disponível do L10-031 continua 34.420 sc (2.065.200 kg) · ['ok', 1, 36960, [2268240, 203040, 2065200], 'RM-0002: saída de 36.960 kg (51.200 − 14.240) = 616 sc para o PV-030 (Coop Grão Sul). Entregue na retirada · R$ 78.848,00 a receber até 26/09. L10-031 disponível 34.420 sc.']
+OK  (3) cliente retira: a RM-0002 fica Entregue, R$ 78.848,00 a receber até 26/09 · ['RM-0002 PV-030 · Coop Grão Sul Soja em grão L10-031 616,67 sc 616 sc Cliente retira Coop Grão Sul · Bitrem graneleiro 37 t · QZA1B23 26/09 Entregue R$ 78.848,00 a receber até 26/09', 'RM-0002: saída de 36.960 kg (51.200 − 14.240) = 616 sc para o PV-030 (Coop Grão Sul). Entregue na retirada · R$ 78
+RESULTADO: FALHOU 22/24
+Traceback (most recent call last):
+  File "gen37/comercial_fluxo_test.py", line 145, in <module>
+    pz = J("ROWTXT('Soja em grão R$')") or J("ROWTXT('Soja em grão')") or ''; kp = J("N(document.querySelector('[aria-label=Indicadores]').innerText)") or ''
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

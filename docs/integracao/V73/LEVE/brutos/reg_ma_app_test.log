@@ -1,0 +1,37 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    §3.7 · o app abre como Marcos (c.app.usuario) e o Ver como só troca c.app.usuario
+OK    AC-PCM-27 · Zé vê a OM-0233 na Minha fila; Marcos não vê OM
+OK    §3.7 · Minha fila do Zé pela janela e depois pela criticidade (OM-0233 23/09 antes da OM-0234 28/09); a OM-0228 (João) não entra
+OK    §3.7 · passo do cartão: Liberadas → "Iniciar serviço"; Em execução com teste reprovado → "Teste pendente"
+OK    MB-09 · Marcos: máquinas herdadas da OS-0421 alocada hoje (Trator 03 primeiro, depois o Pulverizador PJ-3030)
+OK    MB-09 · Zé: a máquina da OM dele (Trator T1)
+OK    AC-PCM-27 · MB-09 mostra "Não opere" com o Trator T1 bloqueado (motivo e OM)
+OK    matriz · o operador (Marcos) registra achado, leitura e abastecimento; quem não está no cadastro de operadores, não
+OK    MB-09 · com sinal grava já pela mesma função da web (AB-1043, por Marcos, leitura 5.126 h) e o toque repetido com a mesma chave não duplica
+OK    MB-09 · faltou o volume: recusa com o campo e nada grava
+OK    §3.7 · sem sinal o abastecimento fica no aparelho (fila com a chave do aparelho), o servidor não muda e o duplo toque não duplica a fila
+OK    §3.7 · a cópia do aparelho mostra o lançamento e a leitura nova (o operador vê o que fez)
+OK    AC-PCM-27 · na volta do sinal a fila vai uma vez só: 1 lançamento no servidor, fila vazia e recibo do envio
+OK    AC-PCM-27 · reenvio da mesma chave (fila repetida) não duplica: o recibo da chave já existe
+OK    AC-PCM-27 · sem sinal: teste, concluir e declarar apto ficam no aparelho (validados na cópia), o servidor segue Em execução
+OK    AC-PCM-27 · na volta: os 3 entram em ordem; OM-0233 Em conferência, Trator T1 apto (por Zé), nenhum conflito
+OK    matriz · Marcos não executa a OM-0233: "Ação de Zé, executante"
+OK    MB-09det · Teste desabilitado com o motivo para quem não tem a habilidade (João)
+OK    §3.7 · sem sinal a regra é a mesma: concluir sem teste aprovado é recusado no campo e nada vai para a fila
+OK    AC-PCM-27 · OM mudada no escritório: os registros do app viram "Conflito a resolver · Otávio" e nada é aplicado em silêncio
+OK    AC-PCM-27 · resolver o conflito é do Otávio (Zé recusado)
+OK    AC-PCM-27 · descartar pede motivo
+OK    AC-PCM-27 · Otávio aplica sobre o estado de agora (mesma função, autor Zé): teste aprovado e OM-0233 Em conferência; o selo sai
+OK    AC-PCM-27 · conflito já decidido não é aplicado de novo
+OK    AC-PCM-27 · MB-04 Equipamento com máquina grava achado de origem Relato, ligado à O.S., visível em Sem ordem (SM-0153)
+OK    §3.2 · a mesma máquina e componente com achado aberto pergunta Somar ou Registrar novo (nada grava)
+OK    §3.2 · Somar acrescenta a ocorrência ao SM-0153
+OK    AC-PCM-27 · sem sinal o achado fica no aparelho e entra uma vez na volta (SM-0153 em Sem ordem)
+OK    REV-A7 · os dois registros da OM-0234 guardam a versão do servidor do 1º (não a projeção do aparelho)
+OK    REV-A7 (S3) · na volta do sinal os dois viram "Conflito a resolver" e nenhum entra em silêncio na OM mudada
+OK    REV-A7 · sem mudança no escritório, iniciar + resposta feitos sem sinal entram em ordem (nenhum conflito)
+OK    REV-A8 · João está no Ver como do app e vê a OM-0228 (eletricista) na Minha fila
+OK    REV-A8 (S3) · João executa a OM-0228 pelo app e, responsável técnico da Bomba do Pivô 2, a declara apta (medição conforme)
+OK    REV-A2 · no app, a repetição mais grave avisa antes de somar
+OK    REV-A2 · somar pelo app leva a gravidade (Alta · Bloqueado) ao INSP-104 e mostra a mudança
+RESULTADO: 36/36 ok

@@ -1,0 +1,5 @@
+OK    F16 Marcos desativado: descartar o turno é recusado ("Acesso de Marcos desativado") e o turno fica
+OK    F16 referência: com acesso, descartar segue
+OK    F14 MB-01: "Entregue por Paula" quando Paula entregou (o movimento diz), não "por Rui"
+OK    F14 referência: entregue por Rui segue "Entregue por Rui" (app_cenario_test)
+RESULTADO 4/4

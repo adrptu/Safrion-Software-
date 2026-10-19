@@ -1,0 +1,3 @@
+cadc_cd06 rc=0 19:46 :: RESULTADO: OK 14/14
+contra_cadc_cd06 rc=0 19:46 :: RESULTADO: FALHOU 12/14
+FIM

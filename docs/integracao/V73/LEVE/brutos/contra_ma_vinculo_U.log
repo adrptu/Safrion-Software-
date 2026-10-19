@@ -1,0 +1,44 @@
+U · regras (node)
+  ok  U · motor JS executou sem erro
+  ok  U · V1 · "Sem plano" no seed = Distribuidor 3 t, Máquina TSI, Esqueletadeira e Gotejo T7 (ativos em uso sem vínculo em plano ativo e publicado)
+  ok  U · V1 · sugestão: Gotejo T7 → PM-07 (mesma classe, Irrigação); Máquina TSI → PM-08 (mesmo grupo, Beneficiamento); Distribuidor e Esqueletadeira sem plano compatível
+  ok  U · V1 · sugestão é opção, não vínculo: nada mudou no estado
+  ok  U · V2 · plano de pulverizador num trator é recusado com o motivo (gera ordem e peças erradas)
+  ok  U · V2 · modelo diferente no mesmo grupo é aviso e permite
+  ok  U · V2 · o mesmo serviço por dois planos é recusado (Revisão 250 h pelo PM-02)
+  ok  U · V2 · gatilho só por km num ativo com horímetro: recusado com o motivo (nunca "Sem gatilho" calado)
+  ok  U · V2 · km + dias num ativo com horímetro: aviso dizendo que só os dias contam
+  ok  U · V2 · ativo inativo não é candidato nem "Sem plano"
+  ok  U · V3 · referência 1.000 h, leitura 1.450 h, intervalo 250 h → Vencida (vence em 1.250 h)
+  ok  U · V3 · vincular de novo (já vinculado) não muda nada: segue Vencida, marco e última execução intactos
+  ok  U · V3 · desvincular guarda o vínculo com fim (marco e última execução intactos) e tira o ativo dos vencimentos
+  ok  U · V3 · revínculo mostra a base de antes ("hist"), não a leitura atual
+  ok  U · V3 · revincular retoma a contagem: continua Vencida em 1.250 h; marco e última execução iguais aos de antes; histórico do período guardado
+  ok  U · V3 · contraprova: com a leitura atual (1.450 h) como referência a mesma conta daria Em dia (vence em 1.700 h)
+  FALHA U · V4 · sem execução registrada e sem escolha: conta de agora (hoje e leitura atual 5.210 h, marco estimado), sem erro (LEVE-1) · {"ref":null,"errs":{"modo":"Escolha como contar: informe a última execução ou conte de agora."},"modo":""}
+  ok  U · V4 · contar de agora: hoje e a leitura atual do próprio ativo (5.210 h), marcado como estimado
+  ok  U · V4 · prévia igual ao vencimento gravado (mesma conta: manRef + manVenc + manProxTxt)
+  ok  U · V4 · vincular inclui o ativo em "Aplica a" (ativos escolhidos) e tira de "Sem plano"
+  ok  U · V4 · última execução: data futura, leitura negativa e maior que a atual recusadas; 5.100 h em 01/09 aceita
+  ok  U · V4 · ativo sem contador: a base fica sem leitura (nunca 0); ativo com horímetro sem leitura não "conta de agora"
+  ok  U · V4 · com OM encerrada do mesmo serviço a base é a dela (OM-0205 · 02/06 · 3.300 h); corrigir pede motivo
+  ok  U · V5 · lote com um inválido não grava metade (tudo ou nada) e diz o motivo
+  ok  U · V5 · 3 ativos num lote (o repetido na lista conta uma vez); a mesma chave (duplo clique) não grava de novo; outra chave acha "já vinculados" e nada muda
+  ok  U · V5 · o ativo pode ter mais de um plano: Trator 02 no PM-01 e no PM-11 (nada é colapsado)
+  ok  U · V5 · permissão pela mesma regra do plano (manExige "plano"): Zé e Ana recusados com o motivo
+  FALHA U · V6 · desvincular sem motivo (LEVE-1) grava quem e quando; com motivo, avisa que a OM-0234 continua aberta e não a apaga · ["Informe o motivo para desvincular.",{"marco":{"data":"2025-03-05","leit":0,"om":null},"ult":{"s1":{"data":"2026-09-02","leit":2793,"om":"OM-0219"},"s2":{"data":"2026-09-02","leit":2793,"om":"OM-0219"}}},{"msg":"Trator 02 · MF 7719 desvinculado do PM-01 · histórico guardado · OM-0234 continua aberta."}]
+  ok  U · V6 · histórico preservado: marco e últimas execuções intactos, fim com quem, quando e motivo
+  ok  U · V6 · vínculo encerrado não gera ordem nem vencimento; o ativo fica "Sem plano"
+  ok  U · V6 · revincular retoma o mesmo ciclo: a OM-0234 volta a ser a ordem do ciclo (nenhuma duplicada)
+  ok  U · V6 · desvincular de novo não muda nada
+  ok  U · V7 · ativo de outro modelo num plano por modelo entra como exceção (aplica.x) e o texto diz isso
+  ok  U · V7 · trocar para "Ativos escolhidos" sem marcar nada mantém o vinculado e diz o efeito
+  ok  U · V7 · trocar para um modelo de outro grupo é recusado (um plano, um grupo de máquina)
+  ok  U · V7 · situação na coluna Plano: Atrasado · Vence em 55 h · Vence em 8 dias · Em dia
+  ok  U · V7 · vínculo só em rascunho continua "Sem plano" (distinto: a coluna diz Rascunho)
+  ok  U · V8.1 · publicado só por km e rascunho por dias, ativo por horímetro: recusado com o motivo (a v1 em vigor não tem gatilho que o ativo conte)
+  ok  U · V8.1 · com a versão compatível publicada (dias), o mesmo vínculo passa e tem vencimento
+  ok  U · V8.2 · publicado por dias e rascunho só por km: aceita pelo publicado (com vencimento) e avisa do rascunho
+  ok  U · V8.2 · com o ativo vinculado, o rascunho só por km não pode ser publicado (o motivo diz quem ficaria sem gatilho)
+  ok  U · V8.3 · sem versão publicada: km recusado com o motivo (rascunho v1 é o que vale ao publicar); dias aceita, a prévia diz que vence só depois de publicar e o ativo segue "Sem plano"
+RESULTADO: 40/42 ok · FALHAS: U · V4 · sem execução registrada e sem escolha: conta de agora (hoje e leitura atual 5.210 h, marco estimado), sem erro (LEVE-1); U · V6 · desvincular sem motivo (LEVE-1) grava quem e quando; com motivo, avisa que a OM-0234 continua aberta e não a apaga
