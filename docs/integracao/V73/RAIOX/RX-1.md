@@ -32,7 +32,7 @@ Seguimento é população P-SEG separada: não exige antes nem controle. S6 se p
 
 ## Verificação executada
 
-`node tools/prototipo/v37/gen37/raiox_comparacao_test.cjs` — 45/45 casos PASS, Node24.19.0. Inclui controle futuro D10/D12, versão retroativa, existência futura, isolamento de todos os componentes do contexto, ausência/parcial/zero, interferência, campanha, não fallback, S1–S6, conflito de instantes e permutações/imutabilidade. Sete casos adicionais verificam a agregação par/ímpar, contraste entre métodos, controles divergentes, insuficiência/zero/duplicação, resultado negativo, invariância à ordem e escala comum e método ausente/desconhecido.
+`node tools/prototipo/v37/gen37/raiox_comparacao_test.cjs` — 48/48 casos PASS, Node24.19.0 (inclui as correções A3 e precisão abaixo). Inclui controle futuro D10/D12, versão retroativa, existência futura, isolamento de todos os componentes do contexto, ausência/parcial/zero, interferência, campanha, não fallback, S1–S6, conflito de instantes e permutações/imutabilidade. Sete casos adicionais verificam a agregação par/ímpar, contraste entre métodos, controles divergentes, insuficiência/zero/duplicação, resultado negativo, invariância à ordem e escala comum e método ausente/desconhecido.
 
 Contraprova executada: remover o filtro `disp > corte` reprovou a invariância de versões futuras (exit 1). O fonte original permaneceu intacto. Não é teste de UI, integração MIP, fonte real ou validação RT. Nenhum teste navegador é alegado para esta parte sem tela.
 
@@ -124,3 +124,10 @@ O bloco conserva integralmente o texto retornado e os metadados de modelo/payloa
 ### Correção A3 — revisão Claude 5572126839
 
 A janela residual anterior à leitura inicial também se aplica ao tratado. Um defensivo de outro alvo nesse intervalo torna o contraste indisponível. Contraprova no HEAD1889755: teste novo falha; após a correção, 46/46 PASS em Node24.19.0, incluindo evento fora da janela que permanece elegível. Sem mudança de interface ou validação agronômica real.
+
+
+### Precisão e fronteira — revisão Claude 6270892529 após PR137
+
+Base integrada `899d986ce310ab91247cf5fbddfd129e8c472644`. Um manejo conhecido com precisão de dia não comprova ausência de interferência: a meia-noite serializada pode ficar fora da janela enquanto o restante do dia a sobrepõe. O núcleo agora trata conservadoramente precisão diferente de `instante` como interferência no talhão/contexto pertinente, inclusive quando a data serializada parece distante. Isso pode excluir um candidato; não fabrica fuso ou horário para incluí-lo. Uma futura interpretação de intervalos de dia exigirá contrato explícito do fuso/limites e revisão independente.
+
+Provas executadas: novo caso falha no núcleo anterior; 48/48 PASS após correção, nos talhões tratado e controle. Fronteira residual inclusiva e um milissegundo fora também verificados nos dois. Mutante trocando `>= inicio` por `> inicio` é rejeitado (exit1). Dados exclusivamente sintéticos, Node24.19.0. Revisão Claude deste delta pendente; sem mudança de UI ou publicação.

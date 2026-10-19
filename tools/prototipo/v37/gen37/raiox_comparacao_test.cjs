@@ -187,4 +187,21 @@ teste('A3 residual anterior no tratado bloqueia contraste; fora da janela perman
   d.aplicacoes[1].evento = d.aplicacoes[1].disponivelEm = '2025-12-29T12:00:00.000Z';
   assert.equal(executar(d, contexto, ps).comparacao.estado, 'disponivel');
 });
-console.log(`${passou}/${passou} PASS — dados e parâmetros exclusivamente sintéticos.`);
+
+teste('precisão insuficiente não comprova ausência de interferência', () => {
+  for (const talhao of ['T', 'C1']) {
+    const d = fixture(); d.aplicacoes.push(aplicacao('dia', talhao, 1, {alvo:'A2', precisao:'dia', evento:'2025-12-30T00:00:00.000Z', disponivelEm:'2025-12-30T00:00:00.000Z'}));
+    const r=executar(d).comparacao;
+    assert.equal(talhao==='T' ? r.motivo : r.controles[0].motivo, talhao==='T' ? 'interferencia_no_tratado' : 'interferencia_no_controle');
+  }
+});
+teste('limite residual inclusivo e um milissegundo fora em ambos os talhões', () => {
+  for (const talhao of ['T','C1']) for (const fora of [false,true]) {
+    const d=fixture(), t=new Date(Date.parse(dia(1))-2*86400000-(fora?1:0)).toISOString();
+    d.aplicacoes.push(aplicacao('borda',talhao,1,{alvo:'A2',evento:t,disponivelEm:t}));
+    const r=executar(d).comparacao;
+    if(fora) assert.equal(r.quantidadeElegivel,2);
+    else assert.equal(talhao==='T'?r.motivo:r.controles[0].motivo,talhao==='T'?'interferencia_no_tratado':'interferencia_no_controle');
+  }
+});
+console.log(passou + '/' + passou + ' PASS — dados e parâmetros exclusivamente sintéticos.');

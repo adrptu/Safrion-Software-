@@ -74,7 +74,9 @@ const RaioxComparacao = (() => {
       if (x.talhao !== talhao || chaveAplicacao(x) === exceto || x.estado === 'cancelada') return false;
       const t = instante(x.evento);
       // Evento conhecido sem ordem ou confirmação suficiente não comprova ausência.
-      if (!Number.isFinite(t)) return true;
+      // Sem instante demonstrado, não há prova de que o manejo ficou fora da
+      // janela. Não interpretar a meia-noite de uma data como hora de aplicação.
+      if (!Number.isFinite(t) || x.precisao !== 'instante') return true;
       return t >= inicio && t <= fim;
     });
   }
