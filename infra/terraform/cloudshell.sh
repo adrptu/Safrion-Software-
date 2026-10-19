@@ -2,7 +2,7 @@
 # Bootstrap da HML pelo Cloud Shell do Google, sem depender de uma máquina local (ordem do proprietário, 29/09/2026).
 # O Adrianus cola os comandos, guiado pelo Codex; o Claude responde pelo plan; as três IAs revisam pelo hash.
 #
-#   infra/terraform/cloudshell.sh conferir                  cópia = main atual do GitHub, com os 10 checks verdes
+#   infra/terraform/cloudshell.sh conferir                  cópia = main atual do GitHub, com os checks obrigatórios verdes
 #   infra/terraform/cloudshell.sh state <projeto>           bucket do state do bootstrap, conferido no servidor
 #   infra/terraform/cloudshell.sh planejar <projeto>        Terraform e TFLint pelo checksum, travas e plan
 #   infra/terraform/cloudshell.sh aplicar <projeto> <hash>  aplica só o plano com esse SHA-256

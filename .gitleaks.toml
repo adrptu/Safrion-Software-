@@ -51,6 +51,49 @@ paths = [
 ]
 regexes = ['''^talhao-os-cenario-v1$''']
 
+# NAV-F1-A: identificadores de intenção das fixtures sintéticas entregues por Grok
+# no commit 64f9a58f61a505282861cdaa3814c7564e504c1c (linhas 553/554 e 675/676).
+# Não são credenciais; a exceção exige este arquivo e um destes dois literais exatos.
+[[rules.allowlists]]
+description = "Identificadores exatos de intenção das fixtures Grok NAV-F1-A; não são credenciais"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^evidencias/grok/nav-f1-a/nav-f1-offline-adendo-check\.mjs$''']
+regexes = ['''^ap-OS-0420-kempty$''', '''^ap-OS-0420-kstop1$''']
+
+# HML-SECRET-04 (aceite do proprietário no chat, 05/10/2026): nomes das chaves de localStorage dos cenários do
+# protótipo (cenário, compras, irrigação, MIP e manutenção), na base limpa e8d780d e nas especificações que copiam
+# o código da manutenção. Não são credenciais. Só estes cinco literais exatos e só nestes caminhos; outro valor
+# nesses arquivos, ou estes valores em outro arquivo, continua reprovando.
+[[rules.allowlists]]
+description = "Nomes exatos das chaves de localStorage dos cenários do protótipo; não são credenciais"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^tools/prototipo/v37/gen37/''',
+  '''^docs/pcm-suprimentos/verificacao/man_prefix\.js$''',
+  '''^docs/beneficiamento/verificacao/revisao\.json$''',
+]
+regexes = [
+  '''^talhao-os-cenario-v1$''',
+  '''^talhao-os-compras-v1$''',
+  '''^talhao-os-irrigacao-v1$''',
+  '''^talhao-os-mip-v1$''',
+  '''^talhao-os-manutencao-v1$''',
+]
+
+# VEL-20261013-01: nome da chave localStorage da ficha sintética de pivô, autorizado pelo proprietário.
+# Só este literal nestes dois arquivos; outros valores e caminhos continuam sujeitos às regras padrão.
+[[rules.allowlists]]
+description = "Chave exata de localStorage da ficha de pivô; não é credencial"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^tools/prototipo/v37/gen37/ficha_pivo\.py$''',
+  '''^tools/prototipo/v37/gen37/irrigacao_estado\.js$''',
+]
+regexes = ['''^talhao-os-ficha-pivo-v1$''']
+
 # HML-SECRET-02: nomes de Secret Manager usados por value_source.secret_key_ref.
 # Este identificador não é senha; outros valores/arquivos continuam sujeitos à regra.
 [[rules]]

@@ -24,7 +24,7 @@
         "required_reviewers": [],
         "require_code_owner_review": false,
         "require_last_push_approval": false,
-        "required_review_thread_resolution": false,
+        "required_review_thread_resolution": true,
         "require_extra_approval_for_unattributed_changes": true,
         "allowed_merge_methods": ["merge", "squash", "rebase"]
       }
@@ -73,6 +73,10 @@
           },
           {
             "context": "Semgrep (regras, fixtures e inventário)",
+            "integration_id": 15368
+          },
+          {
+            "context": "Revisão do Codex no commit atual",
             "integration_id": 15368
           }
         ]

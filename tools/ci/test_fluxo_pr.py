@@ -89,6 +89,45 @@ class GateTests(unittest.TestCase):
         self.assertNotIn('merge_arguments', result)
         self.assertIn('executor autorizado', result['limitation'])
 
+    def pair_only(self):
+        self.request['receipts'] = self.request['receipts'][:2]
+        self.snapshot['comments'] = self.snapshot['comments'][:2]
+        del self.snapshot['receipts']['102']
+
+    def test_author_evidence_and_independent_reviewer_are_sufficient(self):
+        self.pair_only()
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_counterproof_cannot_replace_the_other_implementer(self):
+        self.request['receipts'].pop(1)
+        self.blocked()
+
+    def test_integrator_must_be_the_independent_reviewer(self):
+        self.request['integrator'] = 'gemini'
+        self.blocked()
+
+    def test_explicit_counterproof_requirement_cannot_be_omitted(self):
+        self.pair_only()
+        self.request['counterproof_required'] = True
+        self.blocked()
+
+    def test_required_counterproof_with_three_receipts_passes(self):
+        self.request['counterproof_required'] = True
+        self.assertEqual(flow.avaliar(self.request, self.snapshot, NOW)['state'], 'eligible')
+
+    def test_counterproof_requirement_is_boolean(self):
+        self.request['counterproof_required'] = 'false'
+        self.blocked()
+
+    def test_unselected_counterproof_cannot_hide_existing_objection(self):
+        self.request['receipts'] = self.request['receipts'][:2]
+        for verdict in ('pass', 'blocked', 'pending'):
+            with self.subTest(verdict=verdict):
+                body = json.loads(self.snapshot['receipts']['102']['body'])
+                body['verdict'] = verdict
+                self.snapshot['receipts']['102']['body'] = json.dumps(body)
+                self.blocked()
+
     def test_missing_or_malformed_input_cannot_yield_eligible(self):
         for field in ('pr', 'checks', 'reviews', 'receipts', 'threads_complete', 'ruleset', 'identity', 'comments', 'comments_complete'):
             with self.subTest(field=field):
@@ -196,7 +235,7 @@ class GateTests(unittest.TestCase):
                 request, snapshot = fixture()
                 rewrite_receipt(request, snapshot, changes)
                 self.blocked(request, snapshot)
-        self.request['receipts'] = self.request['receipts'][:2]
+        self.request['receipts'] = self.request['receipts'][:1]
         self.blocked()
 
     def test_foreign_pr_unauthorized_reporter_and_duplicate_reference(self):

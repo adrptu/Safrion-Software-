@@ -7,7 +7,7 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 ## Onde está cada coisa
 | O quê | Onde |
 |---|---|
-| Contrato do produto (PRD v3.9 vigente) | [`docs/PRD.md`](docs/PRD.md) |
+| Contrato do produto (PRD v3.11 vigente; versões anteriores no histórico) | [`docs/PRD.md`](docs/PRD.md) |
 | Fluxogramas com raias | [`docs/prd/fluxogramas/`](docs/prd/fluxogramas/) |
 | Decisões e ADRs | [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/adr/`](docs/adr/) |
 | Design system | [`docs/design-system/`](docs/design-system/) |
@@ -16,7 +16,7 @@ Plataforma de gestão agrícola integrada: planejamento da safra, planos agronô
 | Operação e homologação | [`docs/OPERACAO.md`](docs/OPERACAO.md), [`infra/terraform/`](infra/terraform/) |
 | Portões da CI e proteção da `main` | [`.github/workflows/`](.github/workflows/), [`tools/ci/`](tools/ci/), [`tools/github/`](tools/github/) |
 | Parceria Claude + Codex | [`docs/parceria/`](docs/parceria/) |
-| Protótipo navegável (validação) | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
+| Protótipo com dados sintéticos; versão e limites no checkpoint | [Artefato existente](https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm) · [checkpoint](https://github.com/adrptu/Safrion-Software-/issues/1#issuecomment-5858061746) |
 
 ## Como rodar (3 passos)
 1. Instale o Node **24.21.0** (versão em `.nvmrc`) e ative o pnpm pela versão fixada: `corepack enable`.

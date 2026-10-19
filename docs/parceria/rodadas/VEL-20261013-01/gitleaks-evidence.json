@@ -1,0 +1,2098 @@
+{
+  "schema": "focal-gitleaks-evidence-v1",
+  "scope": "Gitleaks 8.30.1; isolated local Git histories with fabricated fixture values only",
+  "sanitization": "Reports use Gitleaks --redact. Only machine-specific paths in commands/logs are replaced; finding paths, rule IDs, commits, locations and outcomes are preserved.",
+  "limits": [
+    "No product repository or real credentials were scanned.",
+    "Focal config regression, not a repository security audit.",
+    "This script exercises Git history mode; CI and other invocation modes are outside its scope.",
+    "Default preservation proven by identical preexisting config plus synthetic github-pat detections."
+  ],
+  "gitleaks_version": "8.30.1",
+  "binary_sha256": "ba52fb1bfabbcde42f032afad3d6e0b19dff8ed105229a16e7caa338bbc0e84f",
+  "config_sha256": {
+    "base": "0c9b21ed36f012e77beea624950e786e4642630631119d26e05f3069035b84f0",
+    "candidate": "e9b6d64b2a534254f2d3148f8a0a92297da8e777213b481be082c343245ffc60"
+  },
+  "configs_unchanged_after_scans": true,
+  "script_sha256": "c044fb71ea38d66e8ad0b54666abfeb53356b8f1b34f8ec68bf3b955ed3f933b",
+  "config_contract": {
+    "passed": true,
+    "checks": {
+      "all_existing_config_preserved_byte_for_byte": true,
+      "defaults_enabled_in_both": true,
+      "exactly_two_anchored_paths": true,
+      "only_exact_anchored_literal": true,
+      "and_condition": true,
+      "secret_target": true,
+      "only_one_new_rule_allowlist": true
+    }
+  },
+  "tests": [
+    {
+      "case": "exact_literal_py",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14",
+      "fixture_head": "853cd86160adc3a838f08b72a2bad0124234aea3",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14:tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "72c2b39905430c0736d502fc0797ac3f9e33e3ec0a12b214cf63e7a6f49ae98f",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 119ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_py",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "27006660a51b3a7f2c9bc084e0dbcdf308e06f14",
+      "fixture_head": "853cd86160adc3a838f08b72a2bad0124234aea3",
+      "file_absent_at_head": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "expected_findings": [],
+      "findings": [],
+      "raw_report": [],
+      "raw_report_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 112ms\n11:03PM INF no leaks found\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_js",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "05996e24d6b149b788efaa55f8795b2760523278",
+      "fixture_head": "bc7d297a1cb2984f9595fac48753b9bac298ecd3",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "05996e24d6b149b788efaa55f8795b2760523278"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "05996e24d6b149b788efaa55f8795b2760523278"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "05996e24d6b149b788efaa55f8795b2760523278",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "05996e24d6b149b788efaa55f8795b2760523278:tools/prototipo/v37/gen37/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "7dd27e888ef3a141af9a63ae29a4fe47ff5a10e8e27715c226d52d85408c7793",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 113ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_js",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "05996e24d6b149b788efaa55f8795b2760523278",
+      "fixture_head": "bc7d297a1cb2984f9595fac48753b9bac298ecd3",
+      "file_absent_at_head": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "expected_findings": [],
+      "findings": [],
+      "raw_report": [],
+      "raw_report_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 109ms\n11:03PM INF no leaks found\n",
+      "passed": true
+    },
+    {
+      "case": "other_literal_py",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9",
+      "fixture_head": "b154b09d0c577bec45268e914ce7b99fb381750f",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9:tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "e249aed2152ec14249fb67560f1dd4606ffac068acbaf9743122ceb4a7b254ee",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 112ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "other_literal_py",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9",
+      "fixture_head": "b154b09d0c577bec45268e914ce7b99fb381750f",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "03229fb49471a08b3b4cb4e5e9ed8b2309b0bef9:tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "e249aed2152ec14249fb67560f1dd4606ffac068acbaf9743122ceb4a7b254ee",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 108ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "other_literal_js",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3",
+      "fixture_head": "84ed0e7bcf2d5da6b5116c148ba1a89c450c5b34",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3:tools/prototipo/v37/gen37/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "64149a02387810f4225f9dbdf28b4ffa5e4da57db88cff20ad0bf3046d239535",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 122ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "other_literal_js",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3",
+      "fixture_head": "84ed0e7bcf2d5da6b5116c148ba1a89c450c5b34",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "3975d36f4eea419f1604fa1e48bb0c2a9d1e79b3:tools/prototipo/v37/gen37/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "64149a02387810f4225f9dbdf28b4ffa5e4da57db88cff20ad0bf3046d239535",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_other_file",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/outra_ficha.py",
+      "introduction_commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991",
+      "fixture_head": "15ba3b0d0d5a1a34f29ea12bd5f0c95abbe85778",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "StartLine": 2,
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "StartLine": 2,
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "SymlinkFile": "",
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "7c2dac4c30a7b10438d14a74dc5b655347b07991:tools/prototipo/v37/gen37/outra_ficha.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "83b5346a30988f90615272fee0da8398759a4eedee9dd24070929d6e5d6c8daf",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 121ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_other_file",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/outra_ficha.py",
+      "introduction_commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991",
+      "fixture_head": "15ba3b0d0d5a1a34f29ea12bd5f0c95abbe85778",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "StartLine": 2,
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "StartLine": 2,
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/outra_ficha.py",
+          "SymlinkFile": "",
+          "Commit": "7c2dac4c30a7b10438d14a74dc5b655347b07991",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "7c2dac4c30a7b10438d14a74dc5b655347b07991:tools/prototipo/v37/gen37/outra_ficha.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "83b5346a30988f90615272fee0da8398759a4eedee9dd24070929d6e5d6c8daf",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 112ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_py_suffix",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+      "introduction_commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0",
+      "fixture_head": "a8ef14ad908e889085de3c01a2d5505594e9bc7e",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "StartLine": 2,
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "StartLine": 2,
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "SymlinkFile": "",
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0:tools/prototipo/v37/gen37/ficha_pivo.py.bak:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "63a9bc523ce8057deda6ba7839e57827600d2c915e1b9df75b2448e81a5b7d62",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 108ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_py_suffix",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+      "introduction_commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0",
+      "fixture_head": "a8ef14ad908e889085de3c01a2d5505594e9bc7e",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "StartLine": 2,
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "StartLine": 2,
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py.bak",
+          "SymlinkFile": "",
+          "Commit": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "150a0a9bb0ccfc894476952e929ffd3d46b2d3a0:tools/prototipo/v37/gen37/ficha_pivo.py.bak:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "63a9bc523ce8057deda6ba7839e57827600d2c915e1b9df75b2448e81a5b7d62",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 121ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_js_suffix",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+      "introduction_commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead",
+      "fixture_head": "a4a9dc238746abbeb81e0c732b00596a2146a7e5",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "StartLine": 2,
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "StartLine": 2,
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "SymlinkFile": "",
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "b107d87278fdb2649c33a9b1df22f872e8b61ead:tools/prototipo/v37/gen37/irrigacao_estado.js.bak:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "82892a28b5c6e8085053417a40896296bad4b7b86950fa04e5b8a70092a323f1",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_js_suffix",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+      "introduction_commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead",
+      "fixture_head": "a4a9dc238746abbeb81e0c732b00596a2146a7e5",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "StartLine": 2,
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "StartLine": 2,
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js.bak",
+          "SymlinkFile": "",
+          "Commit": "b107d87278fdb2649c33a9b1df22f872e8b61ead",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "b107d87278fdb2649c33a9b1df22f872e8b61ead:tools/prototipo/v37/gen37/irrigacao_estado.js.bak:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "82892a28b5c6e8085053417a40896296bad4b7b86950fa04e5b8a70092a323f1",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 134ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_similar_dir_py",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen370/ficha_pivo.py",
+      "introduction_commit": "7a81a05d703a0e793779f0258789fbd18804f00e",
+      "fixture_head": "acebab88bba26233b076aec6a67a8c249d0104ba",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "7a81a05d703a0e793779f0258789fbd18804f00e:tools/prototipo/v37/gen370/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "1d9451e1905f38cec5c6613730bab197f2c49b3a8cf0b39f38cada0e17a1167e",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 111ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_similar_dir_py",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen370/ficha_pivo.py",
+      "introduction_commit": "7a81a05d703a0e793779f0258789fbd18804f00e",
+      "fixture_head": "acebab88bba26233b076aec6a67a8c249d0104ba",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen370/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "7a81a05d703a0e793779f0258789fbd18804f00e",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "7a81a05d703a0e793779f0258789fbd18804f00e:tools/prototipo/v37/gen370/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "1d9451e1905f38cec5c6613730bab197f2c49b3a8cf0b39f38cada0e17a1167e",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 111ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_similar_dir_js",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+      "introduction_commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63",
+      "fixture_head": "eb779a91ad0cd7e897603ea2113aba8abc733759",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "ba71205da8d5ffb97242bd944e383dbdb59bcf63:tools/prototipo/v37/gen370/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "c51131f53a2564569e9afc78a868f34bb82846d71a217715c6f1d971c04f2b30",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 111ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_similar_dir_js",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+      "introduction_commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63",
+      "fixture_head": "eb779a91ad0cd7e897603ea2113aba8abc733759",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 40,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen370/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "ba71205da8d5ffb97242bd944e383dbdb59bcf63",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "ba71205da8d5ffb97242bd944e383dbdb59bcf63:tools/prototipo/v37/gen370/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "c51131f53a2564569e9afc78a868f34bb82846d71a217715c6f1d971c04f2b30",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~192 bytes (192 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_prefixed_path",
+      "config": "base",
+      "fixture_path": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b",
+      "fixture_head": "f4c56c31c74ca0c774c9377b18c2e564db87ec2c",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b:backup/tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "a67e32765d8e9b0d409b086e5db7dfa41af42023ebb44bbd60fc079e744be17c",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 114ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_prefixed_path",
+      "config": "candidate",
+      "fixture_path": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b",
+      "fixture_head": "f4c56c31c74ca0c774c9377b18c2e564db87ec2c",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "backup/tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "a773ebce1ea711ffec8fbe9e8e988f4a5cf0f75b:backup/tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "a67e32765d8e9b0d409b086e5db7dfa41af42023ebb44bbd60fc079e744be17c",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_dot_not_wildcard",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+      "introduction_commit": "200f141b99cc4b69a06afb977e8101bc21f3696e",
+      "fixture_head": "a7dcef7aaea596b85821faef482a9163a0884239",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "StartLine": 2,
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "StartLine": 2,
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "SymlinkFile": "",
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "200f141b99cc4b69a06afb977e8101bc21f3696e:tools/prototipo/v37/gen37/ficha_pivoXpy:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "8408520f8979ad5ff9aca801655c6cb0a2c2e14986c28fc97d44ae2ce8709f63",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 110ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "exact_literal_dot_not_wildcard",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+      "introduction_commit": "200f141b99cc4b69a06afb977e8101bc21f3696e",
+      "fixture_head": "a7dcef7aaea596b85821faef482a9163a0884239",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "StartLine": 2,
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "StartLine": 2,
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 30,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivoXpy",
+          "SymlinkFile": "",
+          "Commit": "200f141b99cc4b69a06afb977e8101bc21f3696e",
+          "Entropy": 3.5013978,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "200f141b99cc4b69a06afb977e8101bc21f3696e:tools/prototipo/v37/gen37/ficha_pivoXpy:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "8408520f8979ad5ff9aca801655c6cb0a2c2e14986c28fc97d44ae2ce8709f63",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~83 bytes (83 bytes) in 110ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "prefixed_literal_py",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f",
+      "fixture_head": "18670cbee5d6def8286a38187e68e3cac8002532",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 35,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f",
+          "Entropy": 3.8388045,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "9a8954dc8a3816b8775959f96123e6654bf8d03f:tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "9f7541b2d8113357c70d7efeb1816506ea9611a689d8bf2837fa374b6dff1080",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~88 bytes (88 bytes) in 111ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "prefixed_literal_py",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f",
+      "fixture_head": "18670cbee5d6def8286a38187e68e3cac8002532",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 2,
+          "EndColumn": 35,
+          "Match": "KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "9a8954dc8a3816b8775959f96123e6654bf8d03f",
+          "Entropy": 3.8388045,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "9a8954dc8a3816b8775959f96123e6654bf8d03f:tools/prototipo/v37/gen37/ficha_pivo.py:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "9f7541b2d8113357c70d7efeb1816506ea9611a689d8bf2837fa374b6dff1080",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~88 bytes (88 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "suffixed_literal_js",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a",
+      "fixture_head": "86475ed69a60c39213083dd59477cf090b53171a",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 45,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a",
+          "Entropy": 3.8388045,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "240b1ce8dd038b65131de3b48d574d21fc60c15a:tools/prototipo/v37/gen37/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "a2aef5f844f165ebfdb4262e38b4e0bff2497f291e13745f0b936ee6ec489a9b",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~197 bytes (197 bytes) in 108ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "suffixed_literal_js",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a",
+      "fixture_head": "86475ed69a60c39213083dd59477cf090b53171a",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "generic-api-key",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "generic-api-key",
+          "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 8,
+          "EndColumn": 45,
+          "Match": "FPV_KEY='REDACTED'",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "240b1ce8dd038b65131de3b48d574d21fc60c15a",
+          "Entropy": 3.8388045,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "240b1ce8dd038b65131de3b48d574d21fc60c15a:tools/prototipo/v37/gen37/irrigacao_estado.js:generic-api-key:2"
+        }
+      ],
+      "raw_report_sha256": "a2aef5f844f165ebfdb4262e38b4e0bff2497f291e13745f0b936ee6ec489a9b",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~197 bytes (197 bytes) in 112ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "default_github_rule_py",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0",
+      "fixture_head": "b640b663b85bb887faf1311c4bcff5438a53db30",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "github-pat",
+          "Description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 7,
+          "EndColumn": 46,
+          "Match": "REDACTED",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0",
+          "Entropy": 3.6740243,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0:tools/prototipo/v37/gen37/ficha_pivo.py:github-pat:2"
+        }
+      ],
+      "raw_report_sha256": "8e21f50cbed190ec741374697f3ff6e19ea44ef69df597d3fb77d01f08d28408",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~100 bytes (100 bytes) in 111ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "default_github_rule_py",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/ficha_pivo.py",
+      "introduction_commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0",
+      "fixture_head": "b640b663b85bb887faf1311c4bcff5438a53db30",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "StartLine": 2,
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "github-pat",
+          "Description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 7,
+          "EndColumn": 46,
+          "Match": "REDACTED",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/ficha_pivo.py",
+          "SymlinkFile": "",
+          "Commit": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0",
+          "Entropy": 3.6740243,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "5014fa9c7a748407c4df325a1ed0be3b5e5599e0:tools/prototipo/v37/gen37/ficha_pivo.py:github-pat:2"
+        }
+      ],
+      "raw_report_sha256": "8e21f50cbed190ec741374697f3ff6e19ea44ef69df597d3fb77d01f08d28408",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~100 bytes (100 bytes) in 110ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "default_github_rule_js",
+      "config": "base",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "e2e6d898db154e213a91c668726c5c80aadec280",
+      "fixture_head": "c3073ba6f5ab1efe94e6407621534387cd9e8be6",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "github-pat",
+          "Description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 17,
+          "EndColumn": 56,
+          "Match": "REDACTED",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280",
+          "Entropy": 3.6740243,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "e2e6d898db154e213a91c668726c5c80aadec280:tools/prototipo/v37/gen37/irrigacao_estado.js:github-pat:2"
+        }
+      ],
+      "raw_report_sha256": "539dc283c6a25c91a7595f449fb7ae03fab216dd9ba27d14ff3852c29b3776a5",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<base_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~209 bytes (209 bytes) in 109ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    },
+    {
+      "case": "default_github_rule_js",
+      "config": "candidate",
+      "fixture_path": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+      "introduction_commit": "e2e6d898db154e213a91c668726c5c80aadec280",
+      "fixture_head": "c3073ba6f5ab1efe94e6407621534387cd9e8be6",
+      "file_absent_at_head": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "expected_findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280"
+        }
+      ],
+      "findings": [
+        {
+          "RuleID": "github-pat",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "StartLine": 2,
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280"
+        }
+      ],
+      "raw_report": [
+        {
+          "RuleID": "github-pat",
+          "Description": "Uncovered a GitHub Personal Access Token, potentially leading to unauthorized repository access and sensitive content exposure.",
+          "StartLine": 2,
+          "EndLine": 2,
+          "StartColumn": 17,
+          "EndColumn": 56,
+          "Match": "REDACTED",
+          "Secret": "REDACTED",
+          "File": "tools/prototipo/v37/gen37/irrigacao_estado.js",
+          "SymlinkFile": "",
+          "Commit": "e2e6d898db154e213a91c668726c5c80aadec280",
+          "Entropy": 3.6740243,
+          "Author": "Synthetic fixture",
+          "Email": "canary@example.invalid",
+          "Date": "2026-10-12T23:00:00Z",
+          "Message": "introduce fabricated fixture",
+          "Tags": [],
+          "Fingerprint": "e2e6d898db154e213a91c668726c5c80aadec280:tools/prototipo/v37/gen37/irrigacao_estado.js:github-pat:2"
+        }
+      ],
+      "raw_report_sha256": "539dc283c6a25c91a7595f449fb7ae03fab216dd9ba27d14ff3852c29b3776a5",
+      "raw_report_matches_assertions": true,
+      "raw_report_redacted": true,
+      "command": [
+        "<gitleaks>",
+        "git",
+        "--no-banner",
+        "--no-color",
+        "--redact",
+        "--ignore-gitleaks-allow",
+        "--gitleaks-ignore-path",
+        "<fixture_repo>",
+        "--config",
+        "<candidate_config>",
+        "--report-format",
+        "json",
+        "--report-path",
+        "<report_json>",
+        "<fixture_repo>"
+      ],
+      "stdout": "",
+      "stderr": "11:03PM INF 1 commits scanned.\n11:03PM INF scanned ~209 bytes (209 bytes) in 110ms\n11:03PM WRN leaks found: 1\n",
+      "passed": true
+    }
+  ],
+  "scans": 30,
+  "passed_scans": 30,
+  "passed": true,
+  "duration_seconds": 10.559,
+  "temporary_repositories_removed": true
+}

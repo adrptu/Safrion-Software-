@@ -84,6 +84,19 @@ jobs:
       - name: Conferir cobertura das dependências de produção (FERR-05)
         if: ${{ !cancelled() }}
         run: python3 tools/ci/conferir_cobertura_trivy.py "$RUNNER_TEMP/trivy-report.json" .
+      # Diagnóstico, não portão (CI-DIAG-20261008): lê o JSON já gravado, sem rodar o scanner de novo; a falha continua
+      # sendo a do passo do Trivy. O relatório bruto fica fora da pasta publicada: pode conter trecho de segredo.
+      - name: Resumir achados sem revelar valores de segredos
+        if: ${{ !cancelled() }}
+        run: python3 tools/ci/recibo_trivy.py "$RUNNER_TEMP/trivy-report.json" "$RUNNER_TEMP/vulnerabilidades/achados.json"
+      - name: Preservar somente o recibo sanitizado
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vulnerabilidades-${{ github.sha }}
+          path: ${{ runner.temp }}/vulnerabilidades/achados.json
+          if-no-files-found: error
+          retention-days: 7
 
   codigo:
     name: Código (lockfile, lint, tipos, testes, build)

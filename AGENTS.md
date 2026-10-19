@@ -10,12 +10,12 @@ Fazer diferença real na melhoria, na evolução e no sucesso contínuo da agric
 ## 1. O que é este repositório
 Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai do planejamento da safra à ordem de serviço, ao almoxarifado, ao app de campo e aos custos.
 
-- **Contrato do produto:** [`docs/PRD.md`](docs/PRD.md). Versão vigente: **3.9**, de 26/09/2026. A v3.10 está em revisão e entra por pull request.
+- **Contrato do produto:** [`docs/PRD.md`](docs/PRD.md). Versão vigente: **3.11**, de 27/09/2026, que inclui a v3.10 (registro em [`docs/prd/v3_10-reconciliacao.md`](docs/prd/v3_10-reconciliacao.md)). As decisões pendentes do proprietário em 73.12, 74.12 e 75.8 foram respondidas por ele em 16/10/2026 (DEC-1610-03 a 11 em [`docs/DECISIONS.md`](docs/DECISIONS.md)). As decisões específicas DEC-1610-03 e 05 a 11 valem desde então, cada uma no seu escopo. A DEC-1610-04 aprova somente os valores numéricos de prazos e limites das pendências que ela cita; suas demais cláusulas mantêm o estado anterior, salvo decisão específica referenciada; o texto do PRD passa a trazê-las no registro da versão seguinte (PRD 73.12).
 - **Estado atual:** [`docs/STATUS.md`](docs/STATUS.md). Leia antes de começar qualquer sessão.
 - **Decisões:** [`docs/DECISIONS.md`](docs/DECISIONS.md) e [`docs/adr/`](docs/adr/).
-- **Design system:** [`docs/design-system/`](docs/design-system/). O capítulo 74 do PRD está em revisão.
+- **Design system:** [`docs/design-system/`](docs/design-system/). É o capítulo 74 do PRD; `tokens.json`, espécime e tabela de contraste ainda não estão no repositório.
 - **Fluxogramas:** [`docs/prd/fluxogramas/`](docs/prd/fluxogramas/).
-- **Protótipo navegável** (validação, não é produção): https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo
+- **Protótipo navegável** (validação, não é produção): https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm. Segue o regime leve da seção 3.5.
 
 ## 2. Autoridade e limites (não negociáveis)
 - **O proprietário é Adrianus.** Só ele decide escopo, custo, estratégia e mudanças materiais de negócio. Decisões dele valem quando registradas no PRD (cap. 72 e sucessores) ou em `docs/DECISIONS.md`.
@@ -24,6 +24,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Estado autorizado em 27/09/2026:**
   - Repositório privado com documentação, estrutura de desenvolvimento e CI (resposta direta do proprietário ao Claude).
   - Decisões técnicas delegadas aos dois agentes, que devem chegar a acordo com testes e revisão independente. Fonte: mensagem do proprietário no canal do Codex, colada por ele no canal do Claude.
+  - **Merge na `main` entre os agentes** (proprietário, 09/10/2026: "Faça o merge entre voce e claude, nao quero trabalho pra mim", corrigido em seguida para "entre vc e codex"). O revisor integra o PR do outro com a CI verde no HEAD e um parecer favorável escrito no PR. O proprietário não é chamado para integrar. Ninguém integra o próprio PR (DEC-0910-02).
 - **Continuam com o proprietário:**
   - o que gera custo, contrato ou conta em nome dele;
   - dados reais de clientes;
@@ -36,8 +37,13 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Papéis:**
   - Claude lidera implementação, integração, especificação técnica e contratos.
   - Codex lidera produto, organização do projeto, backlog, critérios de aceite, QA e revisão.
-  - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato.
-- **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge. Ninguém aprova nem integra o próprio pull request.
+  - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato. No protótipo, a revisão não bloqueia (3.5).
+- **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge pelo revisor (2, DEC-0910-02). Ninguém aprova nem integra o próprio pull request. PR que a `main` já absorveu é fechado com a prova (arquivo a arquivo), pelo autor ou, com aviso, pelo outro agente.
+- **Merge automático do revisor** (proprietário, 09/10/2026: "Automatize PR e Merge entre claude e Codex. quero menos trabalho pra mim"; complementa DEC-0910-02):
+  - o revisor avalia o HEAD, inclusive os achados do app do Codex, e só então publica no PR um comentário dedicado, só com o texto `Parecer favorável do revisor: <SHA completo do HEAD>`, e liga o auto-merge. Para retirar, publica `Parecer retirado: <SHA completo do HEAD>`; vale o último ato. O autor nunca publica esses comentários, nem como exemplo. O GitHub integra quando os checks obrigatórios passam, inclusive "Revisão do Codex no commit atual" (revisão do app concluída e esse parecer, ambos no HEAD), e todas as conversas da revisão estão resolvidas;
+  - depois de cada push no PR pronto, o autor pede nova revisão ao app com o comentário `@codex review`, porque ele não revisa push sozinho; o parecer do commit anterior não vale para o novo HEAD;
+  - o autor resolve a conversa de um achado só quando o corrigiu ou o recusou com fundamento técnico e o revisor reavaliou. Achado que depende do proprietário fica aberto, e o merge espera por ele;
+  - sem auto-merge, com integração manual pelo revisor: mudança nos próprios portões (`.github/workflows/`, `tools/github/`) e o PR do protótipo (3.5).
 - **Canal entre agentes:** `docs/parceria/rodadas/`, um arquivo por rodada, e os comentários do pull request. Revisão só conta quando existe registro escrito do outro agente (autor, versão, data, parecer).
 - **Evidência** é commit, comando executado, saída e captura. Rotule sempre "especificado" ou "executado".
 - **Severidade e prioridade são coisas diferentes:**
@@ -114,13 +120,36 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
 - **Mensagem enviada não é trabalho integrado.** Pedido entre agentes leva caminho, versão, decisão necessária e impedimento.
 - Protocolo completo: [`docs/parceria/protocolo.md`](docs/parceria/protocolo.md).
 
+### 3.5 Protótipo: regime leve (proprietário, 05/10/2026)
+O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigor das seções 3.1 e 3.2 vale para o software real.
+- **Versionamento:** commit e push na branch única `claude/prototipo-v44`, com um único PR rascunho como janela de revisão. Sem PR por incremento, sem reserva de arquivo em commit, sem pacote de evidências com checksum.
+- **Testes por mudança:** unidade das regras que vão para o produto (aprovação, dose, unidade, estoque, carência), geração e varredura das páginas e os testes do módulo mexido. Bateria completa só a cada marco.
+- **Revisão:** o Codex revisa pela branch e pelo artefato quando puder, sem bloquear. Achado vira correção na mesma branch.
+- **Entrega:** artefato atualizado a cada melhoria, com uma linha do que mudou.
+- **Continua valendo:** dados sintéticos e sem segredo (ENG-017), nunca declarar teste não executado, proteção de regressão para defeito corrigido.
+
+- **Branches das frentes** (`claude/v44-*`) também vão ao remoto para revisão dos commits e recuperação do trabalho. O Gitleaks roda antes de cada envio; branch com achado não sobe. Exceção exige escopo explícito, justificativa, autorização pertinente e teste dos limites.
+
+### 3.6 Velocidade com a mesma qualidade (VEL-20261013-01, autorizado pelo proprietário no canal Codex)
+- **No máximo três frentes abertas.** Uma nova só começa quando outra entra numa versão publicada. O teto não amplia a fatia funcional ativa nem uma tarefa de autoria por agente; preserve e consolide as frentes já abertas (§3.1).
+- Antes da revisão, a frente incorpora a ponta publicada da branch única e verifica o delta da composição.
+- **Base verde:** vermelho antigo é corrigido, distinguindo defeito do produto, teste obsoleto e falha da ferramenta. Corrigir não é afrouxar: a contraprova continua reprovando a versão com defeito. Com a base verde, a bateria roda na candidata; não se repete a base sem nova divergência.
+- Testes pelo impacto a cada correção; bateria completa uma vez por versão composta. Preserve provas equivalentes e repita o afetado após correções ou mudanças de composição.
+- **Montagem compartilhada:** uma por commit de árvore limpa, com as entradas que alteram a saída na chave do cache (dados/configuração, dependências e versão do gerador). Artefato pronto é imutável; cada execução mantém perfil e dados de teste isolados. Não reutilize saída de árvore suja como prova daquele commit.
+- Espere a condição observável, preservando os limites contratuais de carregamento e das asserções. DOM quieto é pré-condição, não prova de conclusão do domínio. Espera fixa só quando o tempo real importa (debounce, relógio); falha no limite deve ser explícita.
+- Aceite mensurável combinado com o revisor antes do código (§3.4), com unidades, estados e oráculo de cálculo pertinentes.
+- Uma revisão adversarial por versão composta, com lentes pelo risco: estoque, demanda, aprovação e dinheiro com lente própria; mudança só visual com conferência proporcional. Não substitui a auditoria integral real de Codex, Claude e Gemini na mesma candidata completa, com dados/perfis isolados, inventário comum e análise dos brutos, após todo o conjunto vigente. A revisão final do PRD só começa após todas as implantações do conjunto vigente, conforme o pedido do proprietário de 09/10/2026; publicação parcial não aciona nenhum desses gatilhos.
+- Fonte e brutos no repositório na mesma entrega; mensagens curtas no formato da §3.4.
+- Fluxo cujo agente termina com erro sem resultado não pode registrar conclusão. Ausência de ACK não comprova perda ou ociosidade; timeout de envio exige readback antes de reenvio (§3.4). Commit a cada passo verde, preservando rascunhos em falhas.
+
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
-- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41; revisão v3.10, 73.9).
+- **Design system único** (PRD cap. 74 e [`docs/design-system/`](docs/design-system/), padrões do proprietário de 09/10/2026): botões BOT-01 a BOT-09 (um verde por contexto; lugar, verbo, tamanho e ícone fixos; componente comum), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04). Vale para toda tela nova e para a correção das existentes, no protótipo e no software real.
+- **Toda O.S. agrícola tem aprovação agronômica individual**, inclusive operação mecânica (PRD 41 e 73.9).
   - Exceções expressas: irrigação só com água (DEC-2609-10), manutenção e beneficiamento com responsável próprio.
   - Aprovar não libera; liberar é o CMD-06.
 - **O servidor é a autoridade** para saldo, reserva, custódia, aprovação e encerramento (PRD 24).
-  - Cada comando carrega a chave de idempotência gerada por quem inicia a ação (ENG-021/022; revisão v3.10, 73.3).
+  - Cada comando carrega a chave de idempotência gerada por quem inicia a ação (ENG-021/022; PRD 73.3).
   - Grava o efeito, o recibo e a outbox na mesma transação.
 - **Kanban da O.S. com 5 fases** (A liberar, Liberadas, Em execução, Em conferência, Encerradas). Não criar coluna nova.
 - **Fórmula agronômica ou econômica** existe num único serviço de domínio (ENG-011). Unidades explícitas; decimal para dinheiro e quantidade (ENG-013).
@@ -131,7 +160,7 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
   - Versões fixadas em [`docs/architecture/versions.md`](docs/architecture/versions.md) no primeiro commit executável.
 - **Estrutura** (23.3): `apps/web`, `apps/worker`, `packages/domain`, `packages/application`, `packages/db`, `packages/contracts`, `packages/ui`, `packages/integrations`, `packages/observability`, `tests`, `infra/terraform` e `docs`. Crie um pacote só quando ele tiver responsabilidade real.
 - **Comandos contratados** (23.4): `pnpm setup | dev | check | test:integration | test:e2e | test:load | demo:reset | doctor`. Existem hoje, com `pnpm run`: `check`, `test:integration`, `test:e2e`, `demo:reset` e `doctor`. **Ainda não existem** `setup`, `dev` na raiz e `test:load`: não diga que existem até o PR que os cria passar na CI.
-- **Checks que existem hoje:** os 10 jobs da CI (documentação, segredos, vulnerabilidades, código, navegador, imagens, Semgrep, travas do Cloud SQL e Terraform dos dois módulos), os mesmos nomes de `tools/github/protecao-main.json`. Os comandos locais equivalentes estão no `README.md`.
+- **Checks que existem hoje:** os 11 jobs da CI (documentação, segredos, vulnerabilidades, código, navegador, imagens, Semgrep, travas do Cloud SQL, Terraform dos dois módulos e revisão do Codex no commit atual), os mesmos nomes de `tools/github/protecao-main.json`. Os comandos locais equivalentes estão no `README.md`.
 
 ## 6. Ao terminar cada incremento
 Atualize `docs/STATUS.md` e explique ao proprietário, em português simples:

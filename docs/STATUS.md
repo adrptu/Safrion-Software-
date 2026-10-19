@@ -1,34 +1,46 @@
 # Estado do projeto
 
-Atualizado em 29/09/2026 por Claude, sobre a `main` `15e53d27`. PR aberto não significa integrado; configuração só vale depois de lida no servidor.
+Base do retrato histórico abaixo: 09/10/2026, Claude, `main` `266a682`. Estados e recibos posteriores estão no [checkpoint único](https://github.com/adrptu/Safrion-Software-/issues/1#issuecomment-5858061746). PR aberto não significa integrado; configuração só vale depois de lida no servidor.
+
+**Prioridade de execução:** concluir e validar o conjunto vigente do protótipo, publicando incrementos operáveis conforme seus aceites. A reconciliação integral do PRD aguarda todas as implantações atuais. Após validação integral do protótipo, transferir para a aplicação existente por fatias tela → domínio → banco → HML. CMD-15, C2 e demais trabalhos reais permanecem preservados; F1 técnico de estoque não equivale à Fase 1 comercial.
+
+PR #54, complemento VEL: revisão apontou lacuna em exceções concorrentes e harness ausente. Corrigidos com referência estrutural exata das cinco exceções, regra única sem sobrescritas, herança padrão intacta, fonte portátil e prova antes/depois (8 testes e 15 mutações recusadas; 16/16 execuções); aguardam revisão do Claude e checks da nova candidata. Sem alteração funcional do protótipo.
 
 ## Onde estamos
 
 | Frente | Estado | Evidência |
 |---|---|---|
-| PRD | v3.9 vigente; v3.10 em revisão, com propostas de edição por tema aguardando as três IAs | `docs/PRD.md`, `docs/DECISIONS.md` |
-| Protótipo | Navegável; sem banco ou login reais | https://claude.ai/artifact/WPDgqGvKX6CYTCdPjidBLo |
-| Repositório | Privado; PRs #2 a #15 integrados | https://github.com/adrptu/Safrion-Software- |
+| PRD | **v3.11** (27/09/2026), vigente desde o merge do #48 em 09/10/2026: 40.5 e 40.6, produto fixo ou troca de marca pelo mesmo ingrediente ativo; API de integração com credencial por integração; sobre a **v3.10**: caps. 73 (confiabilidade transacional, offline, desempenho), 74 (design system) e 75 (melhoria contínua), com as seções existentes reconciliadas. As pendências de 73.12, 74.12 e 75.8 foram respondidas pelo proprietário em 16/10/2026 (DEC-1610-03 a 11): DEC-1610-03 e 05 a 11 valem cada uma no seu escopo; A DEC-1610-04 aprova somente os valores numéricos de prazos e limites das pendências que ela cita; suas demais cláusulas mantêm o estado anterior, salvo decisão específica referenciada; entram no texto do PRD na versão seguinte | `docs/PRD.md`; `docs/prd/v3_10-reconciliacao.md`; `docs/DECISIONS.md` |
+| Fluxogramas | v3.10: 14 dos 63 fluxos alterados, mesmas raias; v3.9 mantida ao lado | `docs/prd/fluxogramas/` |
+| Protótipo | Navegável, com dados sintéticos e sem banco ou login reais. Regime leve (AGENTS 3.5): branch única `claude/prototipo-v44`, PR #47 em rascunho; versão publicada, candidata em revisão e frentes pendentes identificadas separadamente no checkpoint; publicação parcial não encerra o conjunto | https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm |
+| Design system | PRD cap. 74 e os padrões do proprietário de 09/10 (DEC-0910-01): botões BOT-01 a BOT-09, seleção que abre detalhe (SEL), etapa futura neutra (ETP) e separador, hover verde, retorno visual e dica (VIS). SEL-02, BOT-03 e BOT-07 precisados pela revisão do Codex no PR #50 (DS-NAV-20261009-02): registro indisponível com aviso e recuperação, Programar só para agendar execução e alvo único semântico na linha. No protótipo: componente comum e teste de conformidade em andamento; correção das telas depois da integração das frentes. No software real (`packages/ui`): pendente | `docs/design-system/README.md` |
+| Merge na `main` | Feito pelos agentes: o revisor integra o PR do outro com CI verde e parecer escrito; ninguém integra o próprio (DEC-0910-02, 09/10) | `AGENTS.md` 2 e 3 |
+| Decisões delegadas (09/10) | Delegação do proprietário aos dois agentes (DEC-0910-03) e 30 linhas com acordo escrito do Codex (recibos 6091153950 e 6091443216), cada uma com o seu limite; 24 entradas aguardam a revisão do Codex. Nada é aprovação do proprietário; o PRD fica inalterado até a comparação final; implementação pendente | `docs/DECISIONS.md`; `docs/parceria/decisoes-delegadas-20261009.md` |
+| Repositório | Privado; PRs #2 a #31, #46 e #48 integrados | https://github.com/adrptu/Safrion-Software- |
 | Fundação | Domínio (decimal, unidades e saldo por lote); PostgreSQL/PostGIS com RLS e isolamento entre organizações; login OIDC com sessões; concessão e revogação de acesso; primeira interface de estoque e cadastros; imagens de homologação verificadas na CI | PRs #5, #7, #8, #9, #10 e #11 |
-| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado**: provisionar depende de autorização concreta de custo e destino | PR #14; `infra/terraform/`; `docs/OPERACAO.md` |
-| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass | PR #15; `tools/github/` |
+| Homologação | Terraform, conexão ao banco por IP privado e fila de vínculo integrados e validados na CI, sem plan nem apply. **Nenhum ambiente hospedado ainda**: desenvolvimento, QA e HML já estão autorizados com referência de custo (EXT-01, R-006); falta provisionar e comprovar o ambiente, dentro dessas autorizações concretas (plano revisado antes de cada apply; alerta de orçamento não é teto) | PR #14; `infra/terraform/`; `docs/OPERACAO.md`; EXT-01 em `docs/DECISIONS.md` |
+| Proteção da `main` | Ruleset `24154464` ativo, conferido na leitura do servidor (alterado em 29/09, 10:13 de Brasília): exclusão e force push bloqueados, pull request obrigatório e os 10 checks obrigatórios do app GitHub Actions, com branch atualizada antes do merge. Sem exceção de bypass. **Merge automático do revisor** (09/10): o portão "Revisão do Codex no commit atual" e a resolução obrigatória das conversas estão no arquivo do ruleset (PR #49), mas só valem depois que o proprietário autorizar aplicar o ruleset e ligar o auto-merge do repositório | PR #15; PR #49; `tools/github/`; AGENTS.md 3 |
 | Produção | Não existe | — |
 
 ## Verificação executada e limite
 
+- **VEL-20261013-01 (PR #53 integrado pelo Claude em `999b0d0`, autoria Codex):** autorização direta de Adrianus para a exceção da chave localStorage da ficha de pivô, limitada a um literal e dois arquivos, e para AGENTS §3.5/3.6. Gitleaks 8.30.1: 30/30 scans sintéticos executados; [fonte, brutos e reprodução](parceria/rodadas/VEL-20261013-01/README.md). Complemento em revisão: contrato dos limites na descoberta existente da CI (8/8 testes e 15 contraprovas recusadas; 16/16 execuções, incluindo path/regex da regra e disabledRules) e este registro. Próximo passo: Claude revisa/integra o complemento após os checks e confere a composição real antes de publicar suas branches. Sem custo novo, publicação de produto ou conclusão de CTL-4/v56 por este incremento. Estado posterior no checkpoint único.
 - PR #14, candidata `a1c880e`: 10 checks com success; 247 testes unitários; integração com PostgreSQL real, 171 testes em 16 arquivos, nenhum pulado; jornadas de navegador no desktop e no celular; imagens com SBOM; Terraform validado sem credencial.
 - PR #15, candidata `b300f6ad`: 10 checks com success, inclusive a regressão da proteção da `main` (`tools/ci/test_protecao_main.py`); simulação contra o GitHub real só com leitura.
 - CI verde não prova operação hospedada, login com provedor real na homologação nem restauração de backup.
 
 ## Próximo passo e responsáveis
 
-### Sequência
+### Dependências de HML e registros históricos
+
+A lista abaixo preserva dependências e recibos; não substitui a prioridade de execução indicada acima. Não reiniciar checks ou trabalhos já encerrados sem novo incidente ou mudança pertinente.
 
 1. Feito em 29/09: os 10 checks obrigatórios estão no ruleset existente, conferidos na leitura do servidor.
-2. Ensaio remoto da homologação, com autorização de custo e destino do proprietário: restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
+2. Ensaio remoto da homologação, dentro das autorizações concretas já recebidas (EXT-01, R-006): restauração do backup em instância isolada, logs sem dados pessoais, acesso e revogação.
 3. Antes do primeiro usuário externo: teste de todas as rotas com usuário de outra organização e inventário dos dados pessoais tratados.
-4. PRD v3.10: revisão das propostas por tema pelas três IAs.
-5. Codex e Claude conduzem a homologação técnica e funcional. Adrianus recebe a candidata verificada e dá feedback; produção exige o aceite explícito dele para a versão.
+4. Feito em 09/10: PRD v3.11 vigente (#48). Em 16/10 o proprietário respondeu as pendências de 73.12, 74.12 e 75.8 (DEC-1610-03 a 11). DEC-1610-03 e 05 a 11 valem cada uma no seu escopo. A DEC-1610-04 aprova somente os valores numéricos de prazos e limites das pendências que ela cita; suas demais cláusulas mantêm o estado anterior, salvo decisão específica referenciada.
+5. Design system de 09/10: aplicar BOT, SEL, ETP e VIS no protótipo (componente comum, teste de conformidade e correção das telas depois da integração) e, ao passar para o software real, em `packages/ui`.
+6. Codex e Claude conduzem a homologação técnica e funcional. Adrianus recebe a candidata verificada e dá feedback; produção exige o aceite explícito dele para a versão.
 
 ### Segurança estática — FERR-06
 
@@ -58,3 +70,5 @@ Referências consultadas em 28/09/2026: [Playwright na CI](https://playwright.de
 ## Automação de PRs e merge — candidata de 04/10/2026
 
 `tools/github/fluxo_pr.py` e seu [procedimento](../tools/github/README.md) automatizam o trabalho mecânico por agente autorizado: draft idempotente, conferência de checks e recibos reais por SHA, merge por integrador diferente do autor e leitura de volta. A configuração de proteção e o auto-merge nativo permanecem como estavam. Autoria Codex; revisão/integração Claude; contraprova Gemini. Pedido/reserva: issue #1, comentário 5985332590. Implementação candidata não significa ativação ou merge comprovado; testes, CI e pareceres por versão ficam no PR. A dependência de integração das correções já preservadas não é removida por esta ferramenta.
+
+Retomada do PR #38 em 19/10: main incorporada sem reescrever histórico; helper ajustado à revisão cruzada (DEC-0910-02), com evidência do autor e parecer do revisor/integrador independente. Contraprova exigida pelo contrato ou já emitida não pode ser omitida. Checks, ruleset, paginação, SHA esperado e readback preservados; nova candidata depende de revisão Claude e CI antes de ativação. Recibo de autoria: [6261849687](https://github.com/adrptu/Safrion-Software-/pull/38#issuecomment-6261849687).
