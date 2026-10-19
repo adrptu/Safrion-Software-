@@ -37,6 +37,11 @@ Com ponteiro grosso, `button[aria-label^='Fechar']` com `width: 32px` e `height:
 | `cada_cd04` | 15/15 |
 | `paginas_scan` | 5/5 (147 páginas) |
 
-**Vermelho antigo achado na mesma bateria:** `assinatura` dá 39/45, com as mesmas 6 falhas na composição `5bc0b340` sem esta mudança (`logs/assinatura_5bc0b340.log`): A7b, A4d, A9c, A9d, A9e e A18c, sobre fatura, reativação e CSV. Não vem desta mudança. Fica como item da base verde 2, a classificar entre defeito do produto e oráculo obsoleto, sem esconder o teste.
+**Vermelho antigo achado na mesma bateria, classificado e corrigido:** `assinatura` dava 39/45, igual na `5bc0b340` sem esta mudança (`logs/assinatura_5bc0b340.log`). As 6 falhas eram A7b, A4d, A9c, A9d, A9e e A18c.
+- **Causa medida:** o passo que inativa o B1 no CD-01 não achava a linha. Desde a v129 (DRILL-RECOLHIDO) o CD-01 abre em árvore recolhida, só com as 3 fazendas e "Expandir tudo"; a sonda listou F_SR, F_BV e F_LG.
+- **Efeito em cascata:** sem o B1 inativo, o fechamento de set/2026, a reativação (A9d/e) e o CSV reprovaram juntos.
+- **Classificação:** teste obsoleto na navegação. O produto está certo.
+- **Correção:** `abre_linha`, quando não acha a linha, faz o que o usuário faz, "Expandir tudo", e procura de novo. Nenhuma asserção muda.
+- **Resultado:** 45/45 neste render e 45/45 também na `5bc0b340` (`logs/assinatura_corrigido*.log`), o que mostra que o produto já estava certo.
 
 **Fotos (`fotos/`):** `cf06_painel_390_antes` mostra o "×" com 32 px; `cf06_painel_390_depois` mostra o "×" com 44 px, alinhado ao título.
