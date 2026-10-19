@@ -1,0 +1,48 @@
+Hoje no campo
+2 ordens · envios em dia
+i
+Marcos · operador
+Zé · mecânico
+João · eletricista
+· Santa Rita
+Com sinal
+Sem sinal
+Nada aguardando sinal
+Ver envios
+Minha fila
+OS-0421 · Pulverização · Fungicida 1ª aplicação
+T1+T2 · 350 ha · janela 20–26/09
+Em execução
+Pronta para o próximo turno
+Realizado 190 de 350 ha · saldo 160 ha
+Fungicida A · lote F26-02 · galão 5 L · com você 65 L
+Iniciar turno
+Abrir ordem
+OS-0424 · Pulverização · Fungicida A
+T1-B · 128 ha · janela 24/09
+Liberadas
+Reservado · REQ-039
+Realizado 0 de 128 ha · saldo 128 ha
+Fungicida A · lote F26-02 · galão 5 L · retirar 65 L
+Retirar no almoxarifado
+Abrir ordem
+Abrir por tipo de trabalho
+Minhas ordens
+lista e detalhe da O.S.
+Apontamento
+turno: início, pausa e fechamento
+Ocorrência
+tipo, texto, foto e voz
+Almoxarifado
+retirar e confirmar
+Vistoria
+rota por pontos
+Contagem de frutos
+previsão de colheita
+Cargas e entregas
+área e cargas da colheita
+Máquina
+condição, leitura e abastecimento
+Restaurar demonstração
+Iniciar turno · OS-0421
+Tela: Hoje no campo · 2 ordens · envios em dia

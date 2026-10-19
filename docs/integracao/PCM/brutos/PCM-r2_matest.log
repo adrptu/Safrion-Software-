@@ -1,0 +1,41 @@
+  ok  MA · semordem: sem erro de JS
+  ok  semordem: grades sem rolagem horizontal a 1440 px
+  ok  semordem: sem botões Editar
+  ok  semordem: sem a faixa "Telas da manutenção" (D-05; o seletor de visão a substitui)
+  ok  MA · ordens: sem erro de JS
+  ok  ordens: grades sem rolagem horizontal a 1440 px
+  ok  ordens: sem botões Editar
+  ok  ordens: sem a faixa "Telas da manutenção" (D-05; o seletor de visão a substitui)
+  ok  MA · ativos: sem erro de JS
+  ok  ativos: grades sem rolagem horizontal a 1440 px
+  ok  ativos: sem botões Editar
+  ok  ativos: sem a faixa "Telas da manutenção" (D-05; o seletor de visão a substitui)
+  ok  MA · planos: sem erro de JS
+  ok  planos: grades sem rolagem horizontal a 1440 px
+  ok  planos: sem botões Editar
+  ok  planos: sem a faixa "Telas da manutenção" (D-05; o seletor de visão a substitui)
+  ok  Ativos: 16 ativos com a identidade do CD-03 + comboio (16)
+  ok  Ativos: próxima manutenção vem dos planos (Vencida · Vence em breve · Sem plano)
+  ok  Ativos: clique na linha abre o detalhe do ativo (#ativo=a08)
+  ok  condição: restringir exige motivo (nada grava sem ele)
+  ok  condição: com motivo, limites e prazo a Colhedora fica Restrita (com histórico)
+  ok  Trator T1: só a OM-0233 devolve o ativo (Bloqueado → Apto por "Declarar apto" na ordem)
+  ok  Sem ordem: achados do estado e vencimentos sem ordem (6 linhas)
+  ok  Registrar achado exige escolher o ativo
+  ok  novo achado registrado (SM-0153) e na fila Sem ordem
+  ok  vincular o achado à OM-0234 não cria ordem nova
+  ok  gerar: 3 ordens preventivas (OM-0235..0237)
+  ok  mover a OM-0234 para 29/09 tira o conflito
+  ok  propor substituto registra a proposta uma vez (aguarda PCP, simulado)
+  ok  sem link para impedimentos (PL-05 oculta e fixa · CTL-1)
+  ok  OM-0230: resolver sobras (ponte simulada) e encerrar
+  ok  clique na linha abre o painel da ordem com o próximo passo
+  ok  OM-0233: sem teste aprovado não há aptidão nem conclusão (o motivo à vista)
+  ok  teste: a 2ª tentativa Aprovado entra por acréscimo (as duas à vista)
+  ok  concluir serviço: Em conferência
+  ok  aptidão declarada (CMD-19) · volta pela reprogramação do PCP
+  ok  encerrar recusado com peça retirada "A definir" (o motivo à vista)
+  ok  destino da peça retirada e encerramento da OM-0233
+  ok  Abastecimentos: o lançamento abre a origem (leitura, método)
+  ok  fim: sem erro de JS
+RESULTADO: 40/40 ok

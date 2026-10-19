@@ -1,0 +1,22 @@
+    if 'roteiro' in MODOS:
+        # integração BEN (09/10), achado 1: a sugestão de caixas (1.169 un do L39-132) passava das 540 livres e a ordem criada com o valor
+        # inicial nunca liberava; o roteiro do proprietário falhava no passo 1. Agora o valor inicial fica dentro do livre, com o porquê escrito
+        print('== roteiro · tarefa do proprietário com o valor inicial das caixas (Igor cria e libera; CG-2107 sem Estornar; Marta sem decisão)')
+        ir('CARGA.dc.html', limpa=True); perfil('Igor'); ir('CARGA.dc.html')
+        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
+        t.chk('R1 · menu Produção com 3 itens (Previsão e colheita · Recebimento e beneficiamento · Estoque de produto)', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
+        nav_clk('Beneficiamento', 'nav[aria-label="Telas de recebimento e beneficiamento"]'); clk('+ Nova ordem'); clk('L39-132', 'aside'); p = pan()
+        cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value")
+        t.chk('R1 · Nova ordem com o L39-132: Caixas vem com 540 (o livre no Estoque) e o porquê está escrito (sugestão 1169 un; 540 un livres)', cxv == '540' and '= 1169 un' in p and 'Livres no Estoque: 540 un: a ordem vem com 540 un' in p, [cxv, p[:800]])
+        r0 = rev(); clk('Criar ordem', 'aside'); tc = toast()
+        t.chk('R1 · Criar ordem com o valor inicial: OB-0113 em A liberar com 540 un de caixa e sem aviso de impedimento', 'OB-0113 criada (A liberar)' in tc and '540 un de caixa' in tc and 'Atenção' not in tc and rev() == r0 + 1, tc)
+        ir('BEN.dc.html#OB-0113'); p = pan()
+        t.chk('R1 · painel da OB-0113 sem impedimento antes do toque', 'Nenhum: a ordem pode ser autorizada e liberada.' in p, p[:900])
+        clk('Autorizar rota e liberar', 'aside'); tc = toast(); st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req, c.producao.lotes['L39-132'].ordem]")
+        t.chk('R1 · Autorizar rota e liberar: OB-0113 Liberadas com a REQ-041 (CMD-42 e CMD-06) e o L39-132 preso à ordem', st == ['Liberadas', 'REQ-041', 'OB-0113'] and 'autorizada (CMD-42) e liberada (CMD-06)' in tc, [st, tc])
+        ir('CARGA.dc.html'); row('CG-2107'); p = pan(); bt = J(BTNS) or []
+        t.chk('R2 · a CG-2107 não oferece "Estornar" e o próximo passo diz por quê', 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p, [bt, p[:500]])
+        perfil('Marta'); ir('PROD.dc.html#L39-132'); p = pan(); bt = J(BTNS) or []
+        t.chk('R3 · Marta: o L39-132 no Estoque de produto sem "Registrar decisão"; o próximo passo aponta a OB-0113', 'Registrar decisão' not in bt and 'OB-0113' in p, [bt, p[:400]])
+        shot('roteiro')
+        t.chk('roteiro sem erro de JS', not t.errs(), t.errs())

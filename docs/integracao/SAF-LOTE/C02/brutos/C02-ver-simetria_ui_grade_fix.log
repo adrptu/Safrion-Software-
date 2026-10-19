@@ -1,0 +1,14 @@
+OK    · [períodos do cadastro] as duas grades foram lidas
+     [períodos do cadastro] células comuns às duas vistas: 36
+OK    · [períodos do cadastro] toda célula recurso × mês comum às duas vistas tem a mesma ocupação e as mesmas horas (36 células)
+OK    · [períodos do cadastro] tela = espelho Python em toda célula das duas vistas
+OK    · [períodos do cadastro] sem erro de JS
+OK    · [mesmo período 01/09/2026 a 12/07/2027] preparo S2627 pela tela
+OK    · [mesmo período 01/09/2026 a 12/07/2027] preparo S27SF pela tela
+OK    · [mesmo período 01/09/2026 a 12/07/2027] as duas grades foram lidas
+     [mesmo período 01/09/2026 a 12/07/2027] células comuns às duas vistas: 36
+OK    · [mesmo período 01/09/2026 a 12/07/2027] toda célula recurso × mês comum às duas vistas tem a mesma ocupação e as mesmas horas (36 células)
+OK    · [mesmo período 01/09/2026 a 12/07/2027] tela = espelho Python em toda célula das duas vistas
+OK    · [mesmo período 01/09/2026 a 12/07/2027] sem erro de JS
+
+RESULTADO: 10 ok · 0 falhas

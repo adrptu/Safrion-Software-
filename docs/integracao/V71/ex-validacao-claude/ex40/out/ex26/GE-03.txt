@@ -1,0 +1,93 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Custos e fechamento
+‹
+Agrícola
+Custos e fechamento
+i
+2 pendências bloqueiam o fechamento
+Fechar competência 09/2026
+Competência
+09/2026 fecha 05/10
+Lançamentos
+1.412 98% com doc.
+Provisórios
+R$ 22.736 4 lançamentos
+Conciliação ERP
+OK até 21/09 14 na fila
+Composição de custos · setembro/2026
+Exportar para ERP
+10 de 10
+Agrupar por
+▾
+Colunas
++3
+ORIGEM (DOCUMENTO)
+⇅
+COMPONENTE
+⇅
+DIMENSÕES
+⇅
+VALOR
+⇅
+NF 8842 · recebimento
+Defensivo · fungicida
+Feijão · P1 · OS-0409
+R$ 5.808
+REQ-035 · OS-0421
+Defensivo · Fungicida A
+Soja · T1+T2 · OS-0421
+R$ 13.775
+Apontamento · OS-0421
+Máquina e equipe · pulverização
+Soja · T1+T2 · OS-0421
+R$ 2.754
+REQ-036 · OS-0420
+Semente · soja 58 W
+Soja · T4 · OS-0420 (30 ha)
+R$ 14.820
+REQ-037 · OS-0420
+Fertilizante · KCl 60%
+Soja · T4 · OS-0420 (30 ha)
+R$ 8.640
+Apontamento · OS-0420
+Máquina e equipe · plantio
+Soja · T4 · OS-0420 (30 ha)
+R$ 2.376
+Abastecimento · Trator T1
+Diesel S10
+Soja · T4 · OS-0420
+R$ 497
+OM-0233
+Manutenção corretiva
+Máquinas · Trator T1
+R$ 18.400
+Bloqueia fechamento
+Romaneio de frete
+Frete de insumos
+comum · 3 entregas
+R$ 1.463
+Folha 09/26
+Mão de obra operacional
+rateio por apontamento
+—
+Fechamento da competência
+Conciliar diesel do tanque
+⋯
+Coleta e apontamentos
+Conciliações
+Rateios versionados
+Revisão e fechamento
+Exportação ERP
+Fechar está bloqueado: frete sem versão de rateio e diesel sem conciliação de tanque.
+Tela: Custos e fechamento · 2 pendências bloqueiam o fechamento

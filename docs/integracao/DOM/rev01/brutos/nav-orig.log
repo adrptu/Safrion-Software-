@@ -1,0 +1,874 @@
+  OK  preparo: OS-0430 liberada por Ana, insumos entregues e confirmados: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+  OK  MB-03: sugestão 20/10/5; informado 20/0/0 fecha o turno e o aviso diz a divergência e quem revisa: ['20', '10', '5'] · Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).
+  OK  recibo do turno no app: selo e planejado × informado com unidade, sem "S2": Turno fechado · OS-0430 · dia 1 · 10 ha em 1 h / Enviado · a ordem continua aberta / Divergência de consumo/dose / Consumo: Glifosato 480 20 L / 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma) / Realizado 10 de 160 ha · saldo 1
+  OK  app a 390 px sem rolagem horizontal
+  OK  lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução Divergência de consumo/dose · 2,4-D 806, Óleo mineral — Ana (agrônoma) revisar a divergência de dose do dia 1 — 10,00 ha 150,00 ha — 6,3 % Marcos
+  OK  Kanban (5 fases, sem coluna nova): cartão com o selo e a pendência: OS-0430 Dessecação pré-plantio T1-A · 160 ha 10/160 ha · 6 % · saldo 150 ha Divergência de consumo/dose · 2,4-D 806, Óleo mineral Ana (agrônoma) · revisar a divergência de dose do dia 1 Marcos · 25/09 (DAP −20)
+  OK  painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): Dia 1 · app 10 ha · 1 h 10 / 160 ha Provisório Divergência de consumo/dose · 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L Aceitar com motivo Registrar correção Acumulado 10 / 160 ha · saldo 150 ha RECURSOS ALOCADOS Máquina · Trator 03 25/09 13:00–20:24 condici
+  OK  perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+  OK  aceitar sem motivo: erro junto ao campo, revisão continua pendente: Informe o motivo para aceitar a divergência do dia 1 da OS-0430. Nada foi alterado.
+  OK  Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D por deriva no vizinho; controle conferido em campo. O consumo informa
+  OK  repetição sem efeito; outra decisão é conflito: Divergência do dia 1 da OS-0430 já revisada (aceita por Ana (agrônoma) às 23:55): nada foi · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 23:55): ou
+  OK  turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: execução. Divergência de consumo/dose: Óleo mineral planejado 75 L × informado 50 L · revisão técnica de Ana (agrônoma). · OS-0430 enviada para conferência.
+  OK  Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": PRÓXIMO PASSO Confira apontamentos, consumo e sobras e encerre a ordem. Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Óleo mineral planejado 75 L × informado 50 L. Quem resolve: Ana (agrônoma), na linha do apontamento: aceita com motivo ou registra a correção ou reapli
+  OK  Kanban em conferência: selo e pendência com Ana, sem "Sobras a receber": OS-0430 Dessecação pré-plantio T1-A · 160 ha 160/160 ha · 100 % · saldo 0 ha Divergência de consumo/dose · Óleo mineral Ana (agrônoma) · revisar a divergência de dose Marcos · 25/09 (DAP −20)
+  OK  390 px: Registrar correção grava a decisão, sem rolagem horizontal: Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430: Reaplicar Óleo mineral 0,5 L/ha nos 50 ha do fim do talhão em nova O.S. O consumo informado fica
+  OK  revisões feitas: Conferir e encerrar → Encerradas (Encerradas)
+  OK  sem erros JS (O.S., app) e Kanban com as 5 fases, sem coluna nova: [] · a liberar|liberadas|em execução|em conferência|encerradas
+  OK  recibo do turno retido como duplicidade: a divergência fica registrada e a revisão só abre se Paula somar: Turno fechado · OS-0430 · dia 2 · 10 ha em 1 h / Em conferência · duplicidade / Divergência de consumo/dose / Consumo: nada baixado: Paula (conferência) decide se é outro turno / 2,4-D 806 planejado 10 L × informado 0 L · a revisão técnica abre se Paula (conferência) somar o turno / Realizado 10 de 160 ha · saldo 150 h
+  OK  guardado como duplicidade (Dia 2 guardado como duplicidade do dia 1: nada foi somado ne): a linha do dia 2 sem divergência nem promessa de revisão; lista sem selo: Dia 2 · app 10 ha · 1 h não somado Duplicidade · não somado 
+  FALHA dois dias divergentes: Enter em "Aceitar com motivo" do dia 1 grava só o dia 1; o texto do dia 2 fica ('') e o foco vai para ele (Aceitar com motivo → Talhão à O.S.
+Mapa
+Cadastros
+▸
+Agrícola
+▾
+Consulta Agrofit
+Planos agronômicos
+Planejar safra
+Ordem de Serviço
+Pragas e doenças (MIP/MID)
+Irrigação
+Produção
+▸
+Manutenção
+▸
+Suprimentos
+▸
+Configurações
+▸
+DEMONSTRAÇÃO · dados fictícios
+A
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife
+Paula · Conferência
+Zé · Mecânico
+Perfil de demonstração
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Agrícola › Ordem de Serviço
+Ordem de Serviço
+3 em execução · 3 impedidas
+A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.
+Ordens por fase
+Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.
+Nova ordem
+Talhão: Todos
+▾
+Agrupar por talhão
+Todas
+10
+A liberar
+2
+Liberadas
+2
+Em execução
+3
+Em conferência
+1
+Encerradas
+2
+Canceladas
+0
+Lista
+Kanban
+Recursos
+10 de 10
+O.S.
+⇅
+▾
+ATIVIDADE
+⇅
+▾
+TALHÃO
+⇅
+▾
+LOCAL
+⇅
+▾
+ÁREA
+⇅
+▾
+INÍCIO
+⇅
+▾
+FIM
+⇅
+▾
+FASE
+⇅
+▾
+SITUAÇÃO
+⇅
+▾
+OBSERVAÇÃO
+⇅
+▾
+QUEM RESOLVE
+⇅
+▾
+PRÓXIMA AÇÃO
+⇅
+▾
+PRAZO
+⇅
+▾
+REALIZADO
+⇅
+▾
+SALDO
+⇅
+▾
+DISPENSADO
+⇅
+▾
+PROGRESSO
+⇅
+▾
+RESPONSÁVEL
+⇅
+▾
+OS-0415
+Dessecação pós-colheita
+T3
+—
+96,00 ha
+10/09/2025
+12/09/2025
+Encerradas
+—
+—
+—
+—
+—
+96,00 ha
+0,00 ha
+—
+100,0 %
+Marcos
+OS-0417
+Adubação de cobertura
+P1
+—
+95,00 ha
+19/09/2026
+21/09/2026
+Em conferência
+Sobras a receber
+—
+Rui (almoxarife)
+—
+24/09
+95,00 ha
+0,00 ha
+—
+100,0 %
+Paula
+OS-0418
+Fertirrigação · reclassificada
+P1
+—
+95,00 ha
+24/09/2026
+25/09/2026
+A liberar
+Falta insumo · Ureia 45%
+—
+Suprimentos
+receber o insumo no Estoque
+—
+0,00 ha
+95,00 ha
+—
+0,0 %
+João
+OS-0420
+Plantio · Soja 58 W
+T4
+—
+100,00 ha
+22/09/2026
+28/09/2026
+Em execução
+Impedida · ativo bloqueado
+—
+Manutenção
+OM-0233
+até 24/09
+30,00 ha
+70,00 ha
+—
+30,0 %
+Carlos
+OS-0421
+Pulverização · Fungicida 1ª aplicação
+T1
+T2
+—
+350,00 ha
+20/09/2026
+26/09/2026
+Em execução
+Parcial · dia 4 de 7
+—
+Paula
+conferir o dia 4
+hoje
+190,00 ha
+160,00 ha
+—
+54,3 %
+Marcos
+OS-0424
+Pulverização · Fungicida A
+T1-B
+—
+128,00 ha
+24/09/2026
+24/09/2026
+Liberadas
+—
+—
+—
+—
+—
+0,00 ha
+128,00 ha
+—
+0,0 %
+Marcos
+OS-0425
+Adubação 1ª parcela · café
+C1
+—
+38,00 ha
+15/10/2026
+15/10/2026
+Liberadas
+Entrega sem saldo suficiente
+—
+Suprimentos
+entrega
+até 15/10
+0,00 ha
+38,00 ha
+—
+0,0 %
+Paula
+OS-0430
+Dessecação pré-plantio
+T1-A
+—
+160,00 ha
+25/09/2026
+25/09/2026
+Em execução
+Divergência de consumo/dose · Óleo mineral
+—
+Ana (agrônoma)
+revisar a divergência de dose do dia 2
+—
+20,00 ha
+140,00 ha
+—
+12,5 %
+Marcos
+OS-0431
+Plantio · Soja 58 W
+T2
+—
+102,00 ha
+24/09/2026
+24/09/2026
+A liberar
+Falta máquina · Trator T1 bloqueado
+—
+PCP
+substituto
+antes de 24/09 06:00
+0,00 ha
+102,00 ha
+—
+0,0 %
+Carlos
+OB-0104
+Beneficiamento · grãos
+—
+Armazém Sede
+—
+15/09/2025
+18/09/2025
+Encerradas
+Lote bloqueado
+—
+—
+—
+—
+—
+—
+—
+—
+Rui
+Restaurar demonstração
+A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.
+OS-0430 · Dessecação pré-plantio
+×
+Em execução
+Divergência de consumo/dose · Óleo mineral
+T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos
+20 / 160 ha · 13 % · saldo 140 ha
+A liberar
+Liberadas
+Em execução
+Em conferência
+Encerradas
+PRÓXIMO PASSO
+Registre o apontamento do turno: data e área feita. Os insumos usados são calculados pela dose. Fechar o turno não encerra a ordem.
+Pendência com Ana (agrônoma) · revisar a divergência de dose do dia 2
+Registrar apontamento
+Dispensar saldo
+INSUMOS E DOSES
+PRODUTO
+DOSE
+NA ORDEM
+USADO
+SITUAÇÃO
+Glifosato 480
+Herbicidas
+2 L/ha
+320 L
+40 L
+Em custódia · Marcos
+Reservado 320 L · lote G26-14
+› Entregue 320 L (16 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 40 L
+› Em custódia 280 L
+› Devolvido
+2,4-D 806
+Herbicidas
+1 L/ha
+160 L
+10 L
+Em custódia · Marcos
+Reservado 160 L · lote D26-01
+› Entregue 160 L (8 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 10 L
+› Em custódia 150 L
+› Devolvido
+Óleo mineral
+Adjuvantes
+0,5 L/ha
+80 L
+5 L
+Em custódia · Marcos
+Reservado 80 L · lote O26-05
+› Entregue 80 L (4 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 5 L
+› Em custódia 75 L
+› Devolvido
+FICHAS DE EXECUÇÃO
+5 cargas (tanque útil 3.000 L · 100 L/ha): 30 ha por carga; última 20 ha · Glifosato 480 60 L por carga, 2,4-D 806 30 L por carga, Óleo mineral 15 L por carga (saldo de 140 ha)
+APONTAMENTOS DIÁRIOS
+DATA
+TURNO
+REALIZADO
+ACUMULADO
+SITUAÇÃO
+25/09
+Dia 1
+10 ha
+10 / 160 ha
+Provisório
+Divergência de consumo/dose · 2,4-D 806 planejado 10 L × informado 0 L
+Revisão técnica: aceita por Ana (agrônoma) às 23:56 · Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido
+26/09
+Dia 2
+10 ha
+20 / 160 ha
+Provisório
+Divergência de consumo/dose · Óleo mineral planejado 5 L × informado 0 L
+Aceitar com motivo
+Registrar correção
+Acumulado 20 / 160 ha · saldo 140 ha
+RECURSOS ALOCADOS
+Máquina · Trator 03
+25/09 13:00–20:24
+condicional
+Implemento · Pulverizador PJ-3030 36 m
+25/09 13:00–20:24
+condicional
+Pessoa · Marcos · operador
+25/09 13:00–20:24
+condicional
+Pessoa · Paula · caldeiro
+25/09 13:00–20:24
+condicional
+ATIVIDADE
+OPERAÇÃO
+Pulverização
+ATIVIDADE
+Dessecação pré-plantio
+GATILHO
+DAP −20 · 25/09
+LOCAL · ÁREA
+T1-A · 160 ha
+JANELA
+25/09 (DAP −20)
+RESPONSÁVEL
+Marcos
+CONJUNTO
+Trator 03 + Pulverizador PJ-3030 36 m · 21,6 ha/h
+HORAS PREVISTAS
+7,4 h (6,5 h no saldo)
+PADRÃO · VERSÃO
+Soja alta tecnologia v6 · v1
+SITUAÇÃO ATUAL
+Em execução · 20 de 160 ha. Registre o apontamento de cada turno.
+ORIGEM
+Safra 2026/27 · Soja T1-A · plano SOJA-AT
+Dessecação pré-plantio · 160 ha
+v1 aprovada por Ana (agrônoma) às 23:56 · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha (CMD-42)
+v1 liberada por Ana (gestora) às 23:56 · REQ-041 reservada no Estoque (CMD-06)
+Dia 1 · Divergência de consumo/dose aceita por Ana (agrônoma) às 23:56: Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido
+Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido. O consumo informado fica como está.): Apontamento do dia 2: 10 ha (provisório) · Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D no dia 1: deriva no vizinho, 
+  FALHA dia 2 pelo teclado (Tab até "Registrar correção" e Enter) grava o rascunho preservado, só a decisão confirmada: Registrar apontamento · Já há dia 2, 10 ha pela web em 26/09. Se for outro turno, salve: ele fica em conferência com Paula (conferência) e só soma depois da decisão. | Divergência de c
+19/21 ok · FALHAS: 2
+ - dois dias divergentes: Enter em "Aceitar com motivo" do dia 1 grava só o dia 1; o texto do dia 2 fica ('') e o foco vai para ele (Aceitar com motivo → Talhão à O.S.
+Mapa
+Cadastros
+▸
+Agrícola
+▾
+Consulta Agrofit
+Planos agronômicos
+Planejar safra
+Ordem de Serviço
+Pragas e doenças (MIP/MID)
+Irrigação
+Produção
+▸
+Manutenção
+▸
+Suprimentos
+▸
+Configurações
+▸
+DEMONSTRAÇÃO · dados fictícios
+A
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife
+Paula · Conferência
+Zé · Mecânico
+Perfil de demonstração
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Agrícola › Ordem de Serviço
+Ordem de Serviço
+3 em execução · 3 impedidas
+A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.
+Ordens por fase
+Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.
+Nova ordem
+Talhão: Todos
+▾
+Agrupar por talhão
+Todas
+10
+A liberar
+2
+Liberadas
+2
+Em execução
+3
+Em conferência
+1
+Encerradas
+2
+Canceladas
+0
+Lista
+Kanban
+Recursos
+10 de 10
+O.S.
+⇅
+▾
+ATIVIDADE
+⇅
+▾
+TALHÃO
+⇅
+▾
+LOCAL
+⇅
+▾
+ÁREA
+⇅
+▾
+INÍCIO
+⇅
+▾
+FIM
+⇅
+▾
+FASE
+⇅
+▾
+SITUAÇÃO
+⇅
+▾
+OBSERVAÇÃO
+⇅
+▾
+QUEM RESOLVE
+⇅
+▾
+PRÓXIMA AÇÃO
+⇅
+▾
+PRAZO
+⇅
+▾
+REALIZADO
+⇅
+▾
+SALDO
+⇅
+▾
+DISPENSADO
+⇅
+▾
+PROGRESSO
+⇅
+▾
+RESPONSÁVEL
+⇅
+▾
+OS-0415
+Dessecação pós-colheita
+T3
+—
+96,00 ha
+10/09/2025
+12/09/2025
+Encerradas
+—
+—
+—
+—
+—
+96,00 ha
+0,00 ha
+—
+100,0 %
+Marcos
+OS-0417
+Adubação de cobertura
+P1
+—
+95,00 ha
+19/09/2026
+21/09/2026
+Em conferência
+Sobras a receber
+—
+Rui (almoxarife)
+—
+24/09
+95,00 ha
+0,00 ha
+—
+100,0 %
+Paula
+OS-0418
+Fertirrigação · reclassificada
+P1
+—
+95,00 ha
+24/09/2026
+25/09/2026
+A liberar
+Falta insumo · Ureia 45%
+—
+Suprimentos
+receber o insumo no Estoque
+—
+0,00 ha
+95,00 ha
+—
+0,0 %
+João
+OS-0420
+Plantio · Soja 58 W
+T4
+—
+100,00 ha
+22/09/2026
+28/09/2026
+Em execução
+Impedida · ativo bloqueado
+—
+Manutenção
+OM-0233
+até 24/09
+30,00 ha
+70,00 ha
+—
+30,0 %
+Carlos
+OS-0421
+Pulverização · Fungicida 1ª aplicação
+T1
+T2
+—
+350,00 ha
+20/09/2026
+26/09/2026
+Em execução
+Parcial · dia 4 de 7
+—
+Paula
+conferir o dia 4
+hoje
+190,00 ha
+160,00 ha
+—
+54,3 %
+Marcos
+OS-0424
+Pulverização · Fungicida A
+T1-B
+—
+128,00 ha
+24/09/2026
+24/09/2026
+Liberadas
+—
+—
+—
+—
+—
+0,00 ha
+128,00 ha
+—
+0,0 %
+Marcos
+OS-0425
+Adubação 1ª parcela · café
+C1
+—
+38,00 ha
+15/10/2026
+15/10/2026
+Liberadas
+Entrega sem saldo suficiente
+—
+Suprimentos
+entrega
+até 15/10
+0,00 ha
+38,00 ha
+—
+0,0 %
+Paula
+OS-0430
+Dessecação pré-plantio
+T1-A
+—
+160,00 ha
+25/09/2026
+25/09/2026
+Em execução
+Divergência de consumo/dose · Óleo mineral
+—
+Ana (agrônoma)
+revisar a divergência de dose do dia 2
+—
+20,00 ha
+140,00 ha
+—
+12,5 %
+Marcos
+OS-0431
+Plantio · Soja 58 W
+T2
+—
+102,00 ha
+24/09/2026
+24/09/2026
+A liberar
+Falta máquina · Trator T1 bloqueado
+—
+PCP
+substituto
+antes de 24/09 06:00
+0,00 ha
+102,00 ha
+—
+0,0 %
+Carlos
+OB-0104
+Beneficiamento · grãos
+—
+Armazém Sede
+—
+15/09/2025
+18/09/2025
+Encerradas
+Lote bloqueado
+—
+—
+—
+—
+—
+—
+—
+—
+Rui
+Restaurar demonstração
+A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.
+OS-0430 · Dessecação pré-plantio
+×
+Em execução
+Divergência de consumo/dose · Óleo mineral
+T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos
+20 / 160 ha · 13 % · saldo 140 ha
+A liberar
+Liberadas
+Em execução
+Em conferência
+Encerradas
+PRÓXIMO PASSO
+Registre o apontamento do turno: data e área feita. Os insumos usados são calculados pela dose. Fechar o turno não encerra a ordem.
+Pendência com Ana (agrônoma) · revisar a divergência de dose do dia 2
+Registrar apontamento
+Dispensar saldo
+INSUMOS E DOSES
+PRODUTO
+DOSE
+NA ORDEM
+USADO
+SITUAÇÃO
+Glifosato 480
+Herbicidas
+2 L/ha
+320 L
+40 L
+Em custódia · Marcos
+Reservado 320 L · lote G26-14
+› Entregue 320 L (16 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 40 L
+› Em custódia 280 L
+› Devolvido
+2,4-D 806
+Herbicidas
+1 L/ha
+160 L
+10 L
+Em custódia · Marcos
+Reservado 160 L · lote D26-01
+› Entregue 160 L (8 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 10 L
+› Em custódia 150 L
+› Devolvido
+Óleo mineral
+Adjuvantes
+0,5 L/ha
+80 L
+5 L
+Em custódia · Marcos
+Reservado 80 L · lote O26-05
+› Entregue 80 L (4 × galão 20 L) a Marcos
+› Confirmado no app
+› Consumido 5 L
+› Em custódia 75 L
+› Devolvido
+FICHAS DE EXECUÇÃO
+5 cargas (tanque útil 3.000 L · 100 L/ha): 30 ha por carga; última 20 ha · Glifosato 480 60 L por carga, 2,4-D 806 30 L por carga, Óleo mineral 15 L por carga (saldo de 140 ha)
+APONTAMENTOS DIÁRIOS
+DATA
+TURNO
+REALIZADO
+ACUMULADO
+SITUAÇÃO
+25/09
+Dia 1
+10 ha
+10 / 160 ha
+Provisório
+Divergência de consumo/dose · 2,4-D 806 planejado 10 L × informado 0 L
+Revisão técnica: aceita por Ana (agrônoma) às 23:56 · Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido
+26/09
+Dia 2
+10 ha
+20 / 160 ha
+Provisório
+Divergência de consumo/dose · Óleo mineral planejado 5 L × informado 0 L
+Aceitar com motivo
+Registrar correção
+Acumulado 20 / 160 ha · saldo 140 ha
+RECURSOS ALOCADOS
+Máquina · Trator 03
+25/09 13:00–20:24
+condicional
+Implemento · Pulverizador PJ-3030 36 m
+25/09 13:00–20:24
+condicional
+Pessoa · Marcos · operador
+25/09 13:00–20:24
+condicional
+Pessoa · Paula · caldeiro
+25/09 13:00–20:24
+condicional
+ATIVIDADE
+OPERAÇÃO
+Pulverização
+ATIVIDADE
+Dessecação pré-plantio
+GATILHO
+DAP −20 · 25/09
+LOCAL · ÁREA
+T1-A · 160 ha
+JANELA
+25/09 (DAP −20)
+RESPONSÁVEL
+Marcos
+CONJUNTO
+Trator 03 + Pulverizador PJ-3030 36 m · 21,6 ha/h
+HORAS PREVISTAS
+7,4 h (6,5 h no saldo)
+PADRÃO · VERSÃO
+Soja alta tecnologia v6 · v1
+SITUAÇÃO ATUAL
+Em execução · 20 de 160 ha. Registre o apontamento de cada turno.
+ORIGEM
+Safra 2026/27 · Soja T1-A · plano SOJA-AT
+Dessecação pré-plantio · 160 ha
+v1 aprovada por Ana (agrônoma) às 23:56 · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha (CMD-42)
+v1 liberada por Ana (gestora) às 23:56 · REQ-041 reservada no Estoque (CMD-06)
+Dia 1 · Divergência de consumo/dose aceita por Ana (agrônoma) às 23:56: Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido
+Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido. O consumo informado fica como está.): Apontamento do dia 2: 10 ha (provisório) · Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D no dia 1: deriva no vizinho, 
+ - dia 2 pelo teclado (Tab até "Registrar correção" e Enter) grava o rascunho preservado, só a decisão confirmada: Registrar apontamento · Já há dia 2, 10 ha pela web em 26/09. Se for outro turno, salve: ele fica em conferência com Paula (conferência) e só soma depois da decisão. | Divergência de c

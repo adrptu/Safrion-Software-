@@ -1,0 +1,46 @@
+v3.9 · MB-01 minha fila do cenário
+  OK  MB-01: fila só com ordens de Marcos liberadas/em execução
+  OK  MB-01: realizado, saldo e insumos a retirar/com você
+  OK  MB-01: alternador de sinal, contador e restaurar
+  OK  primário = passo mais urgente: Iniciar turno · OS-0421
+DEMO-11 · MB-02 pacote
+  OK  MB-02: OS-0421 do cenário e OS-0430 aguardando liberação
+  OK  ordem revogada e relato fora da autorização
+  OK  iniciar ordem revogada bloqueia com motivo
+DEMO-14 · MB-02 reconhecer
+  OK  aviso de revogação das fichas do saldo (sem selo de revisão da v3)
+  OK  reconhecer registra ciência
+  OK  botão Reconhecer some após ciência
+DEMO-11 · sem sinal → fila do aparelho → reenviar sem duplicar
+  OK  MB-03 sem turno: primário Iniciar turno
+  OK  ocorrência sem sinal fica no aparelho
+  OK  recibos: 1 pendente e histórico REC-7741
+  OK  reenviar sem sinal não duplica
+  OK  sinal volta: enviado uma vez com recibo REC-7742
+DEMO-05/15 · MB-08
+  OK  janela da volta inteira (14,5 h), início e andamento
+  OK  13,5 mm da OS-0422
+  OK  liberação LIB-2287
+  OK  execução da volta completa
+  OK  falta mostra o próximo ciclo
+DEMO-06 · MB-07
+  OK  previsão x pedido
+  OK  avança planta
+DEMO-20 · MB-10 papéis
+  OK  balança sem T2/Carga 05
+  OK  Carga 07 · Sandra 10:00
+  OK  motorista vê só a viagem
+  OK  primário do motorista
+  OK  nova previsão exibida
+  OK  recebedor vê a chegada
+  OK  confirmar chegada muda selo e cabeçalho
+Confirmações de detalhe
+  OK  MB-05det: Confirmar recebimento → DV-0912
+  OK  MB-05det: primário não repete a ação
+  OK  MB-09det: Concluir serviço → Em conferência
+  OK  MB-09det: primário não repete a ação
+  OK  MB-10det: Confirmar pesagem → ROM-0791 emitido
+  OK  MB-10det: primário não repete a ação
+  OK  MB-04: Registrar ocorrência → registrada
+  OK  MB-04: primário não repete a ação
+FALHAS: 0

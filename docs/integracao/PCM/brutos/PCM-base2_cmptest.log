@@ -1,0 +1,36 @@
+OK    · sem erro JS · []
+OK    · abre na etapa 1 · 1 Escolha a safra · etapa atual
+OK    · nenhuma safra escolhida sozinha
+OK    · impedimentos visíveis
+OK    · Safrinha sem solicitação
+OK    · link Ver origem para SAF (demanda de insumos da Safra 2026/27, passo=demanda)
+OK    · link Planejar safra na Safrinha (demanda de insumos da Safrinha, passo=demanda)
+  etapa 4 sem safra: sem caminho de 1 para 4 
+OK    · etapa bloqueada sem safra
+OK    · Safrinha selecionada fica na etapa 1 · Safrinha 2027: solicitação ainda não enviada pelo planejamento.
+OK    · 2025/26 abre pedidos em consulta · 6 Acompanhe a entrega · etapa atual
+  abrir compra: ok Compra aberta: Safra 2026/27 · SOL-2026-07.
+OK    · etapa 2 · demanda
+OK    · SOL-2026-07 e total igual ao Planejar safra
+OK    · MAP 11-52 62.500 e KCl coberto com quarentena
+OK    · origem do insumo abre (consulta) · Insumo · MAP 11-52
+×
+Valor calculado — consulte a origem abaixo. Para mudar, alt
+OK    · coluna Falta a partir de
+OK    · 2,4-D falta a partir de 28/09/2026 · 2,4-D 806 610,0 300,0 0,0 310,0 L 28/09/2026 32,00 R$ 9.920,00 A cotar
+OK    · Nitrato de cálcio falta a partir de 01/10/2026 · Nitrato de cálcio 1.680 1.000 0 680 kg 01/10/2026 4,20 R$ 2.856,00 A cotar
+OK    · KCl coberto mostra — · KCl 60% 78.900 50.000 40.000 0 kg — 2,40 R$ 0,00 Coberto 10.000 kg em quarentena não contam
+OK    · 58 W coberto (PC-090 chega antes) mostra — · Semente de soja 58 W 23.816 12.000 20.000 0 kg — 9,50 R$ 0,00 Coberto
+OK    · origem com data no início da linha · Insumo · 2,4-D 806
+×
+Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.
+Insumo
+Unidade
+ORIGEM
+Estoque apto hoje: 300 L
+25/09/2026 · T1-A · Dessecação pré-plantio · 1,00 L/ha × 160 ha = 160,0 L → saldo 140 L
+28/09/2026 · T2 · Dessecação pré-plantio · 1,00 L/ha × 298 
+OK    · etapa 3
+OK    · Química Centro-Oeste desabilitada com motivo
+OK    · link homologar CD-05
+OK    · não homologado não abre edição · Química Centro-Oeste não é homologado para Fungicidas: sem e-mail de cotação e documentação fiscal pendente. Homologue em Cadastros › Parceiros e fornecedores para poder convidar.

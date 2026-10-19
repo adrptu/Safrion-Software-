@@ -1,0 +1,2 @@
+IGUAL M2 fracao_final_no_corte_aninhado (oráculo, linhas 142–144) | JS ms [3.23, 0.47, 0.49] | Py ms [0.43]
+# 1 casos, 0 com diferença

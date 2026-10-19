@@ -1,0 +1,19 @@
+  ok  MA #ativo=a01: sem erro de JS
+  ok  A1 · "Registrar e bloquear" no T1 já bloqueado acrescenta o INSP-106 como 2º motivo e diz "segue bloqueado"
+  ok  A1 · o detalhe do T1 lista os 2 motivos, cada um com achado e ordem
+  ok  A1 · em Em conferência a primária da OM-0233 diz que encerra só o motivo dela e o T1 segue bloqueado
+  ok  A1 (S1) · o T1 segue Bloqueado pelo freio (Falta: INSP-106 · sem ordem); o app e as O.S. continuam vendo "bloqueado"
+  ok  A1 · o motivo sem ordem faz o detalhe do T1 pedir "Criar ordem corretiva"
+  ok  A1: sem erro de JS
+  ok  A2 · a repetição mais grave avisa e oferece "Somar ao INSP-104 e bloquear" como primária
+  ok  A2 (S2) · somar leva a gravidade ao INSP-104 e bloqueia o Trator 02 com ele como motivo
+  ok  A2: sem erro de JS
+  ok  A6 (S3) · com a busca "Trator 03", a primária é "Gerar 1 ordem preventiva" e gera só a do Trator 03
+  ok  A8 (S3) · Ver como João: inicia a OM-0228, mede conforme, conclui e declara a bomba apta (responsável técnico)
+  ok  A8: sem erro de JS
+  ok  A10 (S3) · a linha do comboio mostra "3,3 km/L" (unidade na célula); a coluna é "Consumo"
+  ok  A11 (S3) · mudou em outra aba: o 1º toque é recusado ("Mudou desde que você abriu") e nada grava; o toque seguinte, já com o estado novo, libera
+  ok  A11: sem erro de JS
+  ok  F22 · Vincular o Trator 04 ao PM-03 sugere o marco da OM-0205 (02/06 · 3.300 h), corrigível com motivo
+  ok  fim: sem erro de JS
+RESULTADO: 18/18 ok

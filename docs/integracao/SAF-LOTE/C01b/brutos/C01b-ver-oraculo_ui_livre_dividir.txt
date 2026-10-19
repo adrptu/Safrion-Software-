@@ -1,0 +1,17 @@
+{
+ "toast_cafe": "Cultivo incluído como parcela B1-A · 80 ha livres em B1. Escolha o plano agronômico na linha.",
+ "B1_antes": {
+  "SITUAÇÃO": "Livre",
+  "ÁREA LIVRE": "80 ha"
+ },
+ "toast_planejar_80": "Cultivo incluído como parcela B1-B · 40 ha livres em B1 · plano Soja alta tecnologia.",
+ "B1_depois_80": {
+  "SITUAÇÃO": "Planejado",
+  "ÁREA LIVRE": "—"
+ },
+ "painel_dividir_50_30": "Talhão 120 ha · alocado 80 ha · livre 40 ha 40 ha livres PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO ",
+ "painel_dividir_50_70": "Talhão 120 ha · alocado 120 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLAN",
+ "alerta_50_70": "A divisão travaria a área: 2 parcelas com ocupação certa no período. Nada foi gravado. | De 12/05/2027 a 27/09/2027, 110 ha de B1 estão com Café (B1-A, Café BV 2026/27) e Soja (B1-C, Safra BV 2027). Máximo 10 ha nesse período. | De 12/05/2027 a 27/09/2027, 90 ha de B1 estão com Café (B1-A, Café BV 2",
+ "toast_dividir_50_30": "B1 dividido em 2 parcelas · 40 ha livres. Plano operacional, recursos e demanda recalculados.",
+ "erros_js": ""
+}

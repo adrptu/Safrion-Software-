@@ -1,0 +1,7 @@
+OK    B1 hover (regra): Salvar escurece (brightness); Cancelar ganha a camada verde
+OK    B2 pressionar (pixel): Salvar escurece; Cancelar ganha a camada verde
+OK    B3 foco pelo teclado: contorno verde de 2 px fora do botão
+OK    B5 depois de Salvar: aviso "Salvo" e a linha salva com o realce verde
+OK    B4 indisponível: apagado, cursor de proibido e o motivo em texto ao lado
+OK    B6 sem erro de JS
+RESULTADO: 6 ok · 0 falhas

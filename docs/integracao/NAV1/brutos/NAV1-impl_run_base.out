@@ -1,0 +1,28 @@
+== patest: python3 patest.py
+RuntimeError: Uncaught
+rc=1
+== acao_familias: python3 acao_unica_test.py familias
+RESULTADO: 8 ok · 0 falhas (familias)
+rc=0
+== acao_v3: python3 acao_unica_test.py v3
+RESULTADO: 10 ok · 0 falhas (v3)
+rc=0
+== comp_matriz: python3 componentes_test.py matriz
+RESULTADO: 3 ok · 0 falhas (matriz)
+rc=0
+== comp_interacao: python3 componentes_test.py interacao
+  - 14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover
+rc=1
+== comp_ajustes2: python3 componentes_test.py ajustes2
+RESULTADO: 2 ok · 0 falhas (ajustes2)
+rc=0
+== etapas_celular: python3 etapas_celular_test.py
+RESULTADO: 14 ok · 0 falhas (celular)
+rc=0
+== agrofit: python3 agrofit_test.py
+RESULTADO: 17/17 ok · 45 s []
+rc=0
+== varredura: python3 varredura.py PA
+RESULTADO: 1/1 páginas sem erro
+rc=0
+FIM

@@ -1,0 +1,18 @@
+OK    A1 clique de mouse abre o formulário 
+OK    A1b Responsável só com Marta e Diego 
+OK    A2 salvar sem tema não grava e fica aberto 
+OK    A3 pessoa da fazenda adulterada é recusada junto do campo 
+OK    A3b rascunho preservado (tema e prazo) 
+OK    A4 Sônia (convite pendente) é recusada 
+OK    A5 válido com Diego grava e fecha 
+OK    A5b linha mostra Revisar ação interna e responsável 
+OK    A6 revisar abre com os valores gravados 
+OK    A7 fechar rascunho alterado pede confirmação 
+OK    A8 Enter no botão abre o formulário com Marta e Diego 
+     nota: foco dentro do formulário após abrir = False (o mesmo no PT-07 Convidar usuário: comportamento do motor, anterior ao PR)
+OK    A10 região principal sem campos de ação 
+OK    A11 sem erro de JavaScript 
+OK    A9 toque a 390 abre o formulário dentro da janela 
+OK    A9b Salvar alcançável e com alvo ≥ 44 px 
+OK    A12 PT-07 com Marta, Diego e Sônia (convite pendente) 
+RESULTADO: 16/16

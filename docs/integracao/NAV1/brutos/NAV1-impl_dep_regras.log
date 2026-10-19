@@ -1,0 +1,13 @@
+OK    U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista
+OK    U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam
+OK    U3 a 2ª mudança fica no mesmo rascunho v7
+OK    U4 diferenças v7 × v6: dose alterada, insumo incluído, atividade excluída e gatilho mudado
+OK    U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7"; sem atividade ou com a inclusão de insumo aberta, desabilitado com o motivo
+OK    U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo
+OK    U7 publicar recusa sem rascunho e com o rascunho sem atividade
+OK    U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link
+OK    U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória
+OK    U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base, ids novos, base intacta
+OK    U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6
+RESULTADO 11/11
+rc=0

@@ -1,0 +1,37 @@
+idx 2462 Q 1000 pools {'plant': {'un': 1, 'nome': 'Plantadeiras'}}
+   {'id': 'c0', 'rend': 2, 'jan': '', 'part': 5, 'ativos': ['a2', 'a3'], 'seq': True, 'rec': {'plant': 1}} q= 50 h= 25 25.0
+   {'id': 'c1', 'rend': 3, 'jan': 100, 'part': '', 'ativos': ['a3'], 'seq': True, 'rec': {'plant': 1}} q= 50 h= 50/3 16.666666666666668
+   {'id': 'c2', 'rend': 1, 'jan': 20, 'part': 10, 'ativos': ['a3'], 'rec': {'plant': 1}} q= 20 h= 20 20.0
+   {'id': 'c3', 'rend': 2, 'jan': 0, 'part': 5, 'ativos': ['a1'], 'seq': True} q= 0 h= 0 0.0
+   {'id': 'c4', 'rend': 0.5, 'jan': 100, 'part': 5, 'ativos': ['a2'], 'seq': True} q= 125/3 h= 250/3 83.33333333333333
+   {'id': 'c5', 'rend': 3, 'jan': 20, 'part': 50, 'ativos': ['a2']} q= 50 h= 50/3 16.666666666666668
+   conflito True motivos ['configurações com a mesma máquina do cadastro trabalham em sequência', 'sequência declarada: dividem trator, implemento ou operador', 'Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela', 'c2: a parte fixa não cabe na janela de 20 h', 'c3: a parte fixa não cabe na janela de 0 h', 'c5: a parte fixa não cabe na janela de 20 h', 'as partes fixas em sequência não cabem na janela de 100 h: cada uma faz 83,33 % do que cabia na própria janela', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'c4 e c5: em sequência precisam de 266,67 h para 550 ha; a janela tem 100 h']
+idx 4934 Q 500 pools {'plant': {'un': 1, 'nome': 'Plantadeiras'}}
+   {'id': 'c0', 'rend': 0.5, 'jan': 100, 'part': 5, 'ativos': ['a1', 'a3']} q= 25 h= 50 50.0
+   {'id': 'c1', 'rend': 2, 'jan': 20, 'part': '', 'ativos': ['a3'], 'seq': True} q= 20 h= 10 10.0
+   {'id': 'c2', 'rend': 2, 'jan': 10, 'part': 30, 'ativos': ['a3']} q= 20 h= 10 10.0
+   {'id': 'c3', 'rend': 2, 'jan': 5, 'part': 50, 'seq': True, 'rec': {'plant': 1}} q= 10 h= 5 5.0
+   {'id': 'c4', 'rend': 1, 'jan': 100, 'part': '', 'ativos': ['a1'], 'seq': True} q= 40 h= 40 40.0
+   conflito True motivos ['configurações com a mesma máquina do cadastro trabalham em sequência', 'sequência declarada: dividem trator, implemento ou operador', 'c2: a parte fixa não cabe na janela de 10 h', 'c3: a parte fixa não cabe na janela de 5 h', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'c1 e c3: em sequência precisam de 150 h para 300 ha; a janela tem 20 h']
+idx 1750 Q 500 pools {'plant': {'un': 1, 'nome': 'Plantadeiras'}}
+   {'id': 'c0', 'rend': 2, 'jan': 5, 'part': 5, 'seq': True, 'rec': {'plant': 1}} q= 400/47 h= 200/47 4.25531914893617
+   {'id': 'c1', 'rend': 0.5, 'jan': 20, 'part': '', 'ativos': ['a2'], 'rec': {'plant': 1}} q= 15/2 h= 15 15.0
+   {'id': 'c2', 'rend': 2, 'jan': 100, 'part': 50, 'ativos': ['a1'], 'seq': True} q= 32000/227 h= 16000/227 70.48458149779735
+   {'id': 'c3', 'rend': 2, 'jan': 5, 'part': '', 'ativos': ['a2']} q= 10 h= 5 5.0
+   {'id': 'c4', 'rend': 2, 'jan': 20, 'part': 5, 'ativos': ['a1'], 'seq': True} q= 4000/227 h= 2000/227 8.810572687224669
+   {'id': 'c5', 'rend': 2, 'jan': 100, 'part': 10, 'ativos': ['a1', 'a2']} q= 9400/227 h= 4700/227 20.704845814977972
+   conflito True motivos ['configurações com a mesma máquina do cadastro trabalham em sequência', 'sequência declarada: dividem trator, implemento ou operador', 'Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa', 'c0: a parte fixa não cabe na janela de 5 h', 'c2: a parte fixa não cabe na janela de 100 h', 'as partes fixas em sequência não cabem na janela de 100 h: fazem de 70,48 % a 85,11 % do que cabia na própria janela', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'as janelas não comportam toda a área', 'c1 e c3: em sequência precisam de 120 h para 150 ha; a janela tem 20 h']
+idx 3327 Q 1000 pools {'plant': {'un': 1, 'nome': 'Plantadeiras'}}
+   {'id': 'c0', 'rend': 1, 'jan': 20, 'part': 50, 'ativos': ['a1', 'a2', 'a3'], 'seq': True} q= 38440/4687 h= 38440/4687 8.201408150202688
+   {'id': 'c1', 'rend': 2, 'jan': 100, 'part': 20, 'ativos': ['a1', 'a2'], 'rec': {'plant': 1}} q= 9600/79 h= 4800/79 60.75949367088607
+   {'id': 'c2', 'rend': 2, 'jan': 20, 'part': 5, 'ativos': ['a1', 'a2']} q= 110600/4687 h= 55300/4687 11.798591849797312
+   {'id': 'c3', 'rend': 2, 'jan': 10, 'part': 30, 'ativos': ['a3']} q= 50/3 h= 25/3 8.333333333333334
+   {'id': 'c4', 'rend': 2, 'jan': 50, 'part': 50, 'ativos': ['a3'], 'seq': True, 'rec': {'plant': 1}} q= 31000/553 h= 15500/553 28.028933092224232
+   conflito True motivos ['partes fixas somam 155 %: reduzidas na proporção para fechar 100 %', 'configurações com a mesma máquina do cadastro trabalham em sequência', 'sequência declarada: dividem trator, implemento ou operador', 'Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa', 'c0: a parte fixa não cabe na janela de 20 h', 'c3: a parte fixa não cabe na janela de 10 h', 'c4: a parte fixa não cabe na janela de 50 h', 'as partes fixas em sequência não cabem na janela de 50 h: fazem de 41,01 % a 56,06 % do que cabia na própria janela', 'as partes fixas em sequência não cabem na janela de 100 h: fazem de 41,01 % a 94,18 % do que cabia na própria janela', 'as partes fixas em sequência não cabem na janela de 20 h: fazem de 41,01 % a 73,15 % do que cabia na própria janela', 'c0, c3 e c4: em sequência precisam de 580,65 h para 838,71 ha; a janela tem 50 h']
+idx 4617 Q 500 pools {'plant': {'un': 1, 'nome': 'Plantadeiras'}}
+   {'id': 'c0', 'rend': 2, 'jan': 5, 'part': 30, 'ativos': ['a2']} q= 1220/171 h= 610/171 3.5672514619883042
+   {'id': 'c1', 'rend': 3, 'jan': 10, 'part': 30, 'ativos': ['a2'], 'rec': {'plant': 1}} q= 1100/57 h= 1100/171 6.432748538011696
+   {'id': 'c2', 'rend': 3, 'jan': 50, 'part': 50, 'ativos': ['a1'], 'seq': True, 'rec': {'plant': 1}} q= 7500/61 h= 2500/61 40.98360655737705
+   {'id': 'c3', 'rend': 2, 'jan': 100, 'part': 10, 'ativos': ['a2']} q= 40 h= 20 20.0
+   {'id': 'c4', 'rend': 1, 'jan': 5, 'part': 5, 'seq': True} q= 50/11 h= 50/11 4.545454545454546
+   conflito True motivos ['partes fixas somam 125 %: reduzidas na proporção para fechar 100 %', 'configurações com a mesma máquina do cadastro trabalham em sequência', 'sequência declarada: dividem trator, implemento ou operador', 'Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; configurações consideradas em sequência nesta estimativa', 'c0: a parte fixa não cabe na janela de 5 h', 'c1: a parte fixa não cabe na janela de 10 h', 'c2: a parte fixa não cabe na janela de 50 h', 'c4: a parte fixa não cabe na janela de 5 h', 'as partes fixas em sequência não cabem na janela de 50 h: fazem de 64,33 % a 81,97 % do que cabia na própria janela', 'as partes fixas em sequência não cabem na janela de 10 h: fazem de 64,33 % a 71,35 % do que cabia na própria janela', 'c0 e c1: em sequência precisam de 100 h para 240 ha; a janela tem 10 h']

@@ -1,0 +1,12 @@
+ba035151dd66f28fa569bd221e6f85324dd8b20c PCM: correções da revisão
+21c0e51b5b770876a196794969653407539137a8 PCM: ma_unica com recusa e repetição a 390 px e espera do redirecionamento
+6af8486fce4e6525ba046faa9ae65f616ff87dc8 Merge claude/prototipo-v44 (cdc185f: varredura espera conteúdo; saídas da SAF) na branch do PCM
+98c214f263735e8944ca74d67b9a14c0f912dbe3 docs(pcm-simplificado): implementação executada (S1, S2, 1a, S3, S4), item 12 e próximos 1b/1c
+0c68f182fb1d8f21d60a11e0b39d03f6767a54b7 PCM 1a: item 12 (um saldo, um custo) e horímetro único / Gerar ordem conferidos em teste
+562bc2387901a55c5be15148098ffb90881a4510 Merge claude/prototipo-v44 (ecc8b00: CTL-3, Colheita e Planejar safra) na branch do PCM
+0725404a5ffd0c086915ac2a3f2f454270ad6038 PCM: aceite da tela única (ma_unica), rastreio F01–F111, atrito e testes vizinhos no endereço novo
+a88d51f546800578e53797b79240fb99dc46994f PCM S1/S2: testes antigos da Manutenção no endereço novo e correções que eles acharam
+5f4ff11125a3e59776bc06135a4c7ef84334c012 PCM S4: app de campo na manutenção (MB-01, MB-09, MB-09det, MB-04) com Ver como e sem sinal
+a89a05d89018a2694a8a0e6a06bfcc0a7bf7b59c PCM S3: CD-03 e O.S. leem condição, responsável técnico e leitura da Manutenção
+eba72ba4d57961ff92d9e86b91c2b8c4b4db85d0 PCM S1: links de fora apontam para o registro na tela MA
+f9ea51aa1e472c04f29600f35b27c393d7d3cbf2 PCM S1+S2+1a: Manutenção num só lugar (tela MA) com regras no cenário único

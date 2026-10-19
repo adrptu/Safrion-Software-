@@ -1,0 +1,5 @@
+f1a painel03 rc=0 RESULTADO: 54 ok · 0 falhas
+contraprova osg painel03 rc=1 RESULTADO: 50 ok · 4 falhas P7g:4
+f1a painel_agricola rc=0 RESULTADO 81/81
+f1a ds_test rc=0 RESULTADO: OK 72/72
+f1a pg_focal rc=0 RESULTADO OK

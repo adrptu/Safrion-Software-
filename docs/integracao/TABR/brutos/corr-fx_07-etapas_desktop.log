@@ -1,0 +1,6 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 1200 python3 etapas_celular_test.py desktop
+FALHA 15 1440 px igual à base base ausente: <sp-tabr>/tools/prototipo/v37/gen37/../gen37_antes/_render
+
+RESULTADO: 0 ok · 1 falhas (desktop)
+  - 15 1440 px igual à base
+[exit 1]

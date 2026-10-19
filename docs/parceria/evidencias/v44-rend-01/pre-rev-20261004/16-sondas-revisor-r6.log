@@ -1,0 +1,42 @@
+# sondas do revisor da rodada 5 (scratchpad/prerev6/rev, de autoria do fluxo de revisão) rodadas contra a R6 (cópia de gen37 de 6afb511 em w-rend-r5-r6) e contra 2eeb2e3
+$ python3 fuzz.py 1 400 r6
+seed=1 N=400 commit=r6 paridade JS×Py(float)=400/400 JS×Py(Fraction)=400/400 violações={'atendido/sub/recurso': 12, 'plano_sem_conflito/sub/recurso': 12, 'atendido/sub/clique': 1}
+$ python3 meta2.py 7 700 r6
+seed=7 N=700 variantes=3622 contagens={'janela maior esconde conflito': 18, 'un+1 aumenta déficit': 1, 'un+1 reduz atendido (conhecido)': 1, 'inv atendido/sub/recurso': 10, 'inv plano_sem_conflito/sub/recurso': 5, 'inv atendido/sub/clique': 1, 'inv atendido/max/clique': 3, 'inv plano_sem_conflito/max/clique': 1}
+$ python3 regr.py 21 2000 6 (com R5=r6)
+N=2000 regressões (r5 atende menos que r4): {'outro': 1, 'r4 violava clique (correção legítima)': 3}
+$ python3 fuzz.py 1 400 2eeb2e3
+seed=1 N=400 commit=2eeb2e3 paridade JS×Py(float)=400/400 JS×Py(Fraction)=400/400 violações={'atendido/sub/recurso': 12, 'plano_sem_conflito/sub/recurso': 12, 'atendido/sub/clique': 1}
+$ python3 meta2.py 7 700 2eeb2e3
+seed=7 N=700 variantes=3622 contagens={'janela maior esconde conflito': 18, 'un+1 aumenta déficit': 1, 'un+1 reduz atendido (conhecido)': 1, 'inv atendido/sub/recurso': 10, 'inv plano_sem_conflito/sub/recurso': 5, 'inv atendido/sub/clique': 1, 'inv atendido/max/clique': 3, 'inv plano_sem_conflito/max/clique': 1}
+$ python3 regr.py 21 2000 6 (com R5=2eeb2e3)
+N=2000 regressões (r5 atende menos que r4): {'outro': 2, 'r4 violava clique (correção legítima)': 3}
+$ python3 inv_cmp_r6.py 21 1500 6 (r6 contra 2eeb2e3)
+{'r6 atendido/sub': 1, '2eeb2e3 atendido/sub': 1}
+$ python3 inv_cmp_r6.py 33 1500 8 (r6 contra 2eeb2e3)
+{'r6 atendido/sub': 1, 'r6 plano_sem_conflito/sub': 1, '2eeb2e3 atendido/sub': 1, '2eeb2e3 plano_sem_conflito/sub': 1}
+$ node rev-v4/sonda.js w-rend-r5-r6 · python3 rev-v4/sonda.py · node rev-v4/escala.js · python3 rev-v4/escala.py · python3 rev-v4/trios30.py
+r6       JS caminho n=30 5g un=15         22.5 ms alocado=1500.00 conflito=true
+r6       JS caminho n=30 1g un=10          4.5 ms alocado=100.00 conflito=true
+r6       JS trios n=27                    25.5 ms alocado=100.00 conflito=true
+r6       JS trios n=30                    22.8 ms alocado=100.00 conflito=true
+r6       JS real n=8                       0.6 ms alocado=215.63 conflito=true
+r6       JS real n=12                      0.7 ms alocado=285.00 conflito=true
+r6       PY caminho n=30 5g un=15         39.7 ms alocado=1500.00 conflito=True
+r6       PY caminho n=30 1g un=10         16.0 ms alocado=100.00 conflito=True
+r6       PY real n=8                       1.3 ms alocado=215.62 conflito=True
+r6       PY real n=12                      2.5 ms alocado=285.00 conflito=True
+r6       JS caminho n=16 un=10           8.9 ms alocado=800.00
+r6       JS caminho n=20 un=10           2.8 ms alocado=1000.00
+r6       JS caminho n=24 un=10           2.9 ms alocado=100.00
+r6       JS trios n=18                  17.0 ms alocado=300.00
+r6       JS trios n=21                  36.4 ms alocado=300.00
+r6       JS trios n=24                  18.9 ms alocado=100.00
+r6       PY caminho n=16 un=10           7.4 ms alocado=800.00
+r6       PY caminho n=20 un=10           7.3 ms alocado=1000.00
+r6       PY caminho n=24 un=10           8.9 ms alocado=100.00
+r6       PY trios n=18                  38.4 ms alocado=300.00
+r6       PY trios n=21                  79.3 ms alocado=300.00
+r6       PY trios n=24                  33.0 ms alocado=100.00
+r6       PY trios n=27                  32.0 ms alocado=100.00
+r6       PY trios n=30                  40.4 ms alocado=100.00

@@ -1,0 +1,12 @@
+OK    S1a abre o editor do KPI-PCM-05 na aba A
+OK    S1b a aba B grava a meta 85/75 (v1) pela tela
+OK    S1c a aba A, sem recarregar, mostra o aviso de conflito no editor aberto
+OK    S1d salvar na aba A com a versão antiga é recusado; a meta continua 85 v1
+FALHA 390 px: lista e editor cabem na largura, sem rolagem lateral, botões com 44 px de altura · [390, 390, 390, {'l': 0, 'r': 390, 'w': 390, 'bs': [['×', 334, 366, 32], ['Salvar meta', 262, 366, 32]]}]
+OK    teclado: Tab chega a uma linha, Enter abre o editor com o foco dentro, Esc fecha e devolve o foco à linha
+      grava custo-desvio: Custo realizado × previsto da execução custo-desvio 5 % · menor é melhor Configurada · v1 Ana (gestora) · 26/09/2026 04:47
+OK    Mapa › Custos com meta: a legenda passa a ter as faixas da meta
+OK    Mapa › Custos com meta: nenhum rótulo de talhão leva a dica inteira (> 60 caracteres)
+      grava compra-referencia: Preço de compra × referência compra-referencia 0 % · menor é melhor Configurada · v1 Ana (gestora) · 26/09/2026 04:47
+OK    IC com meta de compra: as comparações ganham o resultado da meta
+RESULTADO 1 falha(s): 390 px: lista e editor cabem na largura, sem rolagem lateral, botões com 44 px de altura

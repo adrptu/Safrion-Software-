@@ -1,0 +1,12 @@
+FALHA M1 "Planejar no mapa ›" abre a visão Mapa (Tabela · Mapa) com os 8 talhões da Santa Rita e a legenda · [[], False, 0, [], '']
+FALHA M2 tocar em 3 talhões marca os 3: contagem com área e painel "Planejar 3 talhões" · [[], [], '', '']
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88b/tools/prototipo/v37/gen37/saf_mapa_test.py", line 79, in <module>
+    st3 = ' '.join(J("[...PN().querySelectorAll('[role=status]')].map(x=>N(x.innerText))") or [])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88b/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'querySelectorAll')
+    at <anonymous>:1:9
+rc=1

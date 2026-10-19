@@ -1,0 +1,11 @@
+est_cenario_test.py rc=0 29s carga=13.10 :: RESULTADO: 15/15 ok
+os_cenario_test.py rc=1 47s carga=15.60 :: RESULTADO: 21/22 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+cada_cd04_test.py rc=0 378s carga=16.75 :: RESULTADO: OK 15/15
+tabelas_est_test.py rc=0 459s carga=11.96 :: RESULTADO: 34/34 ok
+cafe_apurar_test.py rc=0 42s carga=14.21 :: RESULTADO: OK 10/10
+comercial_fluxo_test.py rc=0 312s carga=14.67 :: RESULTADO: OK 74/74
+comercial_revisao_test.py rc=0 355s carga=12.96 :: RESULTADO: OK 33/33
+config_test.py rc=1 862s carga=14.76 :: RESULTADO: FALHOU 87/88
+os_irrig_filtro_test.py rc=0 52s carga=15.29 :: RESULTADO: 15 ok · 0 falhas
+tabelas_os_test.py rc=0 67s carga=13.22 :: RESULTADO: 40/40 ok
+FIM

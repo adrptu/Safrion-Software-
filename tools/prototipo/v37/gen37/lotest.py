@@ -32,11 +32,12 @@ def shots(tela):
     J("(()=>{const m=document.querySelector('main[data-scroll]'); if(m) m.scrollTop=0;})()")
 try:
     c.size(1440,1000)
-    for tela,cur in [('LO-01.dc.html','1 Programe o transporte'),('LO-02.dc.html','2 Expeça as cargas'),('LO-02det.dc.html','2 Expeça as cargas'),('LO-03.dc.html','3 Acompanhe viagens'),('LO-04.dc.html','4 Controle fretes')]:
+    # UX-ACAO-UNICA-20261003: LO-01…04 são telas irmãs de um módulo (navegação "Telas do módulo", sem número de etapa, atual com aria-current=page)
+    for tela,cur in [('LO-01.dc.html','Programe o transporte'),('LO-02.dc.html','Expeça as cargas'),('LO-02det.dc.html','Expeça as cargas'),('LO-03.dc.html','Acompanhe viagens'),('LO-04.dc.html','Controle fretes')]:
         open_(tela); print(tela)
-        a=J("(document.querySelector('[aria-current=step]')||{}).innerText||''").replace('\n',' ')
-        ok(a.startswith(cur),f'etapa atual destacada: {a}')
-        ok(J("[...document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
+        a=J("(document.querySelector('nav.etp-sec .etp-itens [aria-current=page]')||{}).innerText||''").replace('\n',' ')
+        ok(a.startswith(cur),f'tela atual destacada: {a}')
+        ok(J("[...document.querySelectorAll('nav[aria-label=\"Telas do módulo\"] a')].filter(a=>!a.getAttribute('aria-label')).filter(a=>!a.getAttribute('aria-label')).map(a=>a.getAttribute('href')).join(',')")=='LO-01.dc.html,LO-02.dc.html,LO-03.dc.html,LO-04.dc.html','faixa por links LO-01..04')
         ok(J("document.body.innerText.indexOf('{{')<0"),'sem buracos {{}} visíveis')
         ok(J("![...document.querySelectorAll('[role=row] button, [role=row] a')].some(b=>/^(Editar|Alterar)/.test(b.innerText.trim()))"),'sem botões Editar nas linhas')
         ov=J("[...document.querySelectorAll('[role=table]')].map((t,i)=>{const w=t.parentElement; return w.scrollWidth-w.clientWidth>2?('grade '+i+' +'+(w.scrollWidth-w.clientWidth)+'px'):null;}).filter(Boolean)")
@@ -69,7 +70,8 @@ try:
     clk('Confirmar chegada do T1','aside[role=dialog]'); ok('identificação' in J("document.querySelector('aside[role=dialog]').innerText").lower(),'exige identificação verificada')
     setv('#pc_doc','ok'); clk('Confirmar chegada do T1','aside[role=dialog]')
     ok('Presente · apto' in row('check-in') and 'depois do T3' in T(),'T1 presente, entra depois do T3')
-    ok(J("document.body.innerText.indexOf('T1 chegou')>=0"),'KPI no pátio atualizado')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): o "no pátio" saiu do cartão de resumo para o selo do cabeçalho (contraprova: o render anterior não tem "4 no pátio" no selo)
+    ok(J("/4 no pátio \\(T1 chegou/.test(document.querySelector('header').innerText)"),'selo do cabeçalho com o pátio atualizado (4 no pátio, T1 chegou)')
     clk('Chamar próximo elegível'); ok('T1 (chegou' in T(),'chamada cita T1 depois do T3')
     # reordenar pela linha
     rowclick('Presente · carga pronta',0); ok(J("(document.querySelector('aside[role=dialog] h2')||{}).innerText").startswith('Posição na fila · T3'),'linha abre form de posição')

@@ -1,0 +1,7 @@
+saf_c01_test.py rc=0 395s · RESULTADO: 38 ok · 0 falhas (tudo)
+ocupacao_test.py rc=0 116s · RESULTADO: 65 ok · 0 falhas (tudo)
+saf_revisao_test.py rc=1 178s · RESULTADO: 41 ok · 1 falhas
+saf_operacoes_test.py rc=0 164s · RESULTADO: 87 ok · 0 falhas (tudo)
+tabelas_saf_test.py rc=0 51s · RESULTADO: 24/24 ok
+partest.py rc=0 92s · RESULTADO: 46 ok · 1 falhas
+FIM

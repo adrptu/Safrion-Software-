@@ -1,0 +1,16 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 cada_fix04_test.py
+OK  aviso "Salvo: Ana · alocável em O.S." sem ponto duplo · Salvo: Ana · alocável em O.S.
+OK  ajuda de Habilidades: "Exige NR-10, NR-31 e CREA com validade." · nutenção de máquinas
+Exige NR-10, NR-31 e CREA com validade.
+OK  inativar o Lucas grava e nomeia o próximo passo: escolher outro líder para Campo 2 · Salvo: Lucas · inativa · escolha outro líder para Campo 2.
+OK  cartão da Campo 2 mostra o líder Lucas com "Inativa" · Campo 2 Líder inativa Líder Lucas · Inativa 1 Pessoa ativa 9 h/dia Jornada seg–sáb · 06–15h Escolher líder ativo ›
+OK  formulário da Campo 2 mostra o líder gravado "Lucas · inativa" (não Ana) com aviso · [['Lucas', 'Lucas · inativa'], 'Líder\nLucas · inativa\nAna\nMarcos\nCarlos\nPaula\nNilton\nJoão\nRui\nZé\nBeto\nLucas está inativa; escolha um líder ativo.']
+OK  mudar só o calendário e salvar pede um líder ativo no campo Líder · Corrija os campos destacados; o que você preencheu foi mantido. | Lucas está inativa; escolha um líder ativo.
+OK  escolher Carlos grava: Campo 2 com líder Carlos e calendário seg–sex · ['Campo 2 Líder Carlos 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia', '']
+OK  renomear Marcos avisa que o líder da Campo 1 foi atualizado · Salvo: Marcos Silva · alocável em O.S. · líder de Campo 1 atualizado.
+OK  Campo 1: linha e formulário mostram o líder "Marcos Silva" · ['Campo 1 1 não alocável Líder Marcos Silva 4 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia', 'Marcos Silva', 'Marcos Silva']
+OK  Cadastrar equipe: Líder começa em "Escolha…" e salvar sem ele pede o líder no campo · [['', 'Escolha…'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe líder.']
+OK  com a Paula a equipe Campo 3 é criada · ['Campo 3 Líder Paula 0 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia', '']
+OK  nenhum erro de JS
+RESULTADO: OK 12/12
+[exit 0]

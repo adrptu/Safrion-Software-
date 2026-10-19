@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/drill/tools/prototipo/v37/gen37/painel_fixo_2_test.py", line 3, in <module>
+    runtime, base = map(pathlib.Path, sys.argv[1:3])
+    ^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 0)

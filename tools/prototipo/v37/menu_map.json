@@ -261,7 +261,7 @@
  },
  "CD-02": {
   "area": "Cadastros",
-  "submenu": "Culturas, cultivares e operações"
+  "submenu": "Culturas e cultivares"
  },
  "CD-03": {
   "area": "Cadastros",
@@ -302,5 +302,9 @@
  "CF-05": {
   "area": "Configurações",
   "submenu": "Assinatura e medição"
+ },
+ "CD-08": {
+  "area": "Cadastros",
+  "submenu": "Operações e rendimentos"
  }
 }

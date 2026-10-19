@@ -1,0 +1,55 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 partest.py
+  ok  sem erro de JS ao abrir
+   linhas: ['T1 2 parcelas · área toda alocada Dividir Soja 58 W, 62 X 312 ha 15/10 a 25/10/2026 por parcela Soja alta tecnologia v6 1 ajuste local', 'T1-A parcela Soja 58 W 160 ha 15/10/2026 64 sc/ha Soja alta tecnologia Ajustar insumos v6', 'T1-B parcela Soja 62 X 152 ha 25/10/2026 62 sc/ha Soja alta tecnologia Ajustar insumos v6 1 ajuste deste talhão', 'T2 talhão inteiro Dividir Soja 58 W 298 ha 18/10/2026 63 sc/ha Soja alta tecnologia Ajustar insumos v6']
+  ok  T1 aparece como linha do talhão com 2 parcelas · ['T1 2 parcelas · área toda alocada Dividir Soja 58 W, 62 X 312 ha 15/10 a 25/10/2026 por parcela Soja alta tecnologia v6 1 ajuste local', 'T1-A parcela Soja 58 W 160 ha 15/10/2026 64 sc/ha Soja alta tecnologia Ajustar insumos v6', 'T1-B parcela Soja 62 X 152 ha 25/10/2026 62 sc/ha Soja alta tecnologia Ajustar insumos v6 1 ajuste deste talhão']
+  ok  T1-A e T1-B são sublinhas
+   k2: 9 cultivos · 1.165 ha · 5 com plano · 4 sem plano · 1 ajuste local
+  ok  k2 conta 9 cultivos (folhas) · 9 cultivos · 1.165 ha · 5 com plano · 4 sem plano · 1 ajuste local
+   k4: 5.234 ha trabalhados · 562 horas-conjunto · 1.242 horas-homem · 6.876 L de diesel · R$ 1.663.167,07 · R$ 1.427,61/ha da safra · clique numa linha para ver os meses dela
+   k6: Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+  ok  abre Dividir T2
+  ok  proposta inicial T2-A/T2-B 149/149 · ['T2-A', '149', 'T2-B', '149']
+  ok  T2-C adicionada (sem área livre → vazia) · ['T2-A', '149', 'T2-B', '149', 'T2-C', '']
+  ok  T2-C copia plano de T2-B
+  ok  distribui 99,33/99,33/99,34 · ['T2-A', '99,33', 'T2-B', '99,33', 'T2-C', '99,34']
+  ok  selo Área conferida
+  ok  salvou T2 em 3 parcelas · T2 dividido em 3 parcelas. Plano operacional, recursos e demanda recalculados.
+  ok  T2 tem sublinhas T2-A..C
+  ok  k4 idêntico após dividir T2 · 5.234 ha trabalhados · 562 horas-conjunto · 1.242 horas-homem · 6.876 L de diesel · R$ 1.663.167,07 · R$ 1.427,61/ha da safra · clique numa linha para ver os meses dela
+  ok  k6 idêntico após dividir T2 · Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+  ok  T4 em 5 × 40,8 · ['T4-A', '40,8', 'T4-B', '40,8', 'T4-C', '40,8', 'T4-D', '40,8', 'T4-E', '40,8']
+  ok  salvou T4 em 5 · T4 dividido em 5 parcelas. Plano operacional, recursos e demanda recalculados.
+  ok  5 sublinhas de T4
+  ok  k2 conta folhas (15 cultivos, mesma área) · 15 cultivos · 1.165 ha · 7 com plano · 8 sem plano · 1 ajuste local
+  ok  total da tabela 1.165 ha (unidade no cabeçalho "Área (ha)", TABELAS-FOCO) · Total 1.165
+  ok  27 parcelas: última é T1-AA · ['T1-Z', '', 'T1-AA', '']
+  ok  soma exata 312 ha em 27 parcelas · 312.0
+  FALHOU T1-C copia ajuste do T1-B
+  ok  salvou T1 em 27 parcelas · T1 dividido em 27 parcelas. Plano operacional, recursos e demanda recalculados.
+  ok  27 sublinhas de T1
+  ok  T1-B mantém o ajuste
+  ok  selo Excede em 42 ha · Dividir T3 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 96 ha · alocado 13
+  ok  erro de excesso e não salvou · Dividir T3 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 96 ha · alocado 138 ha · livre 0 ha Excede em 42 ha As parcelas somam 138 ha; o talhão tem 96 ha. Reduza 42 ha. PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO ME
+  ok  selo 5 ha livres
+  ok  salvou T3 com área livre · T3 dividido em 2 parcelas · 5 ha livres. Plano operacional, recursos e demanda recalculados.
+  ok  linha do T3 mostra 5 ha livres
+  ok  clique na linha do talhão abre o painel
+  ok  erros de campo (variedade e nome repetido) ·  Soja padrão v3 · 4 atividades × Nome T4-A repetido Soja Milho Feijão Café Mamão Formosa sc/ha t/ha/ano kg/ha Sem plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades × Soja Milho Feijão Café Mamão Formosa sc/ha t/ha/ano kg/ha Sem plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades × + Adicionar parcela Distribuir área igualmente Cancelar Salvar divisão
+  ok  aviso de alterações não salvas
+  ok  descartou e fechou
+  ok  excluir parcela com plano pede confirmação
+  ok  T2 volta a talhão inteiro · T2 volta a talhão inteiro. Plano operacional, recursos e demanda recalculados.
+  ok  linha T2 talhão inteiro
+   k4 depois das divisões: 5.234 ha trabalhados · 562 horas-conjunto · 1.242 horas-homem · 6.876 L de diesel · R$ 1.665.319,60 · R$ 1.435,62/ha da safra · clique numa linha para ver os meses dela
+   campos do formulário: Talhão|Parcela|Fazenda|Cultura|Variedade|Área|Plantio|Meta de produtividade|Unidade da meta|Plano agronômico
+  ok  formulário bloqueia soma acima do talhão ·  alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo. Ajustar insumos e doses de T3-A Escolha um plano agronômico de Soja e salve; depois ajuste os insumos só deste talhão. Cancelar Salvar
+  ok  Safrinha: T1 com 1 parcela e 152 ha livres · ['T1 1 parcela · 152 ha livres Dividir Milho Híbrido AG 8700 160 ha 20/02/2027 por parcela Milho safrinha v4', 'T1-A parcela Milho Híbrido AG 8700 160 ha 20/02/2027 180 sc/ha Milho safrinha Ajustar insumos v4']
+  ok  novo cultivo em talhão livre vira parcela T4-A com 104 ha livres · Cultivo incluído como parcela T4-A · 104 ha livres em T4. Escolha o plano agronômico na linha.
+  ok  novo cultivo em talhão planejado abre o painel com a nova parcela · ('Excede em 50 ha | T2 já está nesta safra: confira a divisão em parcelas e salve.', 'Dividir T2 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 298 ha · alocado 348 ha · livre 0 ha Excede em 50 ha PARCE')
+  ok  salvou T2 com 2 parcelas na Safrinha · T2 dividido em 2 parcelas. Plano operacional, recursos e demanda recalculados.
+  ok  safra encerrada sem "Dividir" · ['T1 talhão inteiro Soja 58 W 312 ha 12/10/2025 62 sc/ha Soja alta tecnologia Ver insumos v6', 'T2 talhão inteiro Soja 58 W 298 ha 16/10/2025 61 sc/ha Soja alta tecnologia Ver insumos v6']
+  ok  sem erro de JS no fim
+
+RESULTADO: 43 ok · 1 falhas
+  - T1-C copia ajuste do T1-B
+[exit 0]

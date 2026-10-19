@@ -1,0 +1,13 @@
+varredura rc=0 361s 18:37:56
+safop rc=0 392s 18:44:28
+safrev rc=0 414s 18:51:22
+tabsaf rc=0 175s 18:54:17
+cmpcont rc=0 339s 18:59:56
+cel rc=0 253s 19:04:09
+partest rc=0 124s 19:06:13
+acaosaf rc=0 149s 19:08:42
+acaov3 rc=0 249s 19:12:51
+rendfluxo rc=0 63s 19:13:54
+rendtelas rc=0 193s 19:17:07
+rendbordas rc=0 207s 19:20:34
+FIM

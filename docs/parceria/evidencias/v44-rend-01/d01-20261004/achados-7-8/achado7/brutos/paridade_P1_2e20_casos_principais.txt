@@ -1,0 +1,8 @@
+IGUAL 5x6 partes fixas, todas 10 h | JS ms [76.83, 67.69, 65.87] | Py ms [1229.09]
+IGUAL 6x5 partes fixas, todas 10 h | JS ms [67.89, 68.45, 68.04] | Py ms [1622.21]
+IGUAL 5x6 T4+P5 sem janela (prestador) | JS ms [45.11, 44.67, 45.19] | Py ms [996.82]
+IGUAL caso 9: 5x6 janelas variadas (perf_casos #9) | JS ms [35.96, 34.95, 34.8] | Py ms [813.14]
+IGUAL controle 4x5 partes fixas, todas 10 h | JS ms [3.32, 3.69, 3.48] | Py ms [42.52]
+IGUAL controle 4x6 partes fixas, todas 10 h | JS ms [12.72, 13.19, 8.08] | Py ms [138.02]
+IGUAL controle 5x5 partes fixas, todas 10 h | JS ms [33.85, 21.32, 27.07] | Py ms [255.75]
+# 7 casos, 0 com diferença

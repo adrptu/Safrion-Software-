@@ -1,0 +1,13 @@
+  OK  1440: conflito informa validade registrada junto ao campo
+  OK  1440: rascunho preservado
+  OK  1440: recusa sem movimento/saldo/recibo
+  OK  1440: código de lote corrigido permite receber em quarentena
+  OK  1440: novo lote conserva vencimento/quarentena e anterior intacto
+  OK  1440: sem overflow/erro JS
+  OK  390: conflito informa validade registrada junto ao campo
+  OK  390: rascunho preservado
+  OK  390: recusa sem movimento/saldo/recibo
+  OK  390: código de lote corrigido permite receber em quarentena
+  OK  390: novo lote conserva vencimento/quarentena e anterior intacto
+  OK  390: sem overflow/erro JS
+RESULTADO: 12/12 ok

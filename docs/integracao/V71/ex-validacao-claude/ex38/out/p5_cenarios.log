@@ -1,0 +1,13 @@
+1 liberar: ok
+  conf Confirmar liberação ok
+  toast: OS-0501 liberada. REQ-041 reservou no Estoque: Glifosato 480 147,93 L, Óleo mineral 24,66 L. v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).
+  etapa Liberadas req REQ-041
+  itens [["Glifosato 480",147.93,"L","galão 20 L"],["Óleo mineral",24.66,"L","galão 20 L"]]
+2 entregar 150 L (acima): Acima do saldo a entregar: 147,93 L.
+3 entregar 147,93 L (fração de galão 20 L): 147,93 L de Glifosato 480 entregues a Wesley (OS-0501). Aguarda confirmação no app.
+4 adjuvante da OS-0421 pela REQ-035: Adjuvante espalhante não está na REQ-035.
+5 lotes Adjuvante: [["Óleo mineral","O26-05",400,24.66],["Adjuvante espalhante","AE26-03",150,0]]
+6 REQ-031: [["MAP 11-52",5000,5000,3500,500,1000]] tot OS-0417 [{"p":"MAP 11-52","dose":36.84,"un":"kg","tot":3500,"emb":"saco 50 kg"}]
+7 REQ-022/025/023/024: [[["REQ-022","Abamectina 18 EC",31.4,"L","galão 5 L"]],[["REQ-025","Tebuconazol 200 EC",63.99,"L","galão 5 L"]],[["REQ-023","Sulfato de potássio",3293.1,"kg","saco 25 kg"],["REQ-023","Nitrato de amônio",1463.6,"kg","saco 25 kg"]],[["REQ-024","Nitrato de amônio",1777.75,"kg","saco 25 kg"],["REQ-024","Ácido bórico",71.11,"kg","saco 25 kg"]]]
+8 movimentos de adjuvante: []
+ERRS []

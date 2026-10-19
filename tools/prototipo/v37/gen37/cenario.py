@@ -3,7 +3,9 @@
 Uso nas áreas: EXTRAJS[0] = cenario.js_prefixo() + <js da tela>; a tela chama cenOuvir(self) e lê cenGet()."""
 import json, os
 import dados2 as D2
+from dados_config import DIA_OP
 import dados_lagoa_safra as DL
+import quantidade as _QTD   # regra única de quantidade (SINT-C03)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REQ_DA_OS = {'OS-0417': 'REQ-031', 'OS-0421': 'REQ-035', 'OS-0420': 'REQ-036', 'OS-0418': 'REQ-038', 'OS-0424': 'REQ-039', 'OS-0425': 'REQ-040'}
@@ -53,6 +55,10 @@ def seed():
                                resp=o['resp'], ins=ins, req=REQ_DA_OS.get(o['id']), selos=o.get('selos', []),
                                ap=[dict(d=a['d'], dia=a['dia'], ha=a['ha'], st=a['st'], sinc=True, origem='web') for a in o.get('ap', [])],
                                reservado=o['id'] in REQ_DA_OS and o['etapa'] != 'A liberar')
+    # EX-38: instrução sintética validada no contrato 6218879317; não é recomendação agronômica.
+    for oid in ('OS-0421', 'OS-0424'):
+        if oid in ordens:
+            ordens[oid]['instrucao'] = dict(vazao=100, origem='instrução da O.S. vigente (demonstração)', versao=ordens[oid]['versao'])
     # reservas vigentes (liberadas e ainda não entregues): REQ-039 da OS-0424 e REQ-040 da OS-0425
     for oid, rid in (('OS-0424', 'REQ-039'), ('OS-0425', 'REQ-040')):
         o = ordens.get(oid)
@@ -70,21 +76,143 @@ def seed():
         if not o: continue
         itens = []
         for x in o['ins']:
-            lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = round(sol * fc, 3)
+            lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = _QTD.qtd(x['dose'], o['realizado']) if fc == 1.0 or abs(fc * o['area'] - o['realizado']) < 1e-6 else round(sol * fc, 3)
             if key in lotes and sol - ent > 0: lotes[key]['reservado'] += sol - ent
             itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=sol, entregue=ent, consumido=con, devolvido=0, custodia=round(ent - con, 3), confirmado=ent > 0))
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
-    return dict(v=2, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-                app=dict(online=True, fila=[], turno=None, operador='Marcos'))
+    # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
+    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a
+    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado.
+    # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
+    # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
+    # v=5 (06/10, beneficiamento BEN-1 · docs/beneficiamento): ordens de processo OB-0110 e OB-0112 (fam BEN) em c.ordens, REQ-030 e o lote
+    # de caixas CX26-01; no estado da Produção, os lotes do packing, o PV-031 e as inspeções (c.producao.ben); o salvo sem eles é descartado
+    # v=5 (09/10, junção PCM × Colheita na frente PCM, D-53): c.man e c.producao juntos
+    # v=5 (06/10, comercial e logística · docs/comercial): c.producao ganha vendas com preço e condição, CT-203/CRE-0095/BT-090 no estado,
+    # cargas de saída (RM-) e sequências rm/pv/ct; o salvo da v=4 é descartado
+    # v=6 (10/10, junção PCM × BEN-1 na branch única): as duas frentes subiram para v=5 com conteúdos diferentes (BEN-1: ordens OB-,
+    # REQ-030, CX26-01 e c.producao.ben; PCM: c.man, app.usuario e app.manFila); o salvo v=5 de qualquer uma volta ao seed (cenGet)
+    # v=7 (10/10, integração V56: Comercial × v=6 da branch única): o salvo v=5 do Comercial (sem c.man e sem o BEN) e o v=6 da branch (sem
+    # as vendas do Comercial) voltam ao seed
+    import dados_manutencao as DM
+    import dados_producao, dados_ben, dados_comercial
+    est = dict(v=7, rev=0, diaOperacional=DIA_OP, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+               # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
+               app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
+               man=DM.seed(), producao=dados_producao.seed())
+    est = dados_ben.semear(est)   # integração V56: o BEN semeia o packing (lotes, PV-031) e o Comercial completa as vendas depois, inclusive o PV-031
+    est['producao'] = dados_comercial.completar(est['producao'])
+    return seed_agrupamento(est)
+
+
+# Validade mensal é inclusiva até o último dia; ausência aplicável (—) conserva o comportamento do cadastro.
+# O físico permanece registrado mesmo vencido. Tela e motor usam a mesma comparação, sem relógio do navegador.
+VALIDADE_JS = r"""
+function cenLoteVencido(l, hoje) {
+  const m = /^(\d{2})\/(\d{4})$/.exec(String((l || {}).validade || ''));
+  if (!m) return false;
+  return m[2] + '-' + m[1] < String(hoje || CEN_DIA_OP).slice(0, 7);
+}
+"""
 
 
 def js_prefixo():
-    return 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+    import dados_cad as _DC
+    capacidades = {a['id']: dict(tanque=a.get('tanque'), nome=a['nome']) for a in _DC.ATIVOS if a.get('classe') == 'Pulverizador'}
+    import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
+    import alocacao as _AL  # 14/10: troca de recurso na O.S. vale no painel, na Carga do PCP, na Manutenção e no app
+    import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
+    # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
+    return ('const CEN_PREP_ATIVOS = ' + json.dumps(capacidades, ensure_ascii=False) + ';\n' + 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+            + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'datas_atividade.js'), encoding='utf-8').read() + '\n' + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n'
+            + _AL.js())   # alocação vigente (semana do PCP + trocas de recurso das O.S.) em toda página do estado
 
+
+def perfis_js():
+    """Bloco de perfis de demonstração do g2lib.js (G2_PERFIS, g2pf, g2perfil, g2papel, g2ator, g2quem, g2umPapel, g2quemUm, g2mesma), entre os marcadores
+    <perfis> e </perfis>: as decisões do cenário (cenExige) o usam, e os testes sem navegador montam o motor com ele. As telas já o têm (G2LIB)."""
+    s = open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8').read()
+    i = s.index('// <perfis>'); j = s.index('// </perfis>')
+    return s[i:j] + '\n'
+
+
+
+def seed_agrupamento(est):
+    """EX-54 Frentes de trabalho (proprietário, 18/10/2026): O.S. A liberar sobre talhões reais do mapa, como sairiam do plano.
+    Lagoa Grande: a semana da especificação viva (O.S. 0584 a 0594: acaricida, fungicida e calagem), com ficha técnica completa (OS-LOTE).
+    Santa Rita: "Dessecação pré-plantio" (mesma receita da OS-0430) em T1-B, T3 e P1 (P1 sem vazão: "Definir vazão") e KCl a lanço em P2 e T2.
+    Sem assinatura nem reserva; os IDs 0584–0599 ficam fora da numeração das O.S. novas (demoLote) e fora da demanda de compra (cenOsDem e
+    dados2.os_dem): a demonstração não muda os totais de compra e estoque conferidos. Selo "Demonstração". Não é recomendação agronômica."""
+    import copy
+    PIV = DL.PIVOS
+    def _no(oid, faz, cult, cultura, talhao, tid, area, ins, atv, op, jan, rend, resp, chave):
+        orig = 'Do plano · ' + atv + ' (' + chave + '). Dados sintéticos; não é recomendação agronômica.'
+        return dict(id=oid, novo=True, demoLote=True, tipo=atv, talhao=talhao, talhoes=[dict(id=tid, nome=talhao)], faz=faz, saf='2026/27', cult=cult,
+                    cultura=cultura, culturas=[cultura], area=area, etapa='A liberar', selos=[dict(t='Demonstração', c='gray')], versao='v1', realizado=0, saldo=area, ap=[], ins=ins, req=None,
+                    reservado=False, resp=resp, jan=jan[0], ini=jan[0], fim=jan[1], janela=jan[0][8:10] + '/' + jan[0][5:7] + '–' + jan[1][8:10] + '/' + jan[1][5:7],
+                    atv=dict(op=op, nome=atv, orig=orig, conj='', rend=rend), keys=[tid + '|' + chave], cond='Revisar a versão de cada origem; agrupar não aprova nem libera.',
+                    dono='Agrônomo', prazo='Revisar versão', orig=[orig], obs=orig, nota='', agua=False, local='', semins='', bloq=None, aviso='', link='')
+    def _ordem(no, extra):
+        o = dict(id=no['id'], tipo=no['tipo'], talhao=no['talhao'], area=no['area'], etapa='A liberar', versao='v1', realizado=0, saldo=no['area'], resp=no['resp'],
+                 ins=copy.deepcopy(no['ins']), req=None, selos=copy.deepcopy(no['selos']), ap=[], reservado=False, osc=dict(novo=no))
+        o.update(extra); return o
+    def _ins(itens, area, emb):
+        return [dict(p=p_, g=g_, dose=d_, un=u_, tot=_QTD.qtd(d_, area), emb=emb.get(p_, '')) for p_, g_, d_, u_ in itens]
+    # ---------- Lagoa Grande: a semana de 28/09 a 05/10 da especificação viva do EX-54 (O.S. 0584 a 0594; pivôs, áreas, produtos e doses do
+    # cenário): acaricida (abamectina 0,5 L/ha e uma de 0,6 L/ha em infestação maior), fungicida (tebuconazol 1 L/ha) e calagem (calcário
+    # 2.000 kg/ha, distribuidor 3 t). Ficha técnica completa (OS-LOTE): rendimento, tanque e volume de calda são premissas da demonstração ----------
+    aba = lambda d: [('Abamectina 18 EC', 'Inseticidas', d, 'L')]   # como na especificação viva (calda aba5/aba6: só abamectina)
+    teb = [('Tebuconazol 200 EC', 'Fungicidas', 1.0, 'L')]
+    cal = [('Calcário dolomítico filler', 'Corretivos', 2000.0, 'kg')]
+    emb = {'Abamectina 18 EC': 'galão 5 L', 'Óleo mineral': 'galão 20 L', 'Tebuconazol 200 EC': 'galão 5 L', 'Calcário dolomítico filler': 'granel'}
+    MOL = {'Abamectina 18 EC': ('LG-ABAM18', 'EC', '18 g/L'), 'Óleo mineral': ('LG-OLEO', 'EC', 'óleo mineral (demonstração)'),
+           'Tebuconazol 200 EC': ('LG-TEBU200', 'EC', '200 g/L'), 'Calcário dolomítico filler': ('LG-CALC', 'pó', 'PRNT da demonstração')}
+    # Pivô 2 no lugar do Pivô 6 da especificação: o 6 já tem as 2 aplicações de abamectina permitidas no ciclo (OS-0504, caderno 28/08)
+    lg = [('OS-0584', 2, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-28', '2026-10-02')), ('OS-0585', 4, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')),
+          ('OS-0586', 9, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-29', '2026-10-03')), ('OS-0587', 17, aba(0.5), 'Controle de ácaro', 'q2', ('2026-09-30', '2026-10-04')),
+          ('OS-0588', 14, aba(0.6), 'Controle de ácaro', 'q2-RT', ('2026-09-30', '2026-10-04')),
+          ('OS-0589', 20, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')), ('OS-0590', 21, teb, 'Fungicida para antracnose', 'q4', ('2026-09-29', '2026-10-04')),
+          ('OS-0591', 22, teb, 'Fungicida para antracnose', 'q4', ('2026-09-30', '2026-10-05')), ('OS-0592', 24, teb, 'Fungicida para antracnose', 'q4', ('2026-10-01', '2026-10-05')),
+          ('OS-0593', 10, cal, 'Calagem', 'i1', ('2026-09-27', '2026-10-02')), ('OS-0594', 8, cal, 'Calagem', 'i1', ('2026-09-29', '2026-10-03'))]
+    for oid, n, itens, atv, rec, jan in lg:
+        if oid in est['ordens']: raise ValueError('ID da demonstração de frentes já ocupado: ' + oid)
+        area = PIV[n]; tid = 'PV%02d' % n; talhao = 'Pivô %d' % n; liq = itens is not cal
+        op = 'Pulverização' if liq else 'Adubação a lanço'
+        no = _no(oid, DL.FAZ, 'lg%02d' % n, 'Mamão Formosa', talhao, tid, area, _ins(itens, area, emb), atv, op, jan, 6 if liq else 5, 'Wesley' if liq else 'Lúcia',
+                 ('MAMAO-PROD ' if liq else 'MAMAO-IMP ') + rec)
+        ficha = dict(versaoOS='v1', organizacao='DEMO-LG', fazenda=DL.FAZ, safra='LG2627', cultura='Mamão Formosa', operacao=op,
+                     metodo='turboatomizador' if liq else 'a lanço', receita=('MAMAO-PROD-' if liq else 'MAMAO-IMP-') + rec, receitaVersao='v1',
+                     perfil='turbo' if liq else 'lanço', regulagem='TURBO-200L' if liq else 'DIST-2000KG', ocorrencia=rec + '-' + tid, parcela=tid,
+                     tipo='liquido' if liq else 'solido', base='ha', janela=[jan[0] + 'T06:00:00-03:00', jan[1] + 'T18:00:00-03:00'],
+                     volumeHa=200 if liq else None, capacidadeHaH=6 if liq else 5, deslocamentoH=0, setupH=0, tanqueUtil=2000 if liq else None,
+                     recursos=dict(maquina='Trator', implemento='Pulverizador' if liq else 'Distribuidor'),   # classes do cadastro de recursos (alocacao.py)
+                     insumos=[dict(p=p_, id=MOL[p_][0], formulacao=MOL[p_][1], concentracao=MOL[p_][2], base='ha') for p_, _g, _d, _u in itens])
+        if not liq: ficha.pop('volumeHa'); ficha.pop('tanqueUtil')
+        extra = dict(loteFicha=ficha)
+        if liq: extra['instrucao'] = dict(vazao=200, versao='v1', origem=no['obs'])
+        est['ordens'][oid] = _ordem(no, extra)
+    # ---------- Santa Rita: dessecação pré-plantio (calda, pulverizador PJ) e KCl a lanço (sólido, distribuidor DI) ----------
+    des = [('Glifosato 480', 'Herbicidas', 2.0, 'L'), ('2,4-D 806', 'Herbicidas', 1.0, 'L'), ('Óleo mineral', 'Adjuvantes', 0.5, 'L')]
+    kcl = [('KCl 60%', 'Fertilizantes', 150.0, 'kg')]
+    emb = {'Glifosato 480': 'galão 20 L', '2,4-D 806': 'galão 20 L', 'Óleo mineral': 'galão 20 L', 'KCl 60%': 'big bag 1.000 kg'}
+    sr = [('OS-0595', 'c2', 'T1-B', 152, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 6, 13), True),
+          ('OS-0596', 'c5', 'T3', 96, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 13, 17.5), True),
+          ('OS-0597', 'c6', 'P1', 95, des, 'Dessecação pré-plantio', 'Pulverização', ('2026-09-30', '2026-10-02'), 21.6, ('T03', 'PJ', 'MAR', 'PAU'), ('2026-09-30', 17.5, 22), False),
+          ('OS-0598', 'c7', 'P2', 80, kcl, 'KCl a lanço antes do plantio', 'Adubação a lanço', ('2026-10-01', '2026-10-03'), 12, ('T04', 'DI', 'CAR'), ('2026-10-01', 6, 13), None),
+          ('OS-0599', 'c3', 'T2', 298, kcl, 'KCl a lanço antes do plantio', 'Adubação a lanço', ('2026-10-01', '2026-10-03'), 12, ('T04', 'DI', 'CAR'), ('2026-10-02', 6, 18), None)]
+    for oid, cult, talhao, area, itens, atv, op, jan, rend, recs, (dia, ini, fim), vaz in sr:
+        if oid in est['ordens']: raise ValueError('ID demonstrativo ocupado: ' + oid)
+        no = _no(oid, 'Santa Rita', cult, 'Soja', talhao, talhao, area, _ins(itens, area, emb), atv, op, jan, rend, 'Marcos', 'SOJA-AT')
+        extra = dict(prog=dict(fuso='-03:00', blocos=[dict(r=r, os=oid, dia=dia, ini=ini, fim=fim, h=fim - ini, sit='condicional') for r in recs]))
+        if vaz: extra['instrucao'] = dict(vazao=100, versao='v1', origem=no['obs'])   # P1 (vaz False) sem vazão: a frente mostra "Definir vazão"
+        est['ordens'][oid] = _ordem(no, extra)
+    return est
 
 if __name__ == '__main__':
     import sys; sys.path.insert(0, HERE)
     s = seed()
     for k, o in s['ordens'].items(): print(k, o['etapa'], o['versao'], o['req'], o['realizado'], '/', o['area'], [i['p'] for i in o['ins']])
     for k, r in s['reqs'].items(): print(k, r['os'], r['estado'], [(i['prod'], i['lote'], i['solicitado'], i['entregue'], i['custodia']) for i in r['itens']])
+
+

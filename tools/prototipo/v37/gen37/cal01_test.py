@@ -84,28 +84,31 @@ chk('memória AC-13: físico com reservas, reserva contada uma vez, compra 20',m
 chk('memória entrega tardia: falta 60 na data de uso; a entrega de 04/10 fica depois do último uso',any('falta 60 L' in l and l.startswith('03/10/2026 · ') for l in mem[1]) and mem[1][-1].endswith('falta a partir de 03/10/2026'),mem[1])
 OP=json.dumps(dict(hoje='2026-09-23',viavel='2026-09-30'))
 mem2=json.loads(runjs(cal+f"\n__OUT__(JSON.stringify([cal01Memo(cal01(60,{json.dumps([D('2026-01-09',500),D('2026-09-25',110),REC('2026-09-30',50,t='Recebimento previsto')])},0,{OP}),{{un:'kg'}})]));").strip())[0]
-chk('memória com realizado e ruptura coberta: realizado antes de hoje, ruptura na data de uso, recebimento cobre, sem compra nova',
-    mem2[1]=='Realizado antes de 23/09/2026 · 1 uso · 500 kg · fora do estoque e da demanda' and any(l.startswith('25/09/2026 · ') and l.endswith('ruptura 50.000 kg'.replace('50.000','50')) for l in mem2)
+chk('memória com uso antes de hoje sem O.S. e ruptura coberta: fora da demanda (histórico do plano, DEM-06), ruptura na data de uso, recebimento cobre, sem compra nova',
+    mem2[1]=='Antes de 23/09/2026 sem O.S. · 1 uso · 500 kg · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)' and any(l.startswith('25/09/2026 · ') and l.endswith('ruptura 50.000 kg'.replace('50.000','50')) for l in mem2)
     and any(l.startswith('30/09/2026 · Recebimento previsto · +50,0 kg') and l.endswith('cobre a ruptura') for l in mem2)
     and mem2[-1]=='Sem compra nova · ruptura de 50 kg de 25/09/2026 a 30/09/2026, coberta pelo recebimento',mem2)
 # 3 · paridade nos dados reais: cal01.js sobre as mesmas entradas de dados2.demanda() dá a mesma necessidade e a mesma data de falta
 OPT=json.dumps(dict(hoje=D2.HOJE_ISO,viavel=D2.VIAVEL))
-for saf,(n_esp,v_esp) in {'S2627':(15,379580.00),'S27SF':(8,1098502.50),'LG2627':(12,1401871.50)}.items():
+# CTL-4 (demanda única): as O.S. entram na demanda e o estoque é o da fazenda da safra (demanda_unica_test.py reproduz os números).
+# Revisão do 853a6a8 (achado 1): a custódia sem uso nas O.S. entra no saldo (os 500 kg de MAP da OS-0417, em conferência): S2627 R$ 428.305,00
+# OS-LOTE (6dfa09c1, 16/10): as O.S. de demonstração do agrupamento põem Sulfato de magnésio na 2026/27 (+1 insumo, +R$ 178,50; base verde 2, 18/10)
+for saf,(n_esp,v_esp) in {'S2627':(14,428305.00),'S27SF':(8,1094947.10),'LG2627':(13,1614202.84)}.items():
     dm=D2.demanda(saf); its=sorted(dm)
-    rr=json.loads(runjs(cal+'\nconst R=[];\n'+''.join(f"R.push(cal01({dm[n]['estoque']},{json.dumps(dm[n]['evs'],ensure_ascii=False)},0,{OPT}));\n" for n in its)+'__OUT__(JSON.stringify(R.map(r=>[r.liq,r.falta])));').strip())
+    rr=json.loads(runjs(cal+'\nconst R=[];\n'+''.join(f"R.push(cal01({dm[n]['estoque']+dm[n].get('cust',0)+dm[n].get('quarC',0)},{json.dumps(dm[n]['evs'],ensure_ascii=False)},0,{OPT}));\n" for n in its)+'__OUT__(JSON.stringify(R.map(r=>[calR2(r.liq),r.falta])));').strip())   # a demanda leva a quantidade a comprar com 0,01 da unidade (calR2)
     dif=[(n,dm[n]['liq'],dm[n]['falta'],r) for n,r in zip(its,rr) if not (perto(r[0],dm[n]['liq']) and r[1]==dm[n]['falta'])]
     tot=sum(o['valor'] for o in dm.values()); n=sum(1 for o in dm.values() if o['liq']>0.001)
     chk(f'paridade {saf}: {len(its)} insumos, JS = Python (necessidade e data da falta)',not dif,dif[:3])
     chk(f'{saf}: {n} insumos a comprar · R$ {tot:,.2f}',n==n_esp and abs(tot-v_esp)<0.005,(n,tot))
 s1=D2.demanda('S2627'); fa=s1['Fungicida A']
-chk('Safra 2026/27 · Fungicida A: físico apto 545 L (inclui 65 da OS-0424, outro destino) → 145,2 L como antes',fa['estoque']==545 and fa['reservado']==65 and perto(round(fa['liq'],1),145.2),(fa['estoque'],fa['reservado'],fa['liq']))
+chk('Safra 2026/27 · Fungicida A: físico apto 545 L (inclui 65 da OS-0424, a mesma demanda da ordem) → 0 L: a OS-0421 já cobre a 1ª aplicação (nunca 145,2 L)',fa['estoque']==545 and fa['reservado']==65 and perto(round(fa['liq'],1),0),(fa['estoque'],fa['reservado'],fa['liq']))
 s2=D2.demanda('S27SF')
 chk('Safrinha 2027 · MAP 11-52: os 90 t aptos vão antes para a Safra 2026/27 → 101.440 kg a partir de 20/02/2027',perto(s2['MAP 11-52']['liq'],101440) and s2['MAP 11-52']['falta']=='2027-02-20',(s2['MAP 11-52']['liq'],s2['MAP 11-52']['falta']))
 lg=D2.demanda('LG2627'); ca=lg['Calcário dolomítico filler']
-chk('Mamão 2026/27 · calcário: 1.118 t realizados antes de hoje saem da demanda; 110 t em 25/09 com 60 t aptos → ruptura de 50 t coberta pelo PC de 30/09, sem compra nova',
-    perto(ca['real'],1118000) and perto(ca['bruta'],110000) and perto(ca['liq'],0) and ca['falta']=='2026-09-25' and perto(ca['rup'],50000) and ca['cob']=='2026-09-30',
+chk('Mamão 2026/27 · calcário: 1.185,68 t do plano antes de hoje sem O.S. ficam fora da demanda; 96,94 t em 25/09 com 60 t aptos → ruptura de 36,94 t coberta pelo pedido de 30/09, sem compra nova',
+    perto(ca['real'],1185680) and perto(ca['bruta'],96940) and perto(ca['liq'],0) and ca['falta']=='2026-09-25' and perto(ca['rup'],36940) and ca['cob']=='2026-09-30',
     {k:ca[k] for k in ('real','bruta','liq','falta','rup','cob')})
 chk('Mamão 2026/27 · nenhuma falta antes de hoje',all(not o['falta'] or o['falta']>=D2.HOJE_ISO for o in lg.values()),[(n,o['falta']) for n,o in lg.items() if o['falta'] and o['falta']<D2.HOJE_ISO])
-chk('RESERVAS fecham com LOTES.reservado; disponível por lote fecha com ESTOQUE',not D2.checa_reservas() and not D2.checa_coerencia(),(D2.checa_reservas(),D2.checa_coerencia()))
+chk('reservas da demanda (est_dem, cenário da semente) fecham com o reservado dos lotes; disponível por lote fecha com ESTOQUE',not D2.checa_reservas() and not D2.checa_coerencia(),(D2.checa_reservas(),D2.checa_coerencia()))
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

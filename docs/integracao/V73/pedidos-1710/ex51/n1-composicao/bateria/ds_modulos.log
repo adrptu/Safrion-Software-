@@ -1,0 +1,22 @@
+módulo                       menu  telas   CAB-1   CAB-2  BOT-01  FIL-01  TAB-07  TAB-05  TAB-08  VIS-05  VIS-06 MAIS-02
+Agrícola                     sim      25       1       0       0       0       3       0       1       0       0       0
+App de campo                 sim       2       0       0       0       0       0       0       0       0       0       0
+Cadastros                    sim      10       0       0       0       0       0       0       0       0       0       0
+Comercial                    sim       5       0       0       0       0       0       0       0       0       0       0
+Configurações                sim       5       0       0       0       0       0       0       0       0       0       0
+Crédito                      sim       2       0       0       0       0       1       1       0       0       0       0
+Manutenção                   sim       3       0       0       0       0       0       0       0       0       0       0
+Mapa                         sim       1       0       0       0       0       0       0       0       0       0       0
+Onboarding e backoffice      sim       3       0       0       0       0       0       0       0       0       0       0
+Portal do parceiro           sim       1       0       0       0       0       0       0       0       0       0       0
+Suprimentos                  sim       5       0       0       0       0       0       0       0       0       0       0
+Agrícola                     não      18       0       0       0       0       1       0       0       0       0       0
+App de campo                 não      14       0       0       0       0       0       0       0       0       0       0
+Comercial                    não      22       0       0       0       0       0       0       0       0       0       0
+Gestão                       não       6       0       0       0       0       3       0       0       0       0       0
+Mapa e Início                não       3       0       0       0       0       0       0       0       0       0       0
+Onboarding e backoffice      não       2       0       0       0       0       0       0       0       0       0       0
+Portal do parceiro           não       9       0       0       0       0       0       0       0       0       0       0
+Suprimentos                  não      12       0       0       0       0       0       0       0       0       0       0
+TOTAL: 11 desvios em 10 de 148 telas · JSON: /tmp/claude-0/intn1/docs/integracao/V72/ds-modulos.json
+RESULTADO: catraca ok

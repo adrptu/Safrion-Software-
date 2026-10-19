@@ -19,7 +19,7 @@ def a(E):
     E.setv('fx_g_rec_conf', '20000'); E.setv('fx_g_rec_apto', '0'); E.setv('fx_g_rec_quar', '20000'); E.setv('fx_g_rec_val', '08/2026'); E.setv('fx_g_rec_obs', 'Lote vencido'); E.salvar()
     print('toast:', E.toast()); print('NF 4533:', E.rowtxt('NF 4533')); print('ovf etapa1 (vencido):', E.J(OVF))
     E.etapa(4); print('S58-0926:', E.rowtxt('S58-0926')); print('ovf etapa4:', E.J(OVF))
-    print(E.rowbtn('S58-0926', 'Liberar após inspeção')); print(E.rowbtn('S58-0926', 'Confirmar liberação')); print('toast:', E.toast())
+    print(E.rowbtn('S58-0926', 'Liberar após inspeção')); E.setv('est-laudo', 'LAB-0001'); print(E.clk('Liberar com o laudo')); print('toast:', E.toast())   # CTL-3: com o laudo
     print('S58-0926 depois:', E.rowtxt('S58-0926'))
 
 
@@ -39,8 +39,8 @@ def b(E):
 def c(E):
     # D3 chip Aguardando sinal cortado · D5 continua aguardando depois do sinal · D7 consumo sem unidade
     RQ = liberar_0430(E); print('RQ', RQ)
-    print(E.mudar(f"cenEntregar(c,'{RQ}','Glifosato 480',320,'Marcos'); cenEntregar(c,'{RQ}','2,4-D 806',160,'Marcos'); return cenEntregar(c,'{RQ}','Óleo mineral',80,'Marcos');"))
-    print(E.mudar("cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,5,1);"))
+    print(E.mudar(f"cenEntregar(c,'{RQ}','Glifosato 480',320,'Marcos','Rui'); cenEntregar(c,'{RQ}','2,4-D 806',160,'Marcos','Rui'); return cenEntregar(c,'{RQ}','Óleo mineral',80,'Marcos','Rui');"))
+    print(E.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,5,1);"))   # CTL-2 · B: o turno exige o recebimento confirmado
     E.abrir(); E.etapa(6); print('k6:', E.k()); print('consumo:', E.rowtxt('Consumo apontado no app')); print('ovf etapa6:', E.J(OVF)); E.shot('est_rep_e6.png')
     print('sinal:', E.mudar("return cenSinal(c,true);"))
     E.abrir(); E.etapa(6); print('k6 depois do sinal:', E.k()); print('consumo:', E.rowtxt('Consumo apontado no app'))

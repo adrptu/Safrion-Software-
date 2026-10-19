@@ -6,27 +6,359 @@
 const CEN_KEY = 'talhao-os-cenario-v1';
 let CEN_MEM = null;
 function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
-function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
-function cenSave(c) { CEN_MEM = c; try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); } catch (e) {} }
+let CEN_ILEG = false;   // VISOES-1: a última leitura achou o cenário gravado ilegível (cenIlegivel lê isto, sem ler de novo a cada desenho)
+function cenLoad() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return null; } if (!t) { CEN_ILEG = false; return null; }
+  try { const c = JSON.parse(t); CEN_ILEG = false; return c; } catch (e) { CEN_ILEG = true; return null; } }
+// VISOES-1 §2.8 (revisão Codex 6093255041, item 4): o cenário gravado que não se lê não é apagado: antes de gravar por cima ou recomeçar,
+// a cópia ilegível vai para CEN_KEY + ':ilegivel' (só a primeira; nada é sobrescrito); a tela diz o que houve (cenIlegivel)
+function cenIlegivel() { return CEN_ILEG; }
+function cenIlegivelAgora() { let t = null; try { t = localStorage.getItem(CEN_KEY); } catch (e) { return false; } if (!t) return false; try { JSON.parse(t); return false; } catch (e) { return true; } }
+function cenGuardaIlegivel() { try { if (cenIlegivelAgora() && localStorage.getItem(CEN_KEY + ':ilegivel') === null) localStorage.setItem(CEN_KEY + ':ilegivel', localStorage.getItem(CEN_KEY)); } catch (e) {} }
+// Gravação (Codex 6150155986): devolve true se o navegador gravou. Sem gravar (cota cheia, armazenamento bloqueado):
+// - modo estrito (comando que precisa ser durável): a memória volta ao estado anterior e o comando recebe o erro, sem efeito;
+// - modo padrão (prévias e demonstração só em memória): a cópia antiga gravada sai, para não esconder a mudança desta aba, e o
+//   comando avisa que ela vale só nesta aba. Sem armazenamento algum (sandbox), segue só em memória, como antes.
+const CEN_GRAVA_ERRO = 'Não foi possível gravar no navegador (armazenamento cheio ou bloqueado). Nada foi alterado: libere espaço e repita.';
+const CEN_GRAVA_AVISO = ' · Atenção: o navegador não gravou; a mudança vale só nesta aba até liberar espaço.';
+function cenSave(c, estrito) { const ant = CEN_MEM; CEN_MEM = c; cenGuardaIlegivel();   /* VISOES-1 §2.8: a cópia ilegível vai antes para :ilegivel */
+  try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); return true; }
+  catch (e) { if (estrito) { CEN_MEM = ant; throw new Error(CEN_GRAVA_ERRO); }
+    try { localStorage.removeItem(CEN_KEY); } catch (e2) {} return false; } }
 function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
-function cenReset() { CEN_MEM = cenClone(CEN0); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
+function cenReset() { cenCompMarcar(); CEN_MEM = cenClone(CEN0); CEN_MEM.compras={v:1,proc:{}}; cenGuardaIlegivel(); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
 function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
 // Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
-function cenMudar(self, fn) {
-  const c = cenClone(cenGet()); let r;
+// Ordem de gravação (CONF-01 R14, revisão F1): o que já existia antes do comando fica com sq 0 (seed) e o que o comando gravou ganha sq = c.rev,
+// para a trilha ordenar atos do mesmo minuto pela ordem em que foram gravados (confCarimbar, configuracoes.js).
+// opt.estrito: só confirma depois de gravar; se a gravação falhar, nada muda (memória, recibo e armazenamento) e volta o erro.
+function cenMudar(self, fn, opt) {
+  const c = cenClone(cenGet()); let r; const carimba = (typeof confCarimbar === 'function') ? confCarimbar : null; const estrito = !!(opt && opt.estrito);
+  if (carimba) carimba(c, 0);
   try { r = fn(c) || {}; } catch (e) { r = { erro: String(e.message || e) }; }
   if (r.erro) { if (self) self.setState({ g2toast: r.erro }); return r; }
-  c.rev = (c.rev || 0) + 1; cenSave(c); if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
+  c.rev = (c.rev || 0) + 1; if (carimba) carimba(c, c.rev);
+  let gravou; try { gravou = cenSave(c, estrito); } catch (e) { const er = { erro: String(e.message || e) }; if (self) self.setState({ g2toast: er.erro }); return er; }
+  if (!gravou && cenHasLS()) r = Object.assign({}, r, { msg: String(r.msg || '') + CEN_GRAVA_AVISO, naoGravado: true });
+  if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
 }
+function cenHasLS() { try { return typeof localStorage !== 'undefined' && !!localStorage; } catch (e) { return false; } }   // há armazenamento (a falha foi de gravação, não sandbox)
 // Outras telas (outros quadros do Canvas) atualizam quando o cenário muda.
 function cenOuvir(self) {
   if (self.__cenOuvindo) return; self.__cenOuvindo = true;
   try { window.addEventListener('storage', (e) => { if (e.key === CEN_KEY) self.setState({ cenrev: Date.now() }); }); } catch (e) {}
 }
+// Regra única de quantidade de insumo (SINT-C03; mesma de quantidade.py): dose × área em DECIMAL exato (forma decimal mais curta
+// de cada número), 2 casas, meio para cima. Consumo de um apontamento = quantidade(acumulado depois) − quantidade(acumulado antes):
+// a soma dos apontamentos fecha no total da ordem e a custódia zera, sem tolerância.
+function cenDec(x) { const m = /^(-?)(\d+)(?:\.(\d+))?(?:e([+-]\d+))?$/.exec(String(Number(x))); if (!m) return null;   // NaN/Infinity: fora
+  const f = m[3] || ''; let n = BigInt(m[1] + m[2] + f), e = f.length - Number(m[4] || 0); if (e < 0) { n *= 10n ** BigInt(-e); e = 0; }   // 1e-7, 1e+21
+  return { n, e }; }
+function cenQtd(dose, area) {
+  const a = cenDec(dose), b = cenDec(area); if (!a || !b) throw new Error('Quantidade fora da faixa: ' + dose + ' × ' + area + '.');
+  let n = a.n * b.n; const e = a.e + b.e; const neg = n < 0n; if (neg) n = -n;
+  let c;   // centésimos, meio para cima
+  if (e <= 2) c = n * (10n ** BigInt(2 - e)); else { const d = 10n ** BigInt(e - 2); c = (n * 2n + d) / (2n * d); }
+  const t = c.toString().padStart(3, '0'); return (neg ? -1 : 1) * Number(t.slice(0, -2) + '.' + t.slice(-2)); }   // decimal exato → número mais próximo (= float(Decimal))
+// Área registrada no aparelho: ainda não entrou no saldo do servidor.
+function cenApPend(o){ return (o.ap||[]).filter(a=>a.sinc===false).reduce((s,a)=>s+(a.ha||0),0); }
+// EX-38: necessidade restante usa área e custódia locais juntas, via cenOsSup.
+// rVis (osReqVis) controla apenas o consumo reconhecido no escritório; a previsão sinaliza a pendência.
+function cenInsumosOrdem(c, ordem, rVis) {
+  const o = c && c.ordens && ordem && c.ordens[ordem.id] || ordem;
+  if(!o) return [];
+  const r = c && c.reqs && c.reqs[o.req];
+  const valido = n => typeof n === 'number' && Number.isFinite(n) && n >= 0;
+  const pend = o ? cenApPend(o) : 0;
+  const area = o && valido(o.saldo) ? Math.max(0,o.saldo-pend) : null;
+  // Custódia já baixada no aparelho: não recompor a baixa sobre a área local.
+  const co = Object.assign({},o,{saldo:area,realizado:(o.realizado||0)+pend,ap:(o.ap||[]).filter(a=>a.sinc!==false),ins:(o.ins||[]).filter(x=>area!==null&&valido(x.dose))});
+  const rCalc=r?Object.assign({},r,{itens:(r.itens||[]).filter(i=>valido(i.custodia)&&valido(i.consumido))}):r;
+  const supr = cenOsSup(c,co,rCalc);
+  return ((o && o.ins) || []).map(x => {
+    const itens = r ? (r.itens || []).filter(i => i.prod === x.p) : [];
+    const mesmaUn = itens.every(i => i.un === x.un);
+    const soma = (k,lista=itens) => lista.length && lista.every(i=>i.un===x.un&&valido(i[k]))
+      ? cenQtd(lista.reduce((n,i)=>n+i[k],0),1) : null;
+    const su=supr[x.p];
+    const previsto=area!==null&&valido(x.dose)&&su?su.bruto:null;
+    const custodia=itens.length?(mesmaUn&&soma('custodia')!==null?su.cust:null):0;
+    const falta=previsto!==null&&custodia!==null?su.need:null;
+    return {p:x.p, un:x.un, dose:x.dose, area, previsto, custodia, falta,
+      consumido:soma('consumido',rVis?(rVis.itens||[]).filter(i=>i.prod===x.p):itens), temReq:itens.length > 0, itens,
+      confirmar:itens.some(i => i.custodia > 0 && !i.confirmado),
+      pendente:itens.some(i => i.semSinal) || pend>0};
+  });
+}
+// Uma projeção por ordem para painel, app e impressão. Não grava preparo nem aplica produtos.
+function cenPreparoOrdem(c, ordem) {
+  const o = c && c.ordens && ordem && c.ordens[ordem.id] || ordem;
+  const fail = motivo => ({ok:false, motivo, cargas:[]});
+  if (!o) return fail('Ordem indisponível · voltar às ordens');
+  const rec = typeof alDaOrdem === 'function' ? alDaOrdem(c,o.id).filter(r=>r.classe==='Pulverizador') : [];
+  if (rec.length !== 1) return fail(rec.length ? 'Mais de um pulverizador · conferir conjunto' : 'Sem conjunto · alocar pulverizador na O.S.');
+  const aid = typeof AL0 !== 'undefined' && AL0.ativo[rec[0].r];
+  const ativo = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid];
+  const tanque = ativo && ativo.tanque;
+  if (!(typeof tanque==='number' && Number.isFinite(tanque) && tanque>0)) return fail('Tanque não informado · conferir implemento');
+  // Cenário salvo antes deste acréscimo: usar a semente apenas se a versão ainda for a mesma.
+  const base = typeof CEN0 !== 'undefined' && CEN0.ordens[o.id];
+  const instr = Object.prototype.hasOwnProperty.call(o,'instrucao') ? o.instrucao : (base && base.versao===o.versao ? base.instrucao : null);
+  if (!instr || instr.versao !== o.versao || !(typeof instr.vazao==='number' && Number.isFinite(instr.vazao) && instr.vazao>0))
+    return fail('Vazão não informada · conferir instrução da versão vigente');
+  const vazao=instr.vazao, saldo=o.saldo;
+  const restante=typeof saldo==='number'&&Number.isFinite(saldo)&&saldo>=0?Math.max(0,saldo-cenApPend(o)):saldo;
+  const area=typeof restante==='number'&&restante>=0&&restante<1e-9?0:restante; // Y4: resíduo aritmético não é nova carga
+  if (!(typeof area==='number' && Number.isFinite(area) && area>=0)) return fail('Área restante inválida · conferir a O.S.');
+  if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');
+  const haCarga=tanque/vazao, n=area>0?Math.max(1,Math.ceil(area/haCarga-1e-9)):0;
+  if (!Number.isFinite(haCarga)||haCarga<=0||!Number.isSafeInteger(n)||n<0||n>10000) return fail('Preparo fora da faixa · conferir tanque, vazão e área');
+  const cargas=Array.from({length:n},(_,i)=>{ const ha=Math.min(haCarga, Math.max(0,area-i*haCarga));
+    return {n:i+1, area:ha, vol:ha*vazao, parcial:ha<haCarga-1e-9,
+      prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:cenQtdTrecho(x.dose,i*haCarga,ha)}))}; });
+  return {ok:true,tanque,vazao,haCarga,n,area,ultima:n?cargas[n-1].area:0,cargas,
+    produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:cenQtd(x.dose,haCarga)})),
+    origem:instr.origem,versao:o.versao,conjunto:alDaOrdem(c,o.id).filter(r=>r.classe==='Trator'||r.classe==='Pulverizador').map(r=>r.nome).join(' + ')};
+}
+function cenPreparoTxt(p) {
+  if(!p.ok) return p.motivo;
+  if(!p.n) return 'Sem área restante para preparar';
+  return cenNum(p.tanque)+' L · '+cenNum(p.vazao)+' L/ha · '+cenNum(p.haCarga,3)+' ha por carga · '+p.n+(p.n===1?' carga':' cargas')
+    +' · última '+cenNum(p.ultima,3)+' ha · '+p.produtos.map(x=>x.p+' '+cenNum(x.q,3)+' '+x.un+' por carga cheia').join(' · ')
+    +' · '+p.origem;
+}
+function cenInsumoSaldoTxt(x) {
+  if (x.previsto === null || x.falta === null) return 'Saldo não calculável · conferir área, dose e unidade';
+  return (x.temReq ? '' : 'Sem requisição · ') + 'previsto para o saldo ' + cenNum(x.previsto) + ' ' + x.un
+    + ' · falta para terminar ' + cenNum(x.falta) + ' ' + x.un
+    + (x.pendente ? ' · consumo no aparelho pendente de sincronização' : '');
+}
+function cenQtdTrecho(dose, antes, ha) {
+  const a0 = Number((antes || 0).toFixed(6)), a1 = Number(((antes || 0) + ha).toFixed(6));
+  return Math.round((cenQtd(dose, a1) - cenQtd(dose, a0)) * 100) / 100; }
 function cenNum(n, d) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: d === undefined ? 2 : d }); }
-function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
-function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+// ---------- regra legal de uso de agrotóxico (RN-016 · RF-EXT-002 · ENG-011): a mesma no receituário (AG-01) e na O.S. (liberar e ajustar) ----------
+// us = usos da bula de referência do produto na cultura, com dose por ha (dados_mip.uso); no AG-01 só o uso do alvo escolhido.
+// dose em un/ha; nap = aplicações do produto no talhão no ciclo, sem contar esta. Trava o que a lei proíbe; o resto é alerta.
+function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que foi contado, para a mensagem dizer com quem resolver
+  const tr = [], al = []; us = us || [];
+  if (!us.length) { tr.push('Sem registro para ' + rot + '.'); return { tr, al }; }
+  if (us[0].sit === 'Cancelado') tr.push('Registro cancelado: uso proibido.');
+  else if (us[0].sit === 'Em reavaliação') al.push('Produto em reavaliação na Anvisa.');
+  const cmp = us.filter(u => !un || u.un === un), ok = cmp.filter(u => dose >= u.dmin - 1e-9 && dose <= u.dmax + 1e-9);
+  const base = ok.length ? ok : (cmp.length ? cmp : us);
+  const ft = (L) => L.map(u => cenNum(u.dmin, 3) + (u.dmax !== u.dmin ? '–' + cenNum(u.dmax, 3) : '') + ' ' + u.un + '/ha').filter((x, i, a) => a.indexOf(x) === i).join(' ou ') + (L.some(u => u.calda) ? ' (calda de 1.000 L/ha)' : '');
+  if (base.every(u => !u.conf)) al.push('Uso não conferido na bula: confira antes de aplicar.');
+  if (!(dose > 0 && isFinite(dose))) tr.push('Informe a dose.');
+  else if (!cmp.length) tr.push('Dose em ' + un + '/ha e bula em ' + ft(us) + ': unidade diferente da bula, não dá para conferir a dose; corrija a unidade.');   // trava: dose sem comparação pode passar do máximo (CTL-1 rev. 1)
+  else if (!ok.length) tr.push('Dose fora da bula: ' + ft(cmp) + '.');
+  const mx = Math.max.apply(null, base.map(u => u.mx || Infinity));
+  if (isFinite(mx) && nap >= mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + mx + (refs && refs.length ? ' (' + refs.join(', ') + ')' : '') + '.');
+  return { tr, al };
+}
+function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod && !cenLoteVencido(l)).sort((a, b) => cenDisp(b) - cenDisp(a))[0] || null; }
+function cenDisp(l) { if (cenLoteVencido(l)) return 0; return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+// ---------- CTL-4 (revisão do 853a6a8, achado 1, S2) · o que cada O.S. ainda precisa e o que já tem, por insumo, numa conta só (cenOsDem e cenEstDem).
+// bruto = o que falta aplicar: A liberar, Liberadas e Em execução, quantidade(dose, saldo) (sem realizado, o total da versão); nas outras fases 0.
+// cust = custódia da requisição. need = máx(0, bruto − cust): o que a ordem ainda tira do almoxarifado. sobra = máx(0, cust − bruto): material
+// entregue que a ordem não vai usar (O.S. cancelada, em conferência, encerrada, ou excedente da ativa) — é suprimento, está com o operador e volta
+// ao Estoque na devolução. Dano evitado: cancelar a OS-0425 com 8.000 kg entregues comprava 8.000 kg de NPK de novo (R$ 27.200) e devolver a sobra
+// mudava a compra (MAP −500 kg da OS-0417). r = a requisição (padrão: a da ordem).
+// Revisão do 853a6a8 (achado 4, S3): turno fechado no app sem sinal já baixou a custódia no aparelho, mas o realizado e o saldo só mudam no envio;
+// a custódia aqui é a que a O.S. mostra (osReqVis: a baixa do aparelho volta até o envio), e a demanda não muda até o sinal (dano evitado: a
+// Safrinha passava de 23,0 para 47,5 L de Fungicida A e a Safra 2026/27 pedia complemento enquanto o celular estava sem sinal).
+const CEN_FASES_PEND = ['A liberar', 'Liberadas', 'Em execução'];
+// Revisão do 853a6a8 (achados 3 e 5, S3) · res: reservas ainda presas no lote para a requisição (cenResPropria), com a parte útil ef = até o need,
+// primeiro os lotes da fazenda da ordem (fz: lote → fazenda; fo: fazenda da ordem). Reserva acima do need (a ordem já não precisa) não é demanda de
+// ninguém; reserva em lote de outra fazenda cobre a ordem na fazenda dela e é demanda na fazenda do lote (conta uma vez em cada).
+function cenOsSup(c, co, r, fz, fo) { const out = {}; if (!co) return out; r = r || ((c && c.reqs) || {})[co.req || ''] || null;
+  const P = (p) => out[p] || (out[p] = { bruto: 0, cust: 0, need: 0, sobra: 0, res: [] });
+  if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0);
+    (co.ins || []).forEach(i => { P(i.p).bruto += real ? cenQtd(i.dose, saldo) : (i.tot || 0); }); }
+  const dev = {}; (co.ap || []).forEach(a => { if (a.sinc === false) Object.keys(a.cons || {}).forEach(p => { dev[p] = (dev[p] || 0) + (Number(a.cons[p]) || 0); }); });
+  ((r && r.itens) || []).forEach(it => { const pd = Math.min(dev[it.prod] || 0, it.consumido || 0); dev[it.prod] = (dev[it.prod] || 0) - pd; P(it.prod).cust += (it.custodia || 0) + pd; });
+  Object.values(out).forEach(x => { x.need = Math.max(0, cenQtd(x.bruto - x.cust, 1)); x.sobra = Math.max(0, cenQtd(x.cust - x.bruto, 1)); });
+  if (r && r.estado !== 'Cancelada' && CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const lotes = (c && c.lotes) || {}; const rs = [];
+    (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l || cenLoteVencido(l)) return; const q = cenResPropria(c, r.id, it, l); if (q > 1e-9) rs.push({ it, l, q, ef: 0 }); });
+    const rem = {}; Object.keys(out).forEach(p => { rem[p] = out[p].need; });
+    (fz ? rs.filter(y => fz(y.l) === fo).concat(rs.filter(y => fz(y.l) !== fo)) : rs).forEach(y => { const p = y.it.prod; y.ef = Math.min(y.q, Math.max(0, rem[p] || 0)); rem[p] = (rem[p] || 0) - y.ef; });
+    rs.forEach(y => { P(y.it.prod).res.push(y); }); }
+  return out; }
+// ---------- CTL-4 · o que cada O.S. ainda tira do almoxarifado (DEM-02), lido do cenário vivo: Planejar safra (etapa 4) e Mapa › Insumos usam
+// na demanda única (demFazenda, cal01.js); espelho dados2.os_dem na semente. b (dados2.os_base): {ords:[{id,faz,saf,chaves,loc,ini,t}],
+// safs:[{id,faz,nome}], cat:{insumo:{g,preco}}, hoje}. A liberar, Liberadas e Em execução: pendente = need de cenOsSup (máx(0, quantidade(dose,
+// saldo) − custódia da requisição); sem realizado, o total da versão). Em conferência e Encerradas: pendente 0, mas a ordem continua cobrindo o
+// plano (DEM-01). Canceladas não cobrem nada. A custódia que passa do pendente é suprimento (cenEstDem). Ordem nova emitida no cenário (osc.novo)
+// entra com a chave, o talhão e a janela dela. Data = máx(hoje, início da janela).
+function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const hoje = b.hoje || ''; const cat = b.cat || {};
+  const n2 = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const na = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const safDe = (faz, lab) => ((b.safs || []).find(s => s.faz === faz && String(s.nome).endsWith(String(lab || ''))) || {}).id || '';
+  const lf = b.locFaz || null; const fzL = lf ? (l => lf[l.local] || b.faz0 || 'Santa Rita') : null;   // local do lote → fazenda (dados2.os_base)
+  const um = (x, co) => { if (!co || co.etapa === 'Canceladas') return;
+    const itens = [];
+    if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0); const S = cenOsSup(c, co, null, fzL, x.faz);
+      (co.ins || []).forEach(i => { const s = S[i.p] || { need: 0, cust: 0, bruto: 0, res: [] }; const cust = Math.min(s.cust, s.bruto); const k = cat[i.p] || {};
+        const ox = fzL ? s.res.filter(y => fzL(y.l) !== x.faz && y.ef > 1e-9) : []; const rx = ox.reduce((a, y) => a + y.ef, 0);   // reservado para ela em lote de outra fazenda
+        itens.push({ p: i.p, q: Math.max(0, cenQtd(s.need - rx, 1)), un: i.un, g: k.g || '', preco: k.preco || 0,
+          calc: n2(i.dose) + ' ' + i.un + '/ha × ' + na(saldo) + ' ha' + (cust > 0 ? ' − ' + na(cust) + ' ' + i.un + ' em custódia' : '')
+            + (rx > 1e-9 ? ' − ' + na(rx) + ' ' + i.un + ' reservados em ' + ox.map(y => y.l.local + ' (' + fzL(y.l) + ')').filter((v, j, a) => a.indexOf(v) === j).join(', ') : '') }); }); }
+    if (!(x.chaves || []).length && !itens.some(i => i.q > 0)) return;
+    out.push({ id: x.id, faz: x.faz, saf: x.saf, chaves: (x.chaves || []).slice(), area: co.area || 0, dt: (x.ini && x.ini > hoje) ? x.ini : hoje, etapa: co.etapa, t: x.t, loc: (x.loc || []).slice(), itens }); };
+  (b.ords || []).forEach(x => { vistos[x.id] = 1; um(x, ((c && c.ordens) || {})[x.id]); });
+  Object.keys((c && c.ordens) || {}).forEach(k => { const co = c.ordens[k]; const no = co && co.osc && co.osc.novo; if (vistos[k] || !no || no.demoLote) return;   // semente de demonstração (EX-54) fora da compra, como em dados2.os_dem
+    const faz = no.faz || 'Santa Rita'; const saf = safDe(faz, no.saf || ''); if (!saf) return;
+    um({ id: k, faz, saf, chaves: (no.keys || []).slice(), loc: [no.talhao], ini: no.jan || '', t: no.talhao + ' · ' + k + ' · ' + (((no.atv || {}).nome) || no.tipo || '') }, co); });
+  return out; }
+// fazenda de cada O.S. (custódia é suprimento da fazenda da ordem): as do registro (dados2.os_base) e as emitidas no cenário (osc.novo)
+function cenOsFaz(c, osb) { const f = {}; ((osb || {}).ords || []).forEach(x => { f[x.id] = x.faz; });
+  Object.keys((c && c.ordens) || {}).forEach(k => { const no = c.ordens[k] && c.ordens[k].osc && c.ordens[k].osc.novo; if (no && !f[k]) f[k] = no.faz || 'Santa Rita'; });
+  return f; }
+// ---------- CTL-4 (revisão, achado 1, S2) · o estoque da demanda vem do MESMO cenário das ordens: físico apto da fazenda (lote − quarentena;
+// inclui as reservas), quarentena, reservas ativas e recebimentos previstos sem o que o Estoque já conferiu da nota do pedido. Entregar move do
+// lote para a custódia, devolver faz o inverso, cancelar solta a reserva e receber troca "a receber" por estoque: nada disso muda a compra
+// (dano evitado: 8.000 kg de NPK a menos depois de uma entrega comum; 24,5 L de Fungicida A a mais depois de uma devolução). Espelho: dados2.est_dem.
+// b (dados2.est_base): {rec:[{item,q,dt,ref,faz,t}] pedidos em aberto da semente, locFaz:{local: fazenda}, faz0 (local fora do mapa), hoje,
+// ofaz:{O.S.: fazenda} (cenOsFaz)}. osd: cenOsDem do mesmo cenário (data da reserva = data da ordem). Reserva = a mesma conta do Estoque
+// (cenResPropria), só de requisição não cancelada de O.S. em A liberar, Liberadas ou Em execução; chave = ID da O.S. (DEM-04: conta uma vez com
+// a ordem). Recebido = o 1º registro de cada recebimento do Estoque (movimento recebimento-nf com estRec: pedido no rótulo "PC-090 · …" e
+// quantidade conferida, apta + quarentena).
+// Revisão do 853a6a8 (achado 1, S2): custódia que a ordem não vai usar (sobra de cenOsSup: ordem cancelada, em conferência, encerrada, ou o que
+// passa do pendente da ativa) é suprimento da fazenda da ordem — sobra:[{item,q,t,chave}], somada ao estoque inicial em demFazenda. Assim
+// cancelar com material entregue e devolver a sobra não mudam a compra.
+// Revisão do 853a6a8 (achado 2, S2) · quarentena (PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): a parte com laudo pendente (quar) é
+// fornecimento condicionado à qualidade — não é apta nem saldo do pedido, e a falta que ela cobriria fica "condicionada à qualidade", fora da compra;
+// a parte com laudo reprovado (quarRep) não cobre nada e vira falta firme, com o motivo. quarRef: [{item,q,lote,doc,mot,rep,reps}] para a memória
+// (reps: cada laudo reprovado do lote com a sua quantidade, cenRepsLote; revisão do 16fb55e, ajuste 2).
+// Revisão do 16fb55e (ajuste 2) · reprovado por laudo, do histórico do lote: cada "Qualidade reprovada" com a sua quantidade, laudo e motivo, e as
+// entradas bloqueadas (nota ou devolução) que ela decidiu — as registradas desde a decisão anterior do lote. Dano evitado: a memória atribuir ao
+// último laudo o que outro reprovou (10 L LAB-A + 10 L LAB-B viravam "20 L · laudo LAB-B"). Sem histórico que feche com o reprovado do lote
+// (semente sem movimentos), vale o registro do lote (l.rep), sem inventar proveniência. Espelho: dados2._reps_lote.
+function cenRepsLote(c, l, qr) { let pend = []; const reps = [];
+  (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote)).forEach(m => {
+    if ((m.tipo === 'recebimento-nf' || m.tipo === 'devolucao') && !m.apto) { const d = m.tipo === 'devolucao' ? 'devolução da ' + m.req : (m.doc || ''); if (d && pend.indexOf(d) < 0) pend.push(d); }
+    else if (m.tipo === 'inspecao') pend = [];
+    else if (m.tipo === 'inspecao-reprovada') { reps.push({ q: Number(m.qtd) || 0, laudo: m.doc || '', motivo: m.motivo || '', quem: m.quem || '', em: m.at || '', doc: pend.join(', ') }); pend = []; } });
+  const sh = reps.reduce((a, r) => a + r.q, 0);
+  return Math.abs(sh - qr) < 1e-6 ? reps : [Object.assign({ q: qr, doc: '' }, l.rep || {}, { q: qr })]; }
+function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; const fz = (l) => lf[l.local] || b.faz0 || 'Santa Rita';
+  const fisico = {}, quar = {}, quarRep = {}, quarRef = [], reservas = [], recebDt = [], recebNaoApuravel = [], sobra = []; const lotes = (c && c.lotes) || {};
+  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; const vencido = cenLoteVencido(l); if (!vencido) fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
+    const qr = Math.min(l.quarentena || 0, l.quarRep || 0), qp = (l.quarentena || 0) - qr;
+    const doc = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && !m.apto && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
+      .map(m => m.tipo === 'devolucao' ? 'devolução da ' + m.req : m.doc).filter(Boolean).pop()) || '';
+    // motivo registrado na entrada (observação da conferência da NF ou da devolução bloqueada): a falta condicionada mostra por que o lote está bloqueado
+    const mot = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
+      .map(m => String(m.obs || (m.estRec && m.estRec.obs) || '').trim()).filter(Boolean).pop()) || '';
+    if (qp > 1e-9) { if (!vencido) quar[l.prod] = (quar[l.prod] || 0) + qp;
+      quarRef.push(Object.assign({ item: l.prod, q: qp, lote: l.lote, doc, mot, rep: null }, vencido ? { vencido: true, validade: l.validade } : {})); }
+    if (qr > 1e-9) { quarRep[l.prod] = (quarRep[l.prod] || 0) + qr; const reps = cenRepsLote(c, l, qr);
+      quarRef.push(Object.assign({ item: l.prod, q: qr, lote: l.lote, doc: reps.map(r => r.doc).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || doc, mot, rep: l.rep || {}, reps }, vencido ? { vencido: true, validade: l.validade } : {})); } });
+  Object.keys((c && c.reqs) || {}).forEach(rid => { const r = c.reqs[rid]; const o = ((c && c.ordens) || {})[r.os]; if (!o) return;
+    const l0 = (r.itens || []).map(it => lotes[it.prod + '|' + it.lote]).find(Boolean); const fo = (b.ofaz || {})[r.os] || (l0 ? fz(l0) : (b.faz0 || 'Santa Rita'));
+    if (fo === faz) { const S = cenOsSup(c, o, r);
+      Object.keys(S).forEach(p => { if (S[p].sobra > 1e-9) sobra.push({ item: p, q: S[p].sobra, t: rid + ' · ' + r.os + ' (' + (o.etapa === 'Canceladas' ? 'cancelada' : (CEN_FASES_PEND.indexOf(o.etapa) >= 0 ? 'sobra da ordem' : o.etapa.toLowerCase())) + ')', chave: r.os, faz }); }); }
+    if (r.estado === 'Cancelada' || CEN_FASES_PEND.indexOf(o.etapa) < 0) return; const od = (osd || []).find(x => x.id === r.os); const S = cenOsSup(c, o, r, fz, fo);
+    // revisão do 853a6a8: a reserva conta pela parte útil (ef: até o que a ordem ainda tira; achado 5) e a de uma ordem de outra fazenda conta só aqui,
+    // na fazenda do lote — lá ela já cobre a ordem (cenOsDem; achado 3). Da mesma fazenda e na demanda: conta uma vez com a ordem (DEM-04)
+    (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l || fz(l) !== faz) return; const y = ((S[it.prod] || {}).res || []).find(z => z.it === it);
+      if (!y || !(y.ef > 1e-9)) return; const mesma = fo === faz && !!od;
+      reservas.push({ item: it.prod, q: mesma ? y.q : y.ef, dt: od ? od.dt : (b.hoje || ''), t: 'Reserva ' + rid + ' · ' + r.os + (o.talhao ? ' (' + o.talhao + ')' : '') + (fo !== faz ? ' · ' + fo : ''), chave: r.os, faz }); }); });
+  const recebidos=cenCompRecebimentos(c);
+  const linhaDe=r=>{const unidades=[...new Set(Object.values(lotes).filter(l=>l.prod===r.item).map(l=>l.un).concat(recebidos.filter(e=>cenCompPC(e)===r.ref&&e.item===r.item).map(e=>e.un)).filter(Boolean))];
+    return {id:r.ref,item:r.item,un:r.un||(unidades.length===1?unidades[0]:null),linha:r.linha};};
+  (b.rec || []).forEach(r => { if (r.faz !== faz) return; const p=linhaDe(r);
+    if(!p.un){recebNaoApuravel.push(Object.assign({},r,{motivo:'Unidade não apurável: previsão fora do suprimento. Confira o pedido e a unidade.'}));return;}
+    // cada outra previsão do mesmo PC e item é outra ocorrência, mesmo sem linha ou com a mesma chave: nota que cabe em duas não baixa nenhuma (Codex 6250436415)
+    const linhas=(b.rec||[]).filter(x=>x!==r&&x.ref===r.ref&&x.item===r.item).map(linhaDe),amb=recebidos.filter(e=>cenCompCabe(e,p)&&linhas.some(q=>cenCompCabe(e,q)));
+    if(amb.length){recebNaoApuravel.push(Object.assign({},r,{motivo:'Nota '+amb.map(e=>e.nf||e.id).join(', ')+' sem unidade ou linha cabe em mais de uma linha do '+r.ref+': previsão fora do suprimento. Confira a nota no Estoque.'}));return;}
+    const baixa=recebidos.filter(e=>cenCompCabe(e,p)).reduce((a,e)=>a+(Number(e.apto==null&&e.quar==null?e.conf:((Number(e.apto)||0)+(Number(e.quar)||0)))||0),0);
+    const q=Math.max(0,r.q-baixa); if(q>1e-9)recebDt.push(Object.assign({},r,{q})); });
+  return { fisico, quar, quarRep, quarRef, reservas, recebDt, recebNaoApuravel, sobra }; }
+// entradas vivas da demanda única (Planejar safra, Mapa › Insumos e Compra de insumos): x = partes fixas (safra, fazenda, hoje, viavel, ordem e
+// nomes das safras, ocorrências do plano); b = {osb: dados2.os_base, est: dados2.est_base}. Ordens, estoque, reservas e recebimentos: o cenário c.
+function cenDemEntradas(c, x, b) { b = b || {}; const osd = cenOsDem(c, b.osb);
+  return Object.assign({}, x, cenEstDem(c, x.faz, Object.assign({ hoje: x.hoje || (b.osb || {}).hoje || '' }, b.est, { ofaz: cenOsFaz(c, b.osb) }), osd), { osd }); }
 function cenMov(c, m) { m.id = 'MV-' + (1000 + c.movs.length + 1); m.at = m.at || cenAgora(); c.movs.push(m); return m; }
+// Decisão que exige papel (PRD 2.1; DEC-2609-13; CMD-47): o comando recebe quem age (no protótipo, o perfil de demonstração de g2lib.js;
+// no software, o ator da sessão no servidor) e confere o papel no cadastro (g2pf). Sem o papel, recusa e nada muda (dano: decisão gravada
+// em nome de quem não decidiu). Mesma pessoa no fato e na decisão: a decisão vale e fica "revisão posterior pendente" (padrão adotado em
+// 05/10/2026; o proprietário pode mudar). Ação aberta a todos (cenQuem) também exige um perfil do cadastro: nenhum registro grava quem não agiu.
+// papel sem titular ativo (CONF-01 R6): a recusa diz onde conceder, nunca "decisão de ." vazio
+function cenSemTit(papeis) { return g2papT(papeis) + ' sem titular: conceda em Configurações › Usuários e alçadas'; }
+function cenExige(ator, papel, acao) { if (!g2papel(ator, papel)) throw new Error(acao + ': decisão de ' + (g2quem(papel) || cenSemTit(papel)) + '. Nada foi alterado.'); return g2ator(ator, papel); }
+function cenExigeUm(ator, papeis, acao) { const p = g2umPapel(ator, papeis); if (!p) throw new Error(acao + ': decisão de ' + (g2quemUm(papeis) || cenSemTit(papeis)) + '. Nada foi alterado.'); return g2ator(ator, p); }   // basta um dos papéis
+// alçada (CONF-01 R7): quem decide vem de G2_ALCADAS com a mudança do CF-01 (c.conf); nível 'base' ou 'acima' do limite. Nenhum papel literal no comando
+function cenExigeAlc(ator, id, acao, nivel) { const n = g2alcN(g2alc(id), nivel); if (!n) throw new Error('Alçada ' + id + ' não encontrada.');
+  return n.modo === 'um' ? cenExigeUm(ator, n.papeis, acao) : cenExige(ator, n.papeis, acao); }
+// quem entrega no Estoque e recebe a devolução (papel almoxarife): o primeiro perfil ativo com o papel; sem titular, diz onde conceder
+function cenAlmox() { const p = g2perfis().find(x => g2papel(x, 'almoxarife')); return p ? g2ator(p, 'almoxarife') : cenSemTit('almoxarife'); }
+// o mesmo almoxarife pelo nome, para os textos do app (revisão CONF F14: "retire com Rui" fixo); sem titular, "o almoxarifado"
+function cenAlmoxNome() { const p = g2perfis().find(x => g2papel(x, 'almoxarife')); return p ? p.k : ''; }
+// quem entregou a requisição (último movimento de entrega, "Rui (almoxarife) → Marcos"); sem entrega gravada, o almoxarife vigente
+function cenEntPor(c, rid) { const m = (c.movs || []).filter(x => x.tipo === 'entrega' && x.req === rid).pop(); return (m && String(m.quem || '').split(/[\s(]/)[0]) || cenAlmoxNome(); }
+function cenAoAlmox() { const k = cenAlmoxNome(); if (!k) return 'ao almoxarifado'; const f = typeof CONF0 !== 'undefined' && !!(CONF0.pessoas.find(x => x.k === k) || {}).fem; return (f ? 'à ' : 'ao ') + k; }
+// limite da dispensa de saldo (AL-05, CMD-47; CONF-01 R11): % vigente da alçada sobre a área da ordem, em decimal (cenQtd), a mesma função no
+// comando (osc_dispensar), no painel da O.S. e nas ordens afetadas do CF-01
+function cenLimDisp(area) { const a = g2alc('AL-05'); return { pct: a.lim, ha: area > 0 ? cenQtd(a.lim / 100, area) : 0 }; }
+// app de campo respeita o acesso (CONF-01 R2, CONF-D24): operador desativado não grava fato de campo; o que já estava na fila do aparelho envia
+function cenAppAtivo(c) { if (typeof CONF0 === 'undefined') return; const k = c.app && c.app.operador; const p = CONF0.pessoas.find(x => x.k === k); if (!p) return;
+  const e = (c.conf && c.conf.v === CONF0.v && c.conf.pessoas[p.id]) || null; if (!e || e.a === 'ativo') return;
+  throw new Error('Acesso de ' + k + (e.a === 'desativado' ? ' desativado em Configurações em ' + String(e.ate || '').split('-').reverse().join('/') : ' não concedido em Configurações') + ': nada foi gravado no aparelho. A gestora reativa em Configurações › Usuários e alçadas.'); }
+function cenQuem(ator, papel, acao) { const q = g2ator(ator, papel); if (!q) throw new Error(acao + ': sem o perfil de quem age. Nada foi alterado.'); return q; }
+/* idempotência (ENG-021/022, PRD 73.3; revisão CONF 13/10): a chave vem de quem inicia (o painel ou o formulário da web, gerada ao abrir).
+   A mesma chave com o mesmo conteúdo devolve o recibo sem gravar de novo; com outro conteúdo, conflito. Sem chave, o comando segue como antes
+   (chamadas internas e testes de outras frentes); as telas da web sempre passam a chave. Dano evitado: dispensa, entrega ou recebimento
+   duplicados (movimento e linha da trilha em dobro) quando o mesmo comando chega duas vezes. */
+function cenIdem(c, chave, imp, oque, fn, opt) { if (!chave) return fn(); const R = c.recibos || (c.recibos = {}); const r0 = R[chave];
+  if (r0) { if (r0.imp !== imp) throw new Error('Este registro (' + chave + ') já foi gravado com outro conteúdo: conflito, nada gravado.');
+    if(r0.resultado) return Object.assign(cenClone(r0.resultado),{repetido:true,recibo:r0});
+    return { msg: oque + ' já registrado (' + chave + '): nada foi gravado de novo.', repetido: true, recibo: r0 }; }
+  const r = fn() || {}; const rs=c.recibos||(c.recibos={}); rs[chave] = { imp, cmd: oque }; if(opt&&opt.resultado) rs[chave].resultado=cenClone(r); return r; }
+function cenRevisao(ator, autor, fato) { const q = g2pf(ator); return q && g2mesma(q.k, autor) ? 'revisão posterior pendente (' + q.k + ' ' + fato + ' e decidiu)' : ''; }
+
+// ---------- Compras (C-3/C-4) ----------
+const CEN_COMP_ANTIGA='talhao-os-compras-v1';
+function cenCompMarcar(){try{if(typeof localStorage==='undefined')return false;localStorage.setItem(CEN_COMP_ANTIGA+':migrado','1');return true;}catch(e){return false;}}
+function cenCompEstado(c,migrar){
+  if(c.compras){ if(c.compras.v!==1||!c.compras.proc) throw Error('Compras incompatíveis. Preserve a cópia antes de gravar.'); return c.compras; }
+  let old=null,raw=null,aviso='';try{if(!localStorage.getItem(CEN_COMP_ANTIGA+':migrado'))raw=localStorage.getItem(CEN_COMP_ANTIGA);}catch(e){aviso='Armazenamento bloqueado: compras antigas indisponíveis. Reabra com acesso para conferir os pedidos.';}
+  if(raw!==null){ try{old=JSON.parse(raw);}catch(e){throw Error('Compras antigas ilegíveis. Preserve a cópia e recupere os dados antes de gravar.');}
+    if(!old||old.v!==1||typeof old!=='object'||(old.proc&&typeof old.proc!=='object')) throw Error('Compras antigas incompatíveis. Preserve a cópia antes de gravar.'); }
+  const s={v:1,proc:cenClone((old&&old.proc)||{}),aviso,migradoDe:{chave:CEN_COMP_ANTIGA,em:new Date().toISOString()}};
+  if(migrar)c.compras=s; return s;
+}
+function cenCompLer(id){try{const s=cenCompEstado(cenGet(),false);return {proc:s.proc[id]||null,aviso:s.aviso||''};}catch(e){return {erro:String(e.message||e),proc:null};}}
+function cenCompGravar(id,snap,chave,ator){
+  let raw; try{raw=localStorage.getItem(CEN_KEY); if(raw!==null){const c=JSON.parse(raw);if(!c||c.v!==CEN0.v||!c.ordens)throw Error('Cenário incompatível');}}
+  catch(e){return {erro:'Cenário ilegível ou indisponível. Preserve os dados antes de gravar Compras.'};}
+  if(!chave||!ator||!id)return {erro:'Identifique a ação, a pessoa e a safra antes de gravar.'};
+  const out=cenMudar(null,c=>{const s=cenCompEstado(c,true);
+    const r=cenIdem(c,chave,JSON.stringify([id,snap,ator]),'Compra '+snap.sol,()=>{s.proc[id]=cenClone(snap);return {msg:'Compra gravada.',sol:snap.sol};},{resultado:true});
+    if(localStorage.getItem(CEN_KEY)!==raw)throw Error('O cenário mudou. Confira os dados antes de repetir.');return r;
+  },{estrito:true});
+  if(!out.erro){if(!cenCompMarcar()){out.aviso='Compra gravada, mas a marca de migração não pôde ser gravada. Libere o armazenamento para preservar a restauração entre sessões.';}}return out;
+}
+function cenCompRecebimentos(c){const seen=new Set();return ((c&&c.movs)||[]).filter(m=>{const r=m.tipo==='recebimento-nf'&&m.estRec;if(!r||!r.id||seen.has(r.id))return false;seen.add(r.id);return true;}).map(m=>m.estRec);}
+function cenCompPC(r){return String(r.pedido||r.ref||r.ped||r.id||'').split(' · ')[0].trim();}
+// nota conferida antes de 16/10 (7762fd3d) não grava unidade, e antes do C-3 não grava linha: cabe na linha do pedido pela unidade dele, como a baixa antiga por PC (revisão do Claude, PR #114).
+// Só baixa se a linha for a única do mesmo PC e item em que a nota cabe; com outra possível, não baixa nenhuma: quantidade sem unidade não se converte nem conta duas vezes (revisão do Codex 6249640248)
+function cenCompCabe(r,p){return cenCompPC(r)===p.id&&(r.item||r.prod)===p.item&&(r.un==null||r.un===''||r.un===p.un)&&(r.linha==null||p.linha==null||String(r.linha)===String(p.linha));}
+function cenCompOutra(r,p,linhas){const k=q=>[q.id,q.item,q.un,q.linha==null?'':String(q.linha)].join('|');return (linhas||[]).some(q=>k(q)!==k(p)&&cenCompCabe(r,q));}
+function cenCompCasa(r,p,linhas){return cenCompCabe(r,p)&&!cenCompOutra(r,p,linhas);}
+function cenCompLinhas(c){let s;cenCompLinhas.aviso='';try{s=cenCompEstado(c,false);cenCompLinhas.aviso=s.aviso||'';}catch(e){cenCompLinhas.aviso=String(e.message||e);return [];}
+  const out=[];Object.keys(s.proc).forEach(saf=>{const v=s.proc[saf],a=v.aprov;if(!a||a.estado!=='aprovada')return;
+    (a.pcs||[]).forEach(p=>(p.itens||[]).forEach(it=>out.push({id:p.id,linha:it.i,item:it.nome,un:it.un,grupo:it.grupo,forn:p.nome,qtd:Number(it.ped)||0,a_entregar:Number(it.ped)||0,saf,sol:v.sol,prev:(v.pcx&&v.pcx[p.id]||{}).prev||p.prev,cmp:true,label:p.id+' · '+p.nome+' · '+it.nome+' · '+it.un+' · linha '+it.i})));});return out;
+}
+function cenCompSaldo(c,p,linhas){const all=cenCompRecebimentos(c),ls=linhas||cenCompLinhas(c).filter(q=>q.id===p.id&&q.item===p.item),rs=all.filter(r=>cenCompCasa(r,p,ls));
+  const rec=rs.reduce((a,r)=>a+(Number(r.apto)||0)+(Number(r.quar)||0),0),entrada=rs.reduce((a,r)=>a+(Number(r.quar)||0),0);
+  let quar=0,ambigua=false;const lotes=new Set(rs.filter(r=>r.quar>0).map(r=>r.item+'|'+r.lote));
+  lotes.forEach(key=>{const l=(c.lotes||{})[key];if(!l)return;
+    const outros=all.some(r=>r.item+'|'+r.lote===key&&r.quar>0&&!cenCompCasa(r,p,ls));
+    // Um lote compartilhado entre linhas não permite atribuir saldo sem rateio inventado.
+    const recebidoNoLote=all.filter(r=>r.item+'|'+r.lote===key).reduce((a,r)=>a+(Number(r.quar)||0),0);
+    if((outros||Number(l.quarentena)>recebidoNoLote)&&l.quarentena>0)ambigua=true;else quar+=Math.min(Number(l.quarentena)||0,rs.filter(r=>r.item+'|'+r.lote===key).reduce((a,r)=>a+(Number(r.quar)||0),0));});
+  return {rec,quar:ambigua?null:quar,quarEntrada:entrada,ae:Math.max(0,(Number(p.qtd)||0)-rec),amb:all.filter(r=>cenCompCabe(r,p)&&!cenCompCasa(r,p,ls)).map(r=>r.nf||r.id)};
+}
 
 // ---------- O.S. (web) ----------
 // Liberar (agrônomo): reserva cada insumo no lote com saldo (a reserva nunca passa do disponível).
@@ -36,6 +368,7 @@ function cenLiberar(c, id) {
   const rid = o.req || ('REQ-' + (41 + Object.keys(c.reqs).length));
   const req = c.reqs[rid] || (c.reqs[rid] = { id: rid, os: id, itens: [], estado: 'Reservada' });
   (o.ins || []).forEach(x => {
+    if (x.dose > 0 && !(x.tot > 0)) throw new Error('Dose × área de ' + x.p + ' dá 0 ' + x.un + ': aumente a dose ou a área.');   // nunca entregaria nada
     const l = cenLote(c, x.p); if (!l) throw new Error('Sem lote de ' + x.p + ' no Estoque.');
     if (cenDisp(l) + 1e-9 < x.tot) throw new Error('Saldo insuficiente de ' + x.p + ': ' + cenNum(cenDisp(l)) + ' ' + x.un + ' disponíveis para ' + cenNum(x.tot) + ' ' + x.un + '.');
     l.reservado += x.tot;
@@ -47,60 +380,146 @@ function cenLiberar(c, id) {
 }
 
 // ---------- Estoque (almoxarife) ----------
-// Saldo a entregar = solicitado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução.
-function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - it.consumido - it.custodia); }
-function cenEntregar(c, rid, prod, qtd, quem) {
-  const r = c.reqs[rid]; const o = r && c.ordens[r.os]; if (!r || !o) throw new Error('Requisição não encontrada.');
+// Saldo a entregar = solicitado − dispensado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução. "dispensado" é o que
+// saiu da necessidade sem reposição e só o beneficiamento grava (sobra devolvida livre, caixa avariada, reserva baixada no Fechar; rodada 3,
+// BEN-D33): nas linhas de O.S., app e SUP o termo é 0 e a conta é a de sempre. Dano evitado: "a entregar" fantasma, sem reserva por trás.
+function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - (it.dispensado || 0) - it.consumido - it.custodia); }
+function cenEntregar(c, rid, prod, qtd, quem, ator, chave) {   // ator: quem entrega (perfil); o movimento grava quem agiu, nunca um nome fixo; chave: de quem inicia (cenIdem)
+  return cenIdem(c, chave, JSON.stringify(['entrega', rid, prod, Number(qtd), quem || '', (g2pf(ator) || {}).k || '']), 'Entrega', () => cenEntregar0(c, rid, prod, qtd, quem, ator)); }
+function cenEntregar0(c, rid, prod, qtd, quem, ator) {
+  const qa = cenQuem(ator, 'almoxarife', 'Entregar ' + prod + ' da ' + rid); const r = c.reqs[rid]; const o = r && c.ordens[r.os]; if (!r || !o) throw new Error('Requisição não encontrada.');
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error('Entregue só para O.S. liberada ou em execução (' + r.os + ' está em ' + o.etapa + ').');
   const it = r.itens.find(i => i.prod === prod); if (!it) throw new Error(prod + ' não está na ' + rid + '.');
   const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  if (cenLoteVencido(l)) throw new Error('Lote ' + l.lote + ' vencido em ' + l.validade + ': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.');
   if (!(qtd > 0)) throw new Error('Informe a quantidade.');
   if (qtd > cenSaldoEntregar(it) + 1e-9) throw new Error('Acima do saldo a entregar: ' + cenNum(cenSaldoEntregar(it)) + ' ' + it.un + '.');
-  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');
-  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - qtd); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
-  r.estado = 'Entregue'; cenMov(c, { tipo: 'entrega', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife) → ' + (quem || o.resp), origem: 'web' });
-  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + '). Aguarda confirmação no app.' };
+  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');   // trava física: nunca estoque negativo, nem com ajuste aprovado depois da reserva
+  // a entrega baixa só a reserva desta requisição; o que passar dela sai do livre, nunca da reserva de outra requisição (rodada 3, I-d3; reprodução 3 do Codex)
+  const own = cenResPropria(c, rid, it, l); if (qtd > own + cenDisp(l) + 1e-9) throw new Error('O lote ' + it.lote + ' tem ' + cenNum(own + cenDisp(l)) + ' ' + it.un + ' para a ' + rid + ' (' + cenNum(own) + ' reservados para ela e ' + cenNum(cenDisp(l)) + ' livres): o resto está reservado para outras requisições.');
+  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - Math.min(qtd, own)); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
+  r.estado = 'Entregue'; cenMov(c, { tipo: 'entrega', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: qa + ' → ' + (quem || o.resp), origem: 'web' });
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + ').' + (o.fam === 'BEN' ? ' Recebidas no balcão (o beneficiamento não confirma no app).' : ' Aguarda confirmação no app.') };
 }
 // Devolução conferida: só o recebido e conferido volta ao disponível; material bloqueado não volta.
-function cenDevolver(c, rid, prod, qtd, apto) {
-  const r = c.reqs[rid]; const it = r && r.itens.find(i => i.prod === prod); if (!it) throw new Error('Item não encontrado.');
+function cenDevolver(c, rid, prod, qtd, apto, ator) {   // ator: quem recebe e confere a devolução (perfil)
+  const qa = cenQuem(ator, 'almoxarife', 'Receber a devolução de ' + prod + ' da ' + rid); const r = c.reqs[rid]; const it = r && r.itens.find(i => i.prod === prod); if (!it) throw new Error('Item não encontrado.');
   if (!(qtd > 0) || qtd > it.custodia + 1e-9) throw new Error('Devolva até ' + cenNum(it.custodia) + ' ' + it.un + ' em custódia.');
   const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  // linha de ordem do beneficiamento (rodada 3, BEN-D33): a regra de divisão (sobra livre; caixa em uso volta reservada à linha) é do ben.js e é
+  // calculada antes de baixar a custódia; sem ela na página a devolução é recusada (falha fechada), nunca devolve tudo ao livre em silêncio
+  const o = c.ordens[r.os]; const ben = !!o && o.fam === 'BEN';
+  if (ben && typeof benSobraDev !== 'function') throw new Error('Devolução de ' + prod + ' da ' + rid + ' (' + r.os + '): regra do beneficiamento ausente nesta página; nada foi gravado.'); const dv = ben ? benSobraDev(c, o, it, qtd, apto) : null;
   it.custodia -= qtd; it.devolvido += qtd;
   if (apto) l.fisico += qtd; else { l.fisico += qtd; l.quarentena += qtd; }
-  cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: 'Rui (almoxarife)', origem: 'web', apto: !!apto });
+  const m = cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: qa, origem: 'web', apto: !!apto });
+  if (dv) return benAposDevolver(c, o, rid, it, l, qtd, apto, dv, m, qa);
   return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' devolvidos' + (apto ? ' ao disponível.' : ' e bloqueados para inspeção.') };
 }
 
 // Recebimento de fornecedor: conferido entra no lote (novo ou existente); com avaria ou sem laudo entra bloqueado (quarentena).
-function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto) {
+function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto, ator, chave) {   // ator: quem confere o recebimento (perfil); chave: de quem inicia (cenIdem)
+  return cenIdem(c, chave, JSON.stringify(['recebimento-nf', prod || '', lote || '', Number(qtd), un || '', local || '', validade || '', doc || '', !!apto, (g2pf(ator) || {}).k || '']), 'Recebimento',
+    () => cenReceber0(c, prod, lote, qtd, un, local, validade, doc, apto, ator)); }
+function cenReceber0(c, prod, lote, qtd, un, local, validade, doc, apto, ator) {
+  const qa = cenQuem(ator, 'almoxarife', 'Receber ' + (prod || 'o produto') + ' (' + (doc || 'sem documento') + ')');
   if (!prod || !lote) throw new Error('Informe produto e lote.'); if (!(qtd > 0)) throw new Error('Informe a quantidade recebida.');
   if (!doc) throw new Error('Informe a nota fiscal ou o documento de entrada.');
   const k = prod + '|' + lote; const l = c.lotes[k] || (c.lotes[k] = { prod, lote, local: local || 'Almox. defensivos', un: un || 'L', fisico: 0, quarentena: 0, reservado: 0, validade: validade || '' });
   if (l.un !== (un || l.un)) throw new Error('Unidade diferente do lote ' + lote + ' (' + l.un + ').');
   l.fisico += qtd; if (!apto) l.quarentena += qtd;
-  cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: 'Rui (almoxarife)', origem: 'web', doc, apto: !!apto });
+  cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: qa, origem: 'web', doc, apto: !!apto });
   return { msg: cenNum(qtd) + ' ' + l.un + ' de ' + prod + ' recebidos no lote ' + lote + ' (' + l.local + ')' + (apto ? '.' : ' e bloqueados até a inspeção.') };
 }
-function cenLiberarQuarentena(c, key) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
-  const q = l.quarentena; l.quarentena = 0; cenMov(c, { tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' });
-  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados após inspeção.' }; }
+// acúmulo (padrão 2) na decisão de qualidade do lote: quem registrou a entrada bloqueada (recebimento ou devolução) e decide (libera ou reprova)
+// fica com revisão posterior — a decisão vale, sem veto nem segundo aprovador. Com a entrada gravando quem agiu (revisão do CTL-3, achado 4), a
+// gestora que recebe e libera deixou de ser invisível; a mesma regra vale para reprovar (revisão do 16fb55e, ajuste 4).
+function cenRevEntrada(c, l, ator) { return (c.movs || []).filter(m => m.prod === l.prod && m.lote === l.lote && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao') && !m.apto)
+    .map(m => cenRevisao(ator, m.quem, 'registrou a entrada bloqueada')).find(Boolean) || ''; }
+// Liberar quarentena (RN-015; SU-06 "Liberar qualidade"): só com o nº do laudo ou relatório de inspeção, pelo gestor (padrão adotado, igual ao ajuste)
+function cenLiberarQuarentena(c, key, laudo, ator) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
+  if (!((l.quarentena || 0) - (l.quarRep || 0) > 1e-9)) throw new Error('O lote ' + l.lote + ' só tem material reprovado (' + (cenRepsLote(c, l, l.quarRep || 0).map(r => 'laudo ' + (r.laudo || '—') + ' ' + cenNum(r.q) + ' ' + l.un).join(' + ') || 'laudo —') + '): ele fica segregado para a devolução ao fornecedor, não volta ao disponível.');
+  const quem = cenExigeAlc(ator, 'AL-11', 'Liberar a quarentena do lote ' + l.lote); const doc = String(laudo || '').trim();
+  if (!doc) throw new Error('Informe o nº do laudo ou relatório de inspeção do lote ' + l.lote + '. Sem laudo o lote continua bloqueado.');
+  const rev = cenRevEntrada(c, l, ator);
+  // caixas em uso de ordem do beneficiamento esperando o laudo (revisão A2 da rodada 3): a regra é do ben.js; sem ela na página, recusa sem gravar
+  const usoBen = Object.values(c.reqs || {}).some(r => (r.itens || []).some(i => i.prod === l.prod && i.lote === l.lote && (i.quarUso || 0) > 1e-9));
+  if (usoBen && typeof benAposLaudo !== 'function') throw new Error('Quarentena do lote ' + l.lote + ' com caixas em uso do beneficiamento: regra do beneficiamento ausente nesta página; nada foi gravado.');
+  const q = l.quarentena - (l.quarRep || 0); l.quarentena = l.quarRep || 0; cenMov(c, Object.assign({ tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem, origem: 'web', doc }, rev ? { rev } : {}));
+  const bx = usoBen ? benAposLaudo(c, l, quem) : '';
+  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados com o laudo ' + doc + ' por ' + quem + '.' + (bx ? ' ' + bx + '.' : '') + (rev ? ' Fica ' + rev + '.' : '') }; }
+// Reprovar a qualidade (RN-015; PRD 65.4: "reprovação reconcilia obrigação de reposição/devolução e falta antes de gerar nova proposta"): o gestor
+// registra o laudo que reprova; o material continua segregado (fora do disponível) para a devolução ao fornecedor e deixa de ser fornecimento
+// condicionado — a demanda passa a contar a falta como firme, com o laudo e o motivo (revisão do 853a6a8, achado 2). Sem laudo, nada muda.
+function cenReprovarQuarentena(c, key, laudo, motivo, ator) { const l = c.lotes[key]; const pend = l ? (l.quarentena || 0) - (l.quarRep || 0) : 0;
+  if (!l || !(pend > 1e-9)) throw new Error('Nada aguardando laudo neste lote.');
+  const quem = cenExigeAlc(ator, 'AL-11', 'Reprovar a qualidade do lote ' + l.lote); const doc = String(laudo || '').trim();
+  if (!doc) throw new Error('Informe o nº do laudo que reprova o lote ' + l.lote + '. Sem laudo o lote continua aguardando a decisão.');
+  const mot = String(motivo || '').trim() || 'reprovado no laudo'; const rev = cenRevEntrada(c, l, ator);   // acúmulo: a mesma regra de liberar (ajuste 4)
+  l.quarRep = (l.quarRep || 0) + pend; l.rep = Object.assign({ laudo: doc, motivo: mot, quem, em: cenAgora() }, rev ? { rev } : {});
+  if (typeof benAposReprovar === 'function') benAposReprovar(c, l);   // caixas em uso do beneficiamento que esperavam o laudo não voltam (revisão A2)
+  cenMov(c, Object.assign({ tipo: 'inspecao-reprovada', prod: l.prod, lote: l.lote, qtd: pend, un: l.un, quem, origem: 'web', doc, motivo: mot }, rev ? { rev } : {}));
+  return { msg: cenNum(pend) + ' ' + l.un + ' do lote ' + l.lote + ' reprovados com o laudo ' + doc + ' por ' + quem + ' (' + mot + '): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada.' + (rev ? ' Fica ' + rev + '.' : '') }; }
 // Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
+// A4 (revisão da v56, S2; contrato do PR #47, comentário 6147474674): a aprovação aplica o valor contado só se a contagem ainda é atual. A contagem
+// guarda o físico do sistema e a posição da trilha (marcador); movimento físico ou de qualidade do lote depois dela (entrada, saída, devolução,
+// ajuste, entrada ou saída de quarentena, laudo; tipo novo também conta), mesmo de ida e volta ao mesmo saldo, torna a contagem velha, e aprovar
+// é recusado sem mudar nada (dano evitado: físico negativo ou fabricado e ajuste aplicado duas vezes). Contagem sem marcador exige recontagem.
+// Só não invalidam: reserva e desreserva, consumo e estorno na custódia da ordem, confirmação do app e contagem sem diferença.
+const CEN_MOV_SEM_FISICO = ['reserva', 'reserva-baixa', 'contagem', 'consumo', 'estorno-consumo', 'recebimento'];
+// Contagem atual abaixo do reservado (contrato 6147474674, item 1): 'alerta' grava o contado, preserva as reservas e mostra "Reserva sem físico"
+// com dono e recuperação (PRD RSV-13: o ajuste de inventário pode reduzir o utilizável abaixo das reservas, como exposição com dono); 'recusa'
+// voltaria a exigir recontagem (e recontar ficaria impossível enquanto a reserva existir).
+const CEN_AJ_ABAIXO_RESERVA = 'alerta';
+function cenDia() { const d = new Date(); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
+function cenSemFisico(l) { return Math.max(0, Math.min(l.reservado || 0, (l.reservado || 0) + (l.quarentena || 0) - (l.fisico || 0))); }   // reserva que o físico apto não cobre
+function cenReqsDoLote(c, l) { return Object.values(c.reqs || {}).filter(r => ['Liberadas', 'Em execução'].indexOf((c.ordens[r.os] || {}).etapa) >= 0 && r.itens.some(i => i.prod === l.prod && i.lote === l.lote && cenSaldoEntregar(i) > 1e-9)).map(r => r.id); }
+function cenSemFisicoTxt(c, l, q) { const rs = cenReqsDoLote(c, l); const quem = typeof g2quem === 'function' ? g2quem('almoxarife') : 'o almoxarife';
+  return 'Reserva sem físico: ' + cenNum(q) + ' ' + l.un + ' no lote ' + l.lote + (rs.length ? ' (' + rs.join(', ') + ')' : '') + ' · ' + quem + ' confere o lote e recebe a reposição, ou a ordem revê a quantidade; a reserva continua e a entrega acima do físico é recusada.'; }
+// Decisão única do valor contado contra o bloqueado e o reservado do lote (na contagem e na aprovação): {erro} ou {alerta}.
+// Quantidade contada: número finito, 0 ou mais (recusa vazio, NaN, Infinity e o null que o Infinity vira depois de salvo). Vale na contagem e na aprovação.
+function cenQtdContada(x) { return typeof x === 'number' && Number.isFinite(x) && x >= 0; }
+function cenAjusteDecisao(c, l, contado) {
+  if (!cenQtdContada(contado)) return { erro: 'Contagem inválida: informe a quantidade contada (número de 0 em diante). Nada foi alterado.' };
+  if (contado + 1e-9 < (l.quarentena || 0)) { const qa = typeof g2quem === 'function' ? g2quem('almoxarife') : 'o almoxarife', qg = typeof g2quem === 'function' ? g2quem('gestor') : 'o gestor';
+    return { erro: 'Contagem de ' + cenNum(contado) + ' ' + l.un + ' abaixo do bloqueado em quarentena (' + cenNum(l.quarentena) + ' ' + l.un + ') no lote ' + l.lote + ': nada foi alterado e o bloqueado não é liberado. ' + qa + ' confere a parcela bloqueada ou a perda e reconta; laudo ou perda do bloqueado: ' + qg + '.' }; }
+  const q = cenSemFisico(Object.assign({}, l, { fisico: contado })); if (!(q > 1e-9)) return { alerta: '' };
+  if (CEN_AJ_ABAIXO_RESERVA === 'recusa') return { erro: 'Contagem abaixo do reservado e bloqueado (' + cenNum((l.reservado || 0) + (l.quarentena || 0)) + ' ' + l.un + '). Recontar antes de ajustar.' };
+  return { alerta: cenSemFisicoTxt(c, l, q) }; }
+function cenAjusteNovo(c, key, sistema, contado, mv, em0) { const l = c.lotes[key]; c.ajustes = c.ajustes || [];
+  const aj = { id: 'AJ-' + (70 + c.ajustes.length + 1), key, prod: l.prod, lote: l.lote, un: l.un, sistema, contado, dif: contado - sistema, estado: 'Aguardando gestor', mv, em0: em0 || '' };
+  c.ajustes.push(aj); return aj; }
+// Contagem velha: lista dos movimentos físicos do lote depois da contagem (vazia se só o físico mudou), ou null se a contagem é atual.
+function cenContagemVelha(c, aj) { const l = c.lotes[aj.key]; const movs = c.movs || []; if (!(aj.mv >= 0) || aj.mv > movs.length) return [];   // sem marcador confiável
+  const ms = movs.slice(aj.mv).filter(m => m.prod === aj.prod && m.lote === aj.lote && CEN_MOV_SEM_FISICO.indexOf(m.tipo) < 0);
+  return (ms.length || !l || Math.abs(l.fisico - aj.sistema) > 1e-9) ? ms : null; }
+function cenVelhaTxt(c, aj, ms) { const l = c.lotes[aj.key] || {}; const un = aj.un; const T = { entrega: 'entrega', devolucao: 'devolução', 'recebimento-nf': 'entrada', ajuste: 'ajuste', inspecao: 'laudo que liberou a quarentena', 'inspecao-reprovada': 'laudo que reprovou' };
+  const um = m => (T[m.tipo] || m.tipo) + ' de ' + cenNum(Math.abs(m.qtd)) + ' ' + (m.un || un) + ((m.req || m.doc) ? ' · ' + (m.req || m.doc) : '');
+  const lst = ms.slice(0, 3).map(um).join('; ') + (ms.length > 3 ? '; e mais ' + (ms.length - 3) : '');
+  const fim = '. Nada foi alterado: reconte o lote ' + aj.lote + ' (Recontar) e aprove a nova diferença.';
+  if (!(aj.mv >= 0) || aj.mv > (c.movs || []).length) return 'A contagem ' + (aj.inv || aj.id) + ' está desatualizada: não tem o marcador da trilha do lote ' + aj.lote + ' e não dá para saber o que mudou depois dela' + fim;
+  return 'A contagem ' + (aj.inv || aj.id) + (aj.em0 ? ' de ' + aj.em0 : '') + ' está desatualizada: depois dela o lote ' + aj.lote + ' teve '
+    + (ms.length ? ms.length + cenPl(ms.length, ' movimento', ' movimentos') + ' (' + lst + ')' : 'o físico mudado') + '; o físico era ' + cenNum(aj.sistema) + ' ' + un + ' e agora é ' + cenNum(l.fisico) + ' ' + un + fim; }
 function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
-  if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');
+  if (!cenQtdContada(contado)) throw new Error('Informe a quantidade contada (número de 0 em diante).');
   const dif = contado - l.fisico; c.ajustes = c.ajustes || [];
   if (Math.abs(dif) < 1e-9) { cenMov(c, { tipo: 'contagem', prod: l.prod, lote: l.lote, qtd: 0, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' }); return { msg: 'Contagem confere: ' + cenNum(contado) + ' ' + l.un + ' no lote ' + l.lote + '.' }; }
-  if (contado + 1e-9 < l.reservado + l.quarentena) throw new Error('Contagem abaixo do reservado e bloqueado (' + cenNum(l.reservado + l.quarentena) + ' ' + l.un + '). Recontar antes de ajustar.');
-  const aj = { id: 'AJ-' + (70 + c.ajustes.length + 1), key, prod: l.prod, lote: l.lote, un: l.un, sistema: l.fisico, contado, dif, estado: 'Aguardando gestor' }; c.ajustes.push(aj);
-  return { msg: 'Divergência de ' + cenNum(dif) + ' ' + l.un + ' no lote ' + l.lote + ' · ' + aj.id + ' aguarda o gestor. O saldo não muda até a aprovação.' }; }
-function cenAprovarAjuste(c, id, aprovar) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
-  const l = c.lotes[aj.key]; if (aprovar) { l.fisico = aj.contado; aj.estado = 'Aprovado'; cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem: 'Ana (gestora)', origem: 'web' }); }
-  else aj.estado = 'Recusado';
-  return { msg: aj.id + (aprovar ? ' aprovado: lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' : ' recusado: recontar o lote ' + aj.lote + '.') }; }
+  const dc = cenAjusteDecisao(c, l, contado); if (dc.erro) throw new Error(dc.erro);
+  const aj = cenAjusteNovo(c, key, l.fisico, contado, c.movs.length, cenDia() + ' às ' + cenAgora());
+  return { msg: 'Divergência de ' + cenNum(dif) + ' ' + l.un + ' no lote ' + l.lote + ' · ' + aj.id + ' aguarda o gestor. O saldo não muda até a aprovação.' + (dc.alerta ? ' Se aprovado: ' + dc.alerta : ''), alerta: dc.alerta }; }
+// Aprovar (entrada única, da tela e direta): papel do gestor, contagem atual e a decisão do valor contado; aplica uma vez (só ajuste pendente).
+function cenAprovarAjuste(c, id, aprovar, ator) { const aj = (c.ajustes || []).find(a => a.id === id); if (!aj || aj.estado !== 'Aguardando gestor') throw new Error('Ajuste não está pendente.');
+  const l = c.lotes[aj.key]; let dc = { alerta: '' }; if (aprovar) { const quem = cenExigeAlc(ator, 'AL-09', 'Aprovar o ajuste ' + (aj.inv || aj.id));
+    const ms = cenContagemVelha(c, aj); if (ms) throw new Error(cenVelhaTxt(c, aj, ms));
+    dc = cenAjusteDecisao(c, l, aj.contado); if (dc.erro) throw new Error(dc.erro);
+    l.fisico = aj.contado; aj.estado = 'Aprovado'; aj.por = quem; aj.em = cenAgora(); aj.rev = cenRevisao(ator, aj.reg, 'registrou a contagem');
+    cenMov(c, { tipo: 'ajuste', prod: aj.prod, lote: aj.lote, qtd: aj.dif, un: aj.un, quem, origem: 'web', rev: aj.rev }); }
+  else { aj.estado = 'Recusado'; if (ator) { aj.por = cenQuem(ator, 'almoxarife', 'Pedir a recontagem do ' + (aj.inv || aj.id)); aj.em = cenAgora(); } }   // recusar = recontar: não muda saldo, qualquer contador pede; grava quem pediu (trilha)
+  return { msg: aj.id + (aprovar ? ' aprovado por ' + aj.por + ': lote ' + aj.lote + ' passa a ' + cenNum(aj.contado) + ' ' + aj.un + '.' + (aj.rev ? ' Fica ' + aj.rev + '.' : '') + (dc.alerta ? ' ' + dc.alerta : '') : ' recusado: recontar o lote ' + aj.lote + '.'), alerta: dc.alerta }; }
 
 // ---------- App de campo ----------
 function cenOnline(c) { return c.app.online !== false; }
-function cenConfirmarRecebimento(c, rid) {
+function cenConfirmarRecebimento(c, rid) { cenAppAtivo(c);
   const r = c.reqs[rid]; if (!r) throw new Error('Requisição não encontrada.');
   const pend = r.itens.filter(i => i.custodia > 0 && !i.confirmado); if (!pend.length) throw new Error('Nada entregue para confirmar.');
   pend.forEach(i => { i.confirmado = true; });
@@ -109,21 +528,42 @@ function cenConfirmarRecebimento(c, rid) {
   if (!m.sinc) c.app.fila.push(m.id);
   return { msg: 'Recebimento confirmado: ' + pend.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + (m.sinc ? '.' : '. Salvo no aparelho; envia quando houver sinal.') };
 }
-function cenIniciarTurno(c, id) {
+// Regra única de início (CMD-07) e de cada turno: todo componente da versão com o executor, entregue e confirmado (PRD 42.2 l.7067;
+// ESTOS-03 l.7103; 41.3 l.6864). Dano evitado: aplicar mistura incompleta. Confirmação: a da 1ª entrega de cada item (R7). Entrega parcial da quantidade vale (PRD l.1251): aqui só
+// se exige algo de cada componente. Usada pela web (osIniErro), pelo comando do app (cenIniciarTurno) e pelo cartão do app (mbPasso).
+// Devolve null ou {k:'entregar'|'rever'|'confirmar', its, t, q}: t = o que falta, q = quem resolve.
+function cenIniFalta(o, r) {
+  const its = ((o.ins || []).length && r) ? r.itens.filter(i => o.ins.some(x => x.p === i.prod)) : []; if (!its.length) return null;
+  const q = i => i.prod + ' ' + cenNum(i.custodia > 1e-6 ? i.custodia : cenSaldoEntregar(i)) + ' ' + i.un;
+  const sem = its.filter(i => !(i.custodia > 1e-6)), fal = sem.filter(i => cenSaldoEntregar(i) > 1e-6), esg = sem.filter(i => !(cenSaldoEntregar(i) > 1e-6));
+  if (fal.length) return { k: 'entregar', its: fal, t: r.id + ' sem entrega · ' + fal.map(q).join(', ') + ' a entregar.', q: cenAlmox() + ' entrega no Estoque; ' + (o.resp || 'o operador') + ' confirma o recebimento no app.' };
+  if (esg.length) return { k: 'rever', its: esg, t: esg.map(i => i.prod).join(', ') + ': todo o solicitado na ' + r.id + ' já foi consumido e nada está com ' + (o.resp || 'o operador') + '.', q: g2alcQuem('AL-02') + ' decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.' };
+  const nc = its.filter(i => !i.confirmado);
+  if (nc.length) { const quem = nc.map(i => i.quem || o.resp).filter((v, k, a) => a.indexOf(v) === k).join(', ');
+    return { k: 'confirmar', its: nc, t: nc.map(q).join(', ') + (nc.length > 1 ? ' entregues a ' : ' entregue a ') + quem + ', aguardando confirmação no app.', q: quem + ' confirma o recebimento no app.' }; }
+  return null; }
+function cenIniciarTurno(c, id) { cenAppAtivo(c);
   const o = c.ordens[id]; if (!o) throw new Error('Ordem não encontrada.');
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' não está liberada para execução.');
   if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
-  c.app.turno = { os: id, ini: cenAgora(), pausas: [], fim: null };
+  { const f = cenIniFalta(o, o.req && c.reqs[o.req]); if (f) throw new Error('Iniciar bloqueado: ' + f.t + ' ' + f.q); }   // mesma regra da web
+  c.app.nt = (c.app.nt || 0) + 1;   // chave do turno, gerada por quem inicia (o aparelho)
+  c.app.turno = { os: id, ini: cenAgora(), d: cenDdMm(CEN_DIA_OP), chave: 'TU-' + id + '-' + c.app.nt, pausas: [], fim: null };
   if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
   return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
 }
-function cenPausar(c) { const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+function cenPausar(c) { cenAppAtivo(c); const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
   const p = t.pausas[t.pausas.length - 1]; if (p && !p.fim) { p.fim = cenAgora(); return { msg: 'Turno retomado.' }; }
   t.pausas.push({ ini: cenAgora(), fim: null }); return { msg: 'Turno pausado.' }; }
 // Consumo informado acima da custódia (RN-018; CONC-07): o fato fica gravado Em conferência, sem baixa nem custódia negativa,
 // e o almoxarife concilia (CMD-50). A dose × área é só estimativa (CONC-13): nunca troca o consumo informado nem abre conferência
 // sozinha; a sugestão não editada acima da custódia (est) segue recusada como antes, para o executor informar quanto usou.
-const CEN_CONC_RESP = 'Rui (almoxarife)';
+// quem concilia (CMD-50, AL-10): o almoxarife do papel, não um nome fixo (CONF-01 R7; antes a constante 'Rui (almoxarife)')
+function CEN_CONC_RESP() { return cenAlmox(); }
+// quem concilia, texto único (O.S., Mapa, app e encerramento): o almoxarife confere ou recusa; o que passa da custódia é aceite do nível acima
+// da AL-10 (gestor pelo padrão 2; revisão do CTL-3, achado 7: o texto mandava o excedente para Rui)
+function cenConcQuem(c, ks) { const exc = (ks || []).some(k => k.relatado - cenConfCust(c, k) > 1e-9);
+  return CEN_CONC_RESP() + (exc ? ' confere; ' + g2alcQuem('AL-10', 'acima') + ' aceita o excedente' : ' concilia'); }
 function cenConfAbertas(c, os) { return (c.confs || []).filter(k => k.estado === 'Em conferência' && k.sinc && (!os || k.os === os)); }
 function cenSeloConf(c, os) { const o = c.ordens[os]; if (!o) return; const t = 'Consumo em conferência';
   o.selos = (o.selos || []).filter(s => s.t !== t); if (cenConfAbertas(c, os).length) o.selos.push({ t, c: 'yellow' }); }
@@ -133,45 +573,235 @@ function cenConfCust(c, k) { if (!c || k.estado !== 'Em conferência') return k.
   const r = k.req && c.reqs && c.reqs[k.req]; const it = r && r.itens.find(i => i.prod === k.prod); return it ? it.custodia : 0; }
 function cenConfTxt(k, c) { const cu = cenConfCust(c, k);
   return k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + cenPl(k.relatado, ' relatado', ' relatados') + ', ' + (cu > 1e-9 ? cenNum(cu) + ' ' + k.un + ' em custódia' : 'nada em custódia'); }
-// reserva feita para o item (na liberação da O.S. ou no início da demonstração); a mesma conta do Estoque (eresTot)
-function cenResTot(c, rid, prod) { const s0 = (typeof CEN0 !== 'undefined' && CEN0 && CEN0.reqs) ? CEN0.reqs[rid] : null;
-  if (s0 && s0.estado === 'Reservada') { const i = s0.itens.find(x => x.prod === prod); return i ? i.solicitado : 0; }
-  return (c.movs || []).filter(m => m.tipo === 'reserva' && m.req === rid && m.prod === prod).reduce((a, m) => a + (m.qtd || 0), 0); }
+// reserva feita para o item (na liberação da O.S. ou no início da demonstração); a mesma conta do Estoque (eresTot). Base da semente: o
+// solicitado da REQ Reservada; senão o entregue da semente (a reserva já consumida pela entrega). Mais as reservas e menos as baixas
+// (reserva-baixa, Fechar do beneficiamento) gravadas depois (rodada 3: a caixa em uso devolvida volta reservada também à REQ da semente)
+function cenResTot(c, rid, prod) { const s0 = (typeof CEN0 !== 'undefined' && CEN0 && CEN0.reqs) ? CEN0.reqs[rid] : null; const i0 = s0 ? s0.itens.find(x => x.prod === prod) : null;
+  const b = i0 ? (s0.estado === 'Reservada' ? i0.solicitado : (i0.entregue || 0)) : 0;
+  return b + (c.movs || []).filter(m => (m.tipo === 'reserva' || m.tipo === 'reserva-baixa') && m.req === rid && m.prod === prod).reduce((a, m) => a + (m.tipo === 'reserva' ? (m.qtd || 0) : -(m.qtd || 0)), 0); }
 function cenResPropria(c, rid, it, l) { return (l && it) ? Math.max(0, Math.min(l.reservado || 0, cenResTot(c, rid, it.prod) - (it.entregue || 0))) : 0; }
-// Fechar turno: registra hectares, horas e consumo (dose × área, ajustável). Fechar o turno não encerra a O.S.
-function cenFecharTurno(c, ha, horas, consumo, obs, est) {
-  const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
-  const o = c.ordens[t.os]; if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
-  const haPend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // apontado no aparelho, ainda sem sinal
-  const saldoApp = Math.max(0, o.saldo - haPend);
-  if (ha > saldoApp + 1e-9) throw new Error('Máximo ' + cenNum(saldoApp) + ' ha: é o saldo da ordem' + (haPend ? ' descontando ' + cenNum(haPend) + ' ha ainda no aparelho.' : '.'));
-  if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
-  t.fim = cenAgora();
-  const cons = consumo || {}; const es = est || []; const inf = {};   // informado pelo executor (a estimativa não editada não conta como informada)
-  Object.keys(cons).forEach(k => { if (cons[k] !== undefined && cons[k] !== null && es.indexOf(k) < 0) inf[k] = true; });
-  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = x.dose * ha; });
-  const r = o.req && c.reqs[o.req]; const conf = {};
-  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) {
-    if (!inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.');
-    conf[it.prod] = { q, it }; } }
-  Object.keys(inf).forEach(k => { if (!(r && r.itens.some(i => i.prod === k)) && cons[k] > 1e-9) conf[k] = { q: cons[k], it: null }; });   // nada dele com o executor
+// ---------- Apontamento: comando único da web (O.S. e Mapa) e do app (PRD 8.5; OSDIA-03/04) ----------
+// k = {os, d:'dd/mm' (data operacional), parc (talhão/parcela; vazio = a ordem toda), ha, h, cons {produto: usado informado},
+//      est [produtos com a sugestão não editada], origem 'web'|'app', quem, chave (de quem inicia: formulário da web ou turno do app), obs}
+// Consumo: informado é o fato; não informado = dose × área do trecho (SINT-C03), só estimativa (CONC-13): acima da custódia, estimativa é
+// recusada e informado vai para conferência com o almoxarife (CONC-07). Mesma chave = mesmo apontamento, nada de novo (OSDIA-03).
+// Duplicata provável (cenApDup) fica "Duplicidade a conferir": não soma área nem baixa consumo até a decisão (OSDIA-04; PRD 8.5).
+const CEN_DIA_OP = CEN0.diaOperacional;   // data padrão do apontamento na demonstração: a mesma na O.S., no Mapa e no turno do app
+const CEN_AP_DUP = 'Duplicidade a conferir', CEN_AP_DESC = 'Duplicidade · não somado', CEN_CC_AGUARDA = 'Aguarda duplicidade';
+function CEN_CONF_AP() { return g2alcQuem('AL-12'); }   // quem confere os apontamentos (AL-12, CMD-09): do papel, nunca nome fixo (CONF-01 R7)
+function cenDdMm(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] : String(iso || ''); }
+function cenApSomado(a) { return a.sinc !== false && (a.st === 'Provisório' || a.st === 'Conferido'); }   // entra no realizado, no custo e no acumulado
+// duplicata provável: mesma O.S. e data, talhão sobreposto, já recebida pelo servidor, outra chave. Turnos do mesmo operador no app não
+// são duplicata entre si (cada um foi aberto e fechado no aparelho, com chave própria).
+function cenApDup(o, ap) { const sob = (x, y) => !x || !y || x === y;
+  return (o.ap || []).filter(a => a !== ap && a.st !== 'Previsto' && a.st !== CEN_AP_DESC && a.sinc !== false && a.d === ap.d && sob(a.parc, ap.parc)
+    && a.chave !== ap.chave && !(a.origem === 'app' && ap.origem === 'app' && a.quem && a.quem === ap.quem)); }
+// relatos de dupDe que ainda valem ou aguardam decisão: o estornado ou guardado depois não conta (rótulo, "vale este" e mensagens)
+function cenApDupVivos(o, ap) { return (ap.dupDe || []).map(d => (o.ap || []).find(a => a.dia === d)).filter(a => a && (cenApSomado(a) || a.st === CEN_AP_DUP)); }
+// o que já foi feito sobre o relato somado K e impede estorná-lo por "vale este": consumo aceito pelo almoxarife (CMD-50) e lote de colheita
+// com destino, liberação ou operação (carLoteUso, carência). Devolve o texto ou ''.
+function cenApUsoK(c, o, K) {
+  const acs = (c.confs || []).filter(k => k.os === o.id && k.dia === K.dia && k.estado === 'Aceito'), ac = acs.map(k => k.id);
+  const por = acs.map(k => k.por || CEN_CONC_RESP()).filter((x, i, a) => a.indexOf(x) === i).join(', ');   // quem aceitou de fato (padrão 2: o excedente é do gestor)
+  const lid = typeof carLid === 'function' ? carLid(o.id, K.dia) : ''; const us = (lid && typeof carLoteUso === 'function') ? carLoteUso(c, lid) : [];
+  return [ac.length ? 'consumo já aceito por ' + por + ' (' + ac.join(', ') + ')' : '', us.length ? 'lote ' + lid + ' com ' + us.join(', ') : ''].filter(Boolean).join('; '); }
+// estado da decisão antes de gravar: realizado, saldo e custódia depois do estorno de K ("vale este"); pend = área no aparelho (conta no máximo)
+function cenApDecBase(c, o, K) { const r = o.req && c.reqs[o.req]; const cust = {};
+  if (r) r.itens.forEach(it => { cust[it.prod] = it.custodia + (K ? ((K.cons || {})[it.prod] || 0) : 0); });
+  return { r, cust, real: (o.realizado || 0) - (K ? K.ha : 0), saldo: (o.saldo || 0) + (K ? K.ha : 0), pend: (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0) }; }
+// consumo a gravar na decisão: o informado fica; a estimativa é refeita no acumulado de agora (SINT-C03) e, acima da custódia, é recusada como
+// na captura (AP-04): falta = o que precisa do usado. us = {produto: usado} informado na conferência (vira informado).
+function cenApDecCons(o, ap, b, us) { const cons = Object.assign({}, ap.cons || {}), inf = Object.assign({}, ap.inf || {}), falta = [];
+  (o.ins || []).forEach(x => { const it = b.r && b.r.itens.find(i => i.prod === x.p); if (!(x.p in cons) || inf[x.p] || !it) return;
+    const u = us ? us[x.p] : undefined; if (u !== undefined && u !== null && u !== '' && Number(u) >= 0) { cons[x.p] = Number(u); inf[x.p] = true; return; }
+    const q = cenQtdTrecho(x.dose, b.real + b.pend, ap.ha); cons[x.p] = q; if (q > (b.cust[x.p] || 0) + 1e-9) falta.push({ p: x.p, q, un: it.un, cust: b.cust[x.p] || 0 }); });
+  return { cons, inf, falta }; }
+// impressão do conteúdo do comando (ENG-021): a mesma chave com outro conteúdo é conflito, não "já registrado"
+function cenApImp(k) { const n = x => (x === undefined || x === null || x === '') ? null : Number(x);
+  const cs = Object.keys(k.cons || {}).filter(p => k.cons[p] !== undefined && k.cons[p] !== null).sort().map(p => p + '=' + Number(k.cons[p]));
+  return JSON.stringify([k.d || '', n(k.ha), n(k.h), k.parc || null, k.origem || 'web', k.quem || '', cs, (k.est || []).slice().sort()]); }
+function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
+function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
+  o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
+// ---------- Divergência de consumo/dose no apontamento (B-R8; PRD 41: dose é decisão agronômica; aprovar ≠ executar conforme) ----------
+// Planejado do trecho = dose × área pela regra única (cenQtdTrecho); informado = o fato do apontamento (o que veio editado, não a sugestão).
+// Precisão: a da regra de quantidade, centésimo da unidade em decimal meio para cima (cenQtd(x, 1)); nenhuma tolerância. O texto mostra o
+// informado nessas mesmas casas (9,995 L = 10,00 L = planejado 10 L: não diverge). LIM_DISP (20 %) é alçada de área dispensada e o
+// ×1,5/×0,5 do ajuste é aviso de digitação de dose: nenhum dos dois é tolerância de consumo, por isso não são usados aqui.
+// Divergente: o consumo fica como informado (nada é forçado à dose), o apontamento guarda planejado × informado por produto (ap.div), a O.S.
+// ganha o selo e o agrônomo revisa: aceita com motivo ou registra a correção/reaplicação; encerrar exige a revisão feita (cenPodeEncerrar).
+// Produto da ordem fora da requisição: nada esteve com o operador, o 0 é fato (cenApontar marca como informado) e diverge do planejado.
+// Dano evitado: subdose ou superdose aplicada sem decisão do agrônomo passar como execução conforme (resultado técnico e receituário).
+const CEN_DIV = 'Divergência de consumo/dose';
+function cenC2(x) { return Math.round(cenQtd(Number(x) || 0, 1) * 100); }   // centésimos pela regra de quantidade (decimal, meio para cima)
+function cenDivUn(c, o, p) { const x = (o.ins || []).find(i => i.p === p); if (x && x.un) return x.un;   // fora da ordem: a unidade do item ou do lote
+  const r = c && o.req && c.reqs[o.req]; const it = r && r.itens.find(i => i.prod === p); if (it && it.un) return it.un;
+  const l = c && c.lotes ? cenLote(c, p) : null; return (l && l.un) || ''; }
+// acumulado antes do apontamento (planejado do trecho): o gravado no apontamento; nos antigos, a soma dos dias somados anteriores
+function cenApAntes(o, ap) { return ap.ant !== undefined ? ap.ant : (o.ap || []).filter(a => a !== ap && a.dia < ap.dia && cenApSomado(a)).reduce((s, a) => s + (a.ha || 0), 0); }
+function cenApDiv(o, ap, antes, c) {
+  const inf = ap.inf || {}, cons = ap.cons || {}, out = [];
+  (o.ins || []).forEach(x => { if (!inf[x.p] || cons[x.p] === undefined) return; const plan = cenQtdTrecho(x.dose, antes, ap.ha), q = Number(cons[x.p]);
+    if (cenC2(q) !== cenC2(plan)) out.push({ p: x.p, un: x.un, plan, inf: q }); });
+  Object.keys(inf).forEach(p => { if (!(o.ins || []).some(x => x.p === p) && cenC2(cons[p]) > 0) out.push({ p, un: cenDivUn(c, o, p), plan: 0, inf: Number(cons[p]) }); });   // fora da ordem: planejado 0
+  return out; }
+function cenDivTxt(d) { const u = d.un ? ' ' + d.un : ''; const q = x => cenNum(cenC2(x) / 100);
+  if (d.rec) return d.p + ' planejado ' + q(d.plan) + u + ' × baixado ' + q(d.inf) + u + ' (informado ' + q(d.rec.rel) + u + ', relato ' + d.rec.conf + ' recusado no Estoque)';
+  return d.p + ' planejado ' + q(d.plan) + u + ' × informado ' + q(d.inf) + u; }
+function cenDivAbertas(o) { return (o.ap || []).filter(a => cenApSomado(a) && (a.div || []).length && !a.rev); }   // só o que somou: retido ou no aparelho ainda não conta
+function cenSeloDiv(c, id) { const o = c.ordens[id]; if (!o) return; o.selos = (o.selos || []).filter(s => String(s.t).indexOf(CEN_DIV) !== 0);
+  const ab = cenDivAbertas(o); if (!ab.length) return; const ps = [];
+  ab.forEach(a => a.div.forEach(d => { if (ps.indexOf(d.p) < 0) ps.push(d.p); })); o.selos.push({ t: CEN_DIV + ' · ' + ps.join(', '), c: 'red' }); }
+function cenDivMsg(ap) { return (ap && (ap.div || []).length) ? ' ' + CEN_DIV + ': ' + ap.div.map(cenDivTxt).join('; ') + ' · revisão técnica de ' + g2quem('agronomo') + '.' : ''; }
+// revisão técnica (agrônomo): dec 'aceitar' (com motivo) ou 'corrigir' (correção/reaplicação decidida, descrita). O consumo informado fica.
+// Mesma decisão de novo = já registrada (nada muda); outra decisão no mesmo dia = conflito (ENG-021).
+function cenDivRever(c, id, dia, dec, texto, ator) {
+  const quem = cenExigeAlc(ator, 'AL-02', 'Revisar a divergência de consumo/dose do dia ' + dia + ' da ' + id);
+  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && (a.div || []).length && cenApSomado(a));
+  if (!ap) throw new Error('O dia ' + dia + ' da ' + id + ' não tem divergência de consumo/dose em revisão.');
+  if (['aceitar', 'corrigir'].indexOf(dec) < 0) throw new Error('Decisão desconhecida: ' + dec + '.');
+  const txt = String(texto || '').trim(); const D = dec === 'aceitar' ? 'Aceita' : 'Correção decidida';
+  if (ap.rev) { if (ap.rev.dec === D && ap.rev.txt === txt) return { msg: 'Divergência do dia ' + dia + ' da ' + id + ' já revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): nada foi gravado de novo.', repetido: true };
+    throw new Error('A divergência do dia ' + dia + ' da ' + id + ' já foi revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): outra decisão é conflito, nada gravado.'); }
+  if (!txt) throw new Error((dec === 'aceitar' ? 'Informe o motivo para aceitar a divergência do dia ' : 'Descreva a correção ou reaplicação decidida para o dia ') + dia + ' da ' + id + '. Nada foi alterado.');
+  ap.rev = { dec: D, txt, quem, at: cenAgora() }; const rp = cenRevisao(ator, ap.quem, 'apontou'); if (rp) ap.rev.rp = rp;
+  cenSeloDiv(c, id); const t1 = txt.replace(/[.\s]+$/, '');
+  return { msg: (dec === 'aceitar' ? 'Divergência de consumo/dose do dia ' + dia + ' da ' + id + ' aceita por ' + quem + ': ' + t1 + '. O consumo informado fica como está.'
+    : 'Correção registrada por ' + quem + ' para o dia ' + dia + ' da ' + id + ': ' + t1 + '. O consumo informado fica como está.') + (rp ? ' Fica ' + rp + '.' : '') }; }
+// relato recusado no Estoque (CMD-50): nada daquele produto foi baixado no dia, então o que vale é 0 contra o planejado do trecho. A divergência
+// do dia passa a dizer isso (planejado × baixado, com o informado recusado) e, se já estava revisada sobre o informado, a revisão é reaberta
+// (a anterior fica no histórico). Dano evitado: o agrônomo decidir sobre um consumo que o Estoque declarou inexistente.
+function cenDivRecusa(c, k, quem) {
+  const o = c.ordens[k.os]; const ap = o && (o.ap || []).find(a => a.dia === k.dia && cenApSomado(a)); if (!ap) return '';
+  const x = (o.ins || []).find(i => i.p === k.prod); const plan = x ? cenQtdTrecho(x.dose, cenApAntes(o, ap), ap.ha) : 0; const old = ap.div || [];
+  const div = old.filter(d => d.p !== k.prod);
+  if (cenC2(plan) !== 0) div.push({ p: k.prod, un: k.un || cenDivUn(c, o, k.prod), plan, inf: 0, rec: { rel: k.relatado, conf: k.id, por: quem } });
+  const ord = p => { const i = (o.ins || []).findIndex(y => y.p === p); return i < 0 ? 1e9 : i; }; div.sort((a, b) => ord(a.p) - ord(b.p));
+  if (JSON.stringify(old) === JSON.stringify(div)) return '';
+  if (div.length) ap.div = div; else delete ap.div;
+  let re = ''; if (ap.rev) { ap.revAnt = (ap.revAnt || []).concat([Object.assign({}, ap.rev, { div: old, reaberta: 'relato ' + k.id + ' recusado no Estoque por ' + quem })]); delete ap.rev; re = ' A revisão anterior fica no histórico e a do dia é reaberta.'; }
+  cenSeloDiv(c, o.id);
+  const nd = div.find(d => d.p === k.prod);
+  return nd ? ' ' + CEN_DIV + ' do dia ' + k.dia + ' da ' + k.os + ': ' + cenDivTxt(nd) + ' · revisão técnica de ' + g2quem('agronomo') + '.' + re
+    : ' O dia ' + k.dia + ' da ' + k.os + ' fica sem divergência de consumo/dose de ' + k.prod + '.' + (re ? ' A revisão anterior fica no histórico.' : ''); }
+// baixa do consumo do apontamento, uma vez: até a custódia baixa; acima vira conferência com o almoxarife (CONC-07; CMD-50)
+function cenApBaixa(c, o, ap) {
+  const r = o.req && c.reqs[o.req]; const cons = ap.cons = ap.cons || {}; const inf = ap.inf || {}; const conf = {};
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9) conf[it.prod] = { q, it }; }
+  Object.keys(inf).forEach(k => { if (!(r && r.itens.some(i => i.prod === k)) && cons[k] > 1e-9) conf[k] = { q: cons[k], it: null }; });
   if (r) r.itens.forEach(it => { if (conf[it.prod]) return; const q = cons[it.prod] || 0; it.consumido += q; it.custodia -= q; });
-  Object.keys(conf).forEach(k => { delete cons[k]; });   // ap.cons = só o consumo baixado; o relatado em conferência fica em ap.conf
-  const dia = (o.ap || []).filter(a => a.st !== 'Previsto').length + 1;
-  const ap = { d: new Date().toLocaleDateString('pt-BR').slice(0, 5), dia, ha, h: horas, st: 'Provisório', cons, obs: obs || '', origem: 'app', sinc: cenOnline(c) };
-  o.ap = (o.ap || []).filter(a => a.st !== 'Previsto').concat([ap]);
-  if (ap.sinc) { o.realizado += ha; o.saldo = Math.max(0, o.saldo - ha); } else { c.app.fila.push('AP|' + t.os + '|' + dia); }
-  const m = cenMov(c, { tipo: 'consumo', os: t.os, req: o.req || '', qtd: 0, quem: c.app.operador, origem: 'app', sinc: ap.sinc, det: Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ') });
-  ap.mov = m.id;
+  Object.keys(cons).forEach(k => { if (conf[k] || !(cons[k] > 0)) delete cons[k]; });   // ap.cons = só o baixado; sem linha 0
+  c.movs = c.movs || []; const det = Object.keys(cons).map(k => k + ' ' + cenNum(cons[k], 1)).join(', ');
+  const m = (ap.mov && c.movs.find(x => x.id === ap.mov)) || cenMov(c, { tipo: 'consumo', os: o.id, req: o.req || '', qtd: 0, quem: ap.quem || 'web', origem: ap.origem, sinc: ap.sinc !== false, det });
+  m.det = det; ap.mov = m.id;
   const ks = Object.keys(conf).map(k => { const x = conf[k]; c.confs = c.confs || [];
-    const kc = { id: 'CC-' + (300 + c.confs.length + 1), os: t.os, req: o.req || '', prod: k, lote: x.it ? x.it.lote : '—', un: x.it ? x.it.un : ((o.ins || []).find(i => i.p === k) || {}).un || '',
-      relatado: x.q, custodia: x.it ? x.it.custodia : 0, dia, at: t.fim, quem: c.app.operador, resp: CEN_CONC_RESP, estado: 'Em conferência',
-      motivo: x.it ? 'Consumo acima da custódia' : 'Consumo sem material em custódia', mov: m.id, sinc: ap.sinc };
+    const kc = { id: 'CC-' + (300 + c.confs.length + 1), os: o.id, req: o.req || '', prod: k, lote: x.it ? x.it.lote : '—', un: x.it ? x.it.un : ((o.ins || []).find(i => i.p === k) || {}).un || '',
+      relatado: x.q, custodia: x.it ? x.it.custodia : 0, dia: ap.dia, at: ap.at, quem: ap.quem || 'web', resp: CEN_CONC_RESP(), estado: 'Em conferência',
+      motivo: x.it ? 'Consumo acima da custódia' : 'Consumo sem material em custódia', mov: m.id, sinc: ap.sinc !== false };
     c.confs.push(kc); return kc; });
-  if (ks.length) { ap.conf = {}; ks.forEach(k => { ap.conf[k.prod] = k.relatado; }); m.conf = ks.map(k => k.id); cenSeloConf(c, t.os); }
-  c.app.turno = null;
-  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.'
-    + (ks.length ? ' Consumo em conferência: ' + ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + CEN_CONC_RESP + ' concilia.' : '') };
+  if (ks.length) { ap.conf = Object.assign(ap.conf || {}); ks.forEach(k => { ap.conf[k.prod] = k.relatado; }); m.conf = (m.conf || []).concat(ks.map(k => k.id)); cenSeloConf(c, o.id); }
+  return ks; }
+// chegada ao servidor (comando com sinal ou envio da fila): soma uma vez, ou retém a duplicata provável sem efeito
+function cenApEntra(c, o, ap, baixado) {
+  const dup = cenApDup(o, ap);
+  if (dup.length) { ap.st = CEN_AP_DUP; ap.dupDe = dup.map(a => a.dia);
+    if (baixado) { const r = o.req && c.reqs[o.req];   // o aparelho já tinha baixado: desfaz, o relato fica guardado no apontamento
+      if (r) r.itens.forEach(it => { const q = (ap.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });
+      (c.confs || []).forEach(k => { if (k.os === o.id && k.dia === ap.dia && k.estado === 'Em conferência') k.estado = CEN_CC_AGUARDA; });
+      const mv = ap.mov && (c.movs || []).find(x => x.id === ap.mov); if (mv) { mv.det = ''; mv.obs = 'Retido: mesma data do dia ' + ap.dupDe.join(', ') + '; nada baixado até a decisão de ' + CEN_CONF_AP() + '.'; }
+      cenSeloConf(c, o.id); }
+    cenSeloAp(c, o.id); return { ap, ks: [], dup }; }
+  const ks = baixado ? [] : cenApBaixa(c, o, ap);
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloDiv(c, o.id);   // divergência de dose: revisão abre quando o apontamento soma (B-R8)
+  return { ap, ks, dup: [] }; }
+function cenApontar(c, k) {
+  const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
+  const ja = k.chave ? (o.ap || []).find(a => a.chave === k.chave) : null;
+  if (ja) { if (ja.imp ? ja.imp !== cenApImp(k) : (ja.ha !== Number(k.ha) || ja.d !== k.d)) throw new Error('Este registro (' + k.chave + ') já foi gravado como dia ' + ja.dia + ' (' + cenNum(ja.ha) + ' ha em ' + ja.d + ') com outro conteúdo: conflito, nada gravado.');   // ENG-021
+    return { ap: ja, repetido: true, ks: [], dup: [] }; }
+  if (o.etapa !== 'Em execução') throw new Error(k.os + ' não está em execução.');
+  if (!/^\d\d\/\d\d$/.test(k.d || '')) throw new Error('Informe a data do turno.');
+  const ha = Number(k.ha); if (!(ha > 0)) throw new Error('Informe a área feita (maior que 0 ha).');
+  const pend = (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0);   // no aparelho, ainda sem sinal
+  if (ha > o.saldo - pend + 1e-9) throw new Error('Máximo ' + cenNum(Math.max(0, o.saldo - pend)) + ' ha: é o saldo da ordem' + (pend ? ' descontando ' + cenNum(pend) + ' ha ainda no aparelho.' : '.'));
+  const cons = {}, es = k.est || [], inf = {};
+  Object.keys(k.cons || {}).forEach(p => { const q = k.cons[p]; if (q === undefined || q === null) return; cons[p] = q; if (es.indexOf(p) < 0) inf[p] = true; });
+  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador (regra única, SINT-C03)
+  // fora da requisição nada esteve com o operador: o 0 (vazio ou sugestão não editada, como no MB-03) é fato, não estimativa, e entra na
+  // comparação com o planejado (B-R8; revisão DOM achado 1: 100 % de subdose do produto não requisitado passava sem revisão)
+  (o.ins || []).forEach(x => { if (!(r && r.itens.some(i => i.prod === x.p))) { if (!inf[x.p]) { cons[x.p] = 0; inf[x.p] = true; } return; }
+    if (cons[x.p] === undefined) cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha); });
+  if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9 && !inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está '
+    + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). '
+    + (k.cons ? 'Informe quanto foi usado ou confira a entrega no Estoque.' : 'Aponte pela O.S., informando quanto foi usado, ou confira a entrega no Estoque.'))); }
+  const quem = k.quem || ((r && (r.itens.find(i => i.quem) || {}).quem) || o.resp || '');   // web: herda quem está com o material (AGENTS §3.3)
+  const feitos = (o.ap || []).filter(a => a.st !== 'Previsto'); const dia = feitos.length + 1;
+  // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
+  const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
+    chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
+  { ap.ant = (o.realizado || 0) + pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; }   // B-R8: antes da baixa (que tira a linha 0 de ap.cons); ant = base do planejado
+  const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
+  const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
+  o.ap = feitos.concat([ap]).concat(prev);
+  let R;
+  if (ap.sinc) R = cenApEntra(c, o, ap, false);
+  else { R = { ap, ks: cenApBaixa(c, o, ap), dup: [] }; c.app.fila.push('AP|' + k.os + '|' + dia); }   // no aparelho: baixa local; o servidor decide no envio
+  if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+  return R; }
+// decisão de quem confere (CMD-09; papel conferente, CTL-3 · ATOR: só quem tem o papel decide e só o nome dele é gravado). modo: 'somar' (outro turno: soma e baixa uma vez) · 'anterior' (mesmo turno: vale o já
+// somado; este fica guardado como duplicidade) · 'este' (mesmo turno: vale este; o já somado é estornado e guardado). O relógio ou a ordem de
+// chegada não define o vencedor (DEMO-11). Nenhum relato é apagado. true/false = 'somar'/'anterior' (chamadas antigas). us = usado informado
+// na conferência para a estimativa que passou da custódia (AP-04). ator = quem decide (perfil). Tudo é conferido antes de gravar: recusa não muda nada.
+function cenApDecidir(c, id, dia, modo, ator, us) {
+  const quem = cenExigeAlc(ator, 'AL-12', 'Decidir a duplicidade do dia ' + dia + ' da ' + id);   // dano evitado: decisão gravada em nome de Paula sem Paula
+  modo = modo === true ? 'somar' : (modo === false ? 'anterior' : modo);
+  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && a.st === CEN_AP_DUP);
+  if (!ap) throw new Error('O apontamento do dia ' + dia + ' não está em conferência de duplicidade.');
+  if (['anterior', 'este', 'somar'].indexOf(modo) < 0) throw new Error('Decisão desconhecida: ' + modo + '.');
+  const viv = cenApDupVivos(o, ap); const de = viv.map(a => a.dia).join(', '), de0 = (ap.dupDe || []).join(', ');
+  // AL-12 (revisão CONF F3): quem apontou um dos dias e decide a duplicidade fica com revisão posterior (padrão do ajuste e da quarentena, PEND-CTL-02)
+  const rv = [ap].concat(viv).map(a => cenRevisao(ator, a.quem, 'apontou o dia ' + a.dia)).find(Boolean) || '';
+  const ag = (c.confs || []).filter(k => k.os === id && k.dia === dia && k.estado === CEN_CC_AGUARDA);
+  const r = o.req && c.reqs[o.req]; const mvOf = a => a.mov && (c.movs || []).find(x => x.id === a.mov);
+  const guarda = (a, txt) => { a.st = CEN_AP_DESC; const m = mvOf(a); if (m) { m.det = ''; m.obs = txt; } };   // det vazio: o Estoque não lê item
+  if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
+  if (modo === 'anterior') {
+    ap.dec = { modo, quem, at: cenAgora(), rev: rv }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
+    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; k.via = 'CMD-09'; }); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);   /* via: a trilha conta o CMD-09, não um CMD-50 */
+    return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' + (rv ? ' Fica ' + rv + '.' : '') }; }
+  const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
+  if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
+    const uso = cenApUsoK(c, o, K); if (uso) throw new Error('"Vale este" não desfaz o dia ' + K.dia + ': ' + uso + '. Escolha "Mesmo turno: vale o dia ' + K.dia + '".'); }
+  const b = cenApDecBase(c, o, K);
+  if (ap.ha > b.saldo - b.pend + 1e-9) throw new Error((K ? '"Vale este" com ' : 'Somar ') + cenNum(ap.ha) + ' ha passa do saldo da ordem (' + cenNum(Math.max(0, b.saldo - b.pend)) + ' ha'
+    + (b.pend ? ', descontando ' + cenNum(b.pend) + ' ha ainda no aparelho' : '') + ')' + (K ? '.' : ': confira se é o mesmo turno do dia ' + (de || de0) + '.'));
+  const dc = cenApDecCons(o, ap, b, us);
+  if (dc.falta.length) throw new Error(dc.falta.map(f => f.p + ': a estimativa dose × área (' + cenNum(f.q) + ' ' + f.un + ') passa do que está em custódia (' + cenNum(f.cust) + ' ' + f.un + ')').join('; ')
+    + '. Informe o usado' + (ap.quem ? ' (com ' + ap.quem + ')' : '') + ' e decida de novo.');
+  ap.dec = { modo, quem, at: cenAgora(), rev: rv }; let est = '';
+  if (K) { if (r) r.itens.forEach(it => { const q = (K.cons || {})[it.prod] || 0; it.consumido -= q; it.custodia += q; });   // estorno vinculado (RN-020)
+    (c.confs || []).forEach(k => { if (k.os === id && k.dia === K.dia && k.estado === 'Em conferência') { k.estado = 'Recusado'; k.decisao = 'mesmo turno: vale o dia ' + dia; k.por = quem; k.via = 'CMD-09'; } });
+    o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
+    guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
+  ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
+  { ap.ant = b.real + b.pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; else delete ap.div; }   // B-R8: o usado informado na conferência também é fato
+  const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
+  if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+  return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
+    + (ks.length || ag.length ? ' Consumo em conferência: ' + cenConcQuem(c, ks.concat(ag)) + '.' : '') + (rv ? ' Fica ' + rv + '.' : '') }; }
+// Fechar turno (app): o mesmo comando da web, com a data e a chave do turno. Fechar o turno não encerra a O.S.
+function cenFecharTurno(c, ha, horas, consumo, obs, est) { cenAppAtivo(c);
+  const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
+  if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
+  if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
+  const R = cenApontar(c, { os: t.os, d: t.d || cenDdMm(CEN_DIA_OP), ha, h: horas, cons: consumo, est, obs, origem: 'app', quem: c.app.operador, chave: t.chave });
+  t.fim = cenAgora(); c.app.turno = null; const ap = R.ap;
+  if (R.repetido) return { msg: 'Turno já registrado como dia ' + ap.dia + ' (' + cenNum(ap.ha, 1) + ' ha): nada foi somado de novo.' };
+  if (R.dup.length) return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h, em conferência: já há ' + cenApDupTxt(R.dup) + ' em ' + ap.d
+    + '. Nada foi somado nem baixado; ' + CEN_CONF_AP() + ' decide se é outro turno.' };
+  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' + cenDivMsg(ap)
+    + (R.ks.length ? ' Consumo em conferência: ' + R.ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + cenConcQuem(c, R.ks) + '.' : '') };
 }
 // Conciliar o consumo em conferência (CMD-50, almoxarife). Prévia = efeito: aceitar baixa o relatado uma vez; o que passa da custódia
 // sai do lote do item (primeiro a reserva da própria requisição, depois o livre) como entrega a regularizar; sem origem no lote é
@@ -184,48 +814,357 @@ function cenConcPrevia(c, id) {
   const cust = it ? it.custodia : 0; const falta = Math.max(0, k.relatado - cust);
   const own = falta > 1e-9 ? cenResPropria(c, k.req, it, l) : 0; const res = Math.min(falta, own); const livre = falta - res;
   let erro = '';
-  if (falta > 1e-9 && (!l || cenDisp(l) + 1e-9 < livre)) erro = 'Sem origem física para ' + cenNum(falta) + ' ' + un + ' de ' + k.prod
+  if (falta > 1e-9 && cenLoteVencido(l)) erro = 'Lote ' + l.lote + ' vencido em ' + l.validade + ': não pode fornecer a retirada complementar. Revise a origem física ou recuse o relato; a custódia já entregue permanece preservada.';
+  else if (falta > 1e-9 && (!l || cenDisp(l) + 1e-9 < livre)) erro = 'Sem origem física para ' + cenNum(falta) + ' ' + un + ' de ' + k.prod
     + (l ? ': o lote ' + l.lote + ' tem ' + cenNum(cenDisp(l) + own) + ' ' + un + ' para esta O.S.' : ': sem lote no Estoque') + '. Conte o lote ou recuse o relato.';
   const ori = (!(falta > 1e-9) || !l) ? '' : cenNum(falta) + ' ' + un + cenPl(falta, ' sai', ' saem') + ' do lote ' + l.lote
     + ' (' + (res > 1e-9 ? (livre > 1e-9 ? cenNum(res) + ' ' + un + ' da reserva da ' + k.req + ' e ' + cenNum(livre) + ' ' + un + ' do livre' : 'reserva da ' + k.req) : 'livre') + ')';
   const txt = 'Baixa ' + cenNum(k.relatado) + ' ' + un + ' na ' + k.os + ': ' + [cust > 1e-9 ? cenNum(Math.min(cust, k.relatado)) + ' ' + un + ' da custódia de ' + k.quem : '', ori].filter(Boolean).join(' · ') + '.';
   return { k, r, it, l, cust, falta, res, livre, erro, txt };
 }
-function cenConciliar(c, id, aceitar, motivo) {
+function cenConciliar(c, id, aceitar, motivo, ator) {
   const p = cenConcPrevia(c, id); const k = p.k, r = p.r, l = p.l; let it = p.it;
-  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = CEN_CONC_RESP; cenSeloConf(c, k.os);
-    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') }; }
+  // padrão (2) adotado em 05/10/2026, o proprietário pode mudar: o que passa da custódia sai do lote (como um ajuste) → aceite do gestor
+  // coberto pela custódia: baixa a custódia como consumo, conferência física do almoxarife (PRD l.181) ou o gestor (revisão do CTL-3, achado 3;
+  // dano evitado: custódia baixada como consumo sem conferência). Recusar não mexe no saldo: aberto, com autor
+  const quem = (aceitar && !p.erro && p.falta > 1e-9) ? cenExigeAlc(ator, 'AL-10', 'Aceitar ' + cenNum(p.falta) + ' ' + k.un + ' acima da custódia (' + k.id + ')', 'acima')
+    : aceitar ? cenExigeAlc(ator, 'AL-10', 'Aceitar o relato ' + k.id) : cenQuem(ator, 'almoxarife', 'Recusar o relato ' + k.id);
+  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; k.em = cenAgora(); cenSeloConf(c, k.os); const dv = cenDivRecusa(c, k, quem);   // B-R8: a divergência segue o que vale
+    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') + dv }; }
   if (p.erro) throw new Error(p.erro);
   const falta = p.falta;
   if (falta > 1e-9) {
     l.fisico -= falta; l.reservado = Math.max(0, (l.reservado || 0) - p.res);   // a reserva da própria requisição não fica maior que a necessidade
     if (!it && r) { it = { prod: k.prod, lote: l.lote, un: k.un, emb: '', solicitado: 0, entregue: 0, consumido: 0, devolvido: 0, custodia: 0, confirmado: true }; r.itens.push(it); }
     if (it) { it.entregue += falta; it.custodia += falta; }
-    cenMov(c, { tipo: 'entrega', req: k.req, os: k.os, prod: k.prod, lote: l.lote, qtd: falta, un: k.un, quem: CEN_CONC_RESP + ' → ' + k.quem + ' · regularização ' + k.id, origem: 'web', conf: k.id });
+    cenMov(c, { tipo: 'entrega', req: k.req, os: k.os, prod: k.prod, lote: l.lote, qtd: falta, un: k.un, quem: quem + ' → ' + k.quem + ' · regularização ' + k.id, origem: 'web', conf: k.id });
   }
   if (it) { it.consumido += k.relatado; it.custodia = Math.max(0, it.custodia - k.relatado); }
-  cenMov(c, { tipo: 'consumo', os: k.os, req: k.req, qtd: 0, quem: CEN_CONC_RESP + ' · aceite ' + k.id, origem: 'web', sinc: true, det: k.prod + ' ' + cenNum(k.relatado, 1), conf: k.id });
+  cenMov(c, { tipo: 'consumo', os: k.os, req: k.req, qtd: 0, quem: quem + ' · aceite ' + k.id, origem: 'web', sinc: true, det: k.prod + ' ' + cenNum(k.relatado, 1), conf: k.id });
   const de = falta > 1e-9 ? ' do lote ' + l.lote + (p.res > 1e-9 ? ' (reserva da ' + k.req + ')' : '') : '';
-  k.estado = 'Aceito'; k.decisao = falta > 1e-9 ? 'origem ' + cenNum(falta) + ' ' + k.un + de : 'coberto pela custódia'; k.por = CEN_CONC_RESP; cenSeloConf(c, k.os);
+  k.estado = 'Aceito'; k.decisao = falta > 1e-9 ? 'origem ' + cenNum(falta) + ' ' + k.un + de : 'coberto pela custódia'; k.por = quem; k.em = cenAgora(); cenSeloConf(c, k.os);
   return { msg: k.id + ' aceito: ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + cenPl(k.relatado, ' baixado', ' baixados') + ' na ' + k.os
     + (falta > 1e-9 ? ' · ' + cenNum(falta) + ' ' + k.un + cenPl(falta, ' regularizado', ' regularizados') + de + '.' : '.') };
 }
-function cenOcorrencia(c, id, tipo, texto) { if (!texto) throw new Error('Descreva a ocorrência.');
+function cenOcorrencia(c, id, tipo, texto) { cenAppAtivo(c); if (!texto) throw new Error('Descreva a ocorrência.');
   const oc = { id: 'OC-' + (500 + c.ocorr.length + 1), os: id, tipo, texto, at: cenAgora(), sinc: cenOnline(c) }; c.ocorr.push(oc); if (!oc.sinc) c.app.fila.push(oc.id);
   return { msg: 'Ocorrência ' + oc.id + ' registrada' + (oc.sinc ? '.' : ' no aparelho.') }; }
-// Sinal: sem sinal tudo vai para a fila; ao voltar, a fila é enviada uma vez só (sem duplicar).
+// Sinal: a fila vai uma vez só; cada apontamento passa pela mesma chegada ao servidor (soma ou fica em conferência de duplicidade).
 function cenSinal(c, online) {
   c.app.online = !!online; if (!online) return { msg: 'Sem sinal: o app continua funcionando e guarda os registros.' };
-  let n = 0; c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
-      if (ap) { ap.sinc = true; o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); n++;
+  let n = 0; const ret = [];
+  c.app.fila.forEach(k => { if (k.indexOf('AP|') === 0) { const [, id, dia] = k.split('|'); const o = c.ordens[id]; const ap = (o.ap || []).find(a => String(a.dia) === dia && !a.sinc);
+      if (ap) { ap.sinc = true; n++;
         if (ap.mov) { const mv = c.movs.find(x => x.id === ap.mov); if (mv) mv.sinc = true; }
-        if (ap.conf) { (c.confs || []).forEach(k => { if (k.os === id && String(k.dia) === dia) k.sinc = true; }); cenSeloConf(c, id); } } }
-    else { const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k); if (m && !m.sinc) { m.sinc = true; n++; } } });
-  c.app.fila = []; return { msg: n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.' };
+        if (ap.conf) (c.confs || []).forEach(q => { if (q.os === id && String(q.dia) === dia) q.sinc = true; });
+        const e = cenApEntra(c, o, ap, true); if (e.dup.length) ret.push(id + ' dia ' + dia + ' (mesma data do ' + cenApDupTxt(e.dup) + ')');
+        if (ap.conf) cenSeloConf(c, id); } }
+    else { const P = c.producao || {}; const m = c.movs.find(x => x.id === k) || c.ocorr.find(x => x.id === k) || (P.cargas || {})[k] || (P.contagens || []).find(x => x.id === k);   // carga e contagem do app (colheita) entram uma vez
+      if (m && !m.sinc) { m.sinc = true; n++; } } });
+  c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
+    + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP() + ' decide.' : '') };
 }
-// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
+// Encerrar exige apontamentos enviados, nada em custódia (sobra devolvida) e a divergência de dose revisada pelo agrônomo (B-R8).
 function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
-  const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. ' + CEN_CONC_RESP + ' concilia no Estoque.';
-  const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
+  const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP() + ' decide se é outro turno.';
+  const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. No Estoque: ' + cenConcQuem(c, cf) + '.';
+  // todas as requisições da ordem (a do beneficiamento tem uma por lote de caixa, BEN-REV-20261009-03); com mais de uma, diz a REQ e o lote
+  const rs = Object.values(c.reqs || {}).filter(x => x.os === id && x !== r); if (r) rs.unshift(r);
+  const cust = []; rs.forEach(x => x.itens.forEach(i => { if (i.custodia > 0.001) cust.push(i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un + (rs.length > 1 ? ' (' + x.id + ' · ' + i.lote + ')' : '')); }));
+  if (cust.length) return 'Sobra em custódia: ' + cust.join(', ') + '. Receba a devolução no Estoque.';
+  const dv = cenDivAbertas(o); if (dv.length) return CEN_DIV + ' em revisão técnica: ' + dv.map(a => 'dia ' + a.dia + ' · ' + a.div.map(cenDivTxt).join('; ')).join(' | ') + '. ' + g2quem('agronomo') + ' aceita com motivo ou registra a correção na linha do apontamento.';   // B-R8
+  if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }
+
+
+
+// OS-LOTE-F1: agrupador operacional; a demanda e os fatos continuam nas O.S. de origem.
+function cenGrupoAtor(ator) { return cenExigeAlc(ator,'AL-19','Agrupar e programar O.S.'); }
+function cenGrupoCanon(x) {
+  if(Array.isArray(x)) return '['+x.map(cenGrupoCanon).join(',')+']';
+  if(x&&typeof x==='object') return '{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+cenGrupoCanon(x[k])).join(',')+'}';
+  return JSON.stringify(x);
+}
+function cenGrupoDose(n,un) {
+  const U={L:['L',1],mL:['L',1000],kg:['kg',1],g:['kg',1000]};
+  if(!U[un]||typeof n!=='number'||!Number.isFinite(n)||n<=0) throw new Error('Dose ou unidade não definida para agrupar.');
+  const d=cenDec(n); let a=d.n, e=d.e+(U[un][1]===1000?3:0);
+  while(e>0&&a%10n===0n){ a/=10n;e--; }
+  return {un:U[un][0],chave:String(a)+'e-'+e,dose:Number(a)/10**e};
+}
+function cenGrupoCompromisso(c,o) {
+  if(o.etapa!=='A liberar') return 'Somente A liberar, antes de compromissos';
+  if((o.realizado||0)>0||o.reservado||o.preparo||(o.ap||[]).some(a=>a.st!=='Previsto')) return 'Há realização, reserva ou preparo';
+  const r=o.req&&c.reqs[o.req];
+  if(r&&(r.itens||[]).some(i=>['solicitado','entregue','custodia','consumido'].some(k=>(i[k]||0)>0))) return 'Há requisição ou material comprometido';
+  if((c.movs||[]).some(m=>m.os===o.id)) return 'Há movimento vinculado: conferir a origem';
+  return '';
+}
+// O.S. comuns: projetar instrução vigente e alocação; não inventar ficha técnica.
+function cenGrupoLiquido(o,b){const t=[((b||{}).atv||{}).op,o.operacao,o.tipo,(b||{}).tipo].filter(Boolean).join(' ');
+  if(/fertirriga/i.test(t))return false;return /pulveriz|dessec|fungic|herbic|insetic|acaric|calda/i.test(t);}
+function cenGrupoComum(c,o){
+  const b=(o.osc||{}).novo||(typeof OSD!=='undefined'?(OSD.ords||[]).find(x=>x.id===o.id):null)||o;
+  // OS-AGRUPA-2 R6: só a calda (pulverização) pede pulverizador, vazão e tanque; a lanço, plantio e demais operações agrupam pela receita
+  const liq=cenGrupoLiquido(o,b),preparo=liq?cenPreparoOrdem(c,o):{ok:true,vazao:null,tanque:null,cargas:[]};if(!preparo.ok)throw Error(o.id+': '+preparo.motivo);
+  const fazenda=b.faz||o.faz,safra=b.saf||o.saf,cultura=b.cultura||o.cultura||((b.culturas||[]).length?(b.culturas||[]).slice().sort().join(' / '):''),operacao=(b.atv||{}).op||o.operacao;
+  if(!fazenda||!safra||!cultura||!operacao)throw Error(o.id+': conferir fazenda, safra, cultura e atividade na origem');
+  const rec=alDaOrdem(c,o.id),maquina=rec.find(x=>AL0.tipo[x.r]==='Máquina'),impl=rec.find(x=>AL0.tipo[x.r]==='Implemento');
+  if(!maquina)throw Error(o.id+': alocar máquina na O.S.');
+  const prods=(o.ins||[]).map(x=>{const d=cenGrupoDose(x.dose,x.un);return {id:x.p,p:x.p,un:d.un,dose:d.dose,chave:d.chave}}).sort((a,b)=>a.id.localeCompare(b.id));
+  if(!prods.length||new Set(prods.map(x=>x.id)).size!==prods.length)throw Error(o.id+': conferir produtos da instrução');
+  const implemento=liq?'Pulverizador':(impl?AL0.classe[impl.r]||AL0.nome[impl.r]:'Sem implemento');
+  const pulv=liq?(rec.find(x=>x.classe==='Pulverizador')||{}).r||null:null;
+  const f={comum:true,fazenda,safra,cultura,operacao,tipo:liq?'liquido':'solido',volumeHa:preparo.vazao,tanqueUtil:preparo.tanque,pulv,parcela:b.cult||b.talhao||o.talhao,
+    receita:(b.atv||{}).nome||operacao,receitaVersao:o.versao,recursos:{maquina:AL0.classe[maquina.r],implemento},insumos:prods.map(x=>({p:x.p,id:x.id})),prazo:b.jan||''};
+  if(!f.parcela)throw Error(o.id+': conferir talhão da origem');
+  return {o,f,prods,preparo,eq:cenGrupoCanon({comum:true,fazenda,safra,cultura,operacao,atividade:f.receita,implemento,volumeHa:f.volumeHa,insumos:prods.map(({id,un,chave})=>({id,un,chave}))})};
+}
+function cenGrupoPreviaComum(c,rows,ator,programa){
+  if(programa)throw Error('Conferir os recursos na O.S.; o grupo usa a alocação vigente de cada origem.');
+  const a=rows[0];if(rows.some(x=>!x.f.comum||x.eq!==a.eq))throw Error('Atividade, receita efetiva, cultura, vazão ou contexto incompatíveis: reveja as origens.');
+  if(new Set(rows.map(x=>x.f.parcela)).size!==rows.length)throw Error('Destino repetido na mesma operação.');
+  // OS-AGRUPA-2 R4: a ordem é a da rota escolhida na tela (antes: prazo da origem)
+  const ids=rows.map(x=>x.o.id),liq=a.f.tipo==='liquido';
+  // EX-54 §7: carga fechada por O.S. até o RT decidir o rateio da calda contínua (a tela mostra o ganho que ele traria)
+  const continua=false,cargas=[];
+  for(const r of rows)for(const x of r.preparo.cargas)cargas.push({n:cargas.length+1,vol:x.vol,destinos:[{os:r.o.id,area:x.area}],produtos:x.prods.map(i=>{const d=cenDec(i.q),div=['mL','g'].includes(i.un)?1000:1;return {id:i.p,p:i.p,un:i.un==='mL'?'L':i.un==='g'?'kg':i.un,q:Number(d.n)/10**d.e/div}})});
+  const pend=liq?'Sequência da rota; cada O.S. prepara as suas cargas, sem transferir restos entre O.S. (calda contínua com rateio depende da decisão do RT).':'Sequência da rota; operação sem calda: abastecimento por O.S.';
+  return {comum:true,ids,versoes:Object.fromEntries(ids.map(id=>[id,cenGrupoSnapshot(c,id)])),assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:'versão individual por O.S.',area:rows.reduce((s,x)=>s+x.o.area,0),produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)})),cargas,continua,horas:null,inicio:null,fim:null,programa:null,programacao:null,pendencias:[pend]};
+}
+function cenGrupoFicha(c,id,grupoPermitido) {
+  const o=c.ordens[id]; if(!o) throw new Error(id+': ordem não encontrada');
+  const bloqueio=cenGrupoCompromisso(c,o); if(bloqueio) throw new Error(id+': '+bloqueio);
+  const outro=Object.values(c.gruposExec||{}).find(g=>g.id!==grupoPermitido&&g.ids.includes(id));
+  if(outro) throw new Error(id+': vinculada a '+outro.id);
+  if(!o.loteFicha){if(!(Number.isFinite(o.area)&&o.area>0&&o.saldo===o.area))throw Error(id+': área autorizada deve estar integralmente disponível');return cenGrupoComum(c,o);}
+  const f=o.loteFicha;
+  if(!f||f.versaoOS!==o.versao) throw new Error(id+': definir parâmetros da versão vigente');
+  const keys=['organizacao','fazenda','safra','cultura','operacao','metodo','receita','receitaVersao','perfil','regulagem','ocorrencia','parcela'];
+  if(keys.some(k=>typeof f[k]!=='string'||!f[k].trim())) throw new Error(id+': parâmetro técnico ou origem ausente');
+  if(!['liquido','solido'].includes(f.tipo)||f.base!=='ha') throw new Error(id+': base ou tipo fora desta fatia');
+  if(!(Number.isFinite(o.area)&&o.area>0&&o.saldo===o.area)) throw new Error(id+': área autorizada deve estar integralmente disponível');
+  if(!Array.isArray(f.janela)||f.janela.length!==2||!f.janela.every(x=>typeof x==='string'&&/Z$|[+-]\d\d:\d\d$/.test(x)&&Number.isFinite(Date.parse(x)))||Date.parse(f.janela[0])>=Date.parse(f.janela[1])) throw new Error(id+': janela técnica com fuso ausente ou inválida');
+  if(f.tipo==='liquido'&&!(Number.isFinite(f.volumeHa)&&f.volumeHa>0)) throw new Error(id+': volume de aplicação não definido');
+  if(!(o.ins||[]).length||!Array.isArray(f.insumos)||f.insumos.length!==o.ins.length) throw new Error(id+': instrução de produtos incompleta');
+  if(!f.recursos||!f.recursos.maquina||!f.recursos.implemento)throw Error(id+': classe de recursos ausente');
+  const prods=o.ins.map(x=>{
+    const ms=f.insumos.filter(m=>m.p===x.p),m=ms[0];
+    if(ms.length!==1||!m.id||!m.formulacao||!m.concentracao||m.base!==f.base) throw new Error(id+': identidade, formulação ou base de '+x.p+' ausente');
+    const d=cenGrupoDose(x.dose,x.un); return {id:m.id,p:x.p,formulacao:m.formulacao,concentracao:m.concentracao,base:m.base,un:d.un,dose:d.dose,chave:d.chave};
+  }).sort((a,b)=>a.id.localeCompare(b.id));
+  if(new Set(prods.map(x=>x.id)).size!==prods.length) throw new Error(id+': produto repetido na receita');
+  const eq={}; ['organizacao','fazenda','safra','cultura','operacao','metodo','receita','receitaVersao','perfil','regulagem','tipo','base'].forEach(k=>eq[k]=f[k]);
+  eq.recursos=f.recursos;
+  eq.volumeHa=f.tipo==='liquido'?f.volumeHa:null;
+  eq.insumos=prods.map(({id,formulacao,concentracao,base,un,chave})=>({id,formulacao,concentracao,base,un,chave}));
+  return {o,f,prods,eq:cenGrupoCanon(eq)};
+}
+function cenGrupoEscopo(c,id){const o=c.ordens[id];return cenGrupoCanon({area:o.area,ins:o.ins,ficha:o.loteFicha,comum:o.loteFicha?null:cenGrupoComum(c,o).eq,preparo:o.loteFicha?null:cenGrupoComum(c,o).preparo.tanque});}
+function cenGrupoSnapshot(c,id) {
+  const o=c.ordens[id];return cenGrupoCanon({o,req:o&&o.req?c.reqs[o.req]:null,movs:(c.movs||[]).filter(m=>m.os===id)});
+}
+// ENG-011: arredondar na unidade da origem antes de converter; 5 mL não vira 0,01 L.
+function cenGrupoQuantidade(rows,produto){
+  const ds=rows.map(r=>{const m=r.f.insumos.find(x=>x.id===produto),i=r.o.ins.find(x=>x.p===m.p),d=cenDec(cenQtd(i.dose,r.o.area));
+    return {n:d.n,e:d.e+(['mL','g'].includes(i.un)?3:0)};});
+  const e=Math.max(...ds.map(d=>d.e)),n=ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n);
+  return Number(n)/10**e;
+}
+function cenGrupoCargasContinuas(rows,a,tanque){
+  const area=rows.reduce((s,x)=>s+x.o.area,0),volume=area*a.f.volumeHa,n=Math.max(1,Math.ceil(volume/tanque-1e-9));
+  if(!Number.isSafeInteger(n)||n<1||n>10000) throw new Error('Preparo fora da faixa.');
+  let ri=0,rest=rows[0].o.area;const preparado={};
+  return Array.from({length:n},(_,i)=>{const vol=Math.min(tanque,Math.max(0,volume-i*tanque));let ha=vol/a.f.volumeHa;const destinos=[];
+    while(ha>0&&ri<rows.length){const q=Math.min(ha,rest);destinos.push({os:rows[ri].o.id,area:q});ha-=q;rest-=q;if(rest<=0){ri++;rest=ri<rows.length?rows[ri].o.area:0;}}
+    // Arredonda cada origem antes de converter unidades; diferenças acumuladas fecham o total da O.S.
+    const produtosCarga=a.prods.map(x=>{
+      const ds=destinos.map(d=>{const r=rows.find(r=>r.o.id===d.os),m=r.f.insumos.find(m=>m.id===x.id),ins=r.o.ins.find(ins=>ins.p===m.p);
+        const fim=Math.min(r.o.area,(preparado[d.os]||0)+d.area),q=cenDec(cenQtdTrecho(ins.dose,preparado[d.os]||0,fim-(preparado[d.os]||0)));
+        return {n:q.n,e:q.e+(['mL','g'].includes(ins.un)?3:0)};});
+      const e=Math.max(0,...ds.map(d=>d.e)),q=Number(ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n))/10**e;
+      return {id:x.id,p:x.p,un:x.un,q};});
+    destinos.forEach(d=>{preparado[d.os]=(preparado[d.os]||0)+d.area;});
+    return {n:i+1,vol,destinos,produtos:produtosCarga}; });
+}
+function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
+  cenGrupoAtor(ator);
+  if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length) throw new Error('Selecione ao menos duas O.S. distintas.');
+  const rows=ids.map(id=>cenGrupoFicha(c,id,grupoPermitido)),a=rows[0];
+  if(rows.some(x=>x.f.comum))return cenGrupoPreviaComum(c,rows,ator,programa);
+  if(rows.some(x=>x.eq!==a.eq)) throw new Error('Receita, dose, base, cultura ou método incompatíveis: reveja as origens.');
+  if(new Set(rows.map(x=>x.f.ocorrencia+'|'+x.f.parcela)).size!==rows.length||new Set(rows.map(x=>x.f.parcela)).size!==rows.length) throw new Error('Destino repetido ou sobreposto na mesma operação.');
+  const inicio=Math.max(...rows.map(x=>Date.parse(x.f.janela[0]))),fim=Math.min(...rows.map(x=>Date.parse(x.f.janela[1])));
+  if(inicio>=fim) throw new Error('As janelas não têm interseção comum.');
+  const area=rows.reduce((s,x)=>s+x.o.area,0); if(!Number.isFinite(area)) throw new Error('Área total fora da faixa.');
+  const produtos=a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)}));
+  if(produtos.some(x=>!Number.isFinite(x.q))) throw new Error('Quantidade fora da faixa.');
+  const capacidades=rows.every(x=>Number.isFinite(x.f.capacidadeHaH)&&x.f.capacidadeHaH>0&&Number.isFinite(x.f.deslocamentoH)&&x.f.deslocamentoH>=0&&Number.isFinite(x.f.setupH)&&x.f.setupH>=0);
+  const horas=capacidades?rows.reduce((s,x)=>s+x.o.area/x.f.capacidadeHaH+x.f.deslocamentoH+x.f.setupH,0):null;
+  const pendencias=[];if(horas===null) pendencias.push('Horas não calculadas · informar capacidade e tempos');
+  else if(horas>(fim-inicio)/3600000) pendencias.push('Duração não cabe na janela comum · rever programação');
+  // Preparo é projeção. Capacidade útil deve ser explícita e igual; não escolher conjunto da primeira ordem.
+  const tanques=rows.map(x=>x.f.tanqueUtil),tanque=tanques.every(t=>Number.isFinite(t)&&t>0&&t===tanques[0])?tanques[0]:null;
+  let cargas=null;
+  if(a.f.tipo==='liquido'&&tanque!==null) cargas=cenGrupoCargasContinuas(rows,a,tanque);
+  else if(a.f.tipo==='liquido') pendencias.push('Preparo não calculado · conferir capacidade útil do conjunto');
+  const versoes={};ids.forEach(id=>versoes[id]=cenGrupoSnapshot(c,id));
+  const previa={ids:ids.slice(),versoes,assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:a.f.receitaVersao,area,produtos,cargas,horas,inicio:new Date(inicio).toISOString(),fim:new Date(fim).toISOString(),pendencias};
+  previa.programa=programa?cenClone(programa):null;previa.programacao=cenGrupoProgramacao(c,ids,programa,previa);
+  if(!programa)previa.pendencias.push('Programação não confirmada · escolher recursos e início');
+  return previa;
+}
+function cenGrupoCriar(c,previa,ator,chave) {
+  const por=cenGrupoAtor(ator);if(!chave) throw new Error('Intenção ausente: refaça a prévia.');
+  return cenIdem(c,chave,cenGrupoCanon(['grupo',previa,por]),'Agrupamento',()=>{
+    const p=cenGrupoPrevia(c,previa.ids,ator,undefined,previa.programa);
+    if(cenGrupoCanon(p.versoes)!==cenGrupoCanon(previa.versoes)) throw new Error('Uma origem mudou: confira versões e refaça a prévia.');
+    const gs=c.gruposExec||(c.gruposExec={});let seq=1;while(gs['GRP-'+seq])seq++;
+    const id='GRP-'+seq,g={id,versao:1,ids:p.ids,receita:p.receita,assinatura:p.assinatura,origens:p.origens,escopos:Object.fromEntries(p.ids.map(os=>[os,cenGrupoEscopo(c,os)])),por,at:cenAgora(),historico:[{acao:'Composição confirmada',versao:1,ids:p.ids.slice(),por,at:cenAgora()}]};
+    if(p.programacao){for(const os of p.ids){const o=c.ordens[os];o.prog=p.programacao[os];o.rec={};o.resp=AL0.pessoas[p.programa.operador].nome;o.recHist=(o.recHist||[]).concat([{por,at:cenAgora(),t:'Programação confirmada no '+id}]);}g.programa=p.programa;}
+    g.preparo=cenClone({ids:p.ids,cargas:p.cargas,produtos:p.produtos,area:p.area});
+    gs[id]=g;
+    return {msg:id+' confirmado · origens preservadas; aprovação e liberação continuam por O.S.',grupo:id,versao:1,itens:p.ids.map(os=>({os,estado:'Vinculada',versao:c.ordens[os].versao}))};
+  },{resultado:true});
+}
+// Separar exige só ausência de compromisso nas linhas vivas: versão nova ou cancelamento de uma origem não pode prender o grupo.
+function cenGrupoSeparavel(c,ids){ ids.forEach(k=>{const o=c.ordens[k];if(o&&o.etapa==='Canceladas')return;const b=o?cenGrupoCompromisso(c,o):'origem ausente';if(b)throw new Error(k+': '+b);}); }
+function cenGrupoSeparar(c,id,os,versao,esperadas,ator,chave) {
+  const por=cenGrupoAtor(ator);if(!chave) throw new Error('Intenção ausente.');
+  return cenIdem(c,chave,cenGrupoCanon(['separar',id,os,versao,esperadas,por]),'Separação',()=>{
+    const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||!g.ids.includes(os)) throw new Error('Composição mudou: releia o grupo.');
+    // Compromisso em qualquer linha impede desfazer coordenação que já serviu à execução.
+    g.ids.forEach(k=>{ if(!esperadas||cenGrupoSnapshot(c,k)!==esperadas[k]) throw new Error(k+': origem mudou; refaça a prévia de separação.'); }); cenGrupoSeparavel(c,g.ids);
+    g.ids=g.ids.filter(k=>k!==os);g.versao++;g.historico.push({acao:'Destino separado',os,versao:g.versao,por,at:cenAgora()});
+    return {msg:os+' separada de '+id+' · origem, aprovação e demanda preservadas.',grupo:id,versao:g.versao,itens:[{os,estado:'Separada'}]};
+  },{resultado:true});
+}
+// Plano confirmado: não recalcular silenciosamente depois de reservar ou executar.
+function cenGrupoCaldas(c,id){
+  const g=(c.gruposExec||{})[id],p=g&&g.preparo;
+  const vazio=motivo=>({cargas:[],talhoes:[],motivo});
+  if(!p)return vazio('Conferir o preparo na programação do grupo.');
+  let mudou=false;try{mudou=cenGrupoCanon(p.ids)!==cenGrupoCanon(g.ids)||g.ids.some(os=>!c.ordens[os]||c.ordens[os].etapa==='Canceladas'||g.origens[os]!==c.ordens[os].versao||g.escopos[os]!==cenGrupoEscopo(c,os))}catch(e){mudou=true}if(mudou)return vazio('Composição ou versão mudou: conferir novamente o preparo antes de executar.');
+  if(!p.cargas)return vazio('Preparo não calculado: conferir capacidade útil do conjunto.');
+  const cargas=cenClone(p.cargas);
+  const talhoes=g.ids.map((os,i)=>{const o=c.ordens[os],cs=cargas.filter(x=>x.destinos.some(d=>d.os===os));
+    return {ordem:i+1,os,talhao:o.talhao||os,area:o.area,cargas:cs.map(x=>x.n),quantidade:cs.length,
+      volume:cs.reduce((s,x)=>s+x.destinos.filter(d=>d.os===os).reduce((n,d)=>n+d.area*(o.loteFicha?o.loteFicha.volumeHa:cenGrupoComum(c,o).f.volumeHa),0),0)};});
+  return {cargas,talhoes,motivo:''};
+}
+// Projeção logística: reservas continuam pertencendo às requisições de cada O.S.
+function cenGrupoSeparacao(c,id) {
+  const g=(c.gruposExec||{})[id];if(!g)throw Error('Grupo não encontrado.');
+  const linhas=new Map(),pendencias=[];
+  for(const os of new Set(g.ids)){
+    const o=c.ordens[os],r=o&&o.req&&c.reqs[o.req];
+    if(!o||!r||r.os!==os){pendencias.push({os,motivo:!o?'Origem não encontrada':!r?'Sem requisição liberada':'Requisição de outra origem'});continue;}
+    if(o.etapa==='Canceladas'||r.estado==='Cancelada')continue;
+    for(const it of r.itens||[]){
+      const l=(c.lotes||{})[it.prod+'|'+it.lote];
+      if(!l){pendencias.push({os,motivo:'Lote '+it.lote+' não encontrado'});continue;}
+      if(cenLoteVencido(l)){pendencias.push({os,motivo:'Lote '+it.lote+' vencido: revisar a reserva antes de separar'});continue;}
+      const q=cenResPropria(c,r.id,it,l);
+      if(!(q>0))continue;
+      const key=JSON.stringify([it.prod,it.lote,it.un]),row=linhas.get(key)||{produto:it.prod,lote:it.lote,un:it.un,q:0,origens:[]};
+      row.origens.push({os,req:r.id,q});linhas.set(key,row);
+    }
+  }
+  for(const row of linhas.values()){
+    const ds=row.origens.map(x=>cenDec(x.q)),e=Math.max(...ds.map(x=>x.e));
+    row.q=Number(ds.reduce((n,x)=>n+x.n*10n**BigInt(e-x.e),0n))/10**e;
+  }
+  return {linhas:Array.from(linhas.values()),pendencias};
+}
+function cenGrupoRealizado(c,id) {
+  const g=(c.gruposExec||{})[id];if(!g) throw new Error('Grupo não encontrado.');
+  return g.ids.map(os=>{const o=c.ordens[os];if(!o)return {os,etapa:'Origem ausente',area:null,realizado:null,saldo:null,pendentes:1,consumo:[]};return {os,etapa:o.etapa,area:o.area,realizado:o.realizado||0,saldo:o.saldo,pendentes:(o.ap||[]).filter(a=>a.sinc===false||!['Previsto','Conferido','Provisório'].includes(a.st)).length,consumo:(o.ap||[]).filter(a=>a.sinc!==false&&['Conferido','Provisório'].includes(a.st)).map(a=>({dia:a.dia,cons:a.cons,sinc:a.sinc}))};});
+}
+function cenGrupoRecursos(c,ids) {
+  const A=typeof alVigente==='function'?alVigente(c):[],out=[];
+  ids.forEach(id=>{
+    const blocos=A.filter(x=>x.os===id);
+    if(!blocos.length) out.push({os:id,motivo:'Sem programação de recursos · alocar na O.S.'});
+    const o=c.ordens[id];let f=o&&o.loteFicha||{};if(o&&!o.loteFicha){try{f=cenGrupoComum(c,o).f}catch(e){out.push({os:id,motivo:e.message});return}}const recs=[...new Set(blocos.map(x=>x.r))];
+    const maquinas=recs.filter(r=>AL0.tipo[r]==='Máquina'),impl=recs.filter(r=>AL0.tipo[r]==='Implemento'),pessoas=recs.filter(r=>AL0.tipo[r]==='Pessoa');
+    if(maquinas.length!==1||impl.length!==1||pessoas.length!==(f.tipo==='liquido'?2:1))out.push({os:id,motivo:'Conjunto incompleto · conferir máquina, implemento, operador e caldeiro'});
+    const req=f.recursos;
+    if(!req||!req.maquina||!req.implemento)out.push({os:id,motivo:'Classe do conjunto pendente na instrução técnica'});
+    else if(maquinas.some(r=>AL0.classe[r]!==req.maquina)||impl.some(r=>AL0.classe[r]!==req.implemento))out.push({os:id,motivo:'Classe incompatível com a instrução'});
+    const ativos=AL0.ativos||{},preq=AL0.preq||{};
+    for(const im of impl){const aid=AL0.ativo[im],pot=maquinas.map(r=>(ativos[AL0.ativo[r]]||{}).pot);
+      if(!(Number.isFinite(preq[aid])&&pot.length===1&&Number.isFinite(pot[0])&&pot[0]>=preq[aid]))out.push({os:id,motivo:'Potência do conjunto insuficiente ou não informada'});}
+    const habs=AL0.ophab&&AL0.ophab[f.operacao];
+    const op=pessoas.find(r=>AL0.classe[r]==='operador'),cal=pessoas.find(r=>AL0.classe[r]==='caldeiro');
+    if(!op||(f.tipo==='liquido'&&!cal)||!Array.isArray(habs))out.push({os:id,motivo:'Habilidades da operação pendentes'});
+    for(const r of pessoas){const pessoa=(AL0.pessoas||{})[r],ex=r===cal?[AL0.calda]:(habs||[]);
+      if(!pessoa||typeof AL_HABIL==='undefined'||!pessoa.hab)out.push({os:id,motivo:'Habilitação pendente · '+r});
+      else{const datas=[AL_HABIL.dia,...blocos.filter(b=>b.r===r).map(b=>b.dia)],valida=datas.map(d=>AL_HABIL.verificar(pessoa,d)).find(x=>!x.ok)||{ok:true},tem=String(pessoa.hab).split(';').map(x=>x.trim());
+        if(!valida.ok)out.push({os:id,motivo:AL0.nome[r]+' · '+valida.m});
+        if(ex.some(h=>!h||!tem.includes(h)))out.push({os:id,motivo:AL0.nome[r]+' · habilidade da operação ausente'});}}
+    const fuso=(o.prog||{}).fuso||(f.janela&&f.janela[0].slice(-6));
+    for(const b of (f.comum?[]:blocos)){const dt=Date.parse(b.dia+'T00:00:00'+fuso),ini=dt+b.ini*3600000,fim=dt+b.fim*3600000;
+      if(!Number.isFinite(ini)||!Number.isFinite(fim)||fim<=ini||!f.janela||ini<Date.parse(f.janela[0])||fim>Date.parse(f.janela[1]))out.push({os:id,motivo:'Programação fora da janela técnica ou inválida'});}
+    for(const r of new Set(blocos.map(x=>x.r))){
+      if(alBloqueado(c,r)) out.push({os:id,motivo:'Recurso '+r+' bloqueado na Manutenção'});
+      alChoques(c,r,id,blocos.filter(x=>x.r===r),A).forEach(x=>out.push({os:id,motivo:alChoqueTxt(x)}));
+    }
+  });return out;
+}
+function cenGrupoProgramacao(c,ids,proposta,previa){
+  if(!proposta)return null;
+  const campos=['maquina','implemento','operador'].concat(c.ordens[ids[0]].loteFicha.tipo==='liquido'?['caldeiro']:[]),recs=campos.map(k=>proposta[k]);
+  if(recs.some(r=>!r||!AL0.nome[r])||new Set(recs).size!==recs.length)throw Error('Escolha máquina, implemento, operador e caldeiro distintos.');
+  if(typeof proposta.inicio!=='string'||!/[+-]\d\d:\d\d$/.test(proposta.inicio)||!Number.isFinite(Date.parse(proposta.inicio)))throw Error('Informe o início com o fuso da fazenda.');
+  if(previa.horas===null)throw Error('Informe capacidade, deslocamento e setup antes de programar.');
+  const comeco=Date.parse(proposta.inicio),fim=comeco+previa.horas*3600000;
+  if(comeco<Date.parse(previa.inicio)||fim>Date.parse(previa.fim))throw Error('A sequência não cabe na janela comum.');
+  const fusos=ids.map(id=>c.ordens[id].loteFicha.janela.map(iso=>/Z$/.test(iso)?'+00:00':iso.slice(-6))).flat();
+  if(new Set(fusos).size!==1)throw Error('Fusos das origens divergentes: confira a janela da fazenda antes de programar.');
+  if(proposta.inicio.slice(-6)!==fusos[0])throw Error('Use o fuso da fazenda da janela técnica (UTC'+fusos[0]+'): outro fuso desloca os blocos e esconde conflitos.');
+  const fuso=proposta.inicio.slice(-6),sinal=fuso[0]==='-'?-1:1,offset=sinal*(Number(fuso.slice(1,3))*60+Number(fuso.slice(4)))*60000;
+  const prog={},k=cenClone(c);let cursor=comeco;
+  for(const id of ids){const f=c.ordens[id].loteFicha,h=c.ordens[id].area/f.capacidadeHaH+f.deslocamentoH+f.setupH;
+    const a=new Date(cursor+offset),b=new Date(cursor+h*3600000+offset),dia=a.toISOString().slice(0,10);
+    if(dia!==b.toISOString().slice(0,10))throw Error(id+': sequência cruza meia-noite; reveja a janela operacional.');
+    const ini=a.getUTCHours()+a.getUTCMinutes()/60+a.getUTCSeconds()/3600,fim=b.getUTCHours()+b.getUTCMinutes()/60+b.getUTCSeconds()/3600;
+    if(fim<=ini)throw Error(id+': duração insuficiente para programar.');
+    prog[id]={fuso,blocos:recs.map(r=>({r,os:id,dia,ini,fim,h:fim-ini,sit:'condicional'}))};
+    k.ordens[id].prog=prog[id];k.ordens[id].rec={};cursor+=h*3600000;
+  }
+  const problemas=cenGrupoRecursos(k,ids);if(problemas.length)throw Error(problemas.map(x=>x.os+': '+x.motivo).join(' · '));
+  return prog;
+}
+function cenGrupoProgramar(c,id,versao,previa,ator,chave){
+  const por=cenGrupoAtor(ator);if(!chave)throw Error('Intenção ausente.');
+  return cenIdem(c,chave,cenGrupoCanon(['programar',id,versao,previa,por]),'Programação',()=>{
+    const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||cenGrupoCanon(g.ids)!==cenGrupoCanon(previa.ids))throw Error('Composição mudou: releia o grupo.');
+    const p=cenGrupoPrevia(c,g.ids,ator,id,previa.programa);
+    if(cenGrupoCanon(p.versoes)!==cenGrupoCanon(previa.versoes))throw Error('Uma origem mudou: refaça a prévia de programação.');
+    if(!p.programacao)throw Error('Escolha recursos e início para programar.');
+    if(p.assinatura!==g.assinatura||g.ids.some(os=>g.origens[os]!==c.ordens[os].versao||!g.escopos||g.escopos[os]!==cenGrupoEscopo(c,os)))throw Error('Versão técnica mudou após a composição.');
+    for(const os of g.ids){c.ordens[os].prog=p.programacao[os];c.ordens[os].rec={};c.ordens[os].resp=AL0.pessoas[p.programa.operador].nome;c.ordens[os].recHist=(c.ordens[os].recHist||[]).concat([{por,at:cenAgora(),t:'Programação revista no '+id}]);}
+    g.preparo=cenClone({ids:p.ids,cargas:p.cargas,produtos:p.produtos,area:p.area});
+    g.programa=p.programa;g.versao++;g.historico.push({acao:'Programação confirmada',versao:g.versao,por,at:cenAgora()});
+    return {grupo:id,versao:g.versao,msg:id+' programado · aprovação e liberação permanecem por origem.',itens:g.ids.map(os=>({os,estado:'Programada'}))};
+  },{resultado:true});
+}
+
+
+// SU-08: perda usa o ajuste canônico; aprovação permanece em cenAprovarAjuste.
+function cenPerdaNova(c, key, qtd, motivo, ator) {
+  const l = c.lotes[key];
+  if (!l) throw new Error('Lote não encontrado.');
+  if (typeof qtd !== 'number' || !Number.isFinite(qtd) || qtd <= 0 || qtd > l.fisico)
+    throw new Error('Informe uma perda positiva até o físico do lote.');
+  const mot = String(motivo || '').trim();
+  if (!mot) throw new Error('Informe o motivo da perda.');
+  const por = cenQuem(ator, 'almoxarife', 'Registrar perda');
+  const contado = l.fisico - qtd;
+  const dc = cenAjusteDecisao(c, l, contado);
+  if (dc.erro) throw new Error(dc.erro);
+  const aj = cenAjusteNovo(c, key, l.fisico, contado, (c.movs || []).length, cenDia() + ' às ' + cenAgora());
+  aj.tipo = 'perda'; aj.motivo = mot; aj.reg = por;
+  return {id: aj.id, alerta: dc.alerta, msg: aj.id + ' aguarda aprovação do gestor. O saldo não foi alterado.'};
+}

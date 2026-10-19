@@ -1,0 +1,19 @@
+  ok  MA #ativo=a01: sem erro de JS
+  ok  A1 · "Registrar e bloquear" no T1 já bloqueado acrescenta o INSP-106 como 2º motivo e diz "segue bloqueado"
+  ok  A1 · o detalhe do T1 lista os 2 motivos, cada um com achado e ordem
+  ok  A1 · em Em conferência a primária da OM-0233 diz que encerra só o motivo dela e o T1 segue bloqueado
+  ok  A1 (S1) · o T1 segue Bloqueado pelo freio (Falta: INSP-106 · sem ordem); o app e as O.S. continuam vendo "bloqueado"
+  ok  A1 · o motivo sem ordem faz o detalhe do T1 pedir "Criar ordem corretiva"
+  ok  A1: sem erro de JS
+  ok  A2 · a repetição mais grave avisa e oferece "Somar ao INSP-104 e bloquear" como primária
+  ok  A2 (S2) · somar leva a gravidade ao INSP-104 e bloqueia o Trator 02 com ele como motivo
+  ok  A2: sem erro de JS
+  FALHA A6 (S3) · com a busca "Trator 03", a primária é "Gerar 1 ordem preventiva" e gera só a do Trator 03 · [['v:PM-02|a03|s1'], 'Gerar 3 ordens preventivas', 3, ['a03', 'a06', 'a11']]
+  ok  A8 (S3) · Ver como João: inicia a OM-0228, mede conforme, conclui e declara a bomba apta (responsável técnico)
+  ok  A8: sem erro de JS
+  ok  A10 (S3) · a linha do comboio mostra "3,3 km/L" (unidade na célula); a coluna é "Consumo"
+  FALHA A11 (S3) · mudou em outra aba: o 1º toque é recusado ("Mudou desde que você abriu") e nada grava; o toque seguinte, já com o estado novo, libera · ['', '✓\nOM-0234 liberada para a oficina · executante Zé · reservado: Kit filtros MF 7719 1 kit, Óleo de motor 15W-40 16 L · conflito com a OS-0420 aceito e avisado ao', 'Liberadas', 'Liberadas']
+  ok  A11: sem erro de JS
+  FALHA F22 · Vincular o Trator 04 ao PM-03 sugere o marco da OM-0205 (02/06 · 3.300 h), corrigível com motivo · ['', 'Vincular ativo\n×\nPM-03 · Tratores John Deere · revisões · o marco é a última execução do serviço.\nAtivo\nTrator 04 · JD 5078E\nLeitura atual: 3.410 h · 12/09 · Apontamento de turno\nSem OM encerrada do mesmo serviço: informe data e leitura ou ', '', '']
+  ok  fim: sem erro de JS
+RESULTADO: 15/18 ok · FALHAS: A6 (S3) · com a busca "Trator 03", a primária é "Gerar 1 ordem preventiva" e gera só a do Trator 03; A11 (S3) · mudou em outra aba: o 1º toque é recusado ("Mudou desde que você abriu") e nada grava; o toque seguinte, já com o estado novo, libera; F22 · Vincular o Trator 04 ao PM-03 sugere o marco da OM-0205 (02/06 · 3.300 h), corrigível com motivo

@@ -1,0 +1,6 @@
+      medidas: {'390 CF-06.dc.html': ([[44, 44]], [[390, 844, 390]], True), '390 CF-01.dc.html': ([[44, 44]], [[390, 844, 390]], True), '390 OS.dc.html': ([[44, 44]], [], True), '390 MA.dc.html': ([], [], True), '1440 CF-06.dc.html': ([[32, 32]], [[1440, 900, 1440]], False), '1440 CF-01.dc.html': ([[32, 32]], [[1440, 900, 1440]], False), '1440 OS.dc.html': ([[32, 32]], [], False), '1440 MA.dc.html': ([], [], False)}
+OK    A1 390 px com toque: o "×" dos painéis abertos mede ≥ 44 × 44 px (pelo menos 3 telas)
+OK    A2 1440 px com mouse: o mesmo "×" continua com 32 × 32 px
+OK    A3 o fundo escuro que fecha o painel continua cobrindo a tela (sem o alvo de 44 px)
+OK    A4 nenhum erro de JavaScript
+RESULTADO: 4/4 ok

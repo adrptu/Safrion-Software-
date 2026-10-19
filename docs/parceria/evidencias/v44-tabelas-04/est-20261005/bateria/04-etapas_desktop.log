@@ -1,0 +1,6 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock timeout 900 python3 etapas_celular_test.py desktop
+FALHA 15 1440 px igual à base base ausente: /home/user/sp-tab/tools/prototipo/v37/gen37/../gen37_antes/_render
+
+RESULTADO: 0 ok · 1 falhas (desktop)
+  - 15 1440 px igual à base
+[exit 1]

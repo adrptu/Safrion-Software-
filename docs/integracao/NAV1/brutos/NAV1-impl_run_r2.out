@@ -1,0 +1,43 @@
+== links
+TOTAL 8 · falhas 0
+rc=0
+== regras
+RESULTADO 11/11
+rc=0
+== pa_lista: python3 pa_lista_test.py (16:04:14)
+RESULTADO: 16 ok · 0 falhas
+rc=0
+== patest: python3 patest.py (16:07:42)
+RESULTADO: 46 ok · OK
+rc=0
+== verif_pa: python3 verif_pa.py <scratchpad>/nav1 (16:10:54)
+erros JS: []
+rc=0
+== acao_familias: python3 acao_unica_test.py familias (16:15:04)
+RESULTADO: 8 ok · 0 falhas (familias)
+rc=0
+== acao_v3: python3 acao_unica_test.py v3 (16:17:34)
+RESULTADO: 10 ok · 0 falhas (v3)
+rc=0
+== comp_matriz: python3 componentes_test.py matriz (16:21:21)
+RESULTADO: 3 ok · 0 falhas (matriz)
+rc=0
+== comp_interacao: python3 componentes_test.py interacao (16:22:55)
+  - 14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover
+rc=1
+== comp_ajustes2: python3 componentes_test.py ajustes2 (16:28:03)
+RESULTADO: 2 ok · 0 falhas (ajustes2)
+rc=0
+== etapas_celular: python3 etapas_celular_test.py (16:33:04)
+KeyError: 'sobrepoe'
+rc=1
+== agrofit: python3 agrofit_test.py (16:37:38)
+RESULTADO: 17/17 ok · 49 s []
+rc=0
+== varredura: python3 varredura.py (16:41:34)
+RESULTADO: 140/140 páginas sem erro
+rc=0
+== dup: python3 ../ferramentas/acoes_duplicadas.py . /tmp/NAV1-dup.json (16:49:36)
+RESULTADO: 140 páginas · 0 com ação repetida · erros 0
+rc=0
+FIM 16:58:03

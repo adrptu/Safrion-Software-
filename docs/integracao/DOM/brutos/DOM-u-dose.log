@@ -1,0 +1,24 @@
+REPRO B-R8 {"esperado":{"Glifosato 480":20,"2,4-D 806":10,"Óleo mineral":5},"retorno":{"r":{"msg":"Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma)."}},"realizado":10,"saldo":150,"st":"Provisório","div":[{"p":"2,4-D 806","un":"L","plan":10,"inf":0},{"p":"Óleo mineral","un":"L","plan":5,"inf":0}],"selos":[{"t":"Divergência de consumo/dose · 2,4-D 806, Óleo mineral","c":"red"}]}
+OK    D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha
+OK    D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)
+OK    D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)
+OK    D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"
+OK    D01e revisão técnica pendente do agrônomo (uma, do dia 1)
+OK    D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"
+OK    D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho
+OK    D03 sugestão dose × área não editada: sem divergência nem selo
+OK    D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)
+OK    D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda
+OK    D05b aceitar sem motivo é recusado, nada muda
+OK    D05c dia sem divergência em revisão é recusado
+OK    D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está
+OK    D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda
+OK    D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai
+OK    D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa
+OK    D07b encerrar é recusado e nada muda
+OK    D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"
+OK    D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão
+OK    D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez
+OK    D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa
+OK    D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão
+RESULTADO unit: 22/22

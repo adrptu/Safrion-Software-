@@ -1,0 +1,132 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Qualidade e rastreabilidade
+Qualidade e rastreabilidade
+i
+1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Inspeções e decisões
+Inspecionar lote
+5 de 5
+INSPEÇÃO · LOTE
+⇅
+PRODUTO
+⇅
+PADRÃO · AMOSTRA
+⇅
+RESULTADO
+⇅
+DECISÃO
+⇅
+RESPONSÁVEL · PRAZO
+⇅
+AÇÃO
+⇅
+INSP-88
+L27-013
+Café beneficiado
+defeitos/peneira · COB · 3 × 300 g
+Defeitos acima do tipo 6
+Bloqueado
+Marta
+até 3 dias · 25/09
+Decidir lote
+INSP-93
+L26-118 · retorno RC-12
+Mamão A (retorno)
+maturação/firmeza · 12 frutos
+Maturação avançada · 40%
+Retorno bloqueado
+Marta
+vence hoje
+Decidir lote
+INSP-92
+L39-120/121
+Mamão classe A e B
+calibre e firmeza · coleta hoje
+Aguardando resultado
+Em inspeção
+Marta
+vence hoje
+Registrar resultado
+INSP-91
+L38-118
+Mamão de campo · consumido na OB-0110
+calibre/firmeza · 24 frutos
+Conforme
+Liberado
+Marta
+no prazo
+—
+INSP-85
+Silo 2
+Milho seco
+umidade/impureza · 3 × 1 kg
+14,0% · 0,9% conforme
+Liberado
+Rui
+no prazo
+—
+Carência e destino dos lotes de mamão
+Ver carência no mapa
+Demonstração · pós-colheita, laudos e destinos sintéticos
+7 lotes · 1 não conforme · 2 pendentes · 3 sem destino · 1 conforme no escopo
+LC-0510-2
+colhido · Pivô 6 (Lagoa Grande) · 18/09
+destino: Mercado sintético de demonstração
+Não conforme · Mercado sintético de demonstração
+Ver avaliação ›
+LM-39-01
+mistura · Pivô 6 (Lagoa Grande) · 18/09 + Pivô 19 (Lagoa Grande) · 21/09 · mistura no packing · classe A
+destino: Exportação · União Europeia
+Pendente · Exportação · União Europeia
+Ver pendência ›
+LC-0505-2A
+divisão · Pivô 19 (Lagoa Grande) · 22/09 · classe A
+destino: Exportação · mercado a definir
+Pendente · Exportação · mercado a definir
+Ver pendência ›
+LC-0505-2B
+divisão · Pivô 19 (Lagoa Grande) · 22/09 · classe B
+destino: sem destino
+Não avaliado · sem destino
+Definir destino ›
+LC-0505-2
+colhido · Pivô 19 (Lagoa Grande) · 22/09
+destino: sem destino
+Não avaliado · sem destino
+Definir destino ›
+LC-0505-1
+colhido · Pivô 19 (Lagoa Grande) · 21/09
+destino: sem destino
+Não avaliado · sem destino
+Definir destino ›
+LC-0510-1
+colhido · Pivô 6 (Lagoa Grande) · 16/09
+destino: Mercado interno · Brasil
+Conforme no escopo · Mercado interno · Brasil
+Ver avaliação ›
+Árvore de lotes e recolhimento
+Rastrear clientes
+⋯
+Tela: Qualidade e rastreabilidade · 1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar

@@ -8,7 +8,9 @@ from journeys import free
 R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=Chrome(port=free()); J=c.js
-CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
+CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t));
+  if(!e){ const it=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].find(x=>n(x.textContent)===t||n(x.textContent).startsWith(t)); if(!it) return 'NÃO ACHEI: '+t; it.closest('.g2mais-w').querySelector('.g2mais').click(); it.click(); return 'ok (⋯ da linha)'; }
+  e.click(); return 'ok';})"""   # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): a ação da linha mora no ⋯; abre-se o ⋯ e escolhe-se o item, como o usuário
 SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
 TOAST=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
 BODY=lambda: J("document.body.innerText")
@@ -60,7 +62,9 @@ try:
     # ---------- CO-05 · origem única ----------
     go('CO-05.dc.html'); b=BODY()
     chk('CO-05: OB-0110 com origem OC-0510 (sem OC-0507)', 'OC-0510' in b and 'OC-0507' not in b)
-    chk('CO-05: âncoras DEMO-19', all(x in b for x in ['balanço 0,0 t · sem divergência','balanço 0 · conciliado','perdas 4,1%','L27-013 bloqueado · INSP-88','Encerrada ≠ liberada','fechar processo não libera lote']))
+    # TEXTO-2 (14/10/2026): a regra "fechar processo não libera lote" saiu do corpo para a dica ⓘ da tela (data-dica do header button.g2-info); os dados seguem à vista
+    dica=J("(()=>{ const i=document.querySelector('header button.g2-info'); return i?(i.getAttribute('data-dica')||''):''; })()") or ''
+    chk('CO-05: âncoras DEMO-19', all(x in b for x in ['balanço 0,0 t · sem divergência','balanço 0 · conciliado','perdas 4,1%','L27-013 bloqueado · INSP-88','Encerrada ≠ liberada']) and 'Fechar processo não libera lote' in dica, dica[:200])
     # ---------- CO-02det · ciclo OC-0510 ----------
     go('CO-02det.dc.html')
     clk('Registrar avanço'); time.sleep(.3)
@@ -79,7 +83,9 @@ try:
     go('CO-04.dc.html'); b=BODY()
     chk('CO-04: RC-13 como retorno bloqueado e L27-020 fora de carga comum', 'RC-13' in b and 'L27-020 · soja (retorno)' in b and 'L27-020 · café' not in b)
     clk('Receber bloqueado'); t=TOAST(); chk('Receber bloqueado não aumenta vendável', 'estoque vendável não aumenta' in t, t)
-    chk('CO-04: âncoras DEMO-07', 'L38-118' in b and 'entrada NÃO equivale a liberação comercial' in b)
+    # TEXTO-2 (14/10/2026): a regra "a entrada não equivale a liberação comercial" saiu do corpo para a dica ⓘ da tela
+    dica=J("(()=>{ const i=document.querySelector('header button.g2-info'); return i?(i.getAttribute('data-dica')||''):''; })()") or ''
+    chk('CO-04: âncoras DEMO-07', 'L38-118' in b and 'entrada não equivale a liberação comercial' in dica.lower(), dica[:200])
     # ---------- CO-06 · retorno L26-118 ----------
     go('CO-06.dc.html'); b=BODY()
     chk('CO-06: inspeção do L26-118 (RC-12)', 'L26-118 · retorno RC-12' in b and '1 lote bloqueado · decisão até 25/09' in b)

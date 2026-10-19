@@ -22,7 +22,7 @@ ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra) if extra else ''))
 def novo(nome,doc,papel='Fornecedor',canais=()):
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()"); time.sleep(.4)
+    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Criar parceiro').click()"); time.sleep(.4)
     J(f"({SETV})('#{FID('nome')}',{json.dumps(nome)})"); J(f"({SETV})('#{FID('cnpj')}',{json.dumps(doc)})"); time.sleep(.2)
     J(f"{CAN(papel)}.click()")
     for cn in canais: J(f"{CAN(cn)}.click()")

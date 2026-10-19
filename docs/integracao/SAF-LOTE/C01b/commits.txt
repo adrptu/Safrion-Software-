@@ -1,0 +1,2 @@
+64a30418d8e9a7eca8dd3d0884b51b608fad52d3 SAF-C01: saídas brutas da verificação
+d1b81f4770b828dbf0b3d9671879dba500b5ec08 SAF-C01: correções da verificação

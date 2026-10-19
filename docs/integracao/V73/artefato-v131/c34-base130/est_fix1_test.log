@@ -1,0 +1,21 @@
+NF 4533: NF 4533 24/09/2026 26/09/2026 PC-090 Ver pedido Coop. Vale Semente de soja 58 W S58-0926 20.000 kg 20.000 kg 0 kg 20.000 kg Vencido — validade 08/2026 [[1659, 1280]]
+  OK  NF 4533 vencida: situação "Vencido" (não "Aguarda laudo") e grade sem rolagem
+S58-0926: sem linha | k4: Bloqueado para inspeção: KCl 60% 10.000 kg · vencido, fora do disponível: Semente de soja 58 W 20.000 kg · custódia fica fora do depósito e não soma no físico
+  FALHA lote vencido S58-0926: sem "Liberar após inspeção"; Situação do lote "Vencido · não volta ao disponível", Validade 08/2026 · ('sem linha', 'sem linha', 'sem linha')
+  OK  faixa da etapa 4 separa inspeção de vencido
+  FALHA etapa 4: página sem rolagem; "Liberar após inspeção" do KCl inteiro (à vista ou pelo teclado) · [[1645, 1280]]
+  OK  cenário: 20.000 kg do lote vencido seguem bloqueados, nenhuma liberação
+cenReceber: 40 L de Óleo mineral recebidos no lote O26-07V (Almox. defensivos) e bloqueados até a inspeção.
+O26-07V: sem linha
+  FALHA lote vencido recebido por cenReceber: sem "Liberar após inspeção", Situação do lote "Vencido", Validade 07/2026 · ('sem linha', 'sem linha', 'sem linha')
+  FALHA etapa 5: página sem rolagem; "Aprovar ajuste" da INV-2609 inteiro (à vista ou pelo teclado) · [[1280, 1280]]
+contadores: ['', 'Paula (almoxarife)', 'Rui (almoxarife)']
+  FALHA nova contagem INV-2612 com diferença: grade sem rolagem, Recontar e Aprovar ajuste inteiros · [[1280, 1280]]
+  OK  contador "Rui (almoxarife)" (mesmo papel da trilha), sem "conferente" na tela
+k2: 5 itens a entregar · 0 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+  OK  faixa da etapa 2: 3 só consulta por fase e 3 bloqueados por O.S. impedida, iguais às linhas da grade (OS-0420 bloqueada; OS-0417 e OS-0418 só consulta)
+  OK  REQ-031 (em conferência): Detalhe mostra a conta do saldo (Entregue 5.000 kg inclui o que voltou; A entregar 1.000 kg)
+filtro: 0 ['Todos os locais', ''] 0
+  FALHA Restaurar demonstração volta o filtro para "Todos os locais" · [0, ['Todos os locais', ''], 0]
+  OK  sem erro de script
+RESULTADO: 7/13 ok · FALHAS: lote vencido S58-0926: sem "Liberar após inspeção"; Situação do lote "Vencido · não volta ao disponível", Validade 08/2026; etapa 4: página sem rolagem; "Liberar após inspeção" do KCl inteiro (à vista ou pelo teclado); lote vencido recebido por cenReceber: sem "Liberar após inspeção", Situação do lote "Vencido", Validade 07/2026; etapa 5: página sem rolagem; "Aprovar ajuste" da INV-2609 inteiro (à vista ou pelo teclado); nova contagem INV-2612 com diferença: grade sem rolagem, Recontar e Aprovar ajuste inteiros; Restaurar demonstração volta o filtro para "Todos os locais"

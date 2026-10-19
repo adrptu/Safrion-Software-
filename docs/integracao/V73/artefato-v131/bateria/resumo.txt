@@ -1,0 +1,23 @@
+c34_test rc=0 TOTAL Q1-Q2 19 PASS
+c34_paridade rc=0 PASS 6ª paridade: dois lotes em unidades distintas e recebimento parcial, previsão ambígua excluída.
+n1_composicao rc=1 RESULTADO: 6 ok · 1 falhas
+est_onda0_test rc=0 RESULTADO 24/24
+demanda_unica_test rc=1 RESULTADO: 60 ok · 11 falhas
+mip_unit_test rc=0 RESULTADO 34/34
+legal_unit_test rc=0 RESULTADO 35/35
+c34_fluxo_test rc=0 RESULTADO: 17 ok · 0 falhas
+n1_fluxo_test rc=0 RESULTADO 10/10
+ds_man_test rc=0 RESULTADO: 99 ok · 0 falhas
+ma_vinculo_test rc=0 RESULTADO: 101/101 ok
+ma_unica_test rc=0 RESULTADO: 23/23 ok
+saf_cmp_continuidade_test rc=1 RESULTADO: 29 ok · 2 falhas
+compras_materiais_test rc=0 RESULTADO: 32/32 ok
+d5_reserva_test rc=0 RESULTADO: 13/13 ok
+est_a4_nav_test rc=0 RESULTADO: 15/15 ok
+tabelas_est_test rc=0 RESULTADO: 34/34 ok
+tabelas_os_test rc=0 RESULTADO: 40/40 ok
+mip_fluxo_test rc=0 RESULTADO 15/15
+ds_test rc=0 RESULTADO: OK 72/72
+paginas_scan_test rc=0 RESULTADO: 5 ok · 0 falhas (148 páginas)
+links_ocultos_test rc=0 TOTAL 16 · falhas 0
+FIM

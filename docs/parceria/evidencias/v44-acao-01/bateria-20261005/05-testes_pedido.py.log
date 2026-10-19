@@ -1,0 +1,15 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 testes_pedido.py
+T01 FALHOU · Escolher/criar safra e percorrer as seis etapas
+   ✗ Safra criada e aberta na etapa 2 → 
+T02 FALHOU · Aplicar um plano a vários cultivos e ajustar somente um
+   ✗ Execução → erro: Uncaught
+T03 PASSOU · Expandir gatilhos, atividades e insumos
+T04 PASSOU · Encaminhar demanda para compras mantendo a origem
+T05 PASSOU · Navegar entre etapas sem perder dados
+T06 PASSOU · Clicar na linha para editar pelo formulário lateral
+T07 PASSOU · Expandir, selecionar ou excluir sem abrir acidentalmente a edição
+T08 PASSOU · Salvar, cancelar e tratar alterações não salvas
+T09 PASSOU · Consultar registros sem permissão de edição
+T10 PASSOU · Abrir a origem de indicadores calculados
+T12 PASSOU · Conferir a consistência das fases das O.S. entre as visualizações
+[exit 0]

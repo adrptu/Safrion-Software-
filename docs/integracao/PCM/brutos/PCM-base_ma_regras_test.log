@@ -1,0 +1,108 @@
+OK    motor JS (jsc/node) executou sem erro
+FALHA AC-PCM-32 · estado v=4 com achados, leituras, abastecimentos e recibos (c.achados substitui c.ach) · ["v","rev","hoje","horiz","antiga","custoh","maxdia","seq","seqpm","seqsc","ativos","ordem","itens","esp","planos","ordemPlanos","vinc","oms","abast","ach","prop"]
+FALHA AC-PCM-32 · o.ver continua a versão do plano (OM-0234 = 3) e a versão do registro é o.rv · {"id":"OM-0234","tipo":"Preventiva","aid":"a02","pid":"PM-01","sid":"s1","ver":3,"cobre":["s1"],"ciclos":{"s1":"PM-01|a02|s1@2026-09-02|2793"},"serv":"Revisão 250 h","crit":"Média","etapa":"A liberar","origem":"PM-01 v3 · Revisão 250 h · 3.043 h (250 h após 2.793 h)","jan":"28/09","ret":"28/09 17:00","esp":"Mecânico","tempo":5,"chk":[{"t":"Trocar óleo do motor","r":"","mot":""},{"t":"Trocar filtro de óleo do motor","r":"","mot":""},{"t":"Trocar filtro de combustível","r":"","mot":""},{"t":"Limpar filtro de ar","r":"","mot":""},{"t":"Lubrificar pontos de graxa","r":"","mot":""}],"pecas":[{"item
+FALHA AC-PCM-32 estado (exceção) · ReferenceError: manCustoFinal is not defined
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:254:220
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:250:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/m
+FALHA AC-PCM-08 · gerar do seed cria OM-0235, OM-0236 e OM-0237 em A liberar, sem reserva, janelas 24/09, 24/09, 01/10 · [{"msg":"3 ordens preventivas geradas: OM-0235, OM-0236, OM-0237 · em A liberar · OM-0235 com Falta peça.","ids":["OM-0235","OM-0236","OM-0237"]},null,null]
+OK    AC-PCM-08 · gerar de novo não duplica (Nada a gerar)
+FALHA D-11 · a preventiva gerada traz as tarefas do plano com tipo (Serviço) e nenhuma respondida · [{"t":"Trocar óleo do motor","r":"","mot":""},{"t":"Trocar filtro de óleo do motor","r":"","mot":""},{"t":"Trocar filtro de combustível","r":"","mot":""},{"t":"Limpar filtro de ar","r":"","mot":""},{"t":"Lubrificar pontos de graxa","r":"","mot":""}]
+FALHA AC-PCM-19 · gerar é do Otávio: Zé é recusado com o motivo · ""
+FALHA AC-PCM-30 conflito (exceção) · ReferenceError: manConflito is not defined
+    at cf (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:272:20)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:273:141
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:270:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:1
+FALHA AC-PCM-31 executante (exceção) · ReferenceError: manExecSug is not defined
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:291:3
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:289:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/module
+FALHA AC-PCM-09 achado (exceção) · ReferenceError: manAchOpcoes is not defined
+    at op (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:301:20)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:302:100
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:299:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:
+OK    AC-PCM-10 · nenhuma tarefa nasce respondida nas OMs abertas que não começaram
+FALHA AC-PCM-11 · OM-0228: "Medir pressão de recalque" é Medição; as outras duas, Verificação · [{"t":"Medir pressão de recalque","r":"","mot":""},{"t":"Inspecionar selo mecânico","r":"","mot":""},{"t":"Verificar painel e pressostato","r":"","mot":""}]
+FALHA AC-PCM-11 · "Não feito" abre OM de Pendência com o executante da origem · [{"erro":"Responda o checklist: 4 tarefas sem resposta."},[]]
+FALHA AC-PCM-19 · Zé não inicia a OM-0228 (executante João): "Ação de João, executante" · {"msg":"OM-0228 Em execução · responda o checklist e informe a leitura do contador para concluir."}
+FALHA AC-PCM-10/11 tarefas (exceção) · TypeError: Cannot read properties of undefined (reading 'SM-0152')
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:353:205
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:338:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function.
+FALHA AC-PCM-12 · a OM-0233 já traz a 1ª tentativa Reprovada (23/09 09:00) · {"t":"Teste de pressão em carga","r":"","mot":""}
+FALHA AC-PCM-12 · Concluir é recusado sem a última tentativa Aprovada · {"erro":"Responda o checklist: 1 tarefa sem resposta."}
+FALHA AC-PCM-12 · Reprovado deixa a OM Em execução e o ativo Bloqueado, sem OM nova · {"erro":"manTentativa is not defined"}
+FALHA AC-PCM-12 · depois de Reprovado e Aprovado, as tentativas ficam por acréscimo (3, a última Aprovada) · ""
+FALHA AC-PCM-12 · sem a habilitação (Otávio não é o executante nem tem "Testar reparo"): Teste recusado com o motivo · {"erro":"manTentativa is not defined"}
+FALHA AC-PCM-12 teste (exceção) · ReferenceError: MAN_PES is not defined
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:368:92
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:357:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/
+FALHA AC-PCM-13/26 condição e encerrar (exceção) · TypeError: Cannot read properties of undefined (reading 'SM-0147')
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:378:282
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:375:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function.
+FALHA AC-PCM-15 · regressão: concluir com 150 h no Trator 02 é recusado e não fecha o ciclo nem desloca referências · {"erro":"Responda o checklist: 5 tarefas sem resposta."}
+FALHA AC-PCM-15 · leitura implausível na conclusão dá aviso (não grava) · {"erro":"Responda o checklist: 5 tarefas sem resposta."}
+FALHA D-18 · horas de oficina obrigatórias (sem valor implícito) · {"erro":"Responda o checklist: 5 tarefas sem resposta."}
+OK    AC-PCM-15 · fora da conclusão, leitura menor vira troca a confirmar; vencimentos seguem a anterior
+FALHA AC-PCM-15 · tíquete com data anterior entra no histórico sem pedir troca e sem mudar a leitura atual · {"sus":"menor","msg":"Leitura de 2.980 h menor que a anterior (2.988 h · 23/09) · confirme a troca de contador ou descarte; os vencimentos seguem na leitura anterior."}
+FALHA AC-PCM-15 · data anterior fora das vizinhas fica "a confirmar" (ainda sem troca) · {"sus":"alta","msg":"Leitura de 3.500 h fica 512 h acima da última (2.988 h · 23/09), mais que 24 h possíveis em 1 dia · confirme ou descarte; os vencimentos seguem na leitura anterior."}
+OK    AC-PCM-15 · leitura de hoje coerente recalcula (Trator 04 vence em breve)
+FALHA AC-PCM-16 abastecimento (exceção) · ReferenceError: manOperadorDia is not defined
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:436:3
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:434:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/mo
+FALHA AC-PCM-19 matriz (exceção) · TypeError: Cannot read properties of null (reading 'k')
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:454:115
+    at Array.map (<anonymous>)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:454:104
+    at Array.forEach (<anonymous>)
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:454:10
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/proto
+FALHA AC-PCM-23 vínculo (exceção) · ReferenceError: manMarcoSug is not defined
+    at <sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:464:3
+    at caso (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:244:33)
+    at Object.<anonymous> (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/_probe/ma_regras_unit_all.js:462:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modul
+FALHA PCMS §10 C1 · OM-0234 encerra a R$ 2.626,00 (690 + 12 L × 28 + 5 h × 320) · {"erro":"OM-0234 não está Em conferência."}
+FALHA PCMS §10 C2 · a estimativa da OM-0235 (gerada) é R$ 1.776,00 · ""
+FALHA D-30 · a mesma chave devolve o recibo sem gravar de novo · [{"erro":"manLeituraAvulsa is not defined"},{"erro":"manLeituraAvulsa is not defined"}]
+FALHA D-46 · comando com versão do registro diferente é recusado ("Mudou desde que você abriu") · "manRv is not defined"
+FALHA §0.1 · "Propor substituto" (sai no 1b): Otávio registra Trator 02 para as O.S. alocadas ao T1 desde o bloqueio (OS-0420 e OS-0431); repetir não duplica; Zé recusado · [{"erro":"manPropor is not defined"},{"erro":"manPropor is not defined"},{"erro":"manPropor is not defined"},false]
+FALHA §0.1 · só para ativo bloqueado com ordem aberta (Trator 02 apto: recusado) · {"erro":"manPropor is not defined"}
+RESULTADO: 5/39 ok · FALHAS: AC-PCM-32 · estado v=4 com achados, leituras, abastecimentos e recibos (c.achados substitui c.ach); AC-PCM-32 · o.ver continua a versão do plano (OM-0234 = 3) e a versão do registro é o.rv; AC-PCM-32 estado (exceção); AC-PCM-08 · gerar do seed cria OM-0235, OM-0236 e OM-0237 em A liberar, sem reserva, janelas 24/09, 24/09, 01/10; D-11 · a preventiva gerada traz as tarefas do plano com tipo (Serviço) e nenhuma respondida; AC-PCM-19 · gerar é do Otávio: Zé é recusado com o motivo; AC-PCM-30 conflito (exceção); AC-PCM-31 executante (exceção); AC-PCM-09 achado (exceção); AC-PCM-11 · OM-0228: "Medir pressão de recalque" é Medição; as outras duas, Verificação; AC-PCM-11 · "Não feito" abre OM de Pendência com o executante da origem; AC-PCM-19 · Zé não inicia a OM-0228 (executante João): "Ação de João, executante"; AC-PCM-10/11 tarefas (exceção); AC-PCM-12 · a OM-0233 já traz a 1ª tentativa Reprovada (23/09 09:00); AC-PCM-12 · Concluir é recusado sem a última tentativa Aprovada; AC-PCM-12 · Reprovado deixa a OM Em execução e o ativo Bloqueado, sem OM nova; AC-PCM-12 · depois de Reprovado e Aprovado, as tentativas ficam por acréscimo (3, a última Aprovada); AC-PCM-12 · sem a habilitação (Otávio não é o executante nem tem "Testar reparo"): Teste recusado com o motivo; AC-PCM-12 teste (exceção); AC-PCM-13/26 condição e encerrar (exceção); AC-PCM-15 · regressão: concluir com 150 h no Trator 02 é recusado e não fecha o ciclo nem desloca referências; AC-PCM-15 · leitura implausível na conclusão dá aviso (não grava); D-18 · horas de oficina obrigatórias (sem valor implícito); AC-PCM-15 · tíquete com data anterior entra no histórico sem pedir troca e sem mudar a leitura atual; AC-PCM-15 · data anterior fora das vizinhas fica "a confirmar" (ainda sem troca); AC-PCM-16 abastecimento (exceção); AC-PCM-19 matriz (exceção); AC-PCM-23 vínculo (exceção); PCMS §10 C1 · OM-0234 encerra a R$ 2.626,00 (690 + 12 L × 28 + 5 h × 320); PCMS §10 C2 · a estimativa da OM-0235 (gerada) é R$ 1.776,00; D-30 · a mesma chave devolve o recibo sem gravar de novo; D-46 · comando com versão do registro diferente é recusado ("Mudou desde que você abriu"); §0.1 · "Propor substituto" (sai no 1b): Otávio registra Trator 02 para as O.S. alocadas ao T1 desde o bloqueio (OS-0420 e OS-0431); repetir não duplica; Zé recusado; §0.1 · só para ativo bloqueado com ordem aberta (Trator 02 apto: recusado)

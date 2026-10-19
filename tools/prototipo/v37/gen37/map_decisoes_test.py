@@ -5,10 +5,10 @@ Decisão do proprietário de 01/10/2026: ao clicar no talhão, o painel mostra s
 "Nova O.S. neste talhão" só aparecem na camada Ordens de serviço; as seções ficam sempre abertas. As ordens só de água (OS-0419/0422/0423)
 não são O.S.: o conflito do T7 sai da camada Ordens de serviço e se resolve na camada Irrigação (02/10: direto na ação, IR-03det#OS-0423:conflito).
 OS-0418 e OS-0430, a liberar pelo agrônomo, entram na contagem (2 a liberar) e deixam P1 e T1 amarelos; a OS-0420 só tem o impedimento
-da máquina; os painéis não repetem destino; "Receber sobras" leva ao Estoque do menu; a devolução recebida pela tela EST e a liberação
+da máquina (CTL-1: primário "Acompanhar OM-0233" → MA-04, não a PL-05 fixa); os painéis não repetem destino; "Receber sobras" leva ao Estoque do menu; a devolução recebida pela tela EST e a liberação
 feita pela tela O.S. (cenário compartilhado) chegam ao mapa. Uso: python3 map_decisoes_test.py (≈ 30 s)."""
 import sys, os, time, subprocess, json
-HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
+HERE=os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import Chrome
 from journeys import free
 R=os.path.join(HERE,'_render'); p=free()
@@ -21,8 +21,10 @@ try:
     CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
     def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.35); return r
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label'),e.getAttribute('fill')]:[null,null];}})()")
-    tap=lambda t: (J(f"{SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')).dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'),e.getAttribute('fill')]:[null,null];}})()")
+    tap=lambda t: (J(f"{SV}.find(x=>x.getAttribute('data-talhao')==='{t}').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
     pan=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''
     links=lambda t: J(f"[...document.querySelectorAll('aside[aria-label^=\"{t}\"] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []
     prim=lambda t: J(f"(()=>{{const a=[...document.querySelectorAll('aside[aria-label^=\"{t}\"] a')].find(a=>a.style.background.indexOf('30, 122, 76')>=0||a.style.backgroundColor.indexOf('30, 122, 76')>=0); return a?[a.innerText.trim(),a.getAttribute('href')]:null;}})()")
@@ -41,7 +43,8 @@ try:
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(ctx))})"); c.size(1440,900); c.goto(f'http://127.0.0.1:{p}/IN-04.dc.html',wait=1.2)
     c.goto(f'http://127.0.0.1:{p}/Main.dc.html'); J("localStorage.removeItem('talhao-os-cenario-v1'); localStorage.removeItem('talhao-os-irrigacao-v1')"); mapa()
     # 1-2 · nenhuma O.S. conta como decisão; OS-0418 e OS-0430 a liberar pelo agrônomo (cabeçalho = indicador) deixam o T1 amarelo
-    chk('1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões"', '2 a liberar' in head() and 'decis' not in head() and 'A liberar (agrônomo) 2' in nums() and 'Decisões' not in nums(), [head(),nums()])
+    # o indicador diz "A liberar", a fase do Kanban ("(agrônomo)" saiu com o menos texto no Mapa, 14/10)
+    chk('1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões"', '2 a liberar' in head() and 'decis' not in head() and 'A liberar 2' in nums() and 'Decisões' not in nums(), [head(),nums()])
     l1,f1=lab('T1'); chk('2 Integrado: T1 amarelo "OS-0430 a liberar" (mesma contagem do cabeçalho)', l1=='T1: OS-0430 a liberar' and f1==AMAR, [l1,f1])
     # 3 · Integrado (01/10): "NESTE TALHÃO" com uma linha por funcionalidade e um "Ver …"; sem cartões de O.S., próximo passo nem "Nova O.S."; nada recolhível
     tap('T1'); t1=pan('T1')
@@ -49,15 +52,17 @@ try:
     sem_os=(J("document.querySelectorAll('aside[aria-label^=\"T1\"] [role=radio], aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"], aside [aria-expanded], aside details').length")==0
             and 'Nova O.S. neste talhão' not in t1 and 'Liberar para execução' not in t1)
     r=ver('T1','Ver ordens'); a=ativa(); tsel=json.loads(J("sessionStorage.getItem('mapa-ctx')") or '{}').get('tsel'); t1=pan('T1')
-    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Lavoura, Pragas e doenças, Carência e destino, Irrigação, Ordens de serviço, Insumos e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
-        [n for n,_ in lin]==['Satélite','Lavoura','Pragas e doenças','Carência e destino','Irrigação','Ordens de serviço','Insumos','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): a ordem é a da barra de nove nomes; Insumos e Carência e destino (filtros) logo abaixo da função que os contém
+    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Solo, Pragas e doenças, Ordens de serviço, Insumos, Irrigação, Estádio, Colheita e produtividade, Carência e destino e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
+        [n for n,_ in lin]==['Satélite','Solo','Pragas e doenças','Ordens de serviço','Insumos','Irrigação','Estádio','Colheita e produtividade','Carência e destino','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
         and sem_os and r=='ok' and a==['Ordens de serviço'] and tsel==['T1'] and 'ORDENS DE SERVIÇO' in t1 and 'NESTE TALHÃO' not in t1, [lin,sem_os,r,a,tsel,t1[:200]])
     # 4-7 · camada Ordens de serviço: primário = próximo passo da ordem mais urgente, sem outro botão para o mesmo destino
     lk=links('T1')
     bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button')].map(b=>b.innerText.trim())") or []
     # Fase 1 (01/10): o painel mostra as ordens do talhão e o próximo passo da escolhida; o primário é Liberar no próprio mapa e o ajuste abre a O.S.
+    # MUX-F0 (17/10/2026, D8): "Nova O.S. neste talhão" leva o talhão (#tal=Fazenda|Talhão), não mais OS.dc.html puro. Oráculo obsoleto no destino; a asserção fica mais estrita
     chk('4 T1 (Ordens de serviço): OS-0430 A liberar · primário "Liberar para execução" · "Ajustar antes de liberar" → O.S. da OS-0430 · rodapé "Nova O.S. neste talhão" · sem revisão · nenhum destino repetido',
-        'Liberar para execução' in bt and ['Ajustar antes de liberar','OS.dc.html#OS-0430:ajustar'] in lk and lk[-1:]==[['Nova O.S. neste talhão','OS.dc.html']]
+        'Liberar para execução' in bt and ['Ajustar antes de liberar','OS.dc.html#OS-0430:ajustar'] in lk and lk[-1:]==[['Nova O.S. neste talhão','OS.dc.html#tal=Santa%20Rita%7CT1']]
         and 'Aguardando agrônomo' not in t1 and 'Revisar' not in t1 and unico(lk), [bt,lk])
     tap('T1'); tap('P1'); p1=pan('P1'); lk=links('P1'); pr=prim('P1')
     # a OS-0418 (mais urgente) vem escolhida, impedida pelo Estoque (Ureia 45 % sem lote); a OS-0417 (sobras) mostra o atalho ao Estoque quando é escolhida
@@ -67,8 +72,9 @@ try:
         'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html'] and unico(lk) and unico(lk2)
         and not any(h in ('SU-07.dc.html','IN-02det.dc.html') for _,h in lk+lk2), [pr,lk,pr2,lk2])
     tap('P1'); tap('T4'); lk=links('T4'); pr=prim('T4')
-    chk('6 T4: OS-0420 parada só pela máquina · primário "Reprogramar saldo" → PL-05 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · nenhum destino repetido',
-        pr==['Reprogramar saldo','PL-05.dc.html'] and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
+    # CTL-1 (Frente F): PL-05 é oculta e fixa; o passo vai para a OM-0233 viva (PCM simplificado: tela única MA, âncora #om= abre o painel)
+    chk('6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA#om=OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido',
+        pr==['Acompanhar OM-0233','MA.dc.html#om=OM-0233'] and not any((h or '').startswith('PL-05') for _,h in lk) and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
     tap('T4')
     # 7 · o conflito de água do T7 (OS-0423) não é O.S. (01/10): em Ordens de serviço o T7 fica sem ordem; na camada Irrigação, um só botão que abre a ação no registro
     l7,_=lab('T7'); tap('T7'); t7=pan('T7'); tap('T7')
@@ -77,7 +83,7 @@ try:
         l7=='T7: sem ordem' and 'OS-0423' not in t7 and r=='ok' and pr==['Resolver conflito',H7] and [h for _,h in lk].count(H7)==1, [l7,t7[:160],r,pr,lk])
     tap('T7')
     # 8-9 · a devolução recebida pela tela Estoque tira custódia, selo e atalho da OS-0417 no mapa
-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('3 Receba devoluções'); clk('Receber devolução da REQ-031'); clk('Salvar','aside[role=dialog]'); t=T()
+    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); J("(()=>{const s=(q,v)=>{const i=document.querySelector(q); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,v); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));}; s('#fx_g_dev_qtd','500'); s('#fx_g_dev_cond','Apta · volta ao disponível'); return 1;})()"); time.sleep(.4); clk('Salvar','aside[role=dialog]'); t=T()   # EST-ONDA0 (E1): quem confere informa quantidade e condição
     chk('8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg)', '500 kg → 0 kg' in t, t)
     mapa('O.S./prazos'); tap('P1'); t1=pan('P1'); i=t1.find('OS-0417'); o17=t1[i:i+260]
     chk('9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras"',
@@ -89,14 +95,47 @@ try:
     clk('Liberar para execução','aside[role=dialog]'); clk('Confirmar liberação','aside[role=dialog]'); t=T()
     chk('10 O.S.: OS-0430 liberada direto pela tela O.S.', 'OS-0430 liberada' in t, t)
     mapa()
-    chk('11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador', '1 a liberar' in head() and 'A liberar (agrônomo) 1' in nums(), [head(),nums()])
+    chk('11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador', '1 a liberar' in head() and 'A liberar 1' in nums(), [head(),nums()])
     l1,f1=lab('T1'); tap('T1'); r=ver('T1','Ver ordens'); t1=pan('T1'); lk=links('T1')
     chk('12 T1 volta ao verde no Integrado; em Ordens de serviço ("Ver ordens") a OS-0430 está Liberadas, sem "Ajustar antes de liberar", sem repetir destino',
         l1=='T1: OS-0421 · 190/350 ha' and f1==VERDE and r=='ok' and 'Liberadas' in t1 and 'Ajustar antes de liberar' not in t1 and unico(lk), [l1,f1,r,lk])
     tap('T1')
     sh=J("document.documentElement.scrollHeight"); chk('13 sem rolagem (≤ 900)', sh<=900, sh)
+    # 14-15 · CTL-1 (Frente F): "Acompanhar OM-0233" abre a OM viva no MA-04; liberar pelo Mapa grava CMD-42 e CMD-06 como a tela O.S.
+    c.goto(f'http://127.0.0.1:{p}/MA.dc.html#om=OM-0233',wait=1.2); am=J("(document.querySelector('#ma-painel')||{}).innerText||''") or ''
+    chk('14 "Acompanhar OM-0233" (MA#om=OM-0233): o painel da OM-0233 viva abre pela âncora', am.startswith('OM-0233'), am[:200])
+    J("localStorage.removeItem('talhao-os-cenario-v1')"); mapa(); tap('T1'); ver('T1','Ver ordens')
+    r1=clk('Liberar para execução','aside[aria-label^="T1"]'); ct=pan('T1'); r2=clk('Confirmar liberação','aside[aria-label^="T1"]'); t=T()
+    ev=J("(((JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').ordens||{})['OS-0430']||{}).osc||{}).ev||[]") or []
+    chk('15 Mapa: confirmação "Ana (agrônoma) aprova esta versão e Ana (gestora) libera" e liberar a OS-0430 grava CMD-42 (agrônoma) e CMD-06 (gestora), v1 (CTL-3: o Mapa repassa o perfil)',
+        r1=='ok' and r2=='ok' and 'Ana (agrônoma) aprova esta versão e Ana (gestora) libera' in ct and [e.get('cmd') for e in ev]==['CMD-42','CMD-06']
+        and all(e.get('v')=='v1' for e in ev) and [e.get('por') for e in ev]==['Ana (agrônoma)','Ana (gestora)'] and 'v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).' in t, [r1,r2,ct[-300:],ev,t])
+    # 15b · CTL-3 (ATOR): com o perfil Caio (PCP), o Mapa mostra quem decide no lugar de "Liberar para execução" e não oferece o ajuste
+    J("localStorage.removeItem('talhao-os-cenario-v1'); localStorage.setItem('safrion.perfilDemo','Caio')"); mapa(); tap('T1'); ver('T1','Ver ordens'); t1=pan('T1')
+    bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button, aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] a')].map(b=>b.innerText.trim())") or []
+    chk('15b Mapa com o perfil Caio: "Liberar para execução: decisão de Ana (agrônoma e gestora)." sem o botão nem "Ajustar antes de liberar"',
+        'Liberar para execução: decisão de Ana (agrônoma e gestora).' in t1 and not any(b.startswith('Liberar para execução') or b.startswith('Ajustar antes de liberar') for b in bt), [bt,t1[:500]])
+    J("localStorage.removeItem('safrion.perfilDemo')"); tap('T1')
+    # 15c · revisão do CTL-3, achado 1: trocar o perfil com a confirmação aberta fecha a confirmação (antes: "Caio (PCP) aprova…" e "Confirmar liberação" visível)
+    J("localStorage.removeItem('talhao-os-cenario-v1')"); mapa(); tap('T1'); ver('T1','Ver ordens'); r1=clk('Liberar para execução','aside[aria-label^="T1"]'); c0=pan('T1')
+    J("""(()=>{const i=document.querySelector('[aria-label="Trocar perfil de demonstração"]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'Caio'); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.5)
+    t1=pan('T1'); bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] button')].filter(b=>b.offsetParent!==null).map(b=>b.innerText.trim())") or []
+    et=J("((JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').ordens||{})['OS-0430']||{}).etapa||'A liberar'")
+    chk('15c Mapa: Ana abre a confirmação da OS-0430 e troca para Caio → a confirmação fecha (sem "Caio (PCP) aprova" nem "Confirmar liberação"), fica "decisão de Ana (agrônoma e gestora)"; segue A liberar',
+        r1=='ok' and 'Ana (agrônoma) aprova esta versão' in c0 and 'Caio (PCP) aprova' not in t1 and 'Liberar OS-0430 (versão' not in t1 and 'Confirmar liberação' not in bt
+        and 'Liberar para execução: decisão de Ana (agrônoma e gestora).' in t1 and et=='A liberar', [r1,bt,t1[:500],et])
+    J("localStorage.removeItem('safrion.perfilDemo')"); tap('T1')
+    # 16 · CTL-1 (Frente E1): no Mapa, a trava legal é a mesma da O.S.: dose fora da bula → "Liberar bloqueado", quem resolve Ana, sem Liberar
+    c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.2); tem=J("!!(window.__cen&&window.__cen.cenMudar)")   # o gancho do cenário está na tela O.S.
+    J("window.__cen.cenReset(); window.__cen.cenMudar(null,c=>{ c.ordens['OS-0430'].ins[0].dose=7.5; c.ordens['OS-0430'].ins[0].tot=1200; return {msg:''}; })")
+    mapa(); tap('T1'); ver('T1','Ver ordens'); t1=pan('T1')
+    bt=J("[...document.querySelectorAll('aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"] button')].map(b=>b.innerText.trim())") or []
+    chk('16 Mapa · OS-0430 com Glifosato 7,5 L/ha: "Liberar bloqueado… dose fora da bula: 1,5–3 L/ha", quem resolve Ana (agrônoma), sem "Liberar para execução"',
+        tem and 'dose fora da bula: 1,5–3 L/ha' in t1 and 'Ana (agrônoma), ajustando produto ou dose' in t1 and 'Liberar para execução' not in bt, [tem,bt,t1[:600]])
+    tap('T1')
 finally:
     try:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+

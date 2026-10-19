@@ -1,0 +1,20 @@
+OK   E3 1440 · link Voltar (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 1440 · link Voltar: navegação nova ao destino canônico (history.length 4 → 5, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=agrupada sem a ficha
+OK   E3 1440 · trilha (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 1440 · trilha: navegação nova ao destino canônico (history.length 8 → 9, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=agrupada sem a ficha
+OK   E3 1440 · Voltar nativo (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 1440 · nova aba COM opener: o "Voltar" vai a OS.dc.html?view=agrupada (sem a ficha) com Fazenda, Safra, fase e o foco na OS-0421, também 2 s depois
+OK   E3 1440 · nova aba SEM opener (detalhe aberto direto, sem contexto): o "Voltar" segue o link (OS.dc.html, sem ?view e sem o voltar do histórico)
+OK   E3 1440 · link direto ao detalhe na mesma aba (contexto válido desta aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 1440 · contexto antigo (2 h), de outro perfil (Caio), de outro escopo (Safra 2025/26 na sessão) e já usado: lista canônica (OS.dc.html, sem ?view nem ficha), funcional e sem o foco antigo; filtros limpos nos recusados (antigo e safra: preferência da Ana = Tabela agrupada; Caio sem preferência: Lista; safra: 2025/26)
+OK   E3 390 · link Voltar (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 390 · link Voltar: navegação nova ao destino canônico (history.length 38 → 39, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=agrupada sem a ficha
+OK   E3 390 · trilha (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 390 · trilha: navegação nova ao destino canônico (history.length 42 → 43, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=agrupada sem a ficha
+OK   E3 390 · Voltar nativo (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 390 · nova aba COM opener: o "Voltar" vai a OS.dc.html?view=agrupada (sem a ficha) com Fazenda, Safra, fase e o foco na OS-0421, também 2 s depois
+OK   E3 390 · nova aba SEM opener (detalhe aberto direto, sem contexto): o "Voltar" segue o link (OS.dc.html, sem ?view e sem o voltar do histórico)
+OK   E3 390 · link direto ao detalhe na mesma aba (contexto válido desta aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois
+OK   E3 390 · contexto antigo (2 h), de outro perfil (Caio), de outro escopo (Safra 2025/26 na sessão) e já usado: lista canônica (OS.dc.html, sem ?view nem ficha), funcional e sem o foco antigo; filtros limpos nos recusados (antigo e safra: preferência da Ana = Tabela agrupada; Caio sem preferência: Lista; safra: 2025/26)
+OK   sem erro de script nas páginas
+RESULTADO: 19 ok · 0 falhas (e2e)

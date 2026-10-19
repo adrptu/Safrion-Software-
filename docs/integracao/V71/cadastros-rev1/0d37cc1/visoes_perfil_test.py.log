@@ -1,0 +1,14 @@
+OK  P0 Ana abre sem agrupamento e com as colunas padrão
+OK  P1 Ana agrupa por Papéis: grupos aparecem e o endereço leva ?ag=
+OK  P2 Ana acrescenta uma coluna
+OK  P3 recarregar limpo como Ana mantém o agrupamento e as colunas dela
+OK  P4 trocar para Caio pela UI (sem recarregar): sem agrupamento, colunas padrão, endereço sem ?ag=
+OK  P5 voltar para Ana sem recarregar: agrupamento e colunas de Ana, endereço com ?ag=
+OK  P6 recarregar como Caio: sem agrupamento e colunas padrão
+OK  P7 recarregar como Ana: agrupamento e colunas de Ana
+OK  P8 Caio chega por link com ?ag=: o link vale
+OK  P9 depois do link, trocar de perfil segue a preferência do novo perfil (Caio: sem agrupamento)
+OK  P10 Ana acrescenta outra coluna e troca para Caio sem recarregar: Caio vê as colunas dele
+OK  P11 volta para Ana sem recarregar: as colunas que ela acabou de escolher
+OK  J sem erro de JS
+RESULTADO: 13/13

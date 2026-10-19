@@ -1,0 +1,15 @@
+OK    · [períodos do cadastro] as duas grades foram lidas
+     [períodos do cadastro] células comuns às duas vistas: 36; meses A=['set/26', 'out/26', 'nov/26', 'dez/26', 'jan/27', 'fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27', 'ago/27'] B=['fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27']; recursos=['trator', 'pulv', 'plant', 'dist', 'colh', 'oper']; tocáveis A=28 B=18
+OK    · [períodos do cadastro] toda célula recurso × mês comum às duas vistas tem a mesma ocupação e as mesmas horas (36 células)
+OK    · [períodos do cadastro] tela = espelho Python em toda célula das duas vistas
+OK    · [períodos do cadastro] sem erro de JS
+OK    · [mesmo período 01/09/2026 a 12/07/2027] preparo S2627 pela tela
+OK    · [mesmo período 01/09/2026 a 12/07/2027] preparo S27SF pela tela
+OK    · [mesmo período 01/09/2026 a 12/07/2027] as duas grades foram lidas
+     [mesmo período 01/09/2026 a 12/07/2027] células comuns às duas vistas: 36; meses A=['set/26', 'out/26', 'nov/26', 'dez/26', 'jan/27', 'fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27'] B=['fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27']; recursos=['trator', 'pulv', 'plant', 'dist', 'colh', 'oper']; tocáveis A=28 B=18
+FALHA · [mesmo período 01/09/2026 a 12/07/2027] toda célula recurso × mês comum às duas vistas tem a mesma ocupação e as mesmas horas (36 células) · [('trator', 'jul/27', {'txt': '15 %', 'aria': 'Tratores, jul/27: 15 %, 140,3 h de 920,0 h (desta safra 25,3 h; Safrinha 2027 115,0 h), precisa de 1, tem 4. Mostra as operações desse mês'}, {'txt': '7 %', 'aria': 'Tratores, jul/27: 7 %, 61,7 h de 920,0 h (desta safra 36,4 h; Safra 2026/27 25,3 h), precisa de 1, tem 4. Mostra as operações desse mês'}), ('trator', 'jul/27', ('140,3', '920,0'), ('61,7', '920,0')), ('colh', 'jul/27', {'txt': '(56 %)', 'aria': ''}, {'txt': '16 %', 'aria': 'Colhedoras, jul/27: 16 %, 32,0 h de 198,0 h, precisa de 1, tem 1. Mostra as operações desse mês'}), ('oper', 'jul/27', {'txt': '15 %', 'aria': 'Operadores e equipe, jul/27: 15 %, 250,9 h de 1.620,0 h (desta safra 25,3 h; Safrinha 2027 225,6 h), precisa de 2, tem 8. Mostra as operações desse mês'}, {'txt': '6 %', 'aria': 'Operadores e equipe, jul/27: 6 %, 93,7 h de 1.620,0 h (desta safra 68,4 h; Safra 2026/27 25,3 h), precisa de 2, tem 8. Mostra as operações desse mês'}), ('oper', 'jul/27', ('250,9', '1.620,0'), ('93,7', '1.620,0'))]
+OK    · [mesmo período 01/09/2026 a 12/07/2027] tela = espelho Python em toda célula das duas vistas
+OK    · [mesmo período 01/09/2026 a 12/07/2027] sem erro de JS
+
+RESULTADO: 9 ok · 1 falhas
+  - [mesmo período 01/09/2026 a 12/07/2027] toda célula recurso × mês comum às duas vistas tem a mesma ocupação e as mesmas horas (36 células)

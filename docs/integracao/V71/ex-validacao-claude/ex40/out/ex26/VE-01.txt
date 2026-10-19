@@ -1,0 +1,157 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Comercial › Demanda e oferta
+Demanda e oferta
+i
+Falta 0,4 t · Mamão A
+Criar oferta
+Confira demanda e oferta
+Acompanhe o mercado
+Faça ofertas
+Registre pedidos
+PV-031 · falta 0,4 t
+Controle contratos
+Trate reclamações
+RC-12 aguarda Qualidade
+Balanço por produto, classe e janela
+Semana
+Dia
+Rever previsão
+⋯
+5 de 5
+PRODUTO · CLASSE
+⇅
+JANELA
+⇅
+DEMANDA
+⇅
+OFERTA
+⇅
+FALTA OU EXCESSO
+⇅
+PRÓXIMO PASSO
+⇅
+Mamão Formosa · A
+T7 · packing
+28/09–04/10
+10,0 t ·
+PV-031
+a confirmar
+9,6 t ·
+L39-120
+em inspeção
+Falta 0,4 t
+Detalhar demanda
+Mamão Formosa · A
+T7 · packing
+05/10–11/10
+6.000 kg firmes + 2.000 kg
+RT-0112
+2.400 kg estoque + 9.100 kg produção
+Publicável 2.000 kg
+Criar oferta
+Mamão Formosa · B
+T7 · packing
+28/09–04/10
+3,0 t ·
+PV-032
+1,8 +
+PV-033
+1,2
+1,8 t ·
+L39-121
+em inspeção
+Disputa · falta 1,2 t
+Confirmar pedidos
+Café beneficiado
+Armazém Sede
+out–nov/26
+2.500 sc ·
+CT-198
+2.000 +
+PV-028
+500
+0 sc ·
+L27-013
+bloqueado
+Falta 2.500 sc
+Abrir inspeção
+Soja · padrão 26/27
+T1+T2+T4
+fev–mar/27
+19.900 sc ·
+obrigações físicas
+51.280 sc ·
+previsão V2
+Sem obrigação 31.380 sc
+Propor ajuste
+Disponibilidade da semana 05/10 · Mamão A
+VENDÁVEL ELEGÍVEL
+11.500 kg
+estoque apto 2.400 kg + produção 9.100 kg
+− COMPROMISSOS
+6.000 kg
+pedidos firmes, contados uma vez
+− RESERVAS TEMP.
+2.000 kg
+RT-0112 · vence 24/09 18:00
+− MARGEM
+500 kg
+segurança definida pelo produtor
+= SALDO PRODUTO
+3.000 kg
+disponível na base do produto
+PUBLICADO
+2.000 kg
+limite de packing e expedição
+Atualizado hoje 06:30
+Reservas e promessas
+RESERVA
+⇅
+TIPO
+⇅
+QUANTIDADE
+⇅
+VENCIMENTO
+⇅
+ESTADO
+⇅
+EFEITO NO SALDO
+⇅
+RT-0112
+Frutas Real · portal · OF-103
+Reserva temporária
+2.000 kg
+24/09 18:00
+Aguardando pedido
+já deduzida; vira pedido sem nova dedução
+RT-0107
+PV-031 · Frutas Real
+Reserva provisória
+9.600 kg
+até confirmar PV-031
+Em L39-120 · aguarda INSP-92
+deduzida uma vez; vira compromisso ao confirmar o pedido
+RT-0109
+Coop Grão Sul
+Reserva temporária
+5.000 sc
+20/09 12:00
+Expirada
+saldo liberado uma única vez
+Déficit visível ao produtor
+Renegociar no pedido
+Mamão A · 28/09: −0,4 t · causa: rendimento A de 80% sobre 12,0 t brutas · pedido em risco: PV-031 (a confirmar; 9,6 t prometíveis). Saídas com aceite: revisão v3 com 9,6 t, deslocar 0,4 t para 05/10 ou origem parceira elegível e rastreável.
+Tela: Demanda e oferta · Falta 0,4 t · Mamão A

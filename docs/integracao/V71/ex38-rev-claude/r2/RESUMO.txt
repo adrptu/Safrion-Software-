@@ -1,0 +1,53 @@
+EX-38 · revisão do Claude, rodada 2 · PR #77 HEAD 0a9c4a70180c9fcf2ea9f79f2b492ed389b5eae4 (pai e3e017c) · base 519ed7b
+Tudo executado pelo Claude em 16/10/2026, com dados sintéticos e sem commit, push ou comentário.
+
+Montagem
+- PR 0a9c4a7: build e montar_render no worktree limpo, 156 páginas.
+- Mutante: git archive 0a9c4a7 com o tanque do PJ-3030 em 2.500 L no dados_cad.py (/tmp/claude-0/pr77mut).
+- Contraprova e3e017c: git archive em /tmp/claude-0/pr77old.
+- Base 519ed7b: /tmp/claude-0/v69b (só leitura).
+
+Testes do Codex
+- ex38_test.py em 0a9c4a7: 17/17, P3 com 400 combinações (codex_ex38_test_0a9c4a7.log).
+
+Teste do Claude (ex38_rev_test.py)
+- Script original da rodada 1, sem mudança, em 0a9c4a7: 39/45 (rev_r1script_pr_0a9c4a7.log).
+  As 6 falhas (A1a, A1b, A1c, A1d, A1g, A5f) vêm só de duas mudanças deliberadas:
+  - a linha "Total" virou "Saldo";
+  - o botão passou de disabled para aria-disabled.
+  As cargas e os valores observados batem com o oráculo.
+- Script da rodada 2 (adaptado aos dois formatos, com os casos N1–N3, X5–X7 como verificação, N5 e Y1–Y4):
+  - 0a9c4a7: 55/56. Só o Y4 reprova (ex38_rev_r2_pr_0a9c4a7.log).
+  - e3e017c: 36/54. Reprova A1e, A1f, A2g, A2d, A2f, X1, X2, X3, X5, X6, X7, N5, X8, N1, N2, N3, Y1 e Y4 (ex38_rev_r2_contraprova_e3e017c.log).
+  - 519ed7b: 21/54 (ex38_rev_r2_contraprova_519ed7b.log).
+  - A1g e A1h (tanque mutante) só rodam no PR.
+
+Regressão no render 0a9c4a7, um teste por vez (regressao/, regressao_resumo.txt)
+- As 4 que tinham regredido agora passam:
+  - app_entrega_parcial 7/7;
+  - app_mb03_turno 11/11;
+  - consumo_divergente 21/21;
+  - mbtest com 0 falhas.
+- Lista verde da rodada 1: tudo verde.
+- Vermelho antigo, igual à base linha a linha nos OK/FALHA:
+  - dose_divergente 7/16;
+  - ap_unico com AttributeError;
+  - solo_os com RuntimeError;
+  - ostest com RuntimeError.
+
+Achado novo
+- Y4 · S3 · cenario.js:109 e :112. Depois de apontar a área toda da OS-0421 (0,2 + 39,8 + 120 ha), o saldo fica em 1,42e-14 ha.
+  - Observado: o painel e o MB-02det mostram "1 carga · última 0 ha · Fungicida A 15 L por carga cheia".
+  - Esperado: "Sem área restante para preparar".
+  - Correção: zerar a área abaixo de 1e-9 ha, o mesmo limite do cenApontar, ou arredondar para 0,0001 ha.
+
+Notas S4
+- Y3: com a área toda feita sem sinal, o painel e o app mostram falta 0 L, e a demanda do servidor (cenOsSup, Node no mesmo estado) mostra 15 L até o sinal.
+  É conservador e anterior a esta fatia; a tela avisa "pendente de sincronização".
+- O Imprimir da ficha continua com disabled nativo (os_campo.py:180). O motivo aparece na linha de preparo.
+- No PDF, a coluna Calda quebra "3.000 L de / calda".
+
+Veredito: integrar.
+- O S2 da rodada 1 foi corrigido e confirmado no navegador, com contraprova em e3e017c.
+- Não há S1 nem S2 conhecido.
+- O Y4 (S3) pode entrar como correção de uma linha antes do merge ou ficar registrado como pendência.

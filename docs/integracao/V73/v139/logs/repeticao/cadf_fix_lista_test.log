@@ -1,0 +1,13 @@
+OK  1 sem erro JS e "Importar geometrias" retirado da tela · ['']
+OK  2 fazenda nova: texto de cadastro, sem instrução de inativar e sem campo Situação · ['Cadastrar fazenda × Cadastre a fazenda com empresa, município, área total e posse. Nome da fazenda Empresa Santa Rita Agro Boa Vista Ltda Responde pelos custos ', ['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse']]
+OK  3 talhão novo: texto de cadastro, sem "Área do polígono" vazio e sem Situação · ['Cadastrar talhão × Cadastre o talhão com fazenda, sistema e área cultivável; o polígono é definido depois, no detalhe do talhão. Identificação do talhão Ex.: T8. Não pode repetir na mesma fazenda. Faz', ['Identificação do talhão', 'Fazenda', 'Sistema', 'Área cultivável']]
+OK  4 edição do T3 mantém texto de edição, polígono e Situação · ['Talhão · T3 × Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marq', ['Identificação do talhão', 'Fazenda', 'Sistema', 'Área cultivável', 'Área do polígono', 'Situação']]
+OK  5 T3 com parcelas na safra aberta não muda de fazenda (erro no campo Fazenda) · ['Corrija os campos destacados; o que você preencheu foi mantido. | T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.', 'Edição cancelada']
+OK  6 depois de cancelar: T3 segue na Santa Rita (1.165,0 ha) e verde no mapa · ['Santa Rita Santa Rita Agro Rio Verde/GO Em dia Própria 1.480 ha 1.165,0 ha 8', 'Boa Vista Boa Vista Ltda Sorriso/MT Em dia Arrendada até 31/08/2029 420 ha 120,0 ha 1', '#8FD67F']
+OK  7 B1 sem parcelas muda para a Santa Rita · ['Salvo: B1 · Santa Rita.', 'Santa Rita Santa Rita Agro Rio Verde/GO Em dia Própria 1.480 ha 1.285,0 ha 9']
+OK  8 reativar o B1 avisa que volta ao Planejar safra e ao Mapa · B1 reativado: volta ao Planejar safra e ao Mapa.
+    N1 cadastrado na Nova Esperança. Próximo passo: definir o polígono no detalhe do talhão. Nova Esperança Santa Rita Agro Jataí/GO Em dia Própria 600 ha 250,0 ha 1
+OK  9 com uma fazenda e um talhão novos a página não rola; a tabela rola dentro do bloco · [{'doc': True, 'main': True}, [1905, 682, 'auto']]
+OK  10 com mais fazendas a página continua sem rolar e a legenda do mapa fica inteira dentro do bloco · [{'doc': True, 'main': True}, {'leg': 740, 'rola': 965}]
+OK  11 T3 de outra fazenda não aparece no Mapa · Santa Rita nem abre por ele · ['#E9EEE6', '#8FD67F', False]
+RESULTADO: OK 11/11

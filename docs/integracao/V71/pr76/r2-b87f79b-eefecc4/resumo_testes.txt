@@ -1,0 +1,11 @@
+paginas_scan_eefecc4 rc=0 RESULTADO: 5 ok · 0 falhas (148 páginas) 
+paginas_scan_RENDER_DIR_b87f79b rc=1 RESULTADO: 4 ok · 1 falhas (148 páginas) 
+acao_unica_test_eefecc4 rc=0 RESULTADO: 10 ok · 0 falhas (saf) 
+cadf_fix_lista_test_eefecc4 rc=0 RESULTADO: OK 11/11 
+ds_1510_test_eefecc4 rc=0 RESULTADO: 17 ok · 0 falhas 
+ds_1610_test_eefecc4 rc=0 RESULTADO: 14 ok · 0 falhas 
+ds_padrao_test_eefecc4 rc=0 RESULTADO: 17 ok · 0 falhas 
+ds_test_eefecc4 rc=1 RESULTADO: FALHOU 69/72 
+ds_unit_test_eefecc4 rc=0 RESULTADO: OK 44/44 RESULTADO: OK 31/31 
+ds_test_DS_RENDER_b87f79b rc=1 RESULTADO: FALHOU 69/72 
+fim

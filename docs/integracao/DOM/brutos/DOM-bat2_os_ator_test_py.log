@@ -1,0 +1,16 @@
+  OK  menu lateral: perfil de demonstração começa em Ana
+  OK  Caio: no lugar de "Liberar para execução" a tela diz quem aprova e quem libera; sem Ajustar antes de liberar
+  OK  Caio no comando direto: recusado com quem decide; nada gravado (A liberar, sem CMD-42/CMD-06, sem reserva, sem requisição)
+  OK  Caio não ajusta dose e área pelo comando: versão segue v1
+  OK  de volta a Ana: Liberar para execução e Ajustar antes de liberar
+  OK  confirmação nomeia quem aprova e quem libera
+  OK  Ana libera: CMD-42 por Ana (agrônoma) e CMD-06 por Ana (gestora), na Origem e no aviso
+  OK  Rui: a linha retida diz quem decide e não oferece as três saídas
+  OK  Rui no comando direto: recusado, nada somado (240 ha)
+  OK  Paula (almoxarife e conferência): as saídas aparecem
+  OK  Paula decide: a decisão grava Paula (conferência); 240 ha
+  OK  Ana abre a confirmação da OS-0430 e troca para Caio: a confirmação fecha (sem "Caio (PCP) aprova" nem "Confirmar liberação"); fica a pendência; segue A liberar (antes: a tela dizia "Caio (PCP) aprova esta versão e Caio (PCP) libera")
+  OK  dispensa aberta por Ana e perfil trocado para Caio: o formulário fecha e a linha diz quem decide; saldo segue 160 ha
+  OK  Caio: sem "Cancelar sem execução" (CMD-46, AL-04: o gestor); a linha diz quem decide e o comando direto recusa; OS-0424 segue Liberadas
+  OK  sem erro de script
+RESULTADO: 15/15 ok

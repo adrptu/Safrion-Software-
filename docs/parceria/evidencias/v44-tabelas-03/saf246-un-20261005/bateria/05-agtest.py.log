@@ -1,0 +1,20 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 agtest.py
+OK  cadeia com 5 elos navegáveis (o próximo passo fica só no primário) ['AG-01.dc.html#VIS-011', 'AG-03det.dc.html', 'PL-02.dc.html', 'OS.dc.html#OS-0420', 'AG-06.dc.html']
+OK  v3: KCl aprovado, TS travado (sem registro), sem botões de decisão 
+OK  TS sem registro para nematoide-de-cisto, com a ficha e a alternativa registrada 
+OK  primário cria a v4 com TS registrado (trava legal no saldo) 
+OK  O.S. segue impedida pela máquina 
+OK  formulário de nova vistoria 
+OK  alvo só do protocolo da cultura (T2 soja pré-plantio) Nematoide-de-cisto · nematoide
+Daninhas pré-plantio · planta daninha
+OK  não duplica talhão × alvo aberto (VIS-017) 
+OK  VIS-018 programada (nematoide, 20 pontos) e painel aberto em "Coletar no app" VIS-018 programada para T2 × nematoide-de-cisto · 24/09 · Marcos · 20 pontos · aparece no app.
+OK  VIS-014 abre o painel (não o formulário) com "Continuar coleta" no app 
+OK  K corrigido e LAU-2048 volta à validação 
+OK  DIA-011 criado em rascunho (numeração única com o MIP) 
+OK  limiar passa a Em validação (segue inativo) 
+OK  DIA-007 aponta para VIS-011 e REC-014 
+OK  DIA-007: um só link visível para a REC-014, o primário do cabeçalho ['cabeçalho']
+OK  VIS-011 com o controle em OS-0420: um só link visível para a O.S., o primário do cabeçalho; o elo O.S. da cadeia fica informativo ['cabeçalho']
+RESULTADO 16/16
+[exit 0]

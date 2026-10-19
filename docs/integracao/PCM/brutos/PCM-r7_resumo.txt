@@ -1,0 +1,18 @@
+ma_unica_test exit=0 (219s) | RESULTADO: 23/23 ok
+ma_app_fluxo_test exit=1 (184s) | 21/21 ok · FALHAS: 0
+ma_atrito_test exit=0 (201s) | RESULTADO: 13/13 ok
+ma_rastreio_test exit=1 (178s) | RESULTADO: 57/58 ok · FALHAS: F95 · F96 → modo Abastecimentos; painel da leitura; app MB-09
+ma_planos_test exit=0 (207s) | RESULTADO: 18/18 ok
+ma_correcoes_om_test exit=0 (222s) | RESULTADO: 15/15 ok
+ma_correcoes_pm_test exit=0 (190s) | RESULTADO: 12/12 ok
+matest exit=0 (149s) | RESULTADO: 40/40 ok
+mbtest exit=0 (384s) | FALHAS: 0
+cada_cd03_test exit=0 (153s) | RESULTADO: OK 14/14
+cada_fix03_test exit=0 (356s) | RESULTADO: OK 11/11
+ostest exit=0 (159s) | 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+osacoes exit=0 (31s) | RESULTADO: 40 ok · 5 falhas
+links_ocultos_test exit=0 (78s) | TOTAL 8 · falhas 0
+map_decisoes_test exit=0 (459s) | 18 ok · 0 falhas []
+varredura exit=0 (394s) | RESULTADO: 141/141 páginas sem erro
+.._ferramentas_acoes_duplicadas_.__tmp_PCM-dup.json exit=0 (370s) | RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM

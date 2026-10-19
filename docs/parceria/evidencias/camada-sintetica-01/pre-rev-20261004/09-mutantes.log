@@ -1,0 +1,72 @@
+== sem mutante
+RESULTADO: 13/13
+RESULTADO: 16/16
+== mutante P1-mip (mip.js)
+FALHOU 7 MIP → O.S. (9 emissões nos pivôs da Lagoa, doses da bula; 5 em que o total antigo de 3 casas ficaria abaixo do consumo; 2 sem lote no Estoque, fora
+FALHOU 10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 6) e nenhum tot: arredondado por conta própria · [[('mip.
+RESULTADO: 11/13
+== mutante P2-fertirrigacao (irrigacao_estado.js)
+FALHOU 8 fertirrigação → O.S. (28 v2 de 36 tentativas, 1 a 50 kg/ha; 21 com passada em curso): total = regra única, com 2 casas na mensagem; com passada em
+FALHOU 10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 6) e nenhum tot: arredondado por conta própria · [[('irri
+RESULTADO: 11/13
+== mutante P3-formulario (areas/agronomia.py)
+FALHOU 9 "Decidir controle" (agDecIni em 10 vistorias da Lagoa): a área que o formulário preenche nunca passa do talhão (com 1 casa, 5 travariam) · [{'vis':
+RESULTADO: 12/13
+== mutante P7-trava-desligada (areas/processo_os.py)
+FALHOU 6 trava de custódia executada: 31,13 contra 31,12 em custódia é recusado na web e no app, sem apontamento nem baixa (sem tolerância nova) · {'web': 
+RESULTADO: 12/13
+== mutante P4-versao (cenario.py)
+FALHOU 16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases · {'cen': [2, True], 'mip'
+RESULTADO: 15/16
+== mutante P5-base-literal (dados_irrigacao.py)
+FALHOU 15 PRE-REV P5/P6: base das fertirrigações = realizado semeado da O.S.; área das decisões do MIP ligadas = área da O.S. e ≤ área do talhão · [{'
+RESULTADO: 15/16
+== mutante Q1-area-1-casa (irrigacao_estado.js)
+FALHOU 8 fertirrigação → O.S. (28 v2 de 36 tentativas, 1 a 50 kg/ha; 21 com passada em curso): total = regra única, com 2 casas na mensagem; com passada em
+RESULTADO: 12/13
+== mutante Q1-previa-propria (areas/irrigacao.py)
+FALHOU 8 fertirrigação → O.S. (28 v2 de 36 tentativas, 1 a 50 kg/ha; 21 com passada em curso): total = regra única, com 2 casas na mensagem; com passada em
+RESULTADO: 12/13
+== mutante Q2-sem-exponencial (cenario.js)
+== mutante Q3-trava-crua (areas/processo_os.py)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+FALHOU 10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 6) e nenhum tot: arredondado por conta própria · [[('area
+RESULTADO: 11/13
+== mutante Q4-mip-cru (mip.js)
+FALHOU 10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 6) e nenhum tot: arredondado por conta própria · [[('mip.
+RESULTADO: 12/13
+== mutante Z1-total-zero-liberado (cenario.js)
+FALHOU 11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP u
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+FALHOU 13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outr
+RESULTADO: 10/13
+== mutante Z2-aviso-soma-lotes (mip.js)
+FALHOU 11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP u
+RESULTADO: 12/13
+== mutante Z4-avanco-3-casas (irrigacao_estado.js)
+FALHOU 8 fertirrigação → O.S. (28 v2 de 36 tentativas, 1 a 50 kg/ha; 21 com passada em curso): total = regra única, com 2 casas na mensagem; com passada em
+RESULTADO: 12/13
+MUTANTE NÃO APLICADO irrigacao_estado.js '  { const m = irrV2Zero(x, p, d.dose); if (m) throw new Erro'
+== mutante Y1-v2-zero: NÃO APLICADO (falha do roteiro)
+== mutante Y2-mip-zero (mip.js)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+RESULTADO: 12/13
+== mutante Y3-rotulo (areas/processo_os.py)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+FALHOU 13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outr
+RESULTADO: 11/13
+== mutante Y4-binario (irrigacao_estado.js)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+RESULTADO: 12/13
+== mutante Y6-trava-zero (areas/processo_os.py)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+RESULTADO: 12/13
+== mutante X1-painel-estoque (areas/processo_os.py)
+FALHOU 13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outr
+RESULTADO: 12/13
+== mutante X2-ajuste-sem-lib (areas/processo_os.py)
+FALHOU 13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outr
+RESULTADO: 12/13
+== mutante X5-msg-passadas (irrigacao_estado.js)
+FALHOU 13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outr
+RESULTADO: 12/13

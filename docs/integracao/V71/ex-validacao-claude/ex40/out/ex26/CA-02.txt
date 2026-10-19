@@ -1,0 +1,132 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Ordem de Serviço
+Apontamentos e conferência
+i
+2 a conferir · 1 divergência
+Conferir 2 apontamentos
+Provisórios
+52 ha aguardam conferência
+Fora da tolerância
+1 horas · OS-0420
+Sobras a receber
+10 sc OS-0417 · com Paula
+Fila de conferência diária
+Devolver para esclarecimento
+4 de 4
+APONTAMENTO
+⇅
+EQUIPE · CONJUNTO
+⇅
+REALIZADO · ACUMULADO
+⇅
+HORAS
+⇅
+CONSUMOS E SOBRAS
+⇅
+ORIGEM · SINCRONIZAÇÃO
+⇅
+CONFERÊNCIA · AÇÃO
+⇅
+OS-0421 · v2
+Dia 4 · 23/09 · T1
+Marcos
+PJ-3030 + Trator 03
+40 ha
+150 conf. + 40 prov. · saldo 160 ha
+7,2 h
+Fungicida A 20 L
+sem sobras
+app · sincronizado 17:40
+A conferir
+Conferir
+OS-0420 · v2
+Dia 2 · 22/09 · T4
+Carlos
+PD-12 + Trator T1
+12 ha
+18 conf. + 12 prov. · saldo 70 ha parado
+3,1 h
+Semente 58 W 624 kg
+horas acima do previsto · 1,8 h
+offline · sincronizado 12:10 · sem conflito
+turno parado pela quebra do Trator T1
+A conferir
+Conferir
+OS-0421 · v2
+Dia 3 · 22/09 · T1
+Marcos
+PJ-3030 + Trator 03
+50 ha
+150 conf. · saldo 160 ha
+8,4 h
+Fungicida A 25 L
+app · sincronizado
+Conferido
+Ver histórico ›
+OS-0417 · v1
+Final · 21/09 · P1
+Paula
+Distribuidor DA-08
+95 ha
+95 conf. · saldo 0 ha
+—
+MAP 100 sc entregues · 70 consumidos
+10 sc com Paula a devolver
+almoxarifado · confirmado
+Divergência de sobras
+Ver custódia ›
+Reabrir saldo para execução
+Reabrir saldo da OS-0417
+Encerramento
+Encerrar OS-0417
+Roteiro da OS-0418 após a liberação
+Liberar OS-0418
+QUANDO
+EVENTO
+EFEITO
+QUEM
+23/09 06:00
+Água aplicada antes da reclassificação · 6,7 mm no Pivô 1
+fica no balanço hídrico; não é reapontada na fertirrigação
+João (irrigante) · balanço hídrico
+liberação
+Ana (agrônoma) libera a OS-0418 (v2, com ajuste opcional)
+passa a Liberadas; a REQ-038 fica disponível para entrega
+Ana (agrônoma)
+entrega
+REQ-038 · Ureia 45 % 1.140 kg com conferência de carga
+sai do físico do depósito e passa à custódia de João
+Rui (almoxarife) → João
+início
+Início da fertirrigação no Pivô 1
+Em execução: a lâmina já aplicada é descontada, sem duplicar apontamentos
+João
+turnos
+Consumo apontado 1.100 kg em 95 ha
+uma única baixa no apontamento; a conferência não repete a baixa
+João · conferência de Paula
+devolução
+40 kg declarados · 40 kg medidos e recebidos
+custódia zero
+João → Rui (almoxarife)
+conciliação
+1.140 entregues = 1.100 consumidos + 40 devolvidos
+Em conferência · pode encerrar
+Paula
+encerramento
+Encerrar OS-0418
+sem encerramento automático
+manual, após a conciliação · sem encerramento automático pela água
+PCP
+Tela: Apontamentos e conferência · 2 a conferir · 1 divergência

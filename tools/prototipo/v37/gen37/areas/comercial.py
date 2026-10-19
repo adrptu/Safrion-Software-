@@ -71,8 +71,7 @@ def R(id,ro=False,o=None,v=None,**cells):
     if o: r['o']=[dict(t=t,h=h) if h else dict(t=t) for t,h in o]
     return r
 def two(a,b): return [Pt.b(a),Pt.br(),Pt.mut(b)]
-PRIM_ST=('padding:11px 20px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;'
-         'background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;')
+PRIM_ST=E.BTN_ST(True)   # o primário do engine (antes uma cópia local, sem alvo de toque)
 PRIM=f'<button type="button" onClick="{H("prim_fn")}" title="{H("prim_tip")}" style="{H("prim_st")}">{H("prim_t")}</button>'
 JS_BASE='''
 function GR(id){ return GRIDS.find(g=>g.id===id); }
@@ -98,7 +97,7 @@ def build():
           ('= SALDO PRODUTO',H('f_base'),'disponível na base do produto',ACC),
           ('PUBLICADO',H('f_pub'),'limite de packing e expedição',ACC),
         ])+'</div>'
-      + f'<div style="font-size: 12px; color: {MUTED}; margin-top: 8px;">Saldo final é o máximo {B("factível")} sob capacidade e prazo — folga de outra classe ou dia não cobre esta janela. Atualizado hoje 06:30 · condição prevista, não garantia.</div>')
+      + f'<div style="font-size: 12px; color: {MUTED}; margin-top: 8px;">Atualizado hoje 06:30</div>')
     bal_cols=[C('prod','Produto · classe',w=160),C('janela','Janela'),C('dem','Demanda',w=220),C('ofe','Oferta',w=220),
               C('saldo','Falta ou excesso',w=200),C('acao','Próximo passo')]
     bal=[
@@ -182,7 +181,8 @@ function EXTRAVALS(self,v){{ self.g2after=(gid,rows,r)=>{{ if(gid==='g_res'&&r){
       subtitle='Estoque elegível + oferta confiável − compromissos únicos − margem, por dia e classe.',
       status=(f'Falta {n1(PV["falta_t"])} t · Mamão A','yellow'),
       primary='Criar oferta',primary_href='VE-03.dc.html',steps=faixa(1),
-      footer='Compromisso firme, reserva temporária e reserva física da mesma obrigação são fases com identidade comum — nunca deduções cumulativas (49.2–49.3, ATP-07).')
+      footer='Compromisso firme, reserva temporária e reserva física da mesma obrigação são fases com identidade comum — nunca deduções cumulativas (49.2–49.3, ATP-07). '
+             'Saldo final é o máximo factível sob capacidade e prazo: folga de outra classe ou dia não cobre esta janela; é condição prevista, não garantia.')
 
     # ================= VE-02 · Acompanhe o mercado =================
     fname='VE-02.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
@@ -218,12 +218,12 @@ function EXTRAVALS(self,v){{ self.g2after=(gid,rows,r)=>{{ if(gid==='g_res'&&r){
       + section('Conversões declaradas','Declare a conversão antes de comparar bushel, saca, tonelada e moedas.',
         ic(btn('Usar premissa',small=True,href='GE-02.dc.html'),'cash','Levar o câmbio como premissa da gestão (GE-02)'),
         nota('1 sc soja = 50 kg · 1 bushel soja = 27,216 kg (≈ 0,5443 sc) · 1 lb = 0,4536 kg. '
-             f'Câmbio da simulação: R$ 5,32/US$ (PTAX D-1) — {B("hipótese de simulação")}, vira premissa só ao usar na gestão. '
-             'Contrato futuro não é inventado: só instrumentos existentes nas fontes acima.')))
+             f'Câmbio da simulação: R$ 5,32/US$ (PTAX D-1) — {B("hipótese de simulação")}.')))
     shell37('VE-02','Mercado e preços',corpo,
       subtitle='Preços observados, contratos, câmbio e sazonalidade por instrumento e mercado, com atraso visível.',
       primary='Preparar oferta',primary_href='VE-03.dc.html',steps=faixa(2),
-      footer='Alerta não realiza venda; cotação ausente não vira zero; toda conversão de unidade e moeda é declarada com fonte e licença.')
+      footer='Alerta não realiza venda; cotação ausente não vira zero; toda conversão de unidade e moeda é declarada com fonte e licença. '
+             'O câmbio da simulação vira premissa só ao usar na gestão. Contrato futuro não é inventado: só instrumentos existentes nas fontes.')
 
     # ================= VE-03 · Faça ofertas =================
     fname='VE-03.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
@@ -277,19 +277,17 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_of'||!r) re
                    ('Finalidade e prazo','cotação de mamão · acesso até 30/09 · documentos: padrão de classificação')],
            confirm='Confirmar destinatários',done='2 destinatários confirmados — parceiro pagante sem convite NÃO recebe')).replace('<button ','<button title="Revisar quem pode receber a oferta" ',1),
          ic(msgbtn('Enviar oferta','Rascunho enviado aos destinatários com convite confirmado pelo portal do cliente (PT-03) · finalidade, prazo e documentos registrados · simulado, nenhuma mensagem real enviada. OF-103 já está com a Frutas Real (RT-0112).'),'users','Enviar a oferta em rascunho aos destinatários confirmados'),
-         f'<button type="button" onClick="{H("g_of_new")}" title="Criar oferta privada" style="{E._MINI} font-size: 13px; padding: 7px 12px;">+ Nova oferta</button>'],
+         f'<button type="button" onClick="{H("g_of_new")}" title="Criar oferta privada" style="{E.BTN_ST(False,True)}">Criar oferta</button>'],
         g_of)
       + section('Comparação de recebimento líquido · OF-101','Compare propostas pelo líquido na fazenda, não pelo preço de face.',
         ic(msgbtn('Comparar propostas','OF-101: Frutas Real v1 rende R$ 2,10/kg líquidos contra R$ 1,99/kg da contraproposta da Rede Hortifrúti BA (frete CIF por conta do produtor) — melhor líquido: Frutas Real (PV-032).'),'scale','Comparar propostas pelo líquido'),
-        g_cmp)
-      + section('Regras da confirmação','Confirme só pedidos que passam em margem, crédito, exposição, saldo e capacidade.','',
-        nota(f'Aceite registrado {B("pelas duas partes, por versão")}. Confirmação automática só sob política prévia explícita do produtor. '
-             'Alteração de preço fora da política volta à negociação como nova versão.')))
+        g_cmp))
     shell37('VE-03','Ofertas e propostas',corpo,
       subtitle='Negociação com propostas privadas por cliente, preço líquido e atendimento possível.',
       status=('OF-101 aceita · 2 pedidos a confirmar','yellow'),
       primary='Abrir pedidos da OF-101',primary_href='VE-04.dc.html',steps=faixa(3),
-      footer='Proposta não fecha pedido sozinha; contraproposta é versionada e o aceite vale para a versão exata (cap. 46).')
+      footer='Proposta não fecha pedido sozinha; contraproposta é versionada e o aceite vale para a versão exata (cap. 46). '
+             'Confirme só pedidos que passam em margem, crédito, exposição, saldo e capacidade. Aceite registrado pelas duas partes, por versão. Confirmação automática só sob política prévia explícita do produtor. Alteração de preço fora da política volta à negociação como nova versão.')
 
     # ================= VE-04 · Registre pedidos =================
     fname='VE-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
@@ -328,7 +326,15 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_of'||!r) re
                 dict(k='janela',l='Janela',t='txt',req=True,help='Ex.: 05/10–11/10'),
                 dict(k='cond',l='Condição',t='sel',req=True,opts=['FOB · 21 d','CIF · 14 d','CIF · 21 d','CIF · 28 d','CIF · 35 d','FOB · contra entrega','FOB armazém'],**{'def':'CIF · 28 d'})]),
         add='Novo pedido',gid='g_cart',total=False)
-    EXTRAJS[0]=JS_BASE+'''
+    # colheita (06/10, spec §3.5): seção "Reservas de produto" com os pedidos do estado (c.producao) e o mesmo comando prReservar do Estoque
+    # de produto; a linha estática do PV-030 na carteira continua até a frente Comercial (§9)
+    import cenario, dados_carencia as _DC
+    from areas import producao as _PRD
+    g_rsv=grid([C('ped','Pedido · cliente',w=200),C('prod','Produto',w=190),C('tipo','Tipo · janela',w=160),dict(k='qtd',l='Quantidade',t='num',a='r'),
+                dict(k='res',l='Reservado',t='num',a='r'),dict(k='falta',l='Falta',t='num',a='r'),C('sit','Situação · próximo passo',w=250)],
+               [],edit=dict(m='pick'),gid='g_rsv',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todos'))
+    E.EXTRA.append(_PRD.painel())
+    EXTRAJS[0]=cenario.js_prefixo()+_DC.js_nucleo()+_PRD.PR_UI_JS+_PRD.PR_PED_JS+JS_BASE+'''
 const NEED={'PV-032':1.8,'PV-033':1.2}; const SALDO_B=1.8; const REC={'PV-032':'CMD-5521','PV-033':'CMD-5522'};
 function qtxt(r){ return (r.v.un==='t'?nf(r.v.qtd,1):nf(r.v.qtd))+' '+(r.v.un||''); }
 function EXTRAVALS(self,v){
@@ -346,15 +352,23 @@ function EXTRAVALS(self,v){
     if(isNew(r)){ const n=rows.filter(x=>String(x.id).indexOf('n')===0).length; const id='PV-0'+(33+n); r.v.__ok=1; r.p.ped=[{k:'b',t:id}]; r.s.ped=id; r.p.aloc=[{k:'chip',t:'Aguardando confirmação',c:'yellow'}]; r.s.aloc='Aguardando confirmação'; r.p.acao=[{k:'mut',t:'confirmação verifica saldo e crédito'}]; }
     r.v.unp='R$/'+(r.v.un==='t'?'kg':r.v.un); r.p.qt=[{k:'txt',t:qtxt(r)},{k:'br',t:''},{k:'mut',t:r.v.janela||''}]; r.s.qt=qtxt(r); r.p.pr=[{k:'txt',t:'R$ '+nf(r.v.preco,2)+'/'+(r.v.un==='t'?'kg':r.v.un)},{k:'br',t:''},{k:'mut',t:r.v.cond||''}]; r.s.pr=r.p.pr[0].t; self.setState({tick:Date.now()}); };
 }
+/* reservas de produto (estado compartilhado com Produção › Estoque de produto): mesma linha, mesmo painel, mesmo prReservar */
+const PR_GRIDS={g_rsv:1};
+const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
+function PREVALS(self,v){ cenOuvir(self); const c=cenGet(); self._c=c;
+  self.g2pick=(gid,rid)=>{ if(gid==='g_rsv') self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_cx:null,pr_ch:prChave('W-RS')}); };   /* chave do formulário aberto (colheita, revisão A-03) */
+  GR('g_rsv').rows=Object.values(prP(c).pedidos).sort((a,b)=>a.id.localeCompare(b.id)).map(p=>prPedRow(c,p)); }
+const _EXV_VE=EXTRAVALS; EXTRAVALS=function(self,v){ _EXV_VE(self,v); const c=self._c||cenGet(); const P=prP(c); const pan=self.state.pr_pan;
+  prPainel(self,v,(pan&&pan.g==='g_rsv'&&P.pedidos[pan.id])?prPanPed(self,c,P.pedidos[pan.id]):null); };
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('A CONFIRMAR','3','PV-031 · PV-032 · PV-033'),('DISPUTA DE SALDO','3,0 t × 1,8 t','Mamão B · 28/09–04/10'),
-            ('SEM ALOCAÇÃO','2',f'{PV["id"]} falta {n1(PV["falta_t"])} t · PV-028'),('RECEBÍVEIS EM ABERTO','R$ 244 mil','PV-029')])
-      + section('Carteira de pedidos','Confirme pedidos pela linha de ação e clique na linha para ajustar um pedido ainda a confirmar.',
-        '',g_cart))
+      section('Carteira de pedidos','Confirme pedidos pela linha de ação e clique na linha para ajustar um pedido ainda a confirmar.',
+        '',g_cart)
+      + section('Reservas de produto','Pedidos do estado: clique num pedido para reservar lote apto ou cancelar reserva (o mesmo comando do Estoque de produto).','',g_rsv))
     shell37('VE-04','Pedidos de venda',corpo,
       subtitle='Confirmação valida preço, crédito, saldo e capacidade numa transação única; alocações futuras e físicas ficam separadas.',
-      status=('2 pedidos em risco · 1 disputa','yellow'),
+      status=('3 a confirmar · 2 em risco · 1 disputa','yellow'),
       primary=f'Resolver alocação do {PV["id"]}',primary_href='VE-04det.dc.html',steps=faixa(4),
       footer='Expedição parcial mantém saldo; recebimento não é inferido da entrega; confirmar é idempotente — repetir devolve o mesmo recibo (49.3, ATP-05).')
 
@@ -524,10 +538,10 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_rc'||!r) re
         g_rc)
       + section(f'Efeito no estoque · retorno do {CASO["id"]}','Mantenha o retorno bloqueado até a Qualidade decidir a destinação.','',
         nota(f'{CASO["qtd_kg"]} kg retornaram e foram recebidos como {B("bloqueados")}: o estoque vendável <b style="color:{RED};">não aumentou</b> e o lote {CASO["lote"]} '
-             f'segue indisponível para reserva e expedição. O ajuste financeiro fica vinculado ao caso — crédito não é emitido pelo retorno em si. '
-             f'Recolhimento, se decidido, usa a genealogia do lote para listar clientes afetados.'),state='yellow'))
+             f'segue indisponível para reserva e expedição.'),state='yellow'))
     shell37('VE-06','Reclamações e devoluções',corpo,
       subtitle='Casos por entrega e lote, com retorno, destinação, crédito e ação corretiva.',
       status=(f'{CASO["id"]} aguarda destinação · RC-15 aberto hoje','yellow'),
       primary_html=f'<button type="button" onClick="{H("g_rc_new")}" style="{PRIM_ST}">Abrir caso</button>',steps=faixa(6),
-      footer='Encerrar exige destinação física e financeira aplicável; item devolvido bloqueado não vira vendável até a Qualidade decidir (DEMO-08).')
+      footer='Encerrar exige destinação física e financeira aplicável; item devolvido bloqueado não vira vendável até a Qualidade decidir (DEMO-08). '
+             'O ajuste financeiro fica vinculado ao caso: crédito não é emitido pelo retorno em si. Recolhimento, se decidido, usa a genealogia do lote para listar clientes afetados.')

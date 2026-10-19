@@ -1,0 +1,19 @@
+HEAD f048862 · ben.js f048862
+build rc=0 :: 141 artboards → /home/user/sp-proto/tools/prototipo/v37/gen37/project · menu vigente: 46 · ocultos: 95 · linhas FALHA: 0
+montar_render rc=0 :: _render montado: 141 páginas + 20 arquivos do site · dados reais locais: 5/5
+ben_unit_test.py rc=0 1s :: RESULTADO: OK 168/168
+ben_mutantes.py rc=0 44s :: RESULTADO: OK 76/76
+ben_fluxo_test.py:roteiro,roteiro390 rc=0 134s :: RESULTADO: OK 34/34
+ben_fluxo_test.py:complemento,lotes,duplo,criada rc=0 93s :: RESULTADO: OK 26/26
+ben_fluxo_test.py:teclado,cancelar,faixa390 rc=0 93s :: RESULTADO: OK 28/28
+ben_fluxo_test.py:cadeia,cadeia390 rc=0 128s :: RESULTADO: OK 16/16
+tabelas_ben_test.py rc=0 18s :: RESULTADO: OK 12/12
+producao_fluxo_test.py rc=0 241s :: RESULTADO: OK 66/66
+tabelas_est_test.py rc=0 31s :: RESULTADO: 34/34 ok
+links_ocultos_test.py rc=0 1s :: TOTAL 11 · falhas 0
+est_cenario_test.py rc=0 23s :: RESULTADO: 15/15 ok
+cada_cd04_test.py rc=0 15s :: RESULTADO: OK 15/15
+varredura.py rc=0 358s :: RESULTADO: 141/141 páginas sem erro
+DUP rc=0 233s :: RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+harness BEN-REV-20261009-03 rc=0 :: RESULTADO: OK 4 / 4
+FIM

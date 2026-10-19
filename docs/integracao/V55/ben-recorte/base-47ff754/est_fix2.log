@@ -1,0 +1,26 @@
+etapa 1: [[1554, 1116]] NF 4533 24/09/2026 23/09/2026 PC-090 Ver pedido Coop. Vale Semente de soja 58 W S58-0926 20.000 kg 20.000 kg 20.000 kg 0 kg Conferido — validade 05/2027
+  OK  etapa 1 após conferir NF 4533: página sem rolagem, "Conferido" e "Aguarda laudo" inteiros na grade
+etapa 4: [[1602, 1116]]
+  OK  etapa 4 com Semente de soja 58 W em 2 lotes (S58-0801 e S58-0926 sob o item); Item › lote e Disponível à vista sem rolar a grade
+toast: Contagem INV-2611 conferida: sem diferença.
+toast: Ajuste INV-2609 (AJ-71) aprovado por Ana (gestora): −600 kg no lote M26-07. Físico 90.000 kg → 89.400 kg.
+  ['04:59 MV-1002 Contagem sem diferença — INV-2611 — Glifosato 480 G26-14 — Paula (almoxarife) Web —'] ['04:59 MV-1003 Ajuste de inventário — INV-2609 AJ-71 — MAP 11-52 M26-07 −600 kg Ana (gestora) Web —']
+  OK  contagem sem diferença na trilha com INV-2611 e o contador
+  OK  ajuste de inventário na trilha com INV-2609 · AJ-71 e −600 kg
+toast: 320 L de Glifosato 480 entregues a Marcos (OS-0430). Aguarda confirmação no app.
+app: Recebimento confirmado: Glifosato 480 320 L.
+  ['04:59 MV-1008 Recebimento confirmado no app — REQ-53 OS-0430 Glifosato 480 — 320 L Marcos App —']
+  OK  confirmação do app lista só o Glifosato 480 (320 L) entregue
+app: Turno fechado: 5 ha em 1 h · salvo no aparelho, envia quando houver sinal. A ordem continua em execução.
+  ['04:59 MV-1012 Consumo apontado no app — REQ-53 OS-0430 Glifosato 480 2,4-D 806 Óleo mineral — 10 L 5 L 2,5 L Marcos App Aguardando sinal'] | 12 movimentos desde o início da demonstração · 1 aguardando sinal do app
+  OK  consumo do app: cada item com quantidade e unidade (10 L, 5 L, 2,5 L) na coluna Quantidade
+  OK  sem sinal: chip "Aguardando sinal" inteiro, grade sem rolagem, faixa com 1 aguardando
+sinal: 1 registro enviado ao voltar o sinal.
+  ['04:59 MV-1012 Consumo apontado no app — REQ-53 OS-0430 Glifosato 480 2,4-D 806 Óleo mineral — 10 L 5 L 2,5 L Marcos App —'] | 12 movimentos desde o início da demonstração · 0 aguardando sinal do app
+  OK  sinal de volta: consumo sem "Aguardando sinal" e faixa com 0 aguardando
+app: Turno fechado: 2 ha em 0,5 h · salvo no aparelho, envia quando houver sinal. A ordem continua em execução.
+  ['04:59 MV-1013 Consumo apontado no app — REQ-53 OS-0430 Glifosato 480 2,4-D 806 Óleo mineral — 4 L 2 L 1 L Marcos App Aguardando sinal', '04:59 MV-1012 Consumo apontado no app — REQ-53 OS-0430 Glifosato 480 2,4-D 806 Óleo mineral — 10 L 5 L 2,5 L Marcos App —'] | 13 movimentos desde o início da demonstração · 1 aguardando sinal do app
+  OK  segundo turno sem sinal: só o consumo novo (4 L de Glifosato) aguarda; o anterior segue enviado
+  OK  entregas na trilha por "Rui (almoxarife)", quem entregou (perfil Rui na tela; Rui nas chamadas diretas), o mesmo papel do contador
+  OK  sem erro de script
+RESULTADO: 11/11 ok

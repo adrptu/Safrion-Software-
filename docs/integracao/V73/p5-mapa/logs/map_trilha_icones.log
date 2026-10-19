@@ -1,0 +1,10 @@
+OK    I1 1440: 9 funções na ordem, cada uma com ícone de 16 px e o nome à vista, alvo de 32 px de altura
+OK    I2 barra no alto, em uma linha, acima da faixa da camada e do mapa; o mapa começa na borda esquerda do bloco (sem coluna de ícones)
+OK    I3 Pragas e doenças = inseto, desenho único na barra (sem a lupa antiga)
+OK    I4 hover em Pragas e doenças: a dica (role=tooltip) diz "Mostrar Pragas e doenças no mapa"
+OK    I5 Tab até Satélite: a dica abre com "Mostrar Satélite no mapa"
+OK    I6 o clique troca a camada: Pragas e doenças selecionada (aria-selected e estado ativo tonal da DS) e o mapa com o título da camada
+OK    I3b painel do talhão (Integrado): "Ver pragas e doenças" com o mesmo inseto
+OK    I7 390 px com toque: barra em linha e rolável dentro dela, 9 botões de 44 px de altura com o nome à vista, sem rolagem lateral da página
+OK    I8 sem erro de JS
+RESULTADO: 9 ok · 0 falhas

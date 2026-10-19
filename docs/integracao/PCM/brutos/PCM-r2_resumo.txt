@@ -1,0 +1,20 @@
+matest exit=0 (70s) | RESULTADO: 40/40 ok
+ma_planos_test exit=0 (412s) | RESULTADO: 18/18 ok
+ma_correcoes_om_test exit=0 (248s) | RESULTADO: 15/15 ok
+ma_correcoes_pm_test exit=0 (175s) | RESULTADO: 12/12 ok
+ma_rastreio_test exit=0 (327s) | RESULTADO: 58/58 ok
+ma_atrito_test exit=0 (415s) | RESULTADO: 13/13 ok
+os_cenario_test exit=1 (149s) | RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+os_v39_bloq_test exit=0 (138s) | RESULTADO: 11/11 ok
+tabelas_os_test exit=0 (154s) | RESULTADO: 38/38 ok
+os_ator_test exit=0 (177s) | RESULTADO: 15/15 ok
+map_decisoes_test exit=0 (350s) | 18 ok · 0 falhas []
+cada_cd03_test exit=0 (162s) | RESULTADO: OK 14/14
+cada_fix03_test exit=0 (240s) | RESULTADO: OK 11/11
+cada_cd04_test exit=0 (176s) | RESULTADO: OK 15/15
+acao_unica_test exit=0 (279s) | RESULTADO: 10 ok · 0 falhas (saf)
+componentes_test exit=0 (400s) | RESULTADO: 3 ok · 0 falhas (matriz)
+app_cenario_test exit=0 (383s) | 15/15 ok · FALHAS: 0
+app_mb04_test exit=0 (245s) | 6/6 ok · FALHAS: 0
+../ferramentas/acoes_duplicadas_._/tmp/PCM-dup.json exit=1 (0s) | 
+FIM

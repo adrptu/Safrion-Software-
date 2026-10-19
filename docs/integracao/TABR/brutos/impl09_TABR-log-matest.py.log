@@ -1,0 +1,69 @@
+MA-01
+  ok  MA-01.dc.html: sem erro JS
+  ok  MA-01.dc.html: faixa com 5 links e etapa 1 atual
+  ok  MA-01.dc.html: grades sem rolagem horizontal a 1440 px [0, 0]
+  ok  MA-01.dc.html: sem botões Editar
+  ok  MA-01: substituto com rótulo único antes do PCP · Trator 02 · MF 7719 Trator · Santa Rita · T4 · 2.988 h Apto Proposto OS-0420 saldo 70 ha · aguarda PCP Elegível Vence em
+  ok  MA-01: 16 ativos com a identidade do CD-03 + comboio
+  ok  MA-01: próxima manutenção vem dos planos (Vencida · Vence em breve · Sem plano)
+  ok  MA-01: clique na linha abre formulário do ativo
+  ok  MA-01: restrição exige motivo
+  ok  MA-01: salvar restrição avisa alocações Colhedora Axial-Flow 7250 restrito · uso só com monitoramento · alocações afetad
+  ok  MA-01: T1 só é liberado pela OM-0233
+  ok  MA-01: troca de tarefa recalcula elegíveis
+MA-02
+  ok  MA-02.dc.html: sem erro JS
+  ok  MA-02.dc.html: faixa com 5 links e etapa 2 atual
+  ok  MA-02.dc.html: grades sem rolagem horizontal a 1440 px [0, 0, 0]
+  ok  MA-02.dc.html: sem botões Editar
+  ok  MA-02: inspeção INSP-105 e OS-0431 na contingência
+  ok  MA-02: registrar inspeção abre formulário
+  ok  MA-02: novo achado exige escolher o ativo
+  ok  MA-02: novo achado registrado Achado NC-0913 registrado · entrou na fila por risco · crie ou vincule uma ordem
+  ok  MA-02: fila com 7 casos
+  ok  MA-02: vincular achado não cria ordem nova
+MA-03
+  ok  MA-03.dc.html: sem erro JS
+  ok  MA-03.dc.html: faixa com 5 links e etapa 3 atual
+  ok  MA-03.dc.html: grades sem rolagem horizontal a 1440 px [0, 0]
+  ok  MA-03.dc.html: sem botões Editar
+  ok  MA-03: painel com Mover OM-0234 e Propor substituição
+  ok  MA-03: Vencimentos e paradas com a primária pelo estado; ações sem efeito cortadas
+  ok  MA-03: mover a OM-0234 para 29/09 tira o conflito · OM-0234 movida para 29/09 · dentro da tolerância (até 3.068 h ≈ 30/09) · sem conflito com a OS-0420.
+  ok  MA-03: propor substituição registra proposta (uma vez)
+  ok  MA-03: sem link para impedimentos (PL-05 oculta e fixa · CTL-1, Frente F)
+MA-04
+  ok  MA-04.dc.html: sem erro JS
+  ok  MA-04.dc.html: faixa com 5 links e etapa 4 atual
+  ok  MA-04.dc.html: grades sem rolagem horizontal a 1440 px [0]
+  ok  MA-04.dc.html: sem botões Editar
+  ok  MA-04: iniciar serviço da OM-0228
+  ok  MA-04: resolver sobras da OM-0230
+  ok  MA-04: encerrar OM-0230
+  ok  MA-04: clique na linha abre o painel da ordem com o próximo passo
+  ok  MA-04: painel cravado Planejar e autorizar ordem removido
+MA-04det
+  ok  MA-04det.dc.html: sem erro JS
+  ok  MA-04det.dc.html: faixa com 5 links e etapa 4 atual
+  ok  MA-04det.dc.html: grades sem rolagem horizontal a 1440 px [0, 0, 0, 0]
+  ok  MA-04det.dc.html: sem botões Editar
+  ok  MA-04det: OS-0431 no impacto e substituto só proposto
+  ok  MA-04det: aptidão recusada sem teste
+  ok  MA-04det: teste registrado
+  ok  MA-04det: 2ª tentativa vira Aprovado
+  ok  MA-04det: recusa de encerrar lista só serviço e sobras · Indisponível agora: falta concluir o serviço (Em conferência) e destinar a bomba hidráulica usada para encerrar
+  ok  MA-04det: aptidão definida
+  ok  MA-04det: concluir serviço
+  ok  MA-04det: nenhuma edição aberta
+  ok  MA-04det: resolver sobras abre a sobra pela linha
+  ok  MA-04det: sobras resolvidas
+  ok  MA-04det: ordem encerrada
+  ok  MA-04det: próxima ação volta às ordens
+  ok  MA-04det: tarefa abre pela linha
+MA-05
+  ok  MA-05.dc.html: sem erro JS
+  ok  MA-05.dc.html: faixa com 5 links e etapa 5 atual
+  ok  MA-05.dc.html: grades sem rolagem horizontal a 1440 px [0, 0]
+  ok  MA-05.dc.html: sem botões Editar
+  ok  MA-05: consumo abre origem
+FALHAS: 0

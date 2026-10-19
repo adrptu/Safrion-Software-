@@ -1,0 +1,1419 @@
+diff --git a/docs/colheita/DECISOES.md b/docs/colheita/DECISOES.md
+index 51ffbf0..848afde 100644
+--- a/docs/colheita/DECISOES.md
++++ b/docs/colheita/DECISOES.md
+@@ -41,6 +41,7 @@ Cada decisão vale até o proprietário mudar. Nenhuma é aprovação dele (AGEN
+ | D-35 | Revisão A-14: no MB-10, durante a carência, o cartão diz "não colha agora" e registrar área ou carga pede o toque "Colheita já feita"; nada é impedido (R-12: registrar nunca é impedido) | O aviso dizia "novos turnos suspensos" com os botões ativos | — |
+ | D-36 | Revisão A-13, A-15, A-17, A-18: "Liberar lote" só quando a pendência é da Qualidade (senão "‹dono› resolve"); a linha da cultura diz a área da ponderada; a linha do pedido mostra a observação (PV-030 = saldo de 4.000 sc do CT-201); Estoque de produto ganha a coluna Em processo | Ação primária sempre recusada; números que não fechavam na linha | — |
+ | D-37 | Revisão A-19: semana sem ano ("Colheita · semana 2") lida no ano mais perto de hoje; a ordem nova guarda a janela ISO e a chave da semana leva o ano; dd/mm mais de 180 dias à frente é do ano anterior | A safra perene cruza o ano (mamão até 31/08/2027) | — |
++| D-38 | Revisão COLH-C01 (Codex 6070584991): café recebido em L sem rendimento medido é um estado próprio, "a apurar", por origem da carga (`prApurado`); a área apontada não o esconde. Linha, total da cultura, painel, passe, cartão e aviso do recebimento mostram "12.000 L · sc a apurar" e "sc/ha a apurar" (nunca 0 sc, 0,00 sc/ha ou −100,0 %); a ponderada da cultura deixa o talhão a apurar fora da conta e diz isso. O rendimento medido entra pela origem (`x.ben`, kg de café beneficiado rateado; gravado pelo BEN-4 · R-D02); `x.ben = 0` é zero medido. Lote "Café da roça" no Estoque de produto em L, sem saca derivada (`prLoteTxt`) | Zero falso apresentado como resultado medido; 12.000 L mostrados como "200 sc" (saca presumida por fator fixo, R-09) | Não se reverte sem decisão: tirar `prApurado`/`prLoteTxt` reabre o zero falso e as sacas por fator fixo. Pendente: o BEN-4 gravar `x.ben` pela ordem de processo |
+ 
+ ## Perguntas só da realidade da fazenda (para a homologação)
+ 1. Na Lagoa Grande, o mamão é vendido por kg como sai do campo ou passa por packing? (D-20, D-23)
+diff --git a/docs/controle-01/PLANO.md b/docs/controle-01/PLANO.md
+index f9cb842..1b25b45 100644
+--- a/docs/controle-01/PLANO.md
++++ b/docs/controle-01/PLANO.md
+@@ -55,6 +55,9 @@ Os números de teste de cada frente vêm das execuções dos desenhos em `ctl/`.
+   - O CTL-3 tira o texto do HEAD, mas o histórico continua.
+   - O Codex confere com o proprietário antes de qualquer publicação.
+ - **G3 · B-R8.** Fechamento com dose efetiva abaixo da aprovada. Carrega o resto do dano da B e está "severidade a classificar". Se o Codex classificar como S2, vira o CTL-11, antes da homologação.
++  - Classificada S2 pelo Codex (6064114787 §2). Feita no protótipo em 09/10 (`e2d1040`, `f0a0cd8`, `dbc1acc`, branch `claude/v44-dom`): o consumo fica como informado; o apontamento e a O.S. ganham o selo "Divergência de consumo/dose" (planejado × informado por produto, com unidade); a revisão técnica do agrônomo (aceitar com motivo ou registrar a correção) é exigida antes do encerramento. Precisão: centésimo da unidade (`cenQtd`), sem tolerância; `LIM_DISP` (20 %) é alçada de área dispensada, não tolerância de consumo.
++  - Revisão adversarial (09/10, "DOM: correções da revisão"): produto da ordem fora da requisição conta como 0 informado e abre a divergência; a comparação usa o decimal meio para cima de `cenQtd` (9,995 L = 10,00 L), não o arredondamento do float; relato recusado no Estoque refaz a divergência do dia como "planejado × baixado" e reabre a revisão já feita (a anterior fica no histórico).
++  - Próxima fatia (registrado, não feito): emitir a O.S. de reaplicação a partir da "Correção decidida". Hoje o formulário Nova ordem recusa uma 2ª ordem da mesma atividade no mesmo cultivo, e a especificação (Codex 6064114787 §2) proíbe forçar a reaplicação. Por isso a correção fica registrada na linha do apontamento e na Origem, e a mensagem não promete mais a ordem automática.
+ - **G4 · CTL-7.** Precisa estar integrado antes da homologação (motivo no §2, CTL-7).
+ 
+ **Regra de pilha:**
+diff --git a/tools/prototipo/v37/gen37/areas/inicio.py b/tools/prototipo/v37/gen37/areas/inicio.py
+index 44de5af..1ab791a 100644
+--- a/tools/prototipo/v37/gen37/areas/inicio.py
++++ b/tools/prototipo/v37/gen37/areas/inicio.py
+@@ -639,7 +639,8 @@ function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
+     if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
+       if(/^Carga a pesar/.test(bq)){ if(!x.selos.some(s=>s[0]==='Carga a pesar')) x.selos=x.selos.concat([['Carga a pesar','yellow']]); }   /* colheita (R-18): não é sobra em custódia */
+       else if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
+-      else if(bq&&!x.selos.some(s=>/^Sobras a receber/i.test(s[0]))) x.selos=x.selos.concat([['Sobras a receber','yellow']]); }
++      else if(bq){ const t=/^Sobra em custódia/.test(bq)?'Sobras a receber':(/^Consumo em conferência/.test(bq)?'Consumo em conferência':(/duplicidade/.test(bq)?'Apontamento em conferência':''));   /* o selo do bloqueio que existe; a divergência de dose já vem do cenário (revisão DOM achado 3) */
++        if(t&&!x.selos.some(s=>s[0]===t)) x.selos=x.selos.concat([[t,'yellow']]); } }
+     if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
+     if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';
+     const a=o.act; x.act=(!a||(a.c==='ag'&&!inPendLib(c,o.id))||(a.c==='cust'&&co&&!cust.length))?null:a;
+diff --git a/tools/prototipo/v37/gen37/areas/mobile.py b/tools/prototipo/v37/gen37/areas/mobile.py
+index 1dc930a..72eb338 100644
+--- a/tools/prototipo/v37/gen37/areas/mobile.py
++++ b/tools/prototipo/v37/gen37/areas/mobile.py
+@@ -475,9 +475,10 @@ v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
+     turno_off=(
+       IF('has_last',f'<div style="{CARD_ST}"><div style="display: flex; align-items: center; gap: 8px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {ACC}; flex-shrink: 0;"></span>'
+          f'<div style="font-size: 14.5px; font-weight: 700; flex-grow: 1;">Turno fechado · {H("last_t")}</div></div>'
+-         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}'+IF('last_hasConf',hchip('lcf'))+'</div>'
++         f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">{hchip("lst")}'+IF('last_hasConf',hchip('lcf'))+IF('last_hasDiv',hchip('ldv'))+'</div>'
+          f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">Consumo: {H("last_cons")}</div>'
+          + IF('last_hasConf',f'<div style="font-size: 13px; color: {INK}; line-height: 1.45;">{H("last_conf")}</div>')
++         + IF('last_hasDiv',f'<div style="font-size: 13px; color: {INK}; line-height: 1.45;">{H("last_div")}</div>')
+          + f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("last_real")}</div></div>')
+       + h2('Nenhum turno aberto','Inicie o turno na ordem em que vai trabalhar.')
+       + qcards('lista',a='l',count=2))
+@@ -495,7 +496,12 @@ if(L){ const oo=c.ordens[L.os]; const ap=oo&&(oo.ap||[]).find(a=>a.dia===L.dia);
+   if(dup) v.last_cons='nada baixado: '+CEN_CONF_AP+' decide se é outro turno'; else if(desc) v.last_cons='nada baixado: guardado como duplicidade';
+   const cf=(c.confs||[]).filter(k=>k.os===L.os&&k.dia===L.dia); const ab=cf.some(k=>k.estado==='Em conferência'||k.estado===CEN_CC_AGUARDA); v.last_hasConf=cf.length>0;
+   v.last_conf=cf.map(k=>k.estado==='Em conferência'?'Em conferência · '+cenConfTxt(k,c)+' · '+cenConcQuem(c,[k]):(k.estado===CEN_CC_AGUARDA?'Aguarda a decisão da duplicidade · '+cenConfTxt(k,c)+' · '+CEN_CONF_AP:k.estado+' por '+k.por+' · '+cenConfTxt(k))).join(' | ');
+-  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno'; }
++  DCH(v,'lcf',ab?'Consumo em conferência':'Conferência resolvida',ab?'yellow':'green'); if(!L.cons&&cf.length&&!dup&&!desc) v.last_cons='nada baixado neste turno';
++  /* B-R8: dose diferente da planejada fica como informada e vai para revisão técnica do agrônomo (o operador vê no recibo) */
++  const dva=(ap&&(ap.div||[]).length&&!desc)?ap:null; v.last_hasDiv=!!dva;
++  /* retido como duplicidade: a revisão só abre se o turno somar (revisão DOM achado 6) */
++  v.last_div=dva?(dva.div.map(cenDivTxt).join('; ')+(dva.rev?' · '+dva.rev.dec.toLowerCase()+' por '+dva.rev.quem:(dup?' · a revisão técnica abre se '+CEN_CONF_AP+' somar o turno':' · revisão técnica de '+g2quem('agronomo')))):'';
++  DCH(v,'ldv',dva&&dva.rev?'Dose revisada':CEN_DIV,dva&&dva.rev?'green':(dup?'yellow':'red')); }
+ DCH(v,'hdr',t?(mbPausado(t)?'turno pausado':'turno aberto'):'sem turno aberto',t?(mbPausado(t)?'yellow':'green'):'gray');
+ v.t_fe=false; v.t_zero=false;
+ if(t){ const pz=mbPausado(t);
+diff --git a/tools/prototipo/v37/gen37/areas/processo_os.py b/tools/prototipo/v37/gen37/areas/processo_os.py
+index fa9fc0f..d21242d 100644
+--- a/tools/prototipo/v37/gen37/areas/processo_os.py
++++ b/tools/prototipo/v37/gen37/areas/processo_os.py
+@@ -237,6 +237,8 @@ function osMerge(b,co,c){ if(!co) return b;
+   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
+     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot}); }); }
+   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
++  (co.ap||[]).forEach(a=>{ (a.revAnt||[]).forEach(r=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+r.dec.toLowerCase()+' por '+r.quem+' às '+r.at+': '+r.txt+' · reaberta: '+r.reaberta]); });
++    if(a.rev) o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8 (revisão reaberta fica no histórico)
+   if(b.area){ o.realizado=co.realizado||0; o.saldo=co.saldo||0; }
+   if(co.etapa!==b.etapa){ o.cond=osCondGen(o); o.dono=co.etapa==='Em conferência'?o.resp:''; o.prazo=co.etapa==='Em conferência'?'conferir':''; }
+   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
+@@ -248,12 +250,14 @@ function osMerge(b,co,c){ if(!co) return b;
+     const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
+     if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
+       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; }
+-    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
++    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; }   // duplicidade retida: decide a conferência (CMD-09)
++    else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); } }   // B-R8: revisão técnica pendente
+   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
+   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
+     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
+     else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Cargas e recebimento */
+       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
++    else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
+     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
+       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
+       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
+@@ -304,6 +308,8 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
+ function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
+   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
+ function osEncBloq(o){ const m=o.encM;
++  if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
++    q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
+   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
+   if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
+   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
+@@ -422,7 +428,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
+   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
+   if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
+   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
+-  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
++  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'+cenDivMsg(ap)
+     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+cenConcQuem(c,R.ks)+'.':'')}; }
+ function osc_apDecidir(c,id,dia,modo,us,ator){ return cenApDecidir(c,id,dia,modo,ator,us); }   /* CMD-09 (quem confere): 'anterior' | 'este' | 'somar'; us = usado informado na conferência */
+ // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
+@@ -441,7 +447,7 @@ function osApColeta(L){ const cons={},est=[]; let erro='';
+ function osApDupAviso(c,o,d){ const co=c.ordens[o.id]; if(!co||!/^\d\d\/\d\d$/.test(d||'')) return '';
+   const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP+' e só soma depois da decisão.':''; }
+ function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
+-  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[];
++  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[]; cenSeloDiv(c,id);   /* B-R8: a revisão pendente segue visível */
+   return {msg:id+' enviada para conferência.'}; }
+ // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
+ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
+@@ -515,7 +521,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
+ // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
+ // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
+ // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
+-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir }; } catch (e) {}
++try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir, osc_conferencia, cenDivRever }; } catch (e) {}
+ // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
+ function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
+ function mfSaf(self){ return self.state.mf_saf||'Todas'; }
+@@ -746,7 +752,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
+     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
+ }
+ function EXTRAVALS(self,v){
+-  self.g2perfilFecha={pa:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar) */
++  self.g2perfilFecha={pa:null,dvr:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
+   const st=self.state, all=ords(self), os=vis(self);
+   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
+   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
+@@ -854,13 +860,23 @@ function EXTRAVALS(self,v){
+     const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
+     const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia),g2perfil()),{apus:null},(e)=>self.setState({g2toast:e}));
+     const CONF=g2papel(g2perfil(),'conferente');   /* CMD-09: as três saídas só para quem confere (CTL-3 · ATOR) */
++    /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
++    const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
++    const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
++    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{}; const t=(cur[dia]||{}).t||'';
++      osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:null},(e)=>dvSet(dia,{err:e})); };
+     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
+       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
+       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
+       const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
+       const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
+         set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
+-      return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
++      const dv=!prev&&x.st!==CEN_AP_DESC&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};   /* guardado como duplicidade nunca soma: sem divergência (revisão DOM achado 6) */
++      const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2quem('agronomo')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
++      return {div:dv,divT:dv?CEN_DIV+' · '+x.div.map(cenDivTxt).join('; '):'',hasRev:dv&&!!x.rev,revT:x.rev?'Revisão técnica: '+x.rev.dec.toLowerCase()+' por '+x.rev.quem+' às '+x.rev.at+' · '+x.rev.txt+(x.rev.rp?' · '+x.rev.rp:''):'',
++        divQ:dvQ,hasDivQ:!!dvQ,dvPode:dvAb&&AGRd,dvfid:'dv_'+x.dia,dvlab:'Motivo ou correção decidida · dia '+x.dia,dvv:dvS.t||'',dverr:dvS.err||'',hasDverr:!!dvS.err,
++        dvset:(e)=>dvSet(x.dia,{t:e.target.value,err:''}),dvAc:()=>dvGo(x.dia,'aceitar'),dvCo:()=>dvGo(x.dia,'corrigir'),
++        d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
+         dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
+           +(uso?' "Vale este" indisponível: '+uso+'.':''),
+         vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
+@@ -1006,7 +1022,17 @@ def _painel():
+            f'<sc-if value="{H("a.pode")}" hint-placeholder-val="{T()}"><div style="display: flex; gap: 6px; flex-wrap: wrap;">'
+            f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
+            f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
+-           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>')
++           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>'
++           # B-R8: divergência de consumo/dose (planejado × informado) e a revisão técnica do agrônomo na mesma linha
++           f'<sc-if value="{H("a.div")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Revisão técnica da dose" style="display: flex; flex-direction: column; gap: 6px; padding: 0 0 8px;">'
++           f'<span style="font-size: 12.5px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("a.divT")}</span>'
++           f'<sc-if value="{H("a.hasRev")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: {MUTED}; line-height: 1.4;">{H("a.revT")}</span></sc-if>'
++           f'<sc-if value="{H("a.hasDivQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: #8A5A00; font-weight: 600; line-height: 1.4;">{H("a.divQ")}</span></sc-if>'
++           f'<sc-if value="{H("a.dvPode")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px;">'
++           f'<textarea id="{H("a.dvfid")}" aria-label="{H("a.dvlab")}" placeholder="Motivo para aceitar, ou a correção/reaplicação decidida" value="{H("a.dvv")}" onChange="{H("a.dvset")}" style="font-family: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; min-height: 48px; resize: vertical; box-sizing: border-box; width: 100%;"></textarea>'
++           f'<sc-if value="{H("a.hasDverr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("a.dverr")}</span></sc-if>'
++           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;"><button type="button" onClick="{H("a.dvAc")}" style="{_MINI}">Aceitar com motivo</button>'
++           f'<button type="button" onClick="{H("a.dvCo")}" style="{_MINI}">Registrar correção</button></div></div></sc-if></div></sc-if>')
+     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
+             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
+     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'
+diff --git a/tools/prototipo/v37/gen37/areas/producao.py b/tools/prototipo/v37/gen37/areas/producao.py
+index 5f7af11..b5af678 100644
+--- a/tools/prototipo/v37/gen37/areas/producao.py
++++ b/tools/prototipo/v37/gen37/areas/producao.py
+@@ -240,7 +240,7 @@ def prod():
+            'Entrada não é liberação: só lote Liberado vai para reserva. Venda futura não desconta o físico. Saca é derivada da massa (DEC-0510-03).')
+ 
+ PROD_JS=r'''
+-function prLoteRow(c,L,S){ const cu=L.cultura; const U=x=>prEstTxt(cu,x); const loc=(PRDC.locais[L.local]||{}).nome||L.local;
++function prLoteRow(c,L,S){ const U=x=>prLoteTxt(L,x); const loc=(PRDC.locais[L.local]||{}).nome||L.local;   /* café da roça em L, sem saca derivada (COLH-C01) */
+   const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
+   return {id:L.id,ro:true,v:{nome:L.id,prod:L.prod,loc,fis:S.fis,blq:S.blq,proc:S.proc,apto:S.apto,res:S.res,disp:S.disp,q},
+     s:{nome:L.id+' '+L.prod,prod:L.prod,loc:loc+' '+(L.validade?prBr(L.validade):''),q:q+' · '+nx.t,fis:U(S.fis),blq:U(S.blq),proc:U(S.proc),apto:U(S.apto),res:U(S.res),disp:U(S.disp)},
+@@ -255,7 +255,7 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
+   const so=self.state.pr_saldo!==false; v.sl_on=String(so); v.sl_st=prPill(so); v.sl_tog=()=>self.setState({pr_saldo:!so});
+   const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)); const prods={};
+   lots.forEach(L=>{ const S=prSaldos(c,L); if(so&&S.esgotado) return; (prods[L.prod]=prods[L.prod]||[]).push({L,S}); });
+-  const rows=Object.keys(prods).sort().map(pr=>{ const ls=prods[pr]; const cu=ls[0].L.cultura; const U=x=>prEstTxt(cu,x); const sm=k=>prSoma(ls.map(x=>x.S[k]));
++  const rows=Object.keys(prods).sort().map(pr=>{ const ls=prods[pr]; const U=x=>prLoteTxt(ls[0].L,x); const sm=k=>prSoma(ls.map(x=>x.S[k]));
+     return {id:'grp:'+pr,ro:true,v:{nome:pr,prod:pr,fis:sm('fis'),blq:sm('blq'),proc:sm('proc'),apto:sm('apto'),res:sm('res'),disp:sm('disp')},
+       s:{nome:pr,prod:pr,fis:U(sm('fis')),blq:U(sm('blq')),proc:U(sm('proc')),apto:U(sm('apto')),res:U(sm('res')),disp:U(sm('disp'))},
+       p:{nome:[{k:'b',t:pr}],prod:[{k:'mut',t:ls.length+(ls.length>1?' lotes':' lote')}],loc:[{k:'mut',t:''}],fis:prTx(U(sm('fis'))),blq:prTx(U(sm('blq'))),proc:prTx(U(sm('proc'))),apto:prTx(U(sm('apto'))),res:prTx(U(sm('res'))),disp:[{k:'b',t:U(sm('disp'))}],q:[{k:'mut',t:''}]},
+@@ -266,10 +266,10 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
+   self._lots=lots; self._peds=peds; }
+ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
+   /* cartões (celular): mesmos registros, filtro e ordem da grade */
+-  v.cards_lot=prCards(self,v,'g_lot',id=>{ if(String(id).indexOf('grp:')===0){ const pr=id.slice(4); const ls=(self._lots||[]).filter(L=>L.prod===pr); if(!ls.length) return null; const cu=ls[0].cultura;
+-      return prCard({grp:true,t1:pr,num:prEstTxt(cu,prSoma(ls.map(L=>prSaldos(c,L).disp)))+' disponível'}); }
++  v.cards_lot=prCards(self,v,'g_lot',id=>{ if(String(id).indexOf('grp:')===0){ const pr=id.slice(4); const ls=(self._lots||[]).filter(L=>L.prod===pr); if(!ls.length) return null;
++      return prCard({grp:true,t1:pr,num:prLoteTxt(ls[0],prSoma(ls.map(L=>prSaldos(c,L).disp)))+' disponível'}); }
+     const L=P.lotes[id]; if(!L) return null; const S=prSaldos(c,L); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S);
+-    return prCard({t1:L.id+' · '+L.prod,num:prEstTxt(L.cultura,S.disp),t2:'Físico '+prEstTxt(L.cultura,S.fis)+' · reservado '+prEstTxt(L.cultura,S.res)+' · '+((PRDC.locais[L.local]||{}).nome||''),chip:[q,PR_QCOR[q]||'gray'],nx:nx.t,go:()=>self.g2pick('g_lot',id)}); });
++    return prCard({t1:L.id+' · '+L.prod,num:prLoteTxt(L,S.disp),t2:'Físico '+prLoteTxt(L,S.fis)+' · reservado '+prLoteTxt(L,S.res)+' · '+((PRDC.locais[L.local]||{}).nome||''),chip:[q,PR_QCOR[q]||'gray'],nx:nx.t,go:()=>self.g2pick('g_lot',id)}); });
+   v.cards_ped=prCards(self,v,'g_ped',id=>{ const p=P.pedidos[id]; if(!p) return null; const st2=prSitPed(c,p);
+     return prCard({t1:p.id+' · '+p.cliente,num:prEstTxt(p.cultura,prFalta(c,p))+' falta',t2:p.prod+' · '+(p.tipo==='futura'?'futura':'pronta entrega')+' · '+p.janela,chip:[st2.t,st2.c],nx:'',go:()=>self.g2pick('g_ped',id)}); });
+   /* seleção → ação primária (uma, do registro); sem seleção: reservar o primeiro lote com disponível e pedido compatível */
+@@ -290,7 +290,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=pr
+   const pan=st.pr_pan; let PP=null;
+   if(pan&&pan.g==='g_lot'&&P.lotes[pan.id]) PP=prPanLote(self,c,P.lotes[pan.id]); else if(pan&&pan.g==='g_ped'&&P.pedidos[pan.id]) PP=prPanPed(self,c,P.pedidos[pan.id]);
+   prPainel(self,v,PP); }
+-function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prEstTxt(cu,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
++function prPanLote(self,c,L){ const P=prP(c); const S=prSaldos(c,L); const cu=L.cultura; const U=x=>prLoteTxt(L,x); const q=S.esgotado?'Esgotado':S.q; const nx=prLoteProx(c,L,S); const modo=self.state.pr_modo;
+   const loc=(PRDC.locais[L.local]||{}); const lcs=prLcs(c,L);
+   const orig=(L.origem||[]).map(x=>({c:[[x.carga||'abertura','b'],x.tal||'',x.os||'',x.dcol?'colhido '+prBr(x.dcol):'',U(x.kg)+(x.modo==='estimada'?' (estimada)':''),x.est?['estornada','red']:''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+(x.carga||'')}}));
+   if(L.abertura) orig.push({c:[['Saldo de abertura','b'],'safra '+L.saf+' · anterior ao sistema, sem talhão (não entra na produção por talhão)']});
+@@ -340,7 +340,7 @@ function prCgSit(c,g){ const P=prP(c); if(g.st==='A pesar') return {t:'A pesar',
+   return {t:'Recebida',c:'green',nx:'no estoque de produto'}; }
+ function prCgOrig(g){ return (g.origem||[]).map(x=>x.tal+' · '+x.os+((g.origem||[]).length>1?' · '+prFmtT(x.pct,2)+' %'+(x.modo==='estimada'?' (estimada)':''):'')); }
+ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.lote]; const cu=g.cultura||'Mamão Formosa'; const u=prUn(cu); const kg=x=>prFmtT(x,2)+' kg';
+-  const comT=g.com===null||g.com===undefined?'—':(u.grao?kg(g.com)+' · '+prUnTxt(cu,g.com):(u.campo?prFmtT(g.litros,0)+' L · sc a apurar':(u.base==='frutos'?prFmtT(g.frutos,0)+' frutos':kg(g.com))));
++  const comT=g.com===null||g.com===undefined?'—':(u.grao?kg(g.com)+' · '+prUnTxt(cu,g.com):(u.campo?prCargaCafeTxt(g):(u.base==='frutos'?prFmtT(g.frutos,0)+' frutos':kg(g.com))));
+   const orig=prCgOrig(g); const loc=(PRDC.locais[g.local]||{}).nome||'';
+   return {id:g.id,ro:true,v:{cg:g.id,cult:cu,dt:g.dcol,liq:g.liq,com:g.com,lote:g.lote||'',sit:s.t},
+     s:{cg:g.id+' '+(g.ticket||''),cult:cu,orig:orig.join(' '),liq:g.liq===null?'':kg(g.liq),com:comT,lote:(g.lote||'')+' '+loc,sit:s.t+' · '+s.nx},
+@@ -407,11 +407,11 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
+       form:{t:'Pesar e receber · '+prRec(g.faz),h:'Bruto e tara em kg, sem valor anterior. O líquido, os descontos e o lote são calculados.',fields:f.fields},err:self.state.pr_err,prim:{t:'Pesar a '+g.id,go:f.go},
+       sec:[{t:'Descartar',go:()=>self.setState({pr_modo:'descarte',pr_form:null,pr_err:''})}]}; }
+   const part=(g.origem||[]).map(x=>({c:[[x.tal,'b'],x.os,prFmtT(x.pct,2)+' %',kg(x.kg),x.modo==='estimada'?'participação estimada':'medida',prLc(c,x.os,g.dcol)||'LC- entra quando o apontamento da data existir']}));
+-  const mv=P.movs.filter(m=>m.carga===g.id).map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,prEstTxt(cu,m.kg),m.lote,m.quem||'',m.obs||''].filter(Boolean)}));
++  const mv=P.movs.filter(m=>m.carga===g.id).map(m=>({c:[[m.id,'b'],prBr(m.d)+' '+(m.at||''),m.tipo,P.lotes[m.lote]?prLoteTxt(P.lotes[m.lote],m.kg):prEstTxt(cu,m.kg),m.lote,m.quem||'',m.obs||''].filter(Boolean)}));
+   const desc=g.desc?('impureza −'+kg(g.desc.dImp)+' · umidade −'+kg(g.desc.dUmid)+' ('+prFmtT(g.u,1)+' % e '+prFmtT(g.impG,1)+' %)'):(u.campo?'sem desconto: café em L':'sem desconto (fruta: massa líquida pesada)');
+   const PPx={title:g.id+' · '+(g.ticket||''),chip:[s.t,s.c],sub:sub+' · recebida '+prBr(g.drec)+(g.horaRec||g.hora?' '+(g.horaRec||g.hora):'')+' · '+(g.quemRec||g.quem||''),
+     next:g.st==='Estornada'?'Estornada: '+(g.estorno||{}).motivo+' ('+(g.estorno||{}).quem+'). O ticket '+g.ticket+' ficou livre.':(s.nx+(S?'. Lote '+L.id+': '+S.q+' · '+S.mot:'')+'.'),nred:s.t==='Bloqueada',
+-    kv:[{l:'Bruto',v:kg(g.bruto)},{l:'Tara',v:kg(g.tara)},{l:'Líquido',v:kg(g.liq)},{l:'Descontos',v:desc},{l:'Comercial',v:u.grao?kg(g.com)+' · '+prUnTxt(cu,g.com):(u.campo?prFmtT(g.litros,0)+' L · sc a apurar':kg(g.com))},
++    kv:[{l:'Bruto',v:kg(g.bruto)},{l:'Tara',v:kg(g.tara)},{l:'Líquido',v:kg(g.liq)},{l:'Descontos',v:desc},{l:'Comercial',v:u.grao?kg(g.com)+' · '+prUnTxt(cu,g.com):(u.campo?prCargaCafeTxt(g):kg(g.com))},
+         {l:'Lote · local',v:(g.lote||'—')+' · '+((PRDC.locais[g.local]||{}).nome||'')}],
+     secs:[{t:'Participação por talhão',rows:part},{t:'Lote',rows:L?[{c:[[L.id,'b'],L.prod,S.q,S.mot],l:{t:'Abrir no estoque',h:'PROD.dc.html#'+L.id}}]:[]},{t:'Trilha de movimentos',rows:mv},
+           {t:'Chave e recibo',rows:[{c:['chave do campo: '+(g.chave||'—')]},{c:['chave da pesagem: '+(g.chaveRec||'—')]}]}],err:self.state.pr_err};
+@@ -493,15 +493,19 @@ function prPrevTxt(c,X){ const k=X.k; const vs=prP(c).previsoes[k.id]||[];
+   if(!k.semanal){ const v=vs.filter(x=>x.safra!==undefined).slice(-1)[0]; return v?{t:prUnTxt(k.cultura,v.safra,0)+' · safra (v'+v.v+')',v:v.safra}:{t:'sem previsão publicada',v:null}; }
+   const s0=prSem(prHoje()); const ws=[...new Set([].concat(...vs.map(v=>Object.keys(v.sem||{}))))].sort(); const w=ws.find(x=>x>=s0)||ws[ws.length-1];
+   if(!w) return {t:X.cnt?'rascunho pela contagem':'sem previsão publicada',v:null}; const v=prVersaoSem(c,k.id,w); return {t:prUnTxt(k.cultura,v.sem[w],1)+' · '+prSemTxt(w)+' (v'+v.v+')',v:v.sem[w]}; }
+-function prTalRow(c,X){ const k=X.k, R=X.R; const pv=prPrevTxt(c,X); const colhT=R.comecou?prUnTxt(k.cultura,R.kg):(R.u.base==='beneficiado'&&R.cafe>0?prFmtT(R.cafe,0)+' L · sc a apurar':'—');
+-  const prtvT=R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(k.semanal?' · ciclo':' · safra')+(R.parcial?' parcial':' final'):'—';
+-  const refT=k.meta?('meta '+prFmtT(k.meta,1)+' '+(k.un_meta||PRDC.un[prCult(k.cultura)].prtv)):'sem meta'; const dsT=R.desv!==null?prFmt(R.desv,1)+' %':(R.comecou?(k.semanal?'ciclo aberto':(R.parcial?'safra parcial':'—')):'—');
++function prTalRow(c,X){ const k=X.k, R=X.R; const pv=prPrevTxt(c,X); const colhT=prProdTxt(k.cultura,R);   /* café sem rendimento medido: "L · sc a apurar" (COLH-C01) */
++  const prtvT=R.apurar?prPrtvResTxt(k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(k.semanal?' · ciclo':' · safra')+(R.parcial?' parcial':' final'):'—');
++  const refT=k.meta?('meta '+prFmtT(k.meta,1)+' '+(k.un_meta||PRDC.un[prCult(k.cultura)].prtv)):'sem meta'; const dsT=R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar':(R.comecou?(k.semanal?'ciclo aberto':(R.parcial?'safra parcial':'—')):'—'));
+   const pes=R.aPesar.length; const nx=X.nx+(pes?' · '+pes+(pes>1?' cargas a receber':' carga a receber'):'');
+-  return {id:k.id,ro:true,v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.kg,sit:X.sit},
++  return {id:k.id,ro:true,v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.apurar&&!(prCmp(R.kg,0)>0)?null:R.kg,sit:X.sit},   /* parte medida ordena pelo medido; só a apurar fica vazio (COLH-C01, revisão DOM achado 7) */
+     s:{tal:k.local+' '+k.cultura,cult:k.cultura,prev:pv.t,colh:colhT,prtv:prtvT,ref:refT+' '+dsT,sit:X.sit+' · '+nx},
+     p:{tal:[{k:'b',t:k.local}].concat(k.var?[{k:'br'},{k:'mut',t:k.var}]:[]),cult:[{k:'txt',t:k.cultura}],prev:[{k:pv.v===null?'mut':'txt',t:pv.t}],colh:[{k:R.comecou?'b':'mut',t:colhT}],
+        prtv:[{k:R.prtv!==null?'txt':'mut',t:prtvT}],ref:[{k:'txt',t:refT},{k:'br'},{k:R.desv!==null&&R.desv<0?'cn':'mut',c:'red',t:dsT}],
+        sit:[{k:'chip',t:X.sit+(X.ult&&X.sit==='Prevista'?' (v'+X.ult.v+')':''),c:PR_SITCOR[X.sit]},{k:'br'},{k:'mut',t:nx}]}}; }
++/* cartão do grupo (cultura) a 390 px: o mesmo texto da linha do grupo no desktop, ponderada só sobre o medido e o que ficou a apurar (COLH-C01) */
++function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.apurar).length; const n=rs.length+(rs.length>1?' talhões':' talhão');
++  if(pd) return prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':'');
++  return nap?prPrtvResTxt(cu,{apurar:true})+' · '+n:n; }
+ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
+   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
+   const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf); });
+@@ -510,10 +514,11 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
+   const grupos=Object.keys(por).map(cu=>{ const xs=por[cu].sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
+     const pd=prPonderada(xs.map(x=>x.R)); const kg=prSoma(xs.map(x=>x.R.kg)); const ha=prSoma(xs.map(x=>x.k.area)); const ord=Math.min.apply(null,xs.map(x=>PR_SITORD[x.sit]));
+     const cnt={}; xs.forEach(x=>{ cnt[x.sit]=(cnt[x.sit]||0)+1; }); const sitT=Object.keys(cnt).sort((a,b)=>PR_SITORD[a]-PR_SITORD[b]).map(k=>cnt[k]+' '+k.toLowerCase()).join(' · ');
+-    const pdT=pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':'—'; const pdA=pd?'sobre '+prFmtT(pd.area,2)+' ha colhidos':'';   /* a área da conta, não a da linha (revisão A-15) */
+-    return {ord,cu,row:{id:'grp:'+cu,ro:true,v:{tal:cu,cult:cu,area:ha,colh:kg},s:{tal:cu,cult:cu,colh:prUnTxt(cu,kg),prtv:pd?pdT+' '+pdA:'',sit:''},
+-      p:{tal:[{k:'b',t:cu}],cult:[{k:'mut',t:xs.length+(xs.length>1?' talhões':' talhão')}],prev:[{k:'mut',t:''}],colh:[{k:'b',t:prUnTxt(cu,kg)}],
+-         prtv:pd?[{k:'b',t:pdT},{k:'br'},{k:'mut',t:pdA}]:[{k:'mut',t:'—'}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
++    const nap=xs.filter(x=>x.R.apurar).length; const GX={kg,apurar:nap>0,cafe:prSoma(xs.map(x=>x.R.cafe||0))}; const colG=prProdTxt(cu,GX);   /* café a apurar fora da soma e da ponderada (COLH-C01) */
++    const pdT=pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':(nap?prPrtvResTxt(cu,GX):'—'); const pdA=pd?'sobre '+prFmtT(pd.area,2)+' ha colhidos'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':''):'';   /* a área da conta, não a da linha (revisão A-15) */
++    return {ord,cu,row:{id:'grp:'+cu,ro:true,v:{tal:cu,cult:cu,area:ha,colh:nap&&!(kg>0)?null:kg},s:{tal:cu,cult:cu,colh:colG,prtv:pd||nap?pdT+' '+pdA:'',sit:''},
++      p:{tal:[{k:'b',t:cu}],cult:[{k:'mut',t:xs.length+(xs.length>1?' talhões':' talhão')}],prev:[{k:'mut',t:''}],colh:[{k:'b',t:colG}],
++         prtv:pd?[{k:'b',t:pdT},{k:'br'},{k:'mut',t:pdA}]:[{k:'mut',t:pdT}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
+       kids:xs.map(x=>prTalRow(c,x))}}; }).sort((a,b)=>a.ord-b.ord||a.cu.localeCompare(b.cu));
+   GR('g_tal').rows=grupos.map(g=>g.row); const x0={}; grupos.forEach(g=>{ x0[g.row.id]=true; }); GR('g_tal').x0=x0;
+   /* por semana: fruta semanal por produto; grão por safra */
+@@ -548,18 +553,18 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
+   const ras=r0?(r0.safra!==undefined?[{c:[['Safra','b'],U(r0.safra),'pela meta ('+prFmtT(k.meta,1)+' '+k.un_meta+' × '+prFmtT(k.area,2)+' ha)']}]
+     :Object.keys(r0.sem).sort().map(w=>({c:[[prSemTxt(w),'b'],U(r0.sem[w]),w===s0?['em curso: orienta a '+((X.oss.find(o=>prSemDaOS(o)===w)||{}).id||'O.S. aberta')+', não publica','mut']:(prSemComecou(w)?['já começou','mut']:''),r0.base==='meta'?['pela meta','mut']:['pela '+r0.cnt.id+' · '+r0.par.plantas_ha+' plantas/ha · perda '+prFmtT(prMul(r0.par.perda,100),1)+' %','mut']].filter(Boolean)}))):[];
+   const vers=(P.previsoes[k.id]||[]).slice().reverse().map(v=>({c:[['v'+v.v,'b'],prBr(v.d)+' '+(v.at||''),v.por,v.safra!==undefined?'safra '+U(v.safra):Object.keys(v.sem).sort().map(w=>prSemTxt(w)+' '+U(v.sem[w])).join(' · '),v.base==='meta'?'pela meta':'pela contagem']}));
+-  const pas=R.passes.map(p=>({c:[[p.os,'b'],prSemTxt(p.sem),p.fase,prFmtT(p.area,2)+' ha',U(p.kg),p.area>0?prPrtvTxt(k.cultura,p.kg,p.area)+(p.final?' final':' parcial'):'sem área apontada',p.refKg?'previsão '+U(p.refKg)+' (v'+p.ref.v+')':'sem previsão antes da semana',p.desv!==null?[prFmt(p.desv,2)+' %',p.desv<0?'red':'ok']:(p.final?'':'sem desvio (parcial)'),p.aPesar.length?[p.aPesar.length+' a pesar: '+p.aPesar.map(g=>g.id).join(', '),'red']:''].filter(Boolean),l:{t:'Abrir '+p.os,h:'OS.dc.html#'+p.os}}));
++  const pas=R.passes.map(p=>({c:[[p.os,'b'],prSemTxt(p.sem),p.fase,prFmtT(p.area,2)+' ha',prProdTxt(k.cultura,p),p.apurar?prPrtvResTxt(k.cultura,p):(p.area>0?prPrtvTxt(k.cultura,p.kg,p.area)+(p.final?' final':' parcial'):'sem área apontada'),p.refKg?'previsão '+U(p.refKg)+' (v'+p.ref.v+')':'sem previsão antes da semana',p.desv!==null?[prFmt(p.desv,2)+' %',p.desv<0?'red':'ok']:(p.final?'':'sem desvio (parcial)'),p.aPesar.length?[p.aPesar.length+' a pesar: '+p.aPesar.map(g=>g.id).join(', '),'red']:''].filter(Boolean),l:{t:'Abrir '+p.os,h:'OS.dc.html#'+p.os}}));
+   const cgs=prCargas(c,g=>g.sinc!==false&&(g.origem||[]).some(x=>x.cult===k.id)).sort((a,b)=>(a.dcol<b.dcol?-1:1)).map(g=>{ const x=g.origem.find(y=>y.cult===k.id);
+     return {c:[[g.id,'b'],'colhida '+prBr(g.dcol),g.st,(g.st==='A pesar'||g.st==='Descartada')?(g.est_cx?'~'+g.est_cx+' caixas (não soma)':'—'):kg(x.kg)+(g.origem.length>1?' ('+prFmtT(x.pct,2)+' %)':''),g.lote||''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+g.id}}; });
+   const liq=prSoma([].concat(...R.passes.map(p=>[p.liq]))), com=prSoma([].concat(...R.passes.map(p=>[p.com])));
+   const res=[{c:[['Bruto de campo (líquido pesado)','b'],kg(liq)]},{c:[['Descontos','b'],kg(prSub(liq,com))]},{c:[['Comercial','b'],kg(com)+(R.u.grao?' · '+U(com):'')]},
+     {c:[['Área colhida','b'],k.semanal?(R.area>0?prFmtT(R.area,2)+' ha (área do cultivo, desde o 1º passe)':'nenhum passe'):prFmtT(R.area,2)+' ha (apontada)']},
+-    {c:[['Produtividade','b'],R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—']},
+-    {c:[['Contra a meta','b'],R.desv!==null?prFmt(R.desv,1)+' %':(k.semanal?'ciclo aberto: compara com a meta anual ao encerrar a safra':'safra parcial')]},
++    {c:[['Produtividade','b'],R.apurar?prPrtvResTxt(k.cultura,R)+' (rendimento do beneficiamento)':(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—')]},
++    {c:[['Contra a meta','b'],R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar: compara quando o beneficiamento medir o rendimento':(k.semanal?'ciclo aberto: compara com a meta anual ao encerrar a safra':'safra parcial'))]},
+     {c:[['Custo','b'],['sem custo realizado · Controle','mut']]}];
+   const PPx={title:k.local+' · '+k.cultura+(k.var?' '+k.var:''),chip:[X.sit,PR_SITCOR[X.sit]],sub:k.faz+' · '+((PRDC.safras[k.saf]||{}).nome||'')+' · '+prFmtT(k.area,2)+' ha'+(k.meta?' · meta '+prFmtT(k.meta,1)+' '+k.un_meta:''),
+-    next:X.nx+'.',kv:[{l:'Previsão vigente',v:prPrevTxt(c,X).t},{l:k.semanal?'Colhido no ciclo':'Colhido na safra',v:R.comecou?U(R.kg):'—'},
+-      {l:'Produtividade',v:R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—'},{l:'Cargas a receber',v:String(R.aPesar.length)},
++    next:X.nx+'.',kv:[{l:'Previsão vigente',v:prPrevTxt(c,X).t},{l:k.semanal?'Colhido no ciclo':'Colhido na safra',v:prProdTxt(k.cultura,R)},
++      {l:'Produtividade',v:R.apurar?prPrtvResTxt(k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—')},{l:'Cargas a receber',v:String(R.aPesar.length)},
+       {l:'Custo R$/'+R.u.un,v:'sem custo realizado · Controle'},{l:'Unidade (DEC-0510-03)',v:R.u.prtv}],
+     secs:(k.semanal?[{t:'Contagens de frutos',rows:cnts,vazio:'Nenhuma contagem: colete no app (MB-07).'}]:[]).concat([{t:'Rascunho (não publicado)',rows:ras,vazio:'Sem rascunho.'},{t:'Versões publicadas',rows:vers,vazio:'Nenhuma versão publicada.'},
+       {t:k.semanal?'Passes (O.S. de colheita por semana)':'Ordens de colheita',rows:pas,vazio:'Nenhuma O.S. de colheita.'},{t:'Cargas do talhão',rows:cgs,vazio:'Nenhuma carga.'},{t:'Resultado',rows:res}]),err:self.state.pr_err};
+@@ -579,10 +584,10 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
+ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
+   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});
+   const XS=self._X||[]; const byId={}; XS.forEach(x=>{ byId[x.k.id]=x; });
+-  v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu); const pd=prPonderada(xs.map(x=>x.R));
+-      return prCard({grp:true,t1:cu,num:pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha':xs.length+' talhões'}); }
++  v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu);
++      return prCard({grp:true,t1:cu,num:prGrpNum(cu,xs.map(x=>x.R))}); }
+     const X=byId[id]; if(!X) return null; const R=X.R;
+-    return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+(R.comecou?prUnTxt(X.k.cultura,R.kg):'—'),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
++    return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.apurar?prProdTxt(X.k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):prProdTxt(X.k.cultura,R)),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+prProdTxt(X.k.cultura,R),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
+   v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null; const neg=prCmp(r.v.livre,0)<0;
+     return prCard({t1:r.s.sem+' · '+r.s.prod,num:r.s.livre+(neg?' (déficit)':' livre'),t2:'Publicada '+r.s.pub+' · colhido '+r.s.colh+' · vendas futuras '+r.s.fut,chip:[neg?'Déficit':'Oferta',neg?'red':'gray'],nx:'',go:()=>{}}); });
+   /* ação primária: do talhão selecionado; sem seleção, a do 1º talhão da lista em que a regra dá passo */
+diff --git a/tools/prototipo/v37/gen37/cafe_apurar_nav.py b/tools/prototipo/v37/gen37/cafe_apurar_nav.py
+new file mode 100644
+index 0000000..6a51c41
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/cafe_apurar_nav.py
+@@ -0,0 +1,84 @@
++# -*- coding: utf-8 -*-
++"""COLH-C01 · parte de navegador do cafe_apurar_test.py (Chrome real, mesmo cenário em localStorage; dados sintéticos).
++Normal: a carga de café de 12.000 L é pesada pela tela Cargas e recebimento (O.S. de colheita de café do C1 com 5 ha apontados) e
++Previsão e colheita mostra "12.000 L · sc a apurar" na linha, no total da cultura, no cartão (390 px) e no painel; Estoque de produto
++mostra o lote em L. Erro/recusa: pesagem de café sem litros é recusada junto ao campo, nada gravado. Repetição: o mesmo ticket com o
++mesmo conteúdo não soma de novo. Transição: o rendimento medido (gravado como o BEN-4 gravará) troca "a apurar" por sacas.
++Capturas em _probe/cafe_apurar_*.png. Uso: python3 cafe_apurar_test.py nav   (compile antes: build.py && montar_render.py)"""
++import os, re, time, json
++from cadc_lib import T
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++LIB = r"""
++window.N=s=>(s||'').replace(/\s+/g,' ').trim();
++window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };
++window.CLK=(t,root)=>{ const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ '+root; const els=[...r.querySelectorAll('button,a,[role=tab]')].filter(VIS);
++  const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
++window.SETV=(sel,val)=>{ const i=document.querySelector(sel); if(!i) return 'sem '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype);
++  Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok'; };
++window.ROWTXT=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).indexOf(t)>=0); return r?N(r.innerText):''; };
++window.ROW=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).indexOf(t)>=0); if(!r) return 'sem linha '+t; (r.querySelector('.g2pw')||r).click(); return 'ok'; };
++window.PAN=()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); return a?N(a.innerText):''; };
++window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
++window.ALERTS=()=>[...document.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ');
++window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null');
++'ok'"""
++FALSO = re.compile(r'(^|[^\d.,])0 sc\b|0,00 sc/ha|−100,0 %')   # zero falso; "6.270 sc" não conta
++
++
++def rodar():
++    t = T(); J = t.J
++    def lib(): J(LIB)
++    def ir(pg, w=1440, h=1000):
++        t.c.size(w, h); t.goto(pg); time.sleep(.4); lib()
++    def clk(x, root=None): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(.45); return r
++    def setv(sel, val): r = J(f"SETV({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.25); return r
++    def faz(f): J(f"SETV('select[aria-label=\"Filtrar por fazenda\"]',{json.dumps(f)})"); time.sleep(.45)
++    def cen(expr): return J(f"(()=>{{ const c=CEN(); return ({expr}); }})()")
++    def falso(s): return bool(FALSO.search(s))
++    shot = lambda n: t.c.shot(os.path.join(HERE, '_probe', 'cafe_apurar_' + n + '.png'))
++    try:
++        t.c.size(1440, 1000); t.goto('Main.dc.html'); J("localStorage.clear(); sessionStorage.clear()")
++        # preparo sintético: O.S. de colheita de café do C1 (Santa Rita) em execução, com 5 ha apontados em 25/09
++        ir('CARGA.dc.html')
++        J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0930']={id:'OS-0930',tipo:'Colheita de café',talhao:'C1',area:0,etapa:'Em execução',versao:'v1',realizado:5,saldo:0,resp:'Sérgio',ins:[],req:null,selos:[],"
++          "ap:[{d:'25/09',dia:1,ha:5,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
++        ir('CARGA.dc.html'); faz('Santa Rita')
++        # erro: café sem litros é recusado junto ao campo, nada gravado
++        n0 = cen("Object.keys(c.producao.cargas).length")
++        clk('Registrar pesagem'); clk('OS-0930 · C1', 'aside'); setv('#pf_dcol', '25/09'); setv('#pf_tk', 'TK-CF1'); setv('#pf_bruto', '9200'); setv('#pf_tara', '3200'); clk('Íntegra', 'aside')
++        clk('Registrar pesagem', 'aside'); e = (J("ALERTS()") or '') + ' ' + (J("TOAST()") or '')
++        t.chk('erro: pesagem de café sem litros é recusada ("Informe os litros de café da roça"), nada gravado', 'litros de café da roça' in e and cen("Object.keys(c.producao.cargas).length") == n0, e[:200])
++        # normal: com 12.000 L a carga entra; o aviso não fala em 0 sc nem 0,00 sc/ha
++        setv('#pf_lit', '12000'); clk('Registrar pesagem', 'aside'); ts = J("TOAST()") or ''
++        g = cen("Object.values(c.producao.cargas).filter(g=>g.st==='Recebida'&&g.cultura==='Café').map(g=>g.id+' '+g.litros+' '+g.lote)")
++        t.chk('pesagem de 12.000 L recebida pela tela; o aviso diz "sc/ha a apurar" no passe, sem zero falso', len(g or []) == 1 and ' 12000 ' in g[0] and 'sc/ha a apurar' in ts and not falso(ts), [g, ts[:220]])
++        # repetição: o mesmo ticket com o mesmo conteúdo não soma de novo (comando direto, como um reenvio)
++        rp = J("(()=>{ const r=window.__car.cenMudar(null,c=>window.__pr.prReceber(c,{os:'OS-0930',ticket:'TK-CF1',bruto:9200,tara:3200,litros:12000,cond:'Íntegra',dcol:'2026-09-25',local:c.producao.cargas[Object.keys(c.producao.cargas).find(k=>c.producao.cargas[k].ticket==='TK-CF1')].local})); return r.erro||r.msg; })()") or ''
++        t.chk('repetição: o mesmo ticket com o mesmo conteúdo é a mesma carga, nada somado', 'nada foi somado de novo' in rp and cen("Object.values(c.producao.cargas).filter(g=>g.st==='Recebida'&&g.cultura==='Café').length") == 1, rp[:200])
++        shot('1_carga')
++        # Previsão e colheita (1440 px): linha, total da cultura e painel
++        ir('COLH.dc.html'); faz('Santa Rita'); lc = J("ROWTXT('C1')") or ''; gr = J("ROWTXT('Café 1 talhão')") or J("ROWTXT('Café')") or ''
++        t.chk('COLH: linha do C1 "12.000 L · sc a apurar", "sc/ha a apurar", meta a apurar; nenhum 0 sc, 0,00 sc/ha ou −100,0 %',
++              '12.000 L · sc a apurar' in lc and 'sc/ha a apurar' in lc and 'a apurar' in lc and not falso(lc), lc[:300])
++        t.chk('COLH: total da cultura Café não soma o café a apurar como zero (12.000 L · sc a apurar; produtividade a apurar)', '12.000 L · sc a apurar' in gr and 'sc/ha a apurar' in gr and not falso(gr), gr[:300])
++        J("ROW('C1')"); time.sleep(.5); p = J("PAN()") or ''
++        t.chk('COLH: painel do C1 com colhido e produtividade a apurar e o passe da OS-0930 sem zero falso', re.search(r'colhido na safra 12\.000 L · sc a apurar', p, re.I) and 'sc/ha a apurar' in p and not falso(p), p[:400])
++        shot('2_colh')
++        # Estoque de produto: o lote Café da roça em L, sem saca derivada
++        ir('PROD.dc.html'); faz('Santa Rita'); lt = J("ROWTXT('Café da roça')") or ''
++        t.chk('PROD: lote Café da roça 12.000 L (Em processo), nunca "200 sc"', '12.000 L' in lt and '200 sc' not in lt and ' sc' not in lt, lt[:300])
++        shot('3_prod')
++        # 390 px: cartão do talhão sem zero falso e sem rolagem horizontal
++        ir('COLH.dc.html', w=390, h=844); faz('Santa Rita'); m = J("N(document.querySelector('main').innerText)") or ''
++        i = m.find('C1 · Café'); j = m.find('Sérgio', i); cd = m[i:j] if i >= 0 and j > i else ''   # só o cartão do C1
++        t.chk('390 px: cartão do C1 "12.000 L · sc a apurar", sem zero falso e sem rolagem horizontal', '12.000 L · sc a apurar' in cd and not falso(cd) and J("document.documentElement.scrollWidth<=window.innerWidth+1"), cd[:260])
++        shot('4_390')
++        # transição: o beneficiamento mede o rendimento (o BEN-4 grava o beneficiado rateado na origem da carga) → sacas medidas
++        J("window.__car.cenMudar(null,c=>{ Object.values(c.producao.cargas).filter(g=>g.cultura==='Café').forEach(g=>g.origem.forEach(x=>{ x.ben=3000; })); return {msg:''}; })")
++        ir('COLH.dc.html'); faz('Santa Rita'); lc2 = J("ROWTXT('C1')") or ''
++        t.chk('transição: rendimento medido 3.000 kg → "50 sc", "10,00 sc/ha · safra parcial" e desvio contra a meta (−73,7 %)', '50 sc' in lc2 and '10,00 sc/ha' in lc2 and '−73,7 %' in lc2 and 'a apurar' not in lc2, lc2[:300])
++        t.chk('nenhuma página com erro de JS', not t.errs(), t.errs())
++    finally:
++        t.fim()
++    return 0 if all(t.ok) else 1
+diff --git a/tools/prototipo/v37/gen37/cafe_apurar_test.py b/tools/prototipo/v37/gen37/cafe_apurar_test.py
+new file mode 100644
+index 0000000..08569ad
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/cafe_apurar_test.py
+@@ -0,0 +1,47 @@
++# -*- coding: utf-8 -*-
++"""COLH-C01 · café em litros "sc a apurar" com ou sem área apontada (revisão Codex 6070584991; docs/colheita R-09).
++unit: monta o JS real (perfis + cenario.js + producao.js + núcleo da O.S. + funções das telas COLH, PROD e CARGA) e roda cafe_apurar_unit.js no node.
++nav:  Chrome real: Produção › Previsão e colheita (1440 e 390 px) e Estoque de produto com a carga de café de 12.000 L, depois o rendimento medido.
++Uso (de gen37/, depois do build e do montar_render): python3 cafe_apurar_test.py [unit|nav]   (sem argumento: as duas; sai 1 se alguma falhar)"""
++import os, sys, json, re, subprocess, tempfile
++os.environ.setdefault('SAFRION_DADOS', 'sintetico')
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
++MODOS = sys.argv[1:] or ['unit', 'nav']
++FALHAS = 0
++
++
++def fatia(js, nome):
++    """uma função de nível superior do JS da tela (até a próxima definição de nível superior)"""
++    i = js.index('function ' + nome + '(')
++    m = re.compile(r'\n(?=function |const |let |var |try )').search(js, i + 1)
++    return js[i:m.start() if m else len(js)] + '\n'
++
++
++def unit():
++    import cenario
++    from areas.processo_os import JS_NUCLEO
++    from areas import producao as AP
++    pre = ("globalThis.window=globalThis; var localStorage=undefined; var location={hash:''};\nfunction g2rows(){ return []; }\n"
++           + cenario.perfis_js() + cenario.js_prefixo())
++    telas = AP.PR_UI_JS + AP.PR_PED_JS + AP.COLH_JS + fatia(AP.PROD_JS, 'prLoteRow') + fatia(AP.PROD_JS, 'prPanLote') + fatia(AP.CARGA_JS, 'prCgSit') + fatia(AP.CARGA_JS, 'prCgOrig') + fatia(AP.CARGA_JS, 'prPanCarga')
++    src = pre + JS_NUCLEO + telas + open(os.path.join(HERE, 'cafe_apurar_unit.js'), encoding='utf-8').read()
++    fd, p = tempfile.mkstemp(prefix='cafe_apurar_', suffix='.js')
++    with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)
++    try: r = subprocess.run(['node', p], capture_output=True, text=True, timeout=120)
++    finally: os.unlink(p)
++    for l in r.stdout.splitlines():
++        if l.startswith('REPRO'): print(l[:900])
++    L = [l for l in r.stdout.splitlines() if l.startswith('[{')]
++    if r.returncode or not L: print('FALHA motor JS:', r.stderr[-1500:]); return 1
++    res = json.loads(L[-1]); f = 0
++    for x in res:
++        print(('OK    ' if x['ok'] else 'FALHA ') + x['n'] + ('' if x['ok'] else ' · ' + x['info'][:600])); f += not x['ok']
++    print(f'RESULTADO unit: {len(res) - f}/{len(res)}'); return 1 if f else 0
++
++
++if __name__ == '__main__':
++    if 'unit' in MODOS: FALHAS += unit()
++    if 'nav' in MODOS:
++        import cafe_apurar_nav
++        FALHAS += cafe_apurar_nav.rodar()
++    sys.exit(1 if FALHAS else 0)
+diff --git a/tools/prototipo/v37/gen37/cafe_apurar_unit.js b/tools/prototipo/v37/gen37/cafe_apurar_unit.js
+new file mode 100644
+index 0000000..046a360
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/cafe_apurar_unit.js
+@@ -0,0 +1,83 @@
++// COLH-C01 · café recebido em litros sem rendimento beneficiado fica "sc a apurar" com ou sem área apontada (revisão Codex 6070584991;
++// contrato docs/colheita R-09: "produção em sc só pelo rendimento medido no beneficiamento; até lá sc a apurar"). Node, sem navegador.
++// Carregado depois de: perfis + CEN0 + cenario.js + PRDC + producao.js + núcleo da O.S. + PR_UI_JS + PR_PED_JS + COLH_JS + prLoteRow/prPanLote/prPanCarga.
++// Dano evitado: "0 sc", "0,00 sc/ha" e "−100,0 %" apresentados como resultado medido (decisão de produtividade e venda sobre zero falso);
++// litros convertidos em sacas por fator fixo no estoque. Zero medido (rendimento 0) continua zero e distinguível do pendente.
++const R = []; function ok(n, c, info) { R.push({ n, ok: !!c, info: c ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 900) }); }
++function MUD(c, fn) { const x = cenClone(c); try { const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; } catch (e) { return { erro: String(e.message || e) }; } }
++const SELF = { state: {} };
++function OSX(c, id, tal, etapa, ap, tipo) { c.ordens[id] = { id, tipo: tipo || 'Colheita de café', talhao: tal, area: 0, etapa, versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
++  ap: (ap || []).map((a, i) => ({ d: a[0], dia: i + 1, ha: a[1], st: a[2] || 'Conferido', sinc: true, origem: 'web' })), reservado: false, osc: {} }; return c.ordens[id]; }
++const CID = 'c9';   // C1 · Café Catuaí 144 (38 ha, meta 38 sc/ha), Santa Rita · sintético
++// a carga da revisão Codex: 12.000 L de café da roça recebidos (bruto 9.200 − tara 3.200 = 6.000 kg), sem rendimento beneficiado medido
++function base(area) { const c = cenClone(CEN0); OSX(c, 'OS-0930', 'C1', 'Em execução', area ? [['25/09', area]] : []);
++  const r = MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' })); return { c, r }; }
++const linha = (c) => { const X = prTal(c, CID); return { X, row: prTalRow(c, X) }; };
++const FALSO = /(^|[^\d.,])0 sc\b|0,00 sc\/ha|−100,0 %/;
++const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === 'Recebida' && g.cultura === 'Café').forEach(g => g.origem.forEach(x => { x.ben = ben; }));
++
++// ---- C01a/b · a mesma carga, com e sem área apontada: "12.000 L · sc a apurar", nunca 0 sc / 0,00 sc/ha / −100,0 % ----
++{ const A = base(5), B = base(0); const la = linha(A.c), lb = linha(B.c);
++  console.log('REPRO COLH-C01 ' + JSON.stringify({ comArea: { colh: la.row.s.colh, prtv: la.row.s.prtv, ref: la.row.s.ref }, semArea: { colh: lb.row.s.colh, prtv: lb.row.s.prtv, ref: lb.row.s.ref } }));
++  ok('C01a com 5 ha apontados: colhido "12.000 L · sc a apurar"; produtividade e desvio a apurar (nada de 0 sc, 0,00 sc/ha ou −100,0 %)',
++     !A.r.erro && la.row.s.colh === '12.000 L · sc a apurar' && la.row.s.prtv === 'sc/ha a apurar' && /a apurar$/.test(la.row.s.ref) && !FALSO.test(la.row.s.colh + ' ' + la.row.s.prtv + ' ' + la.row.s.ref),
++     [A.r.erro, la.row.s]);
++  ok('C01b sem área apontada: o mesmo texto (o apontamento não muda o estado de apuração)', !B.r.erro && lb.row.s.colh === la.row.s.colh && lb.row.s.prtv === la.row.s.prtv && lb.row.s.ref === la.row.s.ref, [lb.row.s, la.row.s]);
++  ok('C01c a linha não ordena o café a apurar como zero colhido (valor vazio, não 0)', la.row.v.colh === null && lb.row.v.colh === null, [la.row.v.colh, lb.row.v.colh]);
++  const R5 = la.X.R; ok('C01d estado único (prResultado): a apurar, 12.000 L pendentes, 0 kg medidos, produtividade e desvio nulos', R5.apurar === true && R5.cafe === 12000 && R5.kg === 0 && R5.prtv === null && R5.desv === null, R5); }
++
++// ---- C01e · consumidores: total por cultura (grupo), painel do talhão (resultado, passes), mensagem do recebimento ----
++{ const A = base(5); const X = prTal(A.c, CID); const pd = prPonderada([X.R]);
++  ok('C01e total da cultura: a produtividade ponderada não soma o café a apurar como zero', pd === null || pd.area === 0, pd);
++  const P = prPanTal(SELF, A.c, X); const kv = Object.fromEntries(P.kv.map(x => [x.l, x.v])); const txt = JSON.stringify(P.secs);
++  ok('C01f painel do talhão: colhido "12.000 L · sc a apurar", produtividade e meta a apurar; passe e resultado sem 0 sc',
++     kv['Colhido na safra'] === '12.000 L · sc a apurar' && kv['Produtividade'] === 'sc/ha a apurar' && /12\.000 L · sc a apurar/.test(txt) && !FALSO.test(JSON.stringify(P.kv) + txt), [P.kv, txt.slice(0, 600)]);
++  ok('C01g mensagem do recebimento com área apontada: passe "sc/ha a apurar", não "0,00 sc/ha"', /passe S\d\d sc\/ha a apurar/.test(A.r.msg) && !FALSO.test(A.r.msg), A.r.msg); }
++
++// ---- C01h · estoque de produto: lote "Café da roça" em L, sem saca derivada de litros ----
++{ const A = base(5); const L = A.r.L; const S = prSaldos(A.c, L); const rw = prLoteRow(A.c, L, S); const pl = prPanLote(SELF, A.c, L); const pc = prPanCarga(SELF, A.c, A.r.g);
++  ok('C01h estoque de produto: lote Café da roça 12.000 L (físico e em processo), nunca "200 sc"; painel do lote e da carga também',
++     rw.s.fis === '12.000 L' && rw.s.proc === '12.000 L' && !/sc/.test(JSON.stringify(rw.s)) && !/\b200 sc\b/.test(JSON.stringify(pl) + JSON.stringify(pc)) && /12\.000 L/.test(JSON.stringify(pl)),
++     [rw.s, JSON.stringify(pl).slice(0, 300)]); }
++
++// ---- C01i · transição: o beneficiamento mede o rendimento (BEN-4 · R-D02 grava o beneficiado rateado na origem) ----
++{ const A = base(5); ORIG(A.c, 3000); const { X, row } = linha(A.c);
++  ok('C01i rendimento medido 3.000 kg beneficiado: 50 sc, 10,00 sc/ha em 5 ha e desvio contra a meta de 38 sc/ha (−73,7 %)',
++     X.R.apurar === false && row.s.colh === '50 sc' && row.s.prtv === '10,00 sc/ha · safra parcial' && /meta 38 sc\/ha −73,7 %$/.test(row.s.ref) && row.v.colh === 3000, [X.R.apurar, row.s, row.v.colh]); }
++
++// ---- C01n · linha e painel da carga (Cargas e recebimento): litros a apurar → sacas medidas, pela mesma regra ----
++{ const A = base(5); const g = A.r.g; const TX = (x) => { try { return prCargaCafeTxt(x); } catch (e) { return String(e.message || e); } };
++  const t0 = TX(A.c.producao.cargas[g.id]); ORIG(A.c, 3000); const t1 = TX(A.c.producao.cargas[g.id]);
++  ok('C01n carga de café: "12.000 L · sc a apurar" e, medido o rendimento, "12.000 L · 50 sc"', t0 === '12.000 L · sc a apurar' && t1 === '12.000 L · 50 sc', [t0, t1]); }
++
++// ---- C01j · zero real: rendimento medido 0 kg é zero (distinguível do pendente) ----
++{ const A = base(5); ORIG(A.c, 0); const { X, row } = linha(A.c);
++  ok('C01j zero medido: 0 sc, 0,00 sc/ha e −100,0 % aparecem porque foram medidos (não a apurar)',
++     X.R.apurar === false && row.s.colh === '0 sc' && row.s.prtv === '0,00 sc/ha · safra parcial' && /−100,0 %$/.test(row.s.ref), [X.R.apurar, row.s]); }
++
++// ---- C01k · parte medida e parte pendente: soma só o medido e diz o que falta, sem produtividade ----
++{ const A = base(5); ORIG(A.c, 3000);
++  const r2 = MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
++  const { X, row } = linha(A.c);
++  ok('C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar',
++     !r2.erro && X.R.apurar === true && row.s.colh === '50 sc + 8.000 L · sc a apurar' && row.s.prtv === 'sc/ha a apurar', [r2.erro, row.s]); }
++
++// ---- C01o · revisão DOM achado 7: cartão do grupo a 390 px (mesma regra da linha do grupo no desktop) ----
++{ const G = (rs) => typeof prGrpNum === 'function' ? prGrpNum('Café', rs) : 'sem prGrpNum (cartão do grupo calculado dentro da tela)';
++  const A = base(5); const X0 = prTal(A.c, CID); const t0 = G([X0.R]); ORIG(A.c, 3000); const X1 = prTal(A.c, CID); const t1 = G([X1.R]); const t2 = G([X0.R, X1.R]);
++  ok('C01o cartão do grupo: café todo a apurar "sc/ha a apurar · 1 talhão" (nunca "1 talhões" sem estado); medido, a ponderada; misto, a ponderada e "1 talhão a apurar fora da conta"',
++     t0 === 'sc/ha a apurar · 1 talhão' && t1 === '10,00 sc/ha ponderada sobre 5 ha' && t2 === '10,00 sc/ha ponderada sobre 5 ha · 1 talhão a apurar fora da conta' && !FALSO.test(t0), [t0, t1, t2]); }
++
++// ---- C01p · revisão DOM achado 7: ordenação do talhão misto (50 sc medidos + 8.000 L a apurar) pelo medido, não como vazio ----
++{ const A = base(5); ORIG(A.c, 3000); MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
++  const { X, row } = linha(A.c);
++  ok('C01p talhão misto ordena pelo medido (3.000 kg), não como vazio; só a apurar continua vazio (C01c)', X.R.apurar === true && row.v.colh === 3000, [X.R.apurar, row.v.colh]); }
++
++// ---- C01l · ligação com o Comercial: a oferta de café beneficiado vem da previsão publicada; o café a apurar não entra como zero ----
++{ const c0 = cenClone(CEN0); const o0 = prOfertaSafra(c0, 'Café beneficiado', '2026/27'); const A = base(5); const o1 = prOfertaSafra(A.c, 'Café beneficiado', '2026/27');
++  ok('C01l oferta de Café beneficiado igual antes e depois dos 12.000 L (o físico em litros não vira oferta nem zero)', JSON.stringify(o0) === JSON.stringify(o1), [o0, o1]); }
++
++// ---- C01m · outras culturas não mudam: grão com carga continua "sc" medido ----
++{ const c = cenClone(CEN0); const s = prResultado(c, 'lg19'); ok('C01m mamão (Pivô 19) segue medido: não fica a apurar', s && s.apurar === false && s.kg > 0, s && [s.apurar, s.kg]); }
++
++console.log(JSON.stringify(R));
+diff --git a/tools/prototipo/v37/gen37/cenario.js b/tools/prototipo/v37/gen37/cenario.js
+index d0161d8..83a5a04 100644
+--- a/tools/prototipo/v37/gen37/cenario.js
++++ b/tools/prototipo/v37/gen37/cenario.js
+@@ -254,6 +254,67 @@ function cenApImp(k) { const n = x => (x === undefined || x === null || x === ''
+ function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
+ function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
+   o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
++// ---------- Divergência de consumo/dose no apontamento (B-R8; PRD 41: dose é decisão agronômica; aprovar ≠ executar conforme) ----------
++// Planejado do trecho = dose × área pela regra única (cenQtdTrecho); informado = o fato do apontamento (o que veio editado, não a sugestão).
++// Precisão: a da regra de quantidade, centésimo da unidade em decimal meio para cima (cenQtd(x, 1)); nenhuma tolerância. O texto mostra o
++// informado nessas mesmas casas (9,995 L = 10,00 L = planejado 10 L: não diverge). LIM_DISP (20 %) é alçada de área dispensada e o
++// ×1,5/×0,5 do ajuste é aviso de digitação de dose: nenhum dos dois é tolerância de consumo, por isso não são usados aqui.
++// Divergente: o consumo fica como informado (nada é forçado à dose), o apontamento guarda planejado × informado por produto (ap.div), a O.S.
++// ganha o selo e o agrônomo revisa: aceita com motivo ou registra a correção/reaplicação; encerrar exige a revisão feita (cenPodeEncerrar).
++// Produto da ordem fora da requisição: nada esteve com o operador, o 0 é fato (cenApontar marca como informado) e diverge do planejado.
++// Dano evitado: subdose ou superdose aplicada sem decisão do agrônomo passar como execução conforme (resultado técnico e receituário).
++const CEN_DIV = 'Divergência de consumo/dose';
++function cenC2(x) { return Math.round(cenQtd(Number(x) || 0, 1) * 100); }   // centésimos pela regra de quantidade (decimal, meio para cima)
++function cenDivUn(c, o, p) { const x = (o.ins || []).find(i => i.p === p); if (x && x.un) return x.un;   // fora da ordem: a unidade do item ou do lote
++  const r = c && o.req && c.reqs[o.req]; const it = r && r.itens.find(i => i.prod === p); if (it && it.un) return it.un;
++  const l = c && c.lotes ? cenLote(c, p) : null; return (l && l.un) || ''; }
++// acumulado antes do apontamento (planejado do trecho): o gravado no apontamento; nos antigos, a soma dos dias somados anteriores
++function cenApAntes(o, ap) { return ap.ant !== undefined ? ap.ant : (o.ap || []).filter(a => a !== ap && a.dia < ap.dia && cenApSomado(a)).reduce((s, a) => s + (a.ha || 0), 0); }
++function cenApDiv(o, ap, antes, c) {
++  const inf = ap.inf || {}, cons = ap.cons || {}, out = [];
++  (o.ins || []).forEach(x => { if (!inf[x.p] || cons[x.p] === undefined) return; const plan = cenQtdTrecho(x.dose, antes, ap.ha), q = Number(cons[x.p]);
++    if (cenC2(q) !== cenC2(plan)) out.push({ p: x.p, un: x.un, plan, inf: q }); });
++  Object.keys(inf).forEach(p => { if (!(o.ins || []).some(x => x.p === p) && cenC2(cons[p]) > 0) out.push({ p, un: cenDivUn(c, o, p), plan: 0, inf: Number(cons[p]) }); });   // fora da ordem: planejado 0
++  return out; }
++function cenDivTxt(d) { const u = d.un ? ' ' + d.un : ''; const q = x => cenNum(cenC2(x) / 100);
++  if (d.rec) return d.p + ' planejado ' + q(d.plan) + u + ' × baixado ' + q(d.inf) + u + ' (informado ' + q(d.rec.rel) + u + ', relato ' + d.rec.conf + ' recusado no Estoque)';
++  return d.p + ' planejado ' + q(d.plan) + u + ' × informado ' + q(d.inf) + u; }
++function cenDivAbertas(o) { return (o.ap || []).filter(a => cenApSomado(a) && (a.div || []).length && !a.rev); }   // só o que somou: retido ou no aparelho ainda não conta
++function cenSeloDiv(c, id) { const o = c.ordens[id]; if (!o) return; o.selos = (o.selos || []).filter(s => String(s.t).indexOf(CEN_DIV) !== 0);
++  const ab = cenDivAbertas(o); if (!ab.length) return; const ps = [];
++  ab.forEach(a => a.div.forEach(d => { if (ps.indexOf(d.p) < 0) ps.push(d.p); })); o.selos.push({ t: CEN_DIV + ' · ' + ps.join(', '), c: 'red' }); }
++function cenDivMsg(ap) { return (ap && (ap.div || []).length) ? ' ' + CEN_DIV + ': ' + ap.div.map(cenDivTxt).join('; ') + ' · revisão técnica de ' + g2quem('agronomo') + '.' : ''; }
++// revisão técnica (agrônomo): dec 'aceitar' (com motivo) ou 'corrigir' (correção/reaplicação decidida, descrita). O consumo informado fica.
++// Mesma decisão de novo = já registrada (nada muda); outra decisão no mesmo dia = conflito (ENG-021).
++function cenDivRever(c, id, dia, dec, texto, ator) {
++  const quem = cenExige(ator, 'agronomo', 'Revisar a divergência de consumo/dose do dia ' + dia + ' da ' + id);
++  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && (a.div || []).length && cenApSomado(a));
++  if (!ap) throw new Error('O dia ' + dia + ' da ' + id + ' não tem divergência de consumo/dose em revisão.');
++  if (['aceitar', 'corrigir'].indexOf(dec) < 0) throw new Error('Decisão desconhecida: ' + dec + '.');
++  const txt = String(texto || '').trim(); const D = dec === 'aceitar' ? 'Aceita' : 'Correção decidida';
++  if (ap.rev) { if (ap.rev.dec === D && ap.rev.txt === txt) return { msg: 'Divergência do dia ' + dia + ' da ' + id + ' já revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): nada foi gravado de novo.', repetido: true };
++    throw new Error('A divergência do dia ' + dia + ' da ' + id + ' já foi revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): outra decisão é conflito, nada gravado.'); }
++  if (!txt) throw new Error((dec === 'aceitar' ? 'Informe o motivo para aceitar a divergência do dia ' : 'Descreva a correção ou reaplicação decidida para o dia ') + dia + ' da ' + id + '. Nada foi alterado.');
++  ap.rev = { dec: D, txt, quem, at: cenAgora() }; const rp = cenRevisao(ator, ap.quem, 'apontou'); if (rp) ap.rev.rp = rp;
++  cenSeloDiv(c, id); const t1 = txt.replace(/[.\s]+$/, '');
++  return { msg: (dec === 'aceitar' ? 'Divergência de consumo/dose do dia ' + dia + ' da ' + id + ' aceita por ' + quem + ': ' + t1 + '. O consumo informado fica como está.'
++    : 'Correção registrada por ' + quem + ' para o dia ' + dia + ' da ' + id + ': ' + t1 + '. O consumo informado fica como está.') + (rp ? ' Fica ' + rp + '.' : '') }; }
++// relato recusado no Estoque (CMD-50): nada daquele produto foi baixado no dia, então o que vale é 0 contra o planejado do trecho. A divergência
++// do dia passa a dizer isso (planejado × baixado, com o informado recusado) e, se já estava revisada sobre o informado, a revisão é reaberta
++// (a anterior fica no histórico). Dano evitado: o agrônomo decidir sobre um consumo que o Estoque declarou inexistente.
++function cenDivRecusa(c, k, quem) {
++  const o = c.ordens[k.os]; const ap = o && (o.ap || []).find(a => a.dia === k.dia && cenApSomado(a)); if (!ap) return '';
++  const x = (o.ins || []).find(i => i.p === k.prod); const plan = x ? cenQtdTrecho(x.dose, cenApAntes(o, ap), ap.ha) : 0; const old = ap.div || [];
++  const div = old.filter(d => d.p !== k.prod);
++  if (cenC2(plan) !== 0) div.push({ p: k.prod, un: k.un || cenDivUn(c, o, k.prod), plan, inf: 0, rec: { rel: k.relatado, conf: k.id, por: quem } });
++  const ord = p => { const i = (o.ins || []).findIndex(y => y.p === p); return i < 0 ? 1e9 : i; }; div.sort((a, b) => ord(a.p) - ord(b.p));
++  if (JSON.stringify(old) === JSON.stringify(div)) return '';
++  if (div.length) ap.div = div; else delete ap.div;
++  let re = ''; if (ap.rev) { ap.revAnt = (ap.revAnt || []).concat([Object.assign({}, ap.rev, { div: old, reaberta: 'relato ' + k.id + ' recusado no Estoque por ' + quem })]); delete ap.rev; re = ' A revisão anterior fica no histórico e a do dia é reaberta.'; }
++  cenSeloDiv(c, o.id);
++  const nd = div.find(d => d.p === k.prod);
++  return nd ? ' ' + CEN_DIV + ' do dia ' + k.dia + ' da ' + k.os + ': ' + cenDivTxt(nd) + ' · revisão técnica de ' + g2quem('agronomo') + '.' + re
++    : ' O dia ' + k.dia + ' da ' + k.os + ' fica sem divergência de consumo/dose de ' + k.prod + '.' + (re ? ' A revisão anterior fica no histórico.' : ''); }
+ // baixa do consumo do apontamento, uma vez: até a custódia baixa; acima vira conferência com o almoxarife (CONC-07; CMD-50)
+ function cenApBaixa(c, o, ap) {
+   const r = o.req && c.reqs[o.req]; const cons = ap.cons = ap.cons || {}; const inf = ap.inf || {}; const conf = {};
+@@ -282,7 +343,7 @@ function cenApEntra(c, o, ap, baixado) {
+       cenSeloConf(c, o.id); }
+     cenSeloAp(c, o.id); return { ap, ks: [], dup }; }
+   const ks = baixado ? [] : cenApBaixa(c, o, ap);
+-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha);
++  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloDiv(c, o.id);   // divergência de dose: revisão abre quando o apontamento soma (B-R8)
+   return { ap, ks, dup: [] }; }
+ function cenApontar(c, k) {
+   const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
+@@ -296,8 +357,11 @@ function cenApontar(c, k) {
+   if (ha > o.saldo - pend + 1e-9) throw new Error('Máximo ' + cenNum(Math.max(0, o.saldo - pend)) + ' ha: é o saldo da ordem' + (pend ? ' descontando ' + cenNum(pend) + ' ha ainda no aparelho.' : '.'));
+   const cons = {}, es = k.est || [], inf = {};
+   Object.keys(k.cons || {}).forEach(p => { const q = k.cons[p]; if (q === undefined || q === null) return; cons[p] = q; if (es.indexOf(p) < 0) inf[p] = true; });
+-  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador; fora da requisição, 0 (como no MB-03)
+-  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = (r && r.itens.some(i => i.prod === x.p)) ? cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha) : 0; });   // regra única (SINT-C03)
++  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador (regra única, SINT-C03)
++  // fora da requisição nada esteve com o operador: o 0 (vazio ou sugestão não editada, como no MB-03) é fato, não estimativa, e entra na
++  // comparação com o planejado (B-R8; revisão DOM achado 1: 100 % de subdose do produto não requisitado passava sem revisão)
++  (o.ins || []).forEach(x => { if (!(r && r.itens.some(i => i.prod === x.p))) { if (!inf[x.p]) { cons[x.p] = 0; inf[x.p] = true; } return; }
++    if (cons[x.p] === undefined) cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha); });
+   if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9 && !inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está '
+     + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). '
+     + (k.cons ? 'Informe quanto foi usado ou confira a entrega no Estoque.' : 'Aponte pela O.S., informando quanto foi usado, ou confira a entrega no Estoque.'))); }
+@@ -306,6 +370,7 @@ function cenApontar(c, k) {
+   // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
+   const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
+     chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
++  { ap.ant = (o.realizado || 0) + pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; }   // B-R8: antes da baixa (que tira a linha 0 de ap.cons); ant = base do planejado
+   const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
+   const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
+   o.ap = feitos.concat([ap]).concat(prev);
+@@ -331,7 +396,7 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
+   if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
+   if (modo === 'anterior') {
+     ap.dec = { modo, quem, at: cenAgora() }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
+-    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id);
++    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
+     return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' }; }
+   const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
+   if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
+@@ -348,8 +413,9 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
+     o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
+     guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
+   ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
++  { ap.ant = b.real + b.pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; else delete ap.div; }   // B-R8: o usado informado na conferência também é fato
+   const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
+-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id);
++  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
+   if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
+   return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
+     + (ks.length || ag.length ? ' Consumo em conferência: ' + cenConcQuem(c, ks.concat(ag)) + '.' : '') }; }
+@@ -363,7 +429,7 @@ function cenFecharTurno(c, ha, horas, consumo, obs, est) {
+   if (R.repetido) return { msg: 'Turno já registrado como dia ' + ap.dia + ' (' + cenNum(ap.ha, 1) + ' ha): nada foi somado de novo.' };
+   if (R.dup.length) return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h, em conferência: já há ' + cenApDupTxt(R.dup) + ' em ' + ap.d
+     + '. Nada foi somado nem baixado; ' + CEN_CONF_AP + ' decide se é outro turno.' };
+-  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.'
++  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' + cenDivMsg(ap)
+     + (R.ks.length ? ' Consumo em conferência: ' + R.ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + cenConcQuem(c, R.ks) + '.' : '') };
+ }
+ // Conciliar o consumo em conferência (CMD-50, almoxarife). Prévia = efeito: aceitar baixa o relatado uma vez; o que passa da custódia
+@@ -391,8 +457,8 @@ function cenConciliar(c, id, aceitar, motivo, ator) {
+   // dano evitado: custódia baixada como consumo sem conferência). Recusar não mexe no saldo: aberto, com autor
+   const quem = (aceitar && !p.erro && p.falta > 1e-9) ? cenExige(ator, 'gestor', 'Aceitar ' + cenNum(p.falta) + ' ' + k.un + ' acima da custódia (' + k.id + ')')
+     : aceitar ? cenExigeUm(ator, ['almoxarife', 'gestor'], 'Aceitar o relato ' + k.id) : cenQuem(ator, 'almoxarife', 'Recusar o relato ' + k.id);
+-  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; cenSeloConf(c, k.os);
+-    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') }; }
++  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; cenSeloConf(c, k.os); const dv = cenDivRecusa(c, k, quem);   // B-R8: a divergência segue o que vale
++    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') + dv }; }
+   if (p.erro) throw new Error(p.erro);
+   const falta = p.falta;
+   if (falta > 1e-9) {
+@@ -426,11 +492,12 @@ function cenSinal(c, online) {
+   c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
+     + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP + ' decide.' : '') };
+ }
+-// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
++// Encerrar exige apontamentos enviados, nada em custódia (sobra devolvida) e a divergência de dose revisada pelo agrônomo (B-R8).
+ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
+   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
+   const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
+   const cf = cenConfAbertas(c, id); if (cf.length) return 'Consumo em conferência: ' + cf.map(k => cenConfTxt(k, c)).join('; ') + '. No Estoque: ' + cenConcQuem(c, cf) + '.';
+   const cust = r ? r.itens.filter(i => i.custodia > 0.001) : []; if (cust.length) return 'Sobra em custódia: ' + cust.map(i => i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un).join(', ') + '. Receba a devolução no Estoque.';
++  const dv = cenDivAbertas(o); if (dv.length) return CEN_DIV + ' em revisão técnica: ' + dv.map(a => 'dia ' + a.dia + ' · ' + a.div.map(cenDivTxt).join('; ')).join(' | ') + '. ' + g2quem('agronomo') + ' aceita com motivo ou registra a correção na linha do apontamento.';   // B-R8
+   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
+   return ''; }
+diff --git a/tools/prototipo/v37/gen37/consumo_divergente_test.py b/tools/prototipo/v37/gen37/consumo_divergente_test.py
+index a9546d3..fe67964 100644
+--- a/tools/prototipo/v37/gen37/consumo_divergente_test.py
++++ b/tools/prototipo/v37/gen37/consumo_divergente_test.py
+@@ -6,7 +6,7 @@ Aceitar mostra antes de confirmar de onde sai cada litro (custódia, reserva da
+ O.S. mostra o selo e não encerra com o caso aberto · aceitar regulariza uma vez e não deixa reserva própria acima da necessidade · recusar deixa o relato
+ sem efeito · sem sinal o caso só aparece depois do envio · recibo de caso resolvido abre com o estado (Aceito/Recusado).
+ Capturas em _probe/q_consumo_*.png. Uso: python3 consumo_divergente_test.py   (compile antes: build.py ou areas.mobile/processo_estoque)"""
+-import os, time
++import os, sys, time
+ from app_lib import App
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+@@ -158,3 +158,4 @@ try:
+     a.abrir('MB-01'); a.clk('Restaurar demonstração')
+ finally:
+     a.fim()
++sys.exit(1 if a.FAIL else 0)   # revisão Codex 6064114787 §5: "19/20 com exit 0 é falha, não aprovação" — o resultado do harness segue as verificações
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_nav.py b/tools/prototipo/v37/gen37/dose_divergente_nav.py
+new file mode 100644
+index 0000000..4b8f1bb
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/dose_divergente_nav.py
+@@ -0,0 +1,134 @@
++# -*- coding: utf-8 -*-
++"""B-R8 · parte de navegador do dose_divergente_test.py: app MB-03 (390 px), O.S. (1440 px e 390 px) sobre o mesmo cenário (localStorage).
++Caminho normal (turno com dose divergente → recibo, selo, linha do apontamento, aceite), erro/recusa (perfil sem papel, motivo vazio,
++encerrar antes da revisão), repetição (mesma revisão de novo não grava) e o encerramento depois da correção registrada.
++Capturas em _probe/dose_div_*.png. Uso: python3 dose_divergente_test.py nav   (compile antes: build.py && montar_render.py)"""
++import json, os, re, time
++from app_lib import App
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++OS = 'OS-0430'
++SELO = 'Divergência de consumo/dose'
++
++
++def rodar():
++    a = App(['MB-01', 'MB-03', 'OS']); J = a.J; erros = []
++    shot = lambda n: a.c.shot(os.path.join(HERE, '_probe', n))
++    def web(w=1440):
++        a.c.size(w, 1100); a.abrir('OS'); time.sleep(.3)
++    def ordem(id_):
++        J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.45)
++    def pan():
++        if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
++        return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
++    def btn(t):
++        r = J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.45); return r
++    def temb(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)}&&b.offsetParent!==null)"))
++    def settx(lab, val):
++        return J(f"""(()=>{{const i=[...document.querySelectorAll('aside[role=dialog] textarea')].find(x=>x.getAttribute('aria-label')==={json.dumps(lab)}); if(!i) return 'NÃO ACHEI';
++          Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
++    def alerta(): return J("[...document.querySelectorAll('aside[role=dialog] [role=alert]')].map(x=>x.innerText).join(' | ')") or ''
++    def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
++    def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
++    def aba(n): J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(n)}); b&&b.click();}})()"); time.sleep(.4)
++    def cartao(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf({json.dumps(id_)})===0); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
++    def perfil(k):
++        J(f"(()=>{{const i=document.querySelector('[aria-label=\"Trocar perfil de demonstração\"]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,{json.dumps(k)}); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.4)
++    def cmd(js):
++        return J("(()=>{const W=window.__cen; const r=W.cenMudar(null,c=>" + js + "); return r.erro||r.msg||'';})()") or ''
++    def guard(): erros.extend(a.erros() or [])
++    def sem_rolagem(): return J("document.documentElement.scrollWidth<=window.innerWidth+1")
++    REV = f"c.ordens['{OS}'].ap.filter(x=>x.rev).map(x=>x.dia+':'+x.rev.dec+':'+x.rev.quem).join(',')"
++    try:
++        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração'); time.sleep(.3)
++        # preparo (como o escritório e o almoxarifado fariam): Ana aprova e libera a OS-0430; Rui entrega os três insumos a Marcos; Marcos confirma
++        web()
++        p0 = cmd(f"(W.osc_liberar(c,'{OS}',false,'','Ana'), c.reqs[c.ordens['{OS}'].req].itens.forEach(i=>W.cenEntregar(c,c.ordens['{OS}'].req,i.prod,i.solicitado,'Marcos','Rui')), W.cenConfirmarRecebimento(c,c.ordens['{OS}'].req))")
++        a.ok(p0.startswith('Recebimento confirmado'), 'preparo: OS-0430 liberada por Ana, insumos entregues e confirmados: ' + p0[:90])
++        # 1 · app (390 px): turno de 10 ha com Glifosato 20 L, 2,4-D 0 L e Óleo 0 L (planejado 20 / 10 / 5) → recibo com a divergência
++        a.c.size(390, 1800); a.abrir('MB-03'); r = a.clk_sel(f'main button[title="Iniciar turno na {OS}"]'); time.sleep(.2)
++        a.setv('#ft_ha', '10'); a.setv('#ft_h', '1'); sug = [J("document.querySelector('#ft_c%d').value" % i) for i in range(3)]
++        a.setv('#ft_c0', '20'); a.setv('#ft_c1', '0'); a.setv('#ft_c2', '0'); a.clk('Fechar turno'); t = a.toast() or ''; b = a.body()
++        DIVT = '2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L'
++        a.ok(r == 'ok' and sug == ['20', '10', '5'] and f'{SELO}: {DIVT} · revisão técnica de Ana (agrônoma).' in t,
++             f'MB-03: sugestão 20/10/5; informado 20/0/0 fecha o turno e o aviso diz a divergência e quem revisa: {sug} · {t[:220]}')
++        i = b.find('Turno fechado ·'); rb = b[i:i + 500]
++        a.ok(SELO in rb and f'{DIVT} · revisão técnica de Ana (agrônoma)' in rb and 'S2' not in rb, 'recibo do turno no app: selo e planejado × informado com unidade, sem "S2": ' + rb.replace('\n', ' / ')[:300])
++        a.ok(sem_rolagem(), 'app a 390 px sem rolagem horizontal')
++        shot('dose_div_1_app_recibo.png'); guard()
++        # 2 · O.S. (1440 px): selo na lista e no Kanban; painel com a linha do apontamento e a revisão (perfil Ana, agrônoma)
++        web(); ln = linha(OS)
++        a.ok(f'{SELO} · 2,4-D 806, Óleo mineral' in ln and 'Ana (agrônoma)' in ln and 'revisar a divergência de dose do dia 1' in ln,
++             'lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: ' + ln[:260])
++        aba('Kanban'); kb = cartao(OS)
++        a.ok(f'{SELO} · 2,4-D 806, Óleo mineral' in kb and 'Ana (agrônoma) · revisar a divergência de dose do dia 1' in kb, 'Kanban (5 fases, sem coluna nova): cartão com o selo e a pendência: ' + kb[:240])
++        ncol = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] span')].filter(s=>getComputedStyle(s).textTransform==='uppercase').map(s=>s.innerText.trim().toLowerCase()).filter((x,i,l)=>l.indexOf(x)===i).join('|')")
++        shot('dose_div_2_kanban.png'); aba('Lista')
++        ordem(OS); p = pan()
++        a.ok(f'{SELO} · {DIVT}' in p and temb('Aceitar com motivo') and temb('Registrar correção') and 'Pendência com Ana (agrônoma) · revisar a divergência de dose do dia 1' in p,
++             'painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): ' + p[p.find('Dia 1'):][:300])
++        shot('dose_div_3_painel.png'); guard()
++        # 3 · recusa: perfil Rui (almoxarife) não vê a decisão e o comando direto é recusado; nada muda
++        perfil('Rui'); web(); ordem(OS); p = pan()
++        rx = cmd(f"W.cenDivRever(c,'{OS}',1,'aceitar','teste','Rui')")
++        a.ok(not temb('Aceitar com motivo') and 'Revisão técnica pendente: decisão de Ana (agrônoma) (aceitar com motivo ou registrar a correção).' in p
++             and rx == 'Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.' and a.cen(REV) == '',
++             f'perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: {rx}')
++        perfil('Ana'); web(); ordem(OS); pan()
++        # 4 · erro: aceitar sem motivo → aviso junto ao campo, nada gravado
++        btn('Aceitar com motivo'); al = alerta()
++        a.ok('Informe o motivo para aceitar a divergência do dia 1 da OS-0430. Nada foi alterado.' in al and a.cen(REV) == '' and SELO in linha(OS),
++             'aceitar sem motivo: erro junto ao campo, revisão continua pendente: ' + al[:160])
++        # 5 · normal: motivo e Aceitar → selo sai, a linha mostra a revisão com autor; o consumo informado fica (2,4-D sem baixa)
++        MOT = 'Calda sem 2,4-D por deriva no vizinho; controle conferido em campo'
++        settx('Motivo ou correção decidida · dia 1', MOT); btn('Aceitar com motivo'); t = toast(); p = pan()
++        cons = a.cen(f"c.reqs[c.ordens['{OS}'].req].itens.map(i=>i.prod+' '+i.consumido).join(', ')")
++        a.ok(f'aceita por Ana (agrônoma): {MOT}' in t and a.cen(REV) == '1:Aceita:Ana (agrônoma)' and SELO not in linha(OS)
++             and re.search(r'Revisão técnica: aceita por Ana \(agrônoma\) às \d\d:\d\d · ' + re.escape(MOT), p) and not temb('Aceitar com motivo')
++             and cons == 'Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0',
++             f'Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado ({cons}): ' + t[:160])
++        # 6 · repetição: a mesma revisão de novo não grava; outra decisão no mesmo dia é conflito
++        r1 = cmd(f"W.cenDivRever(c,'{OS}',1,'aceitar',{json.dumps(MOT)},'Ana')"); r2 = cmd(f"W.cenDivRever(c,'{OS}',1,'corrigir','Reaplicar','Ana')")
++        a.ok('já revisada' in r1 and 'conflito' in r2 and a.cen(REV) == '1:Aceita:Ana (agrônoma)', f'repetição sem efeito; outra decisão é conflito: {r1[:90]} · {r2[:90]}')
++        shot('dose_div_4_aceita.png'); guard()
++        # 7 · conferência: o resto da área (150 ha) com Óleo abaixo do planejado; sobras devolvidas; enviada para conferência
++        f = cmd(f"(W.cenIniciarTurno(c,'{OS}'), W.cenFecharTurno(c,150,8,{{'Glifosato 480':300,'2,4-D 806':150,'Óleo mineral':50}},'',[]))")
++        dv = cmd(f"(c.reqs[c.ordens['{OS}'].req].itens.filter(i=>i.custodia>0).forEach(i=>W.cenDevolver(c,c.ordens['{OS}'].req,i.prod,i.custodia,true,'Rui')), W.osc_conferencia(c,'{OS}'))")
++        a.ok('Óleo mineral planejado 75 L × informado 50 L' in f and dv == 'OS-0430 enviada para conferência.', f'turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: {f[-120:]} · {dv}')
++        web(); ordem(OS); p = pan(); i = p.find('PRÓXIMO PASSO'); pp = p[i:i + 420]
++        a.ok(f'{SELO} · Óleo mineral' in p and 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Óleo mineral planejado 75 L × informado 50 L.' in pp
++             and 'Quem resolve: Ana (agrônoma), na linha do apontamento' in pp and not temb('Conferir e encerrar'),
++             'Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": ' + pp[:300])
++        aba('Kanban'); kb = cartao(OS)
++        a.ok(f'{SELO} · Óleo mineral' in kb and 'Ana (agrônoma) · revisar a divergência de dose' in kb and 'Sobras a receber' not in kb, 'Kanban em conferência: selo e pendência com Ana, sem "Sobras a receber": ' + kb[:220])
++        shot('dose_div_5_conferencia.png'); aba('Lista'); guard()
++        # 8 · 390 px: a revisão cabe e funciona (Registrar correção); depois o encerramento passa
++        web(390); ordem(OS); pan()
++        settx('Motivo ou correção decidida · dia 2', 'Reaplicar Óleo mineral 0,5 L/ha nos 50 ha do fim do talhão em nova O.S.'); btn('Registrar correção'); t = toast()
++        a.ok('Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430' in t and a.cen(REV) == '1:Aceita:Ana (agrônoma),2:Correção decidida:Ana (agrônoma)' and sem_rolagem(),
++             '390 px: Registrar correção grava a decisão, sem rolagem horizontal: ' + t[:160])
++        shot('dose_div_6_390_correcao.png')
++        ok_enc = btn('Conferir e encerrar') and btn('Confirmar encerramento'); et = a.cen(f"c.ordens['{OS}'].etapa")
++        a.ok(ok_enc and et == 'Encerradas', f'revisões feitas: Conferir e encerrar → Encerradas ({et})')
++        guard()
++        a.ok(not erros and ncol == 'a liberar|liberadas|em execução|em conferência|encerradas', f'sem erros JS (O.S., app) e Kanban com as 5 fases, sem coluna nova: {erros} · {ncol}')
++        # 9 · revisão DOM achado 6: turno retido como duplicidade (mesma data do apontamento da web) → o recibo do app diz que a revisão só abre
++        #     se o turno somar; guardado como duplicidade por Paula, a linha do dia não mostra divergência nem promete revisão
++        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração'); time.sleep(.3); web()
++        p0 = cmd(f"(W.osc_liberar(c,'{OS}',false,'','Ana'), c.reqs[c.ordens['{OS}'].req].itens.forEach(i=>W.cenEntregar(c,c.ordens['{OS}'].req,i.prod,i.solicitado,'Marcos','Rui')), W.cenConfirmarRecebimento(c,c.ordens['{OS}'].req), W.cenIniciarTurno(c,'{OS}'), c.app.turno=null, W.osc_apontar(c,'{OS}','26/09',10,{{'Glifosato 480':20,'2,4-D 806':10,'Óleo mineral':5}},[],'W-DUP'))")
++        a.c.size(390, 1800); a.abrir('MB-03'); r = a.clk_sel(f'main button[title="Iniciar turno na {OS}"]'); time.sleep(.2)
++        a.setv('#ft_ha', '10'); a.setv('#ft_h', '1'); a.setv('#ft_c0', '20'); a.setv('#ft_c1', '0'); a.setv('#ft_c2', '5'); a.clk('Fechar turno'); t = a.toast() or ''; b = a.body()
++        i = b.find('Turno fechado ·'); rb = b[i:i + 600]
++        a.ok(p0.startswith('Apontamento do dia 1') and r == 'ok' and 'em conferência' in t and 'Em conferência · duplicidade' in rb
++             and '2,4-D 806 planejado 10 L × informado 0 L · a revisão técnica abre se Paula (conferência) somar o turno' in rb and 'revisão técnica de Ana' not in rb,
++             'recibo do turno retido como duplicidade: a divergência fica registrada e a revisão só abre se Paula somar: ' + rb.replace('\n', ' / ')[:320])
++        shot('dose_div_7_app_dup.png')
++        web(); dd = cmd(f"W.osc_apDecidir(c,'{OS}',2,'anterior',null,'Paula')")   # o comando da O.S. (Paula, conferência)
++        web(); ordem(OS); p = pan(); i = p.find('Dia 2'); l2 = p[i:p.find('Acumulado', i)] if i >= 0 else ''
++        a.ok(dd.startswith('Dia 2 guardado como duplicidade') and 'Duplicidade · não somado' in l2 and SELO not in l2 and 'A revisão técnica abre quando o apontamento somar' not in l2 and SELO not in linha(OS),
++             f'guardado como duplicidade ({dd[:60]}): a linha do dia 2 sem divergência nem promessa de revisão; lista sem selo: ' + l2[:240])
++        shot('dose_div_8_dup_guardado.png'); guard()
++        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração')
++    finally:
++        a.fim()
++    return 1 if a.FAIL else 0
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_test.py b/tools/prototipo/v37/gen37/dose_divergente_test.py
+new file mode 100644
+index 0000000..9185317
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/dose_divergente_test.py
+@@ -0,0 +1,86 @@
++# -*- coding: utf-8 -*-
++"""B-R8 · divergência de consumo/dose no fecho do turno (revisão Codex 6064114787 §2; harness "Prova focal recuperável B-R8" virou teste).
++unit: monta o JS real (perfis + cenario.js + OSD do gerador + núcleo da O.S. com carência) e roda dose_divergente_unit.js no node.
++nav:  Chrome real sobre o mesmo cenário (localStorage): app MB-03 a 390 px fecha o turno com dose divergente e mostra o recibo;
++      O.S. (1440 px e 390 px) mostra o selo na lista, no Kanban e no painel, a linha do apontamento com planejado × informado,
++      recusa de quem não é agrônomo, motivo obrigatório, aceite de Ana, repetição sem efeito e o encerramento só depois da revisão.
++Uso (de gen37/, depois do build e do montar_render): python3 dose_divergente_test.py [unit|nav]   (sem argumento: as duas; sai 1 se alguma falhar)"""
++import os, sys, json, subprocess, tempfile, time
++os.environ.setdefault('SAFRION_DADOS', 'sintetico')
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
++MODOS = sys.argv[1:] or ['unit', 'nav']
++FALHAS = 0
++
++
++def unit():
++    import cenario
++    import areas.processo_os as P
++    g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
++    pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2 + cenario.perfis_js()
++    osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
++    src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n'
++           + open(os.path.join(HERE, 'dose_divergente_unit.js'), encoding='utf-8').read())
++    fd, p = tempfile.mkstemp(prefix='dose_div_', suffix='.js')
++    with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)
++    try: r = subprocess.run(['node', p], capture_output=True, text=True, timeout=120)
++    finally: os.unlink(p)
++    for l in r.stdout.splitlines():
++        if l.startswith('REPRO'): print(l[:900])
++    L = [l for l in r.stdout.splitlines() if l.startswith('[{')]
++    if r.returncode or not L: print('FALHA motor JS:', r.stderr[-1500:]); return 1
++    res = json.loads(L[-1]); f = 0
++    for x in res:
++        print(('OK    ' if x['ok'] else 'FALHA ') + x['n'] + ('' if x['ok'] else ' · ' + x['info'][:500])); f += not x['ok']
++    print(f'RESULTADO unit: {len(res) - f}/{len(res)}'); return 1 if f else 0
++
++
++def fatia(js, nome):
++    """uma função de nível superior do JS da tela (até a próxima definição de nível superior)"""
++    import re
++    i = js.index('function ' + nome + '(')
++    m = re.compile(r'\n(?=function |const |let |var |try |//)').search(js, i + 1)
++    return js[i:m.start() if m else len(js)] + '\n'
++
++
++def mapa():
++    """Início (IN-04, mapOrdsCen do areas/inicio.py): OS-0430 em conferência com a divergência aberta e sem custódia mostra o selo da
++    divergência e não "Sobras a receber" (revisão DOM achado 3); com sobra em custódia, "Sobras a receber" continua."""
++    import cenario
++    import areas.processo_os as P
++    from areas import inicio as I
++    g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
++    pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2 + cenario.perfis_js()
++    osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
++    fns = fatia(I.JS_COMUM, 'nfx') + ''.join(fatia(I.MAP_JS, n) for n in ['mapSc', 'inPendLib', 'mapItVis', 'mapOrdsCen'])
++    probe = r'''
++const R=[]; function ok(n,c,info){ R.push({n,ok:!!c,info:c?'':JSON.stringify(info).slice(0,700)}); }
++let C=null; var cenGet=()=>C; const M={ord:ORD_PY}; let MAPC=null; const ORD0=M.ord;
++function prep(){ const c=cenClone(CEN0), id='OS-0430'; osc_liberar(c,id,false,'','Ana'); const rid=c.ordens[id].req;
++  c.reqs[rid].itens.forEach(i=>cenEntregar(c,rid,i.prod,i.solicitado,'Marcos','Rui')); cenConfirmarRecebimento(c,rid); cenIniciarTurno(c,id);
++  cenFecharTurno(c,160,8,{'Glifosato 480':320,'2,4-D 806':100,'Óleo mineral':80},'',[]); return {c,id,rid}; }
++{ const {c,id,rid}=prep(); c.reqs[rid].itens.filter(i=>i.custodia>0).forEach(i=>cenDevolver(c,rid,i.prod,i.custodia,true,'Rui')); osc_conferencia(c,id); C=c;
++  const x=mapOrdsCen().find(o=>o.id===id); const t=x.selos.map(s=>s[0]);
++  ok('M1 Início (IN-04): em conferência, sem custódia e com a divergência aberta, o selo é o da divergência; sem "Sobras a receber" nem "Receber sobras"',
++     x.fase==='Em conferência'&&t.indexOf('Divergência de consumo/dose · 2,4-D 806')>=0&&t.indexOf('Sobras a receber')<0&&!(x.act&&x.act.t==='Receber sobras'),[t,x.act]); }
++{ const {c,id}=prep(); osc_conferencia(c,id); C=c; const x=mapOrdsCen().find(o=>o.id===id); const t=x.selos.map(s=>s[0]);
++  ok('M2 Início (IN-04): com sobra em custódia, "Sobras a receber" continua', t.indexOf('Sobras a receber')>=0,[t,cenPodeEncerrar(c,id)]); }
++console.log(JSON.stringify(R));
++'''.replace('ORD_PY', json.dumps(I.ORD, ensure_ascii=False))
++    src = pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n' + fns + probe
++    fd, p = tempfile.mkstemp(prefix='dose_div_mapa_', suffix='.js')
++    with os.fdopen(fd, 'w', encoding='utf-8') as f: f.write(src)
++    try: r = subprocess.run(['node', p], capture_output=True, text=True, timeout=120)
++    finally: os.unlink(p)
++    L = [l for l in r.stdout.splitlines() if l.startswith('[{')]
++    if r.returncode or not L: print('FALHA motor JS (Início):', r.stderr[-1500:]); return 1
++    res = json.loads(L[-1]); f = 0
++    for x in res:
++        print(('OK    ' if x['ok'] else 'FALHA ') + x['n'] + ('' if x['ok'] else ' · ' + x['info'][:500])); f += not x['ok']
++    print(f'RESULTADO unit Início: {len(res) - f}/{len(res)}'); return 1 if f else 0
++
++
++if 'unit' in MODOS: FALHAS += unit() + mapa()
++if 'nav' in MODOS:
++    import dose_divergente_nav
++    FALHAS += dose_divergente_nav.rodar()
++sys.exit(1 if FALHAS else 0)
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_unit.js b/tools/prototipo/v37/gen37/dose_divergente_unit.js
+new file mode 100644
+index 0000000..8f6960b
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/dose_divergente_unit.js
+@@ -0,0 +1,230 @@
++// B-R8 · divergência de consumo/dose no fecho do turno (revisão Codex 6064114787 §2 e "Prova focal recuperável B-R8") · node, sem navegador.
++// Carregado depois de: g2num + perfis + CEN0 + cenario.js + OSD + núcleo da O.S. (dose_divergente_test.py). Dados sintéticos.
++// Regra: o consumo informado diferente do planejado para a área apontada (dose × área pela regra única, centésimo da unidade) é gravado
++// como informado, marca o apontamento e a O.S. ("Divergência de consumo/dose", por produto, planejado × informado com unidade) e abre
++// revisão técnica do agrônomo, resolvida (aceitar com motivo ou registrar a correção) antes do encerramento final. Dano evitado: subdose
++// ou superdose aplicada sem decisão do agrônomo passar por execução conforme (resultado técnico da lavoura e receituário).
++const R = []; function ok(n, c, info) { R.push({ n, ok: !!c, info: c ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 900) }); }
++const TRY = (f) => { try { return { r: f() }; } catch (e) { return { erro: String(e.message || e) }; } };
++const SELO = 'Divergência de consumo/dose';
++const temSelo = (o) => (o.selos || []).filter(s => String(s.t).indexOf(SELO) === 0);
++const MUD = (c, fn) => { const x = cenClone(c); try { const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; } catch (e) { return { erro: String(e.message || e) }; } };
++const ABERTAS = (o) => (typeof cenDivAbertas === 'function') ? cenDivAbertas(o) : [];
++const REVER = (c, id, dia, dec, txt, ator) => MUD(c, x => cenDivRever(x, id, dia, dec, txt, ator));
++// a mesma preparação do harness Codex: OS-0430 aprovada e liberada por Ana, três insumos entregues a Marcos e confirmados, turno iniciado
++function prep() { const c = cenClone(CEN0), id = 'OS-0430';
++  const lib = osc_liberar(c, id, false, '', 'Ana'); const o = c.ordens[id], rid = o.req;
++  c.reqs[rid].itens.forEach(i => cenEntregar(c, rid, i.prod, i.solicitado, 'Marcos', 'Rui'));
++  cenConfirmarRecebimento(c, rid); cenIniciarTurno(c, id); return { c, id, o, rid, lib }; }
++const IT = (c, rid, p) => c.reqs[rid].itens.find(i => i.prod === p);
++
++// ---- D01 · reprodução Codex (B-R8): 10 ha, informado 20 / 0 / 0 contra 20 / 10 / 5 planejado ----
++{ const { c, id, o, rid } = prep();
++  const esperado = Object.fromEntries(o.ins.map(i => [i.p, cenQtdTrecho(i.dose, o.realizado, 10)]));
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, 'Contraprova sintética Codex B-R8', []));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  console.log('REPRO B-R8 ' + JSON.stringify({ esperado, retorno: ret, realizado: o.realizado, saldo: o.saldo, st: ap.st, div: ap.div || null, selos: o.selos }));
++  ok('D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha', esperado['Glifosato 480'] === 20 && esperado['2,4-D 806'] === 10 && esperado['Óleo mineral'] === 5, esperado);
++  ok('D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)',
++     !ret.erro && o.realizado === 10 && ap.st === 'Provisório' && IT(c, rid, 'Glifosato 480').consumido === 20 && IT(c, rid, '2,4-D 806').consumido === 0 && IT(c, rid, 'Óleo mineral').consumido === 0,
++     [ret, o.realizado, ap.st, c.reqs[rid].itens.map(i => [i.prod, i.consumido, i.custodia])]);
++  const dv = (ap.div || []).map(d => d.p + ':' + d.plan + '>' + d.inf + ' ' + d.un).join(' | ');
++  ok('D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)',
++     dv === '2,4-D 806:10>0 L | Óleo mineral:5>0 L', ap.div);
++  const s = temSelo(o);
++  ok('D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"',
++     s.length === 1 && s[0].t === SELO + ' · 2,4-D 806, Óleo mineral' && s[0].c === 'red', o.selos);
++  ok('D01e revisão técnica pendente do agrônomo (uma, do dia 1)', ABERTAS(o).length === 1 && ABERTAS(o)[0].dia === 1, ABERTAS(o).map(a => a.dia));
++  ok('D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"',
++     !ret.erro && ret.r.msg === 'Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).'
++     && !/S2/.test(ret.r.msg), ret); }
++
++// ---- D02 · controle Codex: informado = planejado (20 / 10 / 5) não abre nada; mensagem de sempre ----
++{ const { c, o } = prep();
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  ok('D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho',
++     !ret.erro && ret.r.msg === 'Turno fechado: 10 ha em 1 h. A ordem continua em execução.' && !(ap.div || []).length && !temSelo(o).length && !ABERTAS(o).length
++     && JSON.stringify(ap.cons) === JSON.stringify({ 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }), [ret, ap.div, o.selos, ap.cons]); }
++
++// ---- D03 · sugestão não editada (est) é estimativa, não fato informado: não abre divergência ----
++{ const { c, o } = prep();
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', ['Glifosato 480', '2,4-D 806', 'Óleo mineral']));
++  ok('D03 sugestão dose × área não editada: sem divergência nem selo', !ret.erro && !temSelo(o).length && !ABERTAS(o).length, [ret, o.selos]); }
++
++// ---- D04 · precisão: centésimo da unidade (a da regra de quantidade, cenQtd); nenhuma tolerância inventada ----
++{ const a = prep(); TRY(() => cenFecharTurno(a.c, 10, 1, { 'Glifosato 480': 20.004, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const b = prep(); TRY(() => cenFecharTurno(b.c, 10, 1, { 'Glifosato 480': 20.01, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));
++  const db = (b.o.ap.slice(-1)[0] || {}).div || [];
++  ok('D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)',
++     !temSelo(a.o).length && db.length === 1 && db[0].p === 'Glifosato 480' && db[0].plan === 20 && db[0].inf === 20.01, [a.o.selos, db]); }
++// ---- D04b · revisão DOM achado 2: a comparação usa a regra de quantidade (decimal, meio para cima), não o arredondamento do float ----
++{ const F = (q) => { const x = prep(); const r = TRY(() => cenFecharTurno(x.c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': q, 'Óleo mineral': 5 }, '', [])); return { r, div: (x.o.ap.slice(-1)[0] || {}).div || [], selo: temSelo(x.o).length }; };
++  const a = F(9.995), b = F(10.005), d = F(10.0049);
++  ok('D04b 9,995 L = 10,00 L (cenQtd) não diverge do planejado 10 L; 10,005 L = 10,01 L diverge e o texto mostra 10,01 L; 10,0049 L não diverge',
++     !a.div.length && !a.selo && b.div.length === 1 && b.r.r && /2,4-D 806 planejado 10 L × informado 10,01 L/.test(b.r.r.msg) && !d.div.length && !d.selo, [a, b, d]); }
++
++// ---- D05 · revisão: só o agrônomo; motivo obrigatório; recusa não muda nada ----
++{ const { c, id, o } = prep(); TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, '', []));
++  const antes = JSON.stringify(c);
++  const r1 = REVER(c, id, 1, 'aceitar', 'chuva lavou a calda', 'Rui');
++  ok('D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda',
++     r1.erro === 'Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.' && JSON.stringify(c) === antes, r1);
++  const r2 = REVER(c, id, 1, 'aceitar', '   ', 'Ana');
++  ok('D05b aceitar sem motivo é recusado, nada muda', r2.erro === 'Informe o motivo para aceitar a divergência do dia 1 da OS-0430. Nada foi alterado.' && JSON.stringify(c) === antes, r2);
++  const r3 = REVER(c, id, 2, 'aceitar', 'x', 'Ana');
++  ok('D05c dia sem divergência em revisão é recusado', /não tem divergência de consumo\/dose em revisão/.test(r3.erro || '') && JSON.stringify(c) === antes, r3);
++  const r4 = REVER(c, id, 1, 'aceitar', 'Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo', 'Ana');
++  const ap = o.ap.find(a => a.dia === 1) || {}; const ap2 = c.ordens[id].ap.find(a => a.dia === 1) || {};
++  ok('D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está',
++     !r4.erro && ap2.rev && ap2.rev.dec === 'Aceita' && ap2.rev.quem === 'Ana (agrônoma)' && /deriva/.test(ap2.rev.txt) && !temSelo(c.ordens[id]).length && !ABERTAS(c.ordens[id]).length
++     && IT(c, c.ordens[id].req, '2,4-D 806').consumido === 0 && r4.msg === 'Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo. O consumo informado fica como está.',
++     [r4, ap2.rev, c.ordens[id].selos]);
++  // repetição (mesmo conteúdo) não grava de novo; outro conteúdo é conflito
++  const depois = JSON.stringify(c);
++  const r5 = REVER(c, id, 1, 'aceitar', 'Mistura sem 2,4-D por deriva no vizinho; controle conferido em campo', 'Ana');
++  const r6 = REVER(c, id, 1, 'corrigir', 'Reaplicar', 'Ana');
++  ok('D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda',
++     !r5.erro && r5.repetido && /já revisada/.test(r5.msg) && /conflito/.test(r6.erro || '') && JSON.stringify(c) === depois, [r5, r6]); }
++
++// ---- D06 · registrar correção/reaplicação decidida pelo agrônomo ----
++{ const { c, id } = prep(); TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 0 }, '', []));
++  const r0 = REVER(c, id, 1, 'corrigir', '', 'Ana');
++  const r = REVER(c, id, 1, 'corrigir', 'Reaplicar 2,4-D 806 1 L/ha e Óleo mineral 0,5 L/ha nos 10 ha em nova O.S.', 'Ana'); const ap = c.ordens[id].ap.find(a => a.dia === 1) || {};
++  ok('D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai',
++     r0.erro === 'Descreva a correção ou reaplicação decidida para o dia 1 da OS-0430. Nada foi alterado.' && !r.erro && ap.rev && ap.rev.dec === 'Correção decidida' && !temSelo(c.ordens[id]).length
++     && r.msg === 'Correção registrada por Ana (agrônoma) para o dia 1 da OS-0430: Reaplicar 2,4-D 806 1 L/ha e Óleo mineral 0,5 L/ha nos 10 ha em nova O.S. O consumo informado fica como está.'
++     && !/sai em nova ordem/.test(r.msg),   /* revisão DOM achado 5: nada cria a ordem sozinho; a mensagem não promete */
++     [r0, r, ap.rev]); }
++
++// ---- D07 · encerramento final exige a revisão resolvida (conferência, painel e Kanban leem o mesmo estado) ----
++{ const { c, id, rid } = prep();
++  // 160 ha num turno com 2,4-D abaixo do planejado (100 L × 160 L); o resto conforme; sobra devolvida
++  TRY(() => cenFecharTurno(c, 160, 8, { 'Glifosato 480': 320, '2,4-D 806': 100, 'Óleo mineral': 80 }, '', []));
++  const dv = IT(c, rid, '2,4-D 806').custodia; MUD(c, x => cenDevolver(x, rid, '2,4-D 806', dv, true, 'Rui'));
++  const cf = MUD(c, x => osc_conferencia(x, id));
++  const o = c.ordens[id]; const pe = cenPodeEncerrar(c, id);
++  ok('D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa',
++     !cf.erro && o.etapa === 'Em conferência' && temSelo(o).length === 1 && temSelo(o)[0].t === SELO + ' · 2,4-D 806'
++     && pe === 'Divergência de consumo/dose em revisão técnica: dia 1 · 2,4-D 806 planejado 160 L × informado 100 L. Ana (agrônoma) aceita com motivo ou registra a correção na linha do apontamento.',
++     [cf, o.etapa, o.selos, pe]);
++  const en = MUD(c, x => osc_encerrar(x, id));
++  ok('D07b encerrar é recusado e nada muda', /^Encerrar bloqueado: Divergência de consumo\/dose em revisão técnica/.test(en.erro || '') && c.ordens[id].etapa === 'Em conferência', en);
++  const OS0 = (OSD.ords || []).find(b => b.id === id); const m = osMerge(Object.assign(cenClone(OS0), { selos: [] }), c.ordens[id], c); const pb = osProx(m, g2pf('Ana'));
++  ok('D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"',
++     m.selos.some(s => s.t === SELO + ' · 2,4-D 806' && s.c === 'red') && !m.selos.some(s => s.t === 'Sobras a receber') && m.dono === 'Ana (agrônoma)' && m.prazo === 'revisar a divergência de dose'
++     && pb.b && pb.b.t === 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 1 · 2,4-D 806 planejado 160 L × informado 100 L.'
++     && pb.b.q === 'Ana (agrônoma), na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.', [m.selos, m.dono, m.prazo, pb.b]);
++  const rv = REVER(c, id, 1, 'aceitar', 'Subdose de 2,4-D compensada pelo glifosato; sem rebrote na vistoria', 'Ana');
++  const en2 = MUD(c, x => osc_encerrar(x, id));
++  ok('D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão', !rv.erro && !en2.erro && c.ordens[id].etapa === 'Encerradas'
++     && c.ordens[id].ap.find(a => a.dia === 1).st === 'Conferido' && c.ordens[id].ap.find(a => a.dia === 1).rev.dec === 'Aceita', [rv, en2, c.ordens[id].etapa]); }
++
++// ---- D08 · sem sinal: a divergência fica no apontamento do aparelho; selo e revisão só quando chega ao servidor, uma vez ----
++{ const { c, id, o } = prep(); cenSinal(c, false);
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 5 }, '', []));
++  const s0 = [temSelo(o).length, ABERTAS(o).length, ((o.ap.slice(-1)[0] || {}).div || []).length];
++  cenSinal(c, true); cenSinal(c, true);
++  const s1 = [temSelo(o).length, ABERTAS(o).length, (temSelo(o)[0] || {}).t];
++  ok('D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez',
++     s0.join() === '0,0,1' && s1[0] === 1 && s1[1] === 1 && s1[2] === SELO + ' · 2,4-D 806', [s0, s1]); }
++
++// ---- D09 · apontamento pela web (O.S. e Mapa): o mesmo comando, a mesma regra ----
++{ const { c, id, o } = prep(); c.app.turno = null;
++  const r = TRY(() => osc_apontar(c, id, '26/09', 10, { 'Glifosato 480': 20, '2,4-D 806': 12, 'Óleo mineral': 5 }, [], 'W-OS-0430-teste'));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  ok('D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa',
++     !r.erro && (ap.div || []).length === 1 && ap.div[0].p === '2,4-D 806' && ap.div[0].plan === 10 && ap.div[0].inf === 12 && temSelo(o).length === 1
++     && /Divergência de consumo\/dose: 2,4-D 806 planejado 10 L × informado 12 L · revisão técnica de Ana \(agrônoma\)\.$/.test(r.r.msg), [r, ap.div]); }
++
++// ---- D10 · duplicidade retida não abre revisão até a decisão de quem confere; somada, abre ----
++{ const { c, id, o } = prep(); c.app.turno = null;
++  TRY(() => osc_apontar(c, id, '26/09', 10, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, [], 'W-A'));
++  TRY(() => cenIniciarTurno(c, id)); c.app.operador = 'Marcos';
++  const f = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 5 }, '', []));
++  const dup = o.ap.find(a => a.st === CEN_AP_DUP);
++  const s0 = [!!dup, temSelo(o).length];
++  const d = MUD(c, x => cenApDecidir(x, id, dup ? dup.dia : 0, 'somar', 'Paula'));
++  const o2 = c.ordens[id];
++  ok('D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão',
++     s0.join() === 'true,0' && !d.erro && temSelo(o2).length === 1 && ABERTAS(o2).length === 1, [f, s0, d, o2.selos]); }
++
++// ---- D11 · revisão DOM achado 1: produto da ordem fora da requisição — nada esteve com o operador, o 0 é fato e diverge do planejado ----
++{ const c = cenClone(CEN0), id = 'OS-0421'; const o = c.ordens[id]; const r = c.reqs[o.req]; r.itens.forEach(i => { i.confirmado = true; }); TRY(() => cenIniciarTurno(c, id));
++  const sug = cenQtdTrecho(0.5, o.realizado, 10); const cust0 = r.itens.map(i => i.custodia).join();
++  const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Fungicida A': sug, 'Adjuvante espalhante': 0 }, '', ['Fungicida A', 'Adjuvante espalhante']));   // MB-03 sem editar nada
++  const ap = o.ap.filter(a => a.st !== 'Previsto' && a.dia === Math.max.apply(null, o.ap.filter(x => x.st !== 'Previsto').map(x => x.dia)))[0] || {};
++  ok('D11a app (OS-0421, campo do Adjuvante sem edição): selo "Divergência de consumo/dose · Adjuvante espalhante", planejado 2,5 L × informado 0 L, revisão de Ana; a sugestão do Fungicida não diverge',
++     !ret.erro && temSelo(o).length === 1 && temSelo(o)[0].t === SELO + ' · Adjuvante espalhante' && (ap.div || []).length === 1 && ap.div[0].p === 'Adjuvante espalhante' && ap.div[0].plan === 2.5 && ap.div[0].inf === 0 && ap.div[0].un === 'L'
++     && /Adjuvante espalhante planejado 2,5 L × informado 0 L · revisão técnica de Ana \(agrônoma\)\.$/.test(ret.r.msg), [ret, ap.div, o.selos]);
++  ok('D11b a baixa não muda: só o Fungicida sai da custódia, sem conferência nem linha 0 do Adjuvante',
++     !(c.confs || []).some(k => k.os === id) && JSON.stringify(ap.cons) === JSON.stringify({ 'Fungicida A': sug }) && r.itens[0].custodia === Number(cust0) - sug, [ap.cons, c.confs, cust0, r.itens]);
++  // web (O.S. e Mapa): o mesmo formulário (osApIns/osApColeta) sem editar nada → o mesmo fato
++  const c2 = cenClone(CEN0); c2.reqs[c2.ordens[id].req].itens.forEach(i => { i.confirmado = true; }); const o2 = c2.ordens[id];
++  const k = osApColeta(osApIns(c2, o2, 10, {})); const w = TRY(() => osc_apontar(c2, id, '26/09', 10, k.cons, k.est, 'W-D11'));
++  const apw = o2.ap.find(a => a.chave === 'W-D11') || {};
++  ok('D11c web (formulário sem edição): a mesma divergência do Adjuvante e a mensagem diz quem revisa',
++     !w.erro && (apw.div || []).map(d => d.p + ':' + d.plan + '>' + d.inf).join() === 'Adjuvante espalhante:2.5>0' && /revisão técnica de Ana \(agrônoma\)\.$/.test(w.r.msg), [k, w, apw.div]); }
++
++// ---- D12 · revisão DOM achado 4: relato recusado no Estoque — a divergência passa a planejado × baixado (0) e a revisão já feita é reaberta ----
++function prep150() { const P = prep(); TRY(() => cenFecharTurno(P.c, 150, 8, { 'Glifosato 480': 300, '2,4-D 806': 150, 'Óleo mineral': 75 }, '', [])); cenIniciarTurno(P.c, P.id); return P; }
++{ const { c, id, o } = prep150();
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 15, 'Óleo mineral': 5 }, '', []));
++  const cc = (c.confs || []).find(k => k.os === id && k.dia === 2) || {}; const d0 = JSON.stringify((o.ap.find(a => a.dia === 2) || {}).div);
++  const rc = MUD(c, x => cenConciliar(x, cc.id, false, 'digitação errada: usou 10 L, a sobra está no tanque', 'Rui')); const ap = c.ordens[id].ap.find(a => a.dia === 2) || {}; const dv = (ap.div || [])[0] || {};
++  ok('D12a recusado o relato de 15 L (CC-301): a divergência do dia 2 vira "2,4-D 806 planejado 10 L × baixado 0 L (informado 15 L, relato CC-301 recusado no Estoque)", selo e revisão seguem',
++     d0 === '[{"p":"2,4-D 806","un":"L","plan":10,"inf":15}]' && !rc.erro && (ap.div || []).length === 1 && dv.plan === 10 && dv.inf === 0 && dv.rec && dv.rec.rel === 15
++     && cenDivTxt(dv) === '2,4-D 806 planejado 10 L × baixado 0 L (informado 15 L, relato CC-301 recusado no Estoque)' && temSelo(c.ordens[id]).length === 1 && ABERTAS(c.ordens[id]).length === 1
++     && /Divergência de consumo\/dose do dia 2 da OS-0430: 2,4-D 806 planejado 10 L × baixado 0 L .* · revisão técnica de Ana \(agrônoma\)\.$/.test(rc.msg), [d0, rc, ap.div]); }
++{ const { c, id } = prep150();
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 15, 'Óleo mineral': 5 }, '', []));
++  const rv = REVER(c, id, 2, 'aceitar', 'Superdose de 2,4-D aceita: sem fitotoxidez na vistoria', 'Ana'); const s1 = temSelo(c.ordens[id]).length;
++  const cc = (c.confs || []).find(k => k.os === id && k.dia === 2) || {}; const rc = MUD(c, x => cenConciliar(x, cc.id, false, 'digitação errada', 'Rui'));
++  const ap = c.ordens[id].ap.find(a => a.dia === 2) || {};
++  ok('D12b revisada sobre os 15 L e depois recusado o relato: a revisão anterior vai para o histórico (reaberta, com quem recusou) e a do dia volta a pendente',
++     !rv.erro && s1 === 0 && !rc.erro && !ap.rev && (ap.revAnt || []).length === 1 && ap.revAnt[0].dec === 'Aceita' && /relato CC-301 recusado no Estoque por Rui \(almoxarife\)/.test(ap.revAnt[0].reaberta)
++     && ABERTAS(c.ordens[id]).length === 1 && temSelo(c.ordens[id]).length === 1 && /A revisão anterior fica no histórico e a do dia é reaberta\.$/.test(rc.msg), [rv, rc, ap.rev, ap.revAnt]);
++  const OS0 = (OSD.ords || []).find(b => b.id === id); const m = osMerge(Object.assign(cenClone(OS0), { selos: [], orig: [] }), c.ordens[id], c);
++  ok('D12c a Origem da O.S. guarda a revisão reaberta', (m.orig || []).some(t => /Dia 2 · Divergência de consumo\/dose aceita por Ana \(agrônoma\).*reaberta: relato CC-301 recusado no Estoque/.test(t)), m.orig); }
++{ const { c, id, rid } = prep150(); MUD(c, x => cenDevolver(x, rid, '2,4-D 806', 5, true, 'Rui'));   // custódia de 2,4-D: 5 L
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', []));   // informado = planejado, acima da custódia
++  const ap0 = c.ordens[id].ap.find(a => a.dia === 2) || {}; const s0 = [(ap0.div || []).length, temSelo(c.ordens[id]).length];
++  const cc = (c.confs || []).find(k => k.os === id && k.dia === 2) || {}; const rc = MUD(c, x => cenConciliar(x, cc.id, false, 'não usou', 'Rui'));
++  const ap = c.ordens[id].ap.find(a => a.dia === 2) || {};
++  ok('D12d informado igual ao planejado mas acima da custódia: sem divergência; recusado o relato, nada foi baixado e a divergência abre (planejado 10 L × baixado 0 L)',
++     s0.join() === '0,0' && !rc.erro && (ap.div || []).length === 1 && ap.div[0].plan === 10 && ap.div[0].inf === 0 && temSelo(c.ordens[id]).length === 1, [s0, rc, ap.div]); }
++{ const { c, id, o } = prep150();
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 15, 'Óleo mineral': 5 }, '', []));
++  const cc = (c.confs || []).find(k => k.os === id && k.dia === 2) || {}; const a = MUD(c, x => cenConciliar(x, cc.id, true, '', 'Ana'));
++  ok('D12e aceito o relato (baixa os 15 L): a divergência continua a do informado', !a.erro && JSON.stringify(c.ordens[id].ap.find(x => x.dia === 2).div) === '[{"p":"2,4-D 806","un":"L","plan":10,"inf":15}]', [a, c.ordens[id].ap.find(x => x.dia === 2).div]); }
++
++// ---- D13 · revisão DOM achado 8 (mutante B7): produto fora da ordem informado sai com unidade ----
++{ const { c, o } = prep(); const ret = TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5, 'Adjuvante espalhante': 5 }, '', []));
++  const ap = o.ap.filter(a => a.st !== 'Previsto').slice(-1)[0] || {};
++  ok('D13 produto fora da ordem (Adjuvante 5 L): divergência planejado 0 L × informado 5 L, com unidade',
++     !ret.erro && (ap.div || []).length === 1 && ap.div[0].un === 'L' && cenDivTxt(ap.div[0]) === 'Adjuvante espalhante planejado 0 L × informado 5 L', [ret, ap.div]); }
++
++// ---- D14 · mutante B6: na decisão da duplicidade, o usado informado vira fato e a divergência é recalculada ----
++{ const { c, id, o, rid } = prep(); c.app.turno = null;
++  TRY(() => osc_apontar(c, id, '26/09', 150, { 'Glifosato 480': 300, '2,4-D 806': 150, 'Óleo mineral': 75 }, [], 'W-A')); TRY(() => cenIniciarTurno(c, id));
++  TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 10, 'Óleo mineral': 5 }, '', ['Glifosato 480', '2,4-D 806', 'Óleo mineral']));
++  const dup = o.ap.find(a => a.st === CEN_AP_DUP); const s0 = dup ? (dup.div || []).length : -1;
++  MUD(c, x => cenDevolver(x, rid, '2,4-D 806', 5, true, 'Rui'));
++  const d = MUD(c, x => cenApDecidir(x, id, dup ? dup.dia : 0, 'somar', 'Paula', { '2,4-D 806': 5 })); const ap = c.ordens[id].ap.find(a => a.dia === (dup || {}).dia) || {};
++  ok('D14 sugestão retida sem divergência; somada por Paula com o usado de 2,4-D 5 L (planejado 10 L), a divergência abre', s0 === 0 && !d.erro && (ap.div || []).length === 1 && ap.div[0].plan === 10 && ap.div[0].inf === 5 && temSelo(c.ordens[id]).length === 1, [s0, d, ap.div]); }
++
++// ---- D15 · mutante B11: o planejado do trecho desconta a área ainda no aparelho (mesma base da sugestão) ----
++{ const { c, o } = prep(); cenSinal(c, false); const Q = (d, a) => cenQtdTrecho(d, a, 0.333);
++  TRY(() => cenFecharTurno(c, 0.333, 1, { 'Glifosato 480': Q(2, 0), '2,4-D 806': Q(1, 0), 'Óleo mineral': Q(0.5, 0) }, '', [])); cenIniciarTurno(c, 'OS-0430');
++  TRY(() => cenFecharTurno(c, 0.333, 1, { 'Glifosato 480': Q(2, 0.333), '2,4-D 806': Q(1, 0.333), 'Óleo mineral': Q(0.5, 0.333) }, '', []));
++  const aps = o.ap.filter(a => a.st !== 'Previsto');
++  ok('D15 dois turnos de 0,333 ha sem sinal, cada um com o trecho exato (Óleo 0,17 e 0,16 L): nenhuma divergência; base do 2º = 0,333 ha no aparelho',
++     aps.length === 2 && aps.every(a => !(a.div || []).length) && aps[1].ant === 0.333 && Q(0.5, 0) !== Q(0.5, 0.333), aps.map(a => [a.dia, a.ant, a.div])); }
++
++// ---- D16 · mutante B12: em execução, a O.S. com revisão aberta tem dona Ana (lista e Kanban) ----
++{ const { c, id } = prep(); TRY(() => cenFecharTurno(c, 10, 1, { 'Glifosato 480': 20, '2,4-D 806': 0, 'Óleo mineral': 5 }, '', []));
++  const OS0 = (OSD.ords || []).find(b => b.id === id); const m = osMerge(Object.assign(cenClone(OS0), { selos: [] }), c.ordens[id], c);
++  ok('D16 Em execução: selo, dona Ana (agrônoma) e próxima ação "revisar a divergência de dose do dia 1"',
++     m.etapa === 'Em execução' && m.selos.some(s => s.t === SELO + ' · 2,4-D 806') && m.dono === 'Ana (agrônoma)' && m.prazo === 'revisar a divergência de dose do dia 1', [m.etapa, m.selos, m.dono, m.prazo]); }
++
++console.log(JSON.stringify(R));
+diff --git a/tools/prototipo/v37/gen37/inicio_entrega_unit.js b/tools/prototipo/v37/gen37/inicio_entrega_unit.js
+index 68ec8b2..f654cc3 100644
+--- a/tools/prototipo/v37/gen37/inicio_entrega_unit.js
++++ b/tools/prototipo/v37/gen37/inicio_entrega_unit.js
+@@ -64,6 +64,7 @@ ok('N4b app: inicia com os três; fecha 20 ha e o Óleo zera', iniApp('OS-0430')
+ ok('N4b app: só o Óleo falta: "Óleo mineral 60 L a entregar"', iniApp('OS-0430') === 'Iniciar bloqueado: REQ-041 sem entrega · Óleo mineral 60 L a entregar. ' + Q1, iniApp('OS-0430'));
+ 
+ // N5 · componente esgotado: consumo acima da custódia aceito pela gestora (CTL-3, padrão 2) zera o saldo a entregar; a área continua → dono é a agrônoma
++// B-R8 (09/10): 80 L de Fungicida A e 0 L de Adjuvante informados em 100 ha (planejado 50 L e 25 L) também abrem a divergência de dose (selo vermelho)
+ reset(); iniApp('OS-0421'); fechar(100, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }); mud(W, "return cenConciliar(c,'CC-301',true,undefined,'Ana')");
+ const it5 = st("(()=>{const i=c.reqs['REQ-035'].itens[0];return [i.solicitado,i.consumido,i.custodia,cenSaldoEntregar(i),c.ordens['OS-0421'].saldo]})()");
+ const T5 = 'Iniciar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.';
+@@ -71,7 +72,7 @@ ok('N5 estado: 175 solicitados, 175 consumidos, custódia 0, nada a entregar, 60
+ ok('N5 app: recusa com dono Ana (agrônoma); cartão "Insumo esgotado", não "Retirar"', iniApp('OS-0421') === T5 && JSON.stringify(passo('OS-0421')) === JSON.stringify(['rever', 'Insumo esgotado · Ana (agrônoma)']), [iniApp('OS-0421'), passo('OS-0421')]);
+ const MG = id => w(`(()=>{const c=cenGet(),co=c.ordens['${id}'];const o=osMerge(Object.assign(cenClone(co),{selos:[]}),co,c);const pb=osProx(o);return [o.selos.map(s=>s.t+'/'+s.c).join(', '),o.dono,o.prazo,pb.P.btn,pb.b?pb.b.t+' | '+pb.b.q:null]})()`);
+ const mg5 = MG('OS-0421');
+-ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
++ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Divergência de consumo/dose · Fungicida A, Adjuvante espalhante/red, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
+ ok('N5 Rui não resolve: entregar mais é recusado (saldo a entregar 0 L)', ent('REQ-035', 'Fungicida A', 1) === 'Acima do saldo a entregar: 0 L.', ent('REQ-035', 'Fungicida A', 1));
+ 
+ // P5 · caminho feliz: entrega completa, 160 ha num turno, custódia 0/0/0 → próximo passo é Enviar para conferência, sem selo vermelho
+diff --git a/tools/prototipo/v37/gen37/os_cenario_test.py b/tools/prototipo/v37/gen37/os_cenario_test.py
+index 90192f4..536e299 100644
+--- a/tools/prototipo/v37/gen37/os_cenario_test.py
++++ b/tools/prototipo/v37/gen37/os_cenario_test.py
+@@ -59,10 +59,20 @@ try:
+     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p
+          and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
+          'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])
+-    # 8 · Estoque recebe a devolução (apta): o bloqueio sai sem recarregar e o botão de encerrar aparece
++    # 8 · Estoque recebe a devolução (apta): o bloqueio da sobra sai sem recarregar
++    # B-R8 (09/10): o turno 2 informou 180 L de Glifosato onde o planejado do trecho era 200 L (2 L/ha × 100 ha); a divergência de dose
++    # passa a ser o bloqueio do encerramento até a revisão técnica de Ana (agrônoma) — regra nova, expectativa mudada com motivo
+     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); p = T.pan(); i = T.ins()
+-    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i and 'nada em custódia' in p,
+-         'devolução recebida no Estoque: bloqueio some, trilha mostra Devolvido 20 L e surge Conferir e encerrar', p[:500])
++    T.ok('sobra em custódia' not in p and 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Glifosato 480 planejado 200 L × informado 180 L.' in p
++         and not T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i,
++         'devolução recebida no Estoque: o bloqueio da sobra some e fica o da divergência de dose (Glifosato 200 L planejado × 180 L informado), trilha com Devolvido 20 L', p[:500])
++    # 8b · Ana (agrônoma) aceita a divergência com motivo na linha do apontamento: o bloqueio some e surge Conferir e encerrar
++    T.J("""(()=>{const i=[...document.querySelectorAll('aside[role=dialog] textarea')].find(x=>x.getAttribute('aria-label')==='Motivo ou correção decidida · dia 2');
++      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,'Bordadura sem aplicação por vento; vistoria sem rebrote');
++      i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
++    T.btn('Aceitar com motivo'); p = T.pan()
++    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'nada em custódia' in p and 'Revisão técnica: aceita por Ana (agrônoma)' in p,
++         'revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar', p[:500])
+     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)
+     T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); st = T.cen(f"[c.ordens['{OS}'].etapa, c.ordens['{OS}'].ap.map(a=>a.st).join(',')]"); print('  ', st, T.toast())
+     T.ok(st == ['Encerradas', 'Conferido,Conferido'] and 'Encerradas' in T.linha(OS) and 'somente consulta' in T.pan() and f'{OS} encerrada' in T.toast(),
+diff --git a/tools/prototipo/v37/gen37/os_v39_bloq_test.py b/tools/prototipo/v37/gen37/os_v39_bloq_test.py
+index b43c937..e0bbd41 100644
+--- a/tools/prototipo/v37/gen37/os_v39_bloq_test.py
++++ b/tools/prototipo/v37/gen37/os_v39_bloq_test.py
+@@ -34,7 +34,12 @@ try:
+     tab('Kanban'); k = card(OS); tab('Lista')
+     T.ok('Sobras a receber' in k and 'Rui (almoxarife) · receber a devolução' in k, 'Kanban da OS-0430 com o mesmo selo e dono', k)
+     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); l = T.linha(OS)
+-    T.ok('Sobras a receber' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'devolução recebida: selo sai e o dono volta a ser Marcos', l)
++    # B-R8 (09/10): 300 L de Glifosato informados para 160 ha (planejado 320 L) abrem a divergência de dose; depois da sobra, a pendência é
++    # a revisão técnica de Ana (agrônoma). Expectativa mudada com motivo: regra nova; aceita a revisão, o dono volta a ser Marcos
++    T.ok('Sobras a receber' not in l and 'Divergência de consumo/dose · Glifosato 480' in l and T.cel(OS, 'Quem resolve') == 'Ana (agrônoma)' and T.cel(OS, 'Próxima ação') == 'revisar a divergência de dose',
++         'devolução recebida: selo de sobra sai; fica a divergência de dose com Ana (agrônoma)', l)
++    T.mudar(f"return cenDivRever(c,'{OS}',1,'aceitar','Bordadura sem aplicação; vistoria sem rebrote','Ana');"); l = T.linha(OS)
++    T.ok('Divergência de consumo/dose' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'revisão aceita por Ana: selo sai e o dono volta a ser Marcos', l)
+     T.ordem(OS); T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); T.fechar()
+     # CTL-2 · A (AP-02): o turno do app grava a data operacional (CEN_DIA_OP = 26/09), não o relógio do aparelho → o período fecha em 26/09
+     esp = 'período 10–26/09'
+diff --git a/tools/prototipo/v37/gen37/producao.js b/tools/prototipo/v37/gen37/producao.js
+index 545ff45..870b5ff 100644
+--- a/tools/prototipo/v37/gen37/producao.js
++++ b/tools/prototipo/v37/gen37/producao.js
+@@ -35,10 +35,14 @@ function prUn(cultura) { const u = PRDC.un[prCult(cultura)]; if (!u) throw new E
+ /* base (kg, frutos) → unidade de produção da cultura: 2.305.200 kg de soja = 38.420 sc; 60.320 kg de mamão = 60,32 t */
+ function prQ(cultura, base) { return prDiv(base, prUn(cultura).massa); }
+ function prUnTxt(cultura, base, d) { const u = prUn(cultura); return prFmtT(prQ(cultura, base), d === undefined ? 2 : d) + ' ' + u.un; }
+-/* estoque e pedido: unidade de estoque (est) quando a cultura tem uma (mamão em kg, coco em fruto); senão a de produção */
+-function prEstUn(cultura) { const u = prUn(cultura); return u.est || u.un; }
+-function prEstQ(cultura, base) { const u = prUn(cultura); return u.est ? prN(prM(base)) : prQ(cultura, base); }
+-function prEstTxt(cultura, base, d) { return prFmtT(prEstQ(cultura, base), d === undefined ? 2 : d) + ' ' + prEstUn(cultura); }
++/* estoque e pedido: unidade de estoque (est) quando a cultura tem uma (mamão em kg, coco em fruto); senão a de produção.
++   prod (opcional, o produto do lote): o estágio de campo (café da roça, u.proc) fica na unidade de campo (L), sem saca derivada:
++   a saca só sai do rendimento medido no beneficiamento (R-09; COLH-C01: 12.000 L não são "200 sc") */
++function prCampo(cultura, prod) { const u = prUn(cultura); return !!(u.campo && prod && prod === u.proc); }
++function prEstUn(cultura, prod) { const u = prUn(cultura); return prCampo(cultura, prod) ? u.campo : (u.est || u.un); }
++function prEstQ(cultura, base, prod) { const u = prUn(cultura); return (u.est || prCampo(cultura, prod)) ? prN(prM(base)) : prQ(cultura, base); }
++function prEstTxt(cultura, base, d, prod) { return prFmtT(prEstQ(cultura, base, prod), d === undefined ? 2 : d) + ' ' + prEstUn(cultura, prod); }
++function prLoteTxt(L, base, d) { return prEstTxt(L.cultura, base, d, L.prod); }   /* quantidade de um lote, na unidade do estágio dele */
+ function prEstBase(cultura, q) { const u = prUn(cultura); return u.est ? prN(prM(q)) : prMul(q, u.massa); }   /* quantidade digitada na unidade de estoque → base */
+ /* produtividade = produção na base física ÷ área colhida, na unidade da cultura (R-04); laranja mostra t/ha ao lado */
+ function prPrtv(cultura, base, ha) { if (!(Number(ha) > 0)) return null; return prDiv(prQ(cultura, base), ha); }
+@@ -109,11 +113,17 @@ function prCargas(c, f) { return Object.values(prP(c).cargas).filter(g => !f ||
+ function prCargasOS(c, osId) { return prCargas(c, g => (g.origem || []).some(x => x.os === osId)); }
+ /* pendentes da O.S.: carga a pesar (com ou sem sinal) */
+ function prAPesar(c, osId) { return prCargas(c, g => g.st === 'A pesar' && (g.origem || []).some(x => x.os === osId)); }
+-/* produção na base física da cultura (R-04): grão = comercial corrigido; fruta e cana = massa líquida; coco e abacaxi = frutos; café = a apurar */
+-function prProdOrig(x, cultura) { const u = prUn(cultura); if (u.base === 'beneficiado') return 0; return u.base === 'comercial' ? (x.com || 0) : (x.kg || 0); }
+-function prProdOS(c, osId) { const out = { kg: 0, liq: 0, com: 0, cafe: 0 }; let cult = '';
+-  prCargas(c, g => g.st === 'Recebida').forEach(g => (g.origem || []).filter(x => x.os === osId).forEach(x => { cult = g.cultura;
+-    out.kg = prSoma([out.kg, prProdOrig(x, g.cultura)]); out.liq = prSoma([out.liq, x.kg || 0]); out.com = prSoma([out.com, x.com || 0]); if (prUn(g.cultura).base === 'beneficiado') out.cafe = prSoma([out.cafe, x.litros || 0]); }));
++/* produção na base física da cultura (R-04): grão = comercial corrigido; fruta e cana = massa líquida; coco e abacaxi = frutos.
++   Café (base beneficiado, R-09): a origem da carga guarda os litros; a produção é o café beneficiado medido e rateado a ela pelo
++   beneficiamento (x.ben, kg; BEN-4 · R-D02). Sem x.ben a origem está "a apurar" (estado próprio, COLH-C01): não entra como zero na
++   produção, na produtividade nem no desvio; x.ben = 0 é zero medido (real). Função única do estado de apuração: prApurado. */
++function prApurado(x, cultura) { return prUn(cultura).base !== 'beneficiado' || (x.ben !== undefined && x.ben !== null && x.ben !== '' && isFinite(Number(x.ben))); }
++function prProdOrig(x, cultura) { const u = prUn(cultura); if (u.base === 'beneficiado') return prApurado(x, cultura) ? Number(x.ben) : 0; return u.base === 'comercial' ? (x.com || 0) : (x.kg || 0); }
++function prProdOS(c, osId) { const out = { kg: 0, liq: 0, com: 0, cafe: 0, apurar: false };
++  prCargas(c, g => g.st === 'Recebida').forEach(g => (g.origem || []).filter(x => x.os === osId).forEach(x => {
++    out.liq = prSoma([out.liq, x.kg || 0]); out.com = prSoma([out.com, x.com || 0]);
++    if (prApurado(x, g.cultura)) out.kg = prSoma([out.kg, prProdOrig(x, g.cultura)]);
++    else { out.apurar = true; out.cafe = prSoma([out.cafe, x.litros || 0]); } }));
+   return out; }
+ function prAreaOS(o) { return prSoma((o.ap || []).filter(a => cenApSomado(a)).map(a => a.ha)); }
+ /* versão publicada que vale como referência do passe: a última publicada ANTES do início da semana (R-05, R-17) */
+@@ -123,24 +133,33 @@ function prVersaoSem(c, cid, sem) { const vs = (prP(c).previsoes[cid] || []).fil
+ function prPasse(c, o) { const cid = prCultDaOS(c, o); const k = PRDC.cult[cid] || {}; const sem = prSemDaOS(o); const p = prProdOS(c, o.id);
+   const area = prAreaOS(o); const ap = prAPesar(c, o.id); const final = o.etapa === 'Encerradas' && !ap.length;
+   const ref = prVersaoRef(c, cid, sem); const refKg = ref ? ref.sem[sem] : null;
+-  const desv = (final && refKg) ? prDiv(prMul(prSub(p.kg, refKg), 100), refKg) : null;
+-  return { os: o.id, o, cid, cultura: k.cultura, sem, fase: o.etapa, area, kg: p.kg, liq: p.liq, com: p.com, aPesar: ap, final, ref, refKg, desv,
+-           prtv: prPrtv(k.cultura || 'Mamão Formosa', p.kg, area) }; }
++  const desv = (final && refKg && !p.apurar) ? prDiv(prMul(prSub(p.kg, refKg), 100), refKg) : null;
++  return { os: o.id, o, cid, cultura: k.cultura, sem, fase: o.etapa, area, kg: p.kg, liq: p.liq, com: p.com, cafe: p.cafe, apurar: p.apurar, aPesar: ap, final, ref, refKg, desv,
++           prtv: p.apurar ? null : prPrtv(k.cultura || 'Mamão Formosa', p.kg, area) }; }
+ /* resultado do cultivo: passes (perene semanal), ciclo (área do cultivo, R-02 e D-11) ou safra (anual: mín(área, Σ ha)) */
+ function prResultado(c, cid) { const k = PRDC.cult[cid]; if (!k) return null; const u = prUn(k.cultura); const oss = prOsCult(c, cid);
+   const passes = oss.map(o => prPasse(c, o)).sort((a, b) => a.sem < b.sem ? -1 : (a.sem > b.sem ? 1 : 0));
+   const kg = prSoma(passes.map(p => p.kg)); const haSom = prSoma(passes.map(p => p.area)); const aPesar = [].concat(...passes.map(p => p.aPesar));
+-  const comecou = passes.some(p => prCmp(p.area, 0) > 0 || prCmp(p.kg, 0) > 0);
++  const apurar = passes.some(p => p.apurar); const cafe = prSoma(passes.map(p => p.cafe || 0));   /* café: litros ainda sem rendimento medido */
++  const comecou = apurar || passes.some(p => prCmp(p.area, 0) > 0 || prCmp(p.kg, 0) > 0);
+   let area, parcial, ref = null, desv = null;
+   if (k.semanal) { area = comecou ? k.area : 0; const fim = (PRDC.safras[k.saf] || {}).fim || ''; parcial = !(fim && prHoje() > fim);
+-    if (!parcial && k.meta) { ref = k.meta; desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), k.meta), 100), k.meta); } }
++    if (!parcial && k.meta && !apurar) { ref = k.meta; desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), k.meta), 100), k.meta); } }
+   else { area = prCmp(haSom, k.area) > 0 ? k.area : haSom; parcial = !oss.length || oss.some(o => o.etapa !== 'Encerradas') || aPesar.length > 0;
+-    ref = k.meta || null; if (ref && area > 0) desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), ref), 100), ref); }
+-  const cafe = u.base === 'beneficiado' ? prSoma([].concat(...oss.map(o => [prProdOS(c, o.id).cafe]))) : 0;
+-  return { cid, k, u, passes, kg, area, parcial, ref, desv, aPesar, cafe, prtv: area > 0 ? prPrtv(k.cultura, kg, area) : null, comecou }; }
+-/* cultura (ou fazenda): Σ produção ÷ Σ área, ponderada; nunca média de médias (R-04, K07) */
+-function prPonderada(rs) { const v = rs.filter(r => r && r.area > 0); if (!v.length) return null; const cultura = v[0].k.cultura;
+-  const kg = prSoma(v.map(r => r.kg)), ha = prSoma(v.map(r => r.area)); return { kg, area: ha, prtv: prPrtv(cultura, kg, ha), parcial: v.some(r => r.parcial) }; }
++    ref = k.meta || null; if (ref && area > 0 && !apurar) desv = prDiv(prMul(prSub(prPrtv(k.cultura, kg, area), ref), 100), ref); }
++  return { cid, k, u, passes, kg, area, parcial, ref, desv, aPesar, cafe, apurar, prtv: (area > 0 && !apurar) ? prPrtv(k.cultura, kg, area) : null, comecou }; }
++/* textos do resultado (linha, grupo, painel, passe, cartão e recebimento): com parte a apurar nunca "0 sc", "0,00 sc/ha" nem desvio (COLH-C01).
++   X = resultado do talhão (prResultado) ou passe (prPasse): kg medido, cafe (L a apurar), apurar, area, comecou */
++function prProdTxt(cultura, X) { if (X.apurar) return (prCmp(X.kg, 0) > 0 ? prUnTxt(cultura, X.kg) + ' + ' : '') + prFmtT(X.cafe, 0) + ' L · ' + prUn(cultura).un + ' a apurar';
++  return (X.comecou === undefined || X.comecou) ? prUnTxt(cultura, X.kg) : '—'; }
++/* carga de café: os litros e, medido o rendimento de todas as origens, as sacas medidas; senão "sc a apurar" */
++function prCargaCafeTxt(g) { const os = g.origem || []; const ok = os.length > 0 && os.every(x => prApurado(x, g.cultura));
++  return prFmtT(g.litros, 0) + ' L · ' + (ok ? prUnTxt(g.cultura, prSoma(os.map(x => Number(x.ben)))) : prUn(g.cultura).un + ' a apurar'); }
++function prPrtvResTxt(cultura, X) { if (X.apurar) return prUn(cultura).prtv + ' a apurar'; return (X.prtv !== null && X.prtv !== undefined && X.area > 0) ? prPrtvTxt(cultura, X.kg, X.area) : '—'; }
++/* cultura (ou fazenda): Σ produção ÷ Σ área, ponderada; nunca média de médias (R-04, K07). Talhão a apurar fica fora da conta
++   (a área sem produção medida não entra como zero, COLH-C01); apurar conta os que ficaram fora */
++function prPonderada(rs) { const v = rs.filter(r => r && r.area > 0 && !r.apurar); const fora = rs.filter(r => r && r.apurar).length; if (!v.length) return null; const cultura = v[0].k.cultura;
++  const kg = prSoma(v.map(r => r.kg)), ha = prSoma(v.map(r => r.area)); return { kg, area: ha, prtv: prPrtv(cultura, kg, ha), parcial: v.some(r => r.parcial) || fora > 0, apurar: fora }; }
+ 
+ /* ---------- previsão (R-17) ---------- */
+ function prContagem(c, cid) { const l = (prP(c).contagens || []).filter(x => x.cult === cid && x.sinc !== false); return l[l.length - 1] || null; }
+@@ -347,17 +366,17 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
+   prMov(c, { tipo: 'recebimento', lote: L.id, kg: base, carga: g.id, quem: g.quemRec });
+   const S = prSaldos(c, L); const R = prResultado(c, prCultDaOS(c, o)); const pa = R && R.passes.find(p => p.os === osId);
+   return { msg: g.id + ' recebida: ' + prFmtT(liq, 2) + ' kg líquidos (' + prFmtT(prNum(k.bruto), 2) + ' − ' + prFmtT(prNum(k.tara), 2) + ')' + (u.grao ? ' · comercial ' + prFmtT(com, 2) + ' kg = ' + prUnTxt(cultura, com) : '')
+-    + ' no ' + L.id + (novo ? ' (novo)' : '') + ' · ' + PRDC.locais[local].nome + ' · ' + S.q + '.' + (pa && pa.area > 0 ? ' ' + o.talhao + ': passe ' + prSemTxt(pa.sem) + ' ' + prPrtvTxt(cultura, pa.kg, pa.area) + (pa.final ? '.' : ' (parcial).') : ''), g, L }; }
++    + ' no ' + L.id + (novo ? ' (novo)' : '') + ' · ' + PRDC.locais[local].nome + ' · ' + S.q + '.' + (pa && pa.area > 0 ? ' ' + o.talhao + ': passe ' + prSemTxt(pa.sem) + ' ' + prPrtvResTxt(cultura, pa) + (pa.final || pa.apurar ? '.' : ' (parcial).') : ''), g, L }; }
+ 
+ /* estornar carga recebida (R-19): motivo; devolve o efeito; recusa se o lote ficar abaixo do reservado; o ticket fica livre */
+ function prEstornar(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g || g.st !== 'Recebida') throw new Error('Só carga recebida é estornada.');
+   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do estorno.');
+   const L = P.lotes[g.lote]; const mv = P.movs.find(m => m.tipo === 'recebimento' && m.carga === id); const kg = mv ? mv.kg : 0;
+   const fis = prFis(c, L.id), res = prResLote(c, L.id); const fica = prSub(fis, kg);
+-  if (prCmp(fica, res) < 0) throw new Error('Estorno recusado: o ' + L.id + ' ficaria com ' + prEstTxt(L.cultura, fica) + ', abaixo do reservado (' + prEstTxt(L.cultura, res) + '). Cancele ou reduza a reserva antes.');
++  if (prCmp(fica, res) < 0) throw new Error('Estorno recusado: o ' + L.id + ' ficaria com ' + prLoteTxt(L, fica) + ', abaixo do reservado (' + prLoteTxt(L, res) + '). Cancele ou reduza a reserva antes.');
+   prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: quem || prRec(g.faz), obs: mot });
+   (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
+-  return { msg: id + ' estornada (' + mot + '): ' + prEstTxt(L.cultura, kg) + ' saem do ' + L.id + '. O ticket ' + g.ticket + ' fica livre para novo registro; o histórico continua.' }; }
++  return { msg: id + ' estornada (' + mot + '): ' + prLoteTxt(L, kg) + ' saem do ' + L.id + '. O ticket ' + g.ticket + ' fica livre para novo registro; o histórico continua.' }; }
+ 
+ /* descartar carga A pesar (revisão A-06): registro do app em dobro ou carga que não saiu; nada pesado, nada a estornar; motivo e trilha ficam */
+ function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
+@@ -374,7 +393,7 @@ function prLiberarLote(c, lid, quem) { const P = prP(c, 1); const L = P.lotes[li
+   if (S.q === 'Bloqueado') throw new Error('Liberar recusado: ' + S.mot + '. Lote bloqueado por carência só sai pela Qualidade com laudo (fora desta etapa). Quem decide: ' + S.dono + '.');
+   const Q = prQualidade(c, Object.assign({}, L, { q0: 'Liberado' })); if (Q.q !== 'Liberado') throw new Error('Liberar recusado: ' + Q.mot + '. Quem resolve: ' + Q.dono + '.');
+   L.q0 = 'Liberado'; L.lib = { quem: quem || prQuem('qual'), d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem });
+-  return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prEstTxt(L.cultura, S.fis) + ' aptos para reserva e venda.' }; }
++  return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prLoteTxt(L, S.fis) + ' aptos para reserva e venda.' }; }
+ 
+ /* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única */
+ function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNum(k.kg) : NaN; const imp = JSON.stringify([k.pedido, k.lote, kg]);
+@@ -387,18 +406,18 @@ function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNu
+     if (a.st === 'nao_conforme') { const x = a.motivos[0] || {}; throw new Error('Reserva recusada: ' + lc + ' ' + a.rot + ' · ' + (x.t || '') + (x.q ? ' (quem decide: ' + x.q + ')' : '') + '.'); }
+     if (a.st === 'pendente') pend = pend.concat(a.faltas.map(f => f.t + ' (' + f.q + ')')); }
+   if (!(kg > 0)) throw new Error('Informe a quantidade a reservar.');
+-  if (prCmp(kg, S.disp) > 0) throw new Error('Acima do disponível do ' + L.id + ': ' + prEstTxt(L.cultura, S.disp) + '.');
++  if (prCmp(kg, S.disp) > 0) throw new Error('Acima do disponível do ' + L.id + ': ' + prLoteTxt(L, S.disp) + '.');
+   const falta = prFalta(c, ped); if (prCmp(kg, falta) > 0) throw new Error('Acima da falta do ' + ped.id + ': ' + prEstTxt(L.cultura, falta) + '.');
+   P.seq.rs = (P.seq.rs || 0) + 1; const id = 'RS-' + String(P.seq.rs).padStart(4, '0');
+   const rs = P.reservas[id] = { id, pedido: ped.id, lote: L.id, kg, st: 'Ativa', d: prHoje(), at: cenAgora(), quem: k.quem || prQuem('com'), chave: k.chave || id, imp };
+   prMov(c, { tipo: 'reserva', lote: L.id, kg, fis: false, reserva: id, pedido: ped.id, quem: rs.quem });
+   const S2 = prSaldos(c, L); const sit = prSitPed(c, ped);
+-  return { msg: id + ': ' + prEstTxt(L.cultura, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prEstTxt(L.cultura, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
++  return { msg: id + ': ' + prLoteTxt(L, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prLoteTxt(L, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
+     + (pend.length ? ' Destino ' + (PRDC.dest[dest] || dest) + ' pendente: ' + pend[0] + '; a expedição exige a liberação comercial.' : ''), rs }; }
+ function prCancelarReserva(c, id, motivo, quem) { const P = prP(c, 1); const r = P.reservas[id]; if (!r || r.st !== 'Ativa') throw new Error('Reserva não está ativa.');
+   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do cancelamento da reserva.');
+   r.st = 'Cancelada'; r.canc = { motivo: mot, quem: quem || prQuem('com'), d: prHoje(), at: cenAgora() };
+   prMov(c, { tipo: 'cancelamento de reserva', lote: r.lote, kg: -r.kg, fis: false, reserva: id, pedido: r.pedido, quem: r.canc.quem, obs: mot });
+-  const L = P.lotes[r.lote]; return { msg: id + ' cancelada (' + mot + '): ' + prEstTxt(L.cultura, r.kg) + ' voltam ao disponível do ' + r.lote + '.' }; }
++  const L = P.lotes[r.lote]; return { msg: id + ' cancelada (' + mot + '): ' + prLoteTxt(L, r.kg) + ' voltam ao disponível do ' + r.lote + '.' }; }
+ /* gancho de teste/inspeção (o script da tela roda isolado) */
+ try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga }; } catch (e) {}

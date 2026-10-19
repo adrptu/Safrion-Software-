@@ -1,0 +1,153 @@
+OK    · sem erro JS · []
+OK    · abre na etapa 1 · 1 Escolha a safra · etapa atual em andamento
+OK    · nenhuma safra escolhida sozinha
+OK    · impedimentos visíveis
+OK    · Safrinha sem solicitação
+OK    · link Ver origem para SAF (demanda de insumos da Safra 2026/27, passo=demanda)
+OK    · link Planejar safra na Safrinha (demanda de insumos da Safrinha, passo=demanda)
+  etapa 4 sem safra: sem caminho de 1 para 4 
+OK    · etapa bloqueada sem safra
+OK    · Safrinha selecionada fica na etapa 1 · Safrinha 2027: solicitação ainda não enviada pelo planejamento.
+OK    · 2025/26 abre pedidos em consulta · 6 Acompanhe a entrega · etapa atual em andamento
+  abrir compra: ok Compra aberta: Safra 2026/27 · SOL-2026-07.
+OK    · etapa 2 · demanda
+OK    · SOL-2026-07 e total igual ao Planejar safra
+OK    · MAP 11-52 79.500 (500 kg da OS-0417 em custódia contam) e KCl coberto com quarentena
+OK    · origem do insumo abre (consulta) · Insumo · MAP 11-52
+×
+Valor calculado — consulte a origem abaixo. Para mudar, alt
+OK    · coluna Falta a partir de
+OK    · 2,4-D falta a partir de 28/09/2026 · 2,4-D 806 610,0 300,0 0,0 310,0 L 28/09/2026 32,00 R$ 9.920,00 A cotar
+OK    · Nitrato de cálcio falta a partir de 01/10/2026 · Nitrato de cálcio 1.680 1.000 0 680 kg 01/10/2026 4,20 R$ 2.856,00 A cotar
+OK    · KCl coberto mostra — · KCl 60% 78.900 50.000 40.000 0 kg — 2,40 R$ 0,00 Coberto 10.000 kg em quarentena não contam
+OK    · 58 W coberto (PC-090 chega antes) mostra — · Semente de soja 58 W 27.456 12.000 20.000 0 kg — 9,50 R$ 0,00 Coberto
+OK    · origem com data no início da linha · Insumo · 2,4-D 806
+×
+Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.
+Insumo
+Unidade
+ORIGEM
+Estoque apto hoje: 300 L
+25/09/2026 · T1-A · OS-0430 · Dessecação pré-plantio · 1,00 L/ha × 160 ha = 160,0 L → saldo 140 L
+28/09/2026 · T2 · Dessecação pré-plantio · 1,00 L
+OK    · etapa 3
+OK    · Química Centro-Oeste desabilitada com motivo
+OK    · link homologar CD-05
+OK    · não homologado não abre edição · Química Centro-Oeste não é homologado para Fungicidas: sem e-mail de cotação e documentação fiscal pendente. Homologue em Cadastros › Parceiros e fornecedores para poder convidar.
+  convite Casa do Adubo (Fertilizantes): ok
+  canais: ['E-mail'] | sub: Destinatário: e-mail vendas@casadoadubo.com.br (Juliana Prado). Itens do convite (Fertilizantes): MAP 11-52 · 79.500 kg; Nitrato de cálcio · 680 kg; Nitrato de potássio · 870 kg; NPK 20-05-20 · 14.800
+OK    · Casa do Adubo só com E-mail autorizado · ['E-mail']
+OK    · subtítulo mostra destinatário e itens do convite · Destinatário: e-mail vendas@casadoadubo.com.br (Juliana Prado). Itens do convite (Fertilizantes): MAP 11-52 · 79.500 kg; Nitrato de cálcio · 680 kg; Nitrato de potássio · 870 kg; NPK 20-05-20 · 14.800 kg; Ureia 45% · 1.140 kg. O envio é simulado.
+OK    · ajuda explica o canal único · Convite · Casa do Adubo
+×
+Destinatário: e-mail vendas@casadoadubo.com.br (Juliana Prado). Itens do convite (Fertilizantes): MAP 11-52 · 79.500 kg; Nitrato de cálcio · 680 kg; Nitrato de potássio · 870 kg; NPK 20-05-20 · 14.800 kg; Ureia 45% · 1.140 kg. O envio é simulado.
+Convite
+Convidar
+Não convid
+  editar convite Coop. Vale (Fertilizantes): ok
+OK    · form do convite abre pela linha · Convite · Coop. Vale
+×
+Destinatário: e-mail insumos@coopvale
+OK    · Coop. Vale tem E-mail e WhatsApp autorizados · ['E-mail', 'WhatsApp']
+OK    · destinatário acompanha o canal escolhido · Destinatário: WhatsApp 65 99466-7788 (Sandra Kuhn). Itens do convite (Fertilizantes): MAP 11-52 · 79.500 kg; Nitrato de 
+OK    · convite salvo · Convite atualizado: Coop. Vale · WhatsApp · responder até 29/09/2026.
+OK    · teclado (Enter) abre o convite · Convite · Fertisul
+×
+Destinatário: e-mai
+OK    · linha de grupo recolhe (não edita)
+  enviar: ok Convites simulados: nenhuma mensagem real foi enviada · 15 convites em 6 grupos. Acompanhe as respostas chegando.
+OK    · aviso simulado
+OK    · respostas chegaram · ['14 de 15 convites responderam']
+  enviar de novo: ok
+OK    · etapa 4
+OK    · menor custo total destacado
+  k4: ['14 propostas · custo total escolhido R$ 415.803,83 · R$ 12.501,17 abaixo da referência · 1 escolha chega depois da falta']
+OK    · form da escolha abre
+OK    · valida ≤ necessidade · Corrija os campos destacados; o que você preencheu foi mantido. | Máximo 79.500 kg.
+OK    · quantidade parcial salva · Escolha salva: MAP 11-52 · Fertisul · 40.000 kg. Custos e pedidos recalculados.
+OK    · proposta abre escolha pré-preenchida · ok
+OK    · justificativa obrigatória · Corrija os campos destacados; o que você preencheu foi mantido. | Informe justificativa.
+OK    · aviso de alteração não salva
+OK    · escolha justificada · Escolha salva: Inoculante líquido · Santa Rita Insumos · 72 L. Custos e pedidos recalculados.
+  2,4-D: 2,4-D 806 falta a partir de 28/09 310 L R$ 32,64 5 dias chega 28/09 CIF 30 dias 30/09 R$ 10.118,40 Agro Norte Menor custo a tempo
+OK    · 2,4-D: padrão Agro Norte (menor custo que chega a tempo) · 2,4-D 806 falta a partir de 28/09 310 L R$ 32,64 5 dias chega 28/09 CIF 30 dias 30/09 R$ 10.118,40 Agro Norte Menor custo a tempo
+  Santa Rita p/ 2,4-D: Santa Rita Insumos 12:13 — R$ 30,72 7 dias chega 30/09 CIF 28 dias 01/10 R$ 9.523,20 Menor custo total Chega depois da falta (28/09)
+OK    · Santa Rita: menor custo total, mas chega depois da falta · Santa Rita Insumos 12:13 — R$ 30,72 7 dias chega 30/09 CIF 28 dias 01/10 R$ 9.523,20 Menor custo total Chega depois da falta (28/09)
+OK    · escolher a atrasada: justificativa obrigatória com as datas · Escolha · 2,4-D 806
+×
+Escolha a proposta e a quantidade a pedir; custo total e pedidos são recalculados.
+Proposta escolhida
+Santa Rita Insumos · R$ 30,72/L · 7 dias · CIF
+Coop. Vale · R$ 32,00/L · 10 dias · FOB
+Agro Norte · R$ 32,64/L · 5 dias · CIF
+Falta a partir de 28/09/2026: proposta que chega depois exige justificativa.
+Quantidade a pedir
+L
+Necessidade na SOL-2026-07: 310 L. Use 0 para não co
+OK    · atrasada sem justificativa não salva
+OK    · Nitrato de cálcio: padrão Casa do Adubo (Fertisul chega depois) · Nitrato de cálcio falta a partir de 01/10 680 kg R$ 4,24 8 dias chega 01/10 CIF 30 dias 02/10 R$ 2.883,20 Casa do Adubo Menor custo a tempo
+OK    · DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "1 escolha chega depois da falta" (só a Ureia; o Sulfato de magnésio das O.S. de demonstração não entra) e nenhuma sem justificativa · ('Ureia 45% falta a partir de 24/09 1.140 kg R$ 3,13 8 dias chega 01/10 CIF 30 dias 02/10 R$ 3.568,20 Casa do Adubo Chega primeiro Chega depois da falta (24/09)', '14 propostas · custo total escolhido R$ 266.623,43 · R$ 161.681,57 abaixo da referência · 1 escolha chega depois da falta', 'sem linha')
+OK    · etapa 5
+OK    · alçada: Direção exigida · ['Valor da compra R$ 415.933,43 · 4 pedidos · aprova: Direção (acima de R$ 300.000,00)']
+OK    · prévia de pedidos PC-101…
+OK    · navegar não aprova
+OK    · PC-088 60/100 t, 10 t quarentena, 40 t a entregar
+  enviar à Direção: ok Enviado para aprovação da Direção (simulado · nenhuma mensagem real enviada). Nada é aprovado até a Direção decidir.
+OK    · pendente com a Direção
+OK    · aviso de reenvio · Escolha salva: MAP 11-52 · Fertisul · 40.000 kg. Custos e pedidos recalculados. A aprovação pendente precisa ser reenviada.
+OK    · dentro da alçada da Ana · ['Valor da compra R$ 266.623,43 · 4 pedidos · aprova: Gerente da fazenda (até R$ 300.000,00)']
+OK    · Ver como Rui (sem gestor nem direção): sem "Aprovar compra"; a primária reenvia à Gerente da fazenda; a alçada não marca "Seu perfil · Ana" · None
+OK    · Ver como Ana: "Valor dentro da sua alçada (Ana · Gerente da fazenda" · ['Valor dentro da sua alçada (Ana · Gerente da fazenda, até R$ 300.000,00). Aprovar emite 4 pedidos vinculados à Safra 2026/27 e à SOL-2026-07. O envio anterior à Direção perdeu a validade.']
+OK    · pede confirmação, como Ana · Gerente da fazenda
+OK    · trocar o Ver como para Rui com a confirmação aberta: a confirmação some e nada é aprovado
+OK    · aprovada gera PCs, por Ana (Gerente da fazenda), o perfil de quem agiu · Compra aprovada por Ana (Gerente da fazenda) · emitidos PC-101 a PC-104 vinculados à Safra 2026/27, à SOL-2026-07 e às propostas escolhidas.
+  aprovar de novo: ok
+OK    · etapa 6 com novos pedidos
+OK    · link Estoque
+  confirmar fornecedor: ok Confirmação de Fertisul registrada para PC-101 (simulada · nenhuma mensagem real enviada) · previsão 05/10/2026.
+OK    · confirmação simulada
+OK    · pedido abre reprogramação · Pedido · PC-102 Casa do Adubo
+×
+Reprograme a previsão de ent
+OK    · data passada recusada
+OK    · previsão reprogramada · Previsão de PC-102 reprogramada para 09/10/2026. O Estoque passa a esperar esta data. Atenção: nova data depois da falta de 24/09/2026.
+  PC-102: PC-102 Casa do Adubo SOL-2026-07 · 2 insumos R$ 6.451,40 09/10/2026 Aguarda confirmação Nova data depois da falta de 24/09 ⋯
+OK    · PC-102 (Nitrato de cálcio e Ureia) avisa: nova data depois da falta de 24/09 · PC-102 Casa do Adubo SOL-2026-07 · 2 insumos R$ 6.451,40 09/10/2026 Aguarda confirmação Nova data depois da falta de 24/09 ⋯
+OK    · PC-090 depois do plantio de T1-A: aviso sem bloquear · Previsão de PC-090 reprogramada para 20/10/2026. O Estoque passa a esperar esta data. Atenção: nova data depois da falta de 15/10/2026.
+OK    · demanda mostra pedidos
+OK    · 58 W passa a faltar em 15/10/2026 com o PC-090 reprogramado · Semente de soja 58 W 27.456 12.000 20.000 0 kg 15/10/2026 9,50 R$ 0,00 Coberto pedido em aberto chega depois da falta
+OK    · safra mostra pedidos emitidos
+OK    · pendente: ações secundárias de devolução e recusa
+  registrar decisão: ok Compra aprovada por Direção (simulado) · emitidos PC-101 a PC-104 vinculados à Safra 2026/27, à SOL-2026-07 e às propostas escolhidas.
+OK    · Direção aprova (simulado) e emite pedidos
+OK    · aprovada: sem devolução/recusa
+OK    · Fungicidas só com a Coop. Vale convidada · Agro Norte Homologado Não convidar — — —
+OK    · Fungicida TS sem proposta · Fungicida TS falta a partir de 17/10 41 L — — — — — R$ 0,00 Sem proposta ainda
+OK    · aviso aponta o convite adicional · Nenhuma proposta recebida para Fungicida TS ainda. Aguarde as respostas ou, na etapa 3 (Solicite cotações), marque Agro Norte ou Santa Rita Insumos e use Enviar convites adicionais.
+OK    · não convidado abre o formulário depois do envio · Convite adicional: os demais já receberam em 23/09/2026 10:47. Destinatário: não será convidado. Itens do convite (Fungicidas): Fungicida C · 30,4 L; Fungicida 
+OK    · ação primária vira Enviar 1 convite adicional · Comparar propostas ›|Enviar 1 convite adicional (simulado)
+OK    · já convidado continua só consulta · Convite simulado enviado a Coop. Vale por E-mail em 23/09/2026 10:47 · responder até 26/09/2026. Nenhuma mensagem real foi enviada.
+  antes: ['12 de 13 convites responderam', '12', '13']
+OK    · envio adicional simulado, sem reenviar · Convites adicionais simulados: nenhuma mensagem real foi enviada · 1 para Agro Norte. Quem já recebeu não recebe de novo.
+  Agro Norte: Agro Norte Homologado Convidar E-mail orcamento@agronorte.com.br 26/09/2026 Proposta recebida 12:42
+OK    · Agro Norte respondeu · Agro Norte Homologado Convidar E-mail orcamento@agronorte.com.br 26/09/2026 Proposta recebida 12:42
+  depois: ['13 de 14 convites responderam', '13', '14']
+OK    · só 1 convite a mais · ['12 de 13 convites responderam', '12', '13'] → ['13 de 14 convites responderam', '13', '14']
+OK    · Fungicida TS agora tem proposta da Agro Norte · Fungicida TS falta a partir de 17/10 41 L R$ 205,80 5 dias chega 28/09 CIF 30 dias 30/09 R$ 8.437,80 Agro Norte Menor custo total
+OK    · pendente com a Direção
+OK    · abre motivo da devolução
+OK    · devolução exige motivo
+OK    · devolvida: motivo na etapa 5 e trilha · Devolução da Direção registrada (simulado): Negociar MAP com prazo de 60 dias. Ajuste na etapa 4 e reenvie.
+OK    · primário vira Ajustar escolhas (sem reenvio sem mudança)
+OK    · etapa 4 mostra o motivo no topo
+OK    · aviso de reenvio após mudança · Escolha salva: MAP 11-52 · Fertisul · 62.000 kg. Custos e pedidos recalculados. Reenvie à Direção na etapa 5.
+OK    · depois da mudança: Reenviar à Direção
+OK    · reenviada e pendente de novo · Reenviado para aprovação da Direção (simulado · nenhuma mensagem real enviada). Nada é aprovado até a Direção decidir.
+OK    · recusada: trilha mostra Recusada · motivo · Recusa da Direção registrada (simulado): Orçamento da safra cortado. Nada foi contratado; a necessidade da SOL-2026-07 continua aberta.
+OK    · recusada: nenhum pedido emitido
+OK    · etapa 2: insumos Não contratado, necessidade aberta · MAP 11-52 170.000 90.000 0 79.500 kg 18/10/2026 3,90 R$ 310.050,00 Não contratado recusado pela Direção · necessidade aberta
+OK    · etapa 1: Recusada · não contratado
+OK    · sem erro JS no fim · []
+
+FALHAS: nenhuma
+rc=0

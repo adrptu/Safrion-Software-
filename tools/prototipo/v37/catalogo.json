@@ -245,7 +245,7 @@
   "responsavel": "Agronomia e gestão",
   "Conteúdo": "Intervenções comparadas com observações posteriores, desvio, recorrência e custo.",
   "Campos e informação essencial": "Recomendação; execução real; método pré/pós; data; resultado; confiança; custo.",
-  "Botões e destinos": "Programar avaliação → AG-01; Abrir aplicação → CA-01; Registrar parecer; Propor revisão → AG-05/GE-07.",
+  "Botões e destinos": "Programar pós (na linha da avaliação) → AG-01; Abrir aplicação → CA-01; Registrar parecer; Propor revisão → AG-05/GE-07.",
   "Continuidade e estados": "Redução observada não equivale automaticamente a eficácia causal. Economia adiada e efetivamente evitada aparecem separadas.",
   "Contrato reconciliado de implementação": "Aplicar os campos, validações e ações acima com fonte do dado, unidade quando numérico, permissão no servidor e vínculo ao documento de origem. A ação seguinte abre o registro de destino preservando contexto e saldo.",
   "Dependências e aceite": "capítulos 33–41, 60–62; critérios AGR, ACAG, TV, ACTV, SOLO, LABMAP, COLMAP; fluxos FL-04, FL-05, FL-R01, FL-R06. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
@@ -1767,11 +1767,11 @@
  },
  "CD-02": {
   "id": "CD-02",
-  "titulo": "Culturas, cultivares e operações",
+  "titulo": "Culturas e cultivares",
   "linha": 1678,
-  "rota": "/cadastros/operacoes",
+  "rota": "/cadastros/culturas",
   "responsavel": "Agronomia e PCP",
-  "Conteúdo": "Catálogo de operação, capacidade e unidades, com fonte e vigência.",
+  "Conteúdo": "Culturas e cultivares, com ciclo, unidade de produtividade e item de semente.",
   "Campos e informação essencial": "Cultura/cultivar; operação; unidade; rendimento; recursos; condições; fonte.",
   "Botões e destinos": "Editar rendimento → FO-28 na aba Rendimentos operacionais; Criar versão; Importar catálogo; Comparar real; Publicar; Abrir protocolo → AG-05.",
   "Continuidade e estados": "Operação descreve como medir e executar; prescrição específica continua em AG-04. Catálogo nativo é ponto inicial validável, não verdade universal.",
@@ -2614,6 +2614,33 @@
   "cmd": [],
   "fl": [
    "FL-R08"
+  ]
+ },
+ "CD-08": {
+  "id": "CD-08",
+  "titulo": "Operações e rendimentos",
+  "linha": 1678,
+  "rota": "/cadastros/operacoes",
+  "responsavel": "Agronomia e PCP",
+  "Conteúdo": "Catálogo de operação, capacidade e unidades, com fonte e vigência (saiu do CD-02 em 13/10/2026, pedido do proprietário).",
+  "Campos e informação essencial": "Cultura/cultivar; operação; unidade; rendimento; recursos; condições; fonte.",
+  "Botões e destinos": "Editar rendimento → FO-28 na aba Rendimentos operacionais; Criar versão; Importar catálogo; Comparar real; Publicar; Abrir protocolo → AG-05.",
+  "Continuidade e estados": "Operação descreve como medir e executar; prescrição específica continua em AG-04. Catálogo nativo é ponto inicial validável, não verdade universal.",
+  "Contrato reconciliado de implementação": "Biblioteca nativa de operações/culturas e rendimentos; velocidade, largura e eficiência ou kg/h por máquina/pessoa, fonte e vigência.",
+  "Dependências e aceite": "capítulos 39, 43, 52, 56, 60; critérios SAFRA, PARC, REND, RAST, CADN; fluxos FL-02, FL-R01, FL-R03. Os detalhamentos desses capítulos são obrigatórios nesta família, inclusive em lista, detalhe, edição e versão móvel aplicável.",
+  "Contrato dos formulários": "aplicar seções 6.2–6.5 e famílias FO-21, FO-28 conforme a ação desta tela. Destinos apenas de consulta herdam dados e abrem o formulário de origem autorizado; não exigem cadastro duplicado para preencher colunas.",
+  "extras": {
+   "Contrato obrigatório": "capítulo 52: aba canônica Operações e atividades → Rendimentos operacionais, com padrões por operação/cultura/conjunto e acesso contextual pelo PCP/orçamento."
+  },
+  "fo": [
+   "FO-21",
+   "FO-28"
+  ],
+  "cmd": [],
+  "fl": [
+   "FL-02",
+   "FL-R01",
+   "FL-R03"
   ]
  }
 }

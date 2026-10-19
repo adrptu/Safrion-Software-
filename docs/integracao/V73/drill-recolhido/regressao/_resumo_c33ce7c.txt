@@ -1,0 +1,36 @@
+saf_fazenda_recolhida exit=0 113s RESULTADO: 18 ok · 0 falhas
+ma_vinculo exit=0 139s RESULTADO: 101/101 ok
+os_lote exit=0 33s RESULTADO 36/36
+painel_fixo_2 exit=1 0s 
+textos_soltos exit=1 119s 
+quantidade exit=0 9s RESULTADO: 16/16
+saf_lote exit=0 184s RESULTADO: OK 47/47
+tabelas_saf exit=0 86s RESULTADO: 24/24 ok
+saf_tab exit=0 40s RESULTADO: 14/14
+saf_c01 exit=0 226s RESULTADO: 68 ok · 0 falhas (tudo)
+saf_fazendas exit=0 83s RESULTADO: 14/14
+saf_multi_fazenda exit=0 69s RESULTADO: 23/23
+drill_recolhido exit=0 1240s RESULTADO: 66 ok · 0 falhas
+saf_operacoes exit=0 156s RESULTADO: 87 ok · 0 falhas (tudo)
+saf_revisao exit=0 190s RESULTADO: 42 ok · 0 falhas
+saf_totais exit=0 19s RESULTADO: 14 ok · 0 falhas
+saf_contexto exit=0 55s RESULTADO: 10/10
+cartoes exit=0 556s RESULTADO: 70/70
+solo_saf exit=0 294s RESULTADO: OK 36/36
+tabelas_os exit=0 89s RESULTADO: 40/40 ok
+rev93_reteste_navegador_tab12 exit=0 86s 
+rev93_reteste_navegador exit=1 36s 
+FIM
+tabelas_cad exit=0 589s RESULTADO: 206/206 ok
+tabelas_est exit=0 50s RESULTADO: 34/34 ok
+tabelas_irr exit=1 229s RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lag
+tabelas_ben exit=0 32s RESULTADO: OK 12/12
+pa_lista exit=0 311s RESULTADO: 24 ok · 0 falhas
+kanban_raias exit=0 5s RESULTADO 9/9
+visoes2_formas exit=0 40s RESULTADO: 23/23
+tab_drill_cab exit=0 687s RESULTADO: 6 ok · 0 falhas
+ds_1510 exit=0 242s RESULTADO: 17 ok · 0 falhas
+ds_1610 exit=0 259s RESULTADO: 14 ok · 0 falhas
+paginas_scan exit=0 413s RESULTADO: 5 ok · 0 falhas (148 páginas)
+seta_padrao exit=0 821s RESULTADO: 14 ok · 0 falhas
+FIM

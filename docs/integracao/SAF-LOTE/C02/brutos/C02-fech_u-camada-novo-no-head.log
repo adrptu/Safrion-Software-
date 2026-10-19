@@ -1,0 +1,18 @@
+OK    1 fonte sintética: REAL falso, DIR = dados_lagoa_sintetico/saida, rótulo "Demonstração sintética", nada do real importado
+OK    2 determinístico: 2 gerações idênticas byte a byte e iguais à saída em uso (11 arquivos)
+OK    3 estrutura: chaves e quantidades do esquema (23 pivôs, 2 cenas, 5 índices, cadastro 3/19/16, 4 cantos, KML 2/18/16)
+OK    4 IDs PV01–PV24 sem PV16, mesma ordem e mesmos valores no KML, resumo, pixels, GeoJSON e cadastro
+OK    5 áreas: raio = √(ha·10⁴/π) (±0,01 m), círculo do GeoJSON ≈ ha (< 1 %), pivôs sem sobreposição, imóvel > soma dos pivôs
+OK    6 pixels: pix = 4·n bytes, q de cada índice com n bytes, dono < 23, todos dentro do círculo do dono, n·100 m² ≈ ha (±3 %), nuvem só em 10/09
+OK    7 mediana de cada pivô e índice = recalculada dos pixels quantizados (q/125 − 1); nuvem % do pivô coerente; cena mais recente primeiro (padrão do mapa)
+OK    8 narrativa: NDVI médio cresce com a fase (preparo < plantio < formação < produção); Pivô 12 lavoura velha em 10/09 e solo exposto em 25/09
+OK    9 CAR "SINTETICO-…", outorga "SINT-nnn/0000", cenas "SINTETICO-S2-…", local no mar (lat < −34) e varrer_categorias TOTAL 0 na saída e nas fontes
+OK    10 sem a camada: o import falha com "Sem dados da Lagoa Grande … gere dados_lagoa_sintetico/"
+OK    11 saída adulterada: em_dia() acusa e garantir() refaz com os mesmos bytes
+OK    12 SINT-G01: carimbo com 1 arquivo, com arquivo a mais ou com "arquivos" fora do formato → em_dia False; garantir() refaz as 11 saídas; carimbo íntegro → True
+OK    13 SINT-C01: PIVOS_HA = área do mapa = cadastro = TALHOES = CULTIVOS = área de cada O.S. (igualdade exata, sem tolerância); 22+ áreas com decimais
+OK    14 SINT-C02: realizado ≤ área, saldo = área − realizado, apontamentos = realizado, fechadas 100 %, fração/texto/reserva/estoque/calcário coerentes — com a área sintética e com áreas ×1,13
+OK    15 PRE-REV P5/P6: base das fertirrigações = realizado semeado da O.S.; área das decisões do MIP ligadas = área da O.S. e ≤ área do talhão
+FALHOU 16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases · {'cen': [4, True], 'mip': [2, True], 'irr': [2, True]}
+FALHOU 17 montar_render com a camada sintética: "dados da Lagoa Grande: sintéticos", nunca "reais" · [0, '_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5\n', '']
+RESULTADO: 15/17

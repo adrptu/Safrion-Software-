@@ -1,0 +1,36 @@
+===== parte 3 =====
+k5: 1 contagem a fazer · 1 ajuste aguardando aprovação
+a contar: INV-2611 — Glifosato 480 G26-14 Almox. defensivos oculto até contar a contar — A contar —
+  OK  A contar: saldo do sistema oculto
+primário: ok
+  OK  formulário da contagem não mostra o saldo
+toast: Contagem INV-2611 registrada: diferença −20 L · AJ-71 aguarda o gestor. O saldo não muda até aprovar · informe a causa antes da aprovação.
+  OK  salvar sempre grava (sem exigir causa ao contar)
+linha: INV-2611 AJ-71 Glifosato 480 G26-14 Almox. defensivos 1.200 L 1.180 L −20 L Ajuste aguardando aprovação informe a causa Recontar Aprovar ajuste
+  OK  diferença vira ajuste aguardando aprovação; pede causa
+  OK  linha oferece Recontar e Aprovar ajuste
+glifosato: G26-14 Glifosato 480 Almox. defensivos 1.200 L — — 1.200 L Disponível 11/2027
+  OK  saldo NÃO muda sem aprovação
+origem: Saldo · G26-14 × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Sem movimentos desde o início da demonstração. Ajuste INV-2611 −20 L aguardando aprovação · não aplicado ao saldo Fechar
+  OK  origem mostra ajuste pendente não aplicado
+aprovar sem causa: ok Informe a causa da diferença de INV-2611 na contagem antes de aprovar o ajuste.
+  OK  aprovar sem causa pede a causa na contagem
+  OK  contagem salva: quantidade e contador travados
+toast: Causa da diferença de INV-2611 registrada: 2 bombonas avariadas descartadas sem baixa. Quantidade e contador seguem travados; o ajuste aguarda aprovação.
+  OK  causa registrada sem mudar a contagem
+recontar: ok Recontagem de INV-2611 aberta: outro contador conta sem ver o saldo; a contagem anterior fica registrada na origem da linha.
+  OK  Recontar reabre a contagem com quantidade em branco
+  OK  recontagem também é cega (sem contagem anterior no formulário)
+  OK  linha volta a ocultar o saldo
+  OK  recontagem exige contador diferente
+toast: Contagem INV-2611 registrada: diferença −15 L · AJ-72 aguarda o gestor. O saldo não muda até aprovar · informe a causa antes da aprovação.
+recontada: INV-2611 AJ-72 Glifosato 480 G26-14 Almox. defensivos 1.200 L 1.185 L −15 L Ajuste aguardando aprovação informe a causa Recontar Aprovar ajuste
+  OK  recontagem registrada: diferença −15 L
+origem: Contagem · INV-2611 × Contagem registrada: quantidade e contador ficam travados. Informe a causa da diferença; para conferir de novo, use Recontar na linha. Item · lote K26-11 · KCl 60% · Galpão 2 M26-07 · MAP 11-52 · Galpão 2 F26-02 · Fungicida A · Almox. defensivos G26-14 · Glifosato 480 · Almox. defensivos S58-0801 · Semente de soja 58 W · Câmara fria N26-03 · NPK 20-05-20 · Galpão 1 O26-05 · Ó
+  OK  contagem anterior fica na origem da linha
+aprovar: ok Ajuste INV-2611 (AJ-72) aprovado por Ana (gestora): −15 L no lote G26-14. Físico 1.200 L → 1.185 L.
+glifosato: G26-14 Glifosato 480 Almox. defensivos 1.185 L — — 1.185 L Disponível 11/2027
+  OK  após aprovação o físico vai a 1.185 L
+  OK  sem erro de script
+RESULTADO: 18/18 ok
+RESULTADO: OK

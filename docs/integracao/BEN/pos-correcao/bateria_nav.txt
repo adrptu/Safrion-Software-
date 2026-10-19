@@ -1,0 +1,7 @@
+ben_fluxo_test.py exit=1 :: RESULTADO: FALHOU 83/85 
+tabelas_ben_test.py exit=0 :: RESULTADO: OK 12/12 
+producao_fluxo_test.py exit=0 :: RESULTADO: OK 66/66 
+tabelas_est_test.py exit=0 :: RESULTADO: 34/34 ok 
+cada_cd04_test.py exit=0 :: RESULTADO: OK 15/15 
+est_cenario_test.py exit=0 :: RESULTADO: 15/15 ok 
+varredura.py exit=0 :: RESULTADO: 141/141 páginas sem erro 

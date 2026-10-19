@@ -1,0 +1,11 @@
+OK    M1 "Planejar no mapa ›" abre a visão Mapa (seletor pelo ícone: Ver em tabela · Ver em mapa) com os 8 talhões da Santa Rita e a legenda
+OK    M2 tocar em 3 talhões marca os 3: contagem com área e painel "Planejar 3 talhões"
+OK    M3 aplicar Milho e plano aos 3: os que podem mudar mudam ao vivo (marca de alterado); o que tem O.S. em execução é recusado com o motivo
+OK    M3b salvar sem variedade: o mapa mostra "A corrigir antes de salvar" com cada talhão e o motivo, e o rótulo do talhão vira "A corrigir"
+OK    M4 "Colorir por" Plano muda a legenda
+OK    M5 um talhão só: o painel traz as ações da linha (Ajustar insumos, Dividir, Ver na tabela)
+OK    M6 Esc limpa a seleção sem fechar o mapa; Enter no talhão com foco marca o talhão
+OK    M7 com a variedade (Híbrido AG 8700) e salvar: ao reabrir, os que mudaram mostram Milho e os recusados seguem como estavam, sem marca de alterado
+OK    M9 seleção parcial da Tabela no Mapa: T1 "em parte" (mixed, 1 de 2), contagem "(1 em parte)" com a área só das linhas marcadas e a parcela na lista; "Aplicar" muda só as 2 linhas anunciadas
+OK    M8 390 px sem rolagem horizontal; nenhum erro de JavaScript
+RESULTADO: 10/10 ok

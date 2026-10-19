@@ -1,0 +1,5 @@
+inicio 2026-10-10T01:54:21Z gen=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/COMP-SAF-DOM-PCM/base7d38e5d/tools/prototipo/v37/gen37 HEAD=copia lista=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/COMP-SAF-DOM-PCM/listaBase1.txt
+partest rc=0 239s · RESULTADO: 46 ok · 1 falhas
+os_cenario rc=1 125s · RESULTADO: 19/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+consumo_divergente rc=0 128s · 20/21 ok · FALHAS: 1
+fim 2026-10-10T02:02:33Z

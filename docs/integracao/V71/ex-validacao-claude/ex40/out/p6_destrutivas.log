@@ -1,0 +1,23 @@
+# EX-40.9 · ações destrutivas (render b87f79b, Ana · gestora; dados sintéticos)
+
+## 1. VEN · PV-030 · "Encerrar saldo"
+{"mais": [], "alvo": {"t": "Encerrar saldo", "cor": "rgb(21, 32, 26)", "fundo": "rgb(255, 255, 255)", "dentroMenu": false}, "prim": [{"t": "Registrar a saca", "dist": 367}], "sec": ["×", "50 kg", "60 kg", "Cancelar reserva", "Encerrar saldo", "Cancelar"]}
+  clique 1 (ok) → 'PV-030 · Coop Grão Sul Saca a conferir Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Saca do contrato a conferir (50 kg ou 60 kg): até registrar a massa com a fonte, falta, oferta, saída e crédito ficam suspensos. Nada é convertido sem esse registro. QUANTIDADE 4.000 sc (saca de 50 ou 60 kg a conferir) PREÇO R$ 128,00/sc (saca a conferir) VALOR R$ 512.000,00 UNIDADE '
+  clique 2 sem motivo (ok) → 'Informe o motivo do encerramento. | Tela: Contratos e pedidos · 2 vendas sem cobertura · 4 com a saca a conferir'
+  clique 3 com motivo (ok) → 'PV-030 encerrada (teste sintético EX-40) por Ana (gestora): quantidade vigente 0 kg (era 4.000 sc (saca de 50 ou 60 kg a conferir)); reservas canceladas: RS-0001. | PV-030 encerrada (teste sintético EX-40) por Ana (gestora): quantidade vigente 0 kg (era 4.000 sc (saca de 50 ou 60 kg a conferir)); reservas canceladas: RS-0001.'
+  painel depois: 'PV-030 · Coop Grão Sul Encerrada Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Saldo encerrado em 26/09 por Ana (gestora): teste sintético EX-40. Quantidade vigente 0 kg (era 4.000 sc). QUANTIDADE 0 kg PREÇO R$ 128,00/sc VALOR R$ 512.000,00 UNIDADE DO CONTRATO a confer' · cliques 4 · digitação 1 campo
+  desfazer/reabrir à vista: []
+
+## 2. VEN · PV-030 · reserva RS-0001 · "Cancelar reserva"
+  linha: {'linha': 'RS-0001 L10-031 232.500 kg Ativa saída impedida: Ana (gestora) ou Dora (comercial) resolve Comercial Cancelar reserva Abrir lote ›', 'cor': 'rgb(21, 32, 26)', 'menu': False}
+  clique 1 (ok) → 'PV-030 · Coop Grão Sul Saca a conferir Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Saca do contrato a conferir (50 kg ou 60 kg): até registrar a massa com a fonte, falta, oferta, saída e crédito ficam suspensos. Nada é convertido sem esse registro. QUANTIDADE 4.000 s'
+  clique 2 com motivo (ok) → 'RS-0001 cancelada (teste sintético EX-40): 3.875 sc voltam ao disponível do L10-031. | RS-0001 cancelada (teste sintético EX-40): 3.875 sc voltam ao disponível do L10-031.' · linha depois 'RS-0001' · cliques 3
+  PROD · L10-031 depois: 'L10-031 · Soja em grão Liberado Silo 01 · recebido 05/03 × PRÓXIMO PASSO PV-030 com a saca do contrato a conferir: a reserva fica suspensa até registrar a massa com a fonte em Comercial › Contratos e pedidos (Comercial). FÍSICO 38.420 sc BLOQUEADO 0 sc APTO 38.420 sc RESERVADO 0 sc DISPONÍVEL 38.420'
+
+## 3. O.S. · OS-0431 · "Cancelar sem execução"
+{"mais": [], "alvo": {"t": "Cancelar sem execução", "cor": "rgb(180, 35, 24)", "fundo": "rgba(0, 0, 0, 0)", "dentroMenu": false}, "prim": [], "sec": ["×", "Ajustar antes de liberar", "Cancelar sem execução", "INSUMOS E DOSES", "RECURSOS ALOCADOS", "Trocar", "Trocar", "ATIVIDADE Plantio · Plantio e adubação de base · Trator T1 JD 6M 155 + Plantadeira 24 linhas", "SITUAÇÃO ATUAL Retirada de Liberadas em 23/09: a INSP-105 bloqueou o Trator T1 (OM-0233) antes do 1º iníc…", "ORIGEM 3 registros"]}
+  clique 1 (ok) → 'ntes 52 kg/ha 5.304 kg — Reserva ao liberar MAP 11-52 Fertilizantes 250 kg/ha 25.500 kg — Reserva ao liberar RECURSOS ALOCADOS Máquina · Trator T1 JD 6M 155 Trocar 24/09 06:00–16:00 condicional Em manutenção em 24/09 06:00–16:00 Implemento · Plantadeira 24 linhas 24/09 06:00–16:00 condicional Conflito com OS-0420 em 24/09 06:00–16:00 Pessoa · Carlos · operador Trocar 24/09 06:00–16:00 condicional Conflito com OS-0420 em 24/09 06:00–16:00 ATIVIDADE Plantio · Plantio e adubação de base · Trator T1'
+  clique 2 sem motivo (ok) → 'Liberar bloqueado: Trator T1 bloqueado (OM-0233).\nQuem resolve: PCP confirma a máquina substituta antes de 24/09 06:00. | Informe o motivo do cancelamento. | Tela: Ordem de Serviço · 2 em execução · 3 impedidas'
+  clique 3 com motivo (ok) → 'OS-0431 cancelada sem execução. Nenhum insumo estava reservado. Cancelada por Ana (gestora). | OS-0431 cancelada sem execução. Nenhum insumo estava reservado. Cancelada por Ana (gestora).'
+  painel depois: 'OS-0431 · Plantio · Soja 58 W × Canceladas T2 · 102 ha · janela amanhã (24/09) 06:00 · Carlos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Ordem cancelada sem execução: somente consulta. INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Semente de soja 58 W Sementes 52 ' · cliques 4
+erros JS: []

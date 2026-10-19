@@ -1,0 +1,17 @@
+A primeiras linhas:
+    OS-0420 · dia 2 · 22/09 Carlos 12 — Sem consumo informado web · sincronizado Provisório
+    OS-0421 · dia 4 · 23/09 Marcos 40 — Sem consumo informado web · sincronizado Provisório
+    OS-0505 · dia 2 · 22/09 Sérgio 25 — Sem consumo informado web · sincronizado Provisório
+    OS-0506 · dia 1 · 22/09 Joaquim 36 — Sem consumo informado web · sincronizado Provisório
+A últimas: OS-0510 · dia 2 · 18/09 Sérgio 31 — Sem consumo informado web · sincronizado A ordem não admite conferência diária nesta
+A cabeçalho: Agrícola › Ordem de Serviço Apontamentos e conferência i 4 apontamentos a revisar Revisar próximo apontamento
+A sem kpis: True
+B primária: ok
+B form: Revisar apontamento · OS-0420 · dia 2 · 22/09
+B toast: Dia 2: conferido por Paula (conferência). A fase da O.S. e os efeitos do apontamento permanecem.
+B cabeçalho: › Ordem de Serviço Apontamentos e conferência i 3 apontamentos a revisar Revisar próximo apontamento
+B primeiras: ['OS-0421 · dia 4 · 23/09 Marcos 40 — Sem consumo informado web · sincronizado Provisório', 'OS-0505 · dia 2 · 22/09 Sérgio 25 — Sem consumo informado web · sincronizado Provisório', 'OS-0506 · dia 1 · 22/09 Joaquim 36 — Sem consumo informado web · sincronizado Provisório']
+C 390 rolagem horizontal: False | primária visível: True
+D foco: True
+D Enter abre: Revisar apontamento · OS-0421 · dia 4 · 23/09
+erros JS: 

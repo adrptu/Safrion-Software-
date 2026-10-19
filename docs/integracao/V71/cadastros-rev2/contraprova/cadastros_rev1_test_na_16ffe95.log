@@ -1,0 +1,20 @@
+OK    R1a valores editados antes da mudança seguem no Crédito com o nome novo (CAR, módulos fiscais, matrícula e contrato); o nome antigo some
+OK    R1a fazenda criada no CD-01 aparece no Crédito com CAR e matrícula a informar (pendentes)
+OK    R1a seletor "Fazenda ou parceiro" segue o cadastro atual: Santa Rita do Sul, Boa Vista, Lagoa Grande e Fazenda Teste; sem o nome antigo
+OK    R1b os campos movidos saem do cadastro salvo e ficam no Crédito pelo id estável da fazenda (dc_car_SR, dc_mat_SR, dc_arr_BV)
+OK    R1c editar no Crédito, recarregar, salvar a fazenda no CD-01 e voltar: o CAR editado fica, nenhum documento duplica ou volta ao antigo
+OK    R1d a edição do Crédito vence o valor antigo do cadastro, que sai do cadastro sem duplicar o documento
+OK    R2a "A resolver" mostra a fazenda incompleta sem talhões (Fazenda Teste) e a incompleta com talhões em dia (Lagoa Grande); conta 3 (B1 + 2 fazendas)
+OK    R2b B1 (sem polígono) aparece com a Boa Vista como contexto; talhões em dia (T1, PV01) ficam fora; nenhuma área somada ou talhão inventado
+OK    R2c "Todos" recupera tudo (mesmas linhas e abertura de antes) e conta fazendas + talhões (4 + 32 = 36)
+OK    R2d teclado: Enter no chip "A resolver" filtra; Enter na linha da Fazenda Teste abre o painel dela
+OK    R2e 390 px: "A resolver" mostra Fazenda Teste, Lagoa Grande e B1 sem rolagem lateral da página
+OK    R1e 390 px: documentos com o nome atual (Santa Rita do Sul) e o painel do documento abre pelo toque na linha
+OK    R1f CD-01det com cadastro antigo: migra para o Crédito antes de ler (o CAR editado fica no Crédito, sai do cadastro) e abre sem erro
+FALHA R3a navegador recusando os documentos: o valor antigo do cadastro (CAR-LEGADO) aparece no Crédito com o nome novo; Salvar não confirma, o formulário fica com o rascunho e o motivo, nada gravado · [[{'_id': 'dc_car_SR', 'Documento': 'CAR', 'Situação': 'Registrado', 'Fazenda ou parceiro': 'Santa Rita renomeada', 'Número ou registro': 'GO-5218805-7F2A.1C9B.44E0.9D31', 'Validade': '—', 'Exigido por': '—'}], True, False, '', False, 'Salvo: CAR · Santa Rita renomeada · registrado.', [' | Salvo: CAR · Santa Rita renomeada · registrado.', ' | Salvo: CAR · Santa Rita renomeada · registrado.'], {}]
+FALHA R3b com a gravação de volta, o mesmo Salvar grava; recarregar mostra CAR-NOVO-1 uma vez, e o cadastro já não guarda o CAR antigo · [True, None, [{'_id': 'dc_car_SR', 'Documento': 'CAR', 'Situação': 'Registrado', 'Fazenda ou parceiro': 'Santa Rita renomeada', 'Número ou registro': 'CAR-LEGADO', 'Validade': '—', 'Exigido por': '—'}], ['area', 'cult', 'empresa', 'fim', 'fuso', 'mun', 'nome', 'nt', 'posse', 'sit', 'uf']]
+FALHA R4a formulário: tipo e fazenda do CAR automático só para leitura, com o motivo; a troca forçada para a Fazenda Teste é recusada, nada gravado (1 CAR em cada fazenda) · [{'tipo': False, 'tit': False, 'motivo': False}, False, {'dc_car_SR': {'tipo': 'CAR', 'num': 'FORCADO-1', 'val': '', 'pend': '', 'exig': '', 'mf': '', 'fid': 'FT'}}, (0, 2)]
+FALHA R4b chamada direta a credSalvarDoc: trocar a fazenda ou o tipo de documento automático é recusado com o motivo e nada é gravado · {'a': True, 'b': True, 'c': True, 'ed': {'dc_car_SR': {'tipo': 'Matrícula', 'num': 'DIRETO-2', 'val': '', 'pend': '', 'exig': '', 'fid': 'SR'}, 'dc_mat_FT': {'tipo': 'Matrícula', 'num': 'DIRETO-3', 'val': '', 'pend': '', 'exig': '', 'fid': 'SR'}}}
+OK    R4c documento incluído pela pessoa continua editável: a fazenda troca para Boa Vista, grava e se mantém ao recarregar (um só)
+OK    R0 sem erro de JS
+CONTRAPROVA: a versão revisada reprova ['R3a', 'R3b', 'R4a', 'R4b'] · 15/19 passam

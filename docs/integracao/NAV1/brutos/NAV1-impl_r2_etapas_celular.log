@@ -1,0 +1,16 @@
+OK    1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02, MA-01) 
+OK    2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA) 
+OK    3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas) 
+OK    4 390 px · tabelas em região rolável na horizontal; o conteúdo não rola de lado; nenhum texto ou comando cortado fora de região rolável nem texto sobre texto 
+     (informativo) campos cortados pela própria caixa da área: {}
+OK    5 325 px (quadro do site) · Compras sem sobreposição, "Etapa 1 de 6 · Escolha a safra", título inteiro 
+OK    6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável 
+Traceback (most recent call last):
+  File "<sp-nav>/tools/prototipo/v37/gen37/etapas_celular_test.py", line 143, in <module>
+    chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (6 telas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
+                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-nav>/tools/prototipo/v37/gen37/etapas_celular_test.py", line 143, in <genexpr>
+    chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (6 telas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
+                                                                                                          ~~~~^^^^^^^^^^^^
+KeyError: 'sobrepoe'
+rc=1

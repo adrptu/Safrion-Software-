@@ -1,0 +1,10 @@
+== K: dose "−2" (menos tipográfico) e "-2" na tabela
+    '−2' → toast: Plano aberto: Soja alta tecnologia | alertas: ['Informe a dose por hectare, maior que zero.'] | dose na tabela: None
+    '-2' → toast: Plano aberto: Soja alta tecnologia | alertas: ['Informe a dose por hectare, maior que zero.'] | dose na tabela: None
+    '2,' → toast: Dose de Fungicida A: 0,5 → 2 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam. | alertas: [] | dose na tabela: 2 L/ha
+== G2: painel "Atividade · Dessecação pré-plantio" aberto na Soja; endereço → #plano=MILHO-SF; botão verde do rodapé do painel
+   painel: Nova atividade | rodapé: ['Cancelar', 'Incluir atividade'] | atrás: Milho safrinha
+   toast: Rascunho v5 criado com a alteração. A v4 publicada e os 3 cultivos que usam o plano não mudam.
+   estado: {'h2': 'Milho safrinha', 'est': 'Rascunho v5 em edição', 'hash': '#plano=MILHO-SF', 'area': ['voltar:‹ Biblioteca de planos', 'comando:Publicar versão v5'], 'cards': 0, 'alerts': []}
+   atividades do milho com "Dessecação": ['Dessecação pré-plantio']
+rc=0

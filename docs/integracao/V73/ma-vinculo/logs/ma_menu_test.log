@@ -1,0 +1,11 @@
+  ok  visão semordem: um só ícone Manutenção → MOD-MAN.dc.html, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "Sem ordem" marcado; a lista é a da visão
+  ok  visão ordens: um só ícone Manutenção → MOD-MAN.dc.html, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "Ordens" marcado; a lista é a da visão
+  ok  visão ativos: um só ícone Manutenção → MOD-MAN.dc.html, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "Ativos" marcado; a lista é a da visão
+  ok  visão planos: um só ícone Manutenção → MOD-MAN.dc.html, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "Planos" marcado; a lista é a da visão
+  ok  no início (IN-04.dc.html), tocar o ícone Manutenção abre a tela de entrada (MOD-MAN.dc.html) com o Painel e os 4 cartões (ícone e nome curto: Sem ordem · Ordens · Ativos · Planos), ícone destacado
+  ok  o cartão "Ordens" abre a MA na visão Ordens (só "Ordens" marcado); "‹ Manutenção" volta à tela de entrada com o foco no cartão
+  ok  tocar "Planos" no seletor estando em Ordens (painel da OM aberto) troca a visão na mesma tela: #vis=planos, "Planos" marcado e a lista dos planos
+  ok  celular: a lista "Visão" traz as 4 visões; escolher "Ativos" troca a visão na mesma tela
+  ok  com o painel da OM aberto ao lado, 8 trocas de visão pelo seletor, logo após abrir, valem e ficam (o # antigo não volta)
+  ok  com o painel da OM aberto ao lado, 8 trocas de visão pelo endereço #vis=, logo após abrir, valem e ficam (o # antigo não volta)
+RESULTADO: 10/10 ok

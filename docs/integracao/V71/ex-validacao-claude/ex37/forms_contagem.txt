@@ -1,0 +1,73 @@
+formulários (campo editável + primária verde): 103
+primária "Salvar": 73  | em criação/ação: 33  | em edição: 40
+formulários de criação/ação: 61 · de edição: 42
+
+Criação/ação com "Salvar":
+   AG-02 | + Registrar medição | Registrar medição de água no solo | 13 campos
+   AG-03 | + Criar diagnóstico | Criar diagnóstico | 7 campos
+   AG-05 | + Criar versão | Criar versão | 6 campos
+   CA-03 | Registrar ocorrência | Registrar ocorrência | 7 campos
+   CD-01 | Cadastrar talhão | Cadastrar talhão | 4 campos
+   CD-02 | Cadastrar cultivar | Cadastrar cultivar | 6 campos
+   CD-03 | Cadastrar máquina ou instalação | Cadastrar máquina ou instalação | 12 campos
+   CD-04 | Cadastrar pessoa | Cadastrar pessoa | 23 campos
+   CD-05 | Cadastrar parceiro | Cadastrar parceiro | 12 campos
+   CD-06 | Cadastrar item | Cadastrar item | 11 campos
+   CD-07 | Cadastrar código | Cadastrar código | 10 campos
+   CD-08 | Cadastrar rendimento | Cadastrar rendimento | 15 campos
+   CO-02det | Registrar avanço | Registrar avanço do turno · OC-0510 | 4 campos
+   CO-03 | Registrar carga | Registrar carga | 7 campos
+   CO-05 | Criar ordem de processo | Criar ordem de processo | 5 campos
+   GE-02 | Criar cenário | Criar cenário | 5 campos
+   GE-07 | Criar ação | Criar ação | 7 campos
+   IN-03 | Criar tarefa vinculada | Nova tarefa vinculada | 4 campos
+   IR-04 | + Cadastrar sensor | Cadastrar sensor | 4 campos
+   LO-01 | + Reservar slot | Reservar slot de doca | 4 campos
+   LO-02det | Registrar lacre | Registrar lacre · Lacre aplicado | 4 campos
+   LO-04 | + Pedir cotação | Pedir cotação | 4 campos
+   PL-01 | + Criar safra | Nova safra | 4 campos
+   PL-02 | Decidir pendência | Operação · C1 Café Catuaí 144 | 8 campos
+   PM | Distribuidor 3 t · Criar plano | Novo plano de manutenção | 19 campos
+   PT-07 | + Convidar usuário | Convidar usuário | 3 campos
+   SAF | Criar safra | Nova safra | 7 campos
+   SU-06 | Ler documento/QR | Recebimento · NF 4533 PC-090 Coop. Vale | 6 campos
+   VE-02 | + Criar alerta | Novo alerta de preço | 6 campos
+   VE-03 | Criar oferta | Nova oferta privada | 7 campos
+   VE-04 | + Criar pedido | Novo pedido de venda | 7 campos
+   VE-04det | Enviar revisão v3 | Revisão v3 do pedido | 4 campos
+   VE-05 | Formalizar compromisso | Novo compromisso | 5 campos
+
+Com verbo do efeito:
+   AG-01 | Programar vistoria | Programar vistoria
+   AG-01 | Confirmar foco | Gerar O.S. de erradicação
+   AG-02 | Registrar laudo | Registrar laudo
+   AG-07 | None | Usar na O.S.
+   CARGA | Registrar pesagem | Registrar pesagem
+   IR-03det | Adicionar produtos | Criar versão v2
+   LO-02 | Registrar chegada | Confirmar chegada do T1
+   LO-02 | Separar lotes | Confirmar separação
+   MA | Registrar achado | Registrar achado
+   MA-01 | Registrar achado | Registrar achado
+   MA-02 | Registrar achado | Registrar achado
+   MA-03 | Registrar achado | Registrar achado
+   MA-05 | Registrar abastecimento | Registrar abastecimento
+   OS | Criar ordem | Emitir ordem
+   PA | Criar plano | Criar plano
+   SU-01 | Reprogramar proposta | Reprogramar
+   SU-02 | Submeter exceção | Submeter exceção
+   SU-03 | Reservar para ordem | Reservar
+   SU-05 | Formalizar contrato | Formalizar contrato
+   SU-06 | Resolver diferença | Registrar decisão
+   SU-06 | Segregar lote | Segregar
+   SU-07 | Solicitar | Criar requisição
+   SU-07det | Destinar saldo | Submeter destinação
+   SU-07det | Receber devolução | Confirmar recebimento
+   SU-08 | Estornar com vínculo | Estornar com vínculo
+   SU-08 | Registrar perda | Submeter perda
+   SU-08 | Transferir entre locais | Iniciar transferência
+   SU-09 | Planejar contagem | Planejar contagem
+   VEN | None | Registrar a saca
+   VEN | Registrar venda | Registrar venda
+
+Agronomia (AG-*) + Cadastros (CD-*): 25 formulários · com marca de obrigatório: 0
+Formulários com * em algum campo: ['SU-01', 'SU-02', 'SU-03', 'SU-05', 'SU-06', 'SU-07', 'SU-07det', 'SU-08', 'SU-09']

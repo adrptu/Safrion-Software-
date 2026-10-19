@@ -1,0 +1,124 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Requisições e entregas
+Requisições e entregas
+i
+2 impedidas · 10 sc de sobras a receber
+Receber devolução da REQ-031
+EM CUSTÓDIA
+3 ordens
+OS-0417 · OS-0421 · OS-0420
+FILA DE SEPARAÇÃO
+2
+REQ-039 · REQ-040
+IMPEDIDAS
+2
+OM-0233 · aprovação do agrônomo
+SOBRAS A RECEBER
+10 sc
+REQ-031 · OS-0417 em conferência
+Fila de separação por ordem
+Solicitar
+Ler QR no app ›
+7 de 7
+REQUISIÇÃO · O.S.
+⇅
+ITEM · LOTE
+⇅
+SOLICITADO
+⇅
+ENTREGUE
+⇅
+CONSUMIDO
+⇅
+EM CUSTÓDIA
+⇅
+ESTADO · PRÓXIMA AÇÃO
+⇅
+REQ-031
+OS-0417 · Adubação de cobertura · P1
+MAP 11-52
+M26-07
+100 sc
+100 sc
+70 sc
+10 sc
+com Paula
+Sobras a receber
+Receber devolução
+REQ-035
+OS-0421 · Fungicida 1ª aplicação · T1+T2
+Fungicida A
+F26-02
+175 L
+160 L
+95 L
+65 L
+com Marcos
+Em uso
+Ver consumo
+REQ-036
+OS-0420 · Plantio soja 58 W · T4
+Semente de soja 58 W
+S58-0801
+5.200 kg
+1.560 kg
+1.560 kg
+—
+Impedida · OM-0233
+Confirmar entrega
+REQ-037
+OS-0420 · Plantio soja 58 W · T4
+KCl 60%
+K26-07
+12.000 kg
+v3: 10.992 kg
+4.800 kg
+3.600 kg
+1.200 kg
+com Carlos
+Devolver até 26/09
+Receber no Estoque
+REQ-038
+OS-0418 · Fertirrigação · P1
+Ureia 45%
+—
+1.140 kg
+—
+—
+—
+Aguarda agrônomo
+Separar FEFO
+REQ-039
+OS-0424 · Fungicida · T1-B
+Fungicida A
+F26-02
+65 L
+—
+—
+—
+A separar
+Separar FEFO
+REQ-040
+OS-0425 · Adubação 1ª parcela · café C1
+NPK 20-05-20
+N26-03
+11.400 kg
+—
+—
+—
+A separar · parcial
+Entregar 8.000 kg
+Tela: Requisições e entregas · 2 impedidas · 10 sc de sobras a receber

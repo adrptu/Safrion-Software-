@@ -1,0 +1,142 @@
+# Correção da NAV-1, 1ª tentativa (agente NAV1:corrigir interrompido; o trabalho foi retomado e commitado pelo seguinte): pa_regras_test antes e depois
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T18:32:52.367Z
+$ cd <sp-nav>/tools/prototipo/v37/gen37 && python3 pa_regras_test.py 2>&1 | tail -15
+OK    U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista
+OK    U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam
+OK    U3 a 2ª mudança fica no mesmo rascunho v7
+OK    U4 diferenças v7 × v6: dose alterada, insumo incluído, atividade excluída e gatilho mudado
+FALHA U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7"; sem atividade ou com a inclusão de insumo aberta, desabilitado com o motivo · [{"prim":null,"nota":""},{"prim":{"t":"Publicar versão v7","dis":""},"nota":"1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha)."},{"prim":{"t":"Publicar versão v7","dis":"Inclua ao menos uma atividade para publicar a v7."},"nota":"Inclua ao menos uma atividade para publicar a v7."},{"prim":{"t":"Publicar versão v7","dis":"Conclua ou cancele a inclusão do insumo para publicar a v7."},"nota":"Conclua ou cancele a inclusão do insumo para publicar a v7."}]
+OK    U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo
+OK    U7 publicar recusa sem rascunho e com o rascunho sem atividade
+OK    U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link
+OK    U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória
+OK    U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base, ids novos, base intacta
+OK    U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6
+RESULTADO 10/11
+
+### 2026-10-09T18:34:22.989Z
+$ cd <sp-nav>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+OK    U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual à versão publicada (R3: nenhuma v7 vazia, nenhum cultivo marcado)
+OK    U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link
+OK    U8b o link do cultivo leva a safra e o cultivo de cada um nas três safras abertas: S27SF (d1, Milho safrinha) e LG2627 (lg01, Lagoa Grande)
+OK    U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória
+OK    U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base (mesmo com a base em rascunho), ids novos, base intacta
+OK    U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6
+OK    U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 publica N atividades"
+OK    U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,6 grava; a saída do campo marca a hora e o que mudou (R1)
+OK    U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7
+OK    U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto
+OK    U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4): plano trocado ou atividade inexistente fecham sem gravar
+RESULTADO 17/17
+/tmp/tmpnrallsrg.js:536
+function paFoco(id,sel){ setTimeout(()=>{ const el=document.getElementById(id); if(el){ el.focus(); if(sel&&el.select) el.select(); } },0); }
+                                                   ^
+
+ReferenceError: document is not defined
+    at Timeout._onTimeout (/tmp/tmpnrallsrg.js:536:52)
+    at listOnTimeout (node:internal/timers:588:17)
+    at process.processTimers (node:internal/timers:523:7)
+
+Node.js v22.22.0
+
+### 2026-10-09T18:34:31.708Z
+$ cd <sp-nav>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+exit=0
+OK    U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto
+OK    U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4): plano trocado ou atividade inexistente fecham sem gravar
+RESULTADO 17/17
+
+### 2026-10-09T18:34:41.394Z
+$ S=<scratchpad>/nav1fix; rm -rf $S/head && mkdir -p $S/head && cd <sp-nav> && git archive 0e1c368 tools/prototipo/v37 | tar -x -C $S/head && cd $S/head/tools/prototipo/v37/gen37 && ls | wc -l && GEN=$S/head/tools/prototipo/v37/gen37 python3 <sp-nav>/tools/prototipo/v37/gen37/pa_regras_test.py 2>&1 | grep -E "^(FALHA|RESULTADO)" | cut -c1-200
+230
+FALHA U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7" e o resumo na nota; desabilitado com o motivo sem atividade, com a dose em edição (R1/R2), com a inclusão
+FALHA U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual à versão publicada (R3: nenhuma v7 vazia, nenhum cultivo marcado) · ["Sem rascunho para publicar.","Inclua
+FALHA U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 publica N atividades" · "sem paResumo, paRascNo, paNovoFaz"
+FALHA U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,6 grava; a saída do campo marca a hora e o que mudou (R1) · [[{"val":"0","err":"Informe a dose 
+FALHA U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v
+FALHA U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto · "sem paPend, paSair, paSaiNao"
+FALHA U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4): plano trocado ou atividade inexistente fecham sem gravar · [{"pid":"MILHO-SF","fm":null,"pl":[{"id":"SOJA-AT"
+RESULTADO 10/17
+
+### 2026-10-09T18:35:21.485Z
+$ S=<scratchpad>/nav1fix; mkdir -p $S/mut && cat > $S/mut/run.py <<'EOF'
+  [corpo do heredoc omitido]
+MORTO   M1 link com a safra fixa S2627 | []
+MORTO   M3 sem a trava da inclusão aberta | []
+MORTO   M4 publicar não grava o histórico | []
+MORTO   M5 nome repetido diferenciando maiúsculas | []
+MORTO   M6 cópia usa o rascunho da base | []
+MORTO   M7 endereço sem decodificar | []
+MORTO   M8 diferenças sem "retira" | []
+MORTO   M9 rascunho sem clonar | []
+MORTO   M10 publica rascunho igual (R3) | []
+MORTO   M11 chip sem a versão publicada | []
+MORTO   M13 sem a trava da dose em edição (R1/R2) | []
+MORTO   M14 paPub sem passar a dose em edição (R1) | []
+MORTO   M15 sem a recusa do gesto desabilitado (R1) | []
+MORTO   M16 sem a recusa logo depois do blur (R1) | []
+MORTO   M17 blur não marca a hora (R1) | []
+MORTO   M18 sair sem aviso (R8) | []
+MORTO   M19 painel grava em outro plano (R4) | []
+MORTO   M20 resumo sem "e mais N" | []
+
+### 2026-10-09T18:35:26.957Z
+$ S=<scratchpad>/nav1fix; GEN=$S/mut/gen37 python3 <sp-nav>/tools/prototipo/v37/gen37/pa_regras_test.py 2>&1 | tail -5
+    from ui37 import shell37, HEIGHTS37
+  File "<scratchpad>/nav1fix/mut/gen37/ui37.py", line 9, in <module>
+    CAT=json.load(open(os.path.join(V37,'..','catalogo.json')))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<scratchpad>/nav1fix/mut/gen37/../catalogo.json'
+
+### 2026-10-09T18:35:32.336Z
+$ S=<scratchpad>/nav1fix; cd $S/mut && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+MORTO   M1 link com a safra fixa S2627 | ['FALHA U8b o link do cultivo leva a safra e o cultivo de cada']
+MORTO   M3 sem a trava da inclusão aberta | ['FALHA U5 Próximo passo: sem rascunho nenhuma primária; com r']
+MORTO   M4 publicar não grava o histórico | ['FALHA U6 publicar cria a v7 (em vigor, no histórico com a da']
+MORTO   M5 nome repetido diferenciando maiúsculas | ['FALHA U9 novo plano: nome obrigatório; repetido na mesma cul']
+MORTO   M6 cópia usa o rascunho da base | ['FALHA U10 novo plano copiando de uma base: rascunho v1 com a']
+MORTO   M7 endereço sem decodificar | ['FALHA U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâm']
+MORTO   M8 diferenças sem "retira" | ['FALHA U4 diferenças v7 × v6: dose alterada, insumo incluído,']
+MORTO   M9 rascunho sem clonar | ['FALHA U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 p', 'FALHA U4 diferenças v7 × v6: dose alterada, insumo incluído,']
+MORTO   M10 publica rascunho igual (R3) | ['FALHA U5 Próximo passo: sem rascunho nenhuma primária; com r', 'FALHA U7 publicar recusa sem rascunho, com o rascunho sem at']
+MORTO   M11 chip sem a versão publicada | ['FALHA U8 situação do cultivo (X-AGR-6): em vigor; com rascun', 'FALHA U8b o link do cultivo leva a safra e o cultivo de cada']
+MORTO   M13 sem a trava da dose em edição (R1/R2) | ['FALHA U5 Próximo passo: sem rascunho nenhuma primária; com r', 'FALHA U14 Publicar: recusa o clique que começou com o botão ']
+MORTO   M14 paPub sem passar a dose em edição (R1) | ['FALHA U14 Publicar: recusa o clique que começou com o botão ']
+MORTO   M15 sem a recusa do gesto desabilitado (R1) | ['FALHA U14 Publicar: recusa o clique que começou com o botão ']
+MORTO   M16 sem a recusa logo depois do blur (R1) | ['FALHA U14 Publicar: recusa o clique que começou com o botão ']
+MORTO   M17 blur não marca a hora (R1) | ['FALHA U13 dose na tabela: 0, vazio, "−2" (menos tipográfico)']
+MORTO   M18 sair sem aviso (R8) | ['FALHA U15 sair do detalhe com a dose ou a inclusão de insumo']
+MORTO   M19 painel grava em outro plano (R4) | ['FALHA U16 o painel da atividade só grava no plano e na ativi']
+MORTO   M20 resumo sem "e mais N" | ['FALHA U12 resumo na nota: 1 alteração; 3 alterações com "e m']
+RESULTADO 17/17
+
+### 2026-10-09T18:38:27.737Z
+$ cd <sp-nav>/docs/navegacao && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-09T18:39:17.029Z
+$ cd <sp-nav>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+exit=0
+RESULTADO 18/18
+
+### 2026-10-09T18:47:07.262Z
+$ S=<scratchpad>/nav1fix; GEN=$S/head/tools/prototipo/v37/gen37 python3 <sp-nav>/tools/prototipo/v37/gen37/pa_regras_test.py 2>&1 | grep -E "^(FALHA|RESULTADO)" | cut -c1-90; ps aux | grep bateria.sh | grep -v grep | wc -l
+FALHA U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7
+FALHA U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual
+FALHA U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 p
+FALHA U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar
+FALHA U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem log
+FALHA U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (
+FALHA U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4): 
+FALHA U17 salvar o painel da atividade sem mudar nada não cria rascunho (R3: nenhum rascu
+RESULTADO 10/18
+7

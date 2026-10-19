@@ -1,0 +1,19 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 patest.py
+PASSOU começa na etapa 1 sem plano escolhido 1 Escolha o plano · etapa atual
+PASSOU etapas 2 e 3 mostram impedimento ['1 Escolha o plano · etapa atual', '2 Edite as atividades · impedida Escolha um plano', '3 Publique a versão · impedida Escolha um plano']
+PASSOU biblioteca com um card por plano (8) (8, ['Soja alta tecnologia', 'Soja padrão', 'Milho safrinha', 'Feijão pivô', 'Café arábica produção', 'Mamão Formosa produção', 'Mamão Formosa · implantação irrigada', 'Mamão Formosa · produção irrigada'])
+PASSOU card mostra versão, estado, atividades, gatilhos, custo e cultivos Soja alta tecnologia v6 Publicado 8 atividades R$ 2.099,90 insumos/ha Gatilhos DAP Aplicado em 5 cultivos 3 na v6 · 2 na v5 Abrir plano →
+PASSOU card do café com gatilhos Data e Após a colheita Café arábica produção v2 Publicado 6 atividades R$ 2.496,00 insumos/ha Gatilhos Data Após a colheita Aplicado em 1 cultivo 1 na v2 Abrir plano →
+PASSOU etapa 3 sem plano é bloqueada 
+PASSOU abrir plano leva à etapa 2 2 Edite as atividades · etapa atual
+PASSOU gatilhos DAP em ordem numérica com negativos ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 25', 'DAP 45', 'DAP 60', 'DAP 118']
+PASSOU faixa informa que editar cria rascunho v7 
+Traceback (most recent call last):
+  File "/home/user/sp-tab/tools/prototipo/v37/gen37/patest.py", line 45, in <module>
+    J("document.querySelector('button[aria-label=\"Recolher DAP 45\"]').click()"); time.sleep(.3)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-tab/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

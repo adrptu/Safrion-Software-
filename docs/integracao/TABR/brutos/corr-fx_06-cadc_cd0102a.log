@@ -1,0 +1,17 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadc_test.py cd0102a
+OK  CD-02 sem erro JS
+OK  rendimentos sem rolagem lateral a 1440 px · [1142, 1142]
+OK  no máximo 7 colunas
+OK  colunas com uma variável cada · ['Operação › conjunto', 'Fonte', 'Processo', 'Cultura', 'Rendimento', 'Custo R$/h', 'Custo R$/ha']
+OK  linha mostra custo por hora e por hectare · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m Medição local Tratos culturais Todas 21,60 ha/h R$ 313,00/h R$ 14,49/ha
+OK  rendimento informado sinalizado no painel (Modo "Informado", largura, velocidade e eficiência vazias) · ['Informado', None, None, None]
+OK  painel mostra largura, velocidade e eficiência (36 m · 8 km/h · 75 %) · ['36', '8', '75']
+OK  formulário abre · ['Operação', 'Conjunto ou equipe', 'Cultura', 'Como obter o rendimento', 'Largura de trabalho', 'Velocidade de trabalho', 'Eficiência de campo', 'Rendimento efetivo', 'Máquina', 'Implemento', 'Pessoas na equipe', 'Custo por pessoa', 'Custo por hora', 'Fonte do dado', 'Vigente até']
+OK  mesmos rótulos do Planejar safra (+ Cultura do cadastro) · ['Operação', 'Conjunto ou equipe', 'Cultura', 'Como obter o rendimento', 'Largura de trabalho', 'Velocidade de trabalho', 'Eficiência de campo', 'Rendimento efetivo', 'Máquina', 'Implemento', 'Pessoas na equipe', 'Custo por pessoa', 'Custo por hora', 'Fonte do dado', 'Vigente até']
+OK  rendimento ao vivo inicial = 21,60 · 21,60
+OK  custo/h ao vivo inicial = 313,00 · 313,00
+OK  L × V ÷ 10 × E ao vivo: 36 × 10 ÷ 10 × 75% = 27,00 · 27,00
+OK  custo/h ao vivo: 200 + 95 + 1 × 38 = 333,00 · 333,00
+OK  ajudas das fórmulas e da composição visíveis
+RESULTADO: OK 14/14
+[exit 0]

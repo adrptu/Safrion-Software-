@@ -1,0 +1,6 @@
+varredura exit=0 (433s) | RESULTADO: 141/141 páginas sem erro
+cmptest exit=0 (379s) | FALHAS: nenhuma
+ma_unica_test exit=1 (329s) | RESULTADO: 22/23 ok · FALHAS: AC-PCM-02 · PM, MA-01..05 e MA-04det (com #OM-, #PM-, #novo:) levam ao endereço novo; fora do canvas
+ma_rastreio_test exit=0 (414s) | RESULTADO: 58/58 ok
+.._ferramentas_acoes_duplicadas_.__tmp_PCM-dup.json exit=0 (638s) | RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM

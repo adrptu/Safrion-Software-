@@ -9,6 +9,8 @@ import os, sys, time, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 JSC = '/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc'
 PARTE = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
+# SINT-T01: jsc no macOS; fora dele (Linux/nuvem) o node, com print → console.log; o mesmo JS nos dois
+MOTOR, PRELUDIO = ([JSC], '') if os.path.exists(JSC) else (['node'], 'globalThis.print=(...a)=>console.log(...a);\n')
 FAIL = []; N = [0]
 def ok(cond, msg, extra=''):
     N[0] += 1; print(('OK    ' if cond else 'FALHA ') + msg + ('' if cond else ' · ' + str(extra)[:400]), flush=True)
@@ -18,18 +20,18 @@ def ok(cond, msg, extra=''):
 def unit():
     import cenario
     from areas.processo_os import JS_NUCLEO
-    src = cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
+    src = PRELUDIO + cenario.perfis_js() + cenario.js_prefixo() + JS_NUCLEO + open(os.path.join(HERE, 'carencia_unit.js'), encoding='utf-8').read()
     p = os.path.join(HERE, '_probe', 'carencia_unit_all.js'); open(p, 'w', encoding='utf-8').write(src)
-    r = subprocess.run([JSC, p], capture_output=True, text=True, timeout=60)
+    r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=60)
     out = r.stdout.strip().splitlines()
-    ok(r.returncode == 0 and out, 'jsc executou o motor sem erro', r.stderr[:400])
+    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou sem erro', r.stderr[:400])
     for x in (json.loads(out[-1]) if out else []): ok(x['ok'], 'unit ' + x['n'], x['info'])
     # app de campo: a mesma guarda no início do turno de colheita (JS do app com o motor leve)
     from areas import mobile
-    src = cenario.js_prefixo() + mobile.JS_BASE + mobile.MBAPP_JS + open(os.path.join(HERE, 'carencia_app_unit.js'), encoding='utf-8').read()
+    src = PRELUDIO + cenario.js_prefixo() + mobile.JS_BASE + mobile.MBAPP_JS + open(os.path.join(HERE, 'carencia_app_unit.js'), encoding='utf-8').read()
     p = os.path.join(HERE, '_probe', 'carencia_app_all.js'); open(p, 'w', encoding='utf-8').write(src)
-    r = subprocess.run([JSC, p], capture_output=True, text=True, timeout=60); out = r.stdout.strip().splitlines()
-    ok(r.returncode == 0 and out, 'jsc executou o JS do app sem erro', r.stderr[:400])
+    r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=60); out = r.stdout.strip().splitlines()
+    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou o JS do app sem erro', r.stderr[:400])
     for x in (json.loads(out[-1]) if out else []): ok(x['ok'], 'app ' + x['n'], x['info'])
 
 
@@ -67,12 +69,13 @@ def fluxo():
         t.goto('Main.dc.html'); J("localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Lagoa Grande',lay:'Integrado',tsel:[]}))")
         t.goto('IN-04.dc.html#car:PV23'); ok(pronto(), 'mapa real da Lagoa Grande pronto'); time.sleep(.8)
         rail = J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].map(b=>b.innerText.trim())") or []
-        ico = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Carência e destino'); const p=b&&b.querySelector('svg path'); return p?p.getAttribute('d'):'';})()") or ''
-        ok('Carência e destino' in rail and rail.index('Carência e destino') == rail.index('Pragas e doenças') + 1, 'barra do mapa com a camada Carência e destino depois de Pragas e doenças', rail)
-        ok(ico.startswith('M12 12m-9 0a9 9') and 'M10.3 3.9' not in ico, 'ícone da camada = relógio do catálogo (o triângulo fica para alerta real)', ico)
-        sel = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Carência e destino'); return b?b.getAttribute('aria-selected'):'';})()")
+        # DEC-0910-36 (decisão do proprietário, 16/10/2026): Carência e destino deixa a barra e vira filtro de Colheita e produtividade
+        filtro = J("(()=>{const b=[...document.querySelectorAll('main [role=group][aria-label=Mostrar] button')].find(b=>b.innerText.trim()==='Carência e destino'); return b?b.getAttribute('aria-pressed'):'';})()")
+        ok('Carência e destino' not in rail and 'Colheita e produtividade' in rail and filtro == 'true', 'Carência e destino é filtro (Mostrar) de Colheita e produtividade, fora da barra', [rail, filtro])
+        sel = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Colheita e produtividade'); return b?b.getAttribute('aria-selected'):'';})()")
         p = pan(); a = acts()
-        ok(sel == 'true' and 'Pivô 23' in p and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre a camada com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
+        # MUX-F0 (17/10/2026, D27): um nome só por pivô no IN-04; o painel abre com "P23 · 64 ha", não mais "Pivô 23". Oráculo obsoleto no nome; a asserção não muda
+        ok(sel == 'true' and p.startswith('P23 · ') and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
         ok('Colheita impedida até 26/09 · Tebuconazol 200 EC (OS-0508)' in p and 'determina o prazo' in p and 'faixa não registrada: vale o talhão todo' in p and 'Consultado em 23/09/2026 (hoje)' in p and 'Atualização' in p,
            'painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização', p[:600])
         ok(a == [['Ver restrição', 'OS.dc.html#OS-0508']], 'uma ação primária no estado: Ver restrição → OS-0508', a)
@@ -97,18 +100,21 @@ def fluxo():
         J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Integrado'); b.click();})()"); time.sleep(.6); p = pan()
         ok('Carência e destino carência até 26/09' in p and 'Ver carência' in p, 'Integrado: linha "Carência e destino" com Ver carência', p[:700])
         btn('Ver carência', 'aside'); time.sleep(.5)
-        ok('CARÊNCIA E DESTINO' in pan().upper() and J("location.hash")=='', 'Ver carência abre a camada sem perder o talhão', pan()[:200])
+        # MUX-F1 (17/10/2026, item 8): o endereço passou a guardar o estado do mapa (#faz=&lay=&t=&dt=). Antes a asserção era "hash vazio" (o comando
+        # #car consumido); agora: nenhum comando sobra e o estado diz a camada e o talhão. Oráculo obsoleto na forma; a asserção não fica mais fraca
+        hs = J("location.hash") or ''
+        ok('CARÊNCIA E DESTINO' in pan().upper() and not hs.startswith('#car') and 'lay=colheita' in hs and 't=PV23' in hs, 'Ver carência abre a camada sem perder o talhão', [hs, pan()[:200]])
         ok(t.errs() == '', 'mapa sem erro de JavaScript', t.errs())
         # ---------- 5 · O.S.: colheita no Pivô 23 impedida pela carência (comando, não cor) e recuperação ----------
         t.goto('OS.dc.html'); time.sleep(.5)
-        btn('Nova ordem', 'main'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
+        btn('Criar ordem', 'header'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
         btn('Emitir ordem', 'aside[role=dialog][aria-label="Nova ordem"]'); time.sleep(.6)
         oid = (J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]; p = ospan()
         ok(oid == 'OS-0440' and 'Liberar bloqueado: carência em curso em Pivô 23 até 26/09' in p and 'OS-0508' in p and 'Quem resolve: Ana (agrônoma) reprograma a colheita para 27/09' in p,
            'colheita OS-0440 (Pivô 23, a partir de 25/09): Liberar bloqueado com motivo (OS-0508, carência até 26/09) e quem resolve (colheita a partir de 27/09)', [oid, p[:700]])
         ok(not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Liberar para execução')") and 'Rever programação' in p and 'Carência até 26/09' in p and 'a colheita pode começar em 27/09' in p,
            'sem botão Liberar; Rever programação junto ao impedimento; selo "Carência até 26/09"', p[:400])
-        er = J("(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ const o=c.ordens['OS-0440']; if(!o) throw new Error('sem OS-0440'); return window.__cen.osc_liberar(c,'OS-0440',false,''); }); return r.erro||'';})()") or ''
+        er = J("(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ const o=c.ordens['OS-0440']; if(!o) throw new Error('sem OS-0440'); return window.__cen.osc_liberar(c,'OS-0440',false,'','Ana'); }); return r.erro||'';})()") or ''
         ok('carência em curso' in er and cen("c.ordens['OS-0440'].etapa") == 'A liberar', 'o próprio comando recusa a liberação (não é só a cor do mapa)', er)
         shot('carencia_os_impedida.png')
         # o mapa mostra o mesmo impedimento e leva à O.S. (Rever programação)
@@ -136,15 +142,17 @@ def fluxo():
            'recuperação: carência conferida (10 dias, até 14/09) registrada no cenário e a colheita pode ser liberada', [bts, p[:300]])
         shot('carencia_os_bula_conferida.png')
         # ---------- 6 · aviso preventivo na aplicação e aplicação efetiva da OS-0504 (Pivô 6) ----------
+        # SINT-T01: a área feita é a do Pivô 6 na fonte única (dados_lagoa_fonte), na forma digitada (vírgula), sem literal de área
+        import dados_lagoa_fonte as _F; A06 = format(_F.PIVOS_HA[6], 'g').replace('.', ',')
         t.goto('OS.dc.html#OS-0504'); time.sleep(.8); p = ospan()
         ok('Conflito com a colheita em Pivô 6' in p and 'impedida até 07/10' in p and 'Conflito com colheita até 07/10' in p and J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"),
            'OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início', p[:700])
         shot('carencia_os_conflito_aplicacao.png')
         btn('Iniciar execução', 'aside[role=dialog]'); btn('Confirmar início', 'aside[role=dialog]'); time.sleep(.4)
         btn('Registrar apontamento', 'aside[role=dialog]'); time.sleep(.3)
-        setv('aside[role=dialog] input[type=date]', '2026-09-24'); setv('aside[role=dialog] input[aria-label="Área feita em hectares"]', '86'); time.sleep(.2)
+        setv('aside[role=dialog] input[type=date]', '2026-09-24'); setv('aside[role=dialog] input[aria-label="Área feita em hectares"]', A06); time.sleep(.2)
         btn('Salvar apontamento', 'aside[role=dialog]'); time.sleep(.5)
-        ok(cen("c.ordens['OS-0504'].ap.filter(a=>a.st!=='Previsto').length") == 1 and cen("c.ordens['OS-0504'].etapa") == 'Em execução', 'OS-0504 executada: apontamento de 24/09 em 86 ha', cen("JSON.stringify(c.ordens['OS-0504'].ap)"))
+        ok(cen("c.ordens['OS-0504'].ap.filter(a=>a.st!=='Previsto').length") == 1 and cen("c.ordens['OS-0504'].etapa") == 'Em execução', f'OS-0504 executada: apontamento de 24/09 em {A06} ha', cen("JSON.stringify(c.ordens['OS-0504'].ap)"))
         # a colheita da semana 39 no Pivô 19 é registrada (fato) depois de uma aplicação: nunca impedida, vai para conferência
         r = J("""(()=>{const X=window.__car; const r=X.cenMudar(null,c=>{ c.ordens['OS-0441']={id:'OS-0441',tipo:'Pulverização · Controle de ácaro e cochonilha',talhao:'Pivô 19',area:42,etapa:'Em conferência',versao:'v1',realizado:42,saldo:0,resp:'Wesley',
              ins:[{p:'Abamectina 18 EC',dose:0.5,un:'L',tot:21}],req:null,selos:[],ap:[{d:'22/09',dia:1,ha:42,st:'Conferido',sinc:true,origem:'app'}],reservado:false,osc:{}};
@@ -188,8 +196,9 @@ def fluxo():
         # ---------- 8b · link "Ver carência no mapa" (#car, sem talhão) não troca fazenda nem seleção ----------
         t.goto('Main.dc.html'); J("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'Lavoura',tsel:['T7'],flt:{}}))")
         t.goto('IN-04.dc.html#car'); time.sleep(1.2); ctx = J("sessionStorage.getItem('mapa-ctx')") or ''
-        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Carência e destino"' in ctx and J("location.hash") == '',
-           'link #car vindo da CO-06 abre a camada na fazenda e com o talhão que já estavam (Santa Rita, T7)', ctx)
+        hs = J("location.hash") or ''   # MUX-F1: o endereço guarda o estado (antes: vazio); o comando #car não sobra
+        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Colheita"' in ctx and '"ver":"Carência e destino"' in ctx and not hs.startswith('#car') and 'faz=SR' in hs and 't=T7' in hs,
+           'link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)', [hs, ctx])
         ok(t.errs() == '', 'link #car sem erro de JavaScript', t.errs())
         # ---------- 9 · celular (390 × 844): camada e lotes alcançáveis, sem erro ----------
         t.c.size(390, 844); t.goto('IN-04.dc.html#car:PV23'); pronto(); time.sleep(1.0)

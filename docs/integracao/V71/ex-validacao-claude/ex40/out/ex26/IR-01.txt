@@ -1,0 +1,64 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Irrigação
+‹
+Agrícola
+Irrigação
+2 impedidos · 1 pendente
+Resolver conflito · OS-0423
+Confira a necessidade
+1 a programar
+Programe a irrigação
+1 conflito · 1 janela a definir
+Execute e confira
+1 a conferir
+Acompanhe clima e sensores
+1 suspeita · 1 sem dado
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Setores
+Todos 3
+Impedida 2
+A conferir 1
+Agrupar por
+▾
+Colunas
++5
+SETOR
+⇅
+DÉFICIT HOJE
+⇅
+PRÓXIMO PASSO
+⇅
+PRÓXIMA PASSADA
+⇅
+Impedida
+Conflito
+Gotejo T7
+≈10,0 mm
+Resolver conflito
+hoje 14:00
+Impedida
+Falta insumo
+Pivô 1
+≈8,4 mm
+Programar só água
+amanhã 21:00
+Pivô 2
+11,2 mm
+Conferir medição
+hoje 20:00
+Tela: Irrigação

@@ -1,0 +1,46 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Comercial › Expedição e entregas
+‹
+Comercial
+Expedição e entregas
+i
+nada a programar: reserve lote em Contratos e pedidos
+Cargas de saída
+1 de 1
+Hoje
+Esta semana
+Todas as datas
+Agrupar por
+▾
+Colunas
++3
+CARGA · ROMANEIO
+⇅
+DATA
+▼
+SITUAÇÃO · PRÓXIMO PASSO
+⇅
+VENDA · CLIENTE
+⇅
+PREVISTO
+⇅
+RM-0001
+17/09
+Entregue
+R$ 91.470,00 a receber até 15/10
+PV-037
+· Frutas Real
+30.490 kg
+Restaurar demonstração
+Tela: Expedição e entregas · nada a programar: reserve lote em Contratos e pedidos

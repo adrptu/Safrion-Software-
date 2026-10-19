@@ -11,13 +11,13 @@ try:
          'antes da entrega: retirada reservada e botão "Retirar no almoxarifado"')
     a.clk('Retirar no almoxarifado')
     a.ok('Nada entregue ainda' in a.toast() and a.cen("c.reqs['REQ-039'].itens[0].confirmado") is False, 'sem entrega o app não confirma nada: ' + a.toast()[:60])
-    print('   pré-carga:', a.mudar("return cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos');")[:80], '·', a.mudar("return cenSinal(c,false);")[:40])
+    print('   pré-carga:', a.mudar("return cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos','Rui');")[:80], '·', a.mudar("return cenSinal(c,false);")[:40])
     a.abrir('OS-0424-app'); b = a.body()
     a.ok('Entregue por Rui · confirme o recebimento' in b and 'F26-02' in b and '13 × galão 5 L' in b, 'entregue: mostra lote e embalagem da REQ-039')
     a.clk('Confirmar recebimento'); b = a.body()
     a.ok(a.cen("c.reqs['REQ-039'].itens[0].confirmado") is True and a.cen("c.app.fila.length") == 1 and 'aguardando sinal' in b,
          'confirmar sem sinal grava no cenário e vai para a fila do aparelho')
-    a.ok('Carga 1 de 3' in b and 'Carga 1 preparada' in a.J("document.querySelector('main').nextElementSibling.innerText"),
+    a.ok('Carga 1 de 5' in b and 'Carga 1 preparada' in a.J("document.querySelector('main').nextElementSibling.innerText"),
          'fichas do caldeiro seguem: carga a carga depois do recebimento')
     a.abrir('MB-01'); a.clk('Com sinal')
     a.ok(a.cen("c.app.fila.length") == 0 and 'recibo REC-7742' in a.toast(), 'sinal volta no app: recebimento enviado uma vez')

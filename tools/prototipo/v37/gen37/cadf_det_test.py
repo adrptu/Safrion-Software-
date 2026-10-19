@@ -3,7 +3,7 @@
 parcelas em consulta com origem no Planejar safra (antes eram editadas aqui), resumo por safra pela área cultivável (312 ha, não o
 polígono de 312,4 ha), "Dividir em parcelas" leva ao SAF e a área cultivável não fica abaixo do alocado. Mais: "Definir polígono"
 (prévia, motivo acima de 1 %, nova versão preservando a anterior) e seletor de talhão no cabeçalho. ≤ 15 verificações."""
-import sys, os, time, subprocess, json
+import re, sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
@@ -14,7 +14,11 @@ SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='S
 BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()===t); if(b){b.click(); return true;} return false;})"""
 CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll(sc||'button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
-def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
+# DRILL-RECOLHIDO (v129): a árvore abre recolhida; a linha que não aparece (a parcela dentro da safra) é achada depois do "Expandir tudo"
+def openrow(ti,txt):
+    if not J(f"(()=>!!({ROW(ti,txt)}))()"):
+        J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.35)
+    J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
 def dlg(): return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
@@ -29,22 +33,25 @@ def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''))
 try:
     c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html',wait=1.2)
-    chk('1 CD-01det sem erro JS e T1 escolhido às claras no seletor', erro_js()=='' and J("document.querySelector('header select').value")=='T1' and 'T1-B sem polígono' in head(), [erro_js(),head()])
+    chk('1 CD-01det sem erro JS e T1 escolhido às claras no seletor', erro_js()=='' and J("document.querySelector('select[aria-label=Talhão]').value")=='T1' and 'T1-B sem polígono' in head(), [erro_js(),head()])
     s1=rowtxt(1,'Safra 2026/27'); s2=rowtxt(1,'Safrinha 2027')
-    chk('2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha)', '312 de 312 ha' in s1 and 'Área conferida' in s1 and '160 de 312 ha' in s2 and '152 ha livres' in s2 and '312,4' not in s1+s2, [s1,s2])
+    # TABELAS-FOCO (06/10/2026): a linha da safra mostra Área (alocada) e Livre em colunas próprias ("312 ha | 0 ha"), em vez de "312 de 312 ha · Área conferida"
+    chk('2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha)', '312 ha 0 ha' in s1 and 'Em planejamento' in s1 and '160 ha 152 ha' in s2 and 'Rascunho' in s2 and '312,4' not in s1+s2, [s1,s2])
     openrow(1,'T1-B'); d=dlg()
     chk('3 T1-B abre em consulta com origem no Planejar safra', 'Parcela · T1-B' in d and 'ORIGEM' in d and 'Planejar safra › Safra 2026/27 › T1-B' in d
         and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='SAF.dc.html')"), d)
     ed=J("document.querySelectorAll('aside[role=dialog] input:not([readonly]), aside[role=dialog] select:not([disabled])').length")
     chk('4 parcela sem campo editável e sem Salvar (muda só no Planejar safra)', ed==0 and 'Salvar' not in d and 'mudam no Planejar safra' in d, [ed,d])
     J(f"({BTN})('Fechar')"); time.sleep(.25)
-    dv=J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a?a.getAttribute('href'):null;})()")
+    # 16/10/2026 (BOT-08): "Planejar T1 na safra ›" só leva a outra tela: é link secundário na barra das parcelas, não verde
+    dv=J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra ›'); return a?a.getAttribute('href'):null;})()")
     chk('5 "Planejar T1 na safra" (aba Parcelas) leva ao SAF e "Cadastrar parcela" saiu', dv=='SAF.dc.html' and 'Cadastrar parcela' not in head()+main(), dv)
     openrow(0,'Santa Rita'); fset('decl','300'); J(f"({BTN})('Salvar')"); time.sleep(.35); al=alerts()
     chk('6 área cultivável abaixo do alocado é barrada (regra da área cultivável)', 'As parcelas da Safra 2026/27 somam 312 ha; reduza-as no Planejar safra antes.' in al, al)
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
     # ---------- Definir polígono da T1-B ----------
-    aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','main button')"); time.sleep(.3); J(f"({BTN})('Salvar polígono')"); time.sleep(.25)
+    # 16/10/2026 (BOT-01): "Definir polígono da T1-B" é a primária do cabeçalho do detalhe (antes na barra da aba Geometria)
+    aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','header button')"); time.sleep(.3); J(f"({BTN})('Salvar polígono')"); time.sleep(.25)
     chk('7 painel abre e não salva sem prévia', 'Definir polígono da T1-B' in dlg() and 'Gere a prévia antes de salvar.' in alerts(), dlg())
     J(f"({BTN})('Desenhar no mapa')"); time.sleep(.2); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); d=dlg()
     J(f"({BTN})('Salvar polígono')"); time.sleep(.25); al=alerts()
@@ -53,18 +60,21 @@ try:
     ts=toast(); vs=main()
     chk('9 nova versão v4 atual e v3 em consulta para as O.S. já emitidas', 'v4 do T1 é a atual; a v3 fica em consulta' in ts and 'Atual v4 · 312,4 ha' in vs and 'Consulta v3 · 312,4 ha' in vs and 'Carreador ou estrada' in vs, [ts,vs[-600:]])
     aba('Parcelas'); t1b=rowtxt(1,'T1-B'); hd=head()
-    chk('10 T1-B validada; estado validado e a primária da aba Parcelas é "Planejar T1 na safra"', 'Validada' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in main()
-        and J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
+    chk('10 T1-B validada; estado validado, sem primária pendente e o link "Planejar T1 na safra ›" na aba Parcelas', 'Polígono validado' in t1b and 'Polígono validado' in hd and 'Planejar T1 na safra' in main()
+        and 'Definir polígono' not in hd
+        and J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra ›'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
     # ---------- seletor: outro talhão, sem misturar linhas ----------
-    J(f"({SETV})('header select','T4')"); time.sleep(.35); m=main()
-    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and '204 de 204 ha' in m and '0 de 204 ha' in m and '204 ha livres' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
-    J(f"({SETV})('header select','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','main button')"); time.sleep(.3)
+    J(f"({SETV})('select[aria-label=Talhão]','T4')"); time.sleep(.35); m=main()
+    # Área e Livre em colunas próprias (TABELAS-FOCO): Safra 2026/27 204 ha alocados e 0 livre; Safrinha 2027 0 alocado e 204 ha livres
+    # revisão TABR (09/10/2026, A1): a Situação da safra vem logo depois do nome ("Safra 2026/27 <situação> … 204 ha 0 ha")
+    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and re.search(r'Safra 2026/27 [^0-9]{0,60}204 ha 0 ha', m) and re.search(r'Safrinha 2027 [^0-9]{0,60}0 ha 204 ha', m) and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
+    J(f"({SETV})('select[aria-label=Talhão]','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','header button')"); time.sleep(.3)
     J(f"({BTN})('Gerar prévia')"); time.sleep(.2); J(f"({BTN})('Cancelar')"); time.sleep(.2); w=alerts()
     J(f"({BTN})('Continuar editando')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     b1=rowtxt(0,'Boa Vista')
     chk('12 B1: fechar com prévia avisa; importar dentro de 1 % salva a v1 e preenche o polígono', 'Há alterações não salvas.' in w and '119,6 ha' in (b1 or '') and 'v1' in (b1 or '') and 'Polígono validado' in head(), [w,b1,toast()])
     c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html?nova=1#talhao=ZZ',wait=1.2)
-    chk('13 talhão desconhecido não abre outro em silêncio', 'Talhão não encontrado' in main() and J("document.querySelector('header select').value")=='' and 'Escolha um talhão' in head(), [main()[:200],head()])
+    chk('13 talhão desconhecido não abre outro em silêncio', 'Talhão não encontrado' in main() and J("document.querySelector('select[aria-label=Talhão]').value")=='' and 'Escolha um talhão' in head(), [main()[:200],head()])
     c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)),'_probe','cadf_det_nf.png'))
 finally:
     c.close(); srv.terminate()

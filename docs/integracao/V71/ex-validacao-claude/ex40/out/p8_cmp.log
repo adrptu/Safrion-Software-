@@ -1,0 +1,12 @@
+# EX-40.11 · Compras › Insumos da safra · etapa 5 (render b87f79b, Ana)
+ir à etapa 5: sem caminho de 1 para 5 · primária(s) []
+  alçada: []
+  prévia de pedidos: []
+
+# Compras › Materiais · SC-039 (reposição, Em cotação): 'SC-039 · Filtro de óleo MF 4292 × Reposição de estoque Material Urgência normal Em cotação ✓ Requisição › ✓ Cotação › Pedido › Recebimento Origem Reposição de estoque Apropriação Estoque do almoxarifado da oficina: o custo vai à ordem que usar o item Pedida por Rui (almoxarife) em 22/09 Motivo Saldo livre 0 un abaixo do ponto de pedido (2 un) Precisa até sem data Cotação enviada em 22/09 a Agro Peças Centro-Oeste, Rondon Peças Agrícolas (simulado) ITENS Filtro de óleo MF 4292 (FIL-MF4292) 4 un × ref. R$ 160,00 PROPOSTAS · ESCOLHA UMA Agro Peças Centro-Oeste entrega 23/09 (1 dia) · 28 dias R$ 640,00 Rondon Peças Agrícolas entrega 28/09 (6 dias) · 30 dias · menor custo a tempo R$ 620,80 O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra. Fechar Emitir pedido · R$ 620,80'
+  botão: ['Emitir pedido · R$ 620,80']
+  clique (ok) → 'PC-202 emitido para Rondon Peças Agrícolas · R$ 620,80 · previsão 28/09 · vinculado à SC-039. | PC-202 emitido para Rondon Peças Agrícolas · R$ 620,80 · previsão 28/09 · vinculado à SC-039.' · cliques 1
+  [Rui] botão: ['Emitir pedido · R$ 620,80 · Ação de quem compra (gestora ou direção)']
+
+# SU-05 (oculta, 2 saltos): ['Formalizar contrato', 'Emitir pedido']
+erros JS: []

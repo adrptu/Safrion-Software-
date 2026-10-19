@@ -1,0 +1,12 @@
+OK    W1 IR-01 tem o bloco Água no solo com AGS-001..004; o AG-02 não tem a grade e leva à Irrigação (IR-01.dc.html#agua)
+OK    W1b IR-01.dc.html#agua rola até o bloco Água no solo (topo do bloco à vista)
+OK    W2 No balanço: AGS-003 em uso no Pivô 2 (AFD 24,8 mm · gatilho 8,0 mm); AGS-004 do Pivô 12 sem PMP: vale o limiar
+OK    W3 setor P2: CAD 45 mm · AFD 24,8 mm (f 0,55 · FAO-56, Tabela 22 (milho grão)) · déficit 11,2 mm = 25 % da CAD · gatilho 8,0 mm (limiar do setor) · AGS-003
+OK    W4 Pivô 19 com CAD 3 mm (AGS-005, número novo): AFD 1,5 mm (f 0,50 a confirmar) vira o gatilho e o setor ganha próximo passo de irrigação
+OK    W5 P1 com CAD 6 mm: déficit 8,4 → 6,0 mm, líquida 6,0 mm e "sem água disponível às raízes"
+OK    W6 PMP ≥ CC é recusado junto ao campo e nada é gravado
+OK    W7 f 0,10 no P2: AFD 4,5 mm vira o gatilho; vazio volta a 0,55 da FAO-56
+OK    W8 F5: o déficit do P1 segue 6,0 mm; "Registrar medição de água no solo" abre o formulário com Santa Rita e P1
+OK    W9 390 px sem rolagem horizontal; nenhum erro de JavaScript
+RESULTADO: 10/10 ok
+rc=0

@@ -1,0 +1,21 @@
+gatilhos iniciais: ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 25', 'DAP 45', 'DAP 60', 'DAP 118']
+grupos: ['Atividades do plano :: Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.', 'Cultivos que usam este plano :: Confira quem continua na versão em que foi aplicado; a troca de versão é decidida por cultivo em Planejar safra.', '▸\nVersões :: v6 em vigor desde 12/08/2026 · 2 versões publicadas']
+novo · tipo selecionado: DAP · rótulo: Dias após o plantio (DAP)
+Casos (atividade Herbicida pós-emergente, DAP 25):
+  DAP '-20': RECUSADO · Use zero ou mais: o sentido já está no tipo.
+  DAP '−20': RECUSADO · Use zero ou mais: o sentido já está no tipo.
+  DAP '–15': RECUSADO · Use zero ou mais: o sentido já está no tipo.
+  DAP '2,5': RECUSADO · Use um número inteiro de dias.
+  DAP '401': RECUSADO · Use de 0 a 400 dias.
+  DAP '400': SALVO · gatilhos DAP ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 45', 'DAP 60', 'DAP 118', 'DAP 400'] · toast Rascunho v7 criado com a alteração. A v6 publicada e os 5 cultivos que usam o pl
+  DAPA '181': RECUSADO · Use de 0 a 180 dias.
+  DAPA '180': SALVO · gatilhos DAP ['DAP −180', 'DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 45', 'DAP 60', 'DAP 118'] · toast Atividade salva no rascunho v7.
+  DAPA '0': SALVO · gatilhos DAP ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 0', 'DAP 20', 'DAP 45', 'DAP 60', 'DAP 118'] · toast Atividade salva no rascunho v7.
+reabrir após DAPA 0 → tipo DAP dias 0 · rótulo Dias após o plantio (DAP)
+  DANC '181': RECUSADO · Use de 0 a 180 dias.
+  DAPC '401': RECUSADO · Use de 0 a 400 dias.
+  DAPC '400': SALVO · gatilhos DAP ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 45', 'DAP 60', 'DAP 118'] · toast Atividade salva no rascunho v7.
+grupos no fim: ['Atividades do plano', 'Cultivos que usam este plano', '▸\nVersões', 'Alterações do rascunho v7 em relação à v6']
+texto do grupo DAP: 
+erros JS: []
+rc=0

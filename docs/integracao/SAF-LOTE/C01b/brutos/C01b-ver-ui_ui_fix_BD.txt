@@ -1,0 +1,52 @@
+OK    · fix 1440x900 B(ordem inversa) · preparo: soja 90 ha no B1 em 2027 grava (sem café ainda)
+     (medido) fix 1440x900 B(ordem inversa) B1 na safra 2020 (soja de 2027 fora da janela): {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '120 ha', '_dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)'}
+OK    · fix 1440x900 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado
+     (medido) fix 1440x900 B(ordem inversa) mensagem da recusa do café: Corrija os campos destacados; o que você preencheu foi mantido. | De 12/05/2027 a 27/09/2027, 90 ha de B1 estão com Soja (B1-A, BV 2027 primeiro). Máximo 30 ha nesse período.
+OK    · fix 1440x900 B(ordem inversa) · café 30 ha (limite 120) grava
+OK    · fix 1440x900 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30
+     (medido) fix 1440x900 B(ordem inversa) B1 na safra 2020 depois do café 30: {'sit': 'Livre', 'livre': '90 ha', 'dica': '90 ha livres a partir de 01/01/2020 (folga 1 dia)', 'ações': ['▾', 'Planejar ›']}
+OK    · fix 1440x900 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado
+     (medido) fix 1440x900 B(ordem inversa) mensagem da 2ª parcela de café: Corrija os campos destacados; o que você preencheu foi mantido. | De 12/05/2027 a 27/09/2027, 120 ha de B1 estão com Soja (B1-A, BV 2027 primeiro) e Café (B1-C, Café 2020 depois). Máximo 0 ha nesse período.
+OK    · fix 1440x900 B(ordem inversa) · sem rolagem lateral
+OK    · fix 1440x900 B(ordem inversa) · sem erro de JS
+     (medido) fix 1440x900 D(dividir C1) C1 na safra 2027: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '18 ha', 'LIVRE A PARTIR DE': '01/01/2027', '_dica': '18 ha livres a partir de 01/01/2027 (folga 1 dia)'}
+OK    · fix 1440x900 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa
+OK    · fix 1440x900 D(dividir C1) · soja 18 ha (limite) grava
+     (medido) fix 1440x900 D(dividir C1) toast: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+OK    · fix 1440x900 D(dividir C1) · Dividir C1 abre só a soja desta safra
+     (medido) fix 1440x900 D(dividir C1) nome sugerido da parcela nova: C1-A
+     (medido) fix 1440x900 D(dividir C1) resumo do painel Dividir: Dividir C1 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO AGRON
+OK    · fix 1440x900 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18
+OK    · fix 1440x900 D(dividir C1) · dividir em 10 + 8 (limite) grava
+     (medido) fix 1440x900 D(dividir C1) toast do dividir: C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+FALHA · fix 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa · C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+OK    · fix 1440x900 D(dividir C1) · sem rolagem lateral
+OK    · fix 1440x900 D(dividir C1) · sem erro de JS
+OK    · fix 390x844 B(ordem inversa) · preparo: soja 90 ha no B1 em 2027 grava (sem café ainda)
+     (medido) fix 390x844 B(ordem inversa) B1 na safra 2020 (soja de 2027 fora da janela): {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '120 ha', '_dica': '120 ha livres a partir de 01/01/2020 (folga 1 dia)'}
+OK    · fix 390x844 B(ordem inversa) · café 2020 de 40 ha depois da soja 2027 (40 + 90 = 130 > 120) recusa com motivo; nada gravado
+     (medido) fix 390x844 B(ordem inversa) mensagem da recusa do café: Corrija os campos destacados; o que você preencheu foi mantido. | De 12/05/2027 a 27/09/2027, 90 ha de B1 estão com Soja (B1-A, BV 2027 primeiro). Máximo 30 ha nesse período.
+OK    · fix 390x844 B(ordem inversa) · café 30 ha (limite 120) grava
+OK    · fix 390x844 B(ordem inversa) · editar o café 30 → 31 ha recusa; continua 30
+     (medido) fix 390x844 B(ordem inversa) B1 na safra 2020 depois do café 30: {'sit': 'Livre', 'livre': '90 ha', 'dica': '90 ha livres a partir de 01/01/2020 (folga 1 dia)', 'ações': ['▾', 'Planejar ›']}
+OK    · fix 390x844 B(ordem inversa) · mais um café de 10 ha em 2020 (30 + 10 + 90 = 130) recusa; nada gravado
+     (medido) fix 390x844 B(ordem inversa) mensagem da 2ª parcela de café: Corrija os campos destacados; o que você preencheu foi mantido. | De 12/05/2027 a 27/09/2027, 120 ha de B1 estão com Soja (B1-A, BV 2027 primeiro) e Café (B1-C, Café 2020 depois). Máximo 0 ha nesse período.
+OK    · fix 390x844 B(ordem inversa) · sem rolagem lateral
+OK    · fix 390x844 B(ordem inversa) · sem erro de JS
+     (medido) fix 390x844 D(dividir C1) C1 na safra 2027: {'SITUAÇÃO': 'Livre', 'ÁREA LIVRE': '18 ha', 'LIVRE A PARTIR DE': '01/01/2027', '_dica': '18 ha livres a partir de 01/01/2027 (folga 1 dia)'}
+OK    · fix 390x844 D(dividir C1) · soja 19 ha (20 + 19 > 38) recusa
+OK    · fix 390x844 D(dividir C1) · soja 18 ha (limite) grava
+     (medido) fix 390x844 D(dividir C1) toast: Cultivo incluído como parcela C1-B · 20 ha livres em C1 · plano Soja alta tecnologia.
+OK    · fix 390x844 D(dividir C1) · Dividir C1 abre só a soja desta safra
+     (medido) fix 390x844 D(dividir C1) nome sugerido da parcela nova: C1-A
+     (medido) fix 390x844 D(dividir C1) resumo do painel Dividir: Dividir C1 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 38 ha · alocado 38 ha · livre 0 ha Área conferida PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO META UNIDADE PLANO AGRON
+OK    · fix 390x844 D(dividir C1) · dividir em 10 + 9 (20 + 19 > 38) recusa "Nada foi gravado" com o motivo; continua 18
+OK    · fix 390x844 D(dividir C1) · dividir em 10 + 8 (limite) grava
+     (medido) fix 390x844 D(dividir C1) toast do dividir: C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+FALHA · fix 390x844 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa · C1 dividido em 2 parcelas · 20 ha livres. Plano operacional, recursos e demanda recalculados.
+OK    · fix 390x844 D(dividir C1) · sem rolagem lateral
+OK    · fix 390x844 D(dividir C1) · sem erro de JS
+
+RESULTADO fix: 28 ok · 2 falhas (tudo ['B', 'D'])
+  - fix 1440x900 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa
+  - fix 390x844 D(dividir C1) · toast do dividir não anuncia área livre que o café ocupa

@@ -1,0 +1,51 @@
+pré-carga: OS-0430 liberada. REQ-52 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+requisição nova: REQ-52
+k2: 8 itens a entregar · 0 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+  REQ-52 OS-0430 Liberadas Glifosato 480 lote G26-14 galão 20 L 320 L 0 L 320 L 16 galões A entregar —
+  REQ-52 OS-0430 Liberadas 2,4-D 806 lote D26-01 galão 20 L 160 L 0 L 160 L 8 galões A entregar —
+  REQ-52 OS-0430 Liberadas Óleo mineral lote O26-05 galão 20 L 80 L 0 L 80 L 4 galões A entregar —
+  OK  REQ-52: 3 itens da OS-0430 (Liberadas), lote sugerido, galão 20 L e saldo a entregar 320/160/80 L
+padrões: 320 Marcos | Entrega · REQ-52 × Entregue Glifosato 480 à OS-0430 (Dessecação pré-plantio), do lote G26-14 em galão 20 L. O material fica com quem recebe e aguarda a confirmação no app. Lote reservado Quantidade a entregar L A entrega
+toast: 320 L de Glifosato 480 entregues a Marcos (OS-0430). Aguarda confirmação no app.
+  REQ-52 OS-0430 Liberadas Glifosato 480 lote G26-14 galão 20 L 320 L 320 L — — Entrega completa Aguardando confirmação no app — [320, 320, False, 880, 0]
+  OK  entrega com padrões (320 L a Marcos): linha aguarda o app; cenário: custódia 320 L, lote 1.200 → 880 L, reserva baixada
+erro: Corrija os campos destacados; o que você preencheu foi mantido. | Acima do saldo a entregar: 160 L (160 L solicitado − 0 L consumido − 0 L em custódia).
+  OK  entrega de 161 L com saldo de 160 L: erro no campo, valor mantido e custódia continua 0
+O.S.: ['320/320 160/160 80/80', 'Sobra em custódia: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L. Receba a devolução no Estoque.', 'Liberadas'] | k2: 5 itens a entregar · 3 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+  OK  OS-0430 no cenário: 3 itens entregues e em custódia; encerramento bloqueado pela custódia; faixa conta 3 aguardando o app
+app: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+  REQ-52 OS-0430 Liberadas Glifosato 480 lote G26-14 galão 20 L 320 L 320 L — — Entrega completa —
+  OK  confirmação no app (aviso de outra tela) retira "Aguardando confirmação no app" sem recarregar
+k3: Em custódia: REQ-022 31,4 L de Abamectina 18 EC com Wesley (OS-0504) · REQ-023 1.673,1 kg de Sulfato de potássio com Joaquim (OS-0506) · REQ-023 743,6 kg de Nitrato de amônio com Joaquim (OS-0506) · REQ-024 1.142,75 kg de Nitrato de amônio com Joaquim (OS-0507) · REQ-024 45,71 kg de Ácido bórico com Joaquim (OS-0507) · REQ-031 500 kg de MAP 11-52 com Paula (OS-0417) · REQ-035 65 L de Fungicida A com Marcos (OS-0421) · REQ-52 320 L de Glifosato 480 com Marcos (OS-0430) · REQ-52 160 L de 2,4-D 806 com Marcos (OS-0430) · REQ-52 80 L de Óleo mineral com Marcos (OS-0430)
+padrão devolução: 320
+toast: 20 L de Glifosato 480 devolvidos ao disponível. Custódia de Glifosato 480 na OS-0430: 320 L → 300 L.
+  [300, 20, 900, 0] REQ-52 OS-0430 Glifosato 480 lote G26-14 320 L 0 L 20 L 300 L com Marcos Em uso na O.S. O.S. liberada
+  OK  devolução apta de 20 L: custódia 320 → 300 L, lote G26-14 880 → 900 L sem bloqueio
+toast: 10 L de Óleo mineral devolvidos e bloqueados para inspeção. Custódia de Óleo mineral na OS-0430: 80 L → 70 L.
+  Corrija os campos destacados; o que você preencheu foi mantido. | Descreva a condição (ex.: embalagem aberta). [330, 10, 320]
+  OK  devolução bloqueada de 10 L exige observação e entra em quarentena: O26-05 físico 330 L, bloqueado 10 L, disponível 320 L
+O26-05: O26-05 Óleo mineral Almox. defensivos 330 L — 10 L Liberar após inspeção 320 L Em quarentena 08/2028 | Câmara fria: ['S58-0801']
+toast: 10 L do lote O26-05 liberados com o laudo INSP-0042 por Ana (gestora). Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu). Disponível de Óleo mineral: 320 L → 330 L.
+  OK  filtro Câmara fria mostra só S58-0801; O26-05 liberado após inspeção (bloqueado 10 → 0, disponível 330 L)
+primário: 
+toast: Contagem INV-2611 registrada: diferença −30 L · AJ-71 aguarda o gestor. O saldo não muda até aprovar · informe a causa antes da aprovação.
+  ['Aguardando gestor', -30, 'INV-2611', 900] INV-2611 AJ-71 Glifosato 480 G26-14 Almox. defensivos 900 L 870 L −30 L Ajuste aguardando aprovação informe a causa Recontar Aprovar ajuste
+  OK  contagem cega (saldo oculto) de 870 L no G26-14: ajuste −30 L aguardando o gestor; físico continua 900 L
+toast: Ajuste INV-2611 (AJ-71) aprovado por Ana (gestora): −30 L no lote G26-14. Físico 900 L → 870 L. Fica revisão posterior pendente (Ana registrou a contagem e decidiu).
+  ['Aprovado', 870, 1] INV-2611 AJ-71 Glifosato 480 G26-14 Almox. defensivos 900 L 870 L −30 L Ajuste aprovado aplicado ao saldo revisão posterior pendente (Ana registrou a contagem e decidiu) —
+  OK  ajuste aprovado pelo gestor: G26-14 900 → 870 L, um movimento de ajuste, sem botão para aprovar de novo
+k6: 11 movimentos desde o início da demonstração · 0 aguardando sinal do app
+  tipos: ['Ajuste de inventário', 'Quarentena liberada', 'Devolução', 'Devolução', 'Recebimento confirmado no app', 'Entrega', 'Entrega', 'Entrega', 'Reserva', 'Reserva', 'Reserva']
+  OK  movimentos: 3 reservas, 3 entregas, confirmação no app, 2 devoluções, liberação e ajuste, com origem Web/App
+app sem sinal: Turno fechado: 10 ha em 1,5 h · salvo no aparelho, envia quando houver sinal. A ordem continua em execução.
+  23:58 MV-1012 Consumo apontado no app — REQ-52 OS-0430 Glifosato 480 2,4-D 806 Óleo mineral — 20 L 10 L 5 L Marcos App Aguardando sinal | k6: 12 movimentos desde o início da demonstração · 1 aguardando sinal do app
+  REQ-52 OS-0430 Glifosato 480 lote G26-14 320 L 0 L 20 L 300 L com Marcos Aguardando sinal do app consumo no aparelho · receba a sobra depois do envio
+  OK  consumo do app sem sinal: movimento "Aguardando sinal"; Glifosato segue consumido 0 L e custódia 300 L até o envio
+O.S.: ['20/20/280 10/0/150 5/10/65', 'Há apontamentos no aparelho aguardando sinal.']
+  OK  OS-0430 no cenário: consumido/devolvido/custódia por item e encerramento ainda bloqueado
+  OK  Fazenda Boa Vista: "Nenhum estoque na Boa Vista · Ver Santa Rita" (sem botão duplicado); o link volta à Santa Rita
+toast: Demonstração restaurada: O.S., estoque e app voltaram ao início.
+  [11, 0, 'A liberar', 1200] []
+  OK  Restaurar demonstração: 11 requisições (6 da Santa Rita + 5 da Lagoa Grande), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script
+RESULTADO: 15/15 ok
+rc=0

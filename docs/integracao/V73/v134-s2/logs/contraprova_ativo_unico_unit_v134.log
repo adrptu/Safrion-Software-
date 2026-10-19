@@ -1,0 +1,36 @@
+# contraprova: areas/cad_ativos_pessoas.py de e0c47a00 (v134), teste novo
+FALHA U1 contraexemplo do Codex: B cria b, a tela antiga A renomeia a; b continua no cadastro (e não fica inativo na Manutenção) :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Trator A1'
+- 'Trator A1,Trator B'
+            ^
+
+FALHA U2 duas edições do mesmo ativo: a segunda é recusada com o motivo; o salvo fica e o rascunho de A continua :: The input did not match the regular expression /outra tela alterou Trator Y/. Input:
+
+''
+
+FALHA U3 campo calculado na tela (capacidade, conjuntos) não conta como mudança: a renomeação da outra tela fica :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Trator A,Trator B'
+- 'Trator A,Trator B2'
+                    ^
+
+FALHA U4 excluído na outra tela e sem mudança aqui: sai daqui também; excluído aqui e mudado lá: recusa :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Trator A,Trator B'
+- 'Trator A'
+           ^
+
+FALHA U5 primeira gravação (cadastro vazio, semente): A e B abrem da semente; B renomeia, A cria c; nada se perde :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Trator A,Trator C'
+- 'Trator A2,Trator C'
+           ^
+
+OK   U6 sem outra tela: grava normal e repetir não regrava (mesmo comportamento de antes)
+RESULTADO: 1/6 ok
+rc=1

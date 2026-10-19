@@ -1,0 +1,16 @@
+OK 1440px · contexto Lagoa Grande disponível
+OK 1440px · quatro origens da seed aparecem
+OK 1440px · abre por teclado
+OK 1440px · seleção começa vazia
+FALHA 1440px · escolhe primeira origem
+FALHA 1440px · dose incompatível excluída com motivo
+OK 1440px · Escape fecha e devolve foco
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev105/tools/prototipo/v37/gen37/os_lote_test.py", line 54, in <module>
+    verificar(prefix+'reabrir conserva seleção',c.js(f"{dialog}.querySelector('input[aria-label^=\"OS-0590 ·\"]').checked"))
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/rev105/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'checked')
+    at <anonymous>:1:119

@@ -1,0 +1,69 @@
+# 1440 px · 148 telas + 14 estados · 211 tabelas (16 com seta de abrir; 97 setas; 1203 linhas) · 1 listas em cartões
+OK    A1440.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 0)
+OK    A1440.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 0)
+OK    A1440.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 0)
+OK    A1440.4 a varredura viu tabelas em árvore, setas e cartões (rodada completa)
+OK    D1440.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 0)
+OK    D1440.2 TAB-13 com "Expandir tudo" (19 telas), toda seta aberta tem o que mostrar (132 setas abertas; telas com desvio: 0)
+OK    G1440 sem erro de JavaScript e todo estado abriu
+OK    B1440 SAF1 B1 Planejar safra › etapa 2 · 1 fazenda: recolhido na abertura (1 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s)
+OK    B1440 SAF1 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 SAF1 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (2 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 SAF2 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 2 faixa(s)
+OK    B1440 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (14 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 OS B3 "Expandir tudo" abre todas as setas do escopo (14) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 PA B1 Atividades do plano (Tabela): recolhido na abertura (8 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 PA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 PA B3 "Expandir tudo" abre todas as setas do escopo (8) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B1440 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda
+OK    B1440 CO06 B1 Qualidade CO-06 · lotes: recolhido na abertura (7 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B1440 CO06 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    C1440 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido
+OK    C1440 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista e à vista
+# 390 px · 148 telas + 14 estados · 195 tabelas (13 com seta de abrir; 87 setas; 1106 linhas) · 1 listas em cartões
+OK    A390.1 tabelas: nenhuma seta aberta nem linha-filha à vista na abertura (telas com desvio: 0)
+OK    A390.2 cartões: nenhuma seta aberta, lista de filhos ou cartão sob grupo na abertura (telas com desvio: 0)
+OK    A390.3 tela: nenhum controle de abrir aberto nem details aberto, fora as exceções da TAB-12 (telas com desvio: 0)
+OK    A390.4 a varredura viu tabelas em árvore, setas e cartões (rodada completa)
+OK    D390.1 TAB-13 nenhuma seta de ir nem seta fora de controle de abrir, na abertura e com "Expandir tudo" (telas com desvio: 0)
+OK    D390.2 TAB-13 com "Expandir tudo" (19 telas), toda seta aberta tem o que mostrar (122 setas abertas; telas com desvio: 0)
+OK    G390 sem erro de JavaScript e todo estado abriu
+OK    B390 SAF1 B1 Planejar safra › etapa 2 · 1 fazenda: recolhido na abertura (1 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 SAF1 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 1 faixa(s)
+OK    B390 SAF1 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 SAF1 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda
+OK    B390 SAF2 B1 Planejar safra › etapa 2 · 2 fazendas: recolhido na abertura (2 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 SAF2 B4 faixa da fazenda recolhida com o resumo (área em ha e talhões planejados): 2 faixa(s)
+OK    B390 SAF2 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 SAF2 B3 "Expandir tudo" abre todas as setas do escopo (5) e "Recolher tudo" recolhe; o total não muda
+OK    B390 OS B1 Ordem de Serviço · Tabela com Agrupar por: recolhido na abertura (14 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 OS B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 OS B3 "Expandir tudo" abre todas as setas do escopo (14) e "Recolher tudo" recolhe; o total não muda
+OK    B390 CD01 B1 Cadastros CD-01 · fazendas e talhões (árvore): recolhido na abertura (3 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 CD01 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 CD01 B3 "Expandir tudo" abre todas as setas do escopo (3) e "Recolher tudo" recolhe; o total não muda
+OK    B390 PA B1 Atividades do plano (Tabela): recolhido na abertura (8 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 PA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 PA B3 "Expandir tudo" abre todas as setas do escopo (8) e "Recolher tudo" recolhe; o total não muda
+OK    B390 MA B1 Manutenção · blocos do ativo: recolhido na abertura (6 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 MA B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 EST B1 Estoque · saldos por lote (seção 4): recolhido na abertura (28 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 EST B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    B390 EST B3 "Expandir tudo" abre todas as setas do escopo (28) e "Recolher tudo" recolhe; o total não muda
+OK    B390 CO06 B1 Qualidade CO-06 · lotes: recolhido na abertura (7 setas, 0 abertas); 1 clique abre só aquele item e o conteúdo dele aparece
+OK    B390 CO06 B2 Enter na seta abre só aquele item e Espaço recolhe (foco na seta)
+OK    C390 C1 busca "T3" abre o caminho (faixa da fazenda) e mostra o T3; limpar a busca volta ao recolhido
+OK    C390 C2 endereço do lote L38-115 (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista (o painel ocupa a tela)
+RESULTADO: 66 ok · 0 falhas

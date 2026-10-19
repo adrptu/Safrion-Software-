@@ -1,0 +1,34 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 tabelas_saf_test.py
+  ok  TF03 cabeçalhos: uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula) · ['OPERAÇÃO', 'ATIVIDADE', 'CONJUNTO', 'RENDIMENTO', 'CUSTO R$/H', 'CUSTO R$/HA', 'CUSTO R$/KG', 'MODO', 'LARGURA', 'VELOCIDADE', 'EFICIÊNCIA', 'PARTE DA ÁREA', 'TRABALHA', 'JANELA POR TALHÃO', 'PLANOS']
+  ok  TF03 nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/ha · R$/kg", "Parte: …") · []
+  ok  árvore preservada: Plantio → Plantio e adubação de base (2 configurações) → 2 configurações com Parte "pelo rendimento" e Trabalha "Ao mesmo tempo" · [['Plantio', '1 atividade', '2 conjuntos', '', '', '', '', '', '', '', '', '', '', '', ''], ['Plantio', 'Plantio e adubação de base 2 configurações + Outra configuração', '2 conjuntos', '', '', '', '', 'por configuração', '', '', '', 'divide a área pelo rendimento', '', '', 'Soja alta tecnologia, So
+  ok  TF03 Custo R$/kg só na colheita, em coluna própria ("R$ 0,0606/kg"); Custo R$/ha com o número e a unidade ("R$ 109,40/ha") · [('Colheita de grãos', 'R$ 229,20/ha', 'R$ 0,0606/kg'), ('Colheita de café', 'R$ 662,86/ha', 'R$ 0,2907/kg')]
+  ok  2d cada valor com a unidade na célula ("4,80 ha/h", "36 m", "7 km/h", "75 %", "R$ 120,00/h") · []
+  ok  TF03 Modo "Informado": Largura, Velocidade e Eficiência vazias (—), rendimento informado · [['Tratamento de sementes', 'Tratamento de sementes', 'Máquina TSI na sede · equipe de 2', '40,00 ha/h', 'R$ 136,00/h', 'R$ 3,40/ha', '—', 'Informado', '—', '—', '—', '—', '—', '—', 'Soja alta tecnologia'], ['Colheita de café', 'Colheita', 'Derriçadeiras portáteis · equipe de 6', '0,35 ha/h', 'R$ 23
+  ok  TF03 filtro Operação = Plantio: só a árvore do Plantio (grupo, atividade e 2 configurações) · [['Plantio', '1 atividade'], ['Plantio', 'Plantio e adubação de base 2 configurações + Outra configuração'], ['Plantio', 'Plantio e adubação de base'], ['Plantio', 'Plantio e adubação de base']]
+  ok  TF03 filtro Modo = Informado: só configurações informadas (TSI, café, poda, fertirrigação…) · ['Colheita de café', 'Colheita de frutas', 'Fertirrigação', 'Plantio de mudas', 'Poda', 'Tratamento de sementes', 'Tratos culturais']
+  ok  TF03 filtro Largura = "36 m" (o menu mostra o texto da célula): só o pulverizador de 36 m · 14
+  ok  TF03 filtro Planos (valor exato): só as atividades do plano do café · ['Adubação 1ª parcela', 'Adubação 2ª parcela', 'Adubação pós-colheita', 'Colheita', 'Fungicida para ferrugem', 'Poda de esqueletamento']
+  ok  TF03 ordenar Largura crescente: 6 m antes de 12 m (número, não texto) · ['6 m', '12 m']
+  ok  TF03 ordenar Custo R$/ha decrescente: R$ 109,40/ha antes de R$ 58,20/ha (número, não texto) · ['R$ 109,40/ha', 'R$ 58,20/ha']
+   painel/aviso:  | Rendimento de Calagem · Trator 03 + Distribuidor 3 t: 9,00 ha/h · R$ 25,89/ha. Plano operacional e recursos recalculados.
+  ok  editar Largura 24 → 12 m na Calagem: Rendimento 9,00 ha/h e Custo 25,89 R$/ha na mesma linha, marcada "ajustado nesta safra" · ['Adubação a lanço', 'Calagem ajustado nesta safra', 'Trator 03 + Distribuidor 3 t', '9,00 ha/h', 'R$ 233,00/h', 'R$ 25,89/ha', '—', 'Largura × velocidade', '12 m', '10 km/h', '75 %', '—', '—', '—', 'Mamão Formosa · implantação irrigada']
+  ok  sem erro de script (1440) · []
+  ok  2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade) · ['', 'TALHÃO OU PARCELA', 'TIPO', 'CULTURA', 'VARIEDADE', 'PLANO AGRONÔMICO', 'VERSÃO', 'ÁREA', 'PLANTIO', 'META', 'ÁREA LIVRE', 'AJUSTES LOCAIS', '']
+  ok  2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão) · {'': '', 'TALHÃO OU PARCELA': 'T7 Dividir', 'TIPO': 'Talhão inteiro', 'CULTURA': 'Mamão Formosa', 'VARIEDADE': 'Formosa', 'PLANO AGRONÔMICO': 'Mamão Formosa produção Ajustar insumos', 'VERSÃO': 'v3', 'ÁREA': '42 ha', 'PLANTIO': '10/03/2025', 'META': '45 t/ha/ano', 'ÁREA LIVRE': '—', 'AJUSTES LOCAIS'
+  ok  2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7 · [('T7 Dividir', '45 t/ha/ano')]
+  ok  2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro · [('T1 Dividir', '2 parcelas'), ('T1-A', 'Parcela'), ('T1-B', 'Parcela')]
+  ok  2b meta 62,5 salva no T2: célula e filtro mostram "62,5 sc/ha" (sem arredondar para 63) · ('62,5 sc/ha', ['38 sc/ha', '45 t/ha/ano', '60 sc/ha', '62 sc/ha', '62,5 sc/ha', '64 sc/ha', '66 sc/ha'])
+   etapa4 cabeçalhos: ['PARTE DA ÁREA', 'JANELA POR TALHÃO', 'TALHÃO'] n linhas 65 T2: [('—', '28/09/2026'), ('—', '12/11/2026'), ('—', '02/12/2026'), ('—', '17/12/2026'), ('—', '17/10/2026'), ('', '18/10/2026'), ('—', '07/11/2026'), ('—', '13/02/2027')]
+  ok  2b etapa 4: Gatilho (regra da atividade) e Data (da ocorrência) separados · ({'OPERAÇÃO › ATIVIDADE › CULTIVO': 'Dessecação pré-plantio', 'GATILHO': 'DAP −20', 'DATA': '', 'MÊS': 'set/26 – out/26', 'ÁREA': '610 ha', 'HORAS-CONJUNTO': '28,2 h', 'DECORRIDO': '', 'CUSTO DE OPERAÇÃO': 'R$ 8.839', 'CUSTO DE INSUMOS': 'R$ 59.170', 'CUSTO TOTAL': 'R$ 68.009', 'CUSTO R$/HA': 'R$ 11
+  ok  2b filtro Talhão = T2: só ocorrências do T2 (com operação e atividade que as agrupam) · 8
+  ok  2b etapa 6: MAP 11-52 com necessidade "62.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias · {'GRUPO': 'Fertilizantes', 'INSUMO': 'MAP 11-52', '1º USO': '15/10/2026', 'NECESSIDADE LÍQUIDA': '62.500 kg', 'FALTA EM': '18/10/2026', 'VALOR': 'R$ 243.750,00', 'SITUAÇÃO': 'Em cotação', 'SOLICITAÇÃO': 'SOL-2026-07', 'A COMPLEMENTAR': '—', 'DEMANDA BRUTA': '152.500 kg', 'JÁ REALIZADO': '—', 'ESTOQU
+  ok  2b etapa 6: cada quantidade com a unidade junto ("152.500 kg", "610,0 L"), sem coluna Unidade e sem "falta em" no texto · []
+  ok  2b filtro Necessidade líquida = "62.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52 · ['MAP 11-52']
+  ok  2b filtro Grupo = Herbicidas: só os herbicidas · ['2,4-D 806', 'Cletodim 240', 'Glifosato 480']
+  ok  2b ordenar Necessidade líquida decrescente nos fertilizantes: "62.500 kg" primeiro, "0 kg" por último (ordem pelo número) · ['62.500 kg', '14.800 kg', '870 kg', '680 kg', '0 kg']
+  ok  sem erro de script (etapas 2, 4 e 6) · []
+   cabeçalhos 390: ['OPERAÇÃO', 'ATIVIDADE', 'CONJUNTO']
+  ok  390 px: a página não rola na horizontal (a tabela rola dentro da caixa) e o cabeçalho Operação está à vista · [390, 390]
+RESULTADO: 28/28 ok
+[exit 0]

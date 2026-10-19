@@ -1,0 +1,55 @@
+{
+ "tl_rect": {
+  "x": 39,
+  "y": 284.6875,
+  "width": 312,
+  "height": 274,
+  "top": 284.6875,
+  "right": 351,
+  "bottom": 558.6875,
+  "left": 39
+ },
+ "svg_rect": {
+  "x": 39,
+  "y": 284.6875,
+  "width": 312,
+  "height": 274,
+  "top": 284.6875,
+  "right": 351,
+  "bottom": 558.6875,
+  "left": 39
+ },
+ "alvo_no_ponto": "svg|dentro do #tl",
+ "arrasto_dedo": {
+  "antes": 86,
+  "trajetoria": [
+   69,
+   63,
+   56,
+   50,
+   43,
+   37,
+   30,
+   24
+  ],
+  "depois": 24,
+  "scrollY": 655
+ },
+ "toque_simples": 18,
+ "hoje": 86,
+ "icone": {
+  "caixa": [
+   22,
+   22
+  ],
+  "label": "04/08 a 05/08: 2 aplicações de defensivo. Ver insumos, doses e efeito.",
+  "pop": "× 04/08 a 05/08 · Defensivos · 2 04/08 · P19 · Defensivo · Ácaro-rajado · 75,1 ha Espirodiclofeno 240 SC 0,30 L/ha 22,5 L IRAC 23 · 1ª entrada Calda: Atomizador · 600 L/ha · 45.066 L no talhão Clima no dia: 32 °C máx · 20 °C mín · UR 55 % · folha molhada 1 h Efeito no alvo: 14 % → 2 % (−87 %) · vistorias 01/08 e 15/08 Até a vistoria: 2 dia(s) quentes e secos Ir para a vistoria de 15/08 › 05/08 · P",
+  "pop_rect": [
+   43,
+   347,
+   67,
+   487
+  ]
+ },
+ "erros_js": []
+}

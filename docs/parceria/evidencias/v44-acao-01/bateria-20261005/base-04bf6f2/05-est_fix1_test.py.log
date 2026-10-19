@@ -1,0 +1,22 @@
+$ CDP_GL=1 timeout 900 flock /tmp/cdp9333.lock python3 est_fix1_test.py
+NF 4533: NF 4533 conferida hoje PC-090 Coop. Vale Ver pedido Semente de soja 58 W S58-0926 · validade 08/2026 20.000 kg 20.000 kg 0 kg 20.000 kg Vencido [[1116, 1116]]
+  OK  NF 4533 vencida: situação "Vencido" (não "Aguarda laudo") e grade sem rolagem
+S58-0926: S58-0926 Câmara fria 20.000 kg — 20.000 kg vencido: não volta ao disponível 0 kg Vencido · 08/2026 | k4: Bloqueado para inspeção: KCl 60% 10.000 kg · vencido, fora do disponível: Semente de soja 58 W 20.000 kg · custódia fica fora do depósito e não soma no físico
+  OK  lote vencido S58-0926: sem "Liberar após inspeção", motivo na coluna Bloqueado
+  OK  faixa da etapa 4 separa inspeção de vencido
+  FALHA etapa 4 sem rolagem; "Liberar após inspeção" do KCl inteiro na tela · [[1176, 1116]]
+  OK  cenário: 20.000 kg do lote vencido seguem bloqueados, nenhuma liberação
+cenReceber: 40 L de Óleo mineral recebidos no lote O26-07V (Almox. defensivos) e bloqueados até a inspeção.
+O26-07V: O26-07V Almox. defensivos 40 L — 40 L vencido: não volta ao disponível 0 L Vencido · 07/2026
+  OK  lote vencido recebido por cenReceber: sem "Liberar após inspeção"
+  OK  etapa 5 sem rolagem; "Aprovar ajuste" da INV-2609 inteiro
+contadores: ['Paula (almoxarife)', 'Rui (almoxarife)']
+  OK  nova contagem INV-2612 com diferença: grade sem rolagem, Recontar e Aprovar ajuste inteiros
+  OK  contador "Rui (almoxarife)" (mesmo papel da trilha), sem "conferente" na tela
+k2: 5 itens a entregar · 0 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+  FALHA faixa da etapa 2: 2 só consulta por fase e 1 bloqueado por O.S. impedida · 5 itens a entregar · 0 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+filtro: 2 ['Todos os locais'] 27
+  OK  Restaurar demonstração volta o filtro para "Todos os locais"
+  OK  sem erro de script
+RESULTADO: 10/12 ok · FALHAS: etapa 4 sem rolagem; "Liberar após inspeção" do KCl inteiro na tela; faixa da etapa 2: 2 só consulta por fase e 1 bloqueado por O.S. impedida
+[exit 1]

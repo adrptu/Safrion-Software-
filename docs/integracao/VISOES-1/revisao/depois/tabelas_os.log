@@ -1,0 +1,41 @@
+linhas ['OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0431', 'OB-0104']
+opções ['C1 1', 'P1 2', 'Sem talhão 1', 'T1 1', 'T1-A 1', 'T1-B 1', 'T2 2', 'T3 1', 'T4 1']
+  ok  TF01 seletor Talhão visível com Todos, contagem por opção e Sem talhão · ('Talhão: Todos ▾', ['C1 1', 'P1 2', 'Sem talhão 1', 'T1 1', 'T1-A 1', 'T1-B 1', 'T2 2', 'T3 1', 'T4 1'])
+  ok  TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418) · ['OS-0417', 'OS-0418']
+  ok  TF01 T1 não seleciona T1-A (OS-0430) nem "Trator T1" (OS-0431): só OS-0421 · (['OS-0421'], 'Talhão: T1 ▾')
+  ok  TF01 T1 ou T2: OS-0421 (T1+T2) aparece uma vez, com OS-0431 · ['OS-0421', 'OS-0431']
+  ok  TF01 Sem talhão: OB-0104 com Local Armazém Sede · (['OB-0104'], ['Armazém Sede'])
+  ok  TF01 Todos os talhões volta às linhas do contexto · 10
+  ok  TF01 T1 + Encerradas: vazio continua vazio (sem cair para todas as linhas) · []
+  ok  TF01 mesmo nome "T1" em duas fazendas não se mistura; vazio por (vazio) · [['A'], ['C']]
+  ok  TF01 Fazenda = Todas: rótulos com a fazenda · ['C1 · Santa Rita 1', 'P1 · Santa Rita 2', 'Pivô 4 · Lagoa Grande 1', 'Pivô 5 · Lagoa Grande 1', 'Pivô 6 · Lagoa Grande 2', 'Pivô 11 · Lagoa Grande 1']
+  ok  TF01 troca para Santa Rita: talhão fora do escopo sai do filtro e a tela avisa (sem trocar a fazenda sozinha) · (['Todas', 'Lagoa Grande', 'Santa Rita', 'Boa Vista'], 'Pivô 4 · Lagoa Grande', ['OS-0506'], 'Talhão: Todos ▾', ['Talhão fora de Santa Rita: PV04 saiu do filtro.'])
+  ok  TF02 Talhão (T1 ou T2) E busca "Plantio": só OS-0431 · ['OS-0431']
+  ok  TF02 Kanban com o mesmo recorte (talhão + fase) e nota do recorte · (['OS-0421'], ['OS-0421'], ['Filtro da lista aplicado: fase Em execução · talhão T1, T2 · 1 de 10 ordens Limpar filtros'])
+  ok  TF02 Recursos só com blocos das O.S. do recorte de talhão · (['OS-0421'], ['A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de Santa Rita no filtro da lista (fase Em execução · talhão T1, T2); conflitos, manutenção e uso continuam da semana inteira.'])
+  ok  TF02 abrir e fechar o detalhe conserva o recorte · (True, ['OS-0421'], 'Talhão: T1, T2 ▾')
+  ok  TF02 recarregar a página (volta do detalhe completo) conserva talhão e fase · (['OS-0421'], 'Talhão: T1, T2 ▾')
+  ok  TF02 limpar Talhão mantém o filtro de fase · (['OS-0421'], ['OS-0420', 'OS-0421'])
+  ok  TF02 filtrar não executou ação de negócio (cenário salvo inalterado)
+  ok  TF03 Área ordena por número (38 antes de 100), com a unidade na célula ("160,00 ha", decisão de 05/10/2026) · ['38,00 ha', '95,00 ha', '95,00 ha', '96,00 ha', '100,00 ha', '102,00 ha', '128,00 ha', '160,00 ha', '350,00 ha']
+  ok  TF03 Início ordena por data, anos distintos (2025 antes de 2026) · ['10/09/2025', '15/09/2025', '19/09/2026', '20/09/2026', '22/09/2026', '24/09/2026', '24/09/2026', '24/09/2026', '25/09/2026', '15/10/2026']
+  ok  TF03 Realizado, Saldo e Progresso em colunas próprias
+  ok  TF03 unidade fixa na célula ("60,00 ha", "37,5 %"), cabeçalho sem "(ha)"; sem a coluna Lâmina, que ficava sempre vazia · ([], ['O.S.', 'ATIVIDADE', 'TALHÃO', 'LOCAL', 'ÁREA', 'INÍCIO', 'FIM', 'FASE', 'SITUAÇÃO', 'OBSERVAÇÃO', 'QUEM RESOLVE', 'PRÓXIMA AÇÃO', 'PRAZO', 'REALIZADO', 'SALDO', 'DISPENSADO', 'PROGRESSO', 'RESPONSÁVEL'])
+  ok  TF03 Próxima ação separada do prazo ("entrega" | "até 15/10") · ('entrega', 'até 15/10')
+  ok  TF06 OS-0421 aparece nos grupos T1 e T2 com a mesma identidade · {'C1': ['OS-0425'], 'P1': ['OS-0417', 'OS-0418'], 'Sem talhão': ['OB-0104'], 'T1': ['OS-0421'], 'T1-A': ['OS-0430'], 'T1-B': ['OS-0424'], 'T2': ['OS-0421', 'OS-0431'], 'T3': ['OS-0415'], 'T4': ['OS-0420']}
+  ok  TF06 total geral conta O.S. distintas (10), não a soma dos grupos (11) · (11, 10, 'Total: 10 O.S. distintas · 1.164 ha (cada O.S. contada uma vez; os grupos se sobrepõem quando a O.S. tem mais de um talhão)')
+  ok  TF06 contador da grade no agrupado conta O.S. distintas (10 de 10), não grupos (9) · 10 de 10
+  ok  TF06 com T1 ou T2: só grupos T1 e T2; total 2 O.S. · 452 ha (350 + 102, cada O.S. uma vez) · (['T1', 'OS-0421', 'T2', 'OS-0421', 'OS-0431'], 'Total: 2 O.S. distintas · 452 ha (cada O.S. contada uma vez; os grupos se sobrepõem quando a O.S. tem mais de um talhão)')
+  ok  TF06 clicar na O.S. dentro do grupo abre o detalhe da própria O.S.
+  ok  TF06 desagrupar volta às linhas canônicas · 10
+  ok  sem botão Expandir/Recolher na lista sem grupos
+  ok  sem erro de script (1440) · None
+  ok  TF04 390 px: Talhão visível sem rolar a tabela, alvo ≥ 28 px e página sem rolagem horizontal · [95, 216.578125, 411.140625, 31, 390, 390]
+  ok  TF04 390 px: seletor aberto cabe entre o menu e a borda, sem deslocar a página, foco na pesquisa · [76, 382, 390, 390, 'ost_q', 68]
+  ok  TF04 toque: abre o seletor e marca T1 (alvo ≥ 32 px); a lista filtra na hora · ([110, 704.140625, 48], ['OS-0421'])
+  ok  TF04 Esc fecha o seletor e o foco volta ao botão Talhão
+  ok  TF04 teclado: Enter abre com o foco na pesquisa; digitar "T2" deixa só T2 · ('ost_q', ['T2'])
+  ok  TF04 teclado: Tab até T2 e Espaço marca (T1 ou T2) · (['OS-0421', 'OS-0431'], '<input data-dc-tpl="158" type="checkbox" style="width: 18px; height: 18px; accen')
+  ok  TF04 Enter na linha abre o detalhe; fechar volta com o recorte · (True, ['OS-0421', 'OS-0431'])
+  ok  sem erro de script (390) · []
+RESULTADO: 38/38 ok

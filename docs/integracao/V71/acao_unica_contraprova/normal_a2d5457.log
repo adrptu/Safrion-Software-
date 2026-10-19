@@ -1,0 +1,13 @@
+OK    1 SAF · faixa leva à etapa: 4 cartões-botão, palavra do estado (concluída/etapa atual/pendente), cursor de ação; clicar na etapa 1 vai a ela e na 2 volta; etapa 3 travada sem safra não navega e diz o motivo na dica (recusa do DS); os cartões recebem foco pelo Tab; nenhuma seta ‹ › solta 
+OK    2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla 
+OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Criar safra secundária 
+OK    3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado 
+OK    4 SAF · falta de plano: sem descrição visível na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (as linhas dos cultivos iguais antes e depois e ainda "Aplicar plano em 4 cultivos" na volta) 
+OK    5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027 
+OK    6 SAF · filtro sem resultado: 0 linhas, "Limpar…" dentro da lista (secundário) e a área mantém o passo da etapa; no máximo uma primária 
+OK    7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 4 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640) 
+OK    8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 4 tem "Enviar para cotação" como comando (não avanço); 4→2→4 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos" 
+OK    9 sem erro de JS (SAF) 
+
+RESULTADO: 10 ok · 0 falhas (saf)
+rc=0

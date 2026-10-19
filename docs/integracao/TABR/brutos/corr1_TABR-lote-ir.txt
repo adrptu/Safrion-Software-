@@ -1,0 +1,7 @@
+irtest.py exit=0 :: 22 de 26 verificações OK
+irr_fluxo_test.py exit=0 :: 31 ok · 2 falhas ['19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo', '27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Pr
+irr_estado_test.py exit=0 :: 38 ok · 0 falhas []
+map_irrig_filtro_test.py exit=0 :: 15 ok · 0 falhas []
+map_decisoes_test.py exit=0 :: 18 ok · 0 falhas []
+os_irrig_filtro_test.py exit=0 :: RESULTADO: 14 ok · 1 falhas
+os_v39_selo_agua_test.py exit=1 :: RESULTADO: 10/12 ok · FALHAS: IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,0 mm uma vez cada (formato irrMm: 2 casas, mínimo 1); IR-03 · OS-0422: selo amarelo Ja

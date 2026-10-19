@@ -1,0 +1,19 @@
+OK    · C1 Compras pela tela: convites → Enviar à Direção → Registrar aprovação da Direção emite PC-101 a PC-104 e grava no cenário (compras.v1, aprovada)
+OK    · C2 a compra aprovada não volta para a chave antiga de Compras (fonte única: cenário)
+OK    · C16 Planejar safra (demanda de insumos da 2026/27) mostra a compra no estado gravado pela Compra: Pedidos emitidos · PC-101 a PC-104
+OK    · C3 EST: o pedido aprovado aparece por linha (PC-101 MAP linha 1, NPK linha 4; PC-104 com 5 linhas), sem perder os pedidos anteriores
+OK    · C4 cota esgotada ao gravar a nota: aviso de que nada foi gravado, nenhum recebimento no cenário e o formulário segue aberto com os valores
+OK    · C5 repetição depois de liberar o armazenamento: NF 9101 grava uma vez a linha 1 (25.000 kg aptos + 5.000 kg em quarentena)
+OK    · C6 a mesma NF 9101 traz outra linha do PC-101 (NPK, linha 4): grava a linha 4 sem confundir com a linha 1
+OK    · C6c a mesma NF 9101 de novo na linha 1 do PC-101 é recusada como documento duplicado e nada é gravado
+OK    · C7 NF 9101 já vinculada ao PC-101 é recusada no PC-103 e nada é gravado
+OK    · C8 faixa do Estoque: saldo a entregar por linha (MAP 79.500 → 49.500 kg; NPK 14.800 → 10.800 kg)
+OK    · C9 Compras etapa 6, linha MAP: pedido 79.500 · recebido 30.000 · em quarentena agora 5.000 · a entregar 49.500 kg
+OK    · C10 linha NPK: 14.800 · 4.000 · 0 · 10.800 kg; linha sem nota (Nitrato de potássio) intacta: 870 · 0 · 0 · 870 kg
+OK    · C11 laudo INSP-0911 libera o lote M26-01: na Compra a linha MAP fica 30.000 recebido · 0 em quarentena agora · 49.500 a entregar (recebido não muda)
+OK    · C12 recarregar a Compra mantém as linhas (MAP 30.000/0/49.500; NPK 4.000/0/10.800)
+OK    · C13 teclado: o pedido PC-101 (3 insumos) tem controle focável na própria linha
+OK    · C14 celular 390 px: a página não rola na horizontal; a coluna A entregar é alcançável na grade e a linha MAP traz os mesmos números
+OK    · C15 nenhum erro de JavaScript nas páginas visitadas
+RESULTADO: 17 ok · 0 falhas
+rc=0

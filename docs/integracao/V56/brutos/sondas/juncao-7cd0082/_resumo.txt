@@ -1,0 +1,3 @@
+build 7cd0082 FALHA=0
+7cd0082 ctl5_test.py rc=1 :: RESULTADO 28/30 ['E3.1 CD-01 › Água (a fonte): 16 pontos; "Outorga SINT-002/0000" 150 m³/h, vence 20/11/2026; captação superficial vigente do Rio A soma 186.11 L/s', 'E3.2c IR-04 painel da capta
+7cd0082 tabelas_irr_test.py rc=1 :: 

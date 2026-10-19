@@ -1,0 +1,11 @@
+ M ../RETOMADA-NUVEM.md
+ M acao_unica_test.py
+ M areas/processo_os.py
+ M dados.py
+ M dados_lagoa_safra.py
+ M engine.py
+ M g2lib.js
+ M os_cenario_test.py
+ M os_lib.py
+ M os_v39_bloq_test.py
+ M ostest.py

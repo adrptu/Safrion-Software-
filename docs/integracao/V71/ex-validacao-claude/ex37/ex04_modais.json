@@ -1,0 +1,311 @@
+{
+ "1_os_botoes": [
+  "Criar ordem"
+ ],
+ "1_os_form": [
+  {
+   "titulo": "Nova ordem",
+   "campos": [
+    [
+     "Safra",
+     ""
+    ],
+    [
+     "Cultivo",
+     ""
+    ],
+    [
+     "Atividade",
+     ""
+    ],
+    [
+     "Início da janela",
+     ""
+    ]
+   ],
+   "verdes": [
+    "Emitir ordem"
+   ]
+  }
+ ],
+ "2_AG-01": {
+  "filtros_iniciais": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]",
+   "Filtrar por fazenda=Lagoa Grande [Todas|Lagoa Grande|Santa Rita|Boa Vista]",
+   "Filtrar por cultura=Todas [Todas|Mamão]",
+   "Filtrar por talhão=Todos [Todos|Pivô 1|Pivô 2|Pivô 4|Pivô 6|Pivô 9|Pivô 17|Pivô 18|Pivô 19|Pivô 22|Pivô 23]",
+   "Agrupar vistorias por=Nenhum [Nenhum|Talhão|Alvo|Situação|Fazenda]"
+  ],
+  "aplica": [
+   "ok Filtrar por fazenda=Santa Rita",
+   "ok Filtrar por talhão=P1"
+  ],
+  "filtros_aplicados": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]",
+   "Filtrar por fazenda=Santa Rita [Todas|Lagoa Grande|Santa Rita|Boa Vista]",
+   "Filtrar por cultura=Todas [Todas|Café|Feijão|Mamão|Milho|Soja]",
+   "Filtrar por talhão=P1 [Todos|C1|P1|P2|T2|T4|T7]",
+   "Agrupar vistorias por=Nenhum [Nenhum|Talhão|Alvo|Situação|Fazenda]"
+  ],
+  "clique": {
+   "txt": "Programar vistoria",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "form": [
+   {
+    "titulo": "Programar vistoria",
+    "campos": [
+     [
+      "Talhão T1 · Soja pré-plantio · 312 ha T2 · So",
+      "T1"
+     ],
+     [
+      "Alvo Nematoide-de-cisto · nematoide Daninhas ",
+      "soja-nematoide"
+     ],
+     [
+      "Data",
+      "2026-09-24"
+     ],
+     [
+      "Responsável Marcos João",
+      "Marcos"
+     ]
+    ],
+    "verdes": [
+     "Programar vistoria"
+    ]
+   }
+  ]
+ },
+ "2_AG-03": {
+  "filtros_iniciais": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]"
+  ],
+  "aplica": [
+   "sem filtro fazenda",
+   "sem filtro talh"
+  ],
+  "filtros_aplicados": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]"
+  ],
+  "clique": {
+   "txt": "+ Criar diagnóstico",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "form": [
+   {
+    "titulo": "Criar diagnóstico",
+    "campos": [
+     [
+      "Talhão · cultura",
+      "T2 · Soja"
+     ],
+     [
+      "Evidências (vistoria · laudo)",
+      ""
+     ],
+     [
+      "Hipótese · causa",
+      ""
+     ],
+     [
+      "Meta",
+      ""
+     ],
+     [
+      "Risco",
+      "médio"
+     ],
+     [
+      "Ação proposta",
+      ""
+     ],
+     [
+      "Responsável",
+      "Ana"
+     ]
+    ],
+    "verdes": [
+     "Salvar"
+    ]
+   }
+  ]
+ },
+ "2_AG-02": {
+  "filtros_iniciais": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]",
+   "Filtrar por fazenda=Todas [Todas|Lagoa Grande|Santa Rita|Boa Vista]"
+  ],
+  "aplica": [
+   "ok Filtrar por fazenda=Santa Rita",
+   "sem filtro talh"
+  ],
+  "filtros_aplicados": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]",
+   "Filtrar por fazenda=Santa Rita [Todas|Lagoa Grande|Santa Rita|Boa Vista]"
+  ],
+  "clique": {
+   "txt": "Registrar laudo",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "form": [
+   {
+    "titulo": "Registrar laudo de solo",
+    "campos": [
+     [
+      "Fazenda",
+      "Santa Rita"
+     ],
+     [
+      "Talhão",
+      ""
+     ],
+     [
+      "Coleta",
+      ""
+     ],
+     [
+      "Laboratório",
+      ""
+     ],
+     [
+      "Arquivo do laudo (PDF)",
+      ""
+     ],
+     [
+      "Ca cmolc/dm³ mmolc/dm³ mg/dm³",
+      ""
+     ],
+     [
+      "Ca cmolc/dm³ mmolc/dm³ mg/dm³",
+      "cmolc/dm³"
+     ],
+     [
+      "Mg cmolc/dm³ mmolc/dm³ mg/dm³",
+      ""
+     ],
+     [
+      "Mg cmolc/dm³ mmolc/dm³ mg/dm³",
+      "cmolc/dm³"
+     ],
+     [
+      "K mg/dm³ cmolc/dm³ mmolc/dm³",
+      ""
+     ],
+     [
+      "K mg/dm³ cmolc/dm³ mmolc/dm³",
+      "mg/dm³"
+     ],
+     [
+      "H+Al cmolc/dm³ mmolc/dm³",
+      ""
+     ],
+     [
+      "H+Al cmolc/dm³ mmolc/dm³",
+      "cmolc/dm³"
+     ],
+     [
+      "Al cmolc/dm³ mmolc/dm³",
+      ""
+     ],
+     [
+      "Al cmolc/dm³ mmolc/dm³",
+      "cmolc/dm³"
+     ],
+     [
+      "Argila % g/kg",
+      ""
+     ],
+     [
+      "Argila % g/kg",
+      "%"
+     ]
+    ],
+    "verdes": [
+     "Registrar laudo"
+    ]
+   }
+  ]
+ },
+ "3_pos": {
+  "clique": {
+   "txt": "Programar pós",
+   "dis": false,
+   "tag": "A",
+   "href": "AG-01.dc.html"
+  },
+  "url": "http://127.0.0.1:38511/AG-01.dc.html",
+  "form": [],
+  "paineis": "",
+  "filtros": [
+   "Trocar perfil de demonstração=Ana · Gestora e RT [Proprietário · todos os papéis (teste)|Ana · Gestora e RT|Caio · PCP|Rui · Almoxarife e expedição|Paula · Conferência|Zé · Mecânico|Otávio · Manutenção (PCM)|João · Irrigante (eletricista NR-10)|Igor · Produção|Dora · Comercial|Marta · Qualidade]",
+   "Filtrar por fazenda=Lagoa Grande [Todas|Lagoa Grande|Santa Rita|Boa Vista]",
+   "Filtrar por cultura=Todas [Todas|Mamão]",
+   "Filtrar por talhão=Todos [Todos|Pivô 1|Pivô 2|Pivô 4|Pivô 6|Pivô 9|Pivô 17|Pivô 18|Pivô 19|Pivô 22|Pivô 23]",
+   "Agrupar vistorias por=Nenhum [Nenhum|Talhão|Alvo|Situação|Fazenda]"
+  ],
+  "topo": "A\nProprietário · todos os papéis (teste)\nAna · Gestora e RT\nCaio · PCP\nRui · Almoxarife e expedição\nPaula · Conferência\nZé · Mecânico\nOtávio · Manutenção (PCM)\nJoão · Irrigante (eletricista NR-10)\nIgor · Produção\nDora · Comercial\nMarta · Qualidade\nAgrícola › Pragas e doenças\n‹\nAgrícola\nPragas e doenças\n2 focos a confirmar\nProgramar vistoria\nFazenda\nTodas\nLagoa Grande\nSanta Rita\nBoa Vista\nCultura\nTodas\nMamão\nTalhão\nTodos\nPivô 1\nPivô 2\nPivô 4\nPivô 6\nPivô 9\nPivô 17\nPivô 18\nPivô 19\nPivô 22\nPivô 23\nVistorias\nTodas 10\nFoco 2\nPerto do NC 1\nEm controle 2\nVistoria atrasada 1\nAbaixo do NC 1\nEncerrada 3\n"
+ },
+ "4_su01_botoes": [
+  "Reprogramar proposta"
+ ],
+ "4_su01_linhas": [
+  "ITEM · ORIGEM ⇅ FALTA FIRME ⇅ PEDIR ATÉ · NECESSÁRIA ▲ DEMANDA ⇅ DISPO",
+  "▸ Semente de soja 58 W Sementes · 3 origens Coberta — necessária 24/09",
+  "▸ KCl 60% Fertilizantes · 6 origens 50.000 kg 10.000 kg coberto se o l",
+  "▸ Óleo mineral Adjuvantes · 6 origens 210 L 13/09 · atrasado necessári",
+  "▸ 2,4-D 806 Herbicidas · 3 origens 310 L 13/09 · atrasado necessária 2",
+  "▸ Glifosato 480 Herbicidas · 3 origens 20 L 13/09 · atrasado necessári",
+  "▸ Nitrato de cálcio Fertilizantes · 1 origem 680 kg 16/09 · atrasado n",
+  "Rolamento 6310 Peças · colhedora, preventiva 3 un 25/09 · até 3 dias n",
+  "Diesel S10 Combustível · frota do plantio 11.000 L 26/09 · até 3 dias ",
+  "▸ MAP 11-52 Fertilizantes · 3 origens 62.500 kg 30/09 necessária 15/10",
+  "▸ NPK 20-05-20 Fertilizantes · 2 origens 14.800 kg 30/09 necessária 15",
+  "▸ Fungicida TS Fungicidas · 3 origens 41 L 02/10 necessária 14/10 61 L"
+ ],
+ "4_su01_form": [
+  {
+   "titulo": "Reprogramar proposta de reposição",
+   "campos": [
+    [
+     "Item *",
+     "Adjuvante espalhante"
+    ],
+    [
+     "Nova data necessária *",
+     ""
+    ],
+    [
+     "Motivo *",
+     ""
+    ]
+   ],
+   "verdes": [
+    "Reprogramar"
+   ]
+  }
+ ],
+ "4_su01_menu_linha": "linha sem ⋯: ▸ Óleo mineral Adjuvantes · 6 origens 210 L 13/09 · atrasado necessária 25/09 61",
+ "4_su01_menu_itens": [],
+ "5_su01_verdes": [
+  "Abrir cotação da SOL-2026-07"
+ ],
+ "5_cmp": {
+  "clique": {
+   "txt": "Abrir cotação da SOL-2026-07",
+   "dis": false,
+   "tag": "A",
+   "href": "CMP.dc.html"
+  },
+  "url": "http://127.0.0.1:38511/CMP.dc.html",
+  "nenhuma_safra": true,
+  "trecho": "TRABALHANDO EM\nInsumos da safra\nMateriais, peças e serviços\nFazenda Santa Rita\nNenhuma safra escolhida\nTrocar safra\nSafras e solicitações\nSAFRA\n⇅\nSOLICITAÇÃO DE COMPRA\n⇅\nORIGEM\n⇅\nCOMPRA\n⇅\nAÇÃO\n⇅\nSafra"
+ }
+}

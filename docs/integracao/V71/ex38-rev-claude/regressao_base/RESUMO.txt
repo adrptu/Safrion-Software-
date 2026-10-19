@@ -1,0 +1,9 @@
+app_entrega_parcial_test.py | rc=0 | 26s | 7/7 ok · FALHAS: 0 
+app_mb03_turno_test.py | rc=0 | 17s | 11/11 ok · FALHAS: 0 
+consumo_divergente_test.py | rc=0 | 78s | 21/21 ok · FALHAS: 0 
+dose_divergente_test.py | rc=1 | 42s |     FALHAS += dose_divergente_nav.rodar() AssertionError: Dia não oferece conferência 
+ap_unico_test.py | rc=1 | 1s |     if 'unit' in MODOS: FALHAS += unit() AttributeError: 'NoneType' object has no attribute 'group' 
+solo_os_test.py | rc=1 | 26s |     if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js')) RuntimeError: Uncaught 
+ostest.py | rc=1 | 16s |     if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js')) RuntimeError: Uncaught 
+mbtest.py | rc=0 | 93s | FALHAS: 0 
+FIM

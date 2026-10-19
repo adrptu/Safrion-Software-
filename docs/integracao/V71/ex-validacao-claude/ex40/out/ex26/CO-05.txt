@@ -1,0 +1,78 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Beneficiamento
+Beneficiamento
+i
+1 lote bloqueado após encerramento
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Ordens de processo
+Criar ordem de processo
+4 de 4
+ORDEM · PRODUTO · ROTA
+⇅
+JANELA
+⇅
+ETAPA
+⇅
+LOTES DE ENTRADA · ORIGEM
+⇅
+SAÍDAS · BALANÇO · QUALIDADE DO LOTE
+⇅
+AÇÃO
+⇅
+OB-0110
+Mamão Formosa · Packing frutas · v3
+23–24/09
+Em execução
+12,0 t · OC-0507 (T7 · S38) · L38-115 a 118
+9,6 t A · 1,8 t B · descarte 0,6 t · em processo 0,0 t
+balanço 0,0 t · sem divergência
+Aguardando inspeção
+Registrar saídas
+OB-0106
+Milho 17,2% → 14% · Secagem grãos · v2
+20–26/09
+Em execução
+48,0 t úmidas · OC-0501 (T3)
+39,1 t secas (base 14%) · em processo 7,1 t · quebra 1,8 t
+balanço 0,0 t · sem divergência
+Registrar avanço
+OB-0104
+Café · Café bica → beneficiado · v1
+15–18/09
+Encerradas
+bica L27-018/019 · colheita C1 jul/26
+3.690 sc 60 kg (L27-013) · perdas 4,1%
+balanço 0 · conciliado
+L27-013 bloqueado · INSP-88
+Ver lote
+OB-0112
+Mamão Formosa · Packing frutas · v3
+29/09–04/10
+A liberar
+a receber · OC-0513 (T7)
+—
+Liberar ordem
+Encerrada ≠ liberada
+OB-0104 fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada. O lote L27-013 (3.690 sc 60 kg) segue Bloqueado pela inspeção INSP-88 — indisponível para reserva e expedição em CO-07 até a decisão da qualidade.
+Tela: Beneficiamento · 1 lote bloqueado após encerramento

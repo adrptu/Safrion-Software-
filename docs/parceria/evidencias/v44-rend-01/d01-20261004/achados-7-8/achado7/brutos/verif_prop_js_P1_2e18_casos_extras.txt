@@ -1,0 +1,9 @@
+{"nome": "extra 6x6 partes fixas, todas 10 h", "violacoes": [], "theta": 5.230769230769229, "motor": "V3b"}
+{"nome": "extra 5x7 partes fixas, todas 10 h", "violacoes": [], "theta": 4.280000000000005, "motor": "V3b"}
+{"nome": "extra 7x5 partes fixas, todas 10 h", "violacoes": [], "theta": 4.9999999999999964, "motor": "V3b"}
+{"nome": "extra 6x7 partes fixas, todas 10 h", "violacoes": [], "theta": 5.26923076923077, "motor": "V3b"}
+{"nome": "extra 7x6 partes fixas, todas 10 h", "violacoes": [], "theta": 5.999999999999995, "motor": "V3b"}
+{"nome": "extra 7x7 partes fixas, todas 10 h", "violacoes": [], "theta": 6.2620320855615015, "motor": "V3b"}
+{"nome": "extra 8x8 partes fixas, todas 10 h", "violacoes": [], "theta": 7.293577981651377, "motor": "V3b"}
+{"nome": "extra 10x10 partes fixas, todas 10 h", "violacoes": [], "theta": 9.35714285714286, "motor": "V3b"}
+{"nome": "extra 6x6 T5+P5 sem janela", "violacoes": [], "theta": 4.2967032967032965, "motor": "V3b"}

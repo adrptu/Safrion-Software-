@@ -1,0 +1,161 @@
+# Correção do Comercial (agente COM:corrigir que fez o commit 29cdc6e): testes de regra e navegador registrados no transcript
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T21:38:03.844Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && SAFRION_DADOS=sintetico python3 comercial_unit_test.py > /tmp/COM-unit.log 2>&1; echo rc=$?; grep -c '^OK' /tmp/COM-unit.log; grep -v '^OK' /tmp/COM-unit.log | head -40
+rc=0
+105
+RESULTADO: OK 105/105
+
+### 2026-10-09T21:38:09.254Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && SAFRION_DADOS=sintetico python3 producao_unit_test.py > /tmp/COM-prod-unit.log 2>&1; echo rc=$?; tail -2 /tmp/COM-prod-unit.log; grep '^FALHA' /tmp/COM-prod-unit.log | head; SAFRION_DADOS=sintetico python3 links_ocultos_test.py 2>&1 | tail -3; ls ../../../../docs/comercial/verificacao/ && SAFRION_DADOS=sintetico python3 ../../../../docs/comercial/verificacao/contas.py 2>&1 | tail -3
+rc=0
+OK    nomes de producao.js não são redefinidos em areas/producao.py:PR_UI_JS
+RESULTADO: OK 123/123
+OK    L2 todo o resto da varredura está na lista residual, por par e com motivo 
+OK    L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (MA-04, visível e com âncora no estado da manutenção), não para PL-05 
+TOTAL 8 · falhas 0
+contas.py
+sonda_base.py
+OK    KC19 19.900 sc × 60 kg = 1.194.000 kg (livre 2.896.800 kg = 48.280 sc); × 50 kg = 995.000 kg (livre 3.095.800 kg = 51.596,67 sc de 60 kg; +199.000 kg); CT-203 12.000 sc 50 kg × R$ 132,00 = R$ 1.584.000,00 (o valor do acordo não depende da massa)
+OK    KC20 PV-030 com 50 kg: 200.000 kg; RS-0001 232.500 kg acima em 32.500 kg = 650 sc 50 kg
+FALHAS: 0
+
+### 2026-10-09T21:38:37.652Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && ls -la --time-style=+%H:%M comercial.js producao.js areas/vendas.py areas/producao.py g2lib.js comercial_unit.js comercial_fluxo_test.py && (time python3 build.py > /tmp/COM-build.log 2>&1); echo rc=$?; grep -c FALHA /tmp/COM-build.log; tail -3 /tmp/COM-build.log
+-rw-r--r-- 1 root root 80842 18:27 areas/producao.py
+-rw-r--r-- 1 root root 79546 18:28 areas/vendas.py
+-rw-r--r-- 1 root root 54621 18:26 comercial.js
+-rw-r--r-- 1 root root 27787 18:34 comercial_fluxo_test.py
+-rw-r--r-- 1 root root 66344 18:33 comercial_unit.js
+-rw-r--r-- 1 root root 53784 18:26 g2lib.js
+-rw-r--r-- 1 root root 55201 18:26 producao.js
+
+real	0m0.851s
+user	0m0.558s
+sys	0m0.112s
+rc=0
+0
+143 artboards → <sp-com>/tools/prototipo/v37/gen37/project · menu vigente: 48 · ocultos: 95
+
+### 2026-10-09T21:38:54.544Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && env CHROME_BIN=<chrome> flock /tmp/cdpC.lock env CDP_GL=1 timeout 900 python3 comercial_revisao_test.py > /tmp/COM-rev.log 2>&1; echo rc=$?; grep -E '^(OK|FALHA)|RESULTADO|==' /tmp/COM-rev.log | cut -c1-400
+rc=0
+== duplo · A1 duplo clique humano nas primárias do painel
+OK  A1 duplo clique em "Confirmar saída da RM-0002" (agricultor entrega): a saída grava uma vez e a entrega NÃO é confirmada pelo 2º clique (RM em trânsito) · [['ok', 'ok'], 'ok', ['Em trânsito', True, None, 1], 'RM-0002: saída de 10.000 kg (22.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 30.500,00 a receber (28 d após a entrega comprovada). L39-13
+OK  A1 o formulário "Confirmar entrega" abre sem data nem "Recebido" escolhidos (nada pré-marcado) · [[], [], 'RM-0002 · PV-036 · Frutas Real Em trânsito Agricultor organiza a entrega · CD Frutas Real · Vitória/ES · Baú refrigerado 12 t ABC1D23 × PRÓXIMO PASSO Confirme a entrega quando o cliente receber (data e devolução, se houver). VENDA PV-036 · Frutas Real PRODUTO Mamão Formos
+OK  A1 confirmar a entrega sem escolher "Recebido" é recusado junto do formulário; nada gravado · ESAGEM Bruto 22.000 kg Tara 12.000 kg Líquido 10.000 kg saída 26/09 21:41 · Rui (expedição) crédito: aprovado por Ana (gestora) ENTREGA Entrega a confirmar. DEVOLUÇÕES Nenhuma devolução. MOVIMENTOS MP-1013 26/09 21:41 expedição −10.000 kg L39-133 Rui (expedição) Cancelar Confirmar e
+OK  A1 duplo clique em "Confirmar entrega": uma entrega (26/09), nenhuma devolução, e o 2º clique não abre outra ação · ['ok', ['Entregue', '2026-09-26', 0], 'RM-0002 · PV-036 · Frutas Real Entregue Agricultor organiza a entrega · CD Frutas Real · Vitória/ES · Baú refrigerado 12 t ABC1D23 × PRÓXIMO PASSO R$ 30.500,00 a receber até 24/10. VENDA PV-036 · Frutas Real PRODUTO Mamão 
+OK  A1 duplo clique em "Registrar venda": PV-039 gravada e nenhuma reserva feita pelo 2º clique (o painel mostra "Reservar" para quem decide) · ['ok', [True, 0], ['Reservar'], 'PV-039 registrada: Coop Grão Sul · 100 sc de Soja em grão a R$ 130,00/sc = R$ 13.000,00 · pronta entrega 28/09–04/10 · À vista na entrega.']
+OK  A1 passado o intervalo, o clique deliberado em "Reservar" age: uma reserva para o PV-039 · [1, 'RS-0002: 100 sc do L10-031 reservados para o PV-039 (Coop Grão Sul). L10-031 disponível 34.445 sc · PV-039 coberto.']
+OK  A1 duplo clique em "Registrar a saca": saca gravada e nenhuma reserva nova (só a RS-0001 da semente) · ['ok', [True, ['RS-0001']], 'PV-030: saca de 60 kg registrada por Dora (comercial) (Contrato CT-201): 4.000 sc = 240.000 kg; falta 125 sc.']
+OK  duplo: nenhuma página com erro de JS
+== cabecalho · A6 o cabeçalho não repete o verde do painel aberto
+OK  A6 painel da RM-0002 aberto: um só verde "Confirmar saída da RM-0002" (o do painel); o cabeçalho fica sem verde · [[], ['Confirmar saída da RM-0002']]
+OK  A6 bruto e tara digitados continuam no formulário depois de outro toque na tela · ['22000', '12000']
+OK  A6 fechado o painel, a primária volta ao cabeçalho ("Confirmar saída da RM-0002") e abre o painel · ['Confirmar saída da RM-0002']
+OK  A6 o verde do cabeçalho abre o formulário da saída (Peso bruto) · ['RM-0002 · PV-036 · Frutas Real Programada Agricultor organiza a entrega · CD Frutas Real · Vitória/ES · Baú refrigerado 12 t ABC1D23 × PRÓXIMO PASSO Pese o caminhão e confirme a saída: baixa o lote um', []]
+OK  A6 "Registrar venda" aberto: o verde é o do painel; o cabeçalho não repete · [[], ['Registrar venda']]
+OK  cabecalho: nenhuma página com erro de JS
+== qualidade · A3 só a Qualidade (ou a gestora) libera o lote devolvido; A11 verde só para quem tem o papel
+OK  A3 Dora no lote devolvido L39-134: nenhum verde "Liberar"; o painel diz quem decide (Ana (gestora) ou Marta (qualidade)) · ['ok', 'L39-134', [], [], 'L39-134 · Mamão Formosa · fruta de campo Em inspeção Galpão de frutas Lagoa Grande · vence 29/09 · recebido 26/09 × PRÓXIMO PASSO Liberar lote · Qualidade (Marta). Qualidade: Recebido devolvido: a Qualidade confere e libera. Decisão 
+OK  A3 Rui no lote devolvido L39-134: nenhum verde "Liberar"; o painel diz quem decide (Ana (gestora) ou Marta (qualidade)) · ['ok', 'L39-134', [], [], 'L39-134 · Mamão Formosa · fruta de campo Em inspeção Galpão de frutas Lagoa Grande · vence 29/09 · recebido 26/09 × PRÓXIMO PASSO Liberar lote · Qualidade (Marta). Qualidade: Recebido devolvido: a Qualidade confere e libera. Decisão d
+OK  A3 perfil "Marta · Qualidade" no seletor; o painel mostra "Liberar L39-134" · [['Marta · Qualidade'], ['Liberar L39-134']]
+OK  A3 Marta libera: grava "Marta (qualidade)" (quem agiu, não um nome fixo) · [['Liberado', 'Marta (qualidade)'], 'L39-134 liberado por Marta (qualidade): 400 kg aptos para reserva e venda.']
+OK  A11 Rui (expedição) no L10-031 com pedido a cobrir: nenhum verde "Reservar …"; o painel diz quem decide · [[], [], 'L10-031 · Soja em grão Liberado Silo 01 · recebido 05/03 × PRÓXIMO PASSO Reservar para pedido · Comercial. Qualidade: Íntegro no recebimento. Decisão de Ana (gestora) ou Dora (comercial). FÍSICO 38.420 sc BLOQUEADO 0 sc APTO 38.420 sc RESERVADO 3.875 sc DISPONÍVEL 
+OK  A11 Dora (comercial) vê "Reservar L10-031 para pedido" no cabeçalho · ['Reservar L10-031 para pedido']
+OK  qualidade: nenhuma página com erro de JS
+== situacao · A4 em trânsito e A5 carga sem reserva que a cubra
+OK  A5 antes de gravar, o painel avisa: líquido 4.000 kg acima do previsto (6.000 kg), a diferença sai da reserva prevista para a RM-0003 · ['ok', 'RM-0002 · PV-036 · Frutas Real Programada Agricultor organiza a entrega · CD Frutas Real · Vitória/ES · Baú refrigerado 12 t AAA1A11 × PRÓXIMO PASSO Pese o caminhão e confirme a saída: baixa o lote uma vez, só o reservado do PV-036. VEND
+OK  A5 a saída grava com o aviso de que a RM-0003 fica sem reserva · RM-0002: saída de 10.000 kg (22.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 30.500,00 a receber (28 d após a entrega comprovada). L39-133 disponível 2.050 kg. Aviso: líquido 4.000 kg acima do previsto (6.000 kg): RM-0003 fica sem reserva que a cubra (reservar de 
+OK  A5 RM-0003 aparece "Programada · impedida: reserva menor que o previsto" (não "Confirmar saída") · RM-0003 PV-036 · Frutas Real Mamão Formosa · fruta de campo L39-133 4.000 kg — Agricultor entrega Rota Sul Transportes · Baú refrigerado 12 t · BBB2B22 26/09 Programada impedida: reserva menor que o previsto · Comercial (L39-133)
+OK  A5 painel da RM-0003: sem verde "Confirmar saída"; o passo diz a reserva que falta e quem resolve · [[], 'RM-0003 · PV-036 · Frutas Real Programada Agricultor organiza a entrega · CD Frutas Real · Vitória/ES · Baú refrigerado 12 t BBB2B22 × PRÓXIMO PASSO Saída impedida: reserva do PV-036 no L39-133 (0 kg) menor que o previsto da carga (4.000 kg): reservar de novo ou cancelar a carg
+OK  A4 venda com a RM-0002 em trânsito: "Em trânsito" (não "Entregue") · PV-036 · Frutas Real Mamão Formosa · fruta de campo Pronta entrega 24–26/09 10.000 kg R$ 3,05/kg 10.000 kg 0 kg 0 kg Em trânsito Confirmar entrega da RM-0002 · Expedição
+OK  A4 "Entregue nos últimos 30 dias" conta só o entregue (RM-0001: R$ 91.470,00), não a carga em trânsito · A RECEBER (A VENCER) R$ 121.970,00 próximo: Frutas Real R$ 91.470,00 em 15/10 VENCIDO (COBRAR) R$ 0,00 nada vencido ENTREGUE NOS ÚLTIMOS 30 DIAS R$ 91.470,00 saídas de venda desde 27/08
+OK  situacao: nenhuma página com erro de JS
+== unidade · A7 venda em saca de 50 kg e A11 datas sem barra
+OK  A7 reservar para o PV-030 (saca de 50 kg): sugestão 4.000 em "sc 50 kg" (200.000 kg) · ['ok', '4000', 'PV-030 · Coop Grão Sul Sem reserva Soja em grão · pronta entrega · set–out/26 · saldo do CT-201 × PRÓXIMO PASSO Falta 4.000 sc 50 kg: reservar lote apto (L10-031 46.104 sc 50 kg). QUANTIDADE 4.000 sc 50 kg PREÇO R$ 128,00/sc 50 kg VALOR R$ 512.000,00 UNIDADE DO CONTRATO saca de 5
+OK  A7 a carga do PV-030 mostra "600 sc 50 kg" (a massa da venda), não "500 sc" · ['ok', 'RM-0002 PV-030 · Coop Grão Sul Soja em grão L10-031 600 sc 50 kg 600 sc 50 kg Cliente retira Coop Grão Sul · Bitrem graneleiro 37 t · AAA1A11 26/09 Entregue R$ 76.800,00 a receber até 26/09']
+OK  A7 devolução digitada "100" em sc 50 kg = 5.000 kg (não 6.000 kg) · [True, 5000, '100 sc 50 kg devolvidos da RM-0002 (Fora do padrão contratado): lote L39-133 Em inspeção, só a Qualidade libera. PV-030: entregue 500 sc 50 kg, a receber da carga R$ 64.000,00.']
+OK  A11 "Outras datas" com o teclado numérico (sem barra): 2809 e 3009 = janela 28/09–30/09 · [['2026-09-28', '2026-09-30'], 'stão: o menor entre o disponível do lote (37.920 sc) e a falta do pedido (100 sc). Pode reduzir. ATENDIMENTO · RESERVAS POR LOTE Nenhuma reserva. CARGAS DE SAÍDA Nenhuma carga. FINANCEIRO · A RECEBER Nada a receber ainda (nasce na saída). MOVIMENTOS Nenhum movimen
+OK  unidade: nenhuma página com erro de JS
+RESULTADO: OK 33/33
+
+### 2026-10-09T21:56:35.593Z
+$ cd <scratchpad>/com && head -20 mut2.py | grep -n "mutantes" ; timeout 1200 python3 mut.py > /tmp/COM-mut1.log 2>&1; echo rc=$?; grep -c MORTO /tmp/COM-mut1.log; grep -v MORTO /tmp/COM-mut1.log | cut -c1-300
+rc=0
+38
+base falhas [] 95
+
+### 2026-10-09T21:57:00.964Z
+$ cd <scratchpad>/com && timeout 900 python3 mut2.py > /tmp/COM-mut2.log 2>&1; echo rc=$?; cut -c1-200 /tmp/COM-mut2.log
+rc=0
+base falhas [] 95
+MORTO P: prReservar sem a checagem de ator · ['R01b reservar com perfil sem o papel (Caio · PCP) é recusado: decisão do comercial ou da gestora', 'C11 AC-12 R-C14: Rui não reserva; Dora reserva e
+MORTO P: prCancelarReserva aceita qualquer perfil · ['RV-A12f reservar acima da falta da venda (PV-036 coberto, falta 0) é recusado: nunca reserva mais que o vendido', 'RV-A12d M17 entrega sem trans
+MORTO P: prSaldoFut sem o máximo zero · ['R02 CE-03 venda futura expedida acima da quantidade (30.040 de 30.000 kg): vendas futuras 0 kg, nunca −40, e a oferta livre não ganha 40 kg', 'C05h exces
+MORTO P: prReservar aceita venda encerrada? (sem falta de qualquer jeito) · ['RV-A12f reservar acima da falta da venda (PV-036 coberto, falta 0) é recusado: nunca reserva mais que o vendido']
+MORTO P: prSitPed sem Encerrada · ['R04 R-C11 venda com saldo encerrado aparece "Encerrada" (não "Entregue" nem "Sem reserva")', 'C09b cancelada a carga (reservas intactas), encerrar cancela RS-0001
+
+### 2026-10-09T22:15:02.256Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+118:        print('== qualidade · A3 só a Qualidade (ou a gestora) libera o lote devolvido; A11 verde só para quem tem o papel')
+9:  qualidade  A3 (S2) e A11: lote devolvido só é liberado por Marta (qualidade) ou Ana (agrônoma); Dora e Rui não veem verde; "Reservar"
+
+### 2026-10-09T22:15:16.245Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && sed -i "112s/prLiberarLote(x, L.id))/prLiberarLote(x, L.id, 'Marta'))/; 117s/prLiberarLote(x, r2.L.id))/prLiberarLote(x, r2.L.id, 'Marta'))/; 254s/prLiberarLote(x, r.L.id))/prLiberarLote(x, r.L.id, 'Marta'))/" producao_unit.js && grep -n "prLiberarLote" producao_unit.js | cut -c1-120 && SAFRION_DADOS=sintetico python3 producao_unit_test.py > /tmp/COM-prod-unit.log 2>&1; tail -1 /tmp/COM-prod-unit.log; grep ^FALHA /tmp/COM-prod-unit.log | cut -c1-300; SAFRION_DADOS=sintetico python3 comercial_unit_test.py > /tmp/COM-unit.log 2>&1; tail -1 /tmp/COM-unit.log; grep ^FALHA /tmp/COM-unit.log | cut -c1-400
+112:  const lb = MUD(c, x => prLiberarLote(x, L.id, 'Marta')); ok('U07d Liberar lote bloqueado por carência é recusado
+117:  const S2 = prSaldos(c2, r2.L); const lb2 = MUD(c2, x => prLiberarLote(x, r2.L.id, 'Marta'));
+122:  const S3 = prSaldos(c3, r3.L); const l3 = MUD(c3, x => prLiberarLote(x, r3.L.id, 'Marta')); const S3b = prSaldos(c
+254:  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-036', lote: r.L.id, kg: 10000, chave: 'W-R01', ator: 'Ana' }));
+291:  MUD(c, x => prLiberarLote(x, a.L.id, 'Marta'));
+RESULTADO: OK 123/123
+RESULTADO: OK 105/105
+
+### 2026-10-09T22:15:36.853Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && for T in comercial_revisao_test.py producao_fluxo_test.py comercial_fluxo_test.py; do env CHROME_BIN=<chrome> flock /tmp/cdpC.lock env CDP_GL=1 timeout 900 python3 $T > /tmp/COM-$T.log 2>&1; echo "$T rc=$? $(grep RESULTADO /tmp/COM-$T.log)"; grep ^FALHA /tmp/COM-$T.log | cut -c1-600; done
+Command running in background with ID: bbhjmcs1d. Output is being written to: <sessao-tmp>/tasks/bbhjmcs1d.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T22:16:15.192Z
+$ cd <sp-com>/docs/comercial && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+35:| D-C29 | Safra de grão **em colheita** (começou a ser colhida e algum cultivo dela a
+36:| D-C30 | Carga programada precisa da reserva que a cubra: previsto acima da reserva at
+37:| D-C31 | Liberar lote (inclusive o devolvido, R-C10) só com o papel qualidade ou agr�
+38:| D-C32 | Painéis da Produção e do Comercial: o 2º clique de um duplo clique (`deta
+40:## Perguntas só da realidade da fazenda (para a homologação)
+47:## Revisão por contraexemplo (v1.1, 06/10/2026)
+71:## Revisão adversarial do Codex (09/10/2026, HEAD `bdc5ca8`)
+76:| A1 | S2 | Duplo clique humano confirmava a entrega, reservava lote depois de "Registr
+77:| A2 | S2 | Lote repetido na carga baixava a reserva de outra venda | D-C30 |
+78:| A3 | S2 | Qualquer perfil liberava o lote devolvido, gravado em nome da Qualidade | D
+80:| A5 | S3 | Carga sem reserva que a cobrisse continuava "Confirmar saída" | D-C30 |
+81:| A6 | S3 | Verde do cabeçalho com o rótulo do painel apagava o que foi digitado | D-
+85:| A10 | S3 | 1º caminhão da safra virava estoque com déficit falso | D-C29 |
+86:| A11 | S4 | "Abrir RM" verde na VEN; local de retirada em venda entregue; "Reservar" v
+
+### 2026-10-09T22:17:05.921Z
+$ cd <sp-com> && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+- **Rótulo:** especificado. Nenhum código alterado. "(executado)" marca o que saiu de comando rodado em 06/1
+- **v1.1 (06/10/2026):** revisão por contraexemplo (commit "spec COM: revisão por contraexemplo"); achados C
+- **v1.2 (09/10/2026):** A-17 do Codex (comentário 6070584991; DEC-0510-03 dimensional): a venda guarda a mas
+- **v1.3 (09/10/2026):** design system de 09/10 (BOT-03, BOT-08): o Painel comercial não põe "Ver vendas de 
+- **v1.4 (09/10/2026, revisão adversarial sobre `bdc5ca8`, subagente revisor; parecer do Codex pendente):** D
+- **Base:** `f4121bd` (branch `claude/v44-comercial`). `gen37/` = `tools/prototipo/v37/gen37/`. PRD = `Safrion
+## Revisão adversarial (09/10/2026, HEAD `bdc5ca8`)
+Revisor: subagente revisor do workflow (Claude), em cópias, sem alterar arquivo versionado; não é o parecer do Codex, que continua pendente.
+Correções no commit "COM: correções da revisão". Regressão: `comercial_unit.js` casos RV-A2..RV-A12 (regras, node) e `comercial_revisao_test.py`
+
+### 2026-10-09T22:27:09.136Z
+$ cd <sp-com>/tools/prototipo/v37/gen37 && python3 build.py > /tmp/COM-build.log 2>&1; echo build rc=$? FALHA=$(grep -c FALHA /tmp/COM-build.log); tail -1 /tmp/COM-build.log; python3 montar_render.py 2>&1 | tail -1; SAFRION_DADOS=sintetico python3 comercial_unit_test.py > /tmp/COM-unit.log 2>&1; tail -1 /tmp/COM-unit.log; SAFRION_DADOS=sintetico python3 producao_unit_test.py > /tmp/COM-prod-unit.log 2>&1; tail -1 /tmp/COM-prod-unit.log; SAFRION_DADOS=sintetico python3 links_ocultos_test.py 2>&1 | tail -1; SAFRION_DADOS=sintetico python3 ../../../../docs/comercial/verificacao/contas.py 2>&1 | tail -1
+build rc=0 FALHA=0
+143 artboards → <sp-com>/tools/prototipo/v37/gen37/project · menu vigente: 48 · ocultos: 95
+_render montado: 143 páginas + 20 arquivos do site · dados reais locais: 5/5
+RESULTADO: OK 105/105
+RESULTADO: OK 123/123
+TOTAL 8 · falhas 0
+FALHAS: 0

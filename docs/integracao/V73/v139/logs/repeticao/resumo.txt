@@ -1,0 +1,11 @@
+BASE cadf_det_test rc=1 
+cadf_test rc=0 RESULTADO: OK 15/15
+cadf_fix_lista_test rc=0 RESULTADO: OK 11/11
+BASE nav_modulos_test rc=0 RESULTADO: 15 ok · 0 falhas
+ma_unica_test rc=0 RESULTADO: 23/23 ok
+BASE producao_fluxo_test rc=1 RESULTADO: FALHOU 15/20
+ma_rastreio_test rc=0 RESULTADO: 58/58 ok
+cadf_det_test rc=1 
+nav_modulos_test rc=0 RESULTADO: 15 ok · 0 falhas
+producao_fluxo_test rc=1 RESULTADO: FALHOU 15/20
+FIM

@@ -20,6 +20,7 @@ try:
         try: c=Chrome(port=free()); break
         except Exception: time.sleep(2)
     J=c.js; c.size(1440,900); U=f'http://127.0.0.1:{p}/'
+    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})   # V2-3: teste de domínio lê colunas fora do "Abre com"
     CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
     SETV="""((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem campo'; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok';})"""
     def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
@@ -30,7 +31,8 @@ try:
         time.sleep(.35)
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
-    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha moram no ⋯ da própria linha; o texto da linha termina com os itens desse ⋯ (como no mip_fluxo_test)
+    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>(r.innerText+' '+[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).join(' ')).replace(/\\s+/g,' ').trim())") or []
     faz=lambda: J("(document.querySelector('select[aria-label=\"Filtrar por fazenda\"]')||{}).value||''")
     ir('Main.dc.html',0.8); J("localStorage.removeItem('talhao-os-mip-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear()")
     if 'a' in PARTE:
@@ -41,7 +43,7 @@ try:
             [f0,f1,f2,f3,f4]==['Lagoa Grande','Santa Rita','Santa Rita','Lagoa Grande','Lagoa Grande'], [f0,f1,f2,f3,f4])
         # 2 · atraso de ritmo visível na lista e com o próximo passo nomeado
         ir('AG-01.dc.html'); l60=next((x for x in linhas() if x.startswith('VIS-060')),'')
-        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2r')].find(r=>r.innerText.trim().startsWith('VIS-060')); const b=[...r.querySelectorAll('button,a')].find(b=>b.innerText.trim()==='Programar vistoria'); b.click();})()"); time.sleep(.5)
+        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2r')].find(r=>r.innerText.trim().startsWith('VIS-060')); const b=[...r.querySelectorAll('button,a,[role=menuitem]')].find(b=>b.textContent.trim()==='Programar vistoria'); b.click();})()"); time.sleep(.5)
         pv=J("(()=>{const a=document.querySelector('aside[aria-label=\"Programar vistoria\"]'); return a?[a.querySelector('#pv_tal').value,a.querySelector('select[aria-label=\"Alvo\"]').value]:null;})()")
         chk('2 AG-01 (Lagoa Grande): VIS-060 "Vistoria atrasada · prevista para 17/09 · 6 dias" com "Programar vistoria", que abre o formulário no Pivô 17 × ácaro-rajado',
             'Vistoria atrasada' in l60 and '17/09 · 6 dias' in l60 and 'Programar vistoria' in l60 and pv==['PV17','mamao-acaro'], [l60,pv])
@@ -55,7 +57,9 @@ try:
         chk('4 1280 × 800: AG-01, AG-03 e AG-04 sem rolagem lateral (Próximo passo à vista)', all(v and max(v)<=0 for v in larg.values()), larg)
         # 5 · Mapa (7 dias) e AG-01 iguais no T7: VIS-008 perto do NC, "Seguir monitorando" como botão
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(dict(mf_faz='Santa Rita',lay='MIP/MID',tsel=['T7'])))})"); ir('IN-04.dc.html',1.6)
-        lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('T7:'))")
+        # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+        # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+        lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('T7:'))")
         pr=J("(()=>{const a=[...document.querySelectorAll('aside[aria-label^=\"T7\"] a, aside[aria-label^=\"T7\"] button')].find(a=>(a.getAttribute('style')||'').indexOf('30, 122, 76')>=0||(a.getAttribute('style')||'').indexOf('#1E7A4C')>=0); return a?[a.tagName,a.innerText.trim()]:null;})()")
         fonte=J("document.body.innerText.indexOf('a mesma base do AG-01')")
         ir('AG-01.dc.html'); l08=next((x for x in linhas() if x.startswith('VIS-008')),'')
@@ -80,10 +84,12 @@ try:
     if 'b' in PARTE:
         # 8 · O.S. cancelada sem execução: não conta no nº máximo nem na rotação; nova decisão reaproveita o DIA-009; clique duplo sem erro
         ir('AG-01.dc.html#VIS-013:decidir'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
+        setv('aside #dc_dose','1')   # AGRO-02: dose digitada pelo RT (Inseticida B, 1,0 kg/ha)
         clk('Emitir receituário e gerar O.S.','aside'); t0=T()
         # cancelamento sem execução feito na tela O.S. (o núcleo da O.S. é de outra trilha): grava a etapa no cenário e volta ao AG-01 vindo da O.S.
         J("(()=>{const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); c.ordens['OS-0440'].etapa='Canceladas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")
         ir('OS.dc.html#OS-0440'); ir('AG-01.dc.html#VIS-013'); a=aside(); clk('Decidir controle','aside'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
+        setv('aside #dc_dose','1')   # AGRO-02: a nova decisão também começa sem dose
         a2=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
         J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
         J("(()=>{const b=[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.'); b.click(); b.click();})()"); time.sleep(.6)
@@ -98,7 +104,9 @@ try:
         # 9 · erradicação: área do foco não passa do talhão
         ir('AG-01.dc.html#VIS-055:decidir'); setv('aside input[aria-label="Área em hectares"]','999'); a=aside()
         dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Gerar O.S. de erradicação').disabled")
-        chk('9 Erradicação com 999 ha no Pivô 22 (83 ha): trava "Área maior que o talhão (83 ha)" e botão bloqueado', 'Área maior que o talhão (83 ha).' in a and dis is True, [a[-300:],dis])
+        # SINT-T01: área do Pivô 22 da fonte única (dados_lagoa_fonte), no formato do mipN (até 1 casa, vírgula)
+        import dados_lagoa_fonte as _F; a22=_F.PIVOS_HA[22]; t22=f'{a22:.2f}'.rstrip('0').rstrip('.').replace('.',',')   # mesma forma do mipN(área, 2) da mensagem
+        chk(f'9 Erradicação com 999 ha no Pivô 22 ({t22} ha): trava "Área maior que o talhão ({t22} ha)" e botão bloqueado', a22 < 999 and f'Área maior que o talhão ({t22} ha).' in a and dis is True, [a[-300:],dis])
         # 10 · AG-01det: o primário executa (não repete o destino do Voltar)
         ir('AG-01det.dc.html#VIS-016'); b=J("(()=>{const x=[...document.querySelectorAll('header a, header button')].find(e=>e.innerText.trim()==='Sincronizar agora'); return x?[x.tagName,x.getAttribute('href')]:null;})()")
         clk('Sincronizar agora','header'); t1=T(); kp=J("document.querySelector('main').innerText.indexOf('6 de 12')>=0")
@@ -115,10 +123,10 @@ try:
         # 12 · REC-014 sem contradição e sem destino repetido; textos de bastidor fora
         ir('AG-04det.dc.html'); b=J("document.body.innerText"); np=J("document.querySelectorAll('a[href=\"AG-07.dc.html#pasteuria-nishizawae-fs\"]').length")
         hd=J("document.querySelector('header').innerText")
-        ir('AG-03det.dc.html'); b3=J("document.body.innerText"); n14=J("document.querySelectorAll('a[href=\"AG-04det.dc.html\"]').length")
-        chk('12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 2 links para o REC-014',
+        ir('AG-03det.dc.html'); b3=J("document.body.innerText"); n14=J("document.querySelectorAll('a[href=\"AG-04det.dc.html\"]').length"); h14=J("document.querySelectorAll('header a[href=\"AG-04det.dc.html\"]').length")   # AÇÃO v3.1 (G2): o elo da cadeia que repete o próximo passo fica informativo
+        chk('12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 1 link para o REC-014 (o primário do cabeçalho; AÇÃO v3.1)',
             'Saldo de 70 ha travado · TS sem registro' in hd and 'Criar v4 com TS registrado' in hd and 'TS travado · sem registro' in b and 'Aprovada por Ana · saldo' not in b and np==1
-            and 'Cada elo abre o registro' not in b3 and n14==2, [hd[:300],np,n14])
+            and 'Cada elo abre o registro' not in b3 and n14==1 and h14==1, [hd[:300],np,n14,h14])
     J("localStorage.removeItem('talhao-os-mip-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear()")
 finally:
     try:
@@ -126,3 +134,4 @@ finally:
     finally: srv.terminate()
 print('RESULTADO', f'{len(OK)}/{len(OK)+len(FAIL)}')
 sys.exit(1 if FAIL else 0)
+

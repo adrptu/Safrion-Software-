@@ -1,0 +1,78 @@
+From 3fcf47c7fae9fc55c7071c592cc01e39315d2d1d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 10 Oct 2026 01:05:37 +0000
+Subject: [PATCH] =?UTF-8?q?COM:=20entrega=20repetida=20com=20outra=20orige?=
+ =?UTF-8?q?m=20da=20devolu=C3=A7=C3=A3o=20=C3=A9=20conflito=20(COM-IDEM-01?=
+ =?UTF-8?q?)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+S3 do Codex (6091943041): comEntregar comparava a impressão sem o lote de origem
+da devolução; a mesma chave com outro lote voltava 'repetido'. Agora, na
+repetição, o lote pedido confere com a origem efetiva gravada na devolução
+daquele recibo (rm.devs com a chave do recibo): outro lote é conflito; sem lote
+(seleção automática) vale a origem gravada; sem a devolução do recibo não há
+como provar a igualdade e é conflito. A impressão e os recibos antigos não
+mudam de formato.
+
+Teste: comercial_unit RV-IDEMa-e. Antes FALHOU 107/110 (b, d, e); depois OK
+110/110. Harness do Codex: antes 6/7, depois 7/7.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ tools/prototipo/v37/gen37/comercial.js      |  6 +++++-
+ tools/prototipo/v37/gen37/comercial_unit.js | 19 +++++++++++++++++++
+ 2 files changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/tools/prototipo/v37/gen37/comercial.js b/tools/prototipo/v37/gen37/comercial.js
+index d4e9524..5450d2f 100644
+--- a/tools/prototipo/v37/gen37/comercial.js
++++ b/tools/prototipo/v37/gen37/comercial.js
+@@ -361,7 +361,11 @@ function comDevolverEf(c, rm, lote, kg, motivo, quem, d, chave, imp) { const P =
+   return dv; }
+ function comEntregar(c, k) { const P = comP(c); const rm = P.expedicoes[k.rm]; if (!rm) throw new Error('Carga ' + k.rm + ' não encontrada.');
+   const imp = JSON.stringify([k.rm, k.d || '', k.dev ? [prNum(k.dev.kg), k.dev.motivo || ''] : null]);
+-  if (rm.entrega) { if (k.chave && rm.entrega.chave === k.chave) { if (rm.entrega.imp !== imp) throw prConflito(k.chave, rm.id); return { msg: 'Entrega da ' + rm.id + ' já confirmada: nada foi gravado de novo.', rm, repetido: true }; }
++  /* COM-IDEM-01: a origem da devolução confere pela origem efetiva gravada (vale também para recibos antigos, cuja impressão não tem o lote):
++     outro lote pedido com a mesma chave é conflito; sem lote (seleção automática) vale a origem gravada; sem a devolução gravada não há como provar: conflito */
++  if (rm.entrega) { if (k.chave && rm.entrega.chave === k.chave) { if (rm.entrega.imp !== imp) throw prConflito(k.chave, rm.id);
++      if (k.dev && k.dev.lote) { const dv0 = (rm.devs || []).find(x => x.chave === k.chave + '-DEV'); if (!dv0 || dv0.de !== k.dev.lote) throw prConflito(k.chave, rm.id + (dv0 ? ' com a devolução do ' + dv0.de : '')); }
++      return { msg: 'Entrega da ' + rm.id + ' já confirmada: nada foi gravado de novo.', rm, repetido: true }; }
+     throw new Error('Entrega da ' + rm.id + ' já confirmada em ' + prBr(rm.entrega.d) + ': nada foi gravado de novo.'); }
+   if (rm.st !== 'Em trânsito') throw new Error(rm.id + ' está ' + rm.st.toLowerCase() + ': só carga em trânsito tem entrega a confirmar.');
+   const quem = cenExigeUm(k.ator, ['expedicao', 'gestor'], 'Confirmar entrega da ' + rm.id);
+diff --git a/tools/prototipo/v37/gen37/comercial_unit.js b/tools/prototipo/v37/gen37/comercial_unit.js
+index 7ccc24f..87ed28a 100644
+--- a/tools/prototipo/v37/gen37/comercial_unit.js
++++ b/tools/prototipo/v37/gen37/comercial_unit.js
+@@ -285,6 +285,25 @@ caso('RV-A2', () => { const c = NOVO60(); COLHEITA(c, false);
+   c2.producao.movs.push({ id: 'MP-T', tipo: 'quebra (teste)', lote: 'L39-133', kg: -1000, d: '2026-09-26' });   /* físico 11.050 < reservado 12.050 (estado fora da regra, injetado) */
+   const s2 = MUD(c2, x => comSair(x, { rm: 'RM-0002', bruto: '16000', tara: '12000', ator: 'Rui', chave: 'B5' }));
+   ok('RV-A2c pós-condição: saída que deixaria o físico do lote abaixo do reservado é recusada, nada baixado', /abaixo do reservado/.test(s2.erro || '') && !c2.producao.expedicoes['RM-0002'].saida, s2.erro || s2.msg); });
++/* COM-IDEM-01 (Codex 6091943041): a mesma chave com outra origem da devolução é conflito; sem lote ou com a mesma origem efetiva repete; recibo sem a devolução gravada não prova a origem */
++caso('RV-IDEM', () => { const c = NOVO60(); EMTRANSITO(c); const rm0 = c.producao.expedicoes['RM-0002']; const orig = (rm0.lotes.find(x => prCmp(x.kg, 0) > 0) || {}).lote;
++  const E = { rm: 'RM-0002', d: '2026-09-26', dev: { lote: orig, kg: 400, motivo: 'Maturação avançada' }, ator: 'Rui', chave: 'I-E' };
++  const e1 = MUD(c, x => comEntregar(x, E)); const S = JSON.stringify(c);
++  const r1 = MUD(c, x => comEntregar(x, E)); ok('RV-IDEMa mesma chave e mesmo conteúdo (lote ' + orig + '): repete sem gravar', !e1.erro && r1.repetido && JSON.stringify(c) === S, [e1.erro, r1]);
++  const r2 = MUD(c, x => comEntregar(x, Object.assign({}, E, { dev: Object.assign({}, E.dev, { lote: 'L10-031' }) })));
++  ok('RV-IDEMb mesma chave com outra origem (L10-031): conflito, nada gravado', /conflito/.test(r2.erro || '') && !r2.repetido && JSON.stringify(c) === S, r2);
++  const r3 = MUD(c, x => comEntregar(x, Object.assign({}, E, { dev: { kg: 400, motivo: 'Maturação avançada' } })));
++  ok('RV-IDEMc mesma chave sem lote (seleção automática) vale a origem gravada: repete sem conflito falso', r3.repetido && JSON.stringify(c) === S, r3);
++  /* recibo de antes da correção: devolução escolhida automaticamente; a origem efetiva gravada (de) decide */
++  const c2 = NOVO60(); EMTRANSITO(c2); const E2 = { rm: 'RM-0002', d: '2026-09-26', dev: { kg: 400, motivo: 'Maturação avançada' }, ator: 'Rui', chave: 'I-L' };
++  MUD(c2, x => comEntregar(x, E2)); const de = (c2.producao.expedicoes['RM-0002'].devs[0] || {}).de; const S2 = JSON.stringify(c2);
++  const r4 = MUD(c2, x => comEntregar(x, Object.assign({}, E2, { dev: Object.assign({}, E2.dev, { lote: de }) })));
++  const r5 = MUD(c2, x => comEntregar(x, Object.assign({}, E2, { dev: Object.assign({}, E2.dev, { lote: 'L10-031' }) })));
++  ok('RV-IDEMd recibo antigo: a origem comprovada (' + de + ') repete; outro lote é conflito; nada gravado', !!de && r4.repetido && /conflito/.test(r5.erro || '') && JSON.stringify(c2) === S2, [de, r4, r5]);
++  /* sem a devolução gravada com a chave do recibo não há como provar a origem: conflito explícito, nunca sucesso */
++  c2.producao.expedicoes['RM-0002'].devs[0].chave = 'OUTRA'; const S3 = JSON.stringify(c2);
++  const r6 = MUD(c2, x => comEntregar(x, Object.assign({}, E2, { dev: Object.assign({}, E2.dev, { lote: de }) })));
++  ok('RV-IDEMe sem a devolução do recibo, pedir o lote é conflito (não dá para provar a igualdade); nada gravado', /conflito/.test(r6.erro || '') && JSON.stringify(c2) === S3, r6); });
+ caso('RV-A3', () => { const c = NOVO60(); EMTRANSITO(c); const PP = () => c.producao;
+   MUD(c, x => comEntregar(x, { rm: 'RM-0002', d: '2026-09-26', dev: { kg: 400, motivo: 'Maturação avançada' }, ator: 'Rui', chave: 'T-E' })); const lid = PP().expedicoes['RM-0002'].devs[0].lote;
+   const er = ['Dora', 'Rui', 'Caio', 'Paula', ''].map(a => MUD(c, x => prLiberarLote(x, lid, a)).erro || '');
+-- 
+2.43.0
+

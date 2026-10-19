@@ -1,0 +1,58 @@
+== A. Janela de efeito em pragas (todas as aplicações dos 4 alvos)
+OK    A1 redução do JS = recálculo pela regra escrita (antes ≤ dia da aplicação) · 122 aplicações, 0 diferenças
+A2 "antes" lido no próprio dia da aplicação: 26 de 122 aplicações (21.3 %)
+    {'alvo': 'acaro', 'pivo': 'P4', 'dia': '07/08', 'antes_mesmo_dia': '15.39', 'depois': '14.26', 'red_prototipo': '7 %', 'antes_estrito': '31/07 18.43', 'red_estrita': '23 %'}
+    {'alvo': 'acaro', 'pivo': 'P4', 'dia': '28/08', 'antes_mesmo_dia': '18.99', 'depois': '24.51', 'red_prototipo': 'subiu 29 %', 'antes_estrito': '21/08 23.77', 'red_estrita': 'subiu 3 %'}
+    {'alvo': 'acaro', 'pivo': 'P4', 'dia': '18/09', 'antes_mesmo_dia': '38.25', 'depois': '42.70', 'red_prototipo': 'subiu 12 %', 'antes_estrito': '11/09 43.47', 'red_estrita': '2 %'}
+    {'alvo': 'acaro', 'pivo': 'P9', 'dia': '14/08', 'antes_mesmo_dia': '21.28', 'depois': '36.96', 'red_prototipo': 'subiu 74 %', 'antes_estrito': '07/08 22.28', 'red_estrita': 'subiu 66 %'}
+    {'alvo': 'acaro', 'pivo': 'P9', 'dia': '04/09', 'antes_mesmo_dia': '23.55', 'depois': '23.15', 'red_prototipo': '2 %', 'antes_estrito': '28/08 55.35', 'red_estrita': '58 %'}
+    {'alvo': 'acaro', 'pivo': 'P9', 'dia': '25/09', 'antes_mesmo_dia': '13.36', 'depois': None, 'red_prototipo': None, 'antes_estrito': '18/09 26.93', 'red_estrita': 'sem par'}
+A3 pares com outra aplicação no mesmo pivô entre a aplicação e a leitura depois (sem marca de interferência na tela): 38
+
+== B. O que reduziu ácaro-rajado até 25/09 · por produto (mediana, n, volta ao NC)
+OK    B Abamectina: n · mediana · volta ao NC · recalculado ['9', '68 %', 'em 7 d 6 seguem abaixo'] · tela ['9', '68 %', 'em 7 d 6 seguem abaixo']
+   Abamectina: "voltou ao NC" sem nunca ter ficado abaixo do NC: 2 de 9; mediana corrigida da volta: 19 d (n=1); média em vez de mediana: 50 %
+OK    B Fenpiroximato: n · mediana · volta ao NC · recalculado ['6', '64 %', 'em 25 d'] · tela ['6', '64 %', 'em 25 d']
+   Fenpiroximato: "voltou ao NC" sem nunca ter ficado abaixo do NC: 0 de 6; mediana corrigida da volta: 25 d (n=6); média em vez de mediana: 57 %
+OK    B Espirodiclofeno: n · mediana · volta ao NC · recalculado ['16', '58 %', 'em 31 d 3 seguem abaixo'] · tela ['16', '58 %', 'em 31 d 3 seguem abaixo']
+   Espirodiclofeno: "voltou ao NC" sem nunca ter ficado abaixo do NC: 4 de 16; mediana corrigida da volta: 32 d (n=9); média em vez de mediana: 43 %
+OK    B Óleo mineral: n · mediana · volta ao NC · recalculado ['3', 'subiu 74 %', 'em 5 d'] · tela ['3', 'subiu 74 %', 'em 5 d']
+   Óleo mineral: "voltou ao NC" sem nunca ter ficado abaixo do NC: 3 de 3; mediana corrigida da volta: sem casos; média em vez de mediana: subiu 59 %
+
+== C. Frases do painel com menos de 3 casos e sem "pouca evidência"
+DIFERE C1 frase "barra × atomizador" do Fenpiroximato tem n ≥ 3 nos dois lados · barra n=1 (7 %), atomizador n=5 (73 %); tela: ['Com Fenpiroximato, a barra a 100 L/ha teve redução mediana de 7 %; o atomizador, 73 %. A calda e o equipamento contam.']
+
+== D. Validade da vistoria no mapa (ácaro, todos os dias e pivôs)
+OK    D1 rótulos com leitura no mapa (tela, 87 dias) = recálculo com validade de 14 dias · tela 1695 · recálculo 1695
+D2 dessas, com idade de 8 a 14 dias (vencidas pela PEND-13, 7 dias, e coloridas como atuais no protótipo): 0 (0.0 %)
+OK    D3 média da fazenda 25/09 (tela "15 % · 6 de 20") = recálculo com 14 dias · 14 dias: 15.3442 %, 6 de 20, área 1137.45 ha · PEND-13 7 dias: 15.3442 %, 6 de 20, área 1137.45 ha
+
+== E. Resposta do vigor (NDVI) por adubação
+OK    E1 resposta do JS = recálculo (117 adubações) · 0 diferenças
+E2 P9 (dia · cena antes · cena depois · NDVI antes → depois · resposta · nº de pivôs de comparação):
+    ('07/07', '07/07', '22/07', '0.81', '0.80', '-0.0106', 10)
+    ('22/07', '22/07', '01/08', '0.80', '0.81', '0.0090', 10)
+    ('05/08', '01/08', '16/08', '0.81', '0.80', '-0.0086', 10)
+    ('20/08', '16/08', '31/08', '0.80', '0.79', '-0.0008', 10)
+    ('03/09', '31/08', '15/09', '0.79', '0.79', '-0.0066', 10)
+OK    E3 P9 07/07: "−0,01 em relação aos pivôs" na tela
+OK    E3 P9 22/07: "+0,01 em relação aos pivôs" na tela
+OK    E3 P9 05/08: "−0,01 em relação aos pivôs" na tela
+OK    E3 P9 20/08: "0,00 em relação aos pivôs" na tela
+OK    E3 P9 03/09: "−0,01 em relação aos pivôs" na tela
+E4 fração mediana dos pivôs de comparação que também foram adubados na mesma janela: 100.0 % (n=104 adubações)
+
+== F. Satélite: cena mostrada no mapa
+F1 pivô-dias: {'ok_ate10': 1791, 'ok_11a15': 4, 'nuvem': 0, 'sem': 21, 'cenas_com_nuvem': 93}
+OK    F2 tela: nenhum pivô hachurado por nuvem em 87 dias (varredura) = recálculo · tela {'cloud': 0, 'nodata': 21, 'ok': 1795} · recálculo nuvem 0
+F3 pivô-dias com cena de 11 a 15 dias mostrada em cor de índice (seria 'sem leitura atual' pela PEND-13, 10 dias): 4
+
+== G. "Dia quente e seco" no dia da aplicação (texto: ≥ 32 °C e UR < 50 %)
+DIFERE G1 aplicações com o alerta = aplicações que cumprem a regra escrita · 122 aplicações: alerta 96, regra 74, alerta sem cumprir a regra 22; ex. [('acaro', 'P2', '11/08', 31.1, 49.5), ('acaro', 'P4', '18/09', 33.4, 62.0), ('acaro', 'P6', '02/09', 31.5, 47.2), ('acaro', 'P20', '21/08', 32.0, 48.8)]
+OK    G2 faixa "favorável a ácaro" (quenteSeco) = ≥ 32 °C e UR < 50 % · 28 dias favoráveis
+G3 dias "molhamento ≥ 8 h" com UR < 90 % (o texto diz "UR ≥ 90 %", o código não usa UR): 7 de 10
+
+== H. Crescimento semanal sem controle (ácaro)
+OK    H1 "+91 % … +52 % (33 e 117 intervalos)" · recalculado +91 % (n=33) e +52 % (n=117); tela: Clima: em intervalos com 3 ou mais dias quentes e secos (≥ 32 °C e UR < 50 %), ácaro-rajado variou +91 % por semana sem controle; nos demais, +52 % (33 e 117 intervalos sem aplicação).
+
+RESULTADO: 16 de 18 conferências iguais; diferenças: ['C1 frase "barra × atomizador" do Fenpiroximato tem n ≥ 3 nos dois lados', 'G1 aplicações com o alerta = aplicações que cumprem a regra escrita']

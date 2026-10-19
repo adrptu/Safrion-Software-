@@ -1,0 +1,13 @@
+  OK  1440: linha mostra bloqueio por validade
+  OK  1440: detalhe nomeia recuperação
+  OK  1440: consulta não oferece quantidade para entregar
+  OK  1440: abrir consulta preserva estado
+  OK  1440: sem overflow ou erroJS
+  OK  390: linha mostra bloqueio por validade
+  OK  390: detalhe nomeia recuperação
+  OK  390: consulta não oferece quantidade para entregar
+  OK  390: abrir consulta preserva estado
+  OK  390: sem overflow ou erroJS
+RESULTADO: 10/10 ok
+
+EXIT=0

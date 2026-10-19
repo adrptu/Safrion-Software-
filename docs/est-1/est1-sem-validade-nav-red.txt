@@ -1,0 +1,9 @@
+  OK  1440: data anterior fica oculta pelo campo sem validade
+  FALHA 1440: troca de pedido permite recebimento válido · Corrija os campos destacados; o que você preencheu foi mantido. | A validade informada difere da registrada no lote EST1-FERT (sem validade). Confira o lote e a validade no documento antes de receber; o estoque foi preservado.
+  FALHA 1440: soma5 preservando ausência de validade
+  OK  1440: sem erro JS
+  OK  390: data anterior fica oculta pelo campo sem validade
+  FALHA 390: troca de pedido permite recebimento válido · Corrija os campos destacados; o que você preencheu foi mantido. | A validade informada difere da registrada no lote EST1-FERT (sem validade). Confira o lote e a validade no documento antes de receber; o estoque foi preservado.
+  FALHA 390: soma5 preservando ausência de validade
+  OK  390: sem erro JS
+RESULTADO: 4/8 ok · FALHAS: 1440: troca de pedido permite recebimento válido; 1440: soma5 preservando ausência de validade; 390: troca de pedido permite recebimento válido; 390: soma5 preservando ausência de validade

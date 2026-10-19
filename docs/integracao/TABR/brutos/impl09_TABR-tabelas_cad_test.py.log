@@ -1,0 +1,126 @@
+  ok  CD-01 Talhões: colunas Fazenda › talhão | Sistema | Área cultivável | Polígono | Diferença | Parcelas na safra 2026/27 | Situação · ['Fazenda › talhão', 'Sistema', 'Área cultivável', 'Polígono', 'Diferença', 'Parcelas na safra 2026/27', 'Situação']
+  ok  CD-01 Talhões: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Fazenda › talhão', 'Sistema', 'Área cultivável', 'Polígono', 'Diferença', 'Parcelas na safra 2026/27', 'Situação']
+  ok  CD-01 Talhões: filtro (▾) e ordenação no título em todas as 7 colunas · [True, True, True, True, True, True, True]
+  ok  CD-01 Talhões: unidade junto do valor nas colunas com unidade (Área cultivável ha, Polígono ha, Diferença %) · []
+  ok  CD-01 Talhões: Situação em chip em todas as linhas com valor (32) · [None, True, True, True, True, True]
+  ok  CD-01: T1 Sequeiro | 312,0 ha | 312,4 ha | +0,1 % | 2 parcelas (número) | Em dia; P1 Pivô central · ({'Fazenda › talhão': 'T1', 'Sistema': 'Sequeiro', 'Área cultivável': '312,0 ha', 'Polígono': '312,4 ha', 'Diferença': '+0,1 %', 'Parcelas na safra 2026/27': '2', 'Situação': 'Em dia'}, {'Fazenda › talhão': 'P1', 'Sistema': 'Pivô central', 'Área cultivável': '95,0 ha', 'Polígono': '94,7 ha', 'Difere
+  ok  CD-01: pivô da Lagoa Grande (círculo do KML) dito uma vez, na Situação; Polígono fica "—" · {'Fazenda › talhão': 'PV01', 'Sistema': 'Pivô central', 'Área cultivável': '29,9 ha', 'Polígono': '—', 'Diferença': '—', 'Parcelas na safra 2026/27': '1', 'Situação': 'Círculo do KML'}
+  ok  CD-01: ordenar Área cultivável (decrescente) pelo número dentro de cada fazenda · [['80,8 ha', '77,4 ha', '75,1 ha', '75,0 ha'], ['312,0 ha', '298,0 ha', '204,0 ha', '96,0 ha']]
+  ok  CD-01: filtro Sistema = Pivô central (texto da célula) deixa só pivôs · {'Pivô central'}
+  ok  CD-01 Água: colunas Ponto de água | Fazenda | Documento | Uso | Curso d’água | Vazão | Vencimento | Situação · ['Ponto de água', 'Fazenda', 'Documento', 'Uso', 'Curso d’água', 'Vazão', 'Vencimento', 'Situação']
+  ok  CD-01 Água: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Ponto de água', 'Fazenda', 'Documento', 'Uso', 'Curso d’água', 'Vazão', 'Vencimento', 'Situação']
+  ok  CD-01 Água: filtro (▾) e ordenação no título em todas as 8 colunas · [True, True, True, True, True, True, True, True]
+  ok  CD-01 Água: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-01 Água: Situação em chip em todas as linhas com valor (16) · [True, True, True, True, True, True]
+  ok  CD-01 Água (defeito): a outorga do ponto 1 aparece como Outorga (antes "Certidão"); o ponto 6 é Certidão · ({'Ponto de água': 'Ponto de água 1 (demonstração)', 'Fazenda': 'Lagoa Grande', 'Documento': 'Outorga', 'Uso': 'Captação superficial', 'Curso d’água': 'Rio A (demonstração)', 'Vazão': '180 m³/h', 'Vencimento': '30/04/2031', 'Situação': 'Vigente'}, {'Ponto de água': 'Ponto de água 6 (demonstração)', 
+  ok  CD-01 Água: ponto 1 = Captação superficial | Rio A | 180 m³/h | 30/04/2031 | Vigente · {'Ponto de água': 'Ponto de água 1 (demonstração)', 'Fazenda': 'Lagoa Grande', 'Documento': 'Outorga', 'Uso': 'Captação superficial', 'Curso d’água': 'Rio A (demonstração)', 'Vazão': '180 m³/h', 'Vencimento': '30/04/2031', 'Situação': 'Vigente'}
+  ok  CD-01 Água (defeito): a faixa "precisa de atenção" diz Outorga SINT-003/0000 (antes "Certidão SINT-003/0000") · 2 outorgas vencidas Outorga SINT-003/0000 · Ribeirão B (demonstração), Outorga SINT-012/0000 · Poço tubular Renovar outorga › 2 outorgas em renovação Outorga SINT-004/0000 · Ribeirão B (demonstração),
+  ok  CD-01 Água: ordenar Vazão pelo valor em m³/h (L/s × 3,6), com a unidade do documento na célula · ['0,5 L/s', '0,8 L/s', '1,0 L/s', '1,0 L/s', '8 m³/h', '12 m³/h', '15 m³/h', '20 m³/h', '120 m³/h', '140 m³/h', '150 m³/h', '160 m³/h', '180 m³/h', '200 m³/h']
+  ok  CD-01 Água: ordenar Vencimento por data (anos diferentes) · ['01/12/2025', '15/01/2026', '10/05/2026', '31/08/2026', '20/11/2026', '10/12/2026']
+  ok  CD-01 Água: filtro Documento = Certidão → só certidões (4) · ['Ponto de água 9 (demonstração)', 'Ponto de água 6 (demonstração)', 'Ponto de água 13 (demonstração)', 'Ponto de água 16 (demonstração)']
+  ok  CD-01 Ambiental: colunas Área ambiental | Fazenda | Tipo | Área · ['Área ambiental', 'Fazenda', 'Tipo', 'Área']
+  ok  CD-01 Ambiental: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Área ambiental', 'Fazenda', 'Tipo', 'Área']
+  ok  CD-01 Ambiental: filtro (▾) e ordenação no título em todas as 4 colunas · [True, True, True, True]
+  ok  CD-01 Ambiental: unidade junto do valor nas colunas com unidade (Área ha) · []
+  ok  CD-01det ficha: colunas Fazenda | Sistema | Setor de irrigação | Área cultivável | Polígono | Versão | Diferença ha | Diferença % | Situação · ['Fazenda', 'Sistema', 'Setor de irrigação', 'Área cultivável', 'Polígono', 'Versão', 'Diferença ha', 'Diferença %', 'Situação']
+  ok  CD-01det ficha: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Fazenda', 'Sistema', 'Setor de irrigação', 'Área cultivável', 'Polígono', 'Versão', 'Diferença ha', 'Diferença %', 'Situação']
+  ok  CD-01det ficha: unidade junto do valor nas colunas com unidade (Área cultivável ha, Polígono ha, Diferença ha ha, Diferença % %) · []
+  ok  CD-01det ficha: Situação em chip em todas as linhas com valor (1) · [True]
+  ok  CD-01det ficha: T1 = Santa Rita | Sequeiro | — | 312,0 ha | 312,4 ha | v3 | +0,4 ha | +0,1 % | Ativo · {'Fazenda': 'Santa Rita', 'Sistema': 'Sequeiro', 'Setor de irrigação': '—', 'Área cultivável': '312,0 ha', 'Polígono': '312,4 ha', 'Versão': 'v3', 'Diferença ha': '+0,4 ha', 'Diferença %': '+0,1 %', 'Situação': 'Ativo'}
+  ok  CD-01det parcelas: colunas Safra › parcela | Tipo | Cultura | Cultivar | Área | Livre | Plantio | Situação · ['Safra › parcela', 'Tipo', 'Cultura', 'Cultivar', 'Área', 'Livre', 'Plantio', 'Situação']
+  ok  CD-01det parcelas: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Safra › parcela', 'Tipo', 'Cultura', 'Cultivar', 'Área', 'Livre', 'Plantio', 'Situação']
+  ok  CD-01det parcelas: filtro (▾) e ordenação no título em todas as 8 colunas · [True, True, True, True, True, True, True, True]
+  ok  CD-01det parcelas: unidade junto do valor nas colunas com unidade (Área ha, Livre ha) · []
+  ok  CD-01det parcelas: Situação em chip em todas as linhas com valor (6) · [True, True, True, True, True, True]
+  ok  CD-01det (defeito): T1 da Santa Rita só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande) · ['Safra 2026/27', 'Safrinha 2027', 'Safra 2025/26']
+  ok  CD-01det: T1-B Parcela | Soja | 62 X | 152,0 ha | 25/10/2026 | Sem polígono; Safrinha 2027 livre 152 ha (número) · ({'Safra › parcela': 'T1-B', 'Tipo': 'Parcela', 'Cultura': 'Soja', 'Cultivar': '62 X', 'Área': '152,0 ha', 'Livre': '', 'Plantio': '25/10/2026', 'Situação': 'Sem polígono'}, {'Safra › parcela': 'Safrinha 2027', 'Tipo': '', 'Cultura': '', 'Cultivar': '', 'Área': '160 ha', 'Livre': '152 ha', 'Plantio'
+  ok  CD-02 Culturas: colunas Cultura › cultivar | Tipo de ciclo | Unidade de produtividade | Ciclo | Item de semente | Cultivos | Situação · ['Cultura › cultivar', 'Tipo de ciclo', 'Unidade de produtividade', 'Ciclo', 'Item de semente', 'Cultivos', 'Situação']
+  ok  CD-02 Culturas: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Cultura › cultivar', 'Tipo de ciclo', 'Unidade de produtividade', 'Ciclo', 'Item de semente', 'Cultivos', 'Situação']
+  ok  CD-02 Culturas: filtro (▾) e ordenação no título em todas as 7 colunas · [True, True, True, True, True, True, True]
+  ok  CD-02 Culturas: unidade junto do valor nas colunas com unidade (Ciclo dias) · []
+  ok  CD-02 Culturas: Situação em chip em todas as linhas com valor (7) · [None, True, True, True, None, True]
+  ok  CD-02: 58 W = Anual | sc de 60 kg/ha | 118 dias | 6 cultivos (número); Mamão Formosa em t/ha/ano (DEC-0510-03) · ({'Cultura › cultivar': '58 W', 'Tipo de ciclo': 'Anual', 'Unidade de produtividade': 'sc de 60 kg/ha', 'Ciclo': '118 dias', 'Item de semente': 'Semente de soja 58 W ›', 'Cultivos': '6', 'Situação': 'Em dia'}, {'Cultura › cultivar': 'Mamão Formosa 1 cultivar', 'Tipo de ciclo': 'Perene', 'Unidade de 
+  ok  CD-02: filtro Unidade de produtividade = t/ha/ano vale na cultivar (Mamão Formosa › Formosa) · ['Mamão Formosa 1 cultivar', 'Formosa']
+  ok  CD-02: ordenar Ciclo (dias) pelo número dentro da cultura · [['125 dias', '118 dias', '112 dias']]
+  ok  CD-02 Rendimentos: colunas Operação › conjunto | Processo | Cultura | Modo | Largura | Velocidade | Eficiência | Rendimento | Custo R$/h | Custo R$/ha | Fonte · ['Operação › conjunto', 'Processo', 'Cultura', 'Modo', 'Largura', 'Velocidade', 'Eficiência', 'Rendimento', 'Custo R$/h', 'Custo R$/ha', 'Fonte']
+  ok  CD-02 Rendimentos: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Operação › conjunto', 'Processo', 'Cultura', 'Modo', 'Largura', 'Velocidade', 'Eficiência', 'Rendimento', 'Custo R$/h', 'Custo R$/ha', 'Fonte']
+  ok  CD-02 Rendimentos: filtro (▾) e ordenação no título em todas as 11 colunas · [True, True, True, True, True, True, True, True, True, True, True]
+  ok  CD-02 Rendimentos: unidade junto do valor nas colunas com unidade (Largura m, Velocidade km/h, Eficiência %, Rendimento ha/h, Custo R$/h R$/h, Custo R$/ha R$/ha) · []
+  ok  CD-02: pulverização 36 m | 8 km/h | 75 % | 21,60 ha/h | R$ 313,00/h | R$ 14,49/ha; processo Tratos culturais · {'Operação › conjunto': 'Trator 02 MF 7719 + Pulverizador PJ-3030 36 m', 'Processo': 'Tratos culturais', 'Cultura': 'Todas', 'Modo': 'Largura × velocidade', 'Largura': '36 m', 'Velocidade': '8 km/h', 'Eficiência': '75 %', 'Rendimento': '21,60 ha/h', 'Custo R$/h': 'R$ 313,00/h', 'Custo R$/ha': 'R$ 14
+  ok  CD-02: filtro Processo = Colheita vale no conjunto · ['Colhedora Axial-Flow 7250 + trator com graneleiro', 'Derriçadeiras portáteis · equipe de 6']
+  ok  CD-03 Máquinas: colunas Máquina ou instalação | Modelo | Classe | Capacidade | Largura de trabalho | Custo R$/h | Conjuntos | Próxima calibração | Situação · ['Máquina ou instalação', 'Modelo', 'Classe', 'Capacidade', 'Largura de trabalho', 'Custo R$/h', 'Conjuntos', 'Próxima calibração', 'Situação']
+  ok  CD-03 Máquinas: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Máquina ou instalação', 'Modelo', 'Classe', 'Capacidade', 'Largura de trabalho', 'Custo R$/h', 'Conjuntos', 'Próxima calibração', 'Situação']
+  ok  CD-03 Máquinas: filtro (▾) e ordenação no título em todas as 9 colunas · [True, True, True, True, True, True, True, True, True]
+  ok  CD-03 Máquinas: unidade junto do valor nas colunas com unidade (Largura de trabalho m, Custo R$/h R$/h) · []
+  ok  CD-03 Máquinas: Situação em chip em todas as linhas com valor (15) · [True, True, True, True, True, True]
+  ok  CD-03: pulverizador Uniport 3030 | 3.000 L | 36 m | R$ 95,00/h | 14/12/2026 | Apta · {'Máquina ou instalação': 'Pulverizador PJ-3030', 'Modelo': 'Uniport 3030', 'Classe': 'Pulverizador', 'Capacidade': '3.000 L', 'Largura de trabalho': '36 m', 'Custo R$/h': 'R$ 95,00/h', 'Conjuntos': '1', 'Próxima calibração': '14/12/2026', 'Situação': 'Apta'}
+  ok  CD-03: ordenar Custo R$/h (decrescente) pelo número · ['R$ 950,00/h', 'R$ 180,00/h', 'R$ 180,00/h', 'R$ 150,00/h', 'R$ 150,00/h']
+  ok  CD-03: ordenar Próxima calibração por data; sem data no fim · ['18/09/2026', '01/10/2026', '12/10/2026', '30/10/2026', '04/11/2026', '14/12/2026', '17/12/2026', '09/03/2027', '—', '—', '—', '—', '—', '—', '—']
+  ok  CD-03: filtro Classe = Irrigação → as 3 bombas/setores · ['Bomba do Pivô 1', 'Gotejo T7', 'Bomba do Pivô 2']
+  ok  CD-03 (recusa): Classe = Irrigação + busca "Silo" → nenhuma linha e o aviso "Nenhuma linha corresponde aos filtros" (sem voltar a todas) · 0
+  ok  CD-03 (repetição): o mesmo filtro duas vezes dá o mesmo recorte; Limpar filtros volta às 15 · (['Trator T1', 'Trator 02', 'Trator 03', 'Trator 04'], ['Trator T1', 'Trator 02', 'Trator 03', 'Trator 04'], 15)
+  ok  CD-03: um clique no título Capacidade ordena crescente pelo número (mesmo com unidades diferentes por classe) · ['24 linhas', '45 m³/h', '78 cv', '110 cv', '155 cv', '190 cv']
+  ok  CD-03 (repetição): três cliques no título (crescente → decrescente → sem ordem) voltam à ordem original · ['Trator T1', 'Trator 02', 'Trator 03', 'Trator 04']
+  ok  CD-03 fluxo 1440 (normal): salvar 172,5 → célula "R$ 172,50/h" e a ordem por custo põe o Trator 03 entre os de 180 e os de 150 · ('R$ 172,50/h', ['Colhedora Axial-Flow 7250', 'Trator T1', 'Trator 02', 'Trator 03', 'Trator 04', 'Plantadeira 24 linhas'])
+  ok  CD-03 fluxo 1440 (recusa): custo "abc" mostra "Use um número" e não grava (célula segue R$ 172,50/h) · ('ção ou aferição?\nSim\nNão\nLocal\nOficina Sede\nGalpão 1\nSanta Rita · T1\nSanta Rita · T4\nPivô 2\nTalhão T7\nArmazém Sede\nPivô 1\nSituação\nAtivo\nInativo\nCancelar\nSalvar', 'R$ 172,50/h')
+  ok  CD-03 fluxo 1440 (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor · 1
+  ok  CD-04 Pessoas: colunas Pessoa | Equipe | Habilidades | Vínculo | Disponível até | Custo R$/h | Habilitação | Validade da habilitação | Calendário | Acesso ao app | Situação · ['Pessoa', 'Equipe', 'Habilidades', 'Vínculo', 'Disponível até', 'Custo R$/h', 'Habilitação', 'Validade da habilitação', 'Calendário', 'Acesso ao app', 'Situação']
+  ok  CD-04 Pessoas: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Pessoa', 'Equipe', 'Habilidades', 'Vínculo', 'Disponível até', 'Custo R$/h', 'Habilitação', 'Validade da habilitação', 'Calendário', 'Acesso ao app', 'Situação']
+  ok  CD-04 Pessoas: filtro (▾) e ordenação no título em todas as 11 colunas · [True, True, True, True, True, True, True, True, True, True, True]
+  ok  CD-04 Pessoas: unidade junto do valor nas colunas com unidade (Custo R$/h R$/h) · []
+  ok  CD-04 Pessoas: Situação em chip em todas as linhas com valor (10) · [True, True, True, True, True, True]
+  ok  CD-04: Lucas Campo 2 | Safrista | 31/07/2027 | R$ 38,00/h | NR-31 | 15/08/2026 | Não alocável em O.S. · {'Pessoa': 'Lucas', 'Equipe': 'Campo 2', 'Habilidades': 'Operar trator, Operar colhedora', 'Vínculo': 'Safrista', 'Disponível até': '31/07/2027', 'Custo R$/h': 'R$ 38,00/h', 'Habilitação': 'NR-31', 'Validade da habilitação': '15/08/2026', 'Calendário': 'Da equipe', 'Acesso ao app': 'Com login', 'Sit
+  ok  CD-04: o filtro de Habilidades oferece cada habilidade (não a lista inteira da célula) · ['Almoxarifado', 'Conferir', 'Irrigar', 'Liberar O.S. (agrônomo)', 'Manutenção de máquinas', 'Operar colhedora', 'Operar plantadeira', 'Operar pulverizador', 'Operar trator', 'Preparar calda (caldeiro)']
+  ok  CD-04: filtro Habilidades = Operar trator → Beto, Carlos, Lucas, Marcos (pertinência, não texto) · ['Beto', 'Carlos', 'Lucas', 'Marcos']
+  ok  CD-04: ordenar Validade da habilitação por data · ['15/08/2026', '30/09/2026', '31/03/2027', '30/04/2027', '30/04/2027', '31/05/2027', '31/08/2027', '31/12/2027', '—', 'pendente']
+  ok  CD-05 Parceiros: colunas Parceiro | CPF/CNPJ | Papéis | Contato | WhatsApp | E-mail | Canais autorizados | Situação do papel · ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Situação do papel']
+  ok  CD-05 Parceiros: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Situação do papel']
+  ok  CD-05 Parceiros: filtro (▾) e ordenação no título em todas as 8 colunas · [True, True, True, True, True, True, True, True]
+  ok  CD-05 Parceiros: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-05 Parceiros: Situação do papel em chip em todas as linhas com valor (20) · [True, True, True, True, True, True]
+  ok  CD-05: Sementes Vale WhatsApp 65 99555-6677 "não autorizado" (Canais = E-mail); Coop. Vale com dois papéis e dois estados · ({'Parceiro': 'Sementes Vale', 'CPF/CNPJ': '55.789.012/0001-39', 'Papéis': 'Fornecedor', 'Contato': 'Otávio Lima', 'WhatsApp': '65 99555-6677 não autorizado', 'E-mail': 'comercial@sementesvale.com.br', 'Canais autorizados': 'E-mail', 'Situação do papel': 'Homologado'}, {'Parceiro': 'Coop. Vale', 'CP
+  ok  CD-05: filtro Canais autorizados = WhatsApp (por item da lista) · 13
+  ok  CD-05 Clientes: colunas Parceiro | CPF/CNPJ | Papéis | Contato | WhatsApp | E-mail | Canais autorizados | Limite de crédito | Validade da análise de crédito | Situação do papel · ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Limite de crédito', 'Validade da análise de crédito', 'Situação do papel']
+  ok  CD-05 Clientes: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Limite de crédito', 'Validade da análise de crédito', 'Situação do papel']
+  ok  CD-05 Clientes: filtro (▾) e ordenação no título em todas as 10 colunas · [True, True, True, True, True, True, True, True, True, True]
+  ok  CD-05 Clientes: unidade junto do valor nas colunas com unidade (Limite de crédito R$) · []
+  ok  CD-05 Clientes: Situação do papel em chip em todas as linhas com valor (7) · [True, True, True, True, True, True]
+  ok  CD-05 Clientes: Rede Hortifrúti BA R$ 40.000 | 31/08/2026 | Limite vencido · {'Parceiro': 'Rede Hortifrúti BA', 'CPF/CNPJ': '15.332.907/0001-25', 'Papéis': 'Cliente', 'Contato': 'Caio Nunes', 'WhatsApp': '71 99655-2103 não autorizado', 'E-mail': 'hortifruti@redehfba.com.br', 'Canais autorizados': 'E-mail', 'Limite de crédito': 'R$ 40.000', 'Validade da análise de crédito': '
+  ok  CD-05 Clientes: ordenar Limite de crédito pelo número · ['R$ 2.000.000', 'R$ 1.500.000', 'R$ 900.000', 'R$ 300.000', 'R$ 120.000', 'R$ 100.000', 'R$ 40.000']
+  ok  CD-05 Cobertura: colunas Grupo de insumo | Fornecedores que recebem cotação | Situação · ['Grupo de insumo', 'Fornecedores que recebem cotação', 'Situação']
+  ok  CD-05 Cobertura: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Grupo de insumo', 'Fornecedores que recebem cotação', 'Situação']
+  ok  CD-05 Cobertura: filtro (▾) e ordenação no título em todas as 3 colunas · [True, True, True]
+  ok  CD-05 Cobertura: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-05 Cobertura: Situação em chip em todas as linhas com valor (9) · [True, True, True, True, True, True]
+  ok  CD-05 Cobertura: a Situação diz o estado (o número fica ao lado): Sementes 2 Com concorrência; Combustível 0 Sem fornecedor · ({'Grupo de insumo': 'Sementes', 'Fornecedores que recebem cotação': '2', 'Situação': 'Com concorrência'}, {'Grupo de insumo': 'Combustível', 'Fornecedores que recebem cotação': '0', 'Situação': 'Sem fornecedor Homologar fornecedor ›'})
+  ok  CD-06 Itens: colunas Grupo › item | Natureza de custo | Unidade | Embalagem | Controle | Preço de referência | Data do preço | Situação · ['Grupo › item', 'Natureza de custo', 'Unidade', 'Embalagem', 'Controle', 'Preço de referência', 'Data do preço', 'Situação']
+  ok  CD-06 Itens: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Grupo › item', 'Natureza de custo', 'Unidade', 'Embalagem', 'Controle', 'Preço de referência', 'Data do preço', 'Situação']
+  ok  CD-06 Itens: filtro (▾) e ordenação no título em todas as 8 colunas · [True, True, True, True, True, True, True, True]
+  ok  CD-06 Itens: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-06 Itens: Situação em chip em todas as linhas com valor (38) · [None, True, True, None, True, None]
+  ok  CD-06: Diesel S10 L | granel | R$ 6,19/L | 15/09/2026; Calcário dolomítico sem preço (— | Sem preço) · ({'Grupo › item': 'Diesel S10', 'Natureza de custo': '3.1.04 · Combustíveis e lubrificantes', 'Unidade': 'L', 'Embalagem': 'granel', 'Controle': 'Sem lote', 'Preço de referência': 'R$ 6,19/L', 'Data do preço': '15/09/2026', 'Situação': 'Em dia'}, {'Grupo › item': 'Calcário dolomítico', 'Natureza de 
+  ok  CD-06: preço com a unidade do item na célula ("R$ 22,00/L", "R$ 2,40/kg") · ['R$ 22,00/L', 'R$ 18,00/L', 'R$ 6,19/L', 'R$ 0,18/kg', 'R$ 0,22/kg']
+  ok  CD-06: filtro Natureza de custo vale no item · 15
+  ok  CD-06: ordenar Preço de referência pelo número dentro do grupo · [['R$ 22,00/L', 'R$ 18,00/L'], ['R$ 0,22/kg', 'R$ 0,18/kg', '—']]
+  ok  CD-06 Locais: colunas Local | Fazenda | Tipo | Capacidade | Itens com este local padrão · ['Local', 'Fazenda', 'Tipo', 'Capacidade', 'Itens com este local padrão']
+  ok  CD-06 Locais: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Local', 'Fazenda', 'Tipo', 'Capacidade', 'Itens com este local padrão']
+  ok  CD-06 Locais: filtro (▾) e ordenação no título em todas as 5 colunas · [True, True, True, True, True]
+  ok  CD-06 Locais: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-06 Locais: capacidade como número com unidade, ordenada pelo número (60.000 sc de 60 kg antes de 15.000 L) · ['60.000 sc de 60 kg', '15.000 L']
+  ok  CD-07 Estrutura: colunas Dimensão › código | Nome | Origem | Início da vigência | Fim da vigência | Vínculos | Conta no ERP (Sankhya) | TOP no ERP | Situação | No rascunho · ['Dimensão › código', 'Nome', 'Origem', 'Início da vigência', 'Fim da vigência', 'Vínculos', 'Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+  ok  CD-07 Estrutura: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Dimensão › código', 'Nome', 'Origem', 'Início da vigência', 'Fim da vigência', 'Vínculos', 'Conta no ERP (Sankhya)', 'TOP no ERP', 'Situação', 'No rascunho']
+  ok  CD-07 Estrutura: filtro (▾) e ordenação no título em todas as 10 colunas · [True, True, True, True, True, True, True, True, True, True]
+  ok  CD-07 Estrutura: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  ok  CD-07 Estrutura: Situação em chip em todas as linhas com valor (23) · [None, True, True, None, True, True]
+  ok  CD-07: 3.1.01 Fertilizantes e corretivos | 01/07/2026 | 30/06/2027 | 4.1.1.01 | 1201 | Mapeado; 02 Novo no rascunho · ({'Dimensão › código': '3.1.01', 'Nome': 'Fertilizantes e corretivos', 'Origem': 'Estrutura gerencial', 'Início da vigência': '01/07/2026', 'Fim da vigência': '30/06/2027', 'Vínculos': 'grupos Fertilizantes, Corretivos', 'Conta no ERP (Sankhya)': '4.1.1.01', 'TOP no ERP': '1201', 'Situação': 'Mapead
+  ok  CD-07: ordenar Início da vigência por data dentro da dimensão · [['01/09/2026', '01/07/2024'], ['01/07/2026', '01/07/2026', '01/07/2026', '01/07/2026', '01/07/2026', '01/07/2026', '01/07/2026']]
+  ok  CD-07: filtro Origem = Culturas e cultivares → só os códigos de cultura · 5
+  ok  sem erro de script (1440) · []
+  ok  390 px: 13 grades sem rolagem lateral da página; cada grade cabe ou rola dentro da caixa, com a 1ª coluna à vista · [('CD-01 Talhões #0', True, True, True, True), ('CD-01 Água #0', True, True, True, True), ('CD-01det #0', True, True, True, True)]
+  ok  390 px: as grades largas rolam dentro da caixa (pelo menos as de muitas colunas) · []
+  ok  CD-03 fluxo 390 px (normal): salvar 165 → célula "R$ 165,00/h" e a ordem por custo põe o Trator 03 entre os de 180 e os de 150 · ('R$ 165,00/h', ['Colhedora Axial-Flow 7250', 'Trator T1', 'Trator 02', 'Trator 03', 'Trator 04', 'Plantadeira 24 linhas'])
+  ok  CD-03 fluxo 390 px (recusa): custo "abc" mostra "Use um número" e não grava (célula segue R$ 165,00/h) · ('ção ou aferição?\nSim\nNão\nLocal\nOficina Sede\nGalpão 1\nSanta Rita · T1\nSanta Rita · T4\nPivô 2\nTalhão T7\nArmazém Sede\nPivô 1\nSituação\nAtivo\nInativo\nCancelar\nSalvar', 'R$ 165,00/h')
+  ok  CD-03 fluxo 390 px (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor · 1
+  ok  CD-03 390 px (filtro): Classe = Irrigação → 3 linhas; + busca "Silo" → nenhuma linha e o aviso; Limpar filtros volta a todas · (['Bomba do Pivô 1', 'Bomba do Pivô 2', 'Gotejo T7'], 15)
+  ok  sem erro de script (390) · []
+RESULTADO: 125/125 ok

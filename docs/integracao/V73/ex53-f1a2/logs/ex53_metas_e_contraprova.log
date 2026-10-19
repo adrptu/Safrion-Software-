@@ -1,0 +1,2 @@
+PASS EX53: sem meta, parcial, valor/link, alavancas e impedimento real
+AssertionError [ERR_ASSERTION]: o aviso de meta vem uma vez no bloco (6258085103)

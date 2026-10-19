@@ -1,0 +1,3 @@
+tabelas_cad_test.py rc=0 684s :: RESULTADO: 206/206 ok
+ds_1610_test.py rc=0 380s :: RESULTADO: 14 ok · 0 falhas
+FIM

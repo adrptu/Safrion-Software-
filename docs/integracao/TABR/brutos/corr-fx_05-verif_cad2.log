@@ -1,0 +1,12 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 verif_cad2.py
+· CD-02 erro JS → 
+· altura necessária → [1100, 694]
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/gen37/verif_cad2.py", line 34, in <module>
+    out('cabeçalhos g_rend', J("[...document.querySelectorAll('[role=table]')[1].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim())"))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

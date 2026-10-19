@@ -1,0 +1,2 @@
+m5_focal rc=0
+painel03 rc=0 RESULTADO: 54 ok · 0 falhas

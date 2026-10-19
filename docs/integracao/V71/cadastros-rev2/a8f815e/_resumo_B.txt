@@ -1,0 +1,5 @@
+credito_menu_test.py rc=1 19s :: 
+cadastros_padrao_test.py rc=0 311s :: RESULTADO: 44/44
+getest.py rc=0 43s :: 
+cad_gravacao_falha_test.py rc=0 57s :: RESULTADO: 7/7 ok
+FIM

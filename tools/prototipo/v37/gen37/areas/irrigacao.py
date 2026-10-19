@@ -23,9 +23,12 @@ import json
 from engine import (grid,section,esc,icon,chip,btn,Pt,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,
                     BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
-from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, _com_setas, _SETA, _etp_nav, _etp_abre
+from ui37 import shell37, HEIGHTS37, PARENT37, MACRO, secoes_nav, secao_item
 import cenario
 import dados_irrigacao as DI
+from areas.cadastros import ncol_dinamico
+from areas.cad_ativos_pessoas import CAPCOL_JS   # TABR-CTX-02: a coluna Fazenda sai com o filtro, a ordem e o menu dela (a mesma função do CD-03)
+import ficha_pivo as FP   # ficha do pivô: o mesmo componente do CD-03 (capacidade do equipamento), aberto pelo setor (09/10/2026)
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -34,25 +37,13 @@ for _f in ('IR-01.dc.html','IR-02.dc.html','IR-03.dc.html','IR-04.dc.html'): MAC
 for _f in ('IR-02.dc.html','IR-03.dc.html','IR-04.dc.html'): PARENT37[_f]='IR-01.dc.html'
 PARENT37['IR-03det.dc.html']='IR-03.dc.html'
 
-# ---------------- faixa de etapas: contador e cor calculados do estado ----------------
+# ---------------- telas da Irrigação: navegação entre telas irmãs, com a pendência de cada uma calculada do estado ----------------
+# UX-ACAO-UNICA-20261003: as quatro telas são trabalho paralelo (qualquer ordem), não etapas de um processo guiado: a faixa é a
+# navegação entre elas (único caminho; IR-02…04 não estão no menu), sem número de etapa e sem setas ‹ ›; a pendência fica escrita.
 ETAPAS=[('Confira a necessidade','IR-01.dc.html'),('Programe a irrigação','IR-02.dc.html'),('Execute e confira','IR-03.dc.html'),('Acompanhe clima e sensores','IR-04.dc.html')]
 def faixa(cur):
-    items=''
-    for i,(t,h) in enumerate(ETAPAS,1):
-        on=(i==cur)
-        badge=(f'width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; flex-shrink: 0; background: {ACC}; color: #fff;'
-               if on else H(f'st{i}_bst'))
-        inner=(f'<span style="{badge}">{i}</span><span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12px; line-height: 1.2; font-weight: {800 if on else 600};">{esc(t)}</span>'
-               f'<sc-if value="{H(f"st{i}_has")}" hint-placeholder-val="{F()}"><span style="display: block; font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{H(f"st{i}_why")}</span></sc-if></span>')
-        st=('display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; min-width: 0; '
-            +(f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC};' if on else 'background: transparent;'))
-        cur_at=' aria-current="step"' if on else ''
-        items+=f'<a href="{h}" title="{esc(t)}"{cur_at} style="{st}">{inner}</a>'
-    seta=lambda j,sim,dica: f'<a href="{ETAPAS[j][1]}" aria-label="{dica}: {esc(ETAPAS[j][0])}" title="{dica}: {esc(ETAPAS[j][0])}" style="{_SETA}">{sim}</a>'
-    ant=seta(cur-2,'‹','Etapa anterior') if cur>1 else ''
-    prox=seta(cur,'›','Próxima etapa') if cur<len(ETAPAS) else ''
-    # faixa no padrão da casca (_etp_nav): em tela estreita vira "Etapa i de 4 · Nome" e a lista abre como folha (RESPONSIVIDADE)
-    return _etp_nav('Etapas do processo',len(ETAPAS),_com_setas(items,len(ETAPAS),ant,prox,_etp_abre(cur,len(ETAPAS),ETAPAS[cur-1][0])))
+    itens=''.join(secao_item(t,i==cur,href=h,why_hole=f'st{i}') for i,(t,h) in enumerate(ETAPAS,1))
+    return secoes_nav(itens,len(ETAPAS),cur,ETAPAS[cur-1][0],'Telas da irrigação')
 
 def ic(name,size=15):
     P={'play':'M8 5v14l11-7z','pause':'M7 5h3v14H7zM14 5h3v14h-3z','plus':'M12 5v14M5 12h14','flag':'M5 21V4h11l-2 4 2 4H5','gauge':'M12 14l4-5M3 14a9 9 0 1 1 18 0'}
@@ -81,9 +72,9 @@ def painel(pre,corpo,rodape,w=480):
             f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H(pre+"_titulo")}</h2>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H(pre+"_cancel")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(pre+"_sub")}</div>{corpo}<div style="flex-grow: 1;"></div>'
-            f'<sc-if value="{H(pre+"_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
+            f'<sc-if value="{H(pre+"_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
             f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-            f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
+            f'<div class="pe-form" style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
 def campo(lbl,fid,inner,err_pre):
     return (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="{fid}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{lbl}</label>{inner}'
             f'<sc-if value="{H(err_pre+"_has")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err_pre)}</span></sc-if></div>')
@@ -155,113 +146,292 @@ function irrHashOuvir(self,fn){ if(self.__hashOuvindo) return; self.__hashOuvind
   try{ window.addEventListener('hashchange',()=>fn(irrHash())); }catch(e){} }
 function irrGo(h){ try{ location.href=h; }catch(e){} }
 function nfx(n,d){ return irrN(n,d); }
-'''
+// TABELAS-FOCO (proprietário, 04/10/2026): uma variável por coluna. Instante que ordena como data ('aaaa-mm-dd hh:mm'); a célula mostra "hoje 20:00"
+function irrIsoM(m){ return (m===null||m===undefined)?'':irrIso(irrDiaN(m))+' '+irrHm(m); }
+// cultura e estádio em colunas próprias: "Milho V10" → Milho | V10; "Mamão · produção" (Lagoa Grande) → Mamão | fase do setor
+function irrCultEst(x){ const t=String(x.cult||''); const m=/^(.*\S)\s+([VR]\d+(?:\.\d+)?)$/.exec(t); if(m) return {c:m[1],e:m[2]};
+  const i=t.indexOf(' · '); return i>0?{c:t.slice(0,i),e:x.fase||t.slice(i+3)}:{c:t,e:x.fase||''}; }
+// coluna Fazenda só com "Todas" no topo (com uma fazenda ela repetiria o mesmo nome em todas as linhas); hole = nº de trilhas da grade.
+// Ao sair, o filtro, a ordem e o menu de filtro dela saem junto (TABR-CTX-02: antes ficava o chip "faz: Santa Rita", ignorado, e voltava com "Todas")
+function irrColsFaz(self,gid,fz,v,hole){ const sp=IRG(gid); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); capColDeps(self,gid,'faz',fz?'':'Fazenda');
+  sp.cols=fz?sp.colsAll.filter(c=>c.k!=='faz'):sp.colsAll; v[hole]=sp.cols.length; }
+// célula de texto (vazio = "—"), de lista (filtro por item: r.m) e de instante
+function irrTxt(r,k,t,b){ r.p[k]=[t?{k:b?'b':'txt',t:t}:{k:'mut',t:'—'}]; r.s[k]=t||''; }
+function irrLst(r,k,a,kind){ r.m=r.m||{}; r.m[k]=a.map(x=>({id:x.t,l:x.t})); r.s[k]=a.map(x=>x.t).join(', ');
+  r.p[k]=!a.length?[{k:'mut',t:'—'}]:(kind==='chip'?a.map(x=>({k:'chip',t:x.t,c:x.c||'gray',dica:x.dica||''})):[{k:'txt',t:r.s[k]}]); }
+// coluna Pendência: o que segura a ordem, uma variável por chip (revisão TABR A11): o tipo no chip ("Divergência", "Falta insumo", "Conflito")
+// e o detalhe na dica e no detalhe da ordem ("−3,8 %", "Ureia 45%", "parada da B3 · 14:00–15:00"); sem repetir "Impedida" (já é a
+// Situação/Etapa ao lado) e sem os selos informativos de ordem encerrada (mut, revisão A6: "Encerrada automaticamente" não segura nada).
+// ref: a ordem da pendência quando ela não é a da coluna Ordem da linha (revisão A2: "Divergência na OS-0394" ao lado da OS-0419)
+function irrPend(a,ref){ return (a||[]).filter(x=>!x.mut).map(x=>{ const t=String(x.t||'').replace(/^Impedida · /,''); const i=t.indexOf(' · ');
+  const cat=i>0?t.slice(0,i):t, det=i>0?t.slice(i+3):''; return Object.assign({},x,{t:cat.charAt(0).toUpperCase()+cat.slice(1)+(ref?' na '+ref:''),dica:[det,x.h].filter(Boolean).join(' · ')}); }); }
+function irrPendFert(fb,ref){ return irrPend(fb?[{t:fb.t,c:'red'}]:[],ref); }
+// Responsável: só a pessoa ("Caio"); a função ("· PCP") fica no cadastro de pessoas (revisão A11)
+function irrQuem(d){ return String(d||'').split(' · ')[0]; }
+// duração da passada na linha do detalhe: o intervalo entre o Início e o Fim da mesma linha (reais quando a passada já rodou, previstos quando
+// não); sem início, a duração prevista. Antes a coluna mostrava a prevista ao lado do horário real (OS-0394: 14,5 h ao lado de 20:00–22:06)
+function irrDurP(o,p){ const temI=p.ini!==null&&p.ini!==undefined; if(!temI) return p.dur; const i0=(p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini; const f=irrFimP(o,p); return f===null?p.dur:f-i0; }
+function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{k:'mut',t:vazio||'—'}:{k:'txt',t:irrQuando(m)}]; r.s[k]=m===null||m===undefined?(vazio||''):irrQuando(m); }
+'''+CAPCOL_JS
 
 # =====================================================================================
+def _irr_mapa_view():
+    import mapa_emb as ME
+    return (f'<section aria-label="Mapa dos setores" data-irr-mapa="1">'
+            + ME.html('irm', 'Talhões irrigados no mapa: Enter ou toque abre o setor').replace(f'href="{H("irm_in04")}"', f'href="{H("irm_in04")}" onClick="{H("irm_in04go")}"')
+            + '</section>')
+
+
+def _irr_mapa_js():
+    """Camada Irrigação do Mapa da fazenda (mapa_camadas.js · mcIrr) e componente do mapa embutido (mapa_emb); a entrada de cada setor é
+    irrigacao_estado.js · irrMapaEntrada (a mesma do IN-04)."""
+    import mapa_emb as ME, os as _os
+    base = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    ler = lambda n: open(_os.path.join(base, n), encoding='utf-8').read() + '\n'
+    return ler('mapa_camadas.js') + ler('mapa_emb.js') + ME.js('irm') + r"""
+// EX-55 F1 · visão Mapa da Irrigação: a camada Irrigação do Mapa da fazenda (mcIrr) com a entrada de cada setor de irrigacao_estado.js
+// (irrMapaEntrada, a mesma do IN-04), sobre as linhas visíveis da lista de setores (fazenda, situação, busca e filtros). Talhão sem setor
+// no recorte fica neutro. Clique, toque ou Enter abre o setor (o mesmo formulário da linha); o mapa não programa nem libera nada.
+const IRM_VERS=['Hoje','Balanço hídrico'];
+function irMapaVals(self,v){
+  const s=irrGet(),st=self.state.irm||{},put=p=>self.setState({irm:Object.assign({},self.state.irm||{},p)});
+  const ver=IRM_VERS.indexOf(st.ver)>=0?st.ver:IRM_VERS[0];
+  v.irm_vers=IRM_VERS.map(k=>({t:k,on:String(k===ver),go:()=>put({ver:k})}));
+  const sp=IRG('g_set'); meRecorte(self,v,'irm',sp,'g_set'); const vis=meVisiveis(self,sp,'g_set');
+  const nomeF=k=>(s.faz[k]||{}).nome||k,fazGeo=Object.keys(ME_IRM.geo),fk=irrFazK(self);
+  const setDe=fz=>Object.keys(s.setores).filter(k=>nomeF(s.setores[k].faz)===fz&&vis.has(String(k)));
+  let faz;
+  if(fk&&ME_IRM.geo[nomeF(fk)]){ faz=nomeF(fk); v.irm_temFazs=false; v.irm_fazs=[]; }
+  else { faz=fazGeo.indexOf(st.faz)>=0?st.faz:fazGeo.slice().sort((a,b)=>setDe(b).length-setDe(a).length)[0]; v.irm_temFazs=true;
+    v.irm_fazs=fazGeo.map(fz=>({t:fz+' · '+setDe(fz).length,on:String(fz===faz),go:()=>put({faz:fz})})); }
+  const geoT=new Set(ME_IRM.idx.filter(x=>x.faz===faz).map(x=>x.t)),porT={},sem=[];
+  setDe(faz).forEach(k=>{ const x=s.setores[k],t=irrTal(x,k); if(!geoT.has(t)){ sem.push(k); return; }
+    const cl=mcIrr(irrMapaEntrada(s,k,''),ver);
+    porT[t]={c:cl.c,l2:cl.l,al:t+' · '+cl.l+' · setor '+x.nome+' · Enter abre o setor',go:()=>g2open(self,sp,k,null)}; });
+  meVals(v,'irm',ME_IRM,ME_IRM.geo[faz]?faz:'',porT,{foraTxt:'sem setor no recorte',leg:mcIrrLeg(ver)});
+  v.irm_temSem=sem.length>0; v.irm_sem=sem.map(k=>({t:s.setores[k].nome,go:()=>g2open(self,sp,k,null)}));
+  const nT=Object.keys(porT).length;
+  v.irm_cont=(ME_IRM.geo[faz]?nT+(nT===1?' setor':' setores')+' no mapa':'Sem desenho dos talhões de '+faz)+(sem.length?' · '+sem.length+' sem contorno':'');
+  const fkk={'Lagoa Grande':'LG','Santa Rita':'SR','Boa Vista':'BV'}[faz]||'TODAS';
+  v.irm_in04='IN-04.dc.html#faz='+fkk+'&lay=irr';
+  v.irm_in04go=()=>{ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:faz,lay:'Irrigação',flt:{'Irrigação':{ver}}})); }catch(e){} };
+  v.irm_temCurta=false; v.irm_curta=[]; v.irm_curtaT=''; v.irm_curtaX=()=>{};
+}
+"""
+
+
 def ir01():
     fname='IR-01.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    g_set=grid([dict(k='setor',l='Setor',w=160),dict(k='def',l='Déficit hoje',t='num',a='r',u='mm',d=1,w=110),dict(k='nec',l='Necessidade',w=190),
-                dict(k='sit',l='Situação',w=210),dict(k='prox',l='Próximo passo',w=150)],[],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, 09/10): estado e próximo passo logo depois do setor, para ficarem
+    # à vista sem rolar; depois a necessidade (déficit, lâmina bruta), a ordem que cobre, quanto cobre e a próxima passada dela. O secundário
+    # vai para o painel do setor: fonte do déficit, cultura e estádio, área, passadas necessárias, o que resta e o responsável.
+    # Fazenda só com "Todas" no topo
+    g_set=grid([dict(k='setor',l='Setor',w=100),dict(k='faz',l='Fazenda',w=110),dict(k='sit',l='Situação',w=150),dict(k='pend',l='Pendência',multi=True,w=190),
+                dict(k='prox',l='Próximo passo',w=150),dict(k='def',l='Déficit hoje',t='num',a='r',un='mm',d=1),dict(k='nec',l='Necessidade bruta',t='num',a='r',un='mm',d=2,dmin=1),
+                dict(k='ord',l='Ordem',w=90),dict(k='cob',l='Cobertura',t='num',a='r',un='%'),dict(k='pps',l='Próxima passada',t='date',w=130)],[],
                edit=dict(m='form',title='Setor',sub='Os limites valem para a próxima programação; ordens liberadas não mudam.',
-                   fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='eqT',l='Equipamento',ro=True),
+                   fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='ordT',l='Ordem que cobre',ro=True),
+                           dict(k='donoT',l='Responsável pelo próximo passo',ro=True),dict(k='cultT',l='Cultura e estádio',ro=True),dict(k='eqT',l='Equipamento',ro=True),
+                           dict(k='aguaT',l='Água no solo usada no cálculo',ro=True,help='CAD = (CC − PMP) × profundidade das raízes; AFD = f × CAD. O déficit não passa da CAD e o gatilho é o limiar do setor, nunca acima da AFD. A lâmina líquida recomendada é o déficit: repõe até a capacidade de campo (FAO-56).'),
+                           dict(k='fdep',l='Fração de depleção (f)',t='num',min=0.1,max=0.9,help='Parte da CAD que a cultura usa sem estresse. Vazio = a referência da cultura (FAO-56, Tabela 22).'),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
-               gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
-    EXTRAJS[0]=prefixo()+JS_COMUM+r"""
+               gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'),cartoes='externo')   # EX-55: Cartões entra no seletor de visões
+    # Água no solo (AGUA-SOLO-IRR, proprietário 18/10/2026: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do solo
+    # para os calculos, deficit e recomendações de irrigação"): a grade saiu de Agrícola › Análises de solo; o comando (soloMedir) e o estado
+    # (c.solo.agua) são os mesmos. A coluna "No balanço" diz qual setor usa a medição, com a AFD e o gatilho que ela dá.
+    import dados_solo as DSO, ocupacao_cen as OCEN
+    g_agua=grid([dict(k='med',l='Medição',w=100),dict(k='tal',l='Talhão · zona',w=120),dict(k='data',l='Data',t='num',w=110),dict(k='uso',l='No balanço',w=200),
+                 dict(k='cc',l='Capacidade de campo',t='num',a='r',w=140),dict(k='pmp',l='Ponto de murcha',t='num',a='r',w=130),dict(k='cad',l='CAD',t='num',a='r',w=130),
+                 dict(k='prof',l='Profundidade',w=150)],[],   # método, fonte e responsável ficam no formulário da medição (a grade cabe na caixa a 1440 px, A1)
+                edit=dict(m='form',title='Medição de água no solo',newTitle='Registrar medição de água no solo',
+                          sub='Capacidade de campo e ponto de murcha do talhão ou da zona: a CAD entra no déficit, no gatilho e na lâmina do setor.',
+                          fields=[dict(k='faz',l='Fazenda',t='sel',opts=['Santa Rita','Lagoa Grande','Boa Vista'],req=True,**{'def':'Santa Rita'}),
+                                  dict(k='talv',l='Talhão',t='sel',dyn=True,opts=[],req=True),dict(k='zona',l='Zona (opcional)',t='txt',help='Ex.: Z1 (baixada). Vazio = talhão inteiro.'),
+                                  dict(k='datav',l='Data da medição',t='date',req=True),dict(k='profv',l='Profundidade amostrada',t='sel',opts=['0–20','0–30','0–40','20–40'],req=True,u='cm'),
+                                  dict(k='z',l='Profundidade efetiva das raízes',t='num',req=True,min=1,max=200,u='cm'),
+                                  dict(k='metv',l='Método',t='sel',opts=DSO.METODOS_AGUA,req=True),dict(k='un',l='Unidade',t='sel',opts=DSO.UN_AGUA,req=True,**{'def':'% volume'}),
+                                  dict(k='ccv',l='Capacidade de campo (CC)',t='num',req=True,min=0,max=100),dict(k='pmpv',l='Ponto de murcha permanente (PMP)',t='num',min=0,max=100,help='Sem PMP medido, a CAD fica "não calculável" e vale o limiar do setor.'),
+                                  dict(k='fontev',l='Fonte ou laboratório',t='sel',opts=DSO.LABS+['Equipe da fazenda'],req=True),dict(k='resp',l='Responsável',t='sel',opts=DSO.RESP_AGUA,req=True,**{'def':'Ana (agrônoma)'}),
+                                  dict(k='cadT',l='Água disponível (CAD)',ro=True,live=True,help='CAD = (CC − PMP) × profundidade efetiva; unidades explícitas.')]),
+                add='Registrar medição',gid='g_agua',total=False,so=dict(k='data',d=True))
+    talf={f:[[t,ha] for t,ha in lst] for f,lst in OCEN.talhoes().items()}
+    EXTRAJS[0]=prefixo()+FP.js('IR')+'const SOLO_TAL='+json.dumps(talf,ensure_ascii=False)+';\n'+JS_COMUM+r"""
+function irAgDia(r,k,iso){ const ok=/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')); r.v[k]=ok?Number(String(iso).slice(0,10).replace(/-/g,'')):''; const t=ok?soloBr(iso):'—'; r.p[k]=[{k:'txt',t}]; r.s[k]=t; }
+function irAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav,prof:x.profv,z:x.z,met:x.metv,un:x.un,cc:x.ccv,pmp:x.pmpv,fonte:x.fontev,resp:x.resp}; }
+// linhas da Água no solo: medições semeadas e gravadas, da fazenda do filtro; "No balanço" = o setor que usa a medição (a mais recente do talhão)
+function irAgRows(self,s,fz){ const c=cenGet(); const ms=(IRR_SOLO0.agua||[]).concat(Object.values(((c&&c.solo)||{}).agua||{}));
+  const nomeF=fz?(s.faz[fz]||{}).nome:''; const uso={}; const porTal={};
+  Object.keys(s.setores).forEach(k=>{ const x=s.setores[k]; const a=irrAgua(s,k); const F=s.faz[x.faz]||{}; porTal[F.nome+'|'+irrTal(x,k)]=k; if(a&&a.m) (uso[a.m.id]=uso[a.m.id]||[]).push(k); });
+  return ms.filter(m=>!nomeF||m.faz===nomeF).map(m=>{ const cad=soloCAD(m); const r={id:m.id,ro:true,v:{},s:{},p:{}};
+    r.p.med=[{k:'b',t:m.id}]; r.s.med=m.id; r.p.tal=[{k:'txt',t:m.tal}].concat(m.zona?[{k:'br'},{k:'mut',t:m.zona}]:[]); r.s.tal=m.tal+(m.zona?' · '+m.zona:''); irAgDia(r,'data',m.data);
+    const ks=uso[m.id]||[]; let up, us;
+    if(ks.length){ const k=ks[0]; const x=s.setores[k]; const a=irrAgua(s,k); const G=irrGatilho(s,k);
+      const det=a.cad===null?'CAD não calculável: vale o limiar':('AFD '+irrN(a.afd,1)+' mm'+(G?' · gatilho '+irrN(G.v,1)+' mm':''));
+      up=[{k:'chip',t:x.bal?'Em uso · '+x.nome:x.nome+' sem rega agora',c:x.bal?'green':'gray'},{k:'br'},{k:'mut',t:det}]; us=(x.bal?'Em uso · ':'')+x.nome+' · '+det; }
+    else { const k=porTal[m.faz+'|'+m.tal]; const a=k?irrAgua(s,k):null;
+      up=[{k:'mut',t:k?(a&&a.m?'Substituída por '+a.m.id:'—'):'Talhão sem setor irrigado'}]; us=up[0].t; }
+    r.p.uso=up; r.s.uso=us;
+    r.p.prof=[{k:'txt',t:m.prof+' cm'},{k:'br'},{k:'mut',t:'raízes até '+prFmtT(m.z,1)+' cm'}]; r.s.prof=m.prof+' cm · raízes '+prFmtT(m.z,1)+' cm'; r.p.met=[{k:'txt',t:m.met}]; r.s.met=m.met;
+    const vu=(q)=>q===''||q===null||q===undefined?'—':prFmtT(q,2)+' '+(m.un==='% volume'?'% vol.':m.un);
+    r.p.cc=[{k:'txt',t:vu(m.cc)}]; r.s.cc=vu(m.cc); r.v.cc=Number(m.cc); r.p.pmp=m.pmp===''?[{k:'mut',t:'não medido'}]:[{k:'txt',t:vu(m.pmp)}]; r.s.pmp=m.pmp===''?'não medido':vu(m.pmp); r.v.pmp=m.pmp===''?'':Number(m.pmp);
+    r.p.cad=cad.v===null?[{k:'mut',t:'não calculável'},{k:'br'},{k:'mut',t:cad.nc}]:[{k:'b',t:prFmtT(cad.v,1)+' mm'}]; r.s.cad=cad.v===null?'não calculável':prFmtT(cad.v,1)+' mm'; r.v.cad=cad.v===null?'':cad.v;
+    r.p.fonte=[{k:'txt',t:m.fonte},{k:'br'},{k:'mut',t:m.resp}]; r.s.fonte=m.fonte+' · '+m.resp;
+    Object.assign(r.v,{faz:m.faz,talv:m.tal,zona:m.zona,datav:m.data,profv:m.prof,z:m.z,metv:m.met,un:m.un,ccv:m.cc,pmpv:m.pmp,fontev:m.fonte,resp:m.resp,cadT:cad.v===null?'não calculável: '+cad.nc:cad.e});
+    return r; }); }
 const RK={'Impedida':1,'A conferir':2,'A programar':3,'A liberar':3,'Irrigando':4,'Programada':5,'Sem necessidade':6,'Sem irrigação':7};
-function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
-  irrHashOuvir(self,(h)=>{ if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname); }catch(e){} return; }
+function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
+  irrHashOuvir(self,(h)=>{ if(h==='agua'){ let n=0; const vai=()=>{ const e=document.getElementById('ir-agua'); if(e) e.scrollIntoView({block:'start'}); else if(n++<8) setTimeout(vai,120); }; setTimeout(vai,0); return; }   // link do AG-02 (AGUA-SOLO-IRR)
+    if(h.indexOf('faz=')===0){ const f=h.slice(4); if(['Santa Rita','Lagoa Grande','Boa Vista','Todas'].indexOf(f)>=0) irrFazSet(self,f,''); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} return; }   /* mantém o ?view (EX-55: IR-01 tem seletor de visões) */
     const sid=h.split(':')[0]; const x=irrGet().setores[sid]; if(!x) return; irrFazDe(self,x.faz);
+    // #P2:ficha abre a ficha do pivô do setor (sub-detalhe; fechar volta ao setor); setor sem ficha abre só o setor
+    const fid=h.split(':')[1]==='ficha'?fpvDe(sid):'';
     // abre o painel do setor quando a linha já estiver na grade (a troca de fazenda redesenha antes)
-    let n=0; const abre=()=>{ const sp=IRG('g_set'); if(g2find(g2rows(self,sp),sid)) g2open(self,sp,sid,null); else if(n++<8) setTimeout(abre,120); }; setTimeout(abre,0); });
+    let n=0; const abre=()=>{ const sp=IRG('g_set'); if(g2find(g2rows(self,sp),sid)){ if(fid) fpvAbrir(self,fid,{gid:'g_set',rid:sid}); else g2open(self,sp,sid,null); } else if(n++<8) setTimeout(abre,120); }; setTimeout(abre,0); });
   const sids=Object.keys(s.setores).filter(k=>!fz||s.setores[k].faz===fz);
-  const rows=sids.map(k=>{ const x=s.setores[k]; const si=irrSituacao(s,k); const n=si.n; const top=si.top; const o=top&&top.o; const F=s.faz[x.faz];
-    const def=si.d===null?[{k:'mut',t:'—'}]:[{k:'b',t:(si.est?'≈':'')+irrN(si.d,1)+' mm'},{k:'br',t:''}].concat(si.est?[{k:'chip',t:'Estimativa por ET',c:'yellow'}]:[{k:'mut',t:F.demo?'demonstrativo':'medido'}]);
-    let nec=[{k:'mut',t:si.d===null?(x.fase||'sequeiro'):'sem lâmina'}];
-    if(n&&n.liq>0.05){ nec=[{k:'txt',t:irrMm(n.br)+' mm brutos'+(n.np>1?' em '+n.np+' passadas':'')},{k:'br',t:''}];
-      const oa=(si.ords||[]).find(z=>z.etapa!=='Em conferência')||o; const cb=oa?irrCobre(s,oa):null; nec.push({k:'mut',t:oa?(oa.id+(cb&&cb.cob!==null?' cobre '+irrN(cb.cob,0)+' %'+(cb.resta>0.05?' · resta '+irrN(cb.resta,1)+' mm':''):(cb&&cb.prox?' · próximo ciclo':''))):(top&&top.fert?top.fert+' · fertirrigação':'sem ordem')}); }
-    const sit=[{k:'chip',t:si.l,c:SITC[si.c]||'gray'}];
-    const prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]},{k:'br',t:''},{k:'mut',t:si.dono||''}]:[{k:'mut',t:'—'}];
+  irrColsFaz(self,'g_set',fz,v,'set_ncol');
+  const rows=sids.map(k=>{ const x=s.setores[k]; const si=irrSituacao(s,k); const n=si.n; const top=si.top; const o=top&&top.o; const F=s.faz[x.faz]; const CE=irrCultEst(x);
+    const temD=si.d!==null; const def=temD?[{k:'b',t:(si.est?'≈':'')+irrN(si.d,1)+' mm'}]:[{k:'mut',t:'—'}];
+    const fon=!temD?'':(si.est?'Estimativa por ET':(F.demo?'Demonstrativo':'Medido'));
+    // ordem da linha (coluna Ordem): a aberta que vai cobrir o déficit (fora da conferência); senão a da situação; senão a fertirrigação da O.S.
+    // Cobertura e Próxima passada são dessa mesma ordem; a pendência de outra ordem diz qual é (revisão TABR A2)
+    const temN=!!(n&&n.liq>0.05); const oa=((si.ords||[]).find(z=>z.etapa!=='Em conferência'))||o||null; const cb=(temN&&oa)?irrCobre(s,oa):null;
+    const ordId=oa?oa.id:(top&&top.fert?top.fert:''); const cobN=cb&&cb.cob!==null?Math.round(cb.cob):''; const restaN=cobN===''?'':(cb.resta>0.05?Math.round(cb.resta*10)/10:0);
     const b=x.bal; const o2=[];
     if(b){ const net=irrCreditos(s,k).gov;
       o2.push(F.demo?('Memória (demonstrativa): déficit 0 na reposição de '+irrDdmm(irrDiaN(b.repos))+' + ETc de '+b.dias+(b.dias>1?' dias':' dia')+' (ETo 5,5 × Kc '+irrN(x.kc,2)+') = '+irrN(si.d,1)+' mm')
         :('Memória: déficit em 15/09 '+irrN(b.d0,1)+' + ETc 7 dias '+irrN(b.etc,1)+' − chuva efetiva '+irrN(b.pef,1)+' − irrigação líquida '+irrN(net,1)+' = '+(si.est?'≈':'')+irrN(si.d,1)+' mm'));
       if(!F.demo) o2.push('Chuva efetiva: '+b.chuva+' · ETc = ET₀ Penman-Monteith (Estação Santa Rita) × Kc do estádio');
+      // com CAD a conta é dia a dia (irrBalDias): a soma acima pode não fechar no déficit; a linha diz por quê (Codex 6252809331)
+      const bd=irrBalDias(s,k,irrCreditos(s,k)); if(bd&&!si.est&&Math.abs(Math.max(0,b.d0+b.etc-b.pef-net)-si.d)>0.05) o2.push('Com a CAD de '+irrN(bd.cad,1)+' mm a conta é dia a dia: o déficit não passa da CAD e a água acima da capacidade de campo drena (FAO-56)');
       const se=irrSerie(s,k).filter(z=>z.v!==null); if(se.length) o2.push('Déficit no fim do dia: '+se.map(z=>z.t+' '+(z.est?'≈':'')+irrN(z.v,1)).join(' · ')+' · hoje '+(si.est?'≈':'')+irrN(si.d,1));
       if(si.faixa) o2.push('Passagem parcial · '+si.faixa);
       irrApsSetor(s,k).slice().sort((p,q)=>q.q-p.q).forEach(a=>{ const pc=irrApParc(a,x.ha); o2.push('Aplicado · '+irrDdmm(irrDiaN(a.q))+' · '+a.os+' · '+a.txt+' · '+irrN(a.vol)+' m³ em '+irrN(irrApCob(a),pc?1:0)+' ha = '+irrMm(irrApBr(a))+' mm brutos'+(pc?' na faixa':'')+' × '+a.ef+' % = '+irrMm(irrApNet(a))+' mm líquidos'+(pc?' · fora do déficit do pivô':'')+(a.prov?' · provisório':'')); }); }
     irrOrdensSetor(s,k).filter(z=>irrAberta(z)||z.etapa==='Encerradas').slice(-4).forEach(z=>o2.push({t:z.id+' · '+irrEtapa(s,z)+' · '+irrJanO(z),h:'IR-03det.dc.html#'+z.id}));
     const so=irrSonda(s,x); o2.push({t:'Fontes: '+(F.demo?'ETo de referência (demonstrativa)':'Estação Santa Rita')+(so?' · '+so.nome+' '+so.st.toLowerCase()+(so.motivo?' ('+so.motivo+')':''):''),h:'IR-04.dc.html'});
     const eq=(x.tipo==='gotejo'?'Gotejo':'Pivô')+' · '+irrN(x.ha)+' ha · '+irrN(x.vazao)+' L/s · '+x.bnome+' · '+((s.capt[x.capt]||{}).nome||'');
-    return {id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
-      v:{def:si.d===null?'':si.d,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:n&&n.liq>0.05?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq},
-      s:{setor:x.nome+' · '+x.cult,sit:si.sit,nec:nec.map(p=>p.t).join(' '),prox:si.acao?si.acao[0]:''},
-      p:{setor:[{k:'b',t:x.nome},{k:'br',t:''},{k:'mut',t:x.cult+' · '+irrN(x.ha)+' ha'+(fz?'':' · '+F.nome)}],def,nec,sit,prox}}; });
+    const r={id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
+      v:{def:temD?si.d:'',nec:temN?n.demandaBr:'',cob:cobN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+(si.fon||fon)),
+         necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.demandaBr)+' mm · programação '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas necessárias de ':' passada necessária de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',
+         ordT:ordId?(ordId+(cobN!==''?' · cobre '+cobN+' %'+(restaN>0?' · resta '+irrN(restaN,1)+' mm':''):(cb&&cb.prox?' · próximo ciclo':''))):'sem ordem',
+         donoT:si.acao?(si.dono||'—'):'—',cultT:CE.c+(CE.e?' · '+CE.e:''),eqT:eq,aguaT:irrAguaTxt(s,k,si.d),fdep:irrFdep(x).f},
+      s:{},p:{def}};
+    irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':'';
+    r.p.nec=[temN?{k:'txt',t:irrMm(n.demandaBr)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.demandaBr):''; irrTxt(r,'ord',ordId);
+    // cobertura da ordem sobre o déficit de hoje; ordem do próximo ciclo não cobre o de hoje (a célula diz isso)
+    r.p.cob=[cobN!==''?{k:'txt',t:String(cobN)}:(cb&&cb.prox?{k:'mut',t:'próximo ciclo'}:{k:'mut',t:'—'})]; r.s.cob=cobN!==''?String(cobN):(cb&&cb.prox?'próximo ciclo':'');
+    r.p.sit=[{k:'chip',t:si.sit,c:SITC[si.c]||'gray'}]; r.s.sit=si.sit;
+    // pendência do item que dá a situação e o próximo passo; se ele não é a ordem da linha, a pendência diz qual ordem é
+    const pid=top?(top.o?top.o.id:(top.fert||'')):''; const ref=(pid&&pid!==ordId)?pid:'';
+    let pen=[], pps=null, ppsV='—';
+    if(top&&top.o) pen=irrPend(irrSelos(s,top.o),ref); else if(top&&top.fert) pen=irrPendFert(irrFertBloq(top.fert),ref);
+    // próxima passada da ordem da coluna Ordem (antes vinha da ordem da situação e misturava duas ordens na linha)
+    if(oa){ const pp=irrPassProx(oa); if(pp){ pps=pp.ini; ppsV='a definir'; } }
+    else if(ordId&&s.fert[ordId]){ const f=s.fert[ordId]; const e2=irrFertEtapa(ordId); if(f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
+    irrLst(r,'pend',pen,'chip'); irrQ(r,'pps',pps,ppsV);
+    r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:'';
+    return r; });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0))||String(a.id).localeCompare(String(b.id),'pt-BR',{numeric:true}));
-  IRG('g_set').rows=rows;
+  IRG('g_set').rows=rows; IRG('g_agua').rows=irAgRows(self,s,fz);
   const imp=rows.filter(r=>r.rk===1).length, pen=rows.filter(r=>r.rk>=2&&r.rk<=3).length;
   const urg=rows.filter(r=>r.rk<=3&&r.ac).sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0)))[0];
   v.prim_has=!!urg; v.prim_h=urg?urg.ac[1]:'#'; v.prim_t=urg?(urg.ac[0].indexOf(urg.acId)>=0?urg.ac[0]:urg.ac[0]+' · '+urg.acId):'';
   v.hs_t=imp||pen?[imp?imp+(imp>1?' impedidos':' impedido'):'',pen?pen+(pen>1?' pendentes':' pendente'):''].filter(Boolean).join(' · '):'Sem pendências'; v.hs_st=chipSt(imp?'red':(pen?'yellow':'green'));
   v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem setor irrigado cadastrado.'; }
 function EXTRAVALS(self,v){ irrVista(self,'g_set');
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_set'||!r) return; g2set(self,'g_set',{rows:null,fl:r.id});
-    irrMudar(self,s=>irrLimites(s,r.id,{lmax:Number(r.v.lmax),imin:Number(r.v.imin),efic:Number(r.v.efic)})); };
+  g2visaoTenta(self,'g_set','mapa',()=>irMapaVals(self,v));   /* EX-55 F1: a falha desta visão não derruba a Tabela */
+  self.g2after=(gid,rows,r)=>{
+    if(gid==='g_agua'&&r){ g2set(self,'g_agua',{rows:null}); const ch=self.__agK||('AGS-'+Date.now()); self.__agK=null;
+      const res=cenMudar(null,cc=>soloMedir(cc,irAgDados(r.v),ch,g2perfil().k)); irrSoloInval();
+      self.setState({cenrev:Date.now(),g2toast:res.erro||(res.repetido?res.msg:res.msg.replace(' Referência para a Irrigação, não a lâmina.',' Déficit, gatilho e lâmina do setor já usam esta medição.'))}); return; }
+    if(gid!=='g_set'||!r) return; g2set(self,'g_set',{rows:null,fl:r.id});
+    irrMudar(self,s=>irrLimites(s,r.id,{lmax:Number(r.v.lmax),imin:Number(r.v.imin),efic:Number(r.v.efic),f:r.v.fdep===''||r.v.fdep===null||r.v.fdep===undefined?'':Number(r.v.fdep)})); };
+  self.g2check=(gid,rows,r,d)=>{ if(gid!=='g_agua') return {}; if(!self.__agK) self.__agK='AGS-'+Date.now(); const k=cenClone(cenGet());
+    try{ soloMedir(k,irAgDados(d),'PREVIA-'+Date.now(),g2perfil().k); return {}; }
+    catch(e){ const m=String(e.message||e); const f=/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/capacidade de campo/.test(m)?'ccv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje|já está registrada/i.test(m)?'datav':'talv'))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };
+  self.g2opts=(gid,k,d)=>{ if(gid==='g_agua'&&k==='talv') return [{v:'',t:'Escolha o talhão'}].concat((SOLO_TAL[d.faz||'Santa Rita']||[]).map(x=>({v:x[0],t:x[0]+' · '+cenNum(x[1])+' ha'}))); return null; };
+  self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
+  self.g2newDraft=(gid,dr)=>{ if(gid!=='g_agua') return {}; const p=self.__agPre||null; self.__agPre=null; if(p) return p;
+    const fz=irrFazK(self); const F=fz?(irrGet().faz[fz]||{}):null; return F&&F.nome?{faz:F.nome}:{}; };
   self.g2formActs=(gid,r)=>{ if(gid!=='g_set') return []; const s=irrGet(); const si=irrSituacao(s,r.id); const out=[];
     if(si.acao) out.push({t:si.acao[0],h:si.hoje,go:()=>irrGo(si.acao[1])});
     if(s.setores[r.id].bal&&(!si.acao||si.acao[0]!=='Programar irrigação')&&!(si.ords||[]).length) out.push({t:'Programar irrigação',h:'Abre a programação com a necessidade e a janela sugerida.',go:()=>irrGo('IR-02.dc.html#programar='+r.id)});
+    // água no solo do talhão do setor: registra a medição (capacidade de campo e ponto de murcha) com a fazenda e o talhão preenchidos
+    { const x=s.setores[r.id]; const F=s.faz[x.faz]||{}; const tal=irrTal(x,r.id); if((SOLO_TAL[F.nome]||[]).some(z=>z[0]===tal)) out.push({t:'Registrar medição de água no solo',h:'Capacidade de campo e ponto de murcha do '+tal+': a CAD passa a valer no déficit e no gatilho.',
+      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); self.__agPre={faz:F.nome,talv:tal}; g2new(self,IRG('g_agua')); }}); }
+    // ficha do pivô (capacidade do equipamento, a mesma do cadastro CD-03): o setor de pivô com equipamento do cadastro (x.eq) abre a ficha
+    // ou, sem ficha, registra (revisão de 10/10, A4); gotejo e setor sem equipamento no cadastro não oferecem
+    const fpo=fpvPode(r.id), fid=fpvDe(r.id); if(fpo) out.push({t:fid?'Ficha do pivô':'Registrar ficha do pivô',
+      h:fid?'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro (ficha do fabricante).':'Digite a capacidade como está na ficha do fabricante: vazão, pressão, tempo de volta e lâmina pelo percentímetro.',
+      go:()=>{ const fm=g2st(self,'g_set').fm; if(g2dirty(fm)){ g2set(self,'g_set',{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,'g_set',{fm:null}); fpvAbrir(self,fpo,{gid:'g_set',rid:r.id},!fid); }});
     return out; }; }
 """
+    EXTRA.append(FP.painel())   # gaveta "Ficha do pivô" (o mesmo componente do CD-03)
+    # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Tabela | Cartões | Mapa dos setores; o seletor fica acima da lista
+    bar,panes=E.visoes('g_set','irr',{'lista':g_set,'cartoes':'lista','mapa':_irr_mapa_view()},rotulo='Visão dos setores')
+    set_vis=f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;"><div style="display: flex; justify-content: flex-end;">{bar}</div>{panes}</div>'
+    EXTRAJS[0]+=_irr_mapa_js()
     corpo=(vazio('vazio','vazioT','Cadastrar setores','CD-03.dc.html')
-           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',g_set)+'</sc-if>')
+           + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Setores','','',set_vis)+'</sc-if>'
+           + '<div id="ir-agua">'+section('Água no solo','','',g_agua)+'</div>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
           f'<sc-if value="{H("prim_has")}" hint-placeholder-val="{T()}"><a href="{H("prim_h")}" style="{BTN_ST(True)} text-decoration: none;">{H("prim_t")}</a></sc-if>')
     shell37('IR-01','Irrigação',corpo,fname=fname,primary_html=prim,steps=faixa(1),search=False)
+    ncol_dinamico(fname,['set_ncol'])
 
 # =====================================================================================
 def ir02():
     fname='IR-02.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    x0={'c-'+k:True for k in DI.CAPT}
-    g_ag=grid([dict(k='item',l='Captação · ordem',w=125),dict(k='setor',l='Setor · bomba',w=130),dict(k='jan',l='Janela',w=180),
-               dict(k='lam',l='Lâmina',t='num',a='r',u='mm',d=2,dmin=1,w=115),dict(k='pend',l='Etapa · pendência',w=195)],[],
-              edit=dict(m='ro',title='Programação',leafOnly=True,fields=[]),gid='g_ag',total=False,tree=True,x0=x0,search=False)
+    # árvore captação › ordem, uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, A4, 09/10): etapa, pendência e próximo
+    # passo logo depois da ordem; depois setor, início e fim (ordenam como data), lâmina e avisos. Tipo, bomba, vazão do setor, passadas e
+    # responsável ficam no detalhe da ordem (IR-03det). A linha da captação não põe o pico do dia numa coluna de vazão das ordens (seriam duas
+    # grandezas na mesma coluna): o pico e a outorga em renovação são avisos da captação, e o pico acima da outorga é pendência dela
+    g_ag=grid([dict(k='item',l='Captação › ordem',w=150),dict(k='etapa',l='Etapa',w=110),dict(k='pend',l='Pendência',multi=True,w=190),dict(k='prox',l='Próximo passo',w=140),
+               dict(k='setor',l='Setor',w=90),dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),
+               dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),dict(k='avs',l='Avisos',multi=True,w=200)],[],
+              edit=dict(m='ro',title='Programação',leafOnly=True,fields=[]),gid='g_ag',total=False,tree=True,search=False)
     pg_corpo=(campo('Setor','pg_sel',f'<select id="pg_sel" value="{H("pg_sid")}" onChange="{H("pg_setsid")}" style="{INP}"><sc-for list="{H("pg_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','pg_err')
               + kvfor('pg_kv',2) + checks('pg_ck')
               + f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><div role="status" style="padding: 10px 12px; border-radius: 10px; background: {ACCS}; color: {ACC}; font-size: 13px; font-weight: 700;">{H("pg_temT")}</div></sc-if>')
     pg_rod=(f'<button type="button" onClick="{H("pg_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><a href="{H("pg_href")}" style="{BTN_ST(True,True)} text-decoration: none;">{H("pg_abrirT")}</a></sc-if>'
+            f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><a href="{H("pg_href")}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-block;">{H("pg_abrirT")}</a></sc-if>'
             f'<sc-if value="{H("pg_nova")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pg_ok")}" style="{BTN_ST(True,True)}">{H("pg_okT")}</button></sc-if>')
     EXTRA.append(painel('pg',pg_corpo,pg_rod))
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
-function irrUsoDia(s,cid,k){ const cp=s.capt[cid]; const ws=irrComprometidas(s,null).filter(w=>w.capt===cid); const d0=k*1440,d1=d0+1440; let vol=0,pico=0;
-  ws.forEach(w=>{ const a=Math.max(d0,w.ini),b=Math.min(d1,w.fim); if(b>a) vol+=w.ls*(b-a)*0.06; });
-  ws.filter(w=>w.fim>d0&&w.ini<d1).forEach(w=>{ const t=Math.max(w.ini,d0); const q=ws.filter(z=>z.ini<=t&&z.fim>t).reduce((a,z)=>a+z.ls,0); if(q>pico) pico=q; });
-  return {vol,pico,pct:cp?vol/(cp.ls*cp.h*3.6)*100:0}; }
-const OUTC={'Vigente':'green','Em renovação':'yellow','Vencida':'red'};
-function irrBr(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
+// uso da captação no dia (pico, volume e % do volume outorgado): irrUsoDia de irrigacao_estado.js, a mesma conta da IR-04 e da trava (CTL-5)
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); const c=irrFaixa(v,s,fz);
   irrHashOuvir(self,(h)=>{ if(h.indexOf('programar')!==0) return; const sid=h.split('=')[1]||''; const x=irrGet().setores[sid]; if(x) irrFazDe(self,x.faz); self.setState({pg:{sid:x?sid:''}}); });
   const sids=Object.keys(s.setores).filter(k=>!fz||s.setores[k].faz===fz);
   const caps=Object.keys(s.capt).filter(cid=>sids.some(k=>s.setores[k].capt===cid));
   const rows=caps.map(cid=>{ const cp=s.capt[cid]; const kids=[];
     Object.values(s.ordens).filter(o=>s.setores[o.setor].capt===cid&&['A liberar','Liberadas','Em execução'].indexOf(irrEtapa(s,o))>=0).sort((a,b)=>(irrIni(a)===null?1e9:irrIni(a))-(irrIni(b)===null?1e9:irrIni(b))).forEach(o=>{
-      const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o).filter(a=>a.k!=='renov'); const p=irrProx(s,o);   // a outorga já aparece na linha da captação
-      const jan=[]; o.passadas.forEach((q,i)=>{ if(i) jan.push({k:'br',t:''}); jan.push({k:'txt',t:(o.passadas.length>1?q.n+'ª · ':'')+(q.ini===null?'a definir':irrJan(q.ini,irrFimP(o,q)))+(q.st!=='Programada'?' · '+q.st.toLowerCase():'')}); });
-      if(av.length) jan.push({k:'br',t:''},{k:'mut',t:av.map(a=>a.t).join(' · ')});
-      const pend=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}].concat(sel.map(z=>({k:'chip',t:z.t,c:z.c}))); if(p&&p.dono) pend.push({k:'br',t:''},{k:'mut',t:p.t+' · '+p.dono});
-      kids.push({id:o.id,dr:'go_'+o.id,v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{item:o.id,setor:x.nome,jan:irrJanO(o),pend:et+' '+sel.map(z=>z.t).join(' ')},
-        p:{item:[{k:'b',t:o.id},{k:'br',t:''},{k:'mut',t:o.fert?'fertirrigação v2':'água'}],setor:[{k:'txt',t:x.nome},{k:'br',t:''},{k:'mut',t:(x.faz==='LG'?'bomba':x.bnome)+' · '+irrN(x.vazao)+' L/s'}],jan,
-           lam:[{k:'txt',t:irrMm(o.lam)+' mm'},{k:'br',t:''},{k:'mut',t:o.passadas.length>1?o.passadas.length+' × '+irrMm(o.passadas[0].lam)+' mm':irrH(o.passadas[0].dur)}],pend}}); });
+      const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o).filter(a=>a.k!=='renov'); const p=irrProx(s,o);   /* outorga em renovação: aviso da captação */
+      // início da 1ª passada e fim da última; passada sem janela deixa o fim "a definir" (a janela de cada passada fica no detalhe da ordem)
+      const ps=o.passadas; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
+      const r={id:o.id,dr:'go_'+o.id,v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
+      irrTxt(r,'item',o.id,true); irrTxt(r,'setor',x.nome);
+      irrQ(r,'ini',irrIni(o),'a definir'); irrQ(r,'fim',fim,'a definir');
+      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip');
+      irrTxt(r,'prox',p?p.t:'',true); irrLst(r,'avs',av);
+      kids.push(r); });
     Object.keys(s.fert).filter(k=>!s.ordens[k]&&s.setores[s.fert[k].setor].capt===cid).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k); if(!et||['Encerradas','Canceladas'].indexOf(et)>=0) return; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
-      kids.push({id:k,dr:'go_'+k,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{item:k,setor:x.nome,jan:f.ini?irrJan(f.ini,f.fim):'parada',pend:et},
-        p:{item:[{k:'b',t:k},{k:'br',t:''},{k:'mut',t:'fertirrigação · O.S.'}],setor:[{k:'txt',t:x.nome},{k:'br',t:''},{k:'mut',t:x.bnome+' · '+irrN(x.vazao)+' L/s'}],
-           jan:[{k:'txt',t:f.ini?irrJan(f.ini,f.fim):'bomba parada'}],lam:f.lam?[{k:'txt',t:irrMm(f.lam)+' mm'}]:[{k:'mut',t:'—'}],
-           pend:[{k:'chip',t:et,c:IRR_COR[et]||'gray'}].concat(fb?[{k:'chip',t:fb.t,c:'red'}]:[]).concat([{k:'br',t:''},{k:'mut',t:fb?fb.passo+' · '+fb.dono:(et==='A liberar'?'Liberar na O.S. · Ana (agrônoma)':'na O.S. · '+(irrFertResp(k)||''))}])}}); });
+      const r={id:k,dr:'go_'+k,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{},p:{}};
+      irrTxt(r,'item',k,true); irrTxt(r,'setor',x.nome);
+      irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
+      r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip');
+      irrTxt(r,'prox',fb?fb.passo:(et==='A liberar'?'Liberar na O.S.':'Abrir na O.S.'),true); irrLst(r,'avs',[]);
+      kids.push(r); });
     const u=irrUsoDia(s,cid,0);
-    return {id:'c-'+cid,v:{},s:{item:cp.nome,pend:cp.st},kids,
-      p:{item:[{k:'b',t:cp.nome},{k:'br',t:''},{k:'mut',t:'outorga '+cp.outorga}],setor:[{k:'mut',t:kids.length+(kids.length===1?' ordem':' ordens')}],
-         jan:[{k:'txt',t:'hoje: pico '+irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'},{k:'br',t:''},{k:'mut',t:'volume do dia '+irrN(u.pct,0)+' % de '+irrN(cp.ls*cp.h*3.6)+' m³'}],
-         lam:[{k:'mut',t:''}],pend:[{k:'chip',t:cp.st,c:OUTC[cp.st]||'gray'},{k:'br',t:''},{k:'mut',t:(cp.st==='Vigente'?'até ':'venceu em ')+irrBr(cp.venc)}]}}; });
+    // linha da captação: o nome e quantas ordens; o pico de vazão de hoje e a outorga a vencer ou em renovação são avisos dela (o pico acima da
+    // vazão outorgada e a captação sem outorga vigente são pendência); as colunas das ordens ficam vazias. A outorga é a do cadastro (CTL-5,
+    // aba Água do CD-01): o aviso diz qual outorga da soma vence e quanto sai (irrOutVenc), o mesmo texto da IR-04
+    const g={id:'c-'+cid,v:{},s:{item:cp.nome},kids,p:{item:[{k:'b',t:cp.nome},{k:'mut',t:kids.length+(kids.length===1?' ordem':' ordens')}]}};
+    ['setor','ini','fim','lam','etapa','prox'].forEach(z=>{ g.p[z]=[{k:'mut',t:''}]; g.s[z]=''; });
+    const acima=u.pico>cp.ls+1e-9; const semOut=['Vencida','Sem outorga'].indexOf(cp.st)>=0;
+    irrLst(g,'pend',(semOut?[{t:cp.st==='Vencida'?'Outorga vencida':'Sem outorga',c:'red',dica:irrOutVenc(s,cp)}]:[]).concat(acima?[{t:'Pico acima da outorga',c:'red',dica:irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'}]:[]),'chip');
+    irrLst(g,'avs',(u.pico>0?[{t:'Pico hoje '+irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'}]:[]).concat(['Vence em 90 dias','Em renovação'].indexOf(cp.st)>=0?[{t:'Outorga '+cp.st.charAt(0).toLowerCase()+cp.st.slice(1)+' · '+irrOutVenc(s,cp)}]:[]));
+    if(!acima&&!semOut){ g.p.pend=[{k:'mut',t:''}]; }
+    return g; });
   IRG('g_ag').rows=rows;
   const t=[]; if(c.conf) t.push(c.conf+(c.conf>1?' conflitos':' conflito')); if(c.jan) t.push(c.jan+(c.jan>1?' janelas a definir':' janela a definir'));
   v.hs_t=t.length?t.join(' · '):'Programação sem pendências'; v.hs_st=chipSt(c.conf?'red':(t.length?'yellow':'green'));
@@ -284,6 +454,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const fz=irrFazK(self);
                {l:'Passadas',t:n.np+(n.np>1?' de ':' de ')+irrMm(n.por)+' mm · limite '+irrMm(x.lmax)+' mm'},{l:'Volume e duração',t:irrN(n.vol)+' m³ · '+irrH(n.dur)+(n.np>1?' por passada':'')}];
       if(ab.length||fe.length){ const id=ab.length?ab[0].id:fe[0]; v.pg_tem=true; v.pg_nova=false; v.pg_href=ab.length?'IR-03det.dc.html#'+id:'OS.dc.html#'+id; v.pg_abrirT='Abrir '+id;
         v.pg_temT='Tarefa única '+id+' já existe'+(ab.length?' · '+irrEtapa(s,ab[0])+' · '+irrJanO(ab[0]):' · fertirrigação na O.S.')+' · nenhuma ordem nova.'; }
+      else if(n.erro){ v.pg_nova=false; v.pg_err=n.erro; v.pg_err_has=true; v.pg_kv.push({l:'Próximo passo',t:'Confira a ficha do pivô e o limite por passada antes de programar.'}); }
       else if(n.liq<0.05){ v.pg_kv.push({l:'Situação',t:'sem déficit hoje'}); v.pg_nova=false; }
       else { if(fp) v.pg_okT='Programar só água'; const durs=Array.from({length:n.np},()=>n.dur); const inis=irrSugerir(s,sid,durs,s.agora,'novo');
         v.pg_kv.push({l:'Janela sugerida',t:inis.every(q=>q!==null)?inis.map((q,i)=>irrJan(q,q+durs[i])).join(' · '):'sem janela livre em 5 dias'});
@@ -304,29 +475,34 @@ function EXTRAVALS(self,v){ const s=irrGet(); const fz=irrFazK(self);
 # =====================================================================================
 def ir03():
     fname='IR-03.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    g_os=grid([dict(k='ordem',l='Ordem',w=100),dict(k='setor',l='Setor',w=120),dict(k='jan',l='Janela',w=190),
-               dict(k='lam',l='Lâmina',t='num',a='r',u='mm',d=2,dmin=1,w=130),dict(k='etapa',l='Etapa',w=170),dict(k='prox',l='Próximo passo',w=130)],[],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, 09/10): etapa (as 5 fases), pendência, próximo passo e responsável
+    # logo depois da ordem; depois tipo, setor, início e fim (ordenam como data) e lâmina. Cultura, passadas, avisos, medido e área coberta
+    # ficam no detalhe da ordem. Fazenda só com "Todas" no topo
+    g_os=grid([dict(k='ordem',l='Ordem',w=90),dict(k='faz',l='Fazenda',w=110),dict(k='etapa',l='Etapa',w=120),dict(k='pend',l='Pendência',multi=True,w=190),
+               dict(k='prox',l='Próximo passo',w=150),dict(k='dono',l='Responsável',w=110),dict(k='tipo',l='Tipo',w=120),dict(k='setor',l='Setor',w=90),
+               dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1)],[],
               edit=dict(m='ro',title='Ordem',fields=[]),gid='g_os',total=False,qf=dict(k='etapa',l='Etapa',todas='Todas'))
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
 const ORD=['A liberar','Em conferência','Em execução','Liberadas','Encerradas','Canceladas'];
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
+  irrColsFaz(self,'g_os',fz,v,'os_ncol');
   const rows=[];
-  Object.values(s.ordens).filter(o=>!fz||o.faz===fz).forEach(o=>{ const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o); const p=irrProx(s,o);
-    const ps=o.passadas.filter(q=>q.st==='Feita'||q.st==='Parcial'); const cob=ps.reduce((a,q)=>Math.max(a,q.cob||0),0);
-    const lam=[{k:'txt',t:irrMm(o.lam)+' mm'},{k:'br',t:''},{k:'mut',t:ps.length?(o.conf&&o.conf.med?irrMm(o.conf.med/(10*Math.max(cob,1e-9)))+' mm medidos em '+irrHa(cob)+' de '+irrHa(x.ha)+' ha':'sem leitura · '+irrHa(cob)+' ha'):(o.passadas.length>1?o.passadas.length+' passadas de '+irrMm(o.passadas[0].lam)+' mm':'1 passada · '+irrH(o.passadas[0].dur))}];
-    rows.push({id:o.id,dr:'go_'+o.id,rk:ORD.indexOf(et),q:irrIni(o),v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{ordem:o.id,setor:x.nome,jan:irrJanO(o),etapa:et,prox:p?p.t:''},
-      p:{ordem:[{k:'b',t:o.id},{k:'br',t:''},{k:'mut',t:o.fert?'fertirrigação v2':'água'}],setor:[{k:'txt',t:x.nome},{k:'br',t:''},{k:'mut',t:fz?x.cult:s.faz[x.faz].nome}],
-         jan:o.passadas.reduce((a,q,i)=>a.concat(i?[{k:'br',t:''}]:[],[{k:'txt',t:(o.passadas.length>1?q.n+'ª · ':'')+(q.ini===null?'a definir':irrJan(q.iniReal!==undefined&&q.iniReal!==null?q.iniReal:q.ini,irrFimP(o,q)))}]),[]).concat(av.length?[{k:'br',t:''},{k:'mut',t:av.map(a=>a.t).join(' · ')}]:[]),lam,
-         etapa:[{k:'chip',t:et,c:IRR_COR[et]||'gray'}].concat(sel.filter(z=>!z.mut).map(z=>({k:'chip',t:z.t,c:z.c}))).concat(sel.filter(z=>z.mut).map(z=>({k:'mut',t:z.t}))),
-         prox:p?[{k:'b',t:p.t},{k:'br',t:''},{k:'mut',t:p.dono||''}]:[{k:'mut',t:'—'}]}}); });
+  Object.values(s.ordens).filter(o=>!fz||o.faz===fz).forEach(o=>{ const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const p=irrProx(s,o);
+    const ps=o.passadas; const i0=(q)=>(q.iniReal!==undefined&&q.iniReal!==null)?q.iniReal:q.ini; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined);
+    const ini=ps.filter(q=>q.ini!==null&&q.ini!==undefined).map(i0); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
+    const r={id:o.id,dr:'go_'+o.id,rk:ORD.indexOf(et),q:irrIni(o),v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
+    irrTxt(r,'ordem',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome);
+    irrQ(r,'ini',ini.length?Math.min.apply(null,ini):null,'a definir'); irrQ(r,'fim',fim,'a definir');
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip');
+    irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?irrQuem(p.dono):''); rows.push(r); });
   // fertirrigações da O.S. (cenário compartilhado): só leitura aqui
   Object.keys(s.fert).filter(k=>!s.ordens[k]&&(!fz||s.setores[s.fert[k].setor].faz===fz)).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k)||'—'; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
     const px=fb?[fb.passo,fb.dono]:(et==='A liberar'?['Liberar na O.S.','Ana (agrônoma)']:['Abrir na O.S.',irrFertResp(k)||'']);
-    rows.push({id:k,dr:'go_'+k,rk:ORD.indexOf(et),q:f.ini,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{ordem:k,setor:x.nome,jan:f.ini?irrJan(f.ini,f.fim):'',etapa:et,prox:px[0]},
-      p:{ordem:[{k:'b',t:k},{k:'br',t:''},{k:'mut',t:'fertirrigação · O.S.'}],setor:[{k:'txt',t:x.nome},{k:'br',t:''},{k:'mut',t:fz?x.cult:s.faz[x.faz].nome}],
-         jan:[{k:'txt',t:f.ini?irrJan(f.ini,f.fim):'bomba parada'}],lam:f.lam?[{k:'txt',t:irrMm(f.lam)+' mm'}]:[{k:'mut',t:'—'}],
-         etapa:[{k:'chip',t:et,c:IRR_COR[et]||'gray'}].concat(fb?[{k:'chip',t:fb.t,c:'red'}]:[]),
-         prox:[{k:'b',t:px[0]},{k:'br',t:''},{k:'mut',t:px[1]}]}}); });
+    const r={id:k,dr:'go_'+k,rk:ORD.indexOf(et),q:f.ini,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{},p:{}};
+    irrTxt(r,'ordem',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome);
+    irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip');
+    irrTxt(r,'prox',px[0],true); irrTxt(r,'dono',irrQuem(px[1])); rows.push(r); });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.q===null||a.q===undefined?1e9:a.q)-(b.q===null||b.q===undefined?1e9:b.q)));
   IRG('g_os').rows=rows;
   const conf=rows.filter(r=>r.s.etapa==='Em conferência').length, lib=rows.filter(r=>r.s.etapa==='A liberar').length;
@@ -340,16 +516,20 @@ function EXTRAVALS(self,v){ irrVista(self,'g_os'); IRG('g_os').rows.forEach(r=>{
     corpo=(vazio('vazio','vazioT','Abrir programação','IR-02.dc.html')
            + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Ordens por etapa','','',g_os)+'</sc-if>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
-          f'<sc-if value="{H("hoje_has")}" hint-placeholder-val="{T()}"><a href="{H("hoje_h")}" style="{BTN_ST(True)} text-decoration: none;">{H("hoje_t")}</a></sc-if>')
+          f'<sc-if value="{H("hoje_has")}" hint-placeholder-val="{T()}"><a href="{H("hoje_h")}" style="{BTN_ST(False)} text-decoration: none; display: inline-block;">{H("hoje_t")}</a></sc-if>')
     shell37('IR-03','Ordens de irrigação',corpo,fname=fname,crumbs_extra=['Ordens'],primary_html=prim,steps=faixa(3),search=False)
+    ncol_dinamico(fname,['os_ncol'])
 
 # =====================================================================================
 def ir03det():
     fname='IR-03det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    g_pas=grid([dict(k='n',l='Passada'),dict(k='jan',l='Janela',w=260),dict(k='lam',l='Lâmina',t='num',a='r',u='mm',d=2,dmin=1),dict(k='dur',l='Duração'),
-                dict(k='st',l='Estado',w=160),dict(k='cob',l='Área coberta',w=180)],[],edit=dict(m='none'),gid='g_pas',total=False,search=False,headtools=False)
-    g_trl=grid([dict(k='hora',l='Quando',w=120),dict(k='rec',l='Recibo'),dict(k='ev',l='Evento',w=560),dict(k='quem',l='Quem')],[],
-               edit=dict(m='ro',title='Evento',fields=[dict(k='hora',l='Quando',ro=True),dict(k='rec',l='Recibo',ro=True),dict(k='ev',l='Evento',ro=True),dict(k='quem',l='Quem',ro=True)]),
+    # passadas (sub-detalhe) com filtro e ordem; uma variável por coluna (TABELAS-FOCO, 04/10/2026): início e fim (ordenam como data), lâmina,
+    # duração (h), estado (chip), área coberta (ha) e volume medido (m³); o saldo da v2 vai para Execução e conferência
+    g_pas=grid([dict(k='n',l='Passada',t='num',a='r'),dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),
+                dict(k='dur',l='Duração',t='num',a='r',un='h',d=1),dict(k='st',l='Estado',w=140),dict(k='cob',l='Área coberta',t='num',a='r',un='ha',d=2,dmin=1),
+                dict(k='vol',l='Volume medido',t='num',a='r',un='m³')],[],edit=dict(m='none'),gid='g_pas',total=False,search=False)
+    g_trl=grid([dict(k='hora',l='Quando',t='date',w=120),dict(k='rec',l='Recibo'),dict(k='ev',l='Evento',w=560),dict(k='quem',l='Quem')],[],
+               edit=dict(m='ro',title='Evento',fields=[dict(k='quando',l='Quando',ro=True),dict(k='rec',l='Recibo',ro=True),dict(k='ev',l='Evento',ro=True),dict(k='quem',l='Quem',ro=True)]),
                gid='g_trl',total=False,search=False)
     # ---------- painéis da ordem ----------
     jn_corpo=(f'<sc-for list="{H("jn_ps")}" as="p" hint-placeholder-count="1"><div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px;">'
@@ -369,18 +549,18 @@ def ir03det():
               + f'<div><button type="button" onClick="{H("cf_outra")}" style="{BTN_ST(False,True)}">Definir outra janela</button></div>')
     cf_rod=(f'<button type="button" onClick="{H("cf_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("cf_ok")}" style="{BTN_ST(True,True)}">Aplicar janela</button>')
-    tm_corpo=(f'<div role="radiogroup" aria-label="Área coberta" style="display: flex; flex-direction: column; gap: 6px;">'
-              f'<label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px; cursor: pointer;"><input type="radio" name="tm_t" checked="{H("tm_full")}" onChange="{H("tm_setfull")}" style="accent-color: {ACC};">{H("tm_fullT")}</label>'
-              f'<label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px; cursor: pointer;"><input type="radio" name="tm_t" checked="{H("tm_parc")}" onChange="{H("tm_setparc")}" style="accent-color: {ACC};">Parou antes · informar a área coberta</label></div>'
-              + f'<sc-if value="{H("tm_parc")}" hint-placeholder-val="{F()}">'+campo('Área coberta (ha)','tm_cob',f'<input id="tm_cob" inputMode="decimal" value="{H("tm_cob")}" onChange="{H("tm_setcob")}" style="{INP}">','tm_ecob')+'</sc-if>'
-              + campo('Leitura do hidrômetro (m³)','tm_vol',f'<input id="tm_vol" inputMode="decimal" value="{H("tm_vol")}" onChange="{H("tm_setvol")}" placeholder="vazio = sem leitura" style="{INP}">','tm_evol')
+    tm_corpo=(campo('Área real coberta (ha)','tm_cob',f'<input id="tm_cob" inputMode="decimal" value="{H("tm_cob")}" onChange="{H("tm_setcob")}" style="{INP}">','tm_ecob')
+              + campo('Volume medido no hidrômetro (m³)','tm_vol',f'<input id="tm_vol" inputMode="decimal" value="{H("tm_vol")}" onChange="{H("tm_setvol")}" style="{INP}">','tm_evol')
+              + f'<sc-if value="{H("tm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para conferir área e tempo','tm_mot',f'<input id="tm_mot" value="{H("tm_mot")}" onChange="{H("tm_setmot")}" style="{INP}">','tm_emot')+'</sc-if>'
               + f'<div style="font-size: 12.5px; color: {MUTED};">{H("tm_hint")}</div>')
     tm_rod=(f'<button type="button" onClick="{H("tm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<button type="button" onClick="{H("tm_ok")}" style="{BTN_ST(True,True)}">Confirmar término</button>')
+            f'<button type="button" onClick="{H("tm_ok")}" style="{BTN_ST(True,True)}">{H("tm_okT")}</button>')
     cm_corpo=(kvfor('cm_kv',2)
-              + campo('Leitura do hidrômetro (m³)','cm_vol',f'<input id="cm_vol" inputMode="decimal" value="{H("cm_vol")}" onChange="{H("cm_setvol")}" style="{INP}">','cm_evol'))
+              + campo('Leitura do hidrômetro (m³)','cm_vol',f'<input id="cm_vol" inputMode="decimal" value="{H("cm_vol")}" onChange="{H("cm_setvol")}" style="{INP}">','cm_evol')
+              + f'<sc-if value="{H("cm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para aceitar a divergência','cm_mot',f'<input id="cm_mot" value="{H("cm_mot")}" onChange="{H("cm_setmot")}" style="{INP}">','cm_emot')+'</sc-if>')
     cm_rod=(f'<button type="button" onClick="{H("cm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<button type="button" onClick="{H("cm_ok")}" style="{BTN_ST(True,True)}">Validar e encerrar</button>')
+            f'<button type="button" onClick="{H("cm_devolver")}" style="{BTN_ST(False,True)} white-space: normal;">Devolver para conferir o hidrômetro</button>'
+            f'<button type="button" onClick="{H("cm_ok")}" style="{BTN_ST(True,True)}">{H("cm_okT")}</button>')
     av_corpo=campo('Área coberta até agora (ha)','av_cob',f'<input id="av_cob" inputMode="decimal" value="{H("av_cob")}" onChange="{H("av_setcob")}" style="{INP}">','av_ecob')
     av_rod=(f'<button type="button" onClick="{H("av_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("av_ok")}" style="{BTN_ST(True,True)}">Salvar avanço</button>')
@@ -405,8 +585,8 @@ function abrirAcao(self,ac){ const s=irrGet(); const o=s.ordens[detId(self)]; if
   if(ac==='janela'){ const ps=o.passadas.filter(p=>p.st==='Programada'); const sug=irrSugerir(s,o.setor,ps.map(p=>p.dur),s.agora,o.id);
     self.setState({jn:{ps:ps.map((p,i)=>{ const q=p.ini!==null?p.ini:sug[i]; return {n:p.n,d:q===null?'':irrIso(irrDiaN(q)),h:q===null?'':irrHm(q)}; })}}); }
   else if(ac==='conflito') self.setState({cf:{i:0}});
-  else if(ac==='termino'){ const p=irrPassAtual(o); if(!p) return; self.setState({tm:{full:true,cob:'',vol:String(irrTele(s,o,p,x.ha))}}); }
-  else if(ac==='conferir') self.setState({cm:{vol:o.conf&&o.conf.med?String(o.conf.med):''}}); }
+  else if(ac==='termino'){ const p=irrPassAtual(o); if(!p) return; self.setState({tm:{cob:'',vol:'',mot:''}}); }
+  else if(ac==='conferir'){ const vol=o.conf&&o.conf.med!==null&&o.conf.med!==undefined?String(o.conf.med):''; self.setState({cm:{vol,original:vol,mot:''}}); } }
 function PREVALS(self,v){ irrOuvir(self);
   irrHashOuvir(self,(h)=>{ const id=h.split(':')[0]||'OS-0419'; self.setState({det:h||'OS-0419',jn:null,cf:null,tm:null,cm:null,av:null,rc:null}); const ac=h.split(':')[1]; if(ac) setTimeout(()=>abrirAcao(self,ac),0); });
   const s=irrGet(); const id=detId(self); const o=s.ordens[id]; v.achou=!!o; v.nao=!o; v.det_id=id; v.naoT='Ordem '+id+' não encontrada na irrigação.';
@@ -422,25 +602,34 @@ function PREVALS(self,v){ irrOuvir(self);
     {l:'Liberação',t:o.fert?('v2 com produto · '+(irrFertEtapa(id)&&irrFertEtapa(id)!=='A liberar'?irrFertEtapa(id)+' na O.S.':'Ana (agrônoma) libera na O.S.')):(o.lib?o.lib+' · automática pela prontidão':'pendente · '+(irrChecar(s,o).bloq.map(b=>b.t+' ('+b.dono+')').join(', ')||'—'))}];
   v.avs=av.map(a=>({t:a.t,st:tagSt()}));
   // passadas (sub-detalhe)
-  IRG('g_pas').rows=o.passadas.map(p=>({id:'p'+p.n,v:{n:p.n+'ª',lam:p.lam,dur:irrH(p.dur)},s:{},p:{jan:[{k:'txt',t:p.ini===null?'a definir':irrJan(p.iniReal!==undefined&&p.iniReal!==null?p.iniReal:p.ini,irrFimP(o,p))}],
-    st:(o.fert&&p.st==='Programada')?[{k:'chip',t:'Na O.S. · v2',c:'yellow'}]:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?[{k:'chip',t:'Parcial · v1',c:'yellow'},{k:'br',t:''},{k:'mut',t:'saldo de '+irrN(o.fert.area,1)+' ha na v2'}]:[{k:'chip',t:p.st,c:{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray'}]),
-    cob:p.cob===null||p.cob===undefined?[{k:'mut',t:'—'}]:[{k:'txt',t:irrN(p.cob,1)+' de '+irrN(x.ha,1)+' ha'},{k:'br',t:''},{k:'mut',t:p.vol!==null&&p.vol!==undefined?irrN(p.vol)+' m³ medidos':(p.st==='Em execução'?'em andamento':'sem leitura')}]}}));
+  IRG('g_pas').rows=o.passadas.map(p=>{ const temI=p.ini!==null&&p.ini!==undefined; const i0=temI?((p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini):null;
+    const sv=p.temporalPendente?['Área e tempo a conferir','yellow']:(o.fert&&p.st==='Programada')?['Na O.S. · v2','yellow']:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?['Parcial · v1','yellow']:[p.st,{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray']);
+    const tc=p.cob!==null&&p.cob!==undefined, tv=p.vol!==null&&p.vol!==undefined;
+    const dm=irrDurP(o,p);   /* Início, Fim e Duração da mesma janela */
+    const r={id:'p'+p.n,v:{n:p.n,lam:p.lam,dur:Math.round(dm/6)/10,cob:tc?p.cob:'',vol:tv?p.vol:''},s:{n:p.n+'ª',st:sv[0]},p:{n:[{k:'txt',t:p.n+'ª'}],st:[{k:'chip',t:sv[0],c:sv[1]}]}};
+    irrQ(r,'ini',i0,'a definir'); irrQ(r,'fim',temI?irrFimP(o,p):null,'a definir');
+    r.p.dur=[{k:'txt',t:irrN(dm/60,1)}]; r.s.dur=irrN(dm/60,1);
+    r.p.cob=[tc?{k:'txt',t:irrN(p.cob,2,1)}:{k:'mut',t:'—'}]; r.s.cob=tc?irrN(p.cob,2,1):''; r.p.vol=[tv?{k:'txt',t:irrN(p.vol)}:{k:'mut',t:'—'}]; r.s.vol=tv?irrN(p.vol):'';
+    return r; });
   // execução e conferência
   const pa=irrPassAtual(o); const pz=(o.exec.pausas||[]); const pzm=pz.filter(z=>z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+(z.fim-z.ini),0);
   const ex=[{l:'Início',t:o.exec.ini!==undefined?irrQuando(o.exec.ini):'—'},{l:'Pausas',t:pz.length?pz.length+' · '+irrN(pzm)+' min'+(irrPausada(o)?' · pausada agora':''):'nenhuma'}];
-  if(pa) ex.push({l:'Avanço',t:(pa.cob?irrN(pa.cob,1)+' de '+irrN(x.ha,1)+' ha ('+irrN(pa.cob/x.ha*100,0)+' %)':'sem leitura de área')+' · término previsto '+irrQuando(irrFimP(o,pa))});
+  if(pa) ex.push({l:'Avanço',t:(pa.cob?irrN(pa.cob,2,1)+' de '+irrN(x.ha,2,0)+' ha ('+irrN(pa.cob/x.ha*100,0)+' %)':'sem leitura de área')+' · término previsto '+irrQuando(irrFimP(o,pa))});
   else ex.push({l:'Término',t:o.exec.fim!==undefined?irrQuando(o.exec.fim):(o.passadas.some(p=>p.ini!==null)?'previsto '+irrQuando(Math.max.apply(null,o.passadas.filter(p=>p.ini!==null).map(p=>irrFimP(o,p)))):'—')});
-  const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
-    {l:'Conferência',t:cf?(cf.med?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
+  const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med!==null&&cf.med!==undefined?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
+    {l:'Conferência',t:cf?(cf.med!==null&&cf.med!==undefined?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
   const aps=x.bal?irrApsSetor(s,o.setor).filter(a=>a.os===id):[];
-  ex.push({l:'Crédito no balanço',t:aps.length?aps.map(a=>irrMm(irrApNet(a))+' mm líquidos '+(irrApParc(a,x.ha)?'na faixa de '+irrN(irrApCob(a),1)+' ha':'no '+x.nome)+(a.osc?' (O.S.)':'')).join(' + ')+(aps.some(a=>a.prov)?' · provisório':' · definitivo'):(o.fert?'quando a O.S. apontar a área':'só com leitura do hidrômetro')});
+  ex.push({l:'Crédito no balanço',t:aps.length?aps.map(a=>irrMm(irrApNet(a))+' mm líquidos '+(irrApParc(a,x.ha)?'na faixa de '+irrN(irrApCob(a),2,1)+' ha':'no '+x.nome)+(a.osc?' (O.S.)':'')).join(' + ')+(aps.some(a=>a.prov)?' · provisório':' · definitivo'):(o.fert?'quando a O.S. apontar a área':'só com leitura do hidrômetro')});
+  // saldo da passagem parcial que foi para a v2 (antes ficava na célula da área coberta das passadas)
+  if(o.fert&&o.fert.exec&&o.passadas.some(p=>p.st==='Parcial'&&o.fert.v1===p.cob)) ex.push({l:'Saldo na v2',t:irrN(o.fert.area,2,0)+' ha'});
   v.ex_kv=ex;
-  IRG('g_trl').rows=o.trilha.slice().sort((a,b)=>a.q-b.q).map((t,i)=>({id:'e'+i,v:{hora:irrQuando(t.q),rec:t.rec,ev:t.ev,quem:t.quem},s:{},p:{}}));
+  // Quando ordena pelo instante (ISO); a célula e o painel mostram "hoje 06:12"
+  IRG('g_trl').rows=o.trilha.slice().sort((a,b)=>a.q-b.q).map((t,i)=>{ const r={id:'e'+i,v:{quando:irrQuando(t.q),rec:t.rec,ev:t.ev,quem:t.quem},s:{},p:{}}; irrQ(r,'hora',t.q); return r; });
 }
 function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.ordens[id];
   const run=(fn,after)=>{ const r=irrMudar(self,fn); if(!r.erro&&after) after(r); return r; };
-  ['jn','cf','tm','cm','av','rc'].forEach(k=>{ v[k+'_open']=false; v[k+'_warn']=false; v[k+'_cancel']=()=>fechar(self,k); v[k+'_key']=(e)=>{ if(e&&e.key==='Escape') fechar(self,k); }; v[k+'_discard']=()=>fechar(self,k); v[k+'_keep']=()=>{}; });
-  irrPaineis(self,['jn','cf','tm','cm','av','rc'].map(k=>[k,!!self.state[k],()=>(k==='rc'?v.rc_cancel():fechar(self,k))]));
+  ['jn','cf','tm','cm','av','rc'].forEach(k=>{ v[k+'_open']=false; v[k+'_warn']=false; v[k+'_cancel']=()=>fechar(self,k); v[k+'_key']=(e)=>{ if(e&&e.key==='Escape') v[k+'_cancel'](); }; v[k+'_discard']=()=>fechar(self,k); v[k+'_keep']=()=>{}; });
+  irrPaineis(self,['jn','cf','tm','cm','av','rc'].map(k=>[k,!!self.state[k],()=>v[k+'_cancel']()]));
   if(!o){ v.hs_t='Ordem não encontrada'; v.hs_st=chipSt('gray'); v.prim_btn=false; v.prim_link=true; v.prim_href='IR-03.dc.html'; v.prim_lt='Voltar às ordens'; v.pz_show=false; v.av_show=false; v.rc_show=false; return; }
   const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const p=irrProx(s,o);
   v.hs_t=[et].concat(sel.filter(z=>!z.mut).map(z=>z.t)).join(' · '); v.hs_st=chipSt(sel.some(z=>z.c==='red')?'red':(sel.some(z=>z.c==='yellow')?'yellow':IRR_COR[et]||'gray'));
@@ -477,44 +666,57 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.cf_outra=()=>{ self.setState({cf:null}); abrirAcao(self,'janela'); };
     v.cf_ok=()=>{ const z=ops[(self.state.cf||{}).i||0]; if(!z) return; run(s0=>irrDefinirJanela(s0,id,z.inis),()=>fechar(self,'cf')); }; }
   else { v.cf_ck=[]; v.cf_opts=[]; v.cf_semop=false; v.cf_semopT=''; v.cf_outra=()=>{}; v.cf_ok=()=>{}; v.cf_titulo=''; v.cf_sub=''; }
-  // ---- painel: confirmar término (área coberta + hidrômetro preenchido pela telemetria) ----
+  // IRR-ONDA0: fato informado, sem área/volume estimados como padrão.
   const tm=self.state.tm;
-  if(tm){ const pa=irrPassAtual(o); v.tm_open=true; v.tm_titulo='Confirmar término · '+id; v.tm_sub=x.nome+' · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
-    v.tm_full=!!tm.full; v.tm_parc=!tm.full; v.tm_fullT=(x.tipo==='gotejo'?'Turno completo':'Volta completa')+' · '+irrN(x.ha)+' ha';
+  if(tm){ const pa=irrPassAtual(o); const tempo=irrTerminoInfo(s,o,irr2(g2num(tm.cob))); const cedo=tempo.cedo;
+    v.tm_open=true; v.tm_okT=cedo?'Registrar término antecipado':'Confirmar término'; v.tm_titulo=v.tm_okT+' · '+id;
+    v.tm_sub=x.nome+' · simulado · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
     v.tm_cob=tm.cob; v.tm_vol=tm.vol; const er=tm.err||{}; v.tm_ecob=er.cob||''; v.tm_ecob_has=!!er.cob; v.tm_evol=er.vol||''; v.tm_evol_has=!!er.vol;
-    v.tm_hint='Leitura da telemetria da '+x.bnome+' · vazio = sem leitura, nada é creditado';
-    const set=(k,val)=>(e)=>{ const cur=self.state.tm; const d=Object.assign({},cur,{[k]:val===undefined?e.target.value:val,err:{}});
-      if(k==='full'&&pa){ const cob=val?x.ha:(g2num(cur.cob)||0); d.vol=val?String(irrTele(s,o,pa,x.ha)):(cob?String(irrTele(s,o,pa,cob)):''); }
-      if(k==='cob'&&pa){ const c2=g2num(e.target.value); if(c2>0) d.vol=String(irrTele(s,o,pa,c2)); }
-      self.setState({tm:d}); };
-    v.tm_setfull=set('full',true); v.tm_setparc=set('full',false); v.tm_setcob=set('cob'); v.tm_setvol=set('vol');
-    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=cur.full?x.ha:g2num(cur.cob); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
-      if(!cur.full&&!(cob>0&&cob<=x.ha)) er.cob='Área entre 0 e '+irrN(x.ha,1)+' ha (ex.: 11,6).'; if(vs&&!(vol>0)) er.vol='Use um número em m³ (ex.: 8.480) ou deixe vazio.';
+    v.tm_hint=(cedo?'Antes do fim previsto: informe o término antecipado e a área real. ':'')+'Simulado: informe o volume medido; estimativa não é leitura. O balanço usa somente o medido.';
+    const set=k=>e=>self.setState({tm:Object.assign({},self.state.tm,{[k]:e.target.value,err:{}})});
+    v.tm_setcob=set('cob'); v.tm_setvol=set('vol'); v.tm_setmot=set('mot'); v.tm_mot=tm.mot||''; v.tm_mot_show=tempo.pendente; v.tm_emot=er.mot||''; v.tm_emot_has=!!er.mot;
+    if(tempo.pendente) v.tm_hint+=' Área e tempo precisam de conferência: informe o motivo; o balanço aguarda validação do irrigante ou gestor.';
+    v.tm_warn=!!tm.warn; v.tm_cancel=()=>{ const t=self.state.tm; if(t&&(t.cob||t.vol||t.mot)) self.setState({tm:Object.assign({},t,{warn:true})}); else fechar(self,'tm'); };
+    v.tm_keep=()=>self.setState({tm:Object.assign({},self.state.tm,{warn:false})});
+    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
+      if(!(cob>0&&cob<=x.ha)) er.cob='Informe a área real entre 0 e '+irrN(x.ha,2,0)+' ha.';
+      if(!vs||!Number.isFinite(vol)||vol<0) er.vol='Informe o volume medido em m³; zero medido é diferente de ausência.';
+      if(tempo.pendente&&!String(cur.mot||'').trim()) er.mot='Informe o motivo; área e tempo serão conferidos antes do crédito.';
       if(Object.keys(er).length){ self.setState({tm:Object.assign({},cur,{err:er})}); return; }
-      run(s0=>irrTerminar(s0,id,cob,vol),()=>fechar(self,'tm')); }; }
-  else { v.tm_full=true; v.tm_parc=false; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_fullT=''; v.tm_setfull=()=>{}; v.tm_setparc=()=>{}; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; }
+      run(s0=>irrTerminar(s0,id,cob,vol,cedo,cur.mot),()=>fechar(self,'tm')); }; }
+  else { v.tm_mot=''; v.tm_mot_show=false; v.tm_emot=''; v.tm_emot_has=false; v.tm_setmot=()=>{}; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; v.tm_okT='Confirmar término'; }
   // ---- painel: conferir medição / informar leitura (hidrômetro validado prevalece) ----
   const cm=self.state.cm;
-  if(cm){ const c=o.conf||{}; v.cm_open=true; v.cm_titulo=(c.st==='Sem leitura'?'Informar leitura · ':'Conferir medição · ')+id; v.cm_sub=x.nome+' · hidrômetro × estimativa na área coberta · tolerância '+s.tol+' %';
+  if(cm){ const c=o.conf||{}; v.cm_open=true; v.cm_titulo=(c.st==='Sem leitura'?'Informar leitura · ':'Conferir medição · ')+id; v.cm_sub=x.nome+' · hidrômetro × estimativa na área coberta · tolerância '+s.tol+' %'+(irrMedicao(s,o,c.med).temporal?' · área e tempo a conferir; crédito pendente':'');
     const ps=o.passadas.filter(p=>p.st==='Feita'||p.st==='Parcial'); const cob=ps.reduce((a,p)=>Math.max(a,p.cob||0),0);
-    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,1)+' ha'},{l:'Medido',t:c.med?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
-             {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,1)+' de '+irrN(x.ha,1)+' ha'}];
-    v.cm_vol=cm.vol; v.cm_evol=(cm.err||''); v.cm_evol_has=!!cm.err; v.cm_setvol=(e)=>self.setState({cm:{vol:e.target.value,err:''}});
-    v.cm_ok=()=>{ const vs=String(self.state.cm.vol||'').trim(); const vol=g2num(vs); if(!(vol>0)){ self.setState({cm:{vol:vs,err:'Informe a leitura em m³ (ex.: 1.206).'}}); return; }
-      run(s0=>irrConferir(s0,id,vol),()=>fechar(self,'cm')); }; }
-  else { v.cm_kv=[]; v.cm_vol=''; v.cm_evol=''; v.cm_evol_has=false; v.cm_setvol=()=>{}; v.cm_ok=()=>{}; v.cm_titulo=''; v.cm_sub=''; }
+    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,2,1)+' ha'},{l:'Medido',t:c.med!==null&&c.med!==undefined?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
+             {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,2,1)+' de '+irrN(x.ha,2,0)+' ha'}];
+    const num=g2num(cm.vol), medicao=irrMedicao(s,o,num);
+    v.cm_mot_show=medicao.exigeMotivo; v.cm_okT=v.cm_mot_show?'Aceitar com motivo':'Validar e encerrar';
+    v.cm_vol=cm.vol; v.cm_mot=cm.mot||''; v.cm_evol=cm.err||''; v.cm_evol_has=!!cm.err;
+    v.cm_emot=cm.emot||''; v.cm_emot_has=!!cm.emot;
+    const set=k=>e=>self.setState({cm:Object.assign({},self.state.cm,{[k]:e.target.value,err:'',emot:''})});
+    v.cm_setvol=set('vol'); v.cm_setmot=set('mot');
+    v.cm_warn=!!cm.warn; v.cm_cancel=()=>{ const c=self.state.cm; if(c&&(c.vol!==c.original||c.mot)) self.setState({cm:Object.assign({},c,{warn:true})}); else fechar(self,'cm'); };
+    v.cm_keep=()=>self.setState({cm:Object.assign({},self.state.cm,{warn:false})});
+    v.cm_devolver=()=>run(s0=>irrDevolver(s0,id),()=>fechar(self,'cm'));
+    v.cm_ok=()=>{ const cur=self.state.cm, vs=String(cur.vol||'').trim(),vol=vs?g2num(vs):null;
+      if(vol===null||!Number.isFinite(vol)||vol<0){ self.setState({cm:Object.assign({},cur,{err:'Informe o volume medido em m³.'})}); return; }
+      if(v.cm_mot_show&&!String(cur.mot||'').trim()){self.setState({cm:Object.assign({},cur,{emot:'Informe o motivo para aceitar a divergência.'})});return;}
+      run(s0=>irrConferir(s0,id,vol,cur.mot),()=>fechar(self,'cm')); }; }
+  else { v.cm_kv=[]; v.cm_vol=''; v.cm_mot=''; v.cm_mot_show=false; v.cm_emot=''; v.cm_emot_has=false; v.cm_evol=''; v.cm_evol_has=false; v.cm_setvol=()=>{}; v.cm_setmot=()=>{}; v.cm_devolver=()=>{}; v.cm_ok=()=>{}; v.cm_titulo=''; v.cm_sub=''; v.cm_okT='Validar e encerrar'; }
   // ---- painel: registrar avanço (telemetria e manual do mesmo evento = um registro) ----
   const avs=self.state.av;
   if(avs){ v.av_open=true; v.av_titulo='Registrar avanço · '+id; v.av_sub=x.nome+' · passada '+((irrPassAtual(o)||{}).n||'')+' em execução · área pelo ângulo do pivô ou app de campo';
     v.av_cob=avs.cob; v.av_ecob=avs.err||''; v.av_ecob_has=!!avs.err; v.av_setcob=(e)=>self.setState({av:{cob:e.target.value,err:''}});
-    v.av_ok=()=>{ const c2=g2num(self.state.av.cob); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,1)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
+    v.av_ok=()=>{ const c2=irr2(g2num(self.state.av.cob)); if(!(c2>=0&&c2<=x.ha)){ self.setState({av:{cob:self.state.av.cob,err:'Área entre 0 e '+irrN(x.ha,2,0)+' ha.'}}); return; } run(s0=>irrAvanco(s0,id,c2),()=>fechar(self,'av')); }; }
   else { v.av_cob=''; v.av_ecob=''; v.av_ecob_has=false; v.av_setcob=()=>{}; v.av_ok=()=>{}; v.av_titulo=''; v.av_sub=''; }
   // ---- painel: adicionar produtos (v2 da mesma ordem, liberada pelo agrônomo na O.S.) ----
   const rc=self.state.rc;
   if(rc){ const exec=(o.etapa==='Em execução'); v.rc_open=true; v.rc_titulo='Adicionar produtos · '+id; v.rc_sub=x.nome+' · versão v2 (fertirrigação) · mesmo setor, janela e saldo';
-    v.rc_prod=rc.d.prod; v.rc_dose=rc.d.dose; v.rc_mot=rc.d.mot; const n=g2num(rc.d.dose); const pa=irrPassAtual(o); const area=x.ha-(exec&&pa?(pa.cob||0):0);
+    v.rc_prod=rc.d.prod; v.rc_dose=rc.d.dose; v.rc_mot=rc.d.mot; const n=g2num(rc.d.dose); const pa=irrPassAtual(o); const area=irrAreaV2(x,pa);   /* a mesma área da v2 (irrReclassificar) */
     const bq=pa?[]:irrChecar(s,o).bloq;
-    v.rc_prev=bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,1)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,1)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+(isNaN(n)?'—':irrN(n*area))+' kg no estoque (falta bloqueia).');
+    const zv=(n>0&&n<=50)?irrV2Zero(o,x,pa,n):''; v.rc_prev=zv?zv:bq.length?('Resolva antes: '+bq.map(b=>b.t+(b.h?' '+b.h:'')).join(', ')+'.'):((exec?'A ordem continua Em execução com selo Revisão de saldo pendente; '+(pa?irrN(pa.cob||0,2,0)+' ha já cobertos ficam na v1 e o saldo de '+irrN(area,2,0)+' ha para até a liberação.':'as próximas passadas esperam a liberação.'):'A ordem volta a A liberar e a liberação da água é revogada.')+' Ana (agrônoma) libera na O.S.; a liberação reserva '+((n>0&&n<=50)?irrN(cenQtd(n,area),2):'—')+' kg no estoque (falta bloqueia).');
     const set=(k)=>(e)=>{ const cur=self.state.rc; const d=Object.assign({},cur.d,{[k]:e.target.value}); const er=Object.assign({},cur.err); delete er[k]; self.setState({rc:Object.assign({},cur,{d,err:er,warn:false})}); };
     v.rc_setprod=set('prod'); v.rc_setdose=set('dose'); v.rc_setmot=set('mot');
     ['prod','dose','mot'].forEach(k=>{ v['rc_e'+k]=(rc.err||{})[k]||''; v['rc_e'+k+'_has']=!!(rc.err||{})[k]; });
@@ -547,64 +749,80 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
 # =====================================================================================
 def ir04():
     fname='IR-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    g_src=grid([dict(k='nome',l='Fonte',w=185),dict(k='at',l='Atualização',w=90),dict(k='cal',l='Calibração',w=150),dict(k='cob',l='Cobertura',w=90),
-                dict(k='estado',l='Estado',w=165),dict(k='efe',l='Efeito no balanço',w=145)],[],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): grandezas e unidades da fonte (listas na mesma ordem: a estação mede ET₀, chuva e vento), atualização (ordena como data), calibração (chip) e a
+    # validade dela (data), cobertura, estado (chip; o motivo da suspeita vai para o painel) e efeito no balanço. Fazenda só com "Todas"
+    # revisão TABR (A1, 09/10): o estado logo depois da fonte (à vista sem rolar)
+    g_src=grid([dict(k='nome',l='Fonte',w=130),dict(k='faz',l='Fazenda',w=110),dict(k='estado',l='Estado',w=120),dict(k='gr',l='Grandeza',multi=True,w=110),dict(k='un',l='Unidade',multi=True,w=90),
+                dict(k='at',l='Atualização',t='date',w=110),dict(k='calst',l='Calibração',w=120),dict(k='cal',l='Validade da calibração',t='date'),dict(k='cob',l='Cobertura',w=100),
+                dict(k='efe',l='Efeito no balanço',w=110)],[],
                edit=dict(m='form',title='Fonte',newTitle='Cadastrar sensor',sub='O estado vem das leituras validadas.',
                    fields=[dict(k='nome',l='Nome',t='txt',req=True),dict(k='gr',l='Grandeza',t='sel',req=True,newOnly=True,opts=['Umidade do solo','Volume','ET₀ / chuva / vento'],**{'def':'Umidade do solo'}),
-                           dict(k='un',l='Unidade',t='sel',req=True,newOnly=True,opts=['% vol.','m³','mm/dia · mm'],**{'def':'% vol.'}),
                            dict(k='cob',l='Cobertura',t='sel',req=True,newOnly=True,opts=['Pivô 1','Pivô 2','Gotejo T7','Fazenda'],**{'def':'Pivô 2'}),
                            dict(k='cal',l='Próxima calibração',t='date')]),
                gid='g_src',total=False,add='Cadastrar sensor',search=False)
-    g_cap=grid([dict(k='nome',l='Captação',w=200),dict(k='ls',l='Vazão outorgada',t='num',a='r',u='L/s',w=110),dict(k='venc',l='Vencimento',t='date',w=100),
-                dict(k='st',l='Situação',w=120),dict(k='uso',l='Uso hoje',w=150),dict(k='set',l='Setores ligados',w=130)],[],
-               edit=dict(m='ro',title='Captação',fields=[dict(k='nome',l='Captação',ro=True),dict(k='outorga',l='Outorga',ro=True),dict(k='obs',l='Observação',ro=True)]),gid='g_cap',total=False,search=False)
-    drows=[R('p2',o=['Hidrômetro · Pivô 2 · 32.480 m³ (09–22/09)','Medidor de energia · bomba B2 · 23.370 kWh','Eficiência = volume ÷ energia · lâmina = volume ÷ 80 ha'],
-             setor=[Pt.b('Pivô 2'),Pt.mut('Milho')],vol=32480,kwh=23370,lam=40.6,ef=1.39,ind=[Pt.chip('+4 % vs quinzena anterior','green')]),
+    # captação: outorga, vazão outorgada (L/s) e regime (h/dia), vencimento, situação, volume de hoje (m³) e uso do dia (%), setores ligados (lista)
+    g_cap=grid([dict(k='nome',l='Captação',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='st',l='Situação',w=120),dict(k='outorga',l='Outorga',w=130),dict(k='ls',l='Vazão outorgada',t='num',a='r',un='L/s'),
+                dict(k='h',l='Regime',t='num',a='r',un='h/dia',d=1,dmin=0),dict(k='venc',l='Vencimento',t='date'),
+                dict(k='vol',l='Volume hoje',t='num',a='r',un='m³'),dict(k='pct',l='Uso do dia',t='num',a='r',un='%'),dict(k='set',l='Setores ligados',multi=True,w=150)],[],
+               edit=dict(m='ro',title='Captação',fields=[dict(k='nome',l='Captação',ro=True),dict(k='outT',l='Outorga',ro=True),dict(k='obs',l='Observação',ro=True)]),gid='g_cap',total=False,search=False)
+    # desempenho: cultura em coluna própria; a variação da eficiência sobre a quinzena anterior é número (%); a sonda sem dado aparece em Fontes
+    drows=[R('p2',o=['Hidrômetro · Pivô 2 · 32.480 m³ (09–22/09)','Medidor de energia · '+DI.eq_nome('a11')+' · 23.370 kWh','Eficiência = volume ÷ energia · lâmina = volume ÷ 80 ha'],
+             setor=[Pt.b('Pivô 2')],cult='Milho',vol=32480,kwh=23370,lam=40.6,ef=1.39,var=(4,[Pt.cn('+4','green')])),
            R('p1',o=['Hidrômetro · Pivô 1 · 34.580 m³ (09–22/09)','Medidor de energia · bomba B1 · 25.610 kWh','Lâmina = volume ÷ 95 ha'],
-             setor=[Pt.b('Pivô 1'),Pt.mut('Feijão')],vol=34580,kwh=25610,lam=36.4,ef=1.35,ind=[Pt.chip('Estável','gray')]),
-           R('t7',o=['Hidrômetro · Gotejo T7 · 10.080 m³ (09–22/09)','Medidor de energia · bomba B3 · 5.760 kWh','Lâmina = volume ÷ 42 ha'],
-             setor=[Pt.b('Gotejo T7'),Pt.mut('Mamão')],vol=10080,kwh=5760,lam=24.0,ef=1.75,ind=[Pt.chip('Sem sonda desde 20/09','yellow')])]
-    g_des=grid([dict(k='setor',l='Setor'),dict(k='vol',l='Volume',t='num',a='r',u='m³',agg='sum'),dict(k='kwh',l='Energia',t='num',a='r',u='kWh',agg='sum'),
-                dict(k='lam',l='Lâmina aplicada',t='num',a='r',u='mm',d=1),dict(k='ef',l='Eficiência',t='num',a='r',u='m³/kWh',d=2),dict(k='ind',l='Indicador')],drows,
-               edit=dict(m='origin',title='Desempenho',fields=[dict(k='setor',l='Setor',ro=True),dict(k='vol',l='Volume (m³)',ro=True),dict(k='kwh',l='Energia (kWh)',ro=True),dict(k='ef',l='Eficiência (m³/kWh)',ro=True)]),
+             setor=[Pt.b('Pivô 1')],cult='Feijão',vol=34580,kwh=25610,lam=36.4,ef=1.35,var=(0,[Pt.txt('0')])),
+           R('t7',o=['Hidrômetro · Gotejo T7 · 10.080 m³ (09–22/09)','Medidor de energia · bomba B3 · 5.760 kWh','Lâmina = volume ÷ 42 ha','Variação: sem quinzena anterior comparável (sonda sem dado desde 20/09)'],
+             setor=[Pt.b('Gotejo T7')],cult='Mamão',vol=10080,kwh=5760,lam=24.0,ef=1.75,var='')]
+    g_des=grid([dict(k='setor',l='Setor'),dict(k='cult',l='Cultura'),dict(k='vol',l='Volume',t='num',a='r',un='m³',agg='sum'),dict(k='kwh',l='Energia',t='num',a='r',un='kWh',agg='sum'),
+                dict(k='lam',l='Lâmina aplicada',t='num',a='r',un='mm',d=1),dict(k='ef',l='Eficiência',t='num',a='r',un='m³/kWh',d=2),
+                dict(k='var',l='Variação da eficiência',t='num',a='r',un='%')],drows,
+               edit=dict(m='origin',title='Desempenho',fields=[dict(k='setor',l='Setor',ro=True),dict(k='cult',l='Cultura',ro=True),dict(k='vol',l='Volume (m³)',ro=True),dict(k='kwh',l='Energia (kWh)',ro=True),dict(k='ef',l='Eficiência (m³/kWh)',ro=True)]),
                gid='g_des',search=False)
     EXTRAJS[0]=prefixo()+JS_COMUM+r'''
 function br(s){ const a=String(s||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:s; }
 const ESTC={'Ativa':'green','Suspeita':'red','Sem dado':'yellow','Aguardando 1ª leitura':'gray','Previsão':'gray'};
+// a unidade vem da grandeza (não se pede de novo e não diverge dela): uma unidade por grandeza, na mesma ordem
+const UN_GR={'Umidade do solo':'% vol.','Volume':'m³','ET₀ / chuva / vento':'mm/dia · mm · km/h'};
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); const c=irrFaixa(v,s,fz);
   const fs=Object.keys(s.fontes).filter(k=>!fz||s.fontes[k].faz===fz);
-  IRG('g_src').rows=fs.map(k=>{ const f=s.fontes[k]; let cal; if(!f.cal) cal=[{k:'tag',t:'Não se aplica'}]; else { const d=irrDeIso(f.cal); cal=d<0?[{k:'chip',t:'Vencida em '+br(f.cal),c:'red'}]:(d<=7?[{k:'chip',t:(f.calAg?'Agendada ':'Vence ')+br(f.cal),c:'yellow'}]:[{k:'chip',t:'Em dia · '+br(f.cal),c:'green'}]); }
-    const stT=f.st==='Suspeita'?'Suspeita · '+(f.motivo||''):(f.st==='Sem dado'?'Sem dado desde '+irrDdmm(irrDiaN(f.desde)):(f.st==='Previsão'?'Só previsão':f.st));
-    const x=f.setor?s.setores[f.setor]:null; const efe=f.st==='Previsão'?'não entra como chuva':(f.gr==='Volume'?'crédito das irrigações · '+f.cob:(f.gr.indexOf('ET')===0?'ETc dos setores':(x?(f.st==='Ativa'?x.nome+' medido':x.nome+' por estimativa de ET (≈)'):(f.st==='Aguardando 1ª leitura'?'nada sem leitura validada':'balanço da fazenda'))));
-    return {id:k,ro:!!f.ro,v:{nome:f.nome,gr:f.gr,un:f.un,cob:f.cob,cal:f.cal||''},s:{nome:f.nome,at:f.at===null||f.at===undefined?'—':irrQuando(f.at),cal:cal[0].t,cob:f.cob,estado:f.st,efe},
-      p:{nome:[{k:'b',t:f.nome},{k:'br',t:''},{k:'mut',t:f.gr+' · '+f.un}],at:[{k:'txt',t:f.at===null||f.at===undefined?'—':irrQuando(f.at)}],cal,estado:[{k:'chip',t:stT,c:ESTC[f.st]||'gray'}],efe:[{k:f.st==='Ativa'?'mut':'txt',t:efe}]}}; });
+  irrColsFaz(self,'g_src',fz,v,'src_ncol'); irrColsFaz(self,'g_cap',fz,v,'cap_ncol');
+  IRG('g_src').rows=fs.map(k=>{ const f=s.fontes[k]; let cs; if(!f.cal) cs=['Não se aplica','gray']; else { const d=irrDeIso(f.cal); cs=d<0?['Vencida','red']:(d<=7?[(f.calAg?'Agendada':'Vence em 7 dias'),'yellow']:['Em dia','green']); }
+    const stT=f.st==='Previsão'?'Só previsão':f.st;
+    const x=f.setor?s.setores[f.setor]:null; const efe=f.st==='Previsão'?'não entra como chuva':(f.gr==='Volume'?'crédito das irrigações':(f.gr.indexOf('ET')===0?'ETc dos setores':(x?(f.st==='Ativa'?x.nome+' medido':x.nome+' por estimativa de ET (≈)'):(f.st==='Aguardando 1ª leitura'?'nada sem leitura validada':'balanço da fazenda'))));
+    const r={id:k,ro:!!f.ro,v:{nome:f.nome,gr:f.gr,un:f.un,cob:f.cob,cal:f.cal||''},s:{},p:{}};
+    irrTxt(r,'nome',f.nome,true); irrTxt(r,'faz',s.faz[f.faz].nome); irrLst(r,'gr',String(f.gr||'').split(' / ').filter(Boolean).map(t=>({t:t.charAt(0).toUpperCase()+t.slice(1)}))); irrLst(r,'un',String(f.un||'').split(' · ').filter(Boolean).map(t=>({t}))); irrQ(r,'at',(f.at===null||f.at===undefined)?null:f.at);
+    r.p.calst=[cs[0]==='Não se aplica'?{k:'tag',t:cs[0]}:{k:'chip',t:cs[0],c:cs[1]}]; r.s.calst=cs[0];
+    r.p.cal=[f.cal?{k:'txt',t:br(f.cal)}:{k:'mut',t:'—'}]; r.s.cal=f.cal?br(f.cal):''; irrTxt(r,'cob',f.cob);
+    r.p.estado=[{k:'chip',t:stT,c:ESTC[f.st]||'gray'}]; r.s.estado=stT; r.p.efe=[{k:f.st==='Ativa'?'mut':'txt',t:efe}]; r.s.efe=efe;
+    return r; });
   const cs=Object.keys(s.capt).filter(k=>!fz||s.capt[k].faz===fz);
   IRG('g_cap').rows=cs.map(k=>{ const cp=s.capt[k]; const ss=Object.keys(s.setores).filter(z=>s.setores[z].capt===k&&s.setores[z].bal);
-    const ws=irrComprometidas(s,null).filter(w=>w.capt===k); let vol=0; ws.forEach(w=>{ const a=Math.max(0,w.ini),b=Math.min(1440,w.fim); if(b>a) vol+=w.ls*(b-a)*0.06; }); const pct=vol/(cp.ls*cp.h*3.6)*100;
-    return {id:k,v:{ls:cp.ls,venc:cp.venc,nome:cp.nome,outorga:cp.outorga+' · '+irrN(cp.ls)+' L/s × '+cp.h+' h/dia',obs:cp.obs||'—'},s:{nome:cp.nome,st:cp.st,uso:irrN(pct,0)+' %',set:ss.length+''},
-      p:{nome:[{k:'b',t:cp.nome},{k:'br',t:''},{k:'mut',t:'outorga '+cp.outorga+(fz?'':' · '+s.faz[cp.faz].nome)}],ls:[{k:'txt',t:irrN(cp.ls)+' L/s'},{k:'br',t:''},{k:'mut',t:cp.h+' h/dia'}],
-         st:[{k:'chip',t:cp.st,c:{'Vigente':'green','Em renovação':'yellow','Vencida':'red'}[cp.st]||'gray'}],uso:[{k:'txt',t:irrN(vol)+' m³ · '+irrN(pct,0)+' % do dia'}],
-         set:[{k:ss.length?'txt':'mut',t:ss.length?ss.length+(ss.length>1?' setores':' setor'):'nenhum'}].concat(ss.length&&ss.length<=3?[{k:'br',t:''},{k:'mut',t:ss.map(z=>s.setores[z].nome).join(', ')}]:[])}}; });
+    const u=irrUsoDia(s,k,0), vol=u.vol, cap=u.cap, pct=u.pct;   /* a mesma conta da IR-02 e da trava (irrigacao_estado.js, CTL-5) */
+    const r={id:k,v:{ls:cp.ls,h:cp.h,venc:cp.venc,nome:cp.nome,vol:Math.round(vol),pct:Math.round(pct),outT:cp.outorga+' · '+irrN(cp.ls)+' L/s × '+irrN(cp.h,1,0)+' h/dia · '+irrN(cap)+' m³/dia',obs:cp.obs||'—'},s:{},p:{}};
+    irrTxt(r,'nome',cp.nome,true); irrTxt(r,'faz',s.faz[cp.faz].nome); irrTxt(r,'outorga',cp.outorga);
+    // situação da outorga (cadastro, CTL-5): fora de "Vigente", qual outorga da soma vence e quanto sai, e quem renova (o gestor, na aba Água do CD-01, a fonte)
+    r.p.st=[{k:'chip',t:cp.st,c:irrOutC(cp.st)}].concat(cp.st!=='Vigente'?[{k:'br',t:''},{k:'mut',t:irrOutVenc(s,cp)},{k:'br',t:''},{k:'link',t:'Renovar no cadastro ›',h:'CD-01.dc.html#aba=agua'}]:[]); r.s.st=cp.st;
+    r.p.vol=[{k:'txt',t:irrN(vol)}]; r.s.vol=irrN(vol); r.p.pct=[{k:'txt',t:irrN(pct,0)}]; r.s.pct=irrN(pct,0);
+    irrLst(r,'set',ss.map(z=>({t:s.setores[z].nome}))); return r; });
   v.hs_t=c.sensT||'Fontes em dia'; v.hs_st=chipSt(c.sens?'yellow':'green');
-  const prob=fs.map(k=>s.fontes[k]).filter(f=>f.st==='Suspeita'||f.st==='Sem dado')[0]; v.p_has=!!prob; v.p_t=prob?'Abrir ação · '+prob.nome.replace('Sonda de umidade · ','sonda '):'';
   v.des=fz!=='LG'&&fz!=='BV'; v.tem=fz!=='BV'; v.vazio=fz==='BV'; v.vazioT='Boa Vista não tem fonte de clima ou sensor cadastrado.'; }
 function EXTRAVALS(self,v){ const fz=irrFazK(self);
+  // painel da fonte: o motivo do estado (suspeita, sem dado desde) no subtítulo, fora da célula
+  const FS=v.g_src_F, fs0=g2st(self,'g_src').fm; if(FS&&FS.open&&fs0&&fs0.rid){ const f=irrGet().fontes[fs0.rid]; if(f&&f.st!=='Ativa') FS.sub=(f.st==='Previsão'?'Só previsão':f.st)+(f.motivo?' · '+f.motivo:'')+(f.desde!==undefined?' · desde '+irrQuando(f.desde):'')+'. O estado vem das leituras validadas.'; }
   self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_src'||!r) return; g2set(self,'g_src',{rows:null,fl:isNew?null:r.id});
-    if(isNew) irrMudar(self,s=>irrFonteNova(s,{faz:fz||'SR',nome:r.v.nome,gr:r.v.gr,un:r.v.un,cob:r.v.cob,cal:r.v.cal}));
+    if(isNew) irrMudar(self,s=>irrFonteNova(s,{faz:fz||'SR',nome:r.v.nome,gr:r.v.gr,un:UN_GR[r.v.gr]||'',cob:r.v.cob,cal:r.v.cal}));
     else irrMudar(self,s=>{ const f=s.fontes[r.id]; if(!f) throw new Error('Fonte não encontrada.'); f.nome=String(r.v.nome||f.nome).trim(); const mudouCal=(r.v.cal||'')!==(f.cal||''); if(mudouCal&&r.v.cal) return irrCalibrar(s,r.id,r.v.cal); return {msg:'Cadastro de '+f.nome+' salvo.'}; }); };
   self.g2formActs=(gid,r)=>{ if(gid!=='g_src') return []; const s=irrGet(); const f=s.fontes[r.id]; if(!f||f.ro) return []; const out=[]; const fechar=()=>g2set(self,'g_src',{fm:null});
     if(f.st==='Ativa'&&f.gr==='Umidade do solo') out.push({t:'Marcar leitura suspeita',h:'Sai do balanço até a inspeção; o setor passa a estimativa por ET em todas as telas.',go:()=>{ fechar(); irrMudar(self,s0=>irrSondaMarcar(s0,r.id,'Suspeita','marcada na conferência')); }});
     if(f.st==='Suspeita') out.push({t:'Validar leitura',h:'Volta ao balanço com a medição.',go:()=>{ fechar(); irrMudar(self,s0=>irrSondaMarcar(s0,r.id,'Ativa')); }});
-    if(f.st==='Suspeita'||f.st==='Sem dado') out.push({t:'Abrir ação',h:'Inspeção na gestão (GE-07).',go:()=>irrGo('GE-07.dc.html')});
     return out; }; }
 '''
     corpo=(vazio('vazio','vazioT','Cadastrar sensores','CD-03.dc.html')
            + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'
            + section('Fontes e sensores','','',g_src) + section('Captações e outorgas','','',g_cap)
            + f'<sc-if value="{H("des")}" hint-placeholder-val="{T()}">'+section('Desempenho por setor · 09–22/09','','',g_des)+'</sc-if></sc-if>')
-    prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
-          f'<sc-if value="{H("p_has")}" hint-placeholder-val="{T()}"><a href="GE-07.dc.html" style="{BTN_ST(True)} text-decoration: none;">{H("p_t")}</a></sc-if>')
+    prim=f'<span style="{H("hs_st")}">{H("hs_t")}</span>'
     shell37('IR-04','Clima e sensores',corpo,fname=fname,crumbs_extra=['Clima e sensores'],primary_html=prim,steps=faixa(4),search=False)
+    ncol_dinamico(fname,['src_ncol','cap_ncol'])
 
 def build():
     ir01(); ir02(); ir03(); ir03det(); ir04()

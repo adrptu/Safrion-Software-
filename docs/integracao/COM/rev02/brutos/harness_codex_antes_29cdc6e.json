@@ -1,0 +1,40 @@
+{
+  "candidate": "orig",
+  "executor": "Claude Node local (harness do Codex 6091943041, sem mudança)",
+  "synthetic": true,
+  "checks": [
+    {
+      "id": "duplicate-atomic",
+      "pass": true
+    },
+    {
+      "id": "saida-replay",
+      "pass": true
+    },
+    {
+      "id": "saida-not-delivery",
+      "pass": true
+    },
+    {
+      "id": "delivery-replay",
+      "pass": true
+    },
+    {
+      "id": "delivery-different-lot-conflict",
+      "pass": false,
+      "raw": {
+        "repetido": true,
+        "actualOrigin": "L39-133",
+        "requestedOrigin": "L10-031"
+      }
+    },
+    {
+      "id": "unauthorized-no-write",
+      "pass": true
+    },
+    {
+      "id": "actor-recorded",
+      "pass": true
+    }
+  ]
+}

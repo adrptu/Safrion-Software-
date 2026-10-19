@@ -1,0 +1,72 @@
+OK  M1 SAF etapa 1: seletor Tabela | Cartões depois de Colunas e do Agrupar por, na barra da tabela; Tabela ativa ao abrir
+OK  M2a SAF etapa 1: Cartões mostra os mesmos itens da Tabela, na mesma ordem (4), e o "X de Y" não muda; o endereço leva ?view=cartoes
+OK  M2b SAF etapa 1: cartões em lista com rótulo (role=list/listitem)
+OK  M2c SAF etapa 1: com a busca "Safra" os dois modos mostram os mesmos itens
+OK  M2d SAF etapa 1: com o filtro rápido "Santa Rita 3" os dois modos mostram os mesmos itens
+OK  M2e SAF etapa 1: Agrupar por "Fazenda": os mesmos grupos e itens nos dois modos (2 grupos)
+OK  M2f SAF etapa 1: no Cartões, um título por grupo (2), sem descer pelo nome nem trilha (AGR-02); os dois modos seguem iguais
+OK  M3a SAF etapa 1: clicar no cartão S2627 faz o mesmo que a linha da Tabela
+OK  M4a SAF etapa 1: recarregar abre em Cartões (preferência da Ana); a listagem principal leva ?view=cartoes
+OK  M4b SAF etapa 1: outro perfil (Caio) abre na Tabela
+OK  M4c SAF etapa 1: voltar à Tabela grava a escolha e tira o view= do endereço
+OK  M1 CD-05 Parceiros: seletor Tabela | Cartões depois de Colunas e do Agrupar por, na barra da tabela; Tabela ativa ao abrir
+OK  M2a CD-05 Parceiros: Cartões mostra os mesmos itens da Tabela, na mesma ordem (20), e o "X de Y" não muda; o endereço leva ?view=cartoes
+OK  M2b CD-05 Parceiros: cartões em lista com rótulo (role=list/listitem)
+OK  M2c CD-05 Parceiros: com a busca "Fertisul" os dois modos mostram os mesmos itens
+OK  M2d CD-05 Parceiros: com o filtro rápido "Fornecedores 8" os dois modos mostram os mesmos itens
+OK  M2e CD-05 Parceiros: Agrupar por "CPF/CNPJ": os mesmos grupos e itens nos dois modos (20 grupos)
+OK  M2f CD-05 Parceiros: no Cartões, um título por grupo (20), sem descer pelo nome nem trilha (AGR-02); os dois modos seguem iguais
+OK  M3a CD-05 Parceiros: clicar no cartão F01 faz o mesmo que a linha da Tabela
+OK  M4a CD-05 Parceiros: recarregar abre em Cartões (preferência da Ana); a listagem principal leva ?view=cartoes
+OK  M4b CD-05 Parceiros: outro perfil (Caio) abre na Tabela
+OK  M4c CD-05 Parceiros: voltar à Tabela grava a escolha e tira o view= do endereço
+OK  M1 MA Ativos: seletor Tabela | Cartões depois de Colunas e do Agrupar por, na barra da tabela; Tabela ativa ao abrir
+OK  M2a MA Ativos: Cartões mostra os mesmos itens da Tabela, na mesma ordem (16), e o "X de Y" não muda; o endereço leva ?view=cartoes
+OK  M2b MA Ativos: cartões em lista com rótulo (role=list/listitem)
+OK  M2c MA Ativos: com a busca "Revisão" os dois modos mostram os mesmos itens
+OK  M2d MA Ativos: com o filtro rápido "Apto 14" os dois modos mostram os mesmos itens
+OK  M2e MA Ativos: Agrupar por "Plano": os mesmos grupos e itens nos dois modos (12 grupos)
+OK  M2f MA Ativos: no Cartões, um título por grupo (12), sem descer pelo nome nem trilha (AGR-02); os dois modos seguem iguais
+OK  M3a MA Ativos: clicar no cartão a01 faz o mesmo que a linha da Tabela
+OK  M4a MA Ativos: recarregar abre em Cartões (preferência da Ana); a listagem principal leva ?view=cartoes
+OK  M4b MA Ativos: outro perfil (Caio) abre na Tabela
+OK  M4c MA Ativos: voltar à Tabela grava a escolha e tira o view= do endereço
+OK  M1 EST Recebimento: seletor Tabela | Cartões depois de Colunas e do Agrupar por, na barra da tabela; Tabela ativa ao abrir
+OK  M2a EST Recebimento: Cartões mostra os mesmos itens da Tabela, na mesma ordem (3), e o "X de Y" não muda; o endereço leva ?view=cartoes
+OK  M2b EST Recebimento: cartões em lista com rótulo (role=list/listitem)
+OK  M2c EST Recebimento: com a busca "4501" os dois modos mostram os mesmos itens
+OK  M2d EST Recebimento: com o filtro rápido "A conferir 1" os dois modos mostram os mesmos itens
+OK  M2e EST Recebimento: Agrupar por "Pedido": os mesmos grupos e itens nos dois modos (3 grupos)
+OK  M2f EST Recebimento: no Cartões, um título por grupo (3), sem descer pelo nome nem trilha (AGR-02); os dois modos seguem iguais
+OK  M3a EST Recebimento: clicar no cartão r4501 faz o mesmo que a linha da Tabela
+OK  M4a EST Recebimento: recarregar abre em Cartões (preferência da Ana); a listagem principal leva ?view=cartoes
+OK  M4b EST Recebimento: outro perfil (Caio) abre na Tabela
+OK  M4c EST Recebimento: voltar à Tabela grava a escolha e tira o view= do endereço
+OK  M1 CF-01 Pessoas: seletor Tabela | Cartões depois de Colunas e do Agrupar por, na barra da tabela; Tabela ativa ao abrir
+OK  M2a CF-01 Pessoas: Cartões mostra os mesmos itens da Tabela, na mesma ordem (15), e o "X de Y" não muda; o endereço leva ?view=cartoes
+OK  M2b CF-01 Pessoas: cartões em lista com rótulo (role=list/listitem)
+OK  M2c CF-01 Pessoas: com a busca "Agronomia" os dois modos mostram os mesmos itens
+OK  M2d CF-01 Pessoas: com o filtro rápido "Com acesso 14" os dois modos mostram os mesmos itens
+OK  M3a CF-01 Pessoas: clicar no cartão pe_p1 faz o mesmo que a linha da Tabela
+OK  M4a CF-01 Pessoas: recarregar abre em Cartões (preferência da Ana); a listagem principal leva ?view=cartoes
+OK  M4b CF-01 Pessoas: outro perfil (Caio) abre na Tabela
+OK  M4c CF-01 Pessoas: voltar à Tabela grava a escolha e tira o view= do endereço
+OK  M4d endereço ?view=cartoes: a listagem principal (IR-01 Setores) abre em Cartões; a segunda (Água no solo) fica na Tabela e trocar o modo dela não mexe no endereço
+OK  M3b CD-05: o cartão recebe o foco (Tab) e Enter abre o parceiro
+OK  M2h CD-06 (árvore): os mesmos itens nos dois modos; o cartão do grupo nasce recolhido e a seta abre os filhos dentro dele, como a seta da Tabela
+OK  M6a PA: Atividades do plano abre em Cartões (a lista própria), com o seletor depois do "Expandir tudo"
+OK  M6b PA Tabela: colunas DAP, Atividade (com o ícone), Insumos, Custo/ha e ⋯; as mesmas atividades, na mesma ordem; ?view=tabela no endereço
+OK  M6c PA: com o filtro por operação os dois modos mostram as mesmas atividades
+OK  M6d PA: clicar na linha da Tabela abre os insumos logo abaixo, como o cartão (mesmo "Incluir insumo")
+OK  M6e PA: recarregar mantém a Tabela (preferência)
+OK  M6f PA: voltar a Cartões tira o view= e mostra a lista própria
+OK  M7a O.S.: "Ver em cartões" no seletor de visões (?view=cartoes) mostra as mesmas ordens da Tabela, também agrupadas por Talhão; sem 2º seletor na barra da grade
+OK  M7b MA › Ordens: "Cartões" no seletor da tela (Lista | Cartões | Kanban) mostra as mesmas ordens da Lista; sem 2º seletor na barra da grade
+OK  M7b BEN: "Cartões" no seletor da tela (Lista | Cartões | Kanban) mostra as mesmas ordens da Lista; sem 2º seletor na barra da grade
+OK  M5 CD-05.dc.html 390 px: cartões numa coluna (20), sem rolagem lateral; seletor com 44 px no toque
+OK  M5 SAF.dc.html 390 px: cartões numa coluna (4), sem rolagem lateral; seletor com 44 px no toque
+OK  M5 MA.dc.html 390 px: cartões numa coluna (16), sem rolagem lateral; seletor com 44 px no toque
+OK  M5 PA 390 px: a Tabela das atividades cabe na largura (sem rolagem lateral)
+OK  M8 sem erro de JavaScript
+RESULTADO: 70/70
+rc=0

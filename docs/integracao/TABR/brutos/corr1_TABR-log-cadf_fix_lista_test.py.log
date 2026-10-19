@@ -1,0 +1,14 @@
+OK  1 sem erro JS e "Importar geometrias" retirado da tela · ['']
+OK  2 fazenda nova: texto de cadastro, sem instrução de inativar e sem campo Situação · ['Cadastrar fazenda × Cadastre a fazenda com empresa, município, área total e posse. Nome da fazenda Empresa Santa Rita Agro Boa Vista Ltda Responde pelos custos ', ['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Fuso horário', 'Área total do imóvel', 'Posse', 'Módulos fiscais', 'CAR', 'Matrícula
+OK  3 talhão novo: texto de cadastro, sem "Área do polígono" vazio e sem Situação · ['Cadastrar talhão × Cadastre o talhão com fazenda, sistema e área cultivável; o polígono é definido depois, no detalhe do talhão. Identificação do talhão Ex.: T8. Não pode repetir na mesma fazenda. Faz', ['Identificação do talhão', 'Fazenda', 'Sistema', 'Área cultivável']]
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cadf_fix_lista_test.py", line 55, in <module>
+    openrow(0,'T3 Sequeiro'); d=dlg(); L=labels()
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cadf_fix_lista_test.py", line 18, in openrow
+    def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

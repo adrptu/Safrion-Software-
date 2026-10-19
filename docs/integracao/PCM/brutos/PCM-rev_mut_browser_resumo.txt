@@ -1,0 +1,7 @@
+BM1_5cartoes ma_unica_test.py exit=0 RESULTADO: 23/23 ok
+BM2_primaria_cab ma_unica_test.py exit=1 RESULTADO: 22/23 ok · FALHAS: AC-PCM-05/06/07 · ≤ 1 primária por visão, detalhe e painel; com painel aberto nenhuma primária fora dele; nenhum botão de comando nas linhas; sem faixa ou etapas
+BM6_marco_sem_sugestao ma_rastreio_test.py exit=0 RESULTADO: 58/58 ok
+BM6_marco_sem_sugestao ma_planos_test.py exit=1 RESULTADO: 18/18 ok
+BM6_marco_sem_sugestao ma_correcoes_pm_test.py exit=0 RESULTADO: 12/12 ok
+feb91ee0b5858d2bbfeaf6dbbcf3efae  <scratchpad>/pcmrev/v37/gen37/project/MA.dc.html
+FIM

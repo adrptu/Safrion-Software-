@@ -1,0 +1,19 @@
+{
+ "render_pr113_sem_composicao": {
+  "emitir_aviso": "Decisão sem autor, chave ou versão. Reabra o formulário antes de emitir.",
+  "emitir_os": [],
+  "app_aviso": "",
+  "ileg_header": "Agrícola › Pragas e doenças | ‹ | Agrícola | Pragas e doenças | Programar vistoria",
+  "ileg_erros": []
+ },
+ "render_composto": {
+  "emitir_aviso": "Receituário RA-0142 emitido (DIA-009 · REC-015) · OS-0440 em A liberar · Ana libera na O.S.",
+  "emitir_os": [
+   "OS-0440"
+  ],
+  "app_aviso": "Ponto 1 registrado · ponto 2 aberto.",
+  "ileg_header": "Agrícola › Pragas e doenças | ‹ | Agrícola | Pragas e doenças | Dados ilegíveis | Programar vistoria",
+  "ileg_erros": []
+ },
+ "comando": "python3 -B contraprova_visivel.py <gen37 do render> (cópia em revisor/contraprova_visivel.py), 17/10/2026 ~23h UTC"
+}

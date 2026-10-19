@@ -1,0 +1,60 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadc_cd06_test.py
+OK  abre com a pendência do cadastro no cabeçalho e sem fatos do Estoque (quarentena, pedido) · Cadastros › Produtos, unidades e locais Produtos, unidades e locais 1 item sem preço
+OK  item mostra unidade + embalagem e preço com data; controle e saldo no painel com "Ver saldo no Estoque" · ['KCl 60% Em dia 3.1.01 · Fertilizantes e corretivos kg big bag de 1.000 kg R$ 2,40/kg 15/09/2026', 'Só lote', 'o continuam no Estoque.\nVer saldo no Estoque ›\nSaldo: 50.000 kg. Saldo e movimentos vivem no Estoque.\nExcluir item\nNão dá para excluir: tem saldo no Estoque; inative em vez de excluir.
+OK  linha do grupo abre nome e natureza; a natureza salva aparece no grupo · ['Grupo · Herbicidas', '3.1.02 · Defensivos', '▾ Herbicidas 5 itens 3.1.01 · Fertilizantes e corretivos', 'Salvo: grupo Herbicidas · custo dos itens vai para 3.1.01 · Fertilizantes e corretivos.']
+OK  Glifosato: unidade-base travada com o motivo (saldo); embalagem galão de 20 L; preço em R$/L · Item · Glifosato 480
+×
+Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.
+Nome do item
+Grupo
+Adjuvantes
+Combustível
+Corretivos
+Embalagem
+Fertilizantes
+Fungicidas
+Herbicidas
+Inoculantes
+Inseticidas
+Peças
+Produto agrícola
+Sementes
+Outro grupo…
+Unidade-base
+kg
+L
+un
+OK  Ureia sem saldo mas em plano: unidade travada pelo plano · Item · Ureia 45%
+×
+Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.
+Nome do item
+Grupo
+Adjuvantes
+Combustível
+Corretivos
+Embalagem
+Fertilizantes
+Fungicidas
+Herbicidas
+Inoculantes
+Inseticidas
+Peças
+Produto agrícola
+Sementes
+Outro grupo…
+Unidade-base
+kg
+L
+un
+sc 
+OK  Calcário (granel): sem campo de conteúdo; preço sem data é barrado junto ao campo · [['Nome do item', 'Grupo', 'Unidade-base', 'Embalagem de entrega', 'Controle', 'Preço de referência', 'Data do preço', 'Garantia ou densidade', 'Local padrão', 'Situação'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe a data do preço.']
+OK  preço salvo com data e a pendência some do cabeçalho · ['Calcário dolomítico Em dia 3.1.01 · Fertilizantes e corretivos t granel R$ 480,00/t 20/09/2026', 'Cadastros › Produtos, unidades e locais Produtos, unidades e locais Cadastro completo']
+OK  embalagem não granel pede o conteúdo na unidade-base (t) · [['Nome do item', 'Grupo', 'Unidade-base', 'Embalagem de entrega', 'Conteúdo da embalagem', 'Controle', 'Preço de referência', 'Data do preço', 'Garantia ou densidade', 'Local padrão', 'Situação'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe quanto cabe em 1 big bag (e
+OK  inativar item em plano: chip Inativo e aviso de que sai dos planos e das cotações · ['Fungicida C Inativo 3.1.02 · Defensivos L galão de 5 L R$ 120,00/L 15/09/2026', 'Salvo: Fungicida C · L · galão de 5 L · R$ 120,00/L em 15/09/2026 · inativo: sai dos planos e das cotações.']
+OK  "Outro grupo…" cria Biológicos (natureza 3.1.02) com o item Trichoderma WP · [['Nome do item', 'Grupo', 'Nome do novo grupo', 'Natureza de custo', 'Unidade-base', 'Embalagem de entrega', 'Conteúdo da embalagem', 'Controle', 'Preço de referência', 'Data do preço', 'Garantia ou densidade', 'Local padrão', 'Situação'], '▾ Biológicos 1 item 3.1.02 · Defensivos', 'Trichoderma WP 
+OK  item repetido é barrado · Corrija os campos destacados; o que você preencheu foi mantido. | Já existe o item MAP 11-52 em Fertilizantes.
+OK  locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo), com o filtro do tipo · [['LOCAL ⇅ ▾', 'FAZENDA ⇅ ▾', 'TIPO ⇅ ▾', 'ITENS COM ESTE LOCAL PADRÃO ⇅ ▾'], 'Tanque Sede Santa Rita Tanque 15.000 L 1', 'Silo 01 Santa Rita Silo 60.000 sc de 60 kg 0']
+OK  "Cadastrar local" é a ação da aba Locais (sem "+ Novo local") · Cadastrar local
+OK  local novo na Boa Vista · ['Galpão BV 2 Boa Vista Galpão 0', '']
+RESULTADO: OK 14/14
+[exit 0]

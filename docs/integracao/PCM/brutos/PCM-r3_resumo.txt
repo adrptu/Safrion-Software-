@@ -1,0 +1,18 @@
+acao_unica_test_familias exit=0 (199s) | RESULTADO: 8 ok · 0 falhas (familias)
+acao_unica_test_responsivo exit=1 (122s) | RESULTADO: 1 ok · 2 falhas (responsivo)
+acao_unica_test_v3 exit=0 (186s) | RESULTADO: 10 ok · 0 falhas (v3)
+componentes_test_ajustes exit=1 (191s) | RESULTADO: 2 ok · 2 falhas (ajustes)
+componentes_test_rotacao exit=0 (326s) | RESULTADO: 6 ok · 0 falhas (rotacao)
+etapas_celular_test_complemento exit=1 (180s) | RESULTADO: 7 ok · 2 falhas (complemento)
+etapas_celular_test_desktop exit=1 (235s) | RESULTADO: 0 ok · 1 falhas (desktop)
+app_mb02det_test exit=0 (190s) | 8/8 ok · FALHAS: 0
+app_mb03_turno_test exit=0 (225s) | 11/11 ok · FALHAS: 0
+app_mb03x_test exit=0 (363s) | 7/7 ok · FALHAS: 0
+app_entrega_parcial_test exit=0 (462s) | 7/7 ok · FALHAS: 0
+app_os0424_test exit=0 (133s) | 9/9 ok · FALHAS: 0
+app_saldo_zero_test exit=0 (367s) | 12/12 ok · FALHAS: 0
+app_restaurar_test exit=0 (7s) | 4/4 ok · FALHAS: 0
+cmptest exit=0 (514s) | FALHAS: ['envio adicional simulado, sem reenviar']
+esttest exit=0 (172s) | RESULTADO: OK
+.._ferramentas_acoes_duplicadas_.__tmp_PCM-dup.json exit=0 (464s) | RESULTADO: 141 páginas · 0 com ação repetida · erros 0
+FIM

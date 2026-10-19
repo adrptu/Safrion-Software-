@@ -11,7 +11,7 @@ import cenario, dados_irrigacao as DI
 R = os.path.join(HERE, '_render'); os.makedirs(R, exist_ok=True)
 open(os.path.join(R, '_irr_estado.html'), 'w', encoding='utf-8').write(
     '<!doctype html><html><head><meta charset="utf-8"><title>irr</title></head><body>irr<script>window.__err="";window.onerror=(m)=>{window.__err+=m+" | ";};\n'
-    + cenario.js_prefixo() + DI.js_prefixo() + '</script></body></html>')
+    + cenario.js_prefixo() + DI.js_prefixo() + "function g2perfil(){return {k:'Ana',papeis:{gestor:'gestora'}};}" + '</script></body></html>')
 p = free(); srv = subprocess.Popen(['python3', '-m', 'http.server', str(p), '--bind', '127.0.0.1', '--directory', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(0.8)
 c = None; OK = []; FAIL = []
 def chk(nome, cond, info=''):
@@ -53,21 +53,27 @@ try:
     chk('12 terminar sem iniciar é bloqueado com motivo', 'inicie' in M("irrTerminar(s,'OS-0419',80,8480)").lower())
     M("irrIniciar(s,'OS-0419')"); M("irrPausar(s,'OS-0419')")
     chk('13 pausa vira selo; término bloqueado enquanto pausada', E("irrSelos(s,s.ordens['OS-0419']).map(x=>x.t)") == ['Pausada'] and 'Retome' in M("irrTerminar(s,'OS-0419',80,8480)"))
-    M("irrRetomar(s,'OS-0419')"); r = M("irrTerminar(s,'OS-0419',80,8480)")
+    M("irrRetomar(s,'OS-0419')")
+    M("{const o=s.ordens['OS-0419']; o.trilha.push({q:irrFimP(o,irrPassAtual(o)),ev:'Fixture: tempo decorrido'});}"); r = M("irrTerminar(s,'OS-0419',80,8480)")
     chk('14 término com hidrômetro 8.480 m³ (−1,9 %) encerra sozinho e credita 9,5 mm líquidos: P2 1,7 mm',
         E("s.ordens['OS-0419'].etapa") == 'Encerradas' and E("irrN(irrDef(s,'P2'),1)") == '1,7' and E("irrQuando(s.ordens['OS-0419'].passadas[0].fimReal)") == 'amanhã 10:41', [r, E("irrQuando(s.ordens['OS-0419'].passadas[0].fimReal)")])
     chk('15 crédito uma vez: repetir o término não duplica', 'Nenhuma passada' in M("irrTerminar(s,'OS-0419',80,8480)") and E("s.setores.P2.bal.ap.filter(a=>a.os==='OS-0419').length") == 1)
     # parcial na área coberta e conferência fora da tolerância
-    M("irrIniciar(s,'OS-0423')"); r = M("irrTerminar(s,'OS-0423',21,800)")
+    M("irrIniciar(s,'OS-0423')"); M("{const o=s.ordens['OS-0423']; o.trilha.push({q:irrPassAtual(o).iniReal+60,ev:'Fixture: uma hora decorrida'});}"); r = M("irrTerminar(s,'OS-0423',21,800,true)")
     chk('16 parada antes (21 de 42 ha, 800 m³): crédito só na faixa coberta (3,8 mm × 95 % nos 21 ha); o T7 segue 10,0 mm fora da faixa',
         E("s.ordens['OS-0423'].etapa") == 'Em conferência' and E("irrN(irrDef(s,'T7'),1)") == '10,0' and E("(f=>f&&[irrN(f.cob,1),irrN(f.d,1)])(irrFaixaCob(s,'T7'))") == ['21,0', '6,4'] and 'divergência' in r.lower(),
         [r, E("irrN(irrDef(s,'T7'),1)"), E("irrFaixaCob(s,'T7')")])
-    r = M("irrConferir(s,'OS-0423',null)")
+    r = M("irrConferir(s,'OS-0423',null,'Leitura de campo conferida')")
     chk('17 conferir medição: hidrômetro prevalece e encerra sem novo crédito (T7 10,0 · faixa 6,4)', E("s.ordens['OS-0423'].etapa") == 'Encerradas' and E("irrN(irrDef(s,'T7'),1)") == '10,0' and 'faixa de 21,0 ha: 6,4 mm' in r, r)
-    # sem leitura
-    r = M("irrIniciar(s,'OS-0602')"); r = M("irrTerminar(s,'OS-0602',86,null)")
-    chk('18 sem leitura do hidrômetro: Em conferência, nada creditado; informar leitura encerra e credita', E("s.ordens['OS-0602'].etapa") == 'Em conferência' and E("irrN(irrDef(s,'PV08'),1)") == '6,4'
-        and 'encerrada' in M("irrConferir(s,'OS-0602',6400)") and E("irrDef(s,'PV08')<6.4"), r)
+    # Ausência não vira leitura estimada. Fixture de tempo não é um comando da UI.
+    M("irrIniciar(s,'OS-0602')")
+    M("{const o=s.ordens['OS-0602']; o.trilha.push({q:irrFimP(o,irrPassAtual(o)),ev:'Fixture: tempo decorrido'});}")
+    antes = E("JSON.stringify(s.ordens['OS-0602'])")
+    r = M("irrTerminar(s,'OS-0602',s.setores.PV08.ha,null)")
+    vol = E("Math.round(s.ordens['OS-0602'].passadas[0].lam*s.setores.PV08.ha*10)")
+    chk('18 ausência de leitura recusa sem alterar ordem/crédito; volume explícito permite concluir', 'volume medido' in r
+        and E("JSON.stringify(s.ordens['OS-0602'])") == antes and E("irrN(irrDef(s,'PV08'),1)") == '6,4'
+        and isinstance(vol, int) and vol > 0 and 'encerrada' in M(f"irrTerminar(s,'OS-0602',s.setores.PV08.ha,{vol})") and E("irrDef(s,'PV08')<6.4"), [r, vol])
     r = M("irrLimites(s,'P2',{lmax:4.5,imin:18,efic:90})")
     chk('19 limites valem só para as próximas: OS-0422 liberada mantém 2 passadas', E("s.ordens['OS-0422'].passadas.length") == 2 and 'OS-0422 não muda' in r, r)
     r = M("irrSondaMarcar(s,'SO-P2','Suspeita','salto')")
@@ -115,7 +121,7 @@ try:
     chk('33 programar P1 cria a ordem só de água (OS-0418 segue parada na O.S.)', 'criada' in r and 'só água' in r and E("Object.values(s.ordens).filter(o=>o.setor==='P1').length") == 1, r)
     # avisos de lâmina: acima da necessidade e abaixo do limiar
     J("localStorage.clear(); irrReset(); cenReset();")
-    M("irrIniciar(s,'OS-0419')"); M("irrTerminar(s,'OS-0419',80,8480)")
+    M("irrIniciar(s,'OS-0419')"); M("{const o=s.ordens['OS-0419']; o.trilha.push({q:irrFimP(o,irrPassAtual(o)),ev:'Fixture: tempo decorrido'});}"); M("irrTerminar(s,'OS-0419',80,8480)")
     av = E("(o=>{ const t=irrClone(o); t.passadas[0].ini=22*60; t.passadas[1].ini=1440+22*60; return irrChecar(s,t).av.map(a=>a.t); })(s.ordens['OS-0422'])")
     chk('34 P2 com 1,7 mm: OS-0422 (12,15 mm líquidos) na janela 23/09 22:00 → aviso Lâmina acima da necessidade (não bloqueia)', any(a.startswith('Lâmina acima da necessidade') for a in av), av)
     av2 = E("irrChecar(s,s.ordens['OS-0422']).av.map(a=>a.t)")
@@ -131,3 +137,5 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(1 if FAIL or not OK else 0)   # SINT-T01: falha não sai com 0
+

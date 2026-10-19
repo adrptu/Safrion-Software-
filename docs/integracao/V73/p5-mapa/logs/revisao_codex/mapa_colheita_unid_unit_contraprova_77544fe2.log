@@ -1,0 +1,7 @@
+OK    C0 colhNum existe no gerador
+OK    motor JS (node) executou sem erro
+FALHA C1 Mamão estimado em kg/ha: o rótulo é o indicador inteiro e diz "estimativa" · {"rot":"500,00 kg/ha","ref":"500,00 kg/ha · estimativa"}
+FALHA C2 Café a apurar em kg/ha: "a apurar" e a produtividade medida do campo ("1.200,00 kg/ha de Café da roça") · {"rot":"kg/ha a apurar","ref":"kg/ha a apurar · 1.200,00 kg/ha de Café da roça"}
+OK    C3 Mamão medido na unidade padrão: o rótulo é o indicador, sem qualificação inventada
+OK    C4 colhNum usa prPrtvResTxt (a função do painel do talhão e da Previsão e colheita), sem cópia da conta
+RESULTADO: FALHOU 4/6

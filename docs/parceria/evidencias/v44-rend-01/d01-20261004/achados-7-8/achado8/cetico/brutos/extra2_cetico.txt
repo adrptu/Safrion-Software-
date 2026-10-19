@@ -1,0 +1,8 @@
+P0 x P0nR23: q muda em 6 ; nR23 atende mais 4 menos 2 [577, 2745, 3327, 3916, 4686, 5796]
+P0 verificador do pacote (cortes por clique): JS tol1e-7 inviáveis= 0 ; Py tol0 inviáveis= 8
+P1 verificador do pacote (cortes por clique): JS tol1e-7 inviáveis= 0 ; Py tol0 inviáveis= 4
+P2 verificador do pacote (cortes por clique): JS tol1e-7 inviáveis= 0 ; Py tol0 inviáveis= 9
+idx1188 py: ['as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 34,38 % do que cabia na própria janela']
+idx1188 js: ['as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 34,37 % do que cabia na própria janela']
+idx2644 py q: ['0', '0', '6.666666666666671', '10', '10', '125/3'] h: ['0', '0', '6.666666666666671', '5', '5', '250/3']
+P2nR23 x P0: q muda 465 mais 263 menos 180

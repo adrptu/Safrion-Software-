@@ -1,0 +1,772 @@
+From 62b0904027747d646658651bd054c08481478b6e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 12:06:13 +0000
+Subject: [PATCH 1/3] =?UTF-8?q?SAF-C02:=20capacidade=20sim=C3=A9trica=20en?=
+ =?UTF-8?q?tre=20safras=20abertas=20(elegibilidade=20pela=20safra=20de=20o?=
+ =?UTF-8?q?rigem)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Achado do Codex (PR #47, adendo de 09/10/2026): com duas safras abertas da
+mesma fazenda e o MESMO período, a carga de uma ocorrência da outra safra
+fora do período dela entrava na soma só quando a outra estava fechada (A:
+340 h, R2 vermelho; B: 140 h, R4). O total do mês dependia da navegação.
+
+Correção (decisão proposta pelo Codex, aplicada; Regra A preservada):
+- safra.js capSaf: outras = [{id, nome, ini, fim, oc}]; a etiqueta de cada
+  ocorrência de outra safra sai do período dela (classeOc), a desta continua
+  em i.cls; o filtro vale igual para as duas. A carga fora da conta vai para
+  g.fora (sid null = desta safra), sem apagar nem mover datas; custo intacto.
+- capVeredito: "Fora da conta" cita a carga de outra safra nos meses e
+  recursos com demanda desta ("1 ocorrência da B depois do fim dela
+  (Tratores 200,0 h)"), sem verde enganoso.
+- Tela: outrasSafras passa o período; linha do filtro e aria-label da
+  célula dizem "fora da conta: <safra> N h depois do fim dela" (ou "desta
+  safra").
+- dados2: capacidade = capCalc + cap_saf (núcleo puro, espelho do capSaf);
+  cap_rec aceita meses e dias.
+- ESPECIFICACAO e DECISOES: uma linha cada, com o dano evitado.
+
+Testes (executados, base 16d6734 → este commit):
+- capacidade_unit.py: 18 casos SAF-C02 (fixture do Codex A↔B, controle com
+  B2 dentro = 340 h nas duas, antes do início, outra fazenda e encerrada,
+  cenário real S2627/S27SF, custo, paridade JS × Python, propriedade com
+  150 sorteios); base 83 OK / 11 FALHA → 94 OK / 0 FALHA.
+- saf_capacidade_simetrica_test.py (novo, 1440 e 390 px): Editar o período
+  das duas safras pela tela, alternar S2627 ↔ S27SF na etapa 3; base 14 ok /
+  12 falhas (Tratores jul/27 140,3 h × 61,7 h) → 28 ok / 0 falhas.
+- Harness do Codex: antes.json (same_total false) e depois.json (true) em
+  docs/planejar-safra/verificacao-saf-c02, com a adaptação registrada.
+- build 0 FALHA; varredura 140/140; saf_operacoes 87/0; saf_revisao 42/0;
+  tabelas_saf 24/24; saf_cmp_continuidade 31/0; rend_multiconjuntos_unit
+  106/106.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ .../etapa-unica-3-4-5/DECISOES.md             |   1 +
+ .../etapa-unica-3-4-5/ESPECIFICACAO.md        |   1 +
+ .../verificacao-saf-c02/LEIA-ME.md            |  20 +++
+ .../verificacao-saf-c02/antes.json            |  82 ++++++++++
+ .../verificacao-saf-c02/depois.json           |  82 ++++++++++
+ .../verificacao-saf-c02/harness_adaptado.js   |  20 +++
+ .../verificacao-saf-c02/harness_original.js   |  20 +++
+ tools/prototipo/v37/gen37/capacidade_unit.py  | 144 +++++++++++++++++-
+ tools/prototipo/v37/gen37/dados2.py           |  39 +++--
+ .../gen37/saf_capacidade_simetrica_test.py    |  92 +++++++++++
+ tools/prototipo/v37/gen37/safra.js            |  31 ++--
+ 11 files changed, 507 insertions(+), 25 deletions(-)
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/antes.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/depois.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/harness_adaptado.js
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/harness_original.js
+ create mode 100644 tools/prototipo/v37/gen37/saf_capacidade_simetrica_test.py
+
+diff --git a/docs/planejar-safra/etapa-unica-3-4-5/DECISOES.md b/docs/planejar-safra/etapa-unica-3-4-5/DECISOES.md
+index e7ec143..f2c0695 100644
+--- a/docs/planejar-safra/etapa-unica-3-4-5/DECISOES.md
++++ b/docs/planejar-safra/etapa-unica-3-4-5/DECISOES.md
+@@ -22,6 +22,7 @@ Decisões técnicas e de produto delegadas aos agentes; o Codex revisa.
+ - **Ordem dos PRs** (§10): PR 1 e PR 2a antes da cadeia; PR 3 ainda com 6 etapas; PR 4 com a renumeração. Assim `acao_unica` e `etapas_celular` mudam uma vez só e não existe etapa provisória.
+ - **`g_cap` sem filtro nem ordenação no cabeçalho** (exceção registrada à regra "toda tabela com filtro e ordenação", revisão SAF de 06/10/2026, S4). É uma matriz de 6 recursos × meses, de leitura: a coluna Maior uso já é a ordenação útil, e o filtro é o toque na célula, que filtra a `g_op` pelo recurso e pelo mês (§3.3). Cabeçalho com ferramentas em 15 colunas tiraria a linha de dados que a `g_op` precisa a 1280 × 800 (§2.1). Volta quando o G2 ganhar navegação por setas ou se o proprietário pedir.
+ - **Meses da `g_cap` pelos dados** (revisão SAF, S3.1): os do calendário dentro do período da safra (`capMeses`), sem lista fixa por safra. Como a demanda desta safra fora do período não conta na capacidade, nenhum mês com demanda dela fica fora da grade.
++- **Capacidade simétrica entre safras abertas** (SAF-C02, achado e decisão proposta pelo Codex em 09/10/2026, aplicada): `capSaf` recebe o período de cada outra safra e etiqueta cada ocorrência pela safra de origem; fato, custo e datas ficam, e a carga de fora aparece no veredito, no filtro e no `aria-label`. Evita total do mês dependente da safra aberta (340 h × 140 h no harness) e verde enganoso.
+ - **IDs de teste renumerados na v2:** C1–C24, N1–N7, O1–O19, V1–V14, L1–L4, P1–P8, M1. O mapa de cada achado está na seção 5.
+ 
+ ## 2. Cortei
+diff --git a/docs/planejar-safra/etapa-unica-3-4-5/ESPECIFICACAO.md b/docs/planejar-safra/etapa-unica-3-4-5/ESPECIFICACAO.md
+index c351028..3e4e9da 100644
+--- a/docs/planejar-safra/etapa-unica-3-4-5/ESPECIFICACAO.md
++++ b/docs/planejar-safra/etapa-unica-3-4-5/ESPECIFICACAO.md
+@@ -249,6 +249,7 @@ Uma função `veredito` dá o texto e a cor do `<span role="status">`, com cor e
+ - **Demanda da célula** = Σ `cargaRec` das ocorrências desta safra no mês + as de `outrasSafras(self, saf)`.
+   - `outrasSafras` usa o predicado de safra.js:344: outra safra, não encerrada (`!r.ro`), da mesma fazenda. É a mesma regra do estoque; espelho em dados2.py:806-809.
+   - A LG2627 (outra fazenda) e a S2526 (encerrada) não entram na S2627.
++  - **Elegibilidade pela safra de origem (SAF-C02, 09/10/2026):** a etiqueta de cada ocorrência (antes do início, depois do fim, fora), desta e das outras safras, sai do período da safra dela, qualquer que seja a aberta; a carga das outras que fica fora vai ao "Fora da conta" do veredito (número, motivo e horas, nos meses com demanda desta safra), à linha do filtro e ao `aria-label`. Dano evitado: o mesmo mês dar falta de recurso numa safra e folga na outra só pela navegação.
+ - **Ocupação** = demanda ÷ capacidade. Capacidade 0 com demanda: "não calculável" (53.2); nunca divide por zero.
+ - **Necessárias** = max(teto(demanda ÷ horas de uma unidade), maior `rc[k]` de uma configuração com área necessária no mês). É o "postos simultâneos" do PRD 44.4 e a mesma regra do motivo de safra.js:65.
+ - **Falta** quando necessárias > unidades.
+diff --git a/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md b/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
+new file mode 100644
+index 0000000..40828e3
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
+@@ -0,0 +1,20 @@
++# SAF-C02 · harness do Codex, antes e depois
++
++Achado: Codex, adendo de 09/10/2026 no PR #47 (comentário 6079770308). Correção: Claude, branch `claude/v44-saf-c02`, base `16d6734`.
++
++| Arquivo | sha256 | O que é |
++|---|---|---|
++| `harness_original.js` | `bc141473d2cc4063652bc7335feaa142f9bc75781f7f4254cbad060dd3725308` | harness do comentário, copiado sem mudança |
++| `antes.json` | `0f00e6e1c2c7831536fa426af6aab5843f2fb4750f0dc6ea6951154a35d8a874` | saída bruta na base (`CHECA_HASH=1`, fonte d96875f8…e9677): A 340 h (R2), B 140 h (R4), `same_total: false` |
++| `harness_adaptado.js` | `7bcf243e672c229039786ee6236dfd58b8a2010132492f644d3f368bde9db6d4` | mesma fixture; única mudança na linha 14 |
++| `depois.json` | `49eb8b9e23b3bdc88eb8ae14d2c90ad44fb40f6b24087ae7b370664518fcf9ce` | saída bruta depois da correção (fonte 1f18e705…cd56a): A 140 h (R4, cita a B2 fora da conta), B 140 h (R4), `same_total: true` |
++
++**Adaptação (linha 14):** a nova assinatura do `capSaf` recebe o período de cada outra safra, para etiquetar as ocorrências dela pela origem. O item de `outras` passa de `{id, nome, oc}` para `{id, nome, ini, fim, oc}`, com `ini` e `fim` de `period[oid]`. Fixture, recursos, meses e saída não mudam. Sem `CHECA_HASH`, porque a fonte mudou.
++
++Comandos (executados; caminhos a partir da raiz do repositório):
++
++```text
++V=docs/planejar-safra/verificacao-saf-c02; S=tools/prototipo/v37/gen37/safra.js
++CHECA_HASH=1 node $V/harness_original.js $S > $V/antes.json   # na base 16d6734
++node $V/harness_adaptado.js $S > $V/depois.json               # depois da correção
++```
+diff --git a/docs/planejar-safra/verificacao-saf-c02/antes.json b/docs/planejar-safra/verificacao-saf-c02/antes.json
+new file mode 100644
+index 0000000..c4167ad
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/antes.json
+@@ -0,0 +1,82 @@
++{
++  "source_hash": "d96875f8348ccde6073e2780da510b2ca72cc974f27af096567d5181176e9677",
++  "a": {
++    "view": "A",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "A1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 100
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 340,
++      "dThis": 100,
++      "dOth": 240,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 212.5,
++      "nec": 3,
++      "red": true,
++      "soma": true,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R2",
++      "cor": "red",
++      "txt": "Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1, somando a B (240,0 h)."
++    }
++  },
++  "b": {
++    "view": "B",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "B1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 40
++      },
++      {
++        "id": "B2",
++        "dt": "2027-02-28",
++        "cls": "depois",
++        "h": 200
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 140,
++      "dThis": 40,
++      "dOth": 100,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 87.5,
++      "nec": 1,
++      "red": false,
++      "soma": false,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R4",
++      "cor": "yellow",
++      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra."
++    }
++  },
++  "same_total": false
++}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/depois.json b/docs/planejar-safra/verificacao-saf-c02/depois.json
+new file mode 100644
+index 0000000..539b0cf
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/depois.json
+@@ -0,0 +1,82 @@
++{
++  "source_hash": "1f18e705cdcbd7ee736dee2f175bcf50ad69fe4ede2305b0dfb9b949c13cd56a",
++  "a": {
++    "view": "A",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "A1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 100
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 140,
++      "dThis": 100,
++      "dOth": 40,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 87.5,
++      "nec": 1,
++      "red": false,
++      "soma": false,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R4",
++      "cor": "yellow",
++      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência da B depois do fim dela (Tratores 200,0 h)."
++    }
++  },
++  "b": {
++    "view": "B",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "B1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 40
++      },
++      {
++        "id": "B2",
++        "dt": "2027-02-28",
++        "cls": "depois",
++        "h": 200
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 140,
++      "dThis": 40,
++      "dOth": 100,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 87.5,
++      "nec": 1,
++      "red": false,
++      "soma": false,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R4",
++      "cor": "yellow",
++      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra."
++    }
++  },
++  "same_total": true
++}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/harness_adaptado.js b/docs/planejar-safra/verificacao-saf-c02/harness_adaptado.js
+new file mode 100644
+index 0000000..bd310f0
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/harness_adaptado.js
+@@ -0,0 +1,20 @@
++const fs=require('fs'),vm=require('vm'),crypto=require('crypto');
++const path=process.argv[2]; const src=fs.readFileSync(path,'utf8');
++const hash=crypto.createHash('sha256').update(src).digest('hex');
++if(process.env.CHECA_HASH && hash!=='d96875f8348ccde6073e2780da510b2ca72cc974f27af096567d5181176e9677') throw Error('Fonte divergente');
++const bloco=src.slice(src.indexOf('// >>> CAPACIDADE'),src.indexOf('// <<< CAPACIDADE'));
++const ctx={};vm.createContext(ctx);vm.runInContext(bloco+'\nthis.C={capSaf,classeOc,capVeredito}',ctx);
++const meses=[['2027-02','fev/27']], dias={'2027-02':20};
++const rec=[{id:'trator',nome:'Tratores',un:1,jornada:8,turnos:1,disp:100}];
++const oc=(id,h,dt)=>({id,mi:0,dt,a:{op:'Teste',nome:id},rp:{itens:[{nh:h,h,nq:h,Hin:2000}],falta:{semHoras:0}},cfs:[{rec:{trator:1}}]});
++const A=[oc('A1',100,'2027-02-10')], B=[oc('B1',40,'2027-02-10'),oc('B2',200,'2027-02-28')];
++const period={A:['2027-02-01','2027-02-15'],B:['2027-02-01','2027-02-15']};
++function view(id,own,other,oid){
++ const typed=own.map(i=>({...i,cls:ctx.C.classeOc(i.dt,i.mi,...period[id])}));
++ const G=ctx.C.capSaf(typed,[{id:oid,nome:oid,ini:period[oid][0],fim:period[oid][1],oc:other}],rec,meses,dias);   // SAF-C02: período da outra safra (única adaptação)
++ const counts={antes:0,fora:0,depois:0,cal:0};typed.forEach(i=>counts[i.cls]++);
++ const verdict=ctx.C.capVeredito(G,typed,{aPlano:100,semPlano:[],cls:counts,ini:period[id][0],outras:{A:'A',B:'B'},pend:0,semHoras:0,incompleto:'',periodoCal:'fev/27'});
++ return {view:id,source_period:period[id],occurrences:typed.map(i=>({id:i.id,dt:i.dt,cls:i.cls,h:i.rp.itens[0].nh})),cell:G.trator.cells[0],verdict};
++}
++const a=view('A',A,B,'B'),b=view('B',B,A,'A');
++console.log(JSON.stringify({source_hash:hash,a,b,same_total:a.cell.d===b.cell.d},null,2));
+diff --git a/docs/planejar-safra/verificacao-saf-c02/harness_original.js b/docs/planejar-safra/verificacao-saf-c02/harness_original.js
+new file mode 100644
+index 0000000..a921b94
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/harness_original.js
+@@ -0,0 +1,20 @@
++const fs=require('fs'),vm=require('vm'),crypto=require('crypto');
++const path=process.argv[2]; const src=fs.readFileSync(path,'utf8');
++const hash=crypto.createHash('sha256').update(src).digest('hex');
++if(process.env.CHECA_HASH && hash!=='d96875f8348ccde6073e2780da510b2ca72cc974f27af096567d5181176e9677') throw Error('Fonte divergente');
++const bloco=src.slice(src.indexOf('// >>> CAPACIDADE'),src.indexOf('// <<< CAPACIDADE'));
++const ctx={};vm.createContext(ctx);vm.runInContext(bloco+'\nthis.C={capSaf,classeOc,capVeredito}',ctx);
++const meses=[['2027-02','fev/27']], dias={'2027-02':20};
++const rec=[{id:'trator',nome:'Tratores',un:1,jornada:8,turnos:1,disp:100}];
++const oc=(id,h,dt)=>({id,mi:0,dt,a:{op:'Teste',nome:id},rp:{itens:[{nh:h,h,nq:h,Hin:2000}],falta:{semHoras:0}},cfs:[{rec:{trator:1}}]});
++const A=[oc('A1',100,'2027-02-10')], B=[oc('B1',40,'2027-02-10'),oc('B2',200,'2027-02-28')];
++const period={A:['2027-02-01','2027-02-15'],B:['2027-02-01','2027-02-15']};
++function view(id,own,other,oid){
++ const typed=own.map(i=>({...i,cls:ctx.C.classeOc(i.dt,i.mi,...period[id])}));
++ const G=ctx.C.capSaf(typed,[{id:oid,nome:oid,oc:other}],rec,meses,dias);
++ const counts={antes:0,fora:0,depois:0,cal:0};typed.forEach(i=>counts[i.cls]++);
++ const verdict=ctx.C.capVeredito(G,typed,{aPlano:100,semPlano:[],cls:counts,ini:period[id][0],outras:{A:'A',B:'B'},pend:0,semHoras:0,incompleto:'',periodoCal:'fev/27'});
++ return {view:id,source_period:period[id],occurrences:typed.map(i=>({id:i.id,dt:i.dt,cls:i.cls,h:i.rp.itens[0].nh})),cell:G.trator.cells[0],verdict};
++}
++const a=view('A',A,B,'B'),b=view('B',B,A,'A');
++console.log(JSON.stringify({source_hash:hash,a,b,same_total:a.cell.d===b.cell.d},null,2));
+diff --git a/tools/prototipo/v37/gen37/capacidade_unit.py b/tools/prototipo/v37/gen37/capacidade_unit.py
+index e13432c..42a58f8 100644
+--- a/tools/prototipo/v37/gen37/capacidade_unit.py
++++ b/tools/prototipo/v37/gen37/capacidade_unit.py
+@@ -5,7 +5,7 @@ Python sobre as mesmas ocorrências (dados2.ocorr_op, repartir com os grupos de
+ capacidade, ocupação, necessárias, falta, soma das safras abertas da mesma fazenda, "<1 %", invariância da demanda, sobrescrita de
+ configuração (cfg_override), custo por cultura (resumo_cultura), partição do calendário e o texto do veredito. JS = Python (C11).
+ Uso: python3 capacidade_unit.py"""
+-import sys, os, json, copy, random, subprocess, re
++import sys, os, json, copy, random, subprocess, re, datetime
+ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+ import dados2 as D2
+ OK, FAIL = [], []
+@@ -21,7 +21,7 @@ const X=globalThis.CX; const jobs=JSON.parse(fs.readFileSync(0,'utf8')); const o
+ for(const j of jobs){ if(j.op==='fmt'){ out.push(j.v.map(x=>X.fmtOcup(x))); continue; } if(j.op==='cls'){ out.push(j.v.map(x=>X.classeOc(...x))); continue; }
+   const G=X.capSaf(j.oc,j.outras,j.recursos,j.meses,j.dias); const g={};
+   Object.keys(G).forEach(k=>{ const x=G[k]; g[k]={un:x.un,cells:x.cells.map(c=>({d:c.d,dThis:c.dThis,dOth:c.dOth,cap:c.cap,ocup:c.ocup,nec:c.nec,red:c.red,soma:c.soma,own:c.own})),
+-    max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—'}; });
++    max:x.max?{mes:x.max.mes,ocup:x.max.ocup}:null,reds:x.reds.map(c=>c.mes),horas:x.horasSafra,txt:x.max?X.fmtOcup(x.max.ocup):'—',fo:(x.fora||[]).map(f=>[f.sid,f.cls,f.mi,f.h,f.n])}; });
+   const r={G:g,carga:j.oc.map(i=>Object.fromEntries(Object.keys(G).map(k=>[k,X.cargaRec(i,k)])))}; if(j.ver) r.ver=X.capVeredito(G,j.oc,j.ver); out.push(r); }
+ process.stdout.write(JSON.stringify(out));
+ """
+@@ -56,7 +56,8 @@ def ver_in(safra, oc, recursos):
+ def job(safra, recursos=None, planos=None, cfg=None, ver=False, outras_off=False):
+     rs = recursos or D2.RECURSOS
+     oc = D2.ocorr_op(safra, planos, cfg, rs)
+-    outras = [] if outras_off else [dict(id=sid, nome=SAF[sid]['nome'], oc=[oc_json(o) for o in D2.ocorr_op(sid, None, None, rs)]) for sid in D2.outras_safras(safra)]
++    # outras com o período de cada uma (SAF-C02): a classe de cada ocorrência delas sai da safra de origem, dentro do capSaf
++    outras = [] if outras_off else [dict(id=sid, nome=SAF[sid]['nome'], ini=SAF[sid]['ini'], fim=SAF[sid]['fim'], oc=[oc_json(o) for o in D2.ocorr_op(sid, None, None, rs)]) for sid in D2.outras_safras(safra)]
+     j = dict(op='cap', oc=[oc_json(o, safra) for o in oc], outras=outras, recursos=rec_js(rs), meses=D2.MESES, dias=D2.DIAS_UTEIS)
+     if ver: j['ver'] = ver_in(safra, oc, rs)
+     return j, oc
+@@ -198,6 +199,143 @@ if __name__ == '__main__':
+         chk('S3.1 classe_oc (Python) = classeOc (tela): antes · depois · fora · cal', [D2.classe_oc(*x) for x in casos] == cj == ['antes', 'depois', 'fora', 'cal'], cj)
+     finally:
+         D2.CULTIVOS['S27SF'][:] = _orig
++    # ================= SAF-C02 (Codex, 09/10/2026) · capacidade simétrica entre safras abertas =================
++    # Regra: a elegibilidade de cada ocorrência na capacidade sai do período da safra de ORIGEM (classeOc), qualquer que seja a safra
++    # aberta; a carga de outra safra que fica fora da conta aparece no veredito com número, motivo e horas (sem verde enganoso). Antes,
++    # a ocorrência de outra safra entrava como estava: com o mesmo período, abrir A dava 340 h (R2) e abrir B, 140 h (R4).
++    MF = [['2027-02', 'fev/27']]; DF = {'2027-02': 20}; RF = [dict(id='trator', nome='Tratores', un=1, jornada=8, turnos=1, disp=100, pes=False)]
++    def ocf(i, h, dt, rec=None, mi=0):   # ocorrência da fixture do harness do Codex (nh = h = nq; janela 2000 h)
++        return dict(id=i, mi=mi, dt=dt, a=dict(op='Teste', nome=i), rp=dict(itens=[dict(nh=h, h=h, nq=h, Hin=2000)], falta=dict(semHoras=0)), cfs=[dict(rec=rec or dict(trator=1))])
++    def vista(sid, ocs, per, recs=RF, meses=MF, dias=DF, ver=True):
++        """job com a safra sid aberta: as ocorrências dela com cls pelo período dela (o capCalc da tela); as outras com o período de cada uma"""
++        oc = [dict(o, cls=D2.classe_oc(o['dt'], o['mi'], *per[sid])) for o in ocs[sid]]
++        cl = dict(antes=0, fora=0, depois=0, cal=0)
++        for o in oc: cl[o['cls']] += 1
++        j = dict(op='cap', oc=oc, outras=[dict(id=x, nome=x, ini=per[x][0], fim=per[x][1], oc=ocs[x]) for x in ocs if x != sid], recursos=recs, meses=meses, dias=dias)
++        if ver: j['ver'] = dict(semPlano=[], aPlano=100, cls=cl, ini=br(per[sid][0]), outras={x: x for x in ocs}, pend=0, semHoras=0, incompleto='', periodoCal=meses[0][1])
++        return j
++    def py_vista(j):
++        f = getattr(D2, 'cap_saf', None)
++        return f(j['oc'], j['outras'], j['recursos'], j['meses'], j['dias']) if f else None
++    def par(rj, pg):
++        if pg is None: return ['sem dados2.cap_saf']
++        dif = []
++        for k, x in rj['G'].items():
++            for i_, (a, b) in enumerate(zip(x['cells'], pg[k]['cells'])):
++                for f in ('d', 'dThis', 'dOth', 'nec'):
++                    if abs((a[f] or 0) - (b[f] or 0)) > 1e-9: dif.append((k, i_, f, a[f], b[f]))
++                if a['red'] != b['red']: dif.append((k, i_, 'red'))
++            if x['fo'] != [[f['sid'], f['cls'], f['mi'], f['h'], f['n']] for f in pg[k].get('fora', [])]: dif.append((k, 'fora', x['fo'], pg[k].get('fora')))
++        return dif
++    OCS = dict(A=[ocf('A1', 100, '2027-02-10')], B=[ocf('B1', 40, '2027-02-10'), ocf('B2', 200, '2027-02-28')])
++    PER = dict(A=('2027-02-01', '2027-02-15'), B=('2027-02-01', '2027-02-15'))
++    PER_CTL = dict(A=('2027-02-01', '2027-02-28'), B=('2027-02-01', '2027-02-28'))   # controle: B2 dentro do período das duas
++    OCS3 = dict(A=[ocf('A1', 100, '2027-02-10'), ocf('A2', 50, '2027-02-20')], B=[ocf('B1', 40, '2027-02-10'), ocf('B2', 200, '2027-02-28')])
++    PER3 = dict(A=('2027-02-11', '2027-02-28'), B=('2027-02-11', '2027-02-28'))       # antes do início: A1 e B1 fora nas duas vistas
++    JF = [vista('A', OCS, PER), vista('B', OCS, PER), vista('A', OCS, PER_CTL), vista('B', OCS, PER_CTL), vista('A', OCS3, PER3), vista('B', OCS3, PER3)]
++    RFX = js(JF); PFX = [py_vista(j) for j in JF]
++    ca, cb = RFX[0]['G']['trator']['cells'][0], RFX[1]['G']['trator']['cells'][0]
++    chk('SAF-C02 A↔B com o mesmo período (01 a 15/02/2027): 140 h nas duas vistas (A1 100 + B1 40), cabe com 1; era 340 h com a A aberta',
++        near(ca['d'], 140) and near(cb['d'], 140) and (ca['dThis'], ca['dOth'], cb['dThis'], cb['dOth']) == (100, 40, 40, 100) and ca['nec'] == cb['nec'] == 1 and not ca['red'] and not cb['red'], (ca, cb))
++    va, vb = RFX[0]['ver'], RFX[1]['ver']
++    chk('SAF-C02 vista A: a B2 (200 h) fica fora da conta com número, motivo e horas; amarelo (R4), nunca verde',
++        va['R'] == 'R4' and va['txt'] == 'Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência da B depois do fim dela (Tratores 200,0 h).', va)
++    chk('SAF-C02 vista B: a B2 fora da conta como "depois do fim da safra" (R4), sem citar a A',
++        vb['R'] == 'R4' and vb['txt'] == 'Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra.', vb)
++    chk('SAF-C02 capSaf guarda a carga excluída da outra safra (B2: depois do fim, fev/27, 200 h)', [f[:4] for f in RFX[0]['G']['trator']['fo']] == [['B', 'depois', 0, 200]], RFX[0]['G']['trator']['fo'])
++    c1, c2 = RFX[2]['G']['trator']['cells'][0], RFX[3]['G']['trator']['cells'][0]
++    chk('SAF-C02 controle (B2 dentro do período, 01 a 28/02/2027): 340 h nas duas vistas, precisa de 3, tem 1',
++        near(c1['d'], 340) and near(c2['d'], 340) and c1['nec'] == c2['nec'] == 3 and c1['red'] and c2['red'] and not RFX[2]['G']['trator']['fo'] and not RFX[3]['G']['trator']['fo'], (c1, c2))
++    chk('SAF-C02 controle: R2 nas duas; a A soma a B (240,0 h), a B falta sozinha',
++        RFX[2]['ver']['txt'] == 'Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1, somando a B (240,0 h).' and RFX[3]['ver']['txt'] == 'Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1.', (RFX[2]['ver'], RFX[3]['ver']))
++    c1, c2 = RFX[4]['G']['trator']['cells'][0], RFX[5]['G']['trator']['cells'][0]
++    chk('SAF-C02 antes do início (11 a 28/02/2027 nas duas): 250 h nas duas vistas (A2 50 + B2 200); A1 e B1 fora',
++        near(c1['d'], 250) and near(c2['d'], 250) and (c1['dThis'], c2['dThis']) == (50, 200), (c1, c2))
++    chk('SAF-C02 antes do início: cada vista cita a própria e a da outra com o motivo "antes do início dela"',
++        RFX[4]['ver']['txt'] == 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1, somando a B (200,0 h). Fora da conta: 1 ocorrência antes do início da safra (11/02/2027); 1 ocorrência da B antes do início dela (Tratores 40,0 h).'
++        and RFX[5]['ver']['txt'] == 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1. Fora da conta: 1 ocorrência antes do início da safra (11/02/2027); 1 ocorrência da A antes do início dela (Tratores 100,0 h).',
++        (RFX[4]['ver']['txt'], RFX[5]['ver']['txt']))
++    dif = [(n, par(r, g)) for n, r, g in zip(('A', 'B', 'A ctl', 'B ctl', 'A antes', 'B antes'), RFX, PFX) if par(r, g)]
++    chk('SAF-C02 paridade JS = Python (dados2.cap_saf) nas 6 vistas da fixture, com a carga excluída', not dif, dif[:3])
++    _saf0 = list(D2.SAFRAS)
++    try:
++        D2.SAFRAS.extend([dict(id='XA', nome='Teste A', ini='2027-02-01', fim='2027-02-15', fazenda='Santa Rita', ro=False),
++                          dict(id='XF', nome='Teste F', ini='2027-02-01', fim='2027-02-15', fazenda='Boa Vista', ro=False),
++                          dict(id='XE', nome='Teste E', ini='2027-02-01', fim='2027-02-15', fazenda='Santa Rita', ro=True)])
++        o1, o2, o3 = D2.outras_safras('S2627'), D2.outras_safras('XE'), D2.outras_safras('XF')
++        chk('SAF-C02 outras safras: só abertas e da mesma fazenda (S27SF, XA); outra fazenda (XF, LG2627) e encerrada (XE, S2526) fora; com a encerrada aberta na tela, nada soma',
++            o1 == ['S27SF', 'XA'] and o2 == [] and o3 == [], (o1, o2, o3))
++    finally:
++        D2.SAFRAS[:] = _saf0
++    # cenário real, o mesmo do teste de navegador (saf_capacidade_simetrica_test.py): S2627 e S27SF com o MESMO período, 01/09/2026 a
++    # 12/07/2027. A colheita da Safrinha em 14 e 15/07 (P1 e T2) cai depois do fim; em jul/27 a S2627 tem a poda do C1 (04/07)
++    _per = {s: (SAF[s]['ini'], SAF[s]['fim']) for s in ('S2627', 'S27SF')}; cop0 = D2.plano_op('S27SF')['cop']
++    try:
++        for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = '2026-09-01', '2027-07-12'
++        jA, ocA = job('S2627', ver=True); jB, ocB = job('S27SF', ver=True); rA, rB = js([jA, jB]); gA, gB = D2.capacidade('S2627'), D2.capacidade('S27SF')
++        jul = MI['jul/27']
++        dj = {k: (rA['G'][k]['cells'][jul]['d'], rB['G'][k]['cells'][jul]['d'], gA[k]['cells'][jul]['d'], gB[k]['cells'][jul]['d']) for k in ('trator', 'oper', 'colh')}
++        chk('SAF-C02 real: jul/27 Tratores 61,7 h nas duas vistas e no espelho (poda 25,3 + dessecação 4,4 + colheita T1-A 32,0); era 140,3 h com a S2627 aberta',
++            all(near(x, 61.7, .06) for x in dj['trator']), dj)
++        tudo = [(k, i) for k in rA['G'] for i in range(12) if len({round(x, 9) for x in (rA['G'][k]['cells'][i]['d'], rB['G'][k]['cells'][i]['d'], gA[k]['cells'][i]['d'], gB[k]['cells'][i]['d'])}) > 1]
++        chk('SAF-C02 real: demanda de todo recurso × mês igual nas duas vistas (JS e Python)', not tudo, tudo[:6])
++        chk('SAF-C02 real: veredito da S2627 identifica a colheita da Safrinha fora da conta (número, motivo e horas dos recursos que a S2627 usa em jul/27)',
++            '2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)' in rA['ver']['txt'] and rA['ver']['R'] != 'R5', rA['ver'])
++        chk('SAF-C02 real: veredito da S27SF diz "2 ocorrências depois do fim da safra" e não cita a S2627 (nada dela fora em jul/27)',
++            'Fora da conta: 2 ocorrências depois do fim da safra' in rB['ver']['txt'] and 'Safra 2026/27' not in rB['ver']['txt'], rB['ver'])
++        dep = [o for o in ocB if D2.classe_oc(o['dt'], o['mi'], '2026-09-01', '2027-07-12') == 'depois']
++        cop1 = D2.plano_op('S27SF')['cop']
++        chk('SAF-C02 real: custo preservado — o custo de operação da S27SF não muda com o período e inclui as 2 colheitas fora da conta',
++            near(cop1, cop0, .001) and len(dep) == 2 and all((o['cop'] or 0) > 0 for o in dep) and near(sum(o['cop'] or 0 for o in ocB), cop1, .01), (cop0, cop1, [(o['c']['local'], str(o['dt']), o['cop']) for o in dep]))
++        dif = [(n, k) for n, r, g in (('S2627', rA, gA), ('S27SF', rB, gB)) for k in r['G'] if r['G'][k]['fo'] != [[f['sid'], f['cls'], f['mi'], f['h'], f['n']] for f in g[k].get('fora', [])]]
++        chk('SAF-C02 real: paridade JS = Python da carga fora da conta (g.fora, desta safra e das outras)', not dif, dif[:4])
++    finally:
++        for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = _per[s]
++    # S3.1 com a S2627 aberta: a colheita da Safrinha depois do fim dela (d3 em 20/05/2027 → ago/27) não entra mais em ago/27 da S2627
++    # (antes entrava: 19 h de Colhedoras e 42,4 h de Operadores); a S2627 não tem demanda em ago/27, então o veredito não muda (V1)
++    _orig = copy.deepcopy(D2.CULTIVOS['S27SF'])
++    try:
++        for c_ in D2.CULTIVOS['S27SF']:
++            if c_['id'] == 'd3': c_['plantio'] = '2027-05-20'
++        jx, _ = job('S2627', ver=True); rx = js([jx])[0]; gx = D2.capacidade('S2627'); ago = MI['ago/27']
++        chk('SAF-C02 S3.1 com a S2627 aberta: nenhuma hora da Safrinha depois do fim dela em ago/27 (JS e Python); veredito igual ao V1',
++            all(rx['G'][k]['cells'][ago]['dOth'] == 0 and gx[k]['cells'][ago]['dOth'] == 0 for k in rx['G']) and rx['ver']['txt'] == V['base S2627'],
++            ({k: (rx['G'][k]['cells'][ago]['dOth'], gx[k]['cells'][ago]['dOth']) for k in rx['G']}, rx['ver']['txt']))
++    finally:
++        D2.CULTIVOS['S27SF'][:] = _orig
++    # propriedade: 150 sorteios de 2 ou 3 safras abertas da mesma fazenda (períodos e ocorrências ao acaso, inclusive fora do calendário):
++    # a demanda de cada recurso × mês é a mesma com qualquer safra aberta, igual à soma das ocorrências elegíveis pela safra de origem
++    # (oráculo independente), e JS = Python
++    random.seed(20261009)
++    MP = [['2027-01', 'jan/27'], ['2027-02', 'fev/27'], ['2027-03', 'mar/27']]; DP = {'2027-01': 21, '2027-02': 19, '2027-03': 22}
++    RP = [dict(id='trator', nome='Tratores', un=2, jornada=8, turnos=1, disp=90, pes=False), dict(id='oper', nome='Operadores', un=3, jornada=8, abs=10, pes=True)]
++    D0 = datetime.date(2026, 12, 15)
++    def mi_de(dt): return next((i for i, (m, _) in enumerate(MP) if m == dt[:7]), -1)
++    JP, CASOS = [], []
++    for _k in range(150):
++        ids = ['A', 'B', 'C'][:random.choice([2, 3])]; per = {}; ocs = {}
++        for x in ids:
++            a, b = sorted(random.sample(range(120), 2)); per[x] = ((D0 + datetime.timedelta(a)).isoformat(), (D0 + datetime.timedelta(b)).isoformat())
++            ocs[x] = []
++            for n in range(random.randint(1, 4)):
++                dt = (D0 + datetime.timedelta(random.randrange(0, 120))).isoformat()
++                ocs[x].append(ocf(x + str(n), random.choice([5, 12.5, 40, 80, 200]), dt, random.choice([dict(trator=1), dict(oper=2), dict(trator=1, oper=1)]), mi_de(dt)))
++        CASOS.append((ids, per, ocs))
++        for x in ids: JP.append(vista(x, ocs, per, RP, MP, DP, ver=False))
++    RPX = js(JP); bad = []; i_ = 0; nviews = 0
++    for ids, per, ocs in CASOS:
++        orac = {}
++        for x in ids:
++            for o in ocs[x]:
++                if o['mi'] < 0 or D2.classe_oc(o['dt'], o['mi'], *per[x]) != 'cal': continue
++                for c_ in D2.carga_itens(o): orac[(c_['k'], o['mi'])] = orac.get((c_['k'], o['mi']), 0) + c_['h']
++        for x in ids:
++            r = RPX[i_]; pg = py_vista(JP[i_]); i_ += 1; nviews += 1
++            for kk in ('trator', 'oper'):
++                for mi in range(3):
++                    dj = r['G'][kk]['cells'][mi]['d']; dp = pg[kk]['cells'][mi]['d'] if pg else None
++                    if abs(dj - orac.get((kk, mi), 0)) > 1e-9 or dp is None or abs(dp - dj) > 1e-9: bad.append((x, kk, mi, dj, dp, orac.get((kk, mi), 0)))
++    chk('SAF-C02 propriedade: 150 sorteios (%d vistas) — demanda igual com qualquer safra aberta, = Σ elegíveis pela origem, JS = Python' % nviews, not bad, (len(bad), bad[:4]))
+     # C11 · 200 combinações sorteadas de unidades, jornada, turnos, disponibilidade e absenteísmo (e sobrescrita de configuração), JS = Python
+     random.seed(20261005); J2 = []; P2 = []
+     for k in range(200):
+diff --git a/tools/prototipo/v37/gen37/dados2.py b/tools/prototipo/v37/gen37/dados2.py
+index 9701e3e..09e05e5 100644
+--- a/tools/prototipo/v37/gen37/dados2.py
++++ b/tools/prototipo/v37/gen37/dados2.py
+@@ -733,11 +733,11 @@ def carga_itens(o):
+             if u<=0: continue
+             out.append(dict(k=k,j=j,u=u,h=float(x.get('nh') or 0)*u,ha=float(x.get('h') or 0)*u,sim=u if float(x.get('nq') or 0)>1e-12 else 0,semRec=bool(x.get('semRec'))))
+     return out
+-def cap_rec(r):
+-    pes=r['id']=='oper' or 'abs' in r
++def cap_rec(r,meses=None,dias=None):
++    pes=r['pes'] if 'pes' in r else (r['id']=='oper' or 'abs' in r)
+     pc=lambda x: min(100,max(0,float(x or 0)))/100
+     un=float(r['un'] or 0); J=float(r['jornada'] or 0); T=1 if pes else float(r.get('turnos') or 0); DP=(1-pc(r.get('abs'))) if pes else pc(r.get('disp'))
+-    por=[DIAS_UTEIS.get(m,0)*J*T*DP for m,_ in MESES]
++    por=[(DIAS_UTEIS if dias is None else dias).get(m,0)*J*T*DP for m,_ in (MESES if meses is None else meses)]
+     return dict(id=r['id'],nome=r['nome'],pes=pes,un=un,porUn=por,cap=[un*p for p in por])
+ def outras_safras(safra):
+     me=next((s for s in SAFRAS if s['id']==safra),None)
+@@ -751,14 +751,27 @@ def classe_oc(dt,mi,ini,fim):
+     if mi<0: return 'fora'
+     return 'cal'
+ def capacidade(safra,recursos=None,planos=None,cfg_override=None):
++    """Espelho do capCalc + capSaf (safra.js): ocorrências desta safra com a etiqueta do período dela e as das outras safras abertas da
++    mesma fazenda com o período de cada uma (SAF-C02); a conta é a do cap_saf."""
++    recs=recursos or RECURSOS; me=next((s for s in SAFRAS if s['id']==safra),{})
++    oc=[dict(o,cls=classe_oc(o['dt'],o['mi'],me.get('ini'),me.get('fim'))) for o in ocorr_op(safra,planos,cfg_override,recs)]
++    outras=[dict(id=s['id'],nome=s['nome'],ini=s.get('ini'),fim=s.get('fim'),oc=ocorr_op(s['id'],None,None,recs)) for sid in outras_safras(safra) for s in SAFRAS if s['id']==sid]
++    return cap_saf(oc,outras,recs)
++def cap_saf(oc,outras,recs,meses=None,dias=None):
+     """Espelho do capSaf (safra.js · bloco CAPACIDADE): por grupo de recursos e mês, demanda desta safra e das outras safras abertas da mesma
+-    fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta."""
+-    recs=recursos or RECURSOS; M=len(MESES); G={}
+-    for r in recs: g=cap_rec(r); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M); G[r['id']]=g
+-    oc=ocorr_op(safra,planos,cfg_override,recs); me=next((s for s in SAFRAS if s['id']==safra),{})
+-    def add(o,own,sid):
+-        # ocorrência desta safra com etiqueta do calendário conta no custo e não na capacidade (espelho do capSaf; revisão SAF, S3.1)
+-        if o['mi']<0 or (own and classe_oc(o['dt'],o['mi'],me.get('ini'),me.get('fim'))!='cal'): return
++    fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta. oc = desta safra,
++    com 'cls'; outras = [dict(id, nome, ini, fim, oc)]. A etiqueta de cada ocorrência sai do período da safra de ORIGEM (SAF-C02): com
++    etiqueta (antes, depois, fora) conta no custo e não na capacidade, e a carga vai para g['fora'] (sid None = desta safra)."""
++    meses=MESES if meses is None else meses; M=len(meses); G={}; n=[0]
++    for r in recs: g=cap_rec(r,meses,dias); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M,fora=[]); G[r['id']]=g
++    def add(o,own,s):
++        sid=None if own else s['id']; ix=n[0]; n[0]+=1
++        if o['mi']<0: return
++        cl=o.get('cls') if own else classe_oc(o['dt'],o['mi'],s.get('ini'),s.get('fim'))
++        if cl and cl!='cal':
++            for c in carga_itens(o):
++                if c['k'] in G and c['h']>0: G[c['k']]['fora'].append(dict(sid=sid,cls=cl,mi=o['mi'],h=c['h'],n=ix))
++            return
+         cs=carga_itens(o)
+         for c in cs:
+             g=G.get(c['k'])
+@@ -773,11 +786,11 @@ def capacidade(safra,recursos=None,planos=None,cfg_override=None):
+             for k in {c['k'] for c in cs}:
+                 if k in G: G[k]['semH'][o['mi']]+=o['rp']['falta']['semHoras']
+     for o in oc: add(o,True,None)
+-    for sid in outras_safras(safra):
+-        for o in ocorr_op(sid,None,None,recs): add(o,False,sid)
++    for s in outras:
++        for o in s['oc']: add(o,False,s)
+     for g in G.values():
+         cells=[]
+-        for mi,(m,lab) in enumerate(MESES):
++        for mi,(m,lab) in enumerate(meses):
+             d=g['dThis'][mi]+g['dOth'][mi]; cap=g['cap'][mi]; pu=g['porUn'][mi]
+             nc=lambda h: (max(_math.ceil(h/pu-1e-9),g['sim'][mi]) if pu>0 else -1) if h>1e-4 else 0
+             nec=nc(d); nt=nc(g['dThis'][mi]); falta=lambda n: n<0 or n>g['un']; red=d>1e-4 and falta(nec)
+diff --git a/tools/prototipo/v37/gen37/saf_capacidade_simetrica_test.py b/tools/prototipo/v37/gen37/saf_capacidade_simetrica_test.py
+new file mode 100644
+index 0000000..458b71e
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/saf_capacidade_simetrica_test.py
+@@ -0,0 +1,92 @@
++# -*- coding: utf-8 -*-
++"""Teste de navegador · SAF-C02 (Codex, 09/10/2026): capacidade simétrica entre safras abertas da mesma fazenda.
++Pela tela, no MESMO estado: Planejar safra → Editar a Safra 2026/27 e a Safrinha 2027 para o mesmo período (01/09/2026 a 12/07/2027).
++A colheita da Safrinha em 14 e 15/07 (P1 e T2) fica depois do fim; em jul/27 a S2627 tem a poda do C1 (04/07). Abre a S2627 na etapa 3
++(Continuar → Dimensionar operações ›), depois a S27SF (Trocar safra → Continuar → ‹ Operações e recursos) e confere que a ocupação de
++jul/27 dos recursos compartilhados (Tratores e Operadores e equipe) é a mesma nas duas vistas e igual ao espelho dados2.capacidade com o
++mesmo período, que a carga de fora aparece identificada (veredito, linha do filtro e aria-label da célula), que outra fazenda (LG2627) e
++safra encerrada (S2526) não entram e que o custo de operação da S27SF conserva as colheitas fora da conta. Antes da correção, com a S2627
++aberta, jul/27 somava a colheita de fora (Tratores 140,3 h contra 61,7 h com a S27SF aberta).
++1440 × 900 e 390 × 844 (toque). Emulação no Chrome headless: não é aparelho físico. Uso: python3 saf_capacidade_simetrica_test.py"""
++import sys, os, time, json
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
++from comp_lib import Chrome
++import dados2 as D2
++import saf_nav_lib as L
++from saf_nav_lib import chk, OK, FAIL, abre, botao, fset, salvar, toast, painel, erros, PROBE
++N = "(s=>(s||'').replace(/\\s+/g,' ').trim())"
++INI, FIM = '2026-09-01', '2027-07-12'
++def h1(x): return f'{x:,.1f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
++def rs(x): return 'R$ ' + f'{x:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
++def na_saf(sid, lab):
++    """botão da linha da safra na etapa 1 (Editar, Continuar…)"""
++    r = L.c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid="{sid}"]'); if(!r) return 'sem linha'; const n=s=>(s||'').replace(/\\s+/g,' ').trim();
++      const b=[...r.querySelectorAll('button')].find(b=>n(b.innerText).indexOf({json.dumps(lab)})===0); if(!b) return 'sem botão'; b.click(); return 'ok';}})()"""); time.sleep(.7); return r
++def linha_saf(sid): return L.c.js(f"(()=>{{const r=document.querySelector('[role=row][data-rid=\"{sid}\"]'); return r?{N}(r.innerText):'';}})()") or ''
++def veredito(): return L.c.js(f"(()=>{{const e=document.querySelector('#saf-v3-ver [role=status]'); return e?{N}(e.innerText):'';}})()") or ''
++def filtro(): return L.c.js(f"(()=>{{const e=document.getElementById('saf-cap-filtro'); return e&&e.offsetParent?{N}(e.innerText):'';}})()") or ''
++def custo(): return L.c.js(f"(()=>{{const b=document.querySelector('[data-acao=resumo]'); const s=b&&b.parentElement; return s?{N}(s.innerText):'';}})()") or ''
++def estado(): return L.c.js("(()=>{const s=window.__safSelf; return s?s.state.saf+' '+s.state.step:'';})()")
++def cel(rid, mes, clica=False):
++    """texto e aria-label da célula recurso × mês da g_cap; clica = filtra a g_op por ela"""
++    return L.c.js(f"""(()=>{{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&/^RECURSO/i.test((t.querySelector('[role=columnheader]')||{{}}).innerText||'')); if(!t) return {{err:'sem g_cap'}};
++      const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').trim().toLowerCase()); const i=hs.indexOf({json.dumps(mes)}); const r=t.querySelector('[role=row][data-rid={json.dumps(rid)}]');
++      if(i<0||!r) return {{err:'sem célula',hs}}; const c=r.querySelectorAll('[role=cell]')[i]; const b=c&&c.querySelector('button'); const o={{txt:{N}(c.innerText),aria:b?b.getAttribute('aria-label'):''}};
++      if({json.dumps(clica)}&&b) b.click(); return o;}})()""") or {}
++def abre_cap():
++    if L.c.js("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Capacidade por mês ▾')"): botao('Capacidade por mês ▾'); time.sleep(.4)
++def vista(nome):
++    """lê a etapa 3 aberta: veredito, células de jul/27 (Tratores e Operadores), filtro de cada uma e custo"""
++    abre_cap(); o = dict(ver=veredito(), custo=custo())
++    for rid in ('trator', 'oper'):
++        c0 = cel(rid, 'jul/27', clica=True); time.sleep(.6); o[rid] = dict(c0, filtro=filtro())
++    o['rolagem'] = L.c.js("document.documentElement.scrollWidth>innerWidth+1")   # com o filtro e o veredito mais longos
++    L.c.shot(os.path.join(PROBE, f'safc02_{nome}.png')); return o
++# espelho com o mesmo período (o que a tela grava): os números esperados saem do dados2.capacidade
++SAF = {s['id']: s for s in D2.SAFRAS}; _per = {s: (SAF[s]['ini'], SAF[s]['fim']) for s in ('S2627', 'S27SF')}
++try:
++    for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = INI, FIM
++    GA, GB = D2.capacidade('S2627'), D2.capacidade('S27SF'); COP = D2.plano_op('S27SF')['cop']
++finally:
++    for s in ('S2627', 'S27SF'): SAF[s]['ini'], SAF[s]['fim'] = _per[s]
++JUL = next(i for i, (_, lab) in enumerate(D2.MESES) if lab == 'jul/27')
++ESP = {k: GA[k]['cells'][JUL] for k in ('trator', 'oper')}
++assert all(abs(GA[k]['cells'][JUL]['d'] - GB[k]['cells'][JUL]['d']) < 1e-9 for k in ESP), 'espelho assimétrico'
++try:
++    c = L.c = Chrome()
++    for w, hh, toque in ((1440, 900, False), (390, 844, True)):
++        tg = f'{w}px'
++        abre('#saf=S2627&passo=safra', w, hh, toque)
++        for sid in ('S2627', 'S27SF'):
++            r1 = na_saf(sid, 'Editar'); fset('g_saf', 'ini', INI); fset('g_saf', 'fim', FIM); r2 = salvar(); time.sleep(.5); t = toast()
++            chk(f'{tg} preparo: Editar {sid} e gravar o período 01/09/2026 a 12/07/2027 pela tela', r1 == 'ok' and r2 == 'ok' and 'Salvo' in t and 'set/2026 – jul/2027' in linha_saf(sid), (r1, r2, t, linha_saf(sid), painel()[:300]))
++        na_saf('S2627', 'Continuar'); botao('Dimensionar operações ›'); time.sleep(.6); e1 = estado(); A = vista(f'S2627_{w}')
++        botao('Trocar safra'); time.sleep(.5); na_saf('S27SF', 'Continuar'); botao('‹ Operações e recursos'); time.sleep(.6); e2 = estado(); B = vista(f'S27SF_{w}')
++        chk(f'{tg} navegação: S2627 e depois S27SF abertas na etapa 3 pela tela', (e1, e2) == ('S2627 3', 'S27SF 3'), (e1, e2))
++        for rid, nome in (('trator', 'Tratores'), ('oper', 'Operadores e equipe')):
++            x = ESP[rid]; tot = f"{h1(x['d'])} h de {h1(x['cap'])} h ({D2.fmt_ocup(x['ocup'])})"
++            chk(f'{tg} {nome} jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF ({tot}), igual ao espelho',
++                A[rid].get('txt') == B[rid].get('txt') == D2.fmt_ocup(x['ocup']) and tot in A[rid]['filtro'] and tot in B[rid]['filtro'] and f"{h1(x['d'])} h de {h1(x['cap'])} h" in A[rid].get('aria', '') and f"{h1(x['d'])} h de {h1(x['cap'])} h" in B[rid].get('aria', ''),
++                (tot, A[rid], B[rid]))
++        chk(f'{tg} Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)', h1(ESP['trator']['d']) == '61,7' and '61,7 h de' in A['trator']['filtro'] and '61,7 h de' in B['trator']['filtro'], (A['trator']['filtro'], B['trator']['filtro']))
++        chk(f'{tg} S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula',
++            'fora da conta: Safrinha 2027 78,6 h depois do fim dela' in A['trator']['filtro'] and 'fora da conta: Safrinha 2027 78,6 h depois do fim dela' in A['trator'].get('aria', '')
++            and 'fora da conta: Safrinha 2027 157,2 h depois do fim dela' in A['oper']['filtro'], (A['trator'], A['oper']['filtro']))
++        chk(f'{tg} S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim',
++            'fora da conta: desta safra 78,6 h depois do fim' in B['trator']['filtro'] and 'fora da conta: desta safra 157,2 h depois do fim' in B['oper']['filtro'], (B['trator']['filtro'], B['oper']['filtro']))
++        chk(f'{tg} veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde',
++            '2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)' in A['ver'] and 'cabe com o que você tem' not in A['ver'], A['ver'])
++        chk(f'{tg} veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"', 'Fora da conta: 2 ocorrências depois do fim da safra' in B['ver'], B['ver'])
++        chk(f'{tg} outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita',
++            all('Mamão' not in v[r]['filtro'] and '2025/26' not in v[r]['filtro'] for v in (A, B) for r in ('trator', 'oper')) and ' · Safrinha 2027 ' in A['trator']['filtro'] and ' · Safra 2026/27 ' in B['trator']['filtro'],
++            (A['trator']['filtro'], B['trator']['filtro']))
++        chk(f'{tg} custo preservado: o custo de operação da S27SF ({rs(COP)}) inclui as colheitas fora da conta', rs(COP) in B['custo'], (rs(COP), B['custo']))
++        chk(f'{tg} sem rolagem lateral nas duas vistas, com o filtro ativo', not A['rolagem'] and not B['rolagem'], (A['rolagem'], B['rolagem']))
++        chk(f'{tg} sem erro de JS', erros() == '', erros())
++finally:
++    try:
++        if L.c: L.c.close()
++    finally: L.srv.terminate()
++print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas')
++for f in FAIL: print('  - ' + f)
++sys.exit(1 if FAIL else 0)
+diff --git a/tools/prototipo/v37/gen37/safra.js b/tools/prototipo/v37/gen37/safra.js
+index 3b30585..1a860c0 100644
+--- a/tools/prototipo/v37/gen37/safra.js
++++ b/tools/prototipo/v37/gen37/safra.js
+@@ -301,16 +301,19 @@ function classeOc(dt,mi,ini,fim){ if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim
+ function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
+ // atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
+ function atvEmUso(oc,op){ const s=new Set(); oc.forEach(i=>{ if(i.a&&i.a.op===op) s.add(i.a.nome); }); return s; }
+-// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra; outras = [{id, nome, oc}] das safras abertas da mesma fazenda.
+-// Ocorrência desta safra com etiqueta do calendário (i.cls de classeOc: antes do início, depois do fim, fora) conta no custo e não na
+-// capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). As das outras safras entram como estão: são a carga real do mês.
+-function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={};
+-  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z()}); });
+-  const add=(i,own,sid)=>{ if(!(i.mi>=0)||(own&&i.cls&&i.cls!=='cal')) return; const cs=cargaItens(i);
++// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra, com i.cls (classeOc pelo período dela); outras = [{id, nome,
++// ini, fim, oc}] das safras abertas da mesma fazenda. Ocorrência com etiqueta do calendário (antes do início, depois do fim, fora) conta
++// no custo e não na capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). SAF-C02: a etiqueta de cada ocorrência sai do
++// período da safra de ORIGEM, a desta e a de cada outra, qualquer que seja a safra aberta: a demanda do mês não depende da navegação.
++// g.fora = carga que ficou fora da conta num mês do calendário ({sid: null = desta safra, cls, mi, h, n = ocorrência}), para o veredito.
++function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={}; let n=0;
++  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z(),fora:[]}); });
++  const add=(i,own,s)=>{ const sid=own?null:s.id, ix=n++; if(!(i.mi>=0)) return; const cl=own?i.cls:classeOc(i.dt,i.mi,s.ini,s.fim);
++    if(cl&&cl!=='cal'){ cargaItens(i).forEach(c=>{ const g=G[c.k]; if(g&&c.h>0) g.fora.push({sid,cls:cl,mi:i.mi,h:c.h,n:ix}); }); return; } const cs=cargaItens(i);
+     cs.forEach(c=>{ const g=G[c.k]; if(!g) return; if(own){ g.dThis[i.mi]+=c.h; g.dThisAt[i.mi]+=c.ha; if(c.semRec) g.pendSR[i.mi]++; } else { g.dOth[i.mi]+=c.h; (g.oth[sid]||(g.oth[sid]=Z()))[i.mi]+=c.h; }
+       g.sim[i.mi]=Math.max(g.sim[i.mi],c.sim); });
+     if(own&&i.rp&&i.rp.falta&&i.rp.falta.semHoras>1e-9){ const ks={}; cs.forEach(c=>{ ks[c.k]=1; }); Object.keys(ks).forEach(k=>{ if(G[k]) G[k].semH[i.mi]+=i.rp.falta.semHoras; }); } };
+-  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s.id)));
++  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s)));
+   Object.values(G).forEach(g=>{ g.cells=meses.map((m,mi)=>{ const d=g.dThis[mi]+g.dOth[mi], cap=g.cap[mi], pu=g.porUn[mi];
+       const nc=(h)=>h>1e-4?(pu>0?Math.max(Math.ceil(h/pu-1e-9),g.sim[mi]):-1):0;   // −1: sem horas de uma unidade no mês (guarda)
+       const nec=nc(d), necThis=nc(g.dThis[mi]); const falta=(n)=>n<0||n>g.un; const red=d>1e-4&&falta(nec);
+@@ -326,6 +329,11 @@ function capJanelas(oc){ const A={}; oc.forEach(i=>{ if(!(i.mi>=0)) return; cons
+   const ks=Object.keys(A); return {M:ks.length,J:ks.filter(k=>A[k].sem).length}; }
+ function capNomes(l){ return l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l.join(''); }
+ function capH(n){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
++// carga de outras safras fora da conta (SAF-C02) nas células com demanda desta safra: por safra e motivo, ocorrências e horas por recurso
++function capForaOutras(G){ const by={}, ord=[]; Object.values(G).forEach(g=>(g.fora||[]).forEach(f=>{ if(f.sid===null||!g.cells[f.mi].own) return;
++    const k=f.sid+'|'+f.cls; let x=by[k]; if(!x){ x=by[k]={sid:f.sid,cls:f.cls,oc:{},h:{},rec:[]}; ord.push(x); } x.oc[f.n]=1;
++    if(!(g.nome in x.h)){ x.h[g.nome]=0; x.rec.push(g.nome); } x.h[g.nome]+=f.h; }));
++  return ord.map(x=>({sid:x.sid,cls:x.cls,n:Object.keys(x.oc).length,h:x.rec.map(r=>[r,x.h[r]])})); }
+ // veredito (§3.1): o único lugar de "cabe", do que falta e do que ficou fora da conta. x = {semPlano:[{local,area}], aPlano, cls (contagens antes/
+ // fora/depois/cal), ini (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
+ function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
+@@ -333,6 +341,7 @@ function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR
+   if(x.cls.antes) fora.push(x.cls.antes+(x.cls.antes>1?' ocorrências':' ocorrência')+' antes do início da safra ('+x.ini+')');
+   if(x.cls.fora) fora.push(x.cls.fora+(x.cls.fora>1?' ocorrências':' ocorrência')+' fora do calendário');
+   if(x.cls.depois) fora.push(x.cls.depois+(x.cls.depois>1?' ocorrências':' ocorrência')+' depois do fim da safra');
++  capForaOutras(G).forEach(f=>fora.push(f.n+(f.n>1?' ocorrências da ':' ocorrência da ')+(x.outras[f.sid]||f.sid)+(f.cls==='antes'?' antes do início':' depois do fim')+' dela ('+capNomes(f.h.map(r=>r[0]+' '+capH(r[1])+' h'))+')'));
+   const foraTxt=fora.length?' Fora da conta: '+fora.join('; ')+'.':'';
+   const jn=capJanelas(oc); const prazo=jn.J?' Prazo por talhão não verificado: '+jn.J+' de '+jn.M+(jn.M>1?' atividades':' atividade')+' sem janela.':'';
+   if(!x.aPlano) return {R:'R0',cor:'',txt:''};
+@@ -913,7 +922,7 @@ function recursosDe(self,rid,dv){ const o=[]; ['g_recp_maq','g_recp_pes'].forEac
+ function poolsDe(recs){ const o={}; recs.forEach(r=>{ o[r.id]={un:Number(r.un)||0,nome:r.nome}; }); return o; }
+ // outras safras que dividem os recursos: abertas (não encerradas) e da mesma fazenda; a própria encerrada não soma nada (o predicado do estoque)
+ function outrasSafras(self,saf,pools){ const S=safList(self); const me=S[saf]; if(!me||me.ro) return [];
+-  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,oc:ocorr(self,id,pools)})); }
++  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,ini:S[id].ini,fim:S[id].fim,oc:ocorr(self,id,pools)})); }   // período: a etiqueta de cada uma sai dela (SAF-C02)
+ function capCalc(self,saf,rid,dv){ const recs=recursosDe(self,rid,dv); const pools=poolsDe(recs); const oc=ocorr(self,saf,pools); const outras=outrasSafras(self,saf,pools);
+   const me=safList(self)[saf]||{}; oc.forEach(i=>{ i.cls=classeOc(i.dt,i.mi,me.ini,me.fim); });   // etiqueta antes da conta: a mesma na tela, no veredito e na capacidade
+   return {oc,outras,recs,pools,G:capSaf(oc,outras,recs,D2.meses,D2.dias)}; }
+@@ -942,8 +951,12 @@ function e3Incompleto(oc){ const by={}, ord=[]; oc.forEach(i=>{ const rp=i.rp; c
+     return op+' com '+t.join(', '); }).join('; '); }
+ // texto, aria-label e estado de uma célula recurso × mês (o mesmo fmtOcup da célula, do filtro, dos atalhos e do espelho)
+ function e3CelTxt(g,c){ return (c.ge?'≥ ':'')+(c.red?('precisa '+(c.nec<0?'horas':c.nec)):fmtOcup(c.ocup)); }
++// carga fora da conta numa célula (SAF-C02), desta safra e de cada outra, com o motivo: a mesma etiqueta do capSaf
++function e3Fora(g,c,outN){ const by={}, ord=[]; (g.fora||[]).forEach(f=>{ if(f.mi!==c.mi) return; const k=(f.sid||'')+'|'+f.cls; if(!by[k]){ by[k]={sid:f.sid,cls:f.cls,h:0}; ord.push(by[k]); } by[k].h+=f.h; });
++  return ord.map(x=>(x.sid?(outN[x.sid]||x.sid):'desta safra')+' '+capH(x.h)+' h '+(x.cls==='antes'?'antes do início':'depois do fim')+(x.sid?' dela':'')).join('; '); }
+ function e3CelAria(g,c,outN){ let t=g.nome+', '+c.mes+': '+fmtOcup(c.ocup)+', '+capH(c.d)+' h de '+capH(c.cap)+' h';
+   if(c.dOth>1e-4) t+=' (desta safra '+capH(c.dThis)+' h; '+Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4).map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join('; ')+')';
++  const fo=e3Fora(g,c,outN); if(fo) t+=', fora da conta: '+fo;
+   t+=', precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un); if(c.ge) t+=', mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis'; return t; }
+ function e3Aperto(g){ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); }
+ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); const me=S[saf]||{}; const E=capCalc(self,saf); const oc=E.oc, G=E.G;
+@@ -984,7 +997,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
+   // linha de filtro (recurso × mês escolhido): números da célula, com o que vem de cada outra safra
+   v.v3_fil=!!capF; v.v3_filx=()=>capSel(self,null,null);
+   if(capF){ const g=G[capF.rec], c=g.cells[capF.mi]; const oth=Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4);
+-    v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')
++    const fo=e3Fora(g,c,outN); v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')+(fo?' · fora da conta: '+fo:'')
+       +' · precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un)+(c.ge?' · mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis':''); }
+   else { v.v3_filn=''; v.v3_filt=''; }
+   e3Op(self,saf,oc,G,capF);
+-- 
+2.43.0
+

@@ -1,0 +1,11 @@
+$ timeout 900 flock /tmp/cdp9333.lock python3 etapas_celular_test.py complemento
+FALHA 17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela {'OS 390x844@1': {'alt': 672, 'cont': 672, 'linhas': 11, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}, 'OS 720x450@2': {'alt': 672, 'cont': 672, 'linhas': 11, 'rolaTela': True, 'ultNaJanela': False, 'ultTocavel': True}, 'AG-07 390x844@1': {'alt': 6008, 'cont': 6008, 'linhas': 51, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}, 'AG-07 720x450@2': {'alt': 4748, 'cont': 4748, 'linhas': 51, 'rolaTela': True, 'ultNaJanela': False, 'ultTocavel': True}, 'EST 320x700@1': {'alt': 195, 'cont': 195, 'linhas': 3, 'rolaTela': True, 'ultNaJanela': True, 'ultTocavel': True}}
+Traceback (most recent call last):
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/etapas_celular_test.py", line 210, in <module>
+    abre('IR-02'); lin=J("(()=>{const e=[...document.querySelectorAll('main *')].find(x=>x.children.length===0&&x.innerText.trim()==='Agenda por setor e bomba'); const lh=parseFloat(getComputedStyle(e).lineHeight)||19; return Math.round(e.getBoundingClientRect().height/lh);})()")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-camada-sintetica/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

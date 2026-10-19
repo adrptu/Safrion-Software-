@@ -1,0 +1,88 @@
+
+— A4 · roteiro do revisor: NF 1.200 → contagem 1.100 (pendente) → OB-0113 liberada e entregue com 1.169 → aprovar (Ana)
+OK    OB-0113 reservou 1.169 un do CX26-02 (físico 1.200)
+OK    entrega de 1.169 un aceita (físico 31)
+OK    aprovar é recusado: contagem desatualizada (1 movimento depois dela) e o caminho "Recontar"
+OK    recusa atômica: estado idêntico ao de antes (físico 31, nunca −69)
+OK    o ajuste continua pendente e não há movimento de ajuste
+OK    a custódia da OB-0113 segue 1.169 un
+OK    entrada direta cenAprovarAjuste: a mesma recusa, sem fabricar físico (nunca 1.100)
+OK    o motor recusa antes de tocar o estado (chamado fora do cenMudar)
+OK    Recontar abre a recontagem (o ajuste velho fica recusado, saldo intacto)
+OK    recontagem 0 e aprovação: físico 31 → 0, um movimento de ajuste −31
+
+— A4 · entrada direta do motor primeiro (sem a tela): o mesmo roteiro e cenAprovarAjuste(AJ-71, Ana)
+OK    recusado; físico 31 (sem fabricar as 1.069 un que levariam o lote a 1.100) e nenhum movimento de ajuste
+OK    conservação das caixas: físico + custódia + consumo = início + entradas + ajustes
+
+— (a) contagem 1.100 → reserva 1.169 → aprovar: aplica 1.100, falta 69 com dono; a entrega de 1.169 continua recusada
+OK    aprovado: físico 1.100 e a reserva 1.169 preservada
+OK    alerta "Reserva sem físico: 69 un" com a requisição, o dono e a recuperação
+OK    o disponível exibido não fica negativo (0)
+OK    entrega de 1.169 un recusada
+OK    entrega de 1.100 un aceita; o lote fica 0
+
+— (b) reserva 1.169 já existe → contagem 1.100 → aprovar
+OK    a contagem abaixo da reserva é aceita (sem isso recontar seria impossível) e avisa a falta
+OK    aprovado: físico 1.100, reserva 1.169, falta 69
+
+— (c) 100 → contagem 90 → entrada de 50 → aprovar: recusado
+OK    recusa na tela: 1 movimento (entrada de 50 un · NF 8002)
+OK    recusa no motor: o físico segue 150 (nunca 90, que apagaria a entrada)
+
+— (d) saída e retorno ao mesmo saldo → aprovar: recusado (a versão é a trilha, não a igualdade do físico)
+OK    entrega de 100 e devolução apta de 100: físico volta a 1.200
+OK    aprovar recusado: 2 movimentos depois da contagem; nada muda
+
+— (e) mudança de qualidade sem mudança física → aprovar: recusado
+OK    laudo libera os 50 un da quarentena (físico 200, sem mudança física)
+OK    aprovar recusado (laudo depois da contagem); físico 200, sem ajuste
+
+— (f) contado abaixo da quarentena → recusa sem efeitos e sem liberar o bloqueado
+OK    contagem 200 → 40 com 50 bloqueados: recusada, nada gravado, os 50 seguem bloqueados
+OK    o motivo pede a conferência da parcela bloqueada ou da perda, com responsável
+OK    motor: aprovar 40 com 50 bloqueados é recusado; físico 200 e quarentena 50 intactos
+
+— ajuste legítimo sem reserva: aplica e grava a trilha
+OK    aprovado: físico 1.200 → 1.100 e mensagem sem alerta
+OK    movimento de ajuste −100 un com o documento, o ajuste e o aprovador
+
+— papel: só o gestor aprova (a contagem atual ou desatualizada não muda isso)
+OK    Rui não aprova; nada muda
+OK    com a contagem desatualizada, Rui recebe a recusa de papel (o papel vem antes)
+OK    perfil forjado como gestor não aprova
+
+— envio duplo: aplica uma vez
+OK    repetir na tela: "já aprovado", físico 1.100 e um só movimento
+OK    repetir no motor: "não está pendente", nada aplicado
+OK    duas contagens da mesma falta: a segunda fica desatualizada pelo ajuste da primeira (nunca 1.000)
+
+— sem travar a recuperação: contagem → reserva → entrega de 1.100 → aprovação recusada → recontagem 0 aceita com a reserva de 69
+OK    aprovação recusada (entrega depois da contagem); físico 100
+OK    recontagem 0 com 69 reservados é aceita (antes era recusada e o lote ficava preso)
+OK    aprovada: físico 0, reserva 69 preservada, alerta com dono
+
+— contagem sem marcador confiável exige recontagem
+OK    ajuste pendente sem marcador da trilha: recusado, físico 1.200
+
+— contagem de base (INV-2609, anterior à demonstração): marcador no início da trilha
+OK    lote sem movimento: aprova −600 kg (90.000 → 89.400)
+OK    com entrada depois do início: recusado, sem criar ajuste nem mudar o físico (91.000)
+
+— A4 · quantidade contada finita (Codex 6148863313): Infinity, NaN e null recusados na contagem e na aprovação; 0 vale
+OK    contagem 9…9 (309 dígitos) → Infinity: recusada sem efeito (nenhum ajuste, físico 1.200)
+OK    contagem NaN: recusada sem efeito (nenhum ajuste, físico 1.200)
+OK    contagem vazio: recusada sem efeito (nenhum ajuste, físico 1.200)
+OK    contagem negativo: recusada sem efeito (nenhum ajuste, físico 1.200)
+OK    contagem 1.100 registrada (pendente)
+OK    aprovar com contado null: recusado pela tela e pelo motor, físico 1.200, ajuste pendente, sem movimento
+OK    aprovar com contado Infinity: recusado pela tela e pelo motor, físico 1.200, ajuste pendente, sem movimento
+OK    aprovar com contado NaN: recusado pela tela e pelo motor, físico 1.200, ajuste pendente, sem movimento
+OK    aprovar com contado texto: recusado pela tela e pelo motor, físico 1.200, ajuste pendente, sem movimento
+OK    contado 1.100 restaurado: aprova (físico 1.100)
+OK    contagem 0 continua válida: registrada e aprovada (físico 0)
+
+RESULTADO_JS OK
+RESULTADO 53/53
+
+exit=0

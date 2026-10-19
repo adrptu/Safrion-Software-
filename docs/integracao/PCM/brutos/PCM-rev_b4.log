@@ -1,0 +1,11 @@
+## ab.cab :: ["LANÇAMENTO · OPERADOR\n⇅\n▾", "ATIVO\n⇅\n▾", "TANQUE/LOTE\n⇅\n▾", "VOLUME\n⇅\n▾", "DATA · LEITURA\n⇅\n▾", "MÉTODO\n⇅\n▾", "CONSUMO L/H\n⇅\n▾", "QUALIDADE\n⇅\n▾"]
+## ab.linha :: "AB-1042 Beto · foto Trator 02 Sede · D-118 180 L 23/09 06:40 2.988 h Tanque cheio 16,4 L/h Confirmada"
+## ach.ids :: ["SELECT#na-aid", "TEXTAREA#na-sint", "INPUT#na-leit"]
+## ach.prims :: ["Somar ao INSP-104"]
+## ach.pan :: " Talhão T7\nPacking linha 1 · Armazém Sede\nSilo 01 · Armazém Sede\nComboio CB-01 · Sede\nResponsável técnico: Zé\nOrigem\nRelato\nInspeção\nAlerta\nComponente\nMotor\nHidráulico\nElétrico\nTransmissão\nRodado e freios\nÓrgão de trabalho\nOutro\nSintoma\nCriticidade\nAlta\nMédia\nBaixa\nCondição sugerida\nApto\nRestrito\nBloqueado\nAnexar foto (simulado)\nSem evidência\nLeitura (opcional) ·\nh\nÚltima: 2.988 h · 23/09\nPossível repetição de INSP-104 · Vazamento leve em mangueira (1 ocorrência)\nSomar ao INSP-104\nRegistrar novo"
+## apto :: "Apto"
+## lib :: "ok"
+## toast :: ""
+## etapa :: "A liberar"
+## rows :: ["OS-0420 | OS-0420 Plantio · Soja 58 W T4 — 100,00 ha 22/09/2026 28/09/2026 Em execução — — PCP reprogramar — 30,00 ha 70,00 ha — 30,0 % Carlos", "OS-0431 | OS-0431 Plantio · Soja 58 W T2 — 102,00 ha 24/09/2026 24/09/2026 A liberar — — PCP reprogramar — 0,00 ha 102,00 ha — 0,0 % Carlos"]
+RESULTADO: 0/0 ok

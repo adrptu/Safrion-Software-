@@ -1,0 +1,196 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Análises de solo
+‹
+Agrícola
+Análises de solo
+i
+1 inconsistente · 1 aguardando validação
+Registrar laudo
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Laudos
+Todos 12
+Validado 10
+Aguardando validação 1
+Inconsistente 1
+Agrupar por
+▾
+Colunas
++17
+LAUDO
+⇅
+FAZENDA · TALHÃO
+⇅
+V %
+⇅
+PH
+⇅
+P
+⇅
+K
+⇅
+MO
+⇅
+COLETA
+▼
+LAU-2050
+solo
+C1 · 38 ha
+não calculável
+5,6
+22 mg/dm³
+97,75 mg/dm³
+31 g/dm³
+19/09/2026
+Inconsistente
+LAU-2048
+folha
+P1 · 95 ha
+—
+—
+—
+17,4
+sem unidade
+—
+18/09/2026
+LAU-2061
+solo
+T1 · 312 ha
+60 %
+5,5
+18,5 mg/dm³
+58,65 mg/dm³
+30 g/dm³
+18/09/2026
+LAU-2063
+solo
+T2 · 298 ha
+40 %
+4,8
+7,5 mg/dm³
+136,85 mg/dm³
+22 g/dm³
+18/09/2026
+LAU-2055
+solo
+Pivô 2 · 37,75 ha
+72,15 %
+5,6
+16 mg/dm³
+110 mg/dm³
+27 g/dm³
+16/09/2026
+LAU-2056
+solo
+Pivô 5 · 71,11 ha
+72,16 %
+5,5
+9,5 mg/dm³
+95 mg/dm³
+24 g/dm³
+16/09/2026
+LAU-2057
+solo
+Pivô 9 · 74,98 ha
+72,57 %
+5,7
+21 mg/dm³
+125 mg/dm³
+32 g/dm³
+16/09/2026
+LAU-2058
+solo
+Pivô 19 · 75,11 ha
+73,46 %
+5,8
+12,5 mg/dm³
+140 mg/dm³
+29 g/dm³
+16/09/2026
+LAU-2071
+solo
+Pivô 12 · 48,47 ha
+50 %
+difere do laboratório
+5,1
+11 mg/dm³
+78,2 mg/dm³
+25 g/dm³
+15/09/2026
+LAU-2072
+solo
+Pivô 12 · 48,47 ha
+12,66 %
+4,6
+3 mg/dm³
+31,28 mg/dm³
+14 g/dm³
+15/09/2026
+LAU-2043
+solo
+T4 · 204 ha
+composta por zona (Z2 de 3 zonas)
+58,48 %
+5,4
+14 mg/dm³
+31,28 mg/dm³
+28 g/dm³
+12/09/2026
+LAU-2044
+solo
+T4 · 204 ha
+composta por zona (3 zonas)
+35,62 %
+4,9
+4,2 mg/dm³
+23,46 mg/dm³
+18 g/dm³
+12/09/2026
+Água no solo
+4 de 4
+Agrupar por
+▾
+Colunas
++5
++ Registrar medição
+MEDIÇÃO
+⇅
+TALHÃO · ZONA
+⇅
+DATA
+▼
+CAD
+⇅
+AGS-004
+Pivô 12
+16/09/2026
+não calculável
+sem ponto de murcha permanente medido
+AGS-003
+P2
+Z1 (baixada)
+02/09/2026
+45 mm
+AGS-002
+P1
+28/08/2026
+39 mm
+AGS-001
+T7
+20/08/2026
+56 mm
+Tela: Análises de solo · 1 inconsistente · 1 aguardando validação

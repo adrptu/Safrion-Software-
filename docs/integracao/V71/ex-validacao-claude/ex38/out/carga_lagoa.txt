@@ -1,0 +1,110 @@
+RECURSO
+SEG 22/09
+TER 23/09
+QUA 24/09
+QUI 25/09
+SEX 26/09
+SÁB 27/09
+USO NA SEMANA
+MÁQUINAS
+Trator T1 JD 6M 155
+Manutenção OM-0233
+Manutenção OM-0233
+Manutenção OM-0233
+livre
+livre
+livre
+49 % · conflito
+13,5 h de 27,5 h
+Trator 02 MF 7719
+livre
+livre
+67 % · em uso
+40 h de 60 h
+Trator 03
+12,4 h · acima da jornada
+livre
+56 % · em uso
+33,4 h de 60 h
+Trator 04
+livre
+livre
+livre
+livre
+livre
+8 % · ocioso
+5 h de 60 h
+Colhedora Axial-Flow 7250
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+Pivô 1
+livre
+livre
+livre
+livre
+10 % · ocioso
+14,3 h de 144 h
+Pivô 2
+livre
+livre
+livre
+livre
+10 % · ocioso
+14,5 h de 144 h
+IMPLEMENTOS
+Pulverizador PJ-3030 36 m
+12,4 h · acima da jornada
+livre
+64 % · conflito
+38,4 h de 60 h
+Plantadeira 24 linhas
+livre
+20 h · acima da jornada
+89 % · conflito
+53,5 h de 60 h
+Distribuidor 3 t
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+Esqueletadeira
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+PESSOAS
+Marcos · operador
+12,4 h · acima da jornada
+livre
+64 % · conflito
+38,4 h de 60 h
+Carlos · operador
+livre
+20 h · acima da jornada
+89 % · conflito
+53,5 h de 60 h
+Paula · caldeiro
+12,4 h · acima da jornada
+livre
+64 % · conflito
+38,4 h de 60 h
+João · irrigante
+livre
+livre
+livre
+26 % · em uso
+15,8 h de 60 h

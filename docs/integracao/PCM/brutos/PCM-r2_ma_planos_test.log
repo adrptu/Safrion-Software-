@@ -1,0 +1,21 @@
+  ok  MA · Planos: sem erro de JS
+  ok  menu: Manutenção com 1 item → MA.dc.html (planos são a visão Planos)
+  ok  Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida (10, 4)
+  ok  vencimento: manVenc (JS) = vencimento() (Python) nos 14 ativo × serviço
+  ok  Sem ordem: 2 vencidas · primária "Gerar 3 ordens preventivas"
+  ok  gerar: 3 ordens; gerar de novo não duplica · ✓
+3 ordens em A liberar: OM-0235, OM-0236, OM-0237 · OM-0235 com Falta peça.
+Abrir as 3 › próxima: O
+  ok  Sem ordem: sem nada a gerar, a primária "Gerar" sai
+  ok  OM-0235: Falta peça e liberar bloqueado (ponte "Solicitar compra")
+  ok  OM-0235: 5 tarefas do plano, nenhuma respondida
+  ok  OM-0234: conflito à vista; "Liberar mesmo assim" libera e reserva
+  ok  concluir exige as tarefas respondidas (o motivo à vista)
+  ok  concluir recusa leitura menor que a última
+  ok  concluir fecha o ciclo: próxima em 3.245 h
+  ok  PM-01: sem erro de JS
+  ok  PM-01: Trator 02 Em dia, próxima 3.245 h
+  ok  publicar v4: OM-0237 segue na v3
+  ok  abastecimento: 3.530 h deixa o Trator 04 vencendo em breve; 48.100 km < 48.200 km pede confirmação
+  ok  Ativos: Trator 04 recalculado; comboio mantém 48.200 km com leitura a confirmar
+RESULTADO: 18/18 ok

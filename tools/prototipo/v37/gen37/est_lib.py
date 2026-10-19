@@ -11,21 +11,47 @@ SETV = """((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem c
 FIND = """((ts)=>[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)))"""
 
 
+# TAB-05 no motor (DS-MODULOS-2, 17/10/2026): os botões de ação da linha moram no ⋯ da própria linha; o texto da linha termina com os itens
+# desse ⋯ ("ações que a linha oferece"), para "a linha oferece X" continuar valendo (contraprova da regra: esttest "TAB-05 …")
+LEGE = r"""(r=>{ const mais=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.replace(/\s+/g,' ').trim()).filter(Boolean).join(' ');
+  const fim=x=>mais?(x+' '+mais):x; const t=r.closest('[role=table]'); const raw=r.innerText.replace(/\s+/g,' '); if(!t) return fim(raw);
+  const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\s+/g,' ').trim().replace(/ · \d+$/,'').toUpperCase()); if(hs.indexOf('LOTE')<0&&hs.indexOf('COM QUEM')<0) return fim(raw);
+  const cs=[...r.querySelectorAll('[role=cell]')]; const lotePre=hs.indexOf('REQUISIÇÃO')>=0||hs.indexOf('MOVIMENTO')>=0;
+  return fim(cs.map((c,i)=>{ const v=c.innerText.replace(/\s+/g,' ').trim(); const h=hs[i]||'';
+    if(h==='LOTE'&&lotePre&&v&&v!=='—'&&!/^sem lote|^fora da/.test(v)) return 'lote '+v;
+    if(h==='COM QUEM'&&v&&v!=='—') return 'com '+v; if(h==='VALIDADE'&&v&&v!=='—'&&/^\d/.test(v)) return 'validade '+v; return v; }).filter(x=>x!=='').join(' ').replace(/\s+/g,' ')); })"""
+
+
 class Est:
-    def __init__(self, copiar=True):
+    def __init__(self, copiar=True, colunas='todas'):
         if copiar:
             open(os.path.join(R, 'EST.dc.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'project', 'EST.dc.html'), encoding='utf-8').read())
         self.p = free()
         self.srv = subprocess.Popen(['python3', '-m', 'http.server', str(self.p), '--bind', '127.0.0.1', '--directory', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(0.6)
         self.c = Chrome(port=free()); self.c.size(1440, 1000); self.J = self.c.js; self.FAIL = []; self.n = 0
+        # V2-3: os testes do Estoque são de domínio e leem colunas fora do "Abre com"; o padrão é conferido nos testes da VISOES-2
+        if colunas == 'todas': self.c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
 
     def abrir(self, wait=1.0):
         self.c.goto(f'http://127.0.0.1:{self.p}/EST.dc.html', wait=wait)
         self.J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }")
+        self.expandir()
+
+    def expandir(self):
+        """TAB-12 (17/10/2026): as grades nascem recolhidas. O teste de domínio lê lotes e requisições como a pessoa faz depois de usar o
+        "Expandir tudo" de cada grade visível; o recolhimento padrão é conferido no drill_recolhido_test (base verde 2, 18/10)."""
+        n = 0
+        for _ in range(4):   # cada clique redesenha a tela: repete até nenhuma grade visível ter "Expandir tudo"
+            k = self.J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 0; b.click(); return 1;})()")
+            if not k: break
+            n += 1; time.sleep(.3)
+        return n
 
     def etapa(self, i):
-        self.J(f"document.querySelectorAll('nav[aria-label=\"Etapas do processo\"] button')[{i - 1}].click()"); time.sleep(.4)
+        # Estoque é trabalho paralelo: as visões ficam na navegação "Seções do estoque" (mesma ordem 1…5), não em etapas (UX-ACAO-UNICA-20261003)
+        self.J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.4)
+        self.expandir()
 
     def clk(self, t, root=None):
         r = self.J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
@@ -38,7 +64,16 @@ class Est:
         r = self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.4); return r
 
     def rowtxt(self, *ts):
-        return self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()")
+        # TABELAS-FOCO (5983172395): lote, "com quem" e validade têm colunas próprias; o texto da linha recompõe "lote X", "com X" e
+        # "validade MM/AAAA" como antes, para as mesmas asserções valerem (a quantidade já traz a unidade junto: decisão de 05/10/2026)
+        return self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); return r?({LEGE})(r):'sem linha';}})()")
+
+    def cel(self, linha, col):
+        """Valor de uma coluna (pelo cabeçalho) na linha que contém o texto linha (TABELAS-FOCO: uma variável por coluna)."""
+        ts = list(linha) if isinstance(linha, (list, tuple)) else [linha]
+        return self.J(f"""(()=>{{const r=({FIND})({json.dumps(ts)}); if(!r) return 'sem linha'; const t=r.closest('[role=table]');
+          const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,'').toUpperCase());
+          const i=hs.indexOf({json.dumps(col.upper())}); const c=[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'sem coluna';}})()""")
 
     def rowbtn(self, ts, b):
         ts = [ts] if isinstance(ts, str) else list(ts)
@@ -78,3 +113,17 @@ class Est:
         finally: self.srv.terminate()
         print(f'RESULTADO: {self.n - len(self.FAIL)}/{self.n} ok' + (' · FALHAS: ' + '; '.join(self.FAIL) if self.FAIL else ''))
         return not self.FAIL
+
+
+# TAB-12: uma gravação redesenha a grade recolhida; a linha não achada abre as grades visíveis e é procurada de novo (base verde 2, 18/10)
+def _reabre(f):
+    def g(self, *a, **k):
+        r = f(self, *a, **k)
+        if r == 'sem linha' and self.expandir():
+            r = f(self, *a, **k)
+        return r
+    return g
+
+
+for _m in ('row', 'rowtxt', 'cel', 'rowbtn'):
+    setattr(Est, _m, _reabre(getattr(Est, _m)))

@@ -1,0 +1,223 @@
+{
+ "A": {
+  "total": 122,
+  "mesmo_dia": 26,
+  "interferencia": 38,
+  "exemplos_mesmo_dia": [
+   {
+    "alvo": "acaro",
+    "pivo": "P4",
+    "dia": "07/08",
+    "antes_mesmo_dia": "15.39",
+    "depois": "14.26",
+    "red_prototipo": "7 %",
+    "antes_estrito": "31/07 18.43",
+    "red_estrita": "23 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P4",
+    "dia": "28/08",
+    "antes_mesmo_dia": "18.99",
+    "depois": "24.51",
+    "red_prototipo": "subiu 29 %",
+    "antes_estrito": "21/08 23.77",
+    "red_estrita": "subiu 3 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P4",
+    "dia": "18/09",
+    "antes_mesmo_dia": "38.25",
+    "depois": "42.70",
+    "red_prototipo": "subiu 12 %",
+    "antes_estrito": "11/09 43.47",
+    "red_estrita": "2 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P9",
+    "dia": "14/08",
+    "antes_mesmo_dia": "21.28",
+    "depois": "36.96",
+    "red_prototipo": "subiu 74 %",
+    "antes_estrito": "07/08 22.28",
+    "red_estrita": "subiu 66 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P9",
+    "dia": "04/09",
+    "antes_mesmo_dia": "23.55",
+    "depois": "23.15",
+    "red_prototipo": "2 %",
+    "antes_estrito": "28/08 55.35",
+    "red_estrita": "58 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P9",
+    "dia": "25/09",
+    "antes_mesmo_dia": "13.36",
+    "depois": null,
+    "red_prototipo": null,
+    "antes_estrito": "18/09 26.93",
+    "red_estrita": "sem par"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P20",
+    "dia": "21/08",
+    "antes_mesmo_dia": "21.11",
+    "depois": "23.41",
+    "red_prototipo": "subiu 11 %",
+    "antes_estrito": "14/08 21.83",
+    "red_estrita": "subiu 7 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P20",
+    "dia": "11/09",
+    "antes_mesmo_dia": "22.51",
+    "depois": "26.67",
+    "red_prototipo": "subiu 19 %",
+    "antes_estrito": "04/09 29.40",
+    "red_estrita": "9 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P21",
+    "dia": "13/08",
+    "antes_mesmo_dia": "4.05",
+    "depois": "5.03",
+    "red_prototipo": "subiu 24 %",
+    "antes_estrito": "06/08 18.56",
+    "red_estrita": "73 %"
+   },
+   {
+    "alvo": "acaro",
+    "pivo": "P21",
+    "dia": "24/09",
+    "antes_mesmo_dia": "25.84",
+    "depois": null,
+    "red_prototipo": null,
+    "antes_estrito": "17/09 35.65",
+    "red_estrita": "sem par"
+   }
+  ]
+ },
+ "B": {
+  "Fenpiroximato": {
+   "n": 6,
+   "mediana": "0.639347673976161564489178520",
+   "nunca_abaixo": 0,
+   "aberto": 0
+  },
+  "Abamectina": {
+   "n": 9,
+   "mediana": "0.6806949560023111461386102177",
+   "nunca_abaixo": 2,
+   "aberto": 6
+  },
+  "Óleo mineral": {
+   "n": 3,
+   "mediana": "-0.7368516793778982760612134428",
+   "nunca_abaixo": 3,
+   "aberto": 0
+  },
+  "Espirodiclofeno": {
+   "n": 16,
+   "mediana": "0.5770955540023929622905878955",
+   "nunca_abaixo": 4,
+   "aberto": 3
+  }
+ },
+ "C": {
+  "fen_barra": 1,
+  "fen_atom": 5,
+  "frase": [
+   "Com Fenpiroximato, a barra a 100 L/ha teve redução mediana de 7 %; o atomizador, 73 %. A calda e o equipamento contam."
+  ]
+ },
+ "D": {
+  "cont": {
+   "atual_ate7": 1695,
+   "vencida_8a14": 0,
+   "sem": 45
+  },
+  "media14": "15.34419488227576331459316893",
+  "media7": "15.34419488227576331459316893",
+  "acima14": 6,
+  "acima7": 6
+ },
+ "E": {
+  "p9": [
+   [
+    "07/07",
+    "07/07",
+    "22/07",
+    "0.81",
+    "0.80",
+    "-0.0106",
+    10
+   ],
+   [
+    "22/07",
+    "22/07",
+    "01/08",
+    "0.80",
+    "0.81",
+    "0.0090",
+    10
+   ],
+   [
+    "05/08",
+    "01/08",
+    "16/08",
+    "0.81",
+    "0.80",
+    "-0.0086",
+    10
+   ],
+   [
+    "20/08",
+    "16/08",
+    "31/08",
+    "0.80",
+    "0.79",
+    "-0.0008",
+    10
+   ],
+   [
+    "03/09",
+    "31/08",
+    "15/09",
+    "0.79",
+    "0.79",
+    "-0.0066",
+    10
+   ]
+  ],
+  "contaminacao_mediana": "1"
+ },
+ "F": {
+  "ok_ate10": 1791,
+  "ok_11a15": 4,
+  "nuvem": 0,
+  "sem": 21,
+  "cenas_com_nuvem": 93
+ },
+ "G": {
+  "n": 122,
+  "alerta": 96,
+  "regra": 74,
+  "so_alerta": 22,
+  "mol_ur_menor90": 7
+ },
+ "H": {
+  "fav": 33,
+  "nfav": 117,
+  "gf": "0.905322266837459106851088318",
+  "gn": "0.524825497627779174180863013"
+ }
+}

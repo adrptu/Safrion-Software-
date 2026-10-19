@@ -1,0 +1,7 @@
+FIM sonda105_390 rc=0 35s :: E3 texto: GRP-1 · versão 1 | × |  | Santa Rita · Todas · Todas |  | 0 selecionadas |  | 3 liberadas · 0 pendentes; consulte cada origem. |  | OS-0595 · L
+FIM os_lote_test rc=1 13s :: 
+FIM os_cenario_test rc=0 71s :: RESULTADO: 22/22 ok
+FIM kanban_raias_test rc=0 5s :: RESULTADO 9/9
+FIM quantidade_test rc=0 10s :: RESULTADO: 16/16
+FIM paginas_scan_test rc=0 402s :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+TUDO

@@ -1,0 +1,18 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cada_cd04_test.py
+OK  cabeçalho: estado calculado "2 não alocáveis · 1 a renovar em 30 dias" e primária "Cadastrar pessoa" · Cadastros › Pessoas e equipes Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias 
+OK  Paula é caldeira da equipe Campo 1 (OS-0424) com NR-31 válida; "Irrigante" no lugar de "Irrigacionista" · Paula Campo 1 Preparar calda (caldeiro), Conferir CLT — R$ 32,00/h NR-31 30/04/2027 Da equipe Com login Alocável
+OK  Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato · Lucas Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 38,00/h NR-31 15/08/2026 Da equipe Com login Não alocável em O.S.
+OK  filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 10 · [['Paula', 'Nilton'], [], '10/10']
+OK  filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 10 · [['Marcos', 'Lucas', 'Beto'], ['Marcos', 'Lucas', 'Beto'], True, '10/10']
+OK  formulário: Nome → Equipe → Habilidades → validade da habilitação exigida → vínculo e vigência → calendário → custo com encargos; sem "Função" · ['Nome', 'Equipe', 'Habilidades', 'Validade da NR-31', 'Vínculo', 'Admissão', 'Disponível até', 'Calendário de trabalho', 'Custo-hora com encargos', 'Acesso ao app', 'Situação']
+OK  salvar com NR-31 vencida grava (sem bloquear) e mantém "Não alocável em O.S." com aviso do efeito · ['Lucas Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 40,00/h NR-31 15/08/2026 Da equipe Com login Não alocável em O.S.', 'Salvo: Lucas · não alocável em O.S. até resolver NR-31 vencida em 15/08/2026.', '']
+OK  renovar a NR-31 libera o Lucas e o estado do cabeçalho é recalculado · ['Lucas Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 40,00/h NR-31 15/08/2027 Da equipe Com login Alocável', 'Cadastros › Pessoas e equipes Pessoas e equipes 1 não alocável · 1 a renovar em 30 dias']
+OK  marcar "Irrigar" faz aparecer a validade da NR-10 exigida (Rui não exigia nenhuma) · ['Habilidades\nOperar trator\nOperar pulverizador\nOperar plantadeira\nOperar colhedora\nPreparar calda (caldeiro)\nIrrigar\nAlmoxarifado\nLiberar O.S. (agrônomo)\nConferir\nManutenção de máquinas\nNenhuma habilitação exigida.', ['Nome', 'Equipe', 'Habilidades', 'Validade da NR-10', 'Vínculo', 'Admi
+OK  calendário herdado da equipe aparece no campo Equipe; acesso ao app oferece "Solicitar acesso ao app" · ['Equipe\nAgronomia\nCampo 1\nCampo 2\nIrrigação\nSuprimentos\nOficina\nCalendário da equipe: seg–sáb · 06–15h · 9 h/dia', ['Sem login', 'Solicitar acesso ao app'], 'Da equipe']
+OK  "Solicitar acesso ao app" (simulado) grava o pedido e a exceção de calendário aparece na linha · ['Beto Campo 1 Operar trator CLT — R$ 38,00/h NR-31 pendente escala 6×2 · 8h Acesso solicitado Não alocável em O.S.', 'Salvo: Beto · não alocável em O.S. até resolver NR-31 pendente · pedido de acesso ao app enviado ao administrador (simulado).']
+OK  quem já tem login vê o acesso só em consulta · True
+OK  safrista sem "Disponível até" é barrado no campo · Corrija os campos destacados; o que você preencheu foi mantido. | Informe até quando o safrista fica disponível.
+OK  caldeira nova sem NR-31 grava como "Não alocável em O.S. · NR-31 pendente" e entra no filtro Caldeiros (3) · ['Rita Campo 1 Preparar calda (caldeiro) Safrista 31/03/2027 R$ 32,00/h NR-31 pendente Da equipe Sem login Não alocável em O.S.', '']
+OK  nenhum erro de JS na jornada
+RESULTADO: OK 15/15
+[exit 0]

@@ -1,0 +1,14 @@
+ocupacao_unit rc=0 RESULTADO: 130 OK · 0 FALHA
+capacidade_unit rc=0 RESULTADO: 76 OK · 0 FALHA
+rend_multiconjuntos_unit rc=0 RESULTADO: 106/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+saf_c01_test rc=0 370s RESULTADO: 66 ok · 0 falhas (tudo)
+saf_c01_test_ANTES_ef0d7b2 rc=1 488s RESULTADO: 34 ok · 32 falhas (tudo)
+ocupacao_test rc=0 305s RESULTADO: 65 ok · 0 falhas (tudo)
+saf_revisao_test rc=0 265s RESULTADO: 42 ok · 0 falhas
+saf_operacoes_test rc=0 291s RESULTADO: 87 ok · 0 falhas (tudo)
+tabelas_saf_test rc=0 148s RESULTADO: 24/24 ok
+partest rc=0 127s RESULTADO: 46 ok · 1 falhas
+saf_cmp_continuidade_test rc=0 253s RESULTADO: 31 ok · 0 falhas
+etapas_celular_test rc=0 169s RESULTADO: 14 ok · 0 falhas (celular)
+varredura rc=0 415s RESULTADO: 140/140 páginas sem erro
+FIM

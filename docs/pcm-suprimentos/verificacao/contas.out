@@ -1,0 +1,33 @@
+C1 realizado: 2626
+C1 se 16 L: 2738
+C1 estimativa (autEcon): 2738
+C1 OF26-01 fisico apos entrega: 1
+C1 OF26-07 fisico apos entrega: 104
+C1 custodia apos concluir: 4
+C1 OF26-07 apos devolucao: 108
+C2 preco F08: 160.00
+C2 preco F09: 155.20
+C2 F08: 1776.00
+C2 F09: 1771.20
+C2 diferenca F08-F09: 4.80
+C2 estimativa (catalogo): 1776
+C2 precisa (janela): 2026-09-24
+C2 F08 chega: 2026-09-24
+C2 F08 atrasa (chega>precisa): False
+C2 F09 chega: 2026-09-29
+C2 F09 atrasa (chega>precisa): True
+C2 OF26-07 apos entrega 12 L: 108
+C3: 4392
+C3 OF26-04 apos devolucao: 5
+C4: 6180.0
+C8 pecas: 1280
+C8 servico (3800-pecas): 2520
+C11: 1791
+OM sintetica 15 bombas + 4 h: 55280
+I1 U (dias): 1
+OTIF atraso vs prevs[0] (dias): 3
+Diesel 38% de 15000: 5700.00
+Diesel apos 180 L: 5520.00
+AC-03 lotes: 13
+AC-03 com saldo: 10
+REQs apos restaurar: 14

@@ -1,0 +1,10 @@
+OK  1 sem erro JS; T3 aberto
+OK  2 safra aberta recalcula (96 de 100 ha · 4 ha livres); encerrada fica 96 de 96 ha · Área conferida · ['▾ Safra 2026/27 96 ha 4 ha Em planejamento', '▾ Safra 2025/26 96 ha 0 ha Encerrada']
+OK  3 no detalhe o T3 também não muda de fazenda · Corrija os campos destacados; o que você preencheu foi mantido. | T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.
+OK  4 T3 segue na Santa Rita · Santa Rita Sequeiro — 100,0 ha 96,0 ha v1 −4,0 ha −4,0 % Ativo
+OK  5 B1 inativo: estado Inativo, "Reativar B1" na linha do talhão e sem "Definir polígono do B1" · [' · Lagoa Grande PV19 · Lagoa Grande PV20 · Lagoa Grande PV21 · Lagoa Grande PV22 · Lagoa Grande PV23 · Lagoa Grande PV24 · Lagoa Grande Inativo desde 23/09/2026', ['Reativar B1', 'Parcelas por safra\n0', 'Geometria']]
+OK  6 "Reativar B1" abre o formulário do B1 com Situação em Ativo e o foco nela · ['Ativo', 'fx_g_idt_sit']
+OK  7 salvar reativa: toast, estado e a aba Geometria voltam a nomear o próximo passo · ['B1 reativado: volta ao Planejar safra e ao Mapa.', ['Parcelas por safra\n0', 'Geometria', 'Definir polígono do B1']]
+OK  8 com v6 a lista de versões e o bloco Geometria aparecem inteiros (corpo rola dentro do artboard) · {'sec': 978, 'main': 1000, 'root': 1000, 'ov': 'auto', 'txt': 'tes de 23/09/2026 Consulta v3 · 312,4 ha 12/09/2026 · Importado · levantamento RTK · O.S. emitidas antes de 23/09/2026 Consulta v2 · 311,8 ha 20/08/2025 · Importado · levantamento 2025 · O.S. emitidas antes de 12/09/2026'}
+OK  9 sem erro JS no fim
+RESULTADO: OK 9/9

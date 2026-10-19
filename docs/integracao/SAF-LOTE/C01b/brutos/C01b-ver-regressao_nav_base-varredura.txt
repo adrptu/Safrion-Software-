@@ -1,0 +1,2 @@
+RESULTADO: 140/140 páginas sem erro
+rc=0 tempo=368 s (inclui espera do lock)

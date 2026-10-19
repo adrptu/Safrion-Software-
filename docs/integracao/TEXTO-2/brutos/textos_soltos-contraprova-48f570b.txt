@@ -1,0 +1,265 @@
+FALHA T MB-01: fora da vista · “Siga a ordem da janela; o botão diz o próximo passo.” · siga a ordem da janela
+FALHA D MB-01: na dica ⓘ · “segue a ordem da janela” · sem ⓘ
+FALHA T MB-01: fora da vista · “Escolha o trabalho para abrir o formulário do seu domínio.” · escolha o trabalho para abrir o formulário
+FALHA T MB-02: fora da vista · “suas (Marcos) e da equipe · mesma ordem do escritório” · suas (marcos) e da equipe
+FALHA D MB-02: na dica ⓘ · “mesma ordem do escritório” · sem ⓘ
+FALHA T MB-02: fora da vista · “Abra a ordem para ver instrução, insumos e apontamentos.” · abra a ordem para ver instrução
+FALHA T MB-02: fora da vista · “Consulte; quem executa é o responsável indicado.” · consulte; quem executa
+FALHA D MB-02: na dica ⓘ · “quem executa é o responsável indicado” · sem ⓘ
+FALHA T MB-02: fora da vista · “Água simplificada: abre em Irrigação, sem materiais e sem requisição.” · água simplificada: abre em irrigação
+FALHA D MB-02: na dica ⓘ · “abre em irrigação, sem materiais e sem requisição” · sem ⓘ
+FALHA T MB-02: fora da vista · “Fechar o turno não encerra a ordem. Encerrar é no escritório, com apon” · encerrar é no escritório
+FALHA D MB-02: na dica ⓘ · “encerrar é no escritório, com apontamentos enviados e nada em custódia” · sem ⓘ
+OK    F MB-02: segue à vista · “Impedimento: OM-0233 · Trator T1 bloqueado” 
+OK    F MB-02: segue à vista · “Relato fora da autorização atual · aguarda decisão” 
+FALHA T MB-02det: fora da vista · “Siga dose, janela e preparo da versão autorizada.” · siga dose, janela e preparo
+FALHA D MB-02det: na dica ⓘ · “siga dose, janela e preparo da versão autorizada” · sem ⓘ
+FALHA T MB-02det: fora da vista · “Use só o material autorizado; a sobra volta pela devolução.” · use só o material autorizado
+FALHA D MB-02det: na dica ⓘ · “use só o material autorizado; a sobra volta pela devolução” · sem ⓘ
+FALHA T MB-02det: fora da vista · “Confira o que já foi enviado e o que está só no aparelho.” · confira o que já foi enviado
+FALHA T MB-03: fora da vista · “iniciar, pausar e fechar · hectares, horas e consumo” · iniciar, pausar e fechar · hectares
+FALHA T MB-03: fora da vista · “Inicie o turno na ordem em que vai trabalhar.” · inicie o turno na ordem
+FALHA D MB-03: na dica ⓘ · “inicie o turno na ordem em que vai trabalhar” · sem ⓘ
+FALHA T MB-03x-recibo: fora da vista · “fila do aparelho · cada registro entra uma vez” · fila do aparelho · cada registro
+FALHA D MB-03x-recibo: na dica ⓘ · “cada registro entra uma vez” · sem ⓘ
+FALHA T MB-03x-recibo: fora da vista · “Reenvios devolvem o mesmo recibo; a conferência decide o realizado.” · reenvios devolvem o mesmo recibo
+FALHA D MB-03x-recibo: na dica ⓘ · “reenvios devolvem o mesmo recibo; a conferência decide o realizado” · sem ⓘ
+FALHA T MB-03x-recibo: fora da vista · “Conflito com outro aparelho abre reconciliação sem somar em dobro. Pac” · conflito com outro aparelho
+FALHA D MB-03x-recibo: na dica ⓘ · “conflito com outro aparelho abre reconciliação sem somar em dobro” · sem ⓘ
+FALHA T MB-04: fora da vista · “tipo e texto · foto e voz simuladas · funciona sem sinal” · tipo e texto · foto e voz simuladas
+FALHA D MB-04: na dica ⓘ · “funciona sem sinal” · sem ⓘ
+OK    F MB-04: segue à vista · “a foto e a voz são simuladas neste protótipo” 
+FALHA T MB-05: fora da vista · “retiradas do operador e tarefas do almoxarife · por lote e embalagem” · retiradas do operador e tarefas do almoxarife
+FALHA T MB-05: fora da vista · “Use na ordem; a sobra volta pela devolução ao Rui.” · use na ordem; a sobra volta
+FALHA D MB-05: na dica ⓘ · “use na ordem; a sobra volta pela devolução” · sem ⓘ
+FALHA T MB-05: fora da vista · “Leve a O.S.; Rui entrega por lote e embalagem.” · leve a o.s.;
+FALHA D MB-05: na dica ⓘ · “entrega por lote e embalagem” · sem ⓘ
+FALHA T MB-05: fora da vista · “Confirmar o recebimento põe o material sob sua custódia; o apontamento” · põe o material sob sua custódia
+FALHA D MB-05: na dica ⓘ · “confirmar o recebimento põe o material sob sua custódia” · sem ⓘ
+FALHA T MB-05det: fora da vista · “ · conferência física contra QR (fim do subtítulo)” · conferência física contra qr
+FALHA D MB-05det: na dica ⓘ · “contra o qr” · sem ⓘ
+FALHA T MB-05det: fora da vista · “Confira as sacas contra o QR antes de confirmar.” · confira as sacas contra o qr
+FALHA D MB-05det: na dica ⓘ · “confira as sacas contra o qr antes de confirmar” · sem ⓘ
+FALHA T MB-05det: fora da vista · “Ao confirmar: custódia zera, a conta 100 = 70 + 30 fecha e a OS-0417 s” · ao confirmar: custódia zera
+FALHA D MB-05det: na dica ⓘ · “ao confirmar: custódia zera” · sem ⓘ
+FALHA T MB-05det: fora da vista · “Material preparado não retorna como produto original disponível; só so” · material preparado não retorna
+FALHA D MB-05det: na dica ⓘ · “material preparado não retorna como produto original disponível” · sem ⓘ
+OK    F MB-05det: segue à vista · “REQ-031 · sobras da OS-0417” 
+OK    F MB-05det: segue à vista · “Responsável pela custódia: Paula” 
+FALHA T MB-07: fora da vista · “previsão de colheita · conta por planta e estádio” · previsão de colheita · conta por planta
+FALHA D MB-07: na dica ⓘ · “por planta e estádio” · sem ⓘ
+FALHA T MB-07: fora da vista · “Toque no talhão de fruta em produção que vai contar.” · toque no talhão de fruta
+FALHA D MB-07: na dica ⓘ · “toque no talhão de fruta em produção que vai contar” · sem ⓘ
+FALHA T MB-08: fora da vista · “OS-0419 · Pivô 2 · água · sem emissão manual (subtítulo)” · sem emissão manual
+FALHA D MB-08: na dica ⓘ · “sem emissão manual” · sem ⓘ
+FALHA T MB-08: fora da vista · “Água sem produto: sem materiais, sem requisição, sem custódia e sem de” · sem requisição, sem custódia e sem devolução
+FALHA D MB-08: na dica ⓘ · “sem requisição, sem custódia e sem devolução” · sem ⓘ
+FALHA T MB-08: fora da vista · “Confira a lâmina antes de iniciar.” · confira a lâmina antes de iniciar
+FALHA D MB-08: na dica ⓘ · “confira a lâmina antes de iniciar” · sem ⓘ
+FALHA T MB-08: fora da vista · “Acompanhe a volta e confirme o término no fim.” · acompanhe a volta e confirme
+FALHA D MB-08: na dica ⓘ · “confirme o término no fim” · sem ⓘ
+FALHA T MB-08: fora da vista · “Registre pausas e avanço sem encerrar a ordem.” · registre pausas e avanço sem encerrar a ordem
+FALHA D MB-08: na dica ⓘ · “registre pausas e avanço sem encerrar a ordem” · sem ⓘ
+FALHA T MB-08: fora da vista · “passam do máximo de 12,0 mm por passada: o sistema divide em 2 passada” · o sistema divide em
+FALHA D MB-08: na dica ⓘ · “dividida pelo sistema em passadas iguais, sem aprovação” · sem ⓘ
+FALHA T MB-08: fora da vista · “Só a fertirrigação (OS-0418) é liberada pelo agrônomo, com materiais e” · só a fertirrigação (os-0418) é liberada
+FALHA D MB-08: na dica ⓘ · “só a fertirrigação (os-0418) é liberada pelo agrônomo” · sem ⓘ
+FALHA T MB-08: fora da vista · “Área/volume insuficientes? Registra-se o tempo e a estimativa fica pen” · área/volume insuficientes
+FALHA D MB-08: na dica ⓘ · “a lâmina não é afirmada como medida” · sem ⓘ
+FALHA F MB-08: segue à vista · “OS-0422 · 13,5 mm em 2 passadas de 6,75 mm” · OS-0422 · 13,5 mm em 2 passadas de 6,75 mm
+OK    F MB-08: segue à vista · “Origem: balanço de 23/09 · déficit 11,2 mm” 
+FALHA T MB-08x-recibo: fora da vista · “mapa, lista, quadro e app leem o mesmo evento” · mapa, lista, quadro e app leem
+FALHA D MB-08x-recibo: na dica ⓘ · “mapa, lista, quadro e app leem o mesmo evento” · sem ⓘ
+FALHA T MB-08x-recibo: fora da vista · “Fatos consistentes → conferência e encerramento automáticos, com recib” · fatos consistentes →
+FALHA D MB-08x-recibo: na dica ⓘ · “encerramento automáticos, com recibos separados” · sem ⓘ
+FALHA T MB-08x-recibo: fora da vista · “Confira os recibos e a área realmente atendida.” · confira os recibos e a área
+FALHA T MB-08x-recibo: fora da vista · “Balanço hídrico atualizado uma vez por aplicação” · balanço hídrico atualizado uma vez
+FALHA D MB-08x-recibo: na dica ⓘ · “o balanço hídrico é atualizado uma vez por aplicação” · sem ⓘ
+FALHA T MB-08x-recibo: fora da vista · “Horímetro divergente da lâmina calculada → a ordem fica Em conferência” · horímetro divergente da lâmina calculada →
+FALHA D MB-08x-recibo: na dica ⓘ · “corrigir a calibração do pivô substitui a fórmula anterior” · sem ⓘ
+FALHA F MB-08x-recibo: segue à vista · “Balanço hídrico: 10,6 mm creditados nos 80 ha do pivô” · Balanço hídrico: 10,6 mm creditados nos 80 ha do pivô
+OK    F MB-08x-recibo: segue à vista · “Conferência: 10,6 mm medidos” 
+FALHA T MB-09: fora da vista · “condição, leitura e abastecimento · funciona sem sinal” · condição, leitura e abastecimento · funciona
+FALHA D MB-09: na dica ⓘ · “condição, leitura e abastecimento; funciona sem sinal” · sem ⓘ
+FALHA T MB-09: fora da vista · “Herdada do seu turno; toque noutra ou busque pelo nome.” · herdada do seu turno;
+FALHA D MB-09: na dica ⓘ · “toque noutra ou busque pelo nome” · sem ⓘ
+FALHA T MB-09: fora da vista · “ · toque noutra para trocar (fim de "Herdada do turno da OS-0421")” · toque noutra para trocar
+FALHA D MB-09: na dica ⓘ · “toque noutra ou busque pelo nome” · sem ⓘ
+FALHA T MB-09: fora da vista · “Tanque, volume e leitura; a foto do tíquete é a evidência.” · a foto do tíquete é a evidência
+FALHA D MB-09: na dica ⓘ · “tanque, volume e leitura; a foto do tíquete é a evidência” · sem ⓘ
+OK    F MB-09: segue à vista · “Herdada do turno da OS-0421 (alocação de hoje)” 
+OK    F MB-09: segue à vista · “a foto é simulada neste protótipo” 
+FALHA T MB-09det: fora da vista · “Nunca voltam ao estoque livre: destino e responsável.” · nunca voltam ao estoque livre
+FALHA D MB-09det: na dica ⓘ · “nunca voltam ao estoque livre: destino e responsável” · sem ⓘ
+OK    F MB-09det: segue à vista · “você vê a ordem, sem alterar” 
+FALHA T MB-10: fora da vista · “colheita: área e cargas do talhão · motorista: viagem” · colheita: área e cargas do talhão
+FALHA T MB-10: fora da vista · “Aponte a área do turno e registre cada carga que sai do talhão; a bala” · aponte a área do turno e registre
+FALHA D MB-10: na dica ⓘ · “aponte a área do turno e registre cada carga que sai do talhão” · sem ⓘ
+FALHA T MB-10: fora da vista · “Área não gera produção: a produção do talhão nasce só da carga pesada ” · área não gera produção
+FALHA D MB-10: na dica ⓘ · “área não gera produção: a produção do talhão nasce só da carga pesada ” · sem ⓘ
+FALHA T CA-01: fora da vista · “(o agrônomo libera) no indicador A LIBERAR” · (o agrônomo libera)
+OK    D CA-01: na dica ⓘ · “o agrônomo libera a ordem” 
+FALHA F CA-01: segue à vista · “3 com produto · 2 só água” · 3 com produto · 2 só água
+FALHA T CA-01det: fora da vista · “término físico do escopo (ou dispensa autorizada do saldo) entra autom” · término físico do escopo (ou dispensa
+FALHA D CA-01det: na dica ⓘ · “(ou dispensa autorizada do saldo) entra automaticamente em em conferên” · finalizar o turno não encerra a ordem; conferir um dia não muda a fase. ajuste de dose só alcança o saldo.
+FALHA T CA-01det: fora da vista · “O agrônomo ajusta e libera a v3 só para o saldo; as fichas do saldo pa” · o agrônomo ajusta e libera a v3
+FALHA D CA-01det: na dica ⓘ · “o agrônomo ajusta e libera a v3 só para o saldo” · finalizar o turno não encerra a ordem; conferir um dia não muda a fase. ajuste de dose só alcança o saldo.
+OK    F CA-01det: segue à vista · “Recomendação de origem: fungicida 1ª aplicação · protocolo do plano té” 
+FALHA T CA-01x-os0420: fora da vista · “impedimento é selo: a ordem segue Em execução e nenhum botão pula etap” · impedimento é selo
+FALHA D CA-01x-os0420: na dica ⓘ · “impedimento é selo: a ordem segue em execução e nenhum botão pula etap” · instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado.
+FALHA T CA-02: fora da vista · “Se a liberação não estiver mais vigente, o saldo reaberto recebe o sel” · o saldo reaberto recebe o selo
+FALHA D CA-02: na dica ⓘ · “o saldo reaberto recebe o selo pausada até renovar as condições” · fato permanece registrável fora da tolerância. conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa.
+FALHA T CA-02: fora da vista · “Concluir execução não encerra a ordem com custódia, divergência ou con” · concluir execução não encerra a ordem
+FALHA D CA-02: na dica ⓘ · “concluir execução não encerra a ordem com custódia, divergência ou con” · fato permanece registrável fora da tolerância. conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa.
+FALHA T CA-04: fora da vista · “Declarar o retorno não aumenta o estoque utilizável: só a quantidade m” · declarar o retorno não aumenta
+FALHA D CA-04: na dica ⓘ · “declarar o retorno não aumenta o estoque utilizável” · é o mesmo registro de suprimentos e do estoque: consumo é apontado na conferência e devolução é recebida no almoxarifado.
+OK    F CA-04: segue à vista · “Balanço da REQ-031: 100 sc entregues − 70 consumidos − 20 recebidos = ” 
+FALHA T CO-02: fora da vista · “Hectares concluídos não geram quilogramas de estoque, e pesagens não d” · hectares concluídos não geram quilogramas
+FALHA D CO-02: na dica ⓘ · “hectares concluídos não geram quilogramas de estoque” · ciclo canônico: a liberar → liberadas → em execução → em conferência → encerradas. finalizar turno mantém em execução; término físico entra em em conferência.
+FALHA T CO-02det: fora da vista · “Término físico entra automaticamente em Em conferência; encerrar exige” · encerrar exige cargas e apontamentos conciliados
+FALHA D CO-02det: na dica ⓘ · “encerrar exige cargas e apontamentos conciliados” · qualidade do lote permanece separada da execução: classe/calibre definitivos saem do packing (co-05) e da inspeção (co-06).
+FALHA T CO-04: fora da vista · “A entrada NÃO equivale a liberação comercial: produto em processo cont” · a entrada não equivale a liberação comercial
+FALHA D CO-04: na dica ⓘ · “a entrada não equivale a liberação comercial: produto em processo cont” · encaminhar processo abre o beneficiamento (co-05); solicitar inspeção abre a qualidade (co-06) — sempre preservando a carga de origem.
+FALHA T CO-05: fora da vista · “— fechar processo não libera lote … decisão posterior de qualidade não” · fechar processo não libera lote
+FALHA D CO-05: na dica ⓘ · “decisão posterior de qualidade não reabre a ordem encerrada” · ciclo canônico das ordens de processo; sem liberação automática de lote por balanço fechado — qualidade decide em co-06 (demo-19).
+OK    F CO-05: segue à vista · “segue Bloqueado pela inspeção INSP-88” 
+FALHA T CO-05det: fora da vista · “Concluir execução leva a Em conferência; fechar processo exige balanço” · concluir execução leva a em conferência
+FALHA D CO-05det: na dica ⓘ · “concluir execução leva a em conferência; fechar processo exige balanço” · balanço conferido torna o processo elegível a fechar; a liberação comercial dos lotes é decisão de qualidade (co-06 · demo-07).
+FALHA T CO-06: fora da vista · “Lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + da” · lotes de campo vêm dos apontamentos
+FALHA D CO-06: na dica ⓘ · “lotes de campo vêm dos apontamentos das o.s. de colheita” · padrões variam por cultura: grãos por umidade/impureza; frutas por classe/calibre; café por defeitos e rendimento bica → beneficiado.
+FALHA T CO-06: fora da vista · “Bloqueio invalida a elegibilidade das reservas afetadas e avisa o Come” · invalida a elegibilidade das reservas
+FALHA D CO-06: na dica ⓘ · “invalida a elegibilidade das reservas afetadas” · padrões variam por cultura: grãos por umidade/impureza; frutas por classe/calibre; café por defeitos e rendimento bica → beneficiado.
+FALHA F CO-06: segue à vista · “Demonstração · pós-colheita, laudos e destinos sintéticos” · Demonstração · pós-colheita, laudos e destinos sintéticos
+FALHA T CO-07: fora da vista · “o contrato barter que originou a reserva não é subtraído de novo. A of” · o contrato barter que originou a reserva
+FALHA D CO-07: na dica ⓘ · “o contrato barter que originou a reserva não é subtraído de novo” · tentar alocar ou expedir o l27-013 falha com motivo (bloqueio insp-88); liberação posterior habilita apenas destinações compatíveis (ac-50).
+OK    F CO-07: segue à vista · “Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc” 
+FALHA T SU-01: fora da vista · “as 10 t em quarentena não entram e ficam como coberto se o laudo aprov” · ficam como coberto se o laudo aprovar
+FALHA D SU-01: na dica ⓘ · “ficam como coberto se o laudo aprovar, somadas uma única vez” · revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (su-01 · cal-01).
+OK    F SU-01: segue à vista · “KCl 60%: falta firme 140 − 50 − 40 = 50 t” 
+FALHA T SU-02: fora da vista · “Classe ABC financeira não substitui criticidade: Diesel é B em valor e” · classe abc financeira não substitui
+FALHA D SU-02: na dica ⓘ · “classe abc financeira não substitui criticidade” · publicar vigência exige aprovação (fo-31); simulação nunca altera a política vigente (su-02, cap. 65).
+OK    F SU-02: segue à vista · “Propostas e exceções aguardando: Diesel S10 v5” 
+FALHA T SU-03: fora da vista · “Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físic” · físico ≠ utilizável ≠ disponível
+FALHA D SU-03: na dica ⓘ · “físico ≠ utilizável ≠ disponível” · os saldos são os mesmos do processo estoque; requisitar, transferir e inspecionar abrem o registro de destino (su-07, su-08, su-06).
+FALHA T SU-04: fora da vista · “O fornecedor responde pelo portal externo com convite próprio, nunca p” · o fornecedor responde pelo portal externo
+FALHA D SU-04: na dica ⓘ · “o fornecedor responde pelo portal externo com convite próprio” · token externo do fornecedor abre o portal pt-02, não esta lista; aprovar contratação segue em contratos e pedidos (fo-16/fo-17).
+FALHA T SU-05: fora da vista · “O recebido já está dentro das liberações acumuladas e não é subtraído ” · o recebido já está dentro das liberações
+FALHA D SU-05: na dica ⓘ · “o recebido já está dentro das liberações acumuladas” · proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / pce-08. antecipação e prazo têm títulos próprios (ge-04).
+FALHA T SU-05: fora da vista · “Recebimento parcial mantém o saldo do pedido aberto; o aceite físico a” · recebimento parcial mantém o saldo
+FALHA D SU-05: na dica ⓘ · “recebimento parcial mantém o saldo do pedido aberto” · proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / pce-08. antecipação e prazo têm títulos próprios (ge-04).
+FALHA T SU-06: fora da vista · “Aceite físico não aprova o título: o título segue para Contas a pagar ” · aceite físico não aprova o título
+FALHA D SU-06: na dica ⓘ · “aceite físico não aprova o título” · demo-02: pc-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (su-06 · fo-18).
+FALHA T SU-07: fora da vista · “Material entregue sai do disponível e passa à custódia da ordem; o con” · material entregue sai do disponível
+FALHA D SU-07: na dica ⓘ · “material entregue sai do disponível e passa à custódia da ordem” · entrega só da versão aprovada pelo agrônomo; excesso e substituição exigem revisão (su-07 · fo-09 · cap. 42).
+FALHA T SU-07det: fora da vista · “É o mesmo balanço que a conferência da ordem usa. Declarar a devolução” · é o mesmo balanço que a conferência
+FALHA D SU-07det: na dica ⓘ · “é o mesmo balanço que a conferência da ordem usa” · demo-03 · item recebido em quarentena não vira apto; calda pronta não volta como produto puro (estos-04/05/06 · osfase-05).
+FALHA T SU-08: fora da vista · “Correção não apaga a operação original: o estorno cria movimento novo ” · correção não apaga a operação original
+FALHA D SU-08: na dica ⓘ · “correção não apaga a operação original” · transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (su-08 · fo-32).
+FALHA T SU-09: fora da vista · “O contador não vê o saldo do sistema e os movimentos do escopo ficam s” · o contador não vê o saldo do sistema
+FALHA D SU-09: na dica ⓘ · “o contador não vê o saldo do sistema” · diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem configurações › usuários e alçadas (su-09 · fo-32).
+FALHA T PL-02: fora da vista · ““20 dias antes do plantio · DAP −20 · previsto para 25/09” — o produto” · o produtor não digita sinal negativo
+FALHA D PL-02: na dica ⓘ · “o produtor não digita sinal negativo” · publicação cria necessidades únicas; a o.s. nasce depois, na janela de emissão (8.6), consumindo o saldo da mesma necessidade (janela-07).
+FALHA T PL-03: fora da vista · “não ofertado como livre (cartão do Trator T1)” · não ofertado como livre
+FALHA D PL-03: na dica ⓘ · “máquina bloqueada não é ofertada como livre” · uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (recurso-01 a 10).
+FALHA T PL-03: fora da vista · “trator livre + implemento reservado ≠ conjunto livre” · trator livre + implemento reservado
+FALHA D PL-03: na dica ⓘ · “trator livre + implemento reservado ≠ conjunto livre” · uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (recurso-01 a 10).
+FALHA T PL-03: fora da vista · “não fica verde por falta de notícia” · não fica verde por falta de notícia
+FALHA D PL-03: na dica ⓘ · “não fica verde por falta de notícia” · uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (recurso-01 a 10).
+FALHA T PL-03: fora da vista · “Contadores são recortes que se sobrepõem — não somam o total da frota.” · contadores são recortes
+FALHA D PL-03: na dica ⓘ · “contadores são recortes que se sobrepõem” · uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (recurso-01 a 10).
+OK    F PL-03: segue à vista · “elegível só após confirmação do PCP” 
+OK    F PL-03: segue à vista · “Última atualização 07:42” 
+FALHA T PL-05: fora da vista · “Resolver compra ou manutenção revalida prontidão; não inicia máquina n” · resolver compra ou manutenção revalida
+FALHA D PL-05: na dica ⓘ · “resolver compra ou manutenção revalida prontidão” · impedimento tem dono e prazo; o selo fica na ordem (nunca vira etapa do kanban).
+FALHA T PL-05det: fora da vista · “A parada do Trator T1 reduz a capacidade da janela uma única vez (já r” · reduz a capacidade da janela
+FALHA D PL-05det: na dica ⓘ · “a parada do trator t1 reduz a capacidade da janela uma única vez” · demo-17 · apto ≠ livre ≠ elegível (44.11.1). teste reprovado mantém o bloqueio; cmd-19 libera tecnicamente sem reassumir agenda; cmd-34 confirma a alocação.
+FALHA T PL-06: fora da vista · “Parcelas não duplicam hectares de cobrança (312 ha); operações e mater” · parcelas não duplicam hectares
+FALHA D PL-06: na dica ⓘ · “parcelas não duplicam hectares de cobrança” · dividir área valida soma, sobreposição e histórico; replantio respeita a liberação física da parcela (cap. 43, parc).
+OK    F PL-06: segue à vista · “Proposta · não divide a área vigente” 
+FALHA T VE-01: fora da vista · “Saldo final é o máximo factível sob capacidade e prazo — folga de outr” · saldo final é o máximo factível
+FALHA D VE-01: na dica ⓘ · “folga de outra classe ou dia não cobre esta janela” · compromisso firme, reserva temporária e reserva física da mesma obrigação são fases com identidade comum — nunca deduções cumulativas (49.2–49.3, atp-07).
+OK    F VE-01: segue à vista · “Atualizado hoje 06:30” 
+FALHA T VE-02: fora da vista · “vira premissa só ao usar na gestão. Contrato futuro não é inventado: s” · contrato futuro não é inventado
+FALHA D VE-02: na dica ⓘ · “contrato futuro não é inventado” · alerta não realiza venda; cotação ausente não vira zero; toda conversão de unidade e moeda é declarada com fonte e licença.
+OK    F VE-02: segue à vista · “Câmbio da simulação: R$ 5,32/US$ (PTAX D-1)” 
+FALHA T VE-03: fora da vista · “Aceite registrado pelas duas partes, por versão. Confirmação automátic” · confirmação automática só sob política
+FALHA D VE-03: na dica ⓘ · “confirmação automática só sob política prévia explícita do produtor” · proposta não fecha pedido sozinha; contraproposta é versionada e o aceite vale para a versão exata (cap. 46).
+FALHA T VE-06: fora da vista · “O ajuste financeiro fica vinculado ao caso — crédito não é emitido pel” · crédito não é emitido pelo retorno
+FALHA D VE-06: na dica ⓘ · “crédito não é emitido pelo retorno em si” · encerrar exige destinação física e financeira aplicável; item devolvido bloqueado não vira vendável até a qualidade decidir (demo-08).
+OK    F VE-06: segue à vista · “o lote L26-118” 
+FALHA T LO-02: fora da vista · “Política v4: elegibilidade (presença, prontidão, doca livre, documento” · política v4: elegibilidade
+FALHA D LO-02: na dica ⓘ · “elegibilidade (presença, prontidão, doca livre, documentos)” · sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (fila-07). demo-19/20.
+FALHA T LO-02: fora da vista · “A preparar → Em separação → Conferência → … Qualidade, financeiro e do” · documentos são dimensões separadas
+FALHA D LO-02: na dica ⓘ · “qualidade, financeiro e documentos são dimensões separadas” · sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (fila-07). demo-19/20.
+FALHA T LO-02det: fora da vista · “o rateio da instalação não se aplica a esta carga” · o rateio da instalação não se aplica
+FALHA D LO-02det: na dica ⓘ · “o rateio da instalação não se aplica” · confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). cmd-26 acontece uma única vez, aqui.
+OK    F LO-02det: segue à vista · “Frete: retirada pelo cliente” 
+FALHA T LO-04: fora da vista · “Sugestão não despacha transportador.” · sugestão não despacha transportador
+OK    D LO-04: na dica ⓘ · “sugestão de rota não despacha transportador” 
+OK    F LO-04: segue à vista · “Mesma base: 9,6 t · 512 km · refrigerado” 
+FALHA T GE-02: fora da vista · “Autorizar versão: só a Direção, pela caixa de Aprovações.” · autorizar versão: só a direção
+FALHA D GE-02: na dica ⓘ · “autorizar versão: só a direção, pela caixa de aprovações” · base v1 aprovada permanece imutável; revisão gera versão nova com aprovador e vigência (cap. 51).
+FALHA T GE-02det: fora da vista · “A matemática explica o desvio, mas não prova desperdício: pode ser aju” · mas não prova desperdício
+FALHA D GE-02det: na dica ⓘ · “a matemática explica o desvio, mas não prova desperdício” · base preservada: proposta de parâmetro tem vigência futura e passa por revisão; nada recalcula versões aprovadas (cap. 51).
+OK    F GE-02det: segue à vista · “desvio contra essa base = R$ 1.008” 
+FALHA T GE-04: fora da vista · “Fonte oficial: ERP designado — aqui se propõe, aprova e concilia; … nu” · fonte oficial: erp designado
+FALHA D GE-04: na dica ⓘ · “fonte oficial: erp designado” · todo título rastreia à origem (pedido, o.s., contrato); conciliação bancária fecha o ciclo antes de qualquer “pago”.
+OK    F GE-04: segue à vista · “título único de R$ 233.000” 
+FALHA T GE-06det: fora da vista · “Fórmula: custo total da operação ÷ ha efetivamente tratados (apontados” · custo total da operação ÷ ha
+FALHA D GE-06det: na dica ⓘ · “custo total da operação ÷ ha efetivamente tratados” · o índice explica o desvio; a decisão (ação, parâmetro ou nada) é humana e fica registrada em planos de ação.
+FALHA T GE-06det: fora da vista · “Fonte: lançamentos de custo documento a documento + apontamentos da O.” · lançamentos de custo documento a documento
+FALHA D GE-06det: na dica ⓘ · “lançamentos de custo documento a documento” · o índice explica o desvio; a decisão (ação, parâmetro ou nada) é humana e fica registrada em planos de ação.
+OK    F GE-06det: segue à vista · “R$/ha · 120 ha·operação” 
+FALHA T GE-08: fora da vista · “— o mesmo saco nunca garante dois contratos.” · o mesmo saco nunca garante
+FALHA D GE-08: na dica ⓘ · “o mesmo saco nunca garante dois contratos” · capacidade usa caixa disponível ao serviço da dívida por período; cet/cetcr sempre com método e premissas declarados.
+OK    F GE-08: segue à vista · “comprometida” 
+FALHA T CF-01: fora da vista · “Origem: Cadastros › Pessoas e equipes (nome, função, habilidade e CREA” · aqui não se cadastra pessoa
+FALHA D CF-01: na dica ⓘ · “aqui não se cadastra pessoa” · o perfil de demonstração (ver como) mostra a experiência e não é segurança: no software o servidor tira o ator da sessão.
+FALHA T CF-01: fora da vista · “Os comandos da O.S., do Estoque e do app leem esta tabela. Mudança val” · leem esta tabela
+FALHA D CF-01: na dica ⓘ · “nunca reescreve registro antigo” · o perfil de demonstração (ver como) mostra a experiência e não é segurança: no software o servidor tira o ator da sessão.
+FALHA T CF-03: fora da vista · “Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir ” · sincronizar envia ao erp cada movimento
+FALHA D CF-03: na dica ⓘ · “sincronizar envia ao erp cada movimento uma vez por conteúdo” · homologação, produção e credenciais reais só com autorização e custo aprovados pelo proprietário (agents §2; eng-017).
+OK    F CF-03: segue à vista · “nenhuma credencial existe nesta demonstração” 
+FALHA T CF-05: fora da vista · “Origem: Cadastros › Fazendas, áreas e talhões · conta a área cultiváve” · conta a área cultivável dos talhões ativos
+FALHA D CF-05: na dica ⓘ · “conta a área cultivável dos talhões ativos de fazendas ativas” · preços, trial e régua são exemplos a decidir pelo proprietário (dec-01/05/09). inadimplência nunca apaga dado.
+FALHA T CF-05: fora da vista · “(Configurações › Usuários e alçadas) · usuários sem limite · não entra” · (configurações › usuários e alçadas)
+FALHA D CF-05: na dica ⓘ · “pessoas com acesso vêm de configurações › usuários e alçadas” · preços, trial e régua são exemplos a decidir pelo proprietário (dec-01/05/09). inadimplência nunca apaga dado.
+FALHA T CF-05: fora da vista · “Usuários sem limite e fora da cobrança. (nota dos planos)” · usuários sem limite e fora da cobrança.
+FALHA D CF-05: na dica ⓘ · “usuários sem limite e fora da cobrança” · preços, trial e régua são exemplos a decidir pelo proprietário (dec-01/05/09). inadimplência nunca apaga dado.
+FALHA T CF-05: fora da vista · “só demonstração · avança a data da cobrança, não a dos outros módulos” · avança a data da cobrança
+FALHA D CF-05: na dica ⓘ · “a data simulada avança só a cobrança, não os outros módulos” · preços, trial e régua são exemplos a decidir pelo proprietário (dec-01/05/09). inadimplência nunca apaga dado.
+FALHA T CF-05: fora da vista · “O período fecha no último dia do mês e a fatura vence no dia 1 (exempl” · o período fecha no último dia do mês
+FALHA D CF-05: na dica ⓘ · “o período fecha no último dia do mês e a fatura vence no dia 1 (exempl” · preços, trial e régua são exemplos a decidir pelo proprietário (dec-01/05/09). inadimplência nunca apaga dado.
+FALHA F CF-05: segue à vista · “Pessoas com acesso: 14 · fora da cobrança” · Pessoas com acesso: 14 · fora da cobrança
+OK    F CF-05: segue à vista · “exemplo · a decidir pelo proprietário” 
+OK    F CF-05: segue à vista · “Data simulada da cobrança” 
+FALHA T BO-01: fora da vista · “Mínimo: cobra-se o maior entre o mínimo e preço × área (não se soma). ” · cobra-se o maior entre o mínimo
+FALHA D BO-01: na dica ⓘ · “cobra-se o maior entre o mínimo e preço × área” · versões de plano (criar, aprovar) voltam quando o proprietário decidir dec-01/05/09.
+OK    F BO-01: segue à vista · “PRECO-01: R$ 2,00/ha·mês = R$ 24,00/ha·ano” 
+OK    F BO-01: segue à vista · “Todos os valores são exemplo, a decidir pelo proprietário” 
+FALHA T BO-02: fora da vista · “a vencer, vencidas, pendentes ou em contestação” · a vencer, vencidas, pendentes
+FALHA D BO-02: na dica ⓘ · “faturas abertas: a vencer, vencidas, pendentes ou em contestação” · fatura só fica paga por evento do provedor (simulado), aplicado uma vez. nada é apagado.
+FALHA T BO-02: fora da vista · “cobrada = mín(medida; contratada)” · mín(medida; contratada)
+FALHA D BO-02: na dica ⓘ · “área cobrada = mín(medida; contratada)” · fatura só fica paga por evento do provedor (simulado), aplicado uma vez. nada é apagado.
+FALHA T BO-02: fora da vista · “Isolamento: a plataforma vê área e cobrança por organização (e por faz” · isolamento: a plataforma vê
+FALHA D BO-02: na dica ⓘ · “isolamento: a plataforma vê área e cobrança por organização” · fatura só fica paga por evento do provedor (simulado), aplicado uma vez. nada é apagado.
+OK    F BO-02: segue à vista · “medida 2.958,23 ha” 
+FALHA T PT-02: fora da vista · “Cada versão submetida fica preservada — revisar antes do prazo cria no” · revisar antes do prazo cria nova versão
+FALHA D PT-02: na dica ⓘ · “revisar antes do prazo cria nova versão” · convite nasce da correspondência categoria/cultura/região do seu perfil (57.4.2); acesso ao dossiê da sol-2026-07 expira em 08/10.
+FALHA T PT-05det: fora da vista · “— recusa no recebimento abre divergência, não devolve ao estoque apto.” · abre divergência, não devolve
+FALHA D PT-05det: na dica ⓘ · “recusa no recebimento abre divergência” · revisão de pedido preserva versões e exige novo aceite; recusa no recebimento não recoloca produto em estoque apto (fo-35).
+OK    F PT-05det: segue à vista · “Entregue dentro da janela com NF-e e laudo por carga” 
+FALHA T ON-01det: fora da vista · “Estoque, análise ou plantio nunca são completados com dados inventados” · são completados com dados inventados
+FALHA D ON-01det: na dica ⓘ · “nunca são completados com dados inventados” · validar grava somente o que passou; o erro permanece preenchido na prévia com correção localizada (cap. 58.3).
+FALHA T IC: fora da vista · “esperando o mês certo, antes da necessidade (repetia o título do indic” · antes da necessidade
+FALHA T IC: fora da vista · “comprando pela melhor cotação (repetia o título do indicador)” · comprando pela melhor cotação
+OK    F IC: segue à vista · “insumo(s) mais baratos” 
+OK    F IC: segue à vista · “contra a referência da safra” 
+FALHA T MA: fora da vista · “das OMs encerradas no sistema (indicador de custo)” · das oms encerradas no sistema
+FALHA Q MB-02 390 px: toque curto no ⓘ abre a dica com as regras e tocar de novo fecha · [None, '', '']
+FALHA Q alvo do ⓘ do app ≥ 44 × 44 px · None
+OK    Q MB-02: o selo do cabeçalho segue logo depois do título (o ⓘ vem depois do selo) 
+FALHA A CA-02 1440 px: com o ⓘ ao lado do título, o anúncio é "Tela: título · estado" (não "· i") · {'msg': 'Tela: Apontamentos e conferência · i', 'tit': 'Apontamentos e conferência', 'selo': '2 a conferir · 1 divergência', 'info': True}
+OK    E sem erro de JS nas telas abertas 
+
+41 OK · 222 falhas · 63 telas · render /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/txt2/base_src/tools/prototipo/v37/gen37/_render

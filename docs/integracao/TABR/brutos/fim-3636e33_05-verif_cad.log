@@ -1,0 +1,13 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 verif_cad.py
+· erro JS → 
+· cabeçalhos g_forn → ['Parceiro ⇅ ▾', 'CPF/CNPJ ⇅ ▾', 'Papéis ⇅ ▾', 'Contato ⇅ ▾', 'WhatsApp ⇅ ▾', 'E-mail ⇅ ▾', 'Canais autorizados ⇅ ▾', 'Situação do papel ⇅ ▾']
+· altura necessária → [1100, 694]
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/gen37/verif_cad.py", line 37, in <module>
+    J("(()=>{const r=[...document.querySelectorAll('[role=table]')[1].querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.split('\\n')[0].trim()==='Sementes'); (r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

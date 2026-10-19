@@ -1,0 +1,29 @@
+painéis estáticos (confirmar com texto fixo): {'oculta': 28}
+oculta	AG-04det	Criar v4 com TS registrado	v4 em rascunho com Pasteuria nishizawae FS · Ana aprova; até lá o TS do saldo segue travado.
+oculta	AG-05	Importar referência	Referência importada · aguardando validação técnica
+oculta	CA-01	Preparar e emitir período	Emitidas · A liberar (o agrônomo libera)
+oculta	CA-04	Solicitar material da ordem	Requisitada · em separação
+oculta	CO-01	Revisar amostragem	Ação registrada · acompanhada em GE-02
+oculta	CO-02	Preparar ordens do período	2 ordens emitidas em A liberar · liberação é ação separada
+oculta	CO-06	Decidir lote	Destinação do L26-118 registrada · 300 kg saem do estoque bloqueado · o RC-12 já pode ser encerrado no Comercial (VE-06)
+oculta	CO-06	Inspecionar lote	INSP-94 aberta · lote permanece Aguardando inspeção
+oculta	CO-06det	Definir destinação	Destinação registrada · ordem de reprocesso criada em A liberar
+oculta	GE-05	Registrar cobrança autorizada	Cobrança registrada no histórico do título
+oculta	GE-07	Reabrir caso	Caso reaberto
+oculta	ON-01	Rever dados	Dados da organização salvos
+oculta	ON-01	Desenhar áreas	Talhão salvo · área calculada 48,2 ha
+oculta	ON-01	Anexar CAR	CAR anexado · pendência resolvida
+oculta	ON-01	Continuar cultura e ciclo	Cultura e ciclo salvos · próximo passo: recursos
+oculta	ON-01	Convidar equipe	Convite enviado · pendente de aceite (simulado · nenhuma mensagem real enviada)
+oculta	ON-01	Importar arquivo	Prévia gerada
+oculta	ON-01	Configurar integração	Solicitação registrada · funcionalidade segue demonstrativa até homologar
+oculta	PL-02	Adicionar operação	Operação adicionada ao rascunho v4
+oculta	PL-05	Reprogramar saldo	Saldo reprogramado · aguarda nova liberação
+oculta	PL-05det	Terceirizar	Reprogramada · responsáveis notificados (simulado)
+oculta	PL-06	Simular parcelas	Cenário v2 simulado · área vigente intacta
+oculta	PT-03	Pedir ajuste da oferta	Contraproposta enviada · oferta original preservada
+oculta	PT-04det	Pedir complemento	Pedido de complemento registrado no dossiê
+oculta	PT-04det	Registrar condição	Condição registrada · aprovação segue condicional
+oculta	PT-04det	Contrapropor condições	Contraproposta v2 enviada · aguarda aceite do produtor
+oculta	PT-05det	Enviar documento da carga 3	NF-e vinculada à carga 3 · obrigação atendida
+oculta	VE-03	Revisar destinatários	2 destinatários confirmados — parceiro pagante sem convite NÃO recebe

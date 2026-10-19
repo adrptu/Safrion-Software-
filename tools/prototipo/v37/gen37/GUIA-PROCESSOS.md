@@ -41,4 +41,4 @@ cd <gen37> && python3 -c "import sys; sys.path.insert(0,'.'); import importlib; 
 cp project/<suas telas>.dc.html _render/ && python3 g2test.py <TELA>.dc.html       # grade: ordena, abre pela linha, valida, avisa, salva, teclado, link/botão não editam
 python3 shot.py <TELA>.dc.html && (abra _shots/<TELA>.png com Read)                # visual
 ```
-Para processos com etapas, escreva um teste CDP como `saftest.py` (copie e adapte) cobrindo o fluxo pedido; rode e corrija até passar.
+Para processos com etapas, escreva um teste CDP como `saf_fazendas_test.py` (copie e adapte; o `saftest.py` foi aposentado) cobrindo o fluxo pedido; rode e corrija até passar.

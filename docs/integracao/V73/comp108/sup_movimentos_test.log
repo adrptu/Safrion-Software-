@@ -1,0 +1,8 @@
+PASS submeter mantém físico e reserva, guarda motivo e autor
+PASS aprovar aplica uma vez sem apagar reserva alheia
+PASS AL09 recusada ao operador sem mutação
+PASS quantidade inválida e perda da quarentena não criam ajuste
+PASS mudança física após submissão bloqueia aprovação
+PASS repetição da chave não duplica ajuste
+PASS persistência estrita: falha preserva estado; retry mesma chave grava uma vez e recarrega
+7 testes; funções de ajuste/AL09 reais, perfis sintéticos; persistência em storage simulado; sem UI real.

@@ -4,7 +4,7 @@ Pré-carga: OS-0430 liberada por cenMudar (reserva a requisição nova). Depois,
 recusar entrega acima do saldo, receber devolução apta e bloqueada, liberar a quarentena, contar lote com divergência e aprovar
 o ajuste; o app confirma e aponta sem sinal. A O.S. e o estoque são conferidos lendo cenGet() na própria página."""
 import sys, os, time
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)))
 from est_lib import Est
 
 E = Est()
@@ -44,7 +44,7 @@ try:
          'confirmação no app (aviso de outra tela) retira "Aguardando confirmação no app" sem recarregar')
     # 6 · devolução apta volta ao disponível
     E.etapa(3); print('k3:', E.k()); E.row(RQ, 'Glifosato 480'); print('padrão devolução:', E.val('fx_g_dev_qtd'))
-    E.setv('fx_g_dev_qtd', '20'); E.salvar(); print('toast:', E.toast())
+    E.setv('fx_g_dev_qtd', '20'); E.setv('fx_g_dev_cond', 'Apta · volta ao disponível'); E.salvar(); print('toast:', E.toast())   # EST-ONDA0 (E1): a condição não tem mais padrão; quem confere escolhe
     st = E.cen(f"(()=>{{const i=c.reqs['{RQ}'].itens[0]; const l=c.lotes['Glifosato 480|G26-14']; return [i.custodia,i.devolvido,l.fisico,l.quarentena];}})()"); print(' ', st, E.rowtxt(RQ, 'Glifosato 480'))
     E.ok(st == [300, 20, 900, 0], 'devolução apta de 20 L: custódia 320 → 300 L, lote G26-14 880 → 900 L sem bloqueio')
     # 7 · devolução bloqueada vai para quarentena (observação obrigatória)
@@ -55,14 +55,14 @@ try:
     # 8 · saldos por lote: filtro por local e liberação da quarentena após inspeção
     E.etapa(4); E.clk('Câmara fria'); lot = E.J("[...document.querySelectorAll('[role=row].g2kid')].map(r=>r.innerText.split('\\n')[0].trim())"); E.clk('Todos os locais')
     t = E.rowtxt('O26-05'); print('O26-05:', t, '| Câmara fria:', lot)
-    E.rowbtn('O26-05', 'Liberar após inspeção'); E.rowbtn('O26-05', 'Confirmar liberação'); print('toast:', E.toast())
+    E.rowbtn('O26-05', 'Liberar após inspeção'); E.setv('est-laudo', 'INSP-0042'); E.clk('Liberar com o laudo'); print('toast:', E.toast())   # CTL-3 (R-D2): com o laudo
     st = E.cen("c.lotes['Óleo mineral|O26-05'].quarentena"); t2 = E.rowtxt('O26-05')
     E.ok(lot == ['S58-0801'] and '10 L' in t and st == 0 and 'Liberar após inspeção' not in t2 and '330 L' in t2,
          'filtro Câmara fria mostra só S58-0801; O26-05 liberado após inspeção (bloqueado 10 → 0, disponível 330 L)')
     E.shot('est_cen_saldos.png')
     # 9 · contagem cega com divergência vira ajuste pendente; o saldo não muda
     E.etapa(5); print('primário:', E.prim()); E.clk('Contar INV-2611'); a = E.aside()
-    E.setv('fx_g_cnt_cont', '870'); E.salvar(); print('toast:', E.toast())
+    E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '870'); E.salvar(); print('toast:', E.toast())  # revisão CONF F6: o contador não tem mais valor padrão (era o 1º da lista fixa); a pessoa escolhe quem contou
     st = E.cen("(()=>{const a=(c.ajustes||[]).slice(-1)[0]||{}; return [a.estado,a.dif,a.inv,c.lotes['Glifosato 480|G26-14'].fisico];})()"); print(' ', st, E.rowtxt('INV-2611'))
     E.ok('900' not in a and st == ['Aguardando gestor', -30, 'INV-2611', 900] and 'Ajuste aguardando aprovação' in E.rowtxt('INV-2611'),
          'contagem cega (saldo oculto) de 870 L no G26-14: ajuste −30 L aguardando o gestor; físico continua 900 L')
@@ -74,7 +74,8 @@ try:
          'ajuste aprovado pelo gestor: G26-14 900 → 870 L, um movimento de ajuste, sem botão para aprovar de novo')
     # 11 · movimentos: trilha da reserva ao ajuste, com origem web/app
     E.etapa(6); m = E.main(); print('k6:', E.k())
-    tipos = E.J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\\n').slice(2,3).join(''))")
+    # V2-3: a coluna Movimento lida pelo cabeçalho (a ordem segue o "Abre com")
+    tipos = E.J("(()=>{const rs=[...document.querySelectorAll('[role=row].g2ed')]; if(!rs.length) return []; const t=rs[0].closest('[role=table]'); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('MOVIMENTO'); return rs.map(r=>([...r.querySelectorAll('[role=cell]')][i]||{innerText:''}).innerText.replace(/\\s+/g,' ').trim());})()")
     print('  tipos:', tipos)
     E.ok(tipos.count('Reserva') == 3 and tipos.count('Entrega') == 3 and tipos.count('Devolução') == 2 and 'Recebimento confirmado no app' in tipos
          and 'Quarentena liberada' in tipos and 'Ajuste de inventário' in tipos and 'App' in m and 'Web' in m,
@@ -82,8 +83,8 @@ try:
     # 12 · apontamento do app sem sinal: movimento "Aguardando sinal"; o Estoque só vê consumo e baixa de custódia quando o app envia
     print('app sem sinal:', E.mudar("cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,10,1.5);"))
     E.abrir(); E.etapa(6); t = E.rowtxt('Consumo apontado no app'); print(' ', t, '| k6:', E.k())
-    E.etapa(3); g = E.rowtxt(RQ, 'Glifosato 480'); print(' ', g)
-    E.ok('Aguardando sinal' in t and 'App' in t and '320 L 0 L 20 L 300 L' in g and 'Aguardando sinal do app' in g,
+    E.etapa(3); g = E.rowtxt(RQ, 'Glifosato 480'); qs = [E.cel([RQ, 'Glifosato 480'], k) for k in ('Entregue', 'Consumido', 'Devolvido', 'Em custódia')]; print(' ', g, qs)
+    E.ok('Aguardando sinal' in t and 'App' in t and qs == ['320 L', '0 L', '20 L', '300 L'] and 'Aguardando sinal do app' in g,
          'consumo do app sem sinal: movimento "Aguardando sinal"; Glifosato segue consumido 0 L e custódia 300 L até o envio', g)
     # 13 · a O.S. reflete a devolução e o consumo (pode encerrar só sem custódia)
     st = E.cen(f"[c.reqs['{RQ}'].itens.map(i=>i.consumido+'/'+i.devolvido+'/'+i.custodia).join(' '), X.cenPodeEncerrar(c,'OS-0430')]"); print('O.S.:', st)
@@ -96,7 +97,8 @@ try:
     # 15 · restaurar demonstração volta o cenário ao início; sem erro de script
     E.clk('Restaurar demonstração'); E.clk('Restaurar'); print('toast:', E.toast())
     st = E.cen("[Object.keys(c.reqs).length, c.movs.length, c.ordens['OS-0430'].etapa, c.lotes['Glifosato 480|G26-14'].fisico]"); er = E.erros(); print(' ', st, er)
-    E.ok(st == [11, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 11 requisições (6 da Santa Rita + 5 da Lagoa Grande), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
+    E.ok(st == [12, 0, 'A liberar', 1200] and not er, 'Restaurar demonstração: 12 requisições (6 da Santa Rita + 5 da Lagoa Grande + REQ-030 da OB-0110, BEN-1), nenhum movimento, OS-0430 A liberar, G26-14 1.200 L; sem erro de script', er)
 finally:
     ok = E.fim()
 sys.exit(0 if ok else 1)
+

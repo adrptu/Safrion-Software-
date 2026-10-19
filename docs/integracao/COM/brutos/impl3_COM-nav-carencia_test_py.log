@@ -1,0 +1,94 @@
+### carencia_test.py  17:16:19
+OK    motor JS (jsc/node) executou sem erro
+OK    unit 1a duas aplicações ativas em 20/09: a ANTERIOR (abamectina 10/09 → 24/09) determina o prazo, não a mais recente (acetamiprido 19/09 → 22/09)
+OK    unit 1b em 24/09 o prazo está cumprido, mas o rótulo diz "destino a avaliar" (não é conforme)
+OK    unit 1c liberar a colheita OS-C (janela 21–22/09) é impedido no comando, com motivo (até 24/09, OS-A) e dono
+OK    unit 1d osc_liberar recusa com o mesmo motivo; a O.S. continua A liberar
+OK    unit 1e Rever programação: janela a partir de 24/09 → liberar passa; histórico da reprogramação guardado
+OK    unit 2a parcela A: carência em curso pela aplicação apontada em T1-A
+OK    unit 2b parcela B: O.S. planejada e O.S. cancelada sem apontamento não geram carência (planejada só como previsão)
+OK    unit 2c talhão T1: rótulo indica que só T1-A está restrita
+OK    unit 2d apontamento parcial SEM parcela (30 de 60 ha): faixa não identificada → prazo vale para o pivô todo
+OK    unit 3a prazo cumprido (05/09 + 7 = 12/09) e colheita em 22/09: nenhum motivo de carência
+OK    unit 3b sem destino → Não avaliado; UE sem regra carregada → Pendente; mercado indefinido → Pendente
+OK    unit 3c destino que exige laudo, sem laudo → Pendente com dono (Qualidade)
+OK    unit 3d mercado interno: LMR ANVISA vigente de tebuconazol em mamão (1 mg/kg) e Conforme só "no escopo"
+OK    unit 3e nenhuma avaliação tem rótulo "Pode exportar"
+OK    unit 4a lote de 18/09 (antes da aplicação de 24/09) não é contaminado retroativamente
+OK    unit 4b lote de 30/09 colhido dentro da carência (último dia 07/10) → Não conforme com motivo e dono
+OK    unit 4c pós-colheita liga-se só ao lote tratado: tiabendazol no lote de 18/09 (uso pós-colheita a conferir), não no de 30/09
+OK    unit 4d colheita apontada em carência é registrada (não impedida) e marcada para conferência
+OK    unit 4e O.S. de colheita recebe o selo "Colhido em carência · conferir" e dono Ana
+OK    unit 5a mistura com lote colhido em carência continua Não conforme mesmo com laudo "não detectado" (sem diluição)
+OK    unit 5b divisão herda origem e restrição do lote de origem
+OK    unit 5c troca de destino MI-BR → UE reavalia (Conforme no escopo → Pendente) e preserva a avaliação anterior no histórico
+OK    unit 5d laudo da mistura não vale para a divisão de outro lote (escopo da amostra)
+OK    unit 6a apontamento ainda no aparelho já conta: carência até 29/09 + pendência "aguardando sinal"
+OK    unit 6b colheita OS-K impedida pela aplicação não sincronizada
+OK    unit 6c O.S. de defensivo em execução com saldo: dados insuficientes (pode haver aplicação não apontada) e colheita impedida
+OK    unit 6d produto sem uso registrado na cultura e carência não conferida: nunca "cumprida"; lote Pendente
+OK    unit 6e colheita de 05/09 exige histórico desde 22/08, antes do início do registro (01/09): pendente (caderno de campo)
+OK    unit 6f apontamento com data depois da consultada (24/09 > 23/09) é fato registrado: o talhão já mostra a carência (até 08/10)
+OK    unit 7a liberar aplicação: aviso preventivo de conflito com a colheita (OS-CO) até 09/10, sem bloquear
+OK    unit 7b iniciar colheita liberada antes da aplicação também é impedido (comando)
+OK    unit 7c registrar a colheita feita (fato) nunca é impedido: apontamento aceito e marcado para conferência
+OK    unit 8a produto fora do cadastro aplicado: "dados insuficientes" (nunca "sem aplicação") e liberar a colheita impedido com dono
+OK    unit 8b registrar a carência conferida (14 dias): valor inválido recusado; o prazo passa a contar (até 05/10) e a colheita segue impedida pela carência
+OK    unit 8c prazo provisório vencido (7 dias não conferidos): liberar a colheita recusado, motivo "não conferidos na bula"
+OK    unit 8d carência conferida (10 dias → 15/09): liberar passa; a conferência fica registrada com quem e quando
+OK    unit 8e mercado interno: sem laudo Conforme no escopo; laudo 5,0 > LMR 1,0 → Não conforme; 0,4 → Conforme; unidade µg/kg → Pendente; resíduo sem aplicação apontada → Pendente
+OK    unit 8f mistura com laudo próprio abaixo (0,03) de origem acima (0,2 > 0,05 sintético): Não conforme, motivo cita o lote de origem
+OK    unit 8g parte de divisão com laudo próprio abaixo: herda o resultado acima da origem (Não conforme)
+OK    unit 8h mistura sem laudo próprio: Não conforme no destino sintético; no mercado interno (LMR 1,0) o 0,2 da origem não impede
+OK    unit 8i cancelada com apontamento em 20/09: carência até 03/10 + pendência "cancelada com apontamento"; cancelada sem apontamento: nada
+OK    unit 8j colheita OS-H em execução: selo "Carência até 05/10", dono Ana e prazo "suspender novos turnos"; apontamento aceito
+OK    unit 8k duas colheitas (OS-0505 e OC-10505) geram dois lotes distintos (LC-0505-1 e LC-OC10505-1)
+OK    unit 8l aplicação 20/09 + 7 dias: rótulo "carência até 26/09"; colheita em 26/09 impedida, em 27/09 liberada
+OK    unit 8m UE (regra não carregada): liberar impedido com motivo e dono; mercado interno conforme: liberado; apontamento tardio de 20/09 → Não conforme e liberação suspensa
+OK    motor JS (jsc/node) executou o JS do app sem erro
+OK    app A1 app: cartão da colheita OS-K mostra "Carência até 28/09 · colheita impedida" e não oferece Iniciar turno
+OK    app A2 app: iniciar turno da colheita recusado com motivo e dono; a O.S. continua Liberadas
+OK    app A3 app: ordem que não é colheita segue o fluxo normal (Iniciar turno)
+OK    mapa real da Lagoa Grande pronto
+OK    barra do mapa com a camada Carência e destino depois de Pragas e doenças
+OK    ícone da camada = relógio do catálogo (o triângulo fica para alerta real)
+OK    link #car:PV23 abre a camada com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)
+OK    painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização
+OK    uma ação primária no estado: Ver restrição → OS-0508
+OK    faixa de números e aviso "prazo cumprido não é conformidade"
+OK    painel sem parágrafo explicativo (nenhum texto com 14 palavras ou mais num elemento)
+OK    consultado em 30/09: prazo cumprido e destino a avaliar (sem selo de conforme/exportar)
+OK    PV06: OS-0504 liberada aparece como previsão (não conta) com a colheita impedida até 07/10 se aplicada em 24/09
+OK    PV06: painel sem parágrafo explicativo (previsão e lotes em frases curtas)
+OK    PV06: lotes colhidos com a avaliação do destino (LC-0510-1 conforme no escopo do mercado interno; LC-0510-2 não conforme no mercado sintético)
+OK    Integrado: linha "Carência e destino" com Ver carência
+OK    Ver carência abre a camada sem perder o talhão
+OK    mapa sem erro de JavaScript
+OK    colheita OS-0440 (Pivô 23, a partir de 25/09): Liberar bloqueado com motivo (OS-0508, carência até 26/09) e quem resolve (colheita a partir de 27/09)
+OK    sem botão Liberar; Rever programação junto ao impedimento; selo "Carência até 26/09"
+OK    o próprio comando recusa a liberação (não é só a cor do mapa)
+OK    mapa: com a colheita impedida, a ação primária do Pivô 23 vira Rever programação → OS-0440
+OK    reprogramar para 26/09 ainda cai na carência: continua impedida
+OK    recuperação: colheita a partir de 27/09 libera o comando e a origem guarda a reprogramação
+OK    OS-0440 liberada depois de reprogramada
+OK    colheita OS-0466 após azoxistrobina (7 dias não conferidos, 05/09): Liberar bloqueado e o formulário "Registrar carência conferida"
+OK    recuperação: carência conferida (10 dias, até 14/09) registrada no cenário e a colheita pode ser liberada
+OK    OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início
+OK    OS-0504 executada: apontamento de 24/09 em 62,79 ha
+OK    colheita apontada em carência no Pivô 19 (app): registrada, com selo "Colhido em carência · conferir" e dono Ana
+OK    PV06 após aplicar a OS-0504: carência até 07/10; o lote LC-0510-1 (colhido em 16/09) não é contaminado retroativamente
+OK    PV19: carência até 05/10 e o lote de 24/09 aparece Não conforme
+OK    mapa e O.S. sem erro de JavaScript
+OK    CO-06 abre o lote do link: Não conforme por colheita em carência, com aplicação, prazo e quem resolve
+OK    LC-0510-1: conforme só no escopo do mercado interno (aplicação posterior não conta)
+OK    liberação comercial do LC-0510-1 registrada só para o mercado interno, no escopo avaliado
+OK    troca de destino reavalia (UE: regra não carregada → Pendente) e preserva a avaliação anterior no histórico
+OK    destino UE: a liberação anterior fica suspensa e o comando de liberar não aparece (impedido com motivo)
+OK    mistura LM-39-01: genealogia com as duas origens, pós-colheita herdado e requisito do comprador separado da lei
+OK    CO-06 sem erro de JavaScript
+OK    link #car vindo da CO-06 abre a camada na fazenda e com o talhão que já estavam (Santa Rita, T7)
+OK    link #car sem erro de JavaScript
+OK    celular: mapa abre a camada no Pivô 23 (texto presente)
+OK    celular: a avaliação do lote não transborda o contêiner (sem largura fixa) e sem erro
+RESULTADO: 91/91 verificações
+### exit 0 17:20:48

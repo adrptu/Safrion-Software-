@@ -1,0 +1,37 @@
+OK    · 1 SAF: Safrinha 2027 abre direto na etapa 4, demanda de insumos ("Continuar: enviar demanda para cotação")
+OK    · 2 SAF demanda de insumos (CAL-01): R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada
+FALHA · 3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes · (['101.440 kg', '20/02/2027', '90.500 kg'], 'Fertilizantes MAP 11-52 20/02/2027 101.440 kg 20/02/2027 R$ 395.616,00 A enviar — — 101.440 kg — 90.000 kg 90.500 kg — 0 kg — — R$ 3,90/kg')
+FALHA · 4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data · ['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', '23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · −17.500,0 kg → saldo 73.000 kg', '24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · −25.500,0 kg → saldo 47.500 kg', '15/10/2026 · Safra 2026/27 · 1 uso · −40.000,0 kg → saldo 7.500 k
+OK    · 5 SAF envia SOL-2027-02: 8 insumos, R$ 1.094.947,10, origem Safrinha 2027 · demanda de insumos
+OK    · 6 registro único talhao-os-compras-v1: ID, fazenda, safra, 8 itens, estado e origem
+OK    · 7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)
+OK    · 8 CMP abre a mesma solicitação: #sol=SOL-2027-02&saf=S27SF, etapa 2, contexto "Safrinha 2027 · SOL-2027-02"
+OK    · 9 CMP etapa 2: mesmos 8 insumos e R$ 1.094.947,10 (resumo e total da tabela)
+FALHA · 10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000 · MAP 11-52 101.440 90.000 usado antes: 90.500 0 101.440 kg 20/02/2027 3,90 R$ 395.616,00 A cotar
+OK    · 11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)
+OK    · 12 origem do insumo volta ao Planejar safra na demanda de insumos da Safrinha (passo=demanda)
+OK    · 13 recarregar a Compra mantém SOL-2027-02 na etapa 2
+OK    · 14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.305,00
+OK    · 15 Safrinha não herda os convites da 2026/27 (convites prontos, nada enviado) e o endereço acompanha a safra
+OK    · 16 cotação da SOL-2027-02 segue: convites enviados e propostas comparadas na etapa 4
+OK    · 17 de volta à 2026/27: os convites dela continuam enviados
+OK    · 18 trilha da compra oferece "Ver origem · demanda de insumos ›" para a Safrinha
+OK    · 19 SAF volta na demanda de insumos (etapa 4) da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas
+OK    · 26 Compra → origem → Compra: convites e propostas da SOL-2027-02 continuam (trilha igual) e o registro guarda o estado
+OK    · 20 SAF recarregada sem endereço: a Safrinha não volta a "enviar demanda" (registro mantido)
+OK    · 23 SAF demanda de insumos, etapa 4 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela
+OK    · 24 memória como extrato por data, com a origem: "25/09/2026 · T1-A · OS-0430 · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto
+OK    · 21 Fungicida A (2026/27): estoque apto 545 L (65 reservados à OS-0424, a mesma demanda) · 0 L a comprar (nunca 145,2 L); memória com a OS-0421 pelo pendente e a reserva contada uma vez, igual nas duas telas; Fungicida A e Adjuvante fora da SOL-2026-07
+OK    · 25 solicitação de safra nova (só no Planejar safra) aparece na Compra e abre com o próprio contexto
+OK    · 27 paridade na tela: demanda de insumos (endereço antigo etapa=6) de S2627, S27SF e LG2627 = dados2.demanda (valor e nº de insumos)
+OK    · 28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com 1.185.680 kg antes de hoje sem O.S. (coluna 'Antes de hoje sem O.S.', DEM-06), ruptura 25/09–30/09 coberta pelo recebimento, 0 a comprar (= dados2.demanda)
+OK    · 29 memória do calcário: antes de hoje sem O.S. fora da demanda (histórico do plano, nunca "Realizado"), ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova
+OK    · 30 Compra da SOL-2026-09: Fazenda Lagoa Grande; Corretivos e Mudas "Sem fornecedor homologado" com link de cadastro; convites dos outros grupos saem e as propostas chegam
+OK    · 31 endereço com SOL de outra safra abre a SOL da safra e corrige o endereço; safra encerrada por endereço abre a consulta (etapa 6)
+OK    · 22 sem erro JS (ouvinte de error e unhandledrejection em cada página aberta)
+
+RESULTADO: 28 ok · 3 falhas
+  - 3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes
+  - 4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data
+  - 10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000
+rc=1

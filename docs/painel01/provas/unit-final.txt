@@ -1,0 +1,18 @@
+OK Agrícola: quatro estados; não conta cancelada, encerrada nem BEN
+OK Suprimentos: lote sobreposto conta nos indicadores pertinentes; requisição por registro, item coberto e cancelada excluídos
+OK Gráfico de estoque: cada lote físico conta uma só vez
+OK Painéis não alteram cenário
+OK Manutenção: serviço vencido sem ordem; quatro abertas, uma executando e um ativo bloqueado
+OK Gráfico manutenção: fases abertas
+OK Plano inativo não cria pendência
+OK Próxima revisão fora da janela não cria pendência
+OK PAGR ausente nunca vira zero
+OK PMAN ausente nunca vira zero
+OK PSUP ausente nunca vira zero
+OK Coleções vazias válidas: zero agrícola
+OK Coleções vazias válidas: zero suprimentos
+OK Saldo físico ausente não produz total parcial
+OK Custódia ausente não vira demanda falsa
+OK Estado ausente impede contagem parcial de O.S.
+RESULTADO 16/16
+

@@ -1,0 +1,15 @@
+## composição local adca8ba + 4cbfa71 (4cf9519, não publicada)
+EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK
+rmenu_unit exit=0
+OK
+rmenu_generator exit=0
+sonda EX47: 561 OK, 0 falhas
+rmenu_alignment exit=0
+PASS:15 analitos; zero/LD0; qualificador fechado e soloKmg real; extrator P/K; detalhes sem valor recusados pelo handler real; CSS/markup estáticos. Sem DOM/E2E.
+agro06_analitos_unit exit=0
+OK    dem_fazenda (Python) escreve a mesma memória que o demFazenda
+RESULTADO: OK 129/129
+solo_unit_test exit=0
+OK    D2 Calcário dolomítico (Corretivos) está no registro legal com o grupo declarado e fora da trava de agrotóxico
+RESULTADO: OK 2/2
+solo_regressao_test exit=0

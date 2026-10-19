@@ -1,0 +1,108 @@
+== ec650424 irr_onda0_test.py
+OK R1 término antes do previsto exige confirmação e não fabrica crédito
+OK R1 antecipado exige área e leitura; ausência não vale zero
+OK R1 parcial explícita credita só a faixa e mantém déficit global
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+OK R1 pausa, retomada e avanço não ficam depois do término
+OK R1 relógio já adiantado não regride com pausa/retomada
+OK R1 estado antigo com trilha futura bloqueia término sem mutação
+OK R2 P2 programa piso 6,7 mm e 9 h
+OK R2 PV19 respeita lâmina e duração mínimas
+OK R2 ficha incompatível rejeita sem criar ordem
+OK R2 cenário salvo não muda ao carregar/recalcular
+OK R3 Rui não aceita nem devolve; medição intacta
+OK R3 Ana sem motivo não aceita desvio maior que 3%
+OK R3 aceite com motivo e recibo; replay não duplica
+OK R3 irrigante devolve mantendo medição e crédito provisório
+OK R3 rateio pequeno conserva total sem negativo
+OK R3 tolerância exata sem motivo; ausência de perfil bloqueia
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+OK UI motivo obrigatório, preserva leitura e permite devolver
+{"ok":21,"fail":0,"navegador":false}
+rc=0
+== contraprova IRR_SOURCE=base 8aa0a17
+FAIL R1 término antes do previsto exige confirmação e não fabrica crédito :: Expected values to be strictly equal:
+
+372 !== 1202
+
+FAIL R1 antecipado exige área e leitura; ausência não vale zero :: Missing expected exception.
+FAIL R1 parcial explícita credita só a faixa e mantém déficit global :: Expected values to be strictly equal:
+
+109 !== 5
+
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+FAIL R1 pausa, retomada e avanço não ficam depois do término :: Expected values to be strictly equal:
+
+false !== true
+
+OK R1 relógio já adiantado não regride com pausa/retomada
+FAIL R1 estado antigo com trilha futura bloqueia término sem mutação :: Missing expected exception.
+FAIL R2 P2 programa piso 6,7 mm e 9 h :: Expected values to be strictly equal:
++ actual - expected
+
++ 6.222222222222221
+- 6.7
+
+FAIL R2 PV19 respeita lâmina e duração mínimas :: Expected values to be strictly equal:
++ actual - expected
+
++ 2.3529411764705883
+- 7.21
+
+FAIL R2 ficha incompatível rejeita sem criar ordem :: Missing expected exception.
+OK R2 cenário salvo não muda ao carregar/recalcular
+FAIL R3 Rui não aceita nem devolve; medição intacta :: Missing expected exception.
+FAIL R3 Ana sem motivo não aceita desvio maior que 3% :: Missing expected exception.
+FAIL R3 aceite com motivo e recibo; replay não duplica :: Expected values to be strictly equal:
+
+undefined !== 'Ana'
+
+FAIL R3 irrigante devolve mantendo medição e crédito provisório :: irrDevolver is not defined
+FAIL R3 rateio pequeno conserva total sem negativo :: Expected values to be strictly equal:
+
+4 !== 2
+
+FAIL R3 tolerância exata sem motivo; ausência de perfil bloqueia :: Missing expected exception.
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+FAIL UI motivo obrigatório, preserva leitura e permite devolver :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Divergência'
+- 'Devolvida'
+
+{"ok":6,"fail":15,"navegador":false}
+rc=1
+== contraprova IRR_SOURCE=8d6b10d
+OK R1 término antes do previsto exige confirmação e não fabrica crédito
+OK R1 antecipado exige área e leitura; ausência não vale zero
+OK R1 parcial explícita credita só a faixa e mantém déficit global
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+FAIL R1 pausa, retomada e avanço não ficam depois do término :: Expected values to be strictly equal:
+
+false !== true
+
+FAIL R1 relógio já adiantado não regride com pausa/retomada :: Expected values to be strictly equal:
+
+false !== true
+
+FAIL R1 estado antigo com trilha futura bloqueia término sem mutação :: Missing expected exception.
+OK R2 P2 programa piso 6,7 mm e 9 h
+OK R2 PV19 respeita lâmina e duração mínimas
+OK R2 ficha incompatível rejeita sem criar ordem
+OK R2 cenário salvo não muda ao carregar/recalcular
+OK R3 Rui não aceita nem devolve; medição intacta
+OK R3 Ana sem motivo não aceita desvio maior que 3%
+OK R3 aceite com motivo e recibo; replay não duplica
+OK R3 irrigante devolve mantendo medição e crédito provisório
+OK R3 rateio pequeno conserva total sem negativo
+OK R3 tolerância exata sem motivo; ausência de perfil bloqueia
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+OK UI motivo obrigatório, preserva leitura e permite devolver
+{"ok":18,"fail":3,"navegador":false}
+rc=1

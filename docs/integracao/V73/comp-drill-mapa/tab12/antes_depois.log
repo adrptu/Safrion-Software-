@@ -1,0 +1,16 @@
+render /tmp/claude-0/intdrill/tools/prototipo/v37/gen37/_render
+2b  sem expansão {'tabela': 133, 'linhas': 3, 'area': 75, 'folga': 0, 'mainRola': False} | com "Expandir tudo" (1) {'tabela': 423, 'linhas': 21, 'area': 75, 'folga': 0, 'mainRola': False}
+3   linha T3 à vista: sem expansão False | depois de abrir 1 faixa(s) True
+4   linhas lidas (len(l4a), mínimo 8): sem expansão 1 | com "Expandir tudo" 19
+5   talhões lidos: sem expansão ['Santa', 'Total'] T1: None | depois de abrir 1 faixa(s) ['Santa', 'T1', 'T2', 'T3', 'T4', 'P1', 'P2', 'T7', 'C1', 'Total'] T1: Livre : 152 ha livres a partir de 21/02/2027 (folga 1 dia) | 152 ha | 21/02/2027
+B5  linha-filha T1 à vista: sem expansão False | depois de abrir a fazenda: T1 T1 Em dia 312,0 ha Sequeiro 312,4 ha +0,
+C3  1440 px: sem expansão {'n': 0, 'esqMax': 0, 'selo': 0} | com "Expandir tudo" {'n': 16, 'esqMax': 7, 'selo': 16}
+C3  390 px: sem expansão {'n': 0, 'esqMax': 0, 'selo': 0} | com "Expandir tudo" {'n': 16, 'esqMax': 7, 'selo': 16}
+render /tmp/claude-0/int90/tools/prototipo/v37/gen37/_render
+2b  sem expansão {'tabela': 423, 'linhas': 16, 'area': 75, 'folga': 0, 'mainRola': False} | com "Expandir tudo" (1) {'tabela': 423, 'linhas': 20, 'area': 75, 'folga': 0, 'mainRola': False}
+3   linha T3 à vista: sem expansão True | depois de abrir 0 faixa(s) True
+4   linhas lidas (len(l4a), mínimo 8): sem expansão 14 | com "Expandir tudo" 18
+5   talhões lidos: sem expansão ['T1', 'T2', 'T3', 'T4', 'P1', 'P2', 'T7', 'C1', 'Total'] T1: Livre : 152 ha livres a partir de 21/02/2027 (folga 1 dia) | 152 ha | 21/02/2027 | depois de abrir 0 faixa(s) ['T1', 'T2', 'T3', 'T4', 'P1', 'P2', 'T7', 'C1', 'Total'] T1: Livre : 152 ha livres a partir de 21/02/2027 (folga 1 dia) | 152 ha | 21/02/2027
+B5  linha-filha T1 à vista: sem expansão True | depois de abrir a fazenda: T1 T1 Em dia 312,0 ha Sequeiro 312,4 ha +0,
+C3  1440 px: sem expansão {'n': 16, 'esqMax': 7, 'selo': 16} | com "Expandir tudo" {'n': 16, 'esqMax': 7, 'selo': 16}
+C3  390 px: sem expansão {'n': 16, 'esqMax': 7, 'selo': 16} | com "Expandir tudo" {'n': 16, 'esqMax': 7, 'selo': 16}

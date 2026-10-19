@@ -1,0 +1,94 @@
+REPRO OS-0421 realizado 240 ha · Fungicida A consumido 120 L · custódia 40 L
+OK    S0 seed OS-0421: 190/350 ha, saldo 160, Fungicida A consumido 95 L e 65 L em custódia
+OK    P1 web 26/09 50 ha e depois app (turno de 26/09) 50 ha: o 2º fica "Duplicidade a conferir"; 240 ha, saldo 110, Fungicida A 120 L consumido / 40 L em custódia (antes: 290 ha e 145 L)
+OK    P1b mensagem do app diz o que existe, que nada foi somado e quem decide
+OK    P1c selo "Apontamento em conferência" na ordem e encerramento bloqueado com dono
+OK    P2 app primeiro, web depois (mesma data): a web fica retida; 240 ha, 120 L
+OK    P3 web repetida na mesma data (outra chave): o 2º fica retido; 240 ha
+OK    P4 app sem sinal + web na mesma data: a web soma (o servidor não via o aparelho); no envio o turno do app fica retido e a baixa local é desfeita: 240 ha, 120 L / 40 L
+OK    P4b reenvio da fila não soma de novo (OSDIA-03)
+OK    D1 "mesmo turno": dia 6 Descartado, nada somado nem baixado (240 ha, 120 L), selo sai, encerramento não fica preso por ele
+OK    D1b decidir de novo é recusado (não está mais em conferência)
+OK    D2 "outro turno": soma uma vez: 290 ha, saldo 60, Fungicida A 145 L / 15 L; dia 6 Provisório com a decisão registrada
+OK    D3 "outro turno" do apontamento que veio da fila: rebaixa uma vez (290 ha, 145 L / 15 L)
+OK    D4 NEGATIVO "outro turno" que passa do saldo é recusado com a causa; nada muda (350 ha, retido)
+OK    N1 dois turnos do mesmo operador no app no mesmo dia somam (turnos distintos): 290 ha
+OK    N2 datas diferentes (web 25/09, app 26/09) somam: 290 ha
+OK    N3 talhões diferentes na mesma data (T1 web, T2 app) somam: 290 ha
+OK    N4 idempotência: a mesma chave (duplo clique) devolve o mesmo apontamento; 240 ha, um só registro
+OK    N5 a retida não conta para concluir: "Enviar para conferência" recusa por saldo (110 ha)
+OK    W1 web aceita o consumo real informado: 27 L baixados (122 L / 38 L), sem linha 0 do adjuvante fora da requisição
+OK    W2 web informado acima da custódia (80 > 65 L): fica Em conferência com Rui, sem baixa (95 L / 65 L), área soma 240 ha; o texto diz que Rui confere e Ana (gestora) aceita o excedente (revisão do CTL-3, achado 7)
+OK    W3 NEGATIVO web com a sugestão não editada acima da custódia (25 > 10 L) é recusada pedindo o usado; nada gravado
+OK    W4 web sem consumo informado (Mapa, chamada antiga): dose × área do trecho, 25 L (SINT-C03)
+OK    W5 a web também grava o movimento de consumo (como o app)
+OK    F1 turno do app leva a data operacional 26/09 (não o relógio do aparelho) e a chave do turno
+OK    F2 formulário da web: Fungicida A sugere 25 L (editável, estimativa); Adjuvante fora da REQ-035 vazio = 0
+OK    F3 editado "27,5" vai como informado (fora de est)
+OK    F4 NEGATIVO usado inválido: erro no campo, nada vai ao comando
+OK    R1 app sem sinal: não soma até o envio (190 ha) e entra na fila uma vez
+OK    R1b no envio soma uma vez: 250 ha
+OK    R2 app: sugestão acima da custódia segue recusada com o texto do app
+OK    R3 área acima do saldo recusada (161 > 160)
+OK    C0 retido em Em execução: selo "Apontamento em conferência", dono Paula (conferência), prazo com o dia
+OK    C1 retido em Em conferência: dono = conferência (Paula), não Rui
+OK    C2 web acima da custódia: a prévia do almoxarife não diz "custódia de web"
+OK    C3 movimento retido sem item no Estoque: det vazio, econsDet vazio, motivo em obs
+OK    C3b movimento descartado também sem item fantasma
+OK    C4 colheita descartada como duplicidade não cria lote de colheita
+OK    C5 mesma chave com área diferente é conflito (ENG-021), não "já registrado"
+OK    C6 somar depois de outro apontamento fecha na regra única (SINT-C03)
+OK    C8 apontamento retido não consome o previsto
+OK    C12 data antiga do Mapa (23/09, a do dia 4) fica retida contra o dia 4; nada somado (o Mapa usa 26/09: nav)
+OK    C7 caso do aparelho retido fica "Aguarda duplicidade" (não "resolvido") e sem baixa
+OK    C13 residual declarado: dois aparelhos (Marcos e Carlos), mesma O.S. e data, sem talhão: o 2º fica retido para Paula (falso positivo previsto), 240 ha
+OK    C9 turno aberto em estado antigo (sem chave) + 5 turnos de 10 ha: chave reserva não colide, soma 50 ha
+OK    C10 aviso no formulário com o mesmo critério do servidor (26/09 avisa; 27/09 não)
+OK    C11 "mesmo turno: vale este" fica com o usado real do app: 240 ha, 122 L / 38 L; o dia 5 estornado e guardado
+OK    C11b "vale este" contra dois anteriores é recusado com a causa
+OK    BA retido + insumo esgotado: selos "Insumo esgotado · Fungicida A" e "Apontamento em conferência", dono Paula (conferência)
+OK    REPRO auditoria: web 50 ha + app 50 ha do mesmo turno = 240 ha · 120 L (base: 290 ha · 145 L)
+OK    V1 S2 "Outro turno: somar" desconta a área no aparelho: recusado (máximo 40 ha, 70 ha no aparelho); depois do sinal 310 ≤ 350 ha
+OK    V1b S2 "vale este" também desconta: 100 ha contra 90 ha (160 depois do estorno − 70 no aparelho) é recusado e nada é estornado
+OK    V2 S2 "vale este" com o consumo do dia 5 já aceito (CC-301, pela gestora: CTL-3) é recusado com quem aceitou; nada muda (165 L, sem caso novo); a tela esconde o botão (cenApUsoK)
+OK    V2b a saída que resta ("vale o dia 5") guarda o dia 6 sem baixa
+OK    V3 S2 colheita retida não vira lote: LC-0505-4 não existe; destino e liberação recusados, nada gravado
+OK    V3b somada como outro turno, o lote LC-0505-4 aparece com 10 ha
+OK    V3c "vale este" na colheita com o lote do dia 3 já com destino e liberação é recusado; lote, destino e liberação ficam
+OK    V3d sem registro sobre o lote, "vale este" troca o lote: LC-0505-3 sai, LC-0505-4 entra
+OK    V4 dispensar saldo com retido é recusado (Paula decide antes); "Outro turno: somar" continua possível: 290 ha
+OK    V4b dispensa parcial na mesma fase e depois retido: dono Paula (conferência), não vazio
+OK    V4c S2 pré-existente: dispensar desconta a área no aparelho; 61 recusado (máximo 60 ha), 60 aceito; com o sinal, 290 + 60 dispensados = 350 ha
+OK    V5 "vale este" só olha o que ainda vale: dia 7 (dupDe 5, 6), com o 6 guardado, vale contra o 5: 240 ha, 120 L (DEMO-11)
+OK    V5b com o dia 5 estornado, o dia 7 não tem "mesmo turno": as duas saídas recusadas com a causa (a tela mostra só "somar"); nada guardado
+OK    V5c o dia 7 soma como outro turno: 240 ha, 120 L (25 + 25 ha do app)
+OK    V6 decisão com a estimativa acima da custódia é recusada pedindo o usado (AP-04): nenhum caso para Rui, nada muda
+OK    V6b com o usado informado na conferência (8 L) soma e baixa 8 L, como informado
+OK    V6c usado informado acima da custódia (15 > 10 L) vai para Rui como relato (CONC-07), sem baixa
+OK    V7 ENG-021: mesma chave com outro consumo, horas, origem ou operador = conflito; o mesmo conteúdo = "já registrado"; 240 ha, 120 L, um registro
+OK    V8 Mapa (sem campo de consumo): a recusa manda apontar pela O.S. informando o usado
+OK    K1 relato guardado não é duplicata de um novo: o dia 7 fica retido só contra o dia 5
+OK    K2 "vale este" recusa o caso ainda aberto do dia 5 (CC-301 Recusado) e baixa só o dia 6: 240 ha, 120 L
+OK    K3 colheita na carência (AP-09): o retido conta (conservador) e o guardado como duplicidade não
+OK    K4 aplicação retida conta na carência e, guardada como duplicidade, deixa de contar (carAplic)
+OK    K5 custo do Mapa (ordCusto) soma só o relato somado: 10 ha, insumo 500, operação 100 (retido e guardado fora)
+OK    AT1 NEGATIVO Rui (almoxarife) decide a duplicidade: recusado com quem decide; nada somado, dia 6 segue retido e sem decisão gravada (antes: somava e gravava "Paula (conferência)")
+OK    AT1 NEGATIVO Ana (gestora e agrônoma) decide a duplicidade: recusado com quem decide; nada somado, dia 6 segue retido e sem decisão gravada (antes: somava e gravava "Paula (conferência)")
+OK    AT1 NEGATIVO Caio (PCP) decide a duplicidade: recusado com quem decide; nada somado, dia 6 segue retido e sem decisão gravada (antes: somava e gravava "Paula (conferência)")
+OK    AT1 NEGATIVO sem perfil decide a duplicidade: recusado com quem decide; nada somado, dia 6 segue retido e sem decisão gravada (antes: somava e gravava "Paula (conferência)")
+OK    AT1 NEGATIVO Rui forjado como conferente decide a duplicidade: recusado com quem decide; nada somado, dia 6 segue retido e sem decisão gravada (antes: somava e gravava "Paula (conferência)")
+OK    AT2 Paula (conferência) decide pela tela (osc_apDecidir com o perfil): vale o dia 5, a decisão grava Paula (conferência)
+OK    AT3 o papel de conferência é da Paula: g2quem("conferente") = CEN_CONF_AP (o texto "Quem decide" das telas e do app)
+RESULTADO unit: 80/80
+Traceback (most recent call last):
+  File "/private/tmp/safrion-est1-final/gen37/ap_unico_test.py", line 41, in <module>
+    FALHAS += ap_unico_nav.rodar()
+  File "/private/tmp/safrion-est1-final/gen37/ap_unico_nav.py", line 12, in rodar
+    a = App(['MB-01', 'MB-03', 'OS', 'EST']); J = a.J; erros = []
+  File "/private/tmp/safrion-est1-final/gen37/app_lib.py", line 21, in __init__
+    self.p = free()
+  File "/private/tmp/safrion-est1-final/gen37/journeys.py", line 11, in free
+    s=socket.socket(); s.bind(('127.0.0.1',0)); p=s.getsockname()[1]; s.close(); return p
+PermissionError: [Errno 1] Operation not permitted
+
+EXIT=1

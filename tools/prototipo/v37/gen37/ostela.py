@@ -74,7 +74,7 @@ try:
     t=pan(); chk('sem insumo entregue, iniciar fica bloqueado e nomeia a entrega no Estoque', 'Iniciar bloqueado: REQ-041 sem entrega' in t and 'Rui (almoxarife) entrega no Estoque' in t
         and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"), t[:500])
     # Estoque entrega (outra tela, pelo cenário compartilhado): falta a confirmação no app
-    J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>{ X.cenEntregar(c,rq,'Glifosato 480',320,'Marcos'); X.cenEntregar(c,rq,'2,4-D 806',160,'Marcos'); return X.cenEntregar(c,rq,'Óleo mineral',80,'Marcos'); }); "+ST+";})()"); time.sleep(.4)
+    J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>{ X.cenEntregar(c,rq,'Glifosato 480',320,'Marcos','Rui'); X.cenEntregar(c,rq,'2,4-D 806',160,'Marcos','Rui'); return X.cenEntregar(c,rq,'Óleo mineral',80,'Marcos','Rui'); }); "+ST+";})()"); time.sleep(.4)
     t=pan(); chk('entregue sem confirmação: iniciar bloqueado até o app confirmar', 'aguardando confirmação no app' in t and 'Marcos confirma o recebimento no app' in t
         and not J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"), t[:500])
     J("(()=>{const X=window.__cen; const rq=X.cenGet().ordens['OS-0430'].req; X.cenMudar(null,c=>X.cenConfirmarRecebimento(c,rq)); "+ST+";})()"); time.sleep(.4)
@@ -92,7 +92,7 @@ try:
     chk('apontamento de 60 ha com insumos usados', 'Apontamento do dia 1: 60 ha' in tt and 'Glifosato 480 120 L' in tt and 'continua em execução' in tt, tt)
     chk('ordem continua em execução, saldo 100', 'Em execução' in fase_lista('OS-0430') and '60 / 160 ha' in fase_lista('OS-0430'), fase_lista('OS-0430'))
     chk('coluna Usado atualiza (120 L)', '120 L' in t)
-    btn('Registrar apontamento'); setin('Área feita em hectares','100'); btn('Salvar apontamento')
+    btn('Registrar apontamento'); setin('Data do turno','2026-09-27'); setin('Área feita em hectares','100'); btn('Salvar apontamento')   # CTL-2 · A: outro dia (o mesmo dia com outra chave fica em conferência de duplicidade)
     chk('saldo zero muda o botão para Enviar para conferência', J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Enviar para conferência')"))
     btn('Enviar para conferência'); btn('Confirmar envio')
     chk('em conferência', 'Em conferência' in fase_lista('OS-0430'))
@@ -108,7 +108,8 @@ try:
     btn('Voltar')
     chk('plantio com semente e MAP pela dose', '52 kg/ha' in t and '5.304 kg' in t and '250 kg/ha' in t and '25.500 kg' in t, t)
     fechar(); abrir('OS-0417'); t=pan()
-    chk('conferência bloqueada por sobras com atalho ao Estoque e à conferência', 'Encerrar bloqueado' in t and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='EST.dc.html')") and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='CA-02.dc.html')"), t[:300])
+    # CTL-1 (Frente F): CA-02 é oculta e fixa; o painel fica com o atalho vivo ao Estoque
+    chk('conferência bloqueada por sobras com atalho ao Estoque e sem elo para CA-02 (oculta e fixa)', 'Encerrar bloqueado' in t and J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>a.getAttribute('href')==='EST.dc.html')") and not J("[...document.querySelectorAll('aside[role=dialog] a')].some(a=>(a.getAttribute('href')||'').startsWith('CA-02'))"), t[:300])
     fechar()
     # 01/10: água sem produto não é O.S. agrícola: OS-0419/OS-0422/OS-0423 não abrem mais aqui (regras conferidas na IR-03/IR-03det, abaixo)
     corpo=J("document.body.innerText") or ''
@@ -118,12 +119,12 @@ try:
     btn('Cancelar'); fechar(); abrir('OS-0425'); t=pan()
     chk('entrega parcial avisa no próximo passo', 'cobre 26,7 dos 38 ha' in t and '11.400 kg' in t)
     fechar()
-    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Kanban'); b&&b.click();})()"); time.sleep(.4)
+    J("document.querySelector('[data-visao=kanban]').click()"); time.sleep(.4)   # VISOES-1: pelo seletor (data-visao)
     J("(()=>{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf('OS-0424')===0); k&&k.click();})()"); time.sleep(.4); t=pan()
-    chk('cartão do Kanban abre a mesma tela', 'OS-0424' in t and 'Fungicida A' in t and '0,8 L/ha' in t and '64 L' in t, t[:200])
+    chk('cartão do Kanban abre a mesma tela', 'OS-0424' in t and 'Fungicida A' in t and '0,5 L/ha' in t and '64 L' in t, t[:200])   # G1 do CTL-1: 0,5 L/ha × 128 ha no T1-B (antes 0,8 × 80 no milho do P2)
     c.shot(os.path.join(HERE,'_probe','os_tela.png'))
     # 01/10: ajuste que tira e inclui produto, salvo e liberado — cenário limpo (a OS-0430 acima já foi encerrada)
-    fechar(); J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Lista'); b&&b.click();})()")
+    fechar(); J("document.querySelector('[data-visao=lista]').click()")
     J("try{localStorage.removeItem('talhao-os-cenario-v1')}catch(e){}"); c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.3)
     abrir('OS-0430'); btn('Ajustar antes de liberar'); btnl('Tirar Óleo mineral da ordem'); setid('#aj_inc','Adjuvante espalhante'); btn('Incluir')
     btn('Salvar e liberar'); e=alertas()

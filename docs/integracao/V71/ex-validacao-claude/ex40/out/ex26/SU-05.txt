@@ -1,0 +1,221 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Contratos, pedidos e entregas
+Contratos, pedidos e entregas
+i
+1 conflito de liberação
+Resolver conflito da carga 4
+CONFLITOS
+1
+carga 4 · CT-2026-11
+A RECEBER ATÉ 26/09
+3
+NF 4533 · PC-093 · PC-094
+LIBERADO A ENTREGAR
+R$ 180,8 mil
+KCl · diesel
+CONTRATOS VIGENTES
+3
+Fertisul · Ipiranga · Santa Rita Insumos
+Contratos de fornecimento
+Formalizar contrato
+3 de 3
+CONTRAPARTE · CONTRATO
+⇅
+ITEM · UNIDADE
+⇅
+CONTRATADO
+⇅
+TOLERÂNCIA (VERSÃO ACEITA)
+⇅
+PREÇO · CONDIÇÃO
+⇅
+EXPOSIÇÃO · LIMITE
+⇅
+ESTADO
+⇅
+Fertisul · CT-2026-11
+Abrir contrato
+KCl 60% · t
+140 t
+−5% / +5% · v2 aceita
+R$ 2.330/t
+28 dias
+R$ 93,2 mil
+de R$ 150 mil
+Conflito
+Ipiranga Agro · CT-2026-03
+Diesel S10 · mil L
+180 mil L
+±10% · hipótese, não aceita
+R$ 5,84/L
+quinzenal
+R$ 87,6 mil
+de R$ 120 mil
+Vigente
+Santa Rita Insumos · CT-2026-08
+Defensivos · consignação
+por item
+por item · v1 aceita
+tabela
+acerto mensal
+R$ 22,0 mil
+de R$ 80 mil
+Consignado
+Pedidos
+Emitir pedido
+Confirmar fornecedor
+Receber ›
+5 de 5
+PEDIDO · FORNECEDOR
+⇅
+ITEM
+⇅
+QUANTIDADE
+⇅
+RECEBIDO
+⇅
+A ENTREGAR
+⇅
+CHEGADA PREVISTA
+⇅
+USO PREVISTO
+⇅
+DEPÓSITO
+⇅
+ESTADO
+⇅
+PC-088
+Fertisul
+KCl 60%
+100.000 kg
+60.000 kg
+40.000 kg
+02/10/2026
+plantio T4 e cobertura
+Galpão 2
+Parcial
+PC-090
+Coop. Vale
+Semente de soja 58 W
+20.000 kg
+—
+20.000 kg
+05/10/2026
+plantio T1-A e T2 · out
+Câmara fria
+Confirmado
+PC-091
+Sementes Vale
+Semente de soja 62 X
+8.000 kg
+—
+8.000 kg
+08/10/2026
+plantio T1-B e T3 · out
+Câmara fria
+Confirmado
+PC-093
+Ipiranga Agro
+Diesel S10
+15.000 L
+—
+15.000 L
+26/09/2026
+frota do plantio
+Tanque Sede
+Confirmado
+PC-094
+Casa das Peças
+Kit filtros + óleo 15W40
+1 kit
+—
+1 kit
+26/09/2026
+OM-0234 · preventiva
+Almox. oficina
+A confirmar
+Programação de entregas
+Simular pico de exposição
+Por carga
+Por item
+Por depósito
+Por mês
+6 de 6
+CARGA · CONTRATO/PEDIDO
+⇅
+ITEM
+⇅
+QUANTIDADE
+⇅
+CHEGADA
+⇅
+USO PREVISTO (COBERTURA)
+⇅
+DEPÓSITO
+⇅
+EXPOSIÇÃO PROJETADA
+⇅
+ESTADO
+⇅
+Cargas 1–2 · CT-2026-11 · PC-088
+KCl 60%
+60 t
+19/09 · NF 4501
+adubação
+Galpão 2
+—
+Recebida
+Carga 3 · CT-2026-11 · PC-088
+KCl 60%
+40 t
+02/10
+plantio T4 · até 10/10
+Galpão 2
+R$ 93,2 mil
+A entregar
+Carga 4 · CT-2026-11 · proposta
+KCl 60%
+40 t
+08/10 (proposta)
+cobertura nov · T4, T3, P1 e P2
+Galpão 2
+R$ 186,4 mil
+Conflito
+Carga D-12 · CT-2026-03 · PC-093
+Diesel S10
+15 mil L
+26/09
+frota do plantio
+Tanque Sede
+R$ 87,6 mil
+Pronta
+PC-090 · Coop. Vale
+Semente de soja 58 W
+20.000 kg
+05/10
+plantio T1-A e T2
+Câmara fria
+—
+Confirmada
+PC-091 · Sementes Vale
+Semente de soja 62 X
+8.000 kg
+08/10
+plantio T1-B e T3
+Câmara fria
+—
+Confirmada
+Tela: Contratos, pedidos e entregas · 1 conflito de liberação

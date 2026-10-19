@@ -23,8 +23,8 @@ def setv(sel,val):
 def marca(lab): J(f"document.querySelector('aside[role=dialog] input[aria-label={json.dumps(lab)}]').click()"); time.sleep(.25)
 def chip_fase(t): J(f"(()=>{{const b=[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); b.click();}})()"); time.sleep(.4)
 def chips(): return J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
-def kanban(): J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Kanban'); b&&b.click();})()"); time.sleep(.4)
-def lista(): J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Lista'); b&&b.click();})()"); time.sleep(.4)
+def kanban(): J("document.querySelector('[data-visao=kanban]').click()"); time.sleep(.4)   # VISOES-1: pelo seletor (data-visao)
+def lista(): J("document.querySelector('[data-visao=lista]').click()"); time.sleep(.4)
 def cartao(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf({json.dumps(id_)})===0); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def ins(): return J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const t=a.innerText; const i=t.indexOf('INSUMOS'); return t.slice(i,i+600).replace(/\\s+/g,' ');})()") or ''
 def nova(saf,cult,atv,jan):
@@ -79,7 +79,7 @@ try:
     for val,exp in [('0','Informe a área a dispensar (maior que 0 ha).'),('abc','Informe a área a dispensar (maior que 0 ha).'),('71','Máximo 70 ha: é o saldo da ordem.'),('-5','Informe a área a dispensar (maior que 0 ha).')]:
         setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]',val); btn('Confirmar dispensa'); a=J("[...document.querySelectorAll('aside[role=dialog] [role=alert]')].map(x=>x.innerText).join(' | ')")
         chk(f'dispensa {val!r}: {exp}', exp in (a or ''), a)
-    setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','70'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Faixa já tratada'); marca('Validação agronômica'); btn('Confirmar dispensa')
+    setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','70'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Faixa já tratada'); btn('Confirmar dispensa')
     tt=toast(); t=pan(); print('   toast disp:', tt)
     chk('dispensa até zerar o saldo: toast pede conferência', 'saldo 0 ha' in tt and 'Envie a ordem para conferência' in tt, tt)
     chk('saldo 0: próximo passo vira Enviar para conferência', temb('Enviar para conferência') and not temb('Registrar apontamento') and not temb('Dispensar saldo'), t[:400])
@@ -90,7 +90,7 @@ try:
     fechar(); l=linha('OS-0421'); print('   linha:', l)
     kanban(); print('   cartao:', cartao('OS-0421')); lista()
     # 7) dispensa decimal
-    reload(); abrir('OS-0421'); btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','10,5'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); marca('Validação agronômica'); btn('Confirmar dispensa')
+    reload(); abrir('OS-0421'); btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','10,5'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); btn('Confirmar dispensa')
     tt=toast(); chk('dispensa decimal 10,5 aceita', 'Dispensados 10,5 ha' in tt and 'saldo 149,5 ha' in tt, tt)
     t=pan(); print('   acum dec:', t[t.find('Realizado 190'):][:90])
     fechar(); print('   linha dec:', linha('OS-0421')); kanban(); print('   cartao dec:', cartao('OS-0421')); lista()

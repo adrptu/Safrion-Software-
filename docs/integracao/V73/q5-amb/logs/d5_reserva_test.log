@@ -1,0 +1,15 @@
+  ok  0 · "Gerar 3 ordens preventivas" à vista (limite 15 s)
+  ok  0 · preparo: OM-0235 pede 3 filtros pela SC-041; Ana emite o PC-202
+  ok  1a recebimento parcial com duplo toque: entra 2 un, as 2 ficam reservadas para a OM-0235, um recebimento só
+  ok  1b o livre não cresce com a peça da OM (antes 0 un, depois 0 un)
+  ok  1c Compras mostra "Reservado para OM-0235", "Recebido em parte" e a origem PC-202 › recebimento PC-202/1
+  ok  1d na OM-0235 o parcial aparece: "Peça chegou · reservada", "Reservada 2 de 3 un · falta 1 un (SC-041)"; ainda não libera
+  ok  2 · a mesma chave de novo não soma nem reserva de novo; o resto (1 un) completa a reserva e a SC-041 fica Recebida
+  ok  3 · na OM-0235: "Peça chegou · reservada" (as 3 un), a origem (pedido › recebimento › reserva › ordem) e a primária "Liberar serviço"
+  ok  4 · outra ordem (OM-0236) não usa a reserva: "Falta 1 un · 3 un reservadas para a OM-0235" e a liberação é recusada com o motivo; nada muda
+  ok  5a cancelar a OM-0235 (motivo) devolve as 3 un ao livre, com registro na ordem (quem, quando, motivo, origem do recebimento)
+  ok  5b a OM-0235 mostra "Reserva de 3 un devolvida ao livre" com o motivo; a OM-0236 sai de Falta; Compras registra "devolvido ao livre (OM-0235 cancelada)"
+  ok  6 · reposição sem ordem: a Graxa EP2 recebida (22 kg) entra no estoque livre, sem reserva
+  ok  D5 · fim: sem erro de JS
+RESULTADO: 13/13 ok
+rc=0

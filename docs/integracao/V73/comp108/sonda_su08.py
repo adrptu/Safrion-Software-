@@ -1,0 +1,42 @@
+import sys, os, time, json
+G=os.environ['GEN37']; sys.path.insert(0,G)
+from cada_lib import T
+t=T(); J=t.J
+def dlg(): return (J("(document.querySelector('[role=dialog]')||{}).innerText||'(fechado)'") or '')[:300].replace('\n',' | ')
+def pset(k,v): return J(f"(()=>{{const i=document.querySelector('[role=dialog] [id$=\"_{k}\"]'); if(!i) return 'sem campo {k}'; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(v)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}})); return i.value}})()")
+def pbtn(b): return J(f"(()=>{{const e=[...document.querySelectorAll('[role=dialog] button')].find(x=>x.innerText.trim()==={json.dumps(b)}); if(!e) return 'sem botão'; e.click(); return 'ok'}})()")
+def rows(): return J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' ').slice(0,200))")
+CG="(()=>{const k=Object.keys(localStorage).find(k=>/cenario/.test(k)); return k?JSON.parse(localStorage.getItem(k)):null})()"
+def cg(expr): return J(f"(()=>{{const c={CG}; if(!c) return 'sem estado salvo'; return ({expr}); }})()")
+def lote(): return cg("Object.keys(c.lotes).map(k=>k+'='+c.lotes[k].fisico+'/'+c.lotes[k].reservado).slice(0,2).join(' ; ')")
+try:
+  t.goto('Main.dc.html'); J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Rui'); 1")
+  t.goto('SU-08.dc.html'); time.sleep(.5)
+  r0=rows(); print('A linhas:', len(r0)); [print('   ',x) for x in r0[:3]]; print('A ações em histórico:', J("[...document.querySelectorAll('[role=row]')].filter(r=>/Histórico/.test(r.innerText)).map(r=>r.querySelectorAll('button').length).reduce((a,b)=>a+b,0)"))
+  print('A cabeçalho:', t.header()[-160:]); print('A primária:', J("(()=>{const h=document.querySelector('header'); return [...h.querySelectorAll('button')].map(b=>b.innerText.trim()).filter(Boolean).join(' | ')})()")); print('A sem kpis:', 'EM TRÂNSITO' not in t.bloco()); print('A corpo topo:', t.bloco()[:400])
+  print('A movs canônicos:', cg("(c.movs||[]).length"), '| lotes:', lote())
+  print('B registrar perda:', t.clk('Registrar perda')); time.sleep(.3); print('B painel:', dlg())
+  print('B campos:', J("[...document.querySelectorAll('[role=dialog] select,[role=dialog] input,[role=dialog] textarea')].map(e=>e.id+'='+e.value)"))
+  pset('q','5'); pset('causa','Embalagem rompida'); pset('ev','foto IMG-1'); print('B submeter:', pbtn('Submeter perda')); time.sleep(.5)
+  print('B toast:', t.toast(), '| painel:', dlg()[:80])
+  print('B ajustes:', cg("JSON.stringify((c.ajustes||[]).map(a=>[a.id,a.tipo,a.estado,a.dif,a.key]))"), '| lotes:', lote())
+  print('B cabeçalho:', t.header()[-80:]); print('B linhas topo:', rows()[:2])
+  print('C Rui revisar:', J("(()=>{const b=[...document.querySelectorAll('[role=row] button')].find(x=>/Revisar perda/.test(x.innerText)); if(!b) return 'sem'; b.click(); return 'ok'})()")); time.sleep(.3)
+  print('C painel:', dlg()); print('C aprovar:', pbtn('Aprovar perda')); time.sleep(.4); print('C toast:', t.toast(), '| ajustes:', cg("JSON.stringify((c.ajustes||[]).filter(a=>a.tipo==='perda').map(a=>a.estado))"), '| lotes:', lote())
+  J("localStorage.setItem('safrion.perfilDemo','Ana'); 1"); t.goto('SU-08.dc.html'); time.sleep(.4)
+  print('D Ana revisar:', J("(()=>{const b=[...document.querySelectorAll('[role=row] button')].find(x=>/Revisar perda/.test(x.innerText)); if(!b) return 'sem'; b.click(); return 'ok'})()")); time.sleep(.3)
+  print('D aprovar:', pbtn('Aprovar perda')); time.sleep(.5); print('D toast:', t.toast(), '| ajustes:', cg("JSON.stringify((c.ajustes||[]).filter(a=>a.tipo==='perda').map(a=>[a.estado,a.por]))"), '| lotes:', lote())
+  print('D movs:', cg("JSON.stringify((c.movs||[]).slice(-1))")[:250]); print('D cabeçalho:', t.header()[-80:]); print('D linhas topo:', rows()[:3])
+  t.goto('EST.dc.html'); time.sleep(.6); b=t.bloco(); i=b.find('AJ-'); print('E Estoque mostra AJ:', i>=0, b[max(0,i-80):i+160] if i>=0 else '')
+  t.goto('SU-08.dc.html'); time.sleep(.4); n0=cg("(c.movs||[]).length")
+  print('F transferir:', t.clk('Prévia de transferência')); time.sleep(.3); print('F painel:', dlg()); pset('q','3'); pset('d','Galpão 1'); pset('mot','abastecer frente'); print('F ok:', pbtn('Conferir prévia')); time.sleep(.4)
+  print('F toast:', t.toast(), '| movs antes/depois:', n0, cg("(c.movs||[]).length"))
+  print('G estornar:', t.clk('Prévia de estorno')); time.sleep(.3); print('G painel:', dlg()); pset('mot','teste'); print('G ok:', pbtn('Conferir prévia')); time.sleep(.4)
+  print('G toast:', t.toast(), '| movs:', cg("(c.movs||[]).length"))
+  print('erros JS:', t.errs())
+  t.c.size(390,844); t.goto('SU-08.dc.html'); time.sleep(.5); print('H 390 rolagem horizontal:', J("document.documentElement.scrollWidth>document.documentElement.clientWidth+1"))
+  print('H 390 primária visível:', J("[...document.querySelectorAll('button')].some(b=>/Registrar perda/.test(b.innerText)&&b.getClientRects().length)")); t.c.size(1440,1100); t.goto('SU-08.dc.html'); time.sleep(.4); f=J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Registrar perda/.test(x.innerText)); if(!b) return 'sem'; b.focus(); return document.activeElement===b})()"); print('K foco em Registrar perda:', f); [t.c.call('Input.dispatchKeyEvent',dict(type=tp,key='Enter',code='Enter',windowsVirtualKeyCode=13,nativeVirtualKeyCode=13,**({'text':'\r'} if tp=='keyDown' else {}))) for tp in ('keyDown','keyUp')]; time.sleep(.4); print('K Enter abre:', dlg()[:60]); print('erros JS final:', t.errs())
+finally:
+  try: t.c.close()
+  except Exception: pass
+  t.srv.terminate()

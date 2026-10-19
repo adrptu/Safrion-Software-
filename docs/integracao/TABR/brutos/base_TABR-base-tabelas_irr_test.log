@@ -1,0 +1,28 @@
+  FALHOU IR-01 Setores: colunas Setor | Cultura | Estádio | Área | Déficit hoje | Fonte do déficit | Necessidade bruta | Passadas | Ordem | Cobertura | Resta | Situação | Pendência | Próxima passada | Próximo passo | Responsável · ['Setor', 'Déficit hoje', 'Necessidade', 'Situação', 'Próximo passo']
+  ok  IR-01 Setores: nenhum rótulo composto (" · ", " / ") · ['Setor', 'Déficit hoje', 'Necessidade', 'Situação', 'Próximo passo']
+  ok  IR-01 Setores: filtro (▾) e ordenação no título em todas as 5 colunas · [True, True, True, True, True]
+  ok  IR-01 Setores: unidade junto do valor (nenhuma) · []
+  ok  IR-01 Setores: Situação em chip (3) · [True, True, True]
+  FALHOU IR-01: Pivô 2 = Milho | V10 | 80 ha | 11,2 mm | Medido | 12,44 mm | 2 | OS-0419 | 87 % | 1,5 mm | A conferir | Divergência · −3,8 % | — | Conferir medição | João · {}
+  FALHOU IR-01: a pendência explica a situação e a próxima passada tem coluna própria (Pivô 1 Impedida · Falta insumo · Ureia 45% · amanhã 21:00; Gotejo T7 Conflito · parada da B3 · hoje 14:00) · ({}, {})
+  FALHOU IR-01: déficit estimado com ≈ e a fonte em coluna própria (Gotejo T7 ≈10,0 mm · Estimativa por ET) · {}
+  FALHOU IR-01: o filtro rápido de Situação tem os mesmos textos dos chips da coluna · (['Todos', 'Impedida', 'A conferir'], ['conflito · parada da B3', 'falta insumo · OS-0418', 'conferir medição · OS-0394'])
+  FALHOU IR-01: filtro Fonte do déficit = Estimativa por ET → Gotejo T7 e Pivô 1 · ['Gotejo T7 Mamão · 42 ha', 'Pivô 1 Feijão R5 · 95 ha', 'Pivô 2 Milho V10 · 80 ha']
+  ok  IR-01: ordenar Déficit hoje (decrescente) pelo número (o ≈ não atrapalha) · ['11,2 mm medido', '≈10,0 mm Estimativa por ET', '≈8,4 mm Estimativa por ET']
+  FALHOU IR-01: ordenar Próxima passada pelo instante (hoje 14:00 antes de amanhã 21:00) · ['', '', '']
+  FALHOU IR-01 Todas: a coluna Fazenda entra (Pivô 2 da Santa Rita e da Lagoa Grande se distinguem) e cada célula fica sob o seu cabeçalho · (['Setor', 'Déficit hoje', 'Necessidade'], [], 0)
+  FALHOU IR-01 Todas: Lagoa Grande com Cultura Mamão e a fase do mamão em Estádio (antes "Mamão · produção" numa célula) · {}
+  FALHOU IR-01 Santa Rita: a coluna Fazenda sai e a grade continua alinhada · ['Setor', 'Déficit hoje', 'Necessidade']
+  FALHOU IR-02 Agenda: colunas Captação › ordem | Tipo | Setor | Bomba | Vazão | Início | Fim | Lâmina | Passadas | Etapa | Pendência | Próximo passo | Responsável | Avisos · ['Captação · ordem', 'Setor · bomba', 'Janela', 'Lâmina', 'Etapa · pendência']
+  FALHOU IR-02 Agenda: nenhum rótulo composto (" · ", " / ") · ['Captação · ordem', 'Setor · bomba', 'Janela', 'Lâmina', 'Etapa · pendência']
+  ok  IR-02 Agenda: filtro (▾) e ordenação no título em todas as 5 colunas · [True, True, True, True, True]
+  ok  IR-02 Agenda: unidade junto do valor (nenhuma) · []
+  FALHOU IR-02: captação com o pico de hoje na Vazão (166 L/s); OS-0419 Água | Pivô 2 | Bomba B2 | 166 L/s | hoje 20:00 | amanhã 10:31 | 10,81 mm | 1 | Liberadas · ({}, {})
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/_base_gen37/tabelas_irr_test.py", line 93, in <module>
+    g.ordena('Início'); bl = por_grupo(g, 'Início')
+                             ^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/_base_gen37/tabelas_irr_test.py", line 48, in por_grupo
+    k = g.labels().index(col); out = []; cur = None
+        ^^^^^^^^^^^^^^^^^^^^^
+ValueError: 'Início' is not in list

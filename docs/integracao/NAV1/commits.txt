@@ -1,0 +1,5 @@
+a7023caf529f9c06ad9cad4f3c6a18ba7c6470be NAV1: clique do pa_lista_test espera o alvo livre e evidência das correções (§7.1)
+7b7d260c47590f83717c3689ccb5c7fe71bc9196 NAV1: correções da revisão
+0e1c36854acc9dd87995af2c42cf8c7c56da99db NAV-1: especificação, decisões e evidência (docs/navegacao)
+74a6df6ad5efacd15582298ae4ad706606287cbd NAV-1: testes antigos da PA na regra nova (lista → detalhe, sem etapas)
+19aeb94a0e41c620cde077fbdcac3342387a2304 NAV-1: Planos agronômicos em lista → detalhe, sem etapas falsas; cultivo abre no Planejar safra

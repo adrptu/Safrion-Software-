@@ -1,0 +1,2 @@
+ma_unica_test exit=0 (472s) | RESULTADO: 23/23 ok
+FIM

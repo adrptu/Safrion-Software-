@@ -1,0 +1,3 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock python3 varredura.py
+RESULTADO: 144/144 páginas sem erro
+[exit 0]

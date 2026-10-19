@@ -1,0 +1,6 @@
+      A antes: Oficina Em dia Zé 2 10 h/dia seg–sex · 07–17h
+OK    E1 B salva a Oficina em 08–18h pela tela; A, ociosa, mostra 08–18h sem interação
+OK    E2 com o formulário aberto em A (rascunho 6×2), a gravação em B não apaga o rascunho
+OK    E3 A salva o rascunho antigo: recusa por revisão, rascunho mantido, fonte com o valor de B
+OK    E4 nenhum erro de JavaScript em A nem em B
+RESULTADO: 4/4 ok

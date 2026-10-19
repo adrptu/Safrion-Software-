@@ -1,0 +1,12 @@
+=== irtest.py
+erros JS: nenhum
+
+26 de 26 verificações OK
+=== irr_fluxo_test.py
+OK    21 nenhuma tela com erro de execução 
+
+33 ok · 0 falhas []
+=== map_irrig_filtro_test.py
+OK    15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423 
+
+15 ok · 0 falhas []

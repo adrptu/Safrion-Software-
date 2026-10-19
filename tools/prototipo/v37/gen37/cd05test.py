@@ -53,7 +53,8 @@ try:
     linha=J(f"{ROW('Agro Norte')}.innerText.replace(/\\s+/g,' ')"); J(f"(()=>{{const r={ROW('Agro Norte')}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.4)
     em2=J(f"(document.getElementById('{FID('email')}')||{{}}).value"); J(f"({BTN})('Cancelar')"); time.sleep(.2)
     chk('linha atualizada (grupos na linha; e-mail salvo no painel)', em2=='vendas@agronorte.com.br' and 'Combustível' in linha, [linha,em2])
-    depois=cob('Combustível'); chk('cobertura de Combustível recalculada', depois and 'Só 1' in depois, depois)
+    # TABELAS-FOCO (06/10/2026): número na coluna Fornecedores e estado em chip ("Sem concorrência" no lugar de "Só 1")
+    depois=cob('Combustível'); chk('cobertura de Combustível recalculada', depois and depois.startswith('Combustível 1 ') and 'Sem concorrência' in depois, depois)
     # 5 · desomologar: fornecedor sai da cobertura
     J(f"(()=>{{const r={ROW('Agro Norte')}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.4)
     J(f"({SETV})('#{FID('homol')}','Não')"); time.sleep(.2); J(f"({BTN})('Salvar')"); time.sleep(.5)
@@ -90,7 +91,7 @@ try:
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
     # novo parceiro pessoa física: 12 dígitos barra, 11 dígitos salva, CPF repetido barra
     FIL('Todos')
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()"); time.sleep(.4)
+    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Criar parceiro').click()"); time.sleep(.4)
     J(f"({SETV})('#{FID('nome')}','Joana Prado')"); J(f"({SETV})('#{FID('cnpj')}','987.654.321-001')"); time.sleep(.2)
     J(f"{CAN('Prestador')}.click()"); time.sleep(.2); J(f"({BTN})('Salvar')"); time.sleep(.4)
     al=AL(); chk('12 dígitos barrado', 'Informe CPF (11 dígitos) ou CNPJ (14 dígitos).' in al, al)

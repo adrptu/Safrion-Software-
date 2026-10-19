@@ -1,0 +1,24 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    B0 · semente: total, ordens e horas por especialidade batem com o oráculo independente
+OK    B1 · os três componentes (pronto, falta de peça, pendência técnica) repartem o backlog sem perder nem repetir ordem nem hora
+OK    B11 · semente: OM-0234 (A liberar com "Conflito · OS-0420") é pendência técnica, 5 HH; pronto = OM-0228 + OM-0233 = 9,5 HH
+OK    B12 · o mesmo conflito aceito pelo PCP não bloqueia: OM-0234 passa a "Pronta para liberar" (pronto)
+OK    B13 · conflito e peça em falta juntos: vale a ordem do §5.2, pendência técnica (não falta de peça); as duas pendências são reais
+OK    B2 · sem capacidade configurada não há semanas equivalentes
+OK    B3 · sem ordem pendente: n = 0 e 0 HH
+OK    B4 · em conferência, encerrada e cancelada ficam fora: 6,5 HH (Mecânico 4, Eletricista 2,5)
+OK    B5 · Liberadas e Em execução = pronto
+OK    B6 · ordem aberta sem tempo previsto não vira 0: conta em sem estimativa e não muda o total
+OK    B7 · contraprova: a soma antiga da carga (tempo ausente = 0) dá o mesmo total sem avisar que falta estimativa
+OK    B8 · A liberar com peça em falta fica em falta de peça; sem impedimento, "Pronta para liberar" entra em pronto
+OK    B14 · pronta × bloqueada: A liberar sem executante possível (X9) e sem tempo previsto (X10) são pendência técnica, como no manLiberar; a X8 continua pronta
+OK    B9 · todas sem tempo: o texto é "N sem estimativa", nunca "0 HH"
+OK    B10 · filtro por ativo: só as ordens daquele ativo (a X2 movida para outro ativo sai)
+OK    B15 · com capacidade: semanas = HH da especialidade ÷ HH/semana (oráculo sobre os dados crus), com a capacidade e as pessoas
+OK    B16 · sem capacidade: semanas null e motivo "capacidade", nunca 0
+OK    B17 · sem leitor de capacidade (tela sem a CF-06): todas null com o motivo, e o resto do backlog igual
+OK    B18 · ordem da especialidade sem tempo previsto: as semanas viram mínimo (parcial), com o mesmo número
+OK    B19 · especialidade só com ordem sem tempo: "sem estimativa" (sem número); ordem sem especialidade não consulta capacidade
+OK    B20 · capacidade zero ou inválida não vira divisão: null com o motivo
+OK    B21 · o leitor de capacidade é chamado por especialidade, nunca para "sem especialidade"
+RESULTADO: 23/23 ok

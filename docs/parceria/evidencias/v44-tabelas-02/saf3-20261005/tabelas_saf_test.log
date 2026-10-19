@@ -1,0 +1,19 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 tabelas_saf_test.py
+  ok  TF03 cabeçalhos: uma variável por coluna, unidade no cabeçalho · ['OPERAÇÃO', 'ATIVIDADE', 'CONJUNTO', 'RENDIMENTO (HA/H)', 'CUSTO (R$/H)', 'CUSTO (R$/HA)', 'CUSTO (R$/KG)', 'MODO', 'LARGURA (M)', 'VELOCIDADE (KM/H)', 'EFICIÊNCIA (%)', 'PARTE DA ÁREA (%)', 'TRABALHA', 'JANELA (H POR TALHÃO)', 'PLANOS']
+  ok  TF03 nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/ha · R$/kg", "Parte: …") · []
+  ok  árvore preservada: Plantio → Plantio e adubação de base (2 configurações) → 2 configurações com Parte "pelo rendimento" e Trabalha "Ao mesmo tempo" · [['Plantio', '1 atividade', '2 conjuntos', '', '', '', '', '', '', '', '', '', '', '', ''], ['Plantio', 'Plantio e adubação de base 2 configurações + Outra configuração', '2 conjuntos', '', '', '', '', 'por configuração', '', '', '', 'divide a área pelo rendimento', '', '', 'Soja alta tecnologia, So
+  ok  TF03 Custo (R$/kg) só na colheita, em coluna própria; o R$/ha fica só com o número · [('Colheita de grãos', '229,20', '0,0606'), ('Colheita de café', '662,86', '0,2907')]
+  ok  TF03 Modo "Informado": Largura, Velocidade e Eficiência vazias (—), rendimento informado · [['Tratamento de sementes', 'Tratamento de sementes', 'Máquina TSI na sede · equipe de 2', '40,00', '136,00', '3,40', '—', 'Informado', '—', '—', '—', '—', '—', '—', 'Soja alta tecnologia'], ['Colheita de café', 'Colheita', 'Derriçadeiras portáteis · equipe de 6', '0,35', '232,00', '662,86', '0,2907
+  ok  TF03 filtro Operação = Plantio: só a árvore do Plantio (grupo, atividade e 2 configurações) · [['Plantio', '1 atividade'], ['Plantio', 'Plantio e adubação de base 2 configurações + Outra configuração'], ['Plantio', 'Plantio e adubação de base'], ['Plantio', 'Plantio e adubação de base']]
+  ok  TF03 filtro Modo = Informado: só configurações informadas (TSI, café, poda, fertirrigação…) · ['Colheita de café', 'Colheita de frutas', 'Fertirrigação', 'Plantio de mudas', 'Poda', 'Tratamento de sementes', 'Tratos culturais']
+  ok  TF03 filtro Largura (m) = 36: só o pulverizador de 36 m · 14
+  ok  TF03 filtro Planos (valor exato): só as atividades do plano do café · ['Adubação 1ª parcela', 'Adubação 2ª parcela', 'Adubação pós-colheita', 'Colheita', 'Fungicida para ferrugem', 'Poda de esqueletamento']
+  ok  TF03 ordenar Largura (m) crescente: 6 antes de 12 (número, não texto) · ['6', '12']
+  ok  TF03 ordenar Custo (R$/ha) decrescente: 109,40 antes de 58,20 (número, não texto) · ['109,40', '58,20']
+   painel/aviso:  | Rendimento de Calagem · Trator 03 + Distribuidor 3 t: 9,00 ha/h · R$ 25,89/ha. Plano operacional e recursos recalculados.
+  ok  editar Largura 24 → 12 m na Calagem: Rendimento 9,00 ha/h e Custo 25,89 R$/ha na mesma linha, marcada "ajustado nesta safra" · ['Adubação a lanço', 'Calagem ajustado nesta safra', 'Trator 03 + Distribuidor 3 t', '9,00', '233,00', '25,89', '—', 'Largura × velocidade', '12', '10', '75', '—', '—', '—', 'Mamão Formosa · implantação irrigada']
+  ok  sem erro de script (1440) · []
+   cabeçalhos 390: ['OPERAÇÃO', 'ATIVIDADE', 'CONJUNTO']
+  ok  390 px: a página não rola na horizontal (a tabela rola dentro da caixa) e o cabeçalho Operação está à vista · [390, 390]
+RESULTADO: 14/14 ok
+[exit 0]

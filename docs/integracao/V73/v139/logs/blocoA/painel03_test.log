@@ -1,0 +1,49 @@
+OK    P1a PG.dc.html existe e PAGR, PMAN e PSUP saíram
+OK    P1b nenhuma página aponta para PAGR, PMAN ou PSUP
+OK    P2a Agrícola: as 4 fases são as do pnValores (PAINEL-01)
+OK    P2b Agrícola: atrasadas e impedidas são as do agrPainelRef (PAINEL-02)
+OK    P2c Manutenção: sem ordem, abertas, em execução e bloqueados = pnValores(PMAN)
+OK    P2d Suprimentos: os 4 indicadores do Estoque = pnValores(PSUP)
+OK    P2e Custos: um cartão por cultivo do agrCustoRef
+OK    P3a "Atacar agora" e "Decidir" na ordem da regra (classe, R$, ha, dias, mais antigo) e sem item duplicado
+OK    P3b ordem: receituário (classe 1) antes de R$ 50 mil (classe 3); na mesma classe, ha antes de dias e o mais antigo primeiro
+OK    P3c ativo bloqueado: classe pela causa (risco à segurança = Lei e segurança; o resto = Prazo e ativos)
+OK    P4 coleções ausentes: "Sem dados" em fases, Manutenção e Estoque; nenhum cartão inventa 0
+OK    P5a a conta não altera o cenário
+OK    P1c 1440: o painel abre em Prioridades, com as 6 abas
+OK    P6 1440: número da aba = itens a atacar e decidir do módulo; some com 0 (Prioridades sem número)
+OK    P1d 1440: a barra lateral tem o item Painel, marcado nesta tela
+OK    P1e 1440 MOD-AGR.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P1e 1440 MOD-MAN.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P1e 1440 MOD-SUP.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P1e 1440 MOD-COM.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P1e 1440 MOD-CRE.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P7a 1440: o endereço #mod=man abre a aba Manutenção
+OK    P7b seta para a direita troca a aba e leva o foco (Suprimentos, #mod=sup); End vai ao Crédito; Home volta a Prioridades e limpa o endereço
+OK    P7c 1440 pri: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7d 1440: Prioridades com alavancas, "Atacar agora" e "Decidir"; nenhum indicador "Sem dados" na semente
+OK    P7c 1440 agr: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 1440 man: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 1440 sup: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 1440 com: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 1440 cre: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7e 1440: o 1º item de "Atacar agora" leva à origem dele (OS.dc.html#OS-0431)
+OK    P7f 1440: sem erro de JavaScript
+OK    P5b navegar pelas abas não grava no armazenamento do navegador
+OK    P8 Comercial: Painel → aba do painel único; "Oferta e compromissos" → PCOM, com o mesmo título
+OK    P1c 390: o painel abre em Prioridades, com as 6 abas
+OK    P6 390: número da aba = itens a atacar e decidir do módulo; some com 0 (Prioridades sem número)
+OK    P1d 390: a barra lateral tem o item Painel, marcado nesta tela
+OK    P1e 390 MOD-AGR.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P1e 390 MOD-CRE.dc.html: o cartão Painel abre o painel único na aba do módulo
+OK    P7a 390: o endereço #mod=man abre a aba Manutenção
+OK    P7c 390 pri: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7d 390: Prioridades com alavancas, "Atacar agora" e "Decidir"; nenhum indicador "Sem dados" na semente
+OK    P7c 390 agr: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 390 man: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 390 sup: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 390 com: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7c 390 cre: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta
+OK    P7e 390: o 1º item de "Atacar agora" leva à origem dele (OS.dc.html#OS-0431)
+OK    P7f 390: sem erro de JavaScript
+RESULTADO: 48 ok · 0 falhas

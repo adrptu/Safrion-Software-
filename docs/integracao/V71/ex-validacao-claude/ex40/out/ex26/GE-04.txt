@@ -1,0 +1,118 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Contas a pagar e caixa
+Contas a pagar e caixa
+i
+R$ 158 mil vencem hoje · 1 aguarda alçada
+Enviar remessa ao banco
+Caixa hoje
+R$ 1,84 mi 2 contas
+Vence hoje
+R$ 158 mil 2 títulos
+Aguardando banco
+R$ 62 mil 1 remessa
+Saldo projetado 30 d
+R$ 1,31 mi cenário V2
+Títulos a pagar
+Importar retorno do banco
+7 de 7
+CREDOR · DOCUMENTO
+⇅
+ORIGEM
+⇅
+VENCIMENTO
+▲
+PRINCIPAL · PAGO / SALDO
+⇅
+PROGRAMADO
+⇅
+CONCILIAÇÃO · PRÓXIMA AÇÃO
+⇅
+Agro Norte
+NF 8790 · 2/3
+PC-084 · defensivos safra 26/27
+vence hoje
+R$ 96.000
+0 / R$ 96.000
+23/09/2026
+Proposto · aguarda alçada
+Abrir aprovação
+Ipiranga Agro
+NF 5531
+diesel S10 · CT-2026-03 · tanque sede
+vence hoje
+R$ 62.000
+0 / R$ 62.000
+23/09/2026
+Aguardando banco
+remessa enviada
+Importar retorno
+Oficina HidroMec
+NF 1203
+OM-0233 · corretiva do Trator T1
+no prazo
+05/10
+R$ 18.400
+0 / R$ 18.400
+—
+A propor
+NF conferida
+Propor pagamento
+Fertisul
+NF 4501 · PC-088
+KCl 60% · 100 t × R$ 2,33/kg · título único, sem barter
+no prazo
+17/10
+R$ 233.000
+0 / R$ 233.000
+17/10/2026
+Aprovado na alçada
+Abrir pedido
+Cooperativa Central
+CT-77 · antecipação
+venda VD-2101 · milho 111 t · abate nas retiradas
+no prazo
+30/10
+R$ 101.800
+R$ 100.000 recebidos
+—
+Crédito vinculado
+abate nas retiradas
+Ver retiradas
+Banco Terra
+CRE-0102 · parc. 1
+crédito de custeio · 1ª liberação
+no prazo
+15/12
+R$ 300.000
+0 / liberado R$ 300 mil
+—
+Conciliado
+Abrir crédito
+Coop. Vale
+PC-090 · NF 4533 a conferir
+Semente de soja 58 W · 20 t × R$ 9,30/kg
+no prazo
+safra · 30/04/27
+R$ 186.000
+previsão · R$ 186.000
+—
+Previsão
+título nasce na conferência
+Abrir pedido
+PC-088: título único de R$ 233.000, sem barter. Antecipação da Cooperativa Central (CT-77) criou
+crédito vinculado
+abatido nas retiradas.
+Tela: Contas a pagar e caixa · R$ 158 mil vencem hoje · 1 aguarda alçada

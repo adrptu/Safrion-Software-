@@ -1,0 +1,13 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 saf38test.py
+Traceback (most recent call last):
+  File "/home/user/sp-tab3/tools/prototipo/v37/gen37/saf38test.py", line 43, in <module>
+    etapa(5); oper0 = total_oper(); print('   Operadores e equipe · demanda total antes:', oper0)
+                      ^^^^^^^^^^^^
+  File "/home/user/sp-tab3/tools/prototipo/v37/gen37/saf38test.py", line 36, in total_oper
+    return J(r"""(()=>{const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent)[1].querySelectorAll('[role=row]'); let on=false;
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-tab3/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+[exit 1]

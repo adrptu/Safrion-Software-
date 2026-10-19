@@ -1,0 +1,113 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Programação e ordens de colheita
+Programação e ordens de colheita
+i
+1 impedida · 1 em conferência
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Janela S39
+22–27/09
+Em execução
+1 +1 em conferência
+Saldo da semana
+2,7 t + 15 sc café
+Recebimento
+14 t/d packing
+Ordens de colheita do período
+Preparar ordens do período
+Liberar ordens prontas
+6 de 6
+ORDEM · ORIGEM
+⇅
+JANELA
+⇅
+ETAPA · SELO
+⇅
+PREVISTO
+⇅
+REALIZADO
+⇅
+SALDO
+⇅
+EQUIPE
+⇅
+AÇÃO
+⇅
+OC-0510
+T7 · Mamão Formosa
+22–27/09
+Em execução
+Parcial · dia 2 de 5
+12,0 t
+6,3 t hoje · 9,3 t acum.
+2,7 t
+Turma A (8) · 2 carretas
+Registrar avanço
+OC-0513
+T7 · Mamão Formosa
+29/09–04/10
+Liberadas
+11,5 t
+—
+11,5 t
+Turma A (8) · 2 carretas
+Iniciar ordem
+OC-0508
+C1 · Café (repasse 25/26)
+15–20/09
+Em conferência
+Divergência de carga
+420 sc 60 kg
+405 sc
+15 sc
+Turma B (12) · 1 colhedora
+Conferir cargas
+OC-0514
+P1 · Feijão
+30/09–02/10
+A liberar
+Impedida · excede 14 t/d
+95 ha
+—
+95 ha
+a alocar
+Liberar ordem
+OC-0507
+T7 · Mamão Formosa (S38)
+15–20/09
+Encerradas
+12,0 t
+12,0 t
+0
+Turma A (8) · 2 carretas
+Ver cargas
+OC-0501
+T3 · Milho
+01–08/09
+Encerradas
+96 ha · 8.640 sc
+96 ha · 8.612 sc
+0
+Colhedora CH-01
+Ver cargas
+Tela: Programação e ordens de colheita · 1 impedida · 1 em conferência

@@ -1,0 +1,8 @@
+rc=0 82s ma_vinculo_test :: RESULTADO: 88/88 ok
+rc=0 531s cartoes_test :: RESULTADO: 70/70
+rc=0 53s ma_correcoes_pm_test :: RESULTADO: 12/12 ok
+rc=0 58s ma_revisao_test :: RESULTADO: 18/18 ok
+rc=0 99s ma_rastreio_test :: RESULTADO: 58/58 ok
+rc=0 218s ma_unica_test :: RESULTADO: 23/23 ok
+rc=0 52s fotos :: 
+FIM

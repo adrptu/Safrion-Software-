@@ -1,0 +1,47 @@
+OK    F1-1a Santa Rita: o mapa é um grupo com nome ("Talhões da Fazenda Santa Rita · 8 talhões") e um botão por talhão
+OK    F1-1b Santa Rita: Tab entra uma vez no mapa (1 parada de Tab; tabindex móvel)
+OK    F1-1c Santa Rita: só com as setas, todos os 8 talhões são alcançados (vizinho na direção)
+OK    F1-1d Santa Rita: Home e End vão ao primeiro e ao último pelo nome (C1 e T7)
+OK    F1-1e Santa Rita: Enter no T4 abre o painel com o foco no título; aria-pressed=true
+OK    F1-1f Santa Rita: Esc fecha o painel e devolve o foco ao T4 (aria-pressed=false)
+OK    F1-1g Santa Rita: o Tab seguinte sai do mapa
+OK    F1-2 Santa Rita: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)
+OK    F1-3a Santa Rita: nome acessível completo no formato do pedido ("T4, N ha, cultura e estádio, valor, estado, data")
+OK    F1-3b Santa Rita: os 8 talhões têm aria-pressed
+OK    F1-4a Santa Rita: "/" com o foco no mapa abre a busca "Ir para talhão"
+OK    F1-4b Santa Rita: T4 / t4 / Talhão 4 + Enter escolhe o T4 e abre o painel com o foco no título
+OK    F1-5a Santa Rita: o Mapa não tem a opção Lista (nem "Ver dados", nem a seção da lista)
+OK    F1-5b Santa Rita: a busca "Ir para talhão" sugere os 8 talhões da fazenda
+OK    F1-1a Lagoa Grande: o mapa é um grupo com nome ("Talhões da Fazenda Lagoa Grande · 23 talhões") e um botão por talhão
+OK    F1-1b Lagoa Grande: Tab entra uma vez no mapa (1 parada de Tab; tabindex móvel)
+OK    F1-1c Lagoa Grande: só com as setas, todos os 23 talhões são alcançados (vizinho na direção)
+OK    F1-1d Lagoa Grande: Home e End vão ao primeiro e ao último pelo nome (PV01 e PV24)
+OK    F1-1e Lagoa Grande: Enter no P5 abre o painel com o foco no título; aria-pressed=true
+OK    F1-1f Lagoa Grande: Esc fecha o painel e devolve o foco ao P5 (aria-pressed=false)
+OK    F1-1g Lagoa Grande: o Tab seguinte sai do mapa
+OK    F1-2 Lagoa Grande: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)
+OK    F1-3a Lagoa Grande: nome acessível completo no formato do pedido ("P5, N ha, cultura e estádio, valor, estado, data")
+OK    F1-3b Lagoa Grande: os 23 talhões têm aria-pressed
+OK    F1-4a Lagoa Grande: "/" com o foco no mapa abre a busca "Ir para talhão"
+OK    F1-4b Lagoa Grande: P5 / PV05 / Pivô 5 + Enter escolhe o P5 e abre o painel com o foco no título
+OK    F1-4c Lagoa Grande: a busca enquadra o pivô (pedido explícito: a câmera muda na busca)
+OK    F1-4d Lagoa Grande: Enter e Esc no P5 (à vista) não mexem na câmera (sem zoom nem recentralização sozinhos)
+OK    F1-5a Lagoa Grande: o Mapa não tem a opção Lista (nem "Ver dados", nem a seção da lista)
+OK    F1-5b Lagoa Grande: a busca "Ir para talhão" sugere os 23 talhões da fazenda
+OK    F1-6 Todas: o mapa mostra a Santa Rita e o aviso diz onde estão as outras (Lagoa Grande: escolher a fazenda; Boa Vista sem geometria), sem Lista
+OK    F1-7a Esc desliga o modo Medir (antes da seleção)
+OK    F1-7b clique no fundo do mapa desmarca (D16): o painel do T2 estava aberto e fecha
+OK    F1-7c Esc não apaga o rascunho de desenho (3 pontos continuam)
+OK    F1-8a o endereço guarda fazenda, camada, talhão e data: #faz=LG&lay=sat&t=PV05&dt=25-09
+OK    F1-8b recarregar #faz=LG&lay=sat&t=PV05&dt=25-09 restaura fazenda, camada, seleção e data
+OK    F1-8c "Abrir talhão ›" leva ao CD-01det do P5; voltar restaura a câmera e a seleção, sem reenquadrar
+OK    F1-10 sem o MapLibre: aviso com "Tentar de novo" (sem citar a Lista, que saiu) e o mapa volta sem recarregar a página
+OK    F1-12a 1440: sem erro de JavaScript (fora o aviso esperado do CDN bloqueado)
+OK    F1-11a 390 com toque: tocar o T4 escolhe e abre o painel embaixo do mapa, com o título à vista; sem cartão de hover
+OK    F1-11b 390 com toque: tocar um pivô da Lagoa Grande (P15) escolhe e abre o painel dele
+OK    F1-11c 390: o mesmo grupo e os mesmos botões (23, um na ordem de Tab)
+OK    F1-12b 390: sem erro de JavaScript
+MEDIDAS {"grupo_Santa Rita": {"role": "group", "nome": "Talhões da Fazenda Santa Rita · 8 talhões", "desc": "mux-instr", "n": 8, "tab0": 1, "pressed": 8, "botao": 8}, "paradas_tab_Santa Rita": 1, "alcance_setas_Santa Rita": [8, 8], "esc_fecha_Santa Rita": true, "aria_pressed_Santa Rita": 8, "busca_Santa Rita": 8, "grupo_Lagoa Grande": {"role": "group", "nome": "Talhões da Fazenda Lagoa Grande · 23 talhões", "desc": "mux-instr", "n": 23, "tab0": 1, "pressed": 23, "botao": 23}, "paradas_tab_Lagoa Grande": 1, "alcance_setas_Lagoa Grande": [23, 23], "esc_fecha_Lagoa Grande": true, "aria_pressed_Lagoa Grande": 23, "busca_Lagoa Grande": 23, "hash": "#faz=LG&lay=sat&t=PV05&dt=25-09"}
+PORTÃO F1-9 (não executado aqui): leitor de tela real (NVDA/Chrome e VoiceOver/Safari, mais VoiceOver iOS ou TalkBack) antes de fechar D1, D2 e T7
+
+RESULTADO: 43 ok · 0 falha(s)

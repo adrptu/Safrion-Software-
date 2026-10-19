@@ -21,7 +21,8 @@ function tmUser(id){ if (!id || isLG(id)) return null; const { st, tal } = tmBas
 function tmIdNovo(tal, faz){ const pre = faz === 'Lagoa Grande' ? 'LGT' : 'TN'; let n = 1; while (tal.some(t => t.id === pre + String(n).padStart(2, '0'))) n++; return pre + String(n).padStart(2, '0'); }
 function tmNum(s){ const x = Number(String(s == null ? '' : s).trim().replace(/\./g, '').replace(',', '.')); return isFinite(x) ? x : NaN; }
 // grava um contorno: talhão novo ou nova versão do contorno de um talhão existente; devolve id, versão e área
-function tmSalvar(d){ const { st, faz, tal } = tmBase(); const ha = Math.round(tgAreaHa(d.ring) * 100) / 100; let id = d.alvo;
+function tmSalvar(d){ if (d.alvo === 'novo' && typeof assinTrava === 'function'){ const tv = assinTrava('ampliar_area'); if (tv) throw new Error(tv); }   // PLAT-01 R12 (defesa)
+  const { st, faz, tal } = tmBase(); const ha = Math.round(tgAreaHa(d.ring) * 100) / 100; let id = d.alvo;
   if (id === 'novo'){ id = tmIdNovo(tal, d.faz); tal.push({ id, v: { t: d.nome, faz: d.faz, sis: d.sis || 'Sequeiro', setor: '', decl: d.decl, calc: ha, motivo: d.motivo || '', sit: 'Ativo', inat: '', ver: '', geo: 'poly', geo_t: '' } }); }
   const T = tal.find(t => t.id === id); if (!T) throw new Error('Talhão não encontrado no cadastro.');
   const vers = Object.assign({}, st.vers || {}); const vs = (vers[id] || []).slice(); const ver = 'v' + (vs.length + 1);
@@ -108,6 +109,8 @@ function tmAvisosImp(rows){ const ficam = []; rows.forEach(r => { if (r.dest ===
 function tmImportar(self){ const imp = self.state.imp; if (!imp || !imp.rows) return; const av = tmAvisosImp(imp.rows); const ruins = imp.rows.filter((r, i) => r.dest !== 'nao' && av[i]);
   if (ruins.length){ self.setState({ imp: Object.assign({}, imp, { err: ruins.length + (ruins.length > 1 ? ' linhas sobrepõem' : ' linha sobrepõe') + ' talhões: escolha "Não importar" ou corrija o arquivo.' }) }); return; }
   const sel = imp.rows.filter(r => r.dest !== 'nao'); if (!sel.length){ self.setState({ imp: Object.assign({}, imp, { err: 'Nenhuma linha para importar: escolha o destino de pelo menos uma.' }) }); return; }
+  const tv = typeof assinTrava === 'function' ? assinTrava('ampliar_area') : ''; const nv = sel.filter(r => r.dest === 'novo');   // PLAT-01 R12
+  if (tv && nv.length){ self.setState({ imp: Object.assign({}, imp, { err: (nv.length > 1 ? nv.length + ' linhas são talhão novo' : 'A linha ' + tmBonito(nv[0].nome) + ' é talhão novo') + ': escolha "Não importar" nela. ' + tv }) }); return; }
   let nov = 0, upd = 0, dif = 0; const nomes = tmBase().tal.filter(t => t.v.faz === FAZ).map(t => tgNome(t.v.t));
   try{ sel.forEach(r => { const origem = (/\.kml$/i.test(imp.arq) ? 'KML ' : 'GeoJSON ') + imp.arq;
       if (r.dest === 'novo'){ let nm = tmBonito(r.nome); while (nomes.indexOf(tgNome(nm)) >= 0) nm = nm + ' (importado)'; nomes.push(tgNome(nm));
@@ -161,10 +164,16 @@ function tmVals(self, v){ const st = self.state; const real = !!v.map_lg; v.tm_o
   if (!self.__tmhl){ self.__tmhl = 1; try{ window.addEventListener('hashchange', () => { self.__tmh = 0; self.setState({ tmh: Date.now() }); }); }catch(e){} }
   if (!self.__tmh){ self.__tmh = 1; let h = ''; try{ h = decodeURIComponent(location.hash || ''); }catch(e){}
     const md = /desenhar=([^&]+)/.exec(h), mi = /importar/.exec(h), mt = /talhao=([^&]+)/.exec(h);
-    if (md || mi || mt) setTimeout(() => { if (md) tmIniciar(self, md[1]); else if (mi) self.setState({ imp: { etapa: 'arq', err: '' }, dw: null }); else { self.setState({ tsel: [mt[1]], px: null, mpa: null }); const go = (n) => { const a = tmAneis('Lagoa Grande').find(o => o.id === mt[1]); if (a && LGI.map) tmEnquadra(a.ring); else if (n < 20) setTimeout(() => go(n + 1), 300); }; go(0); } }, 0); }
+    // MUX-F0 (D18, 17/10/2026): #talhao=ID abre a fazenda do talhão (pivô ou talhão desenhado da Lagoa Grande, ou talhão da Santa Rita), mesmo com
+    // o contexto salvo em outra fazenda; ID que não existe no mapa dá aviso visível e acessível e não seleciona nenhum outro
+    if (md || mi || mt) setTimeout(() => { if (md) tmIniciar(self, md[1]); else if (mi) self.setState({ imp: { etapa: 'arq', err: '' }, dw: null }); else { const id = mt[1];
+      const daLG = M.lg.ids.indexOf(id) >= 0 || tmAneis('Lagoa Grande').some(o => o.id === id), daSR = M.tids.indexOf(id) >= 0;
+      if (!daLG && !daSR) { const m = 'Talhão ' + id + ' não encontrado no mapa: nada foi selecionado.'; self.setState({ tsel: [], px: null, mpa: null, muxAviso: m, g2toast: m }); return; }
+      self.setState({ mf_faz: daLG ? 'Lagoa Grande' : 'Santa Rita', tsel: [id], px: null, mpa: null, muxAviso: '' }); if (typeof MUX !== 'undefined') MUX.ativo[daLG ? 'Lagoa Grande' : 'Santa Rita'] = id;
+      if (daLG) { const go = (n) => { const a = tmAneis('Lagoa Grande').find(o => o.id === id); if (a && LGI.map) tmEnquadra(a.ring); else if (n < 20) setTimeout(() => go(n + 1), 300); }; go(0); } } }, 0); }
   const sty = (on) => 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;box-shadow:0 1px 3px rgba(21,32,26,.18);' + (on ? 'border:1px solid #1E7A4C;background:#E4F3E9;' : 'border:1px solid #E4E9E5;background:#FFFFFF;');
   v.r_des_st = sty(!!st.dw); v.r_des_on = st.dw ? 'true' : 'false'; v.r_imp_st = sty(!!st.imp); v.r_imp_on = st.imp ? 'true' : 'false';
-  v.r_des = () => { if (self.state.dw) self.setState({ dw: null, g2toast: 'Desenho descartado.' }); else tmIniciar(self, 'novo'); };
+  v.r_des = () => { if (self.state.dw) self.setState({ dw: null, g2toast: 'Desenho descartado.' }); else { const tv = typeof assinTrava === 'function' ? assinTrava('ampliar_area') : ''; if (tv) self.setState({ g2toast: tv }); else tmIniciar(self, 'novo'); } };   // PLAT-01 R12
   v.r_imp = () => self.setState({ imp: self.state.imp ? null : { etapa: 'arq', err: '' }, dw: null, tsel: [], px: null, mpa: null });
   // barra do desenho
   const dw = st.dw; v.tm_dbar = !!(real && dw && dw.etapa === 'desenho');
@@ -198,9 +207,12 @@ function tmVals(self, v){ const st = self.state; const real = !!v.map_lg; v.tm_o
     ['nome', 'decl', 'motivo', 'geo'].forEach(k => { v['tm_he_' + k] = !!e[k]; v['tm_e_' + k] = e[k] || ''; });
     v.tm_st_nome = inp(e.nome); v.tm_st_decl = inp(e.decl); v.tm_st_mot = inp(e.motivo); v.tm_st_sel = inp(false);
     v.tm_salvar = () => tmSalvarDesenho(self); v.tm_redes = () => self.setState({ dw: Object.assign({}, self.state.dw, { etapa: 'desenho', err: {} }) }); v.tm_descartar = () => self.setState({ dw: null, g2toast: 'Desenho descartado.' }); }
-  if (imp){ v.tm_t = 'Importar talhões'; v.tm_sub = imp.arq ? (imp.arq + ' · ' + FAZ) : ('KML ou GeoJSON · ' + FAZ); v.tm_ierr = imp.err || ''; v.tm_hasierr = !!imp.err;
+  if (imp){ v.tm_t = 'Importar talhões'; v.tm_sub = imp.arq ? (imp.arq + ' · ' + FAZ) : ('KML, KMZ ou GeoJSON · ' + FAZ); v.tm_ierr = imp.err || ''; v.tm_hasierr = !!imp.err;
     v.tm_arq = (ev) => { const f = ev && ev.target && ev.target.files && ev.target.files[0]; if (!f) return; const rd = new FileReader();
-      rd.onload = () => tmLerArq(self, f.name, String(rd.result || '')); rd.onerror = () => self.setState({ imp: { etapa: 'arq', err: 'Não foi possível ler o arquivo. Tente de novo.' } }); rd.readAsText(f); };
+      const falha = (m) => self.setState({ imp: { etapa: 'arq', err: m || 'Não foi possível ler o arquivo. Tente de novo.' } }); rd.onerror = () => falha();
+      // MAPA-REAL F1 (18/10/2026): o .kmz do Google Earth abre direto (zip lido no navegador; o arquivo não sai do aparelho)
+      if (/\.kmz$/i.test(f.name)){ rd.onload = () => tgKmzTexto(rd.result).then(t => tmLerArq(self, f.name.replace(/\.kmz$/i, '.kml'), t)).catch(e => falha(e.message)); rd.readAsArrayBuffer(f); return; }
+      rd.onload = () => tmLerArq(self, f.name, String(rd.result || '')); rd.readAsText(f); };
     v.tm_outro = () => self.setState({ imp: { etapa: 'arq', err: '' } }); v.tm_importar = () => tmImportar(self);
     if (imp.rows){ const av = tmAvisosImp(imp.rows); const an = tmAneis(FAZ);
       const nomeDe = (id) => (an.find(o => o.id === id) || { nome: id }).nome;

@@ -1,0 +1,17 @@
+  ok  IR-01 Setores: colunas Setor | Situação | Pendência | Próximo passo | Déficit hoje | Necessidade bruta | Ordem | Cobertura | Próxima passada · ['Setor', 'Situação', 'Pendência', 'Próximo passo', 'Déficit hoje', 'Necessidade bruta', 'Ordem', 'Cobertura', 'Próxima passada']
+  ok  IR-01 Setores: nenhum rótulo composto (" · ", " / ") · ['Setor', 'Situação', 'Pendência', 'Próximo passo', 'Déficit hoje', 'Necessidade bruta', 'Ordem', 'Cobertura', 'Próxima passada']
+  ok  IR-01 Setores: filtro (▾) e ordenação no título em todas as 9 colunas · [True, True, True, True, True, True, True, True, True]
+  ok  IR-01 Setores: unidade junto do valor (Déficit hoje mm, Necessidade bruta mm, Cobertura %) · []
+  ok  IR-01 Setores: Situação em chip (3) · [True, True, True]
+  ok  IR-01 (A2): Pivô 2 = A conferir | Divergência na OS-0394 (−3,8 % na dica) | Conferir medição | 11,2 mm | 12,44 mm | OS-0419 | 87 % | hoje 20:00 (a próxima passada é da OS-0419, a ordem da linha) · {'Setor': 'Pivô 2', 'Situação': 'A conferir', 'Pendência': 'Divergência na OS-0394 : −3,8 %', 'Próximo passo': 'Conferir medição', 'Déficit hoje': '11,2 mm', 'Necessidade bruta': '12,44 mm', 'Ordem': 'OS-0419', 'Cobertura': '87 %', 'Próxima passada': 'hoje 20:00'}
+  ok  IR-01 (A11): a pendência tem o tipo no chip e o detalhe na dica (Pivô 1 Falta insumo · Ureia 45% · amanhã 21:00; Gotejo T7 Conflito · parada da B3 · hoje 14:00) · ({'Setor': 'Pivô 1', 'Situação': 'Impedida', 'Pendência': 'Falta insumo : Ureia 45%', 'Próximo passo': 'Programar só água', 'Déficit hoje': '≈8,4 mm', 'Necessidade bruta': '9,33 mm', 'Ordem': 'OS-0418', 'Cobertura': '—', 'Próxima passada': 'amanhã 21:00'}, {'Setor': 'Gotejo T7', 'Situação': 'Impedid
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/V56/bis2/tools/prototipo/v37/gen37/tabelas_irr_test.py", line 139, in <module>
+    vis = J("""(()=>{const t=([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[0]; const c=[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Pivô 1')===0).querySelectorAll('[role=cell]')[2];
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/V56/bis2/tools/prototipo/v37/gen37/comp_lib.py", line 49, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'getAttribute')
+    at <anonymous>:2:59
+    at <anonymous>:2:164

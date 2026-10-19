@@ -1,0 +1,5 @@
+OK    R1 1440 px: em 9 camadas, nenhum valor de rótulo cortado nem "·" no começo de linha
+OK    R2 390 px com toque: em 9 camadas, nenhum valor de rótulo cortado nem "·" no começo de linha
+OK    R3 Colheita e produtividade (Mamão em kg/ha): o Pivô 19 mostra a situação e a produtividade com a unidade inteira
+OK    R4 nenhum erro de JavaScript
+RESULTADO: 4/4 ok

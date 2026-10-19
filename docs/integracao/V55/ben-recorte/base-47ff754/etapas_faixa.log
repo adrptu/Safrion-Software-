@@ -1,0 +1,4 @@
+FALHA 16 varredura de largura (1400 → 300 px) em 35 telas com etapas: faixa completa sem sobreposição ou compacta {'CMP': ['1400:1 Escolha a safra · etapa atua', '1380:1 Escolha a safra · etapa atua', '1360:1 Escolha a safra · etapa atua'], 'PA': ['1400:1 Escolha o plano · etapa atua', '1380:1 Escolha o plano · etapa atua', '1360:1 Escolha o plano · etapa atua'], 'SAF': ['1400:1 Escolha a safra · etapa atua', '1380:1 Escolha a safra · etapa atua', '1360:1 Escolha a safra · etapa atua']}
+
+RESULTADO: 0 ok · 1 falhas (faixa)
+  - 16 varredura de largura (1400 → 300 px) em 35 telas com etapas: faixa completa sem sobreposição ou compacta

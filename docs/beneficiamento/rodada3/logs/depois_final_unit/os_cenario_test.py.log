@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/fr_ben/v37/gen37/os_cenario_test.py", line 11, in <module>
+    from os_lib import Os
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/fr_ben/v37/gen37/os_lib.py", line 7, in <module>
+    from cdp import Chrome
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/fr_ben/v37/gen37/cdp.py", line 10, in <module>
+    CH=_chrome()
+       ^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/fr_ben/v37/gen37/cdp.py", line 9, in _chrome
+    raise RuntimeError('Chrome não encontrado: defina CHROME_BIN')
+RuntimeError: Chrome não encontrado: defina CHROME_BIN

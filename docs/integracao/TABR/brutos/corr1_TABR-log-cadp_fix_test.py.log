@@ -1,0 +1,10 @@
+OK  1 sem erro JS
+OK  2 clientes com pedido (VE-04), contrato de venda (VE-05) e título (GE-05) existem no CD-05 como Cliente · faltam [] · VE-04 ['Atacado Bom Preço', 'CD Horti', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA', 'Torrefação Serra'] · GE-05 ['Atacado Bom Preço', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA'] · VE-05 ['Coop Grão Sul', 'Torrefação Serra']
+OK  3 contraparte de barter (VE-05) cadastrada como Fornecedor; Coopergrão, sem uso em outra tela, saiu · ['Agroquímica Delta', 'Fertisul'] · ['Agro Norte', 'Agroquímica Delta', 'Casa do Adubo', 'Coop. Vale', 'Fertisul', 'Química Centro-Oeste', 'Santa Rita Insumos', 'Sementes Vale']
+OK  4 suspenso com motivo na linha · Casa do Adubo Suspenso Entrega fora do prazo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail
+OK  5 reativado: linha volta a Homologado, sem o motivo · Casa do Adubo Homologado 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail
+OK  6 nova suspensão começa com motivo vazio e a ajuda não promete histórico · '' · SUSPENSÃO Motivo da suspensão Aparece na listagem enquanto durar a suspensão.
+OK  7 salvar sem motivo novo é barrado junto ao campo · Informe motivo da suspensão.
+OK  8 Clientes · Situação do papel: sem "—" dos não clientes, contagens somam 7 · ['(vazio) 0', 'Limite vencido 1', 'Limite vigente 6']
+FALHOU 9 Clientes · Papéis: só valores das 7 linhas de cliente (Coop. Vale também é Fornecedor), sem valor zerado · ['Cliente 7', 'Fornecedor 1', 'Parceiro de crédito 0', 'Prestador 0', 'Transportador 0']
+OK  10 Papéis: Cliente em Todos; em Fornecedores o filtro da coluna que sai é limpo (sem chip "papeis:") · 7 de 20 Papéis: Cliente × Limpar filtros Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Cadastrar parceiro (7) → 8 de 20 Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Cadastrar parceiro (8)

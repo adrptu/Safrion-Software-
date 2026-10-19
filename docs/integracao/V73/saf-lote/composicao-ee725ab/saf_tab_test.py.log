@@ -1,0 +1,15 @@
+OK  T1 1440: abre com Talhão, Cultura, Plano agronômico, Área e Plantio
+OK  T1b "Colunas +11" com as outras colunas
+OK  T2 sem coluna Situação; P1 (a conferir) com ícone e o estado no nome acessível; T3 (planejado) sem ícone
+OK  T3 plano só com o nome, sem "Ajustar insumos" na célula
+OK  T3b o painel da linha T7 oferece "Ajustar insumos e doses de T7"
+OK  T4 sem a Meta à vista, sem o seletor "Unidade de produtividade"
+OK  T4b mostrar a Meta pelo seletor de colunas traz a coluna e o seletor de unidade
+OK  T5 linha T3: nenhum botão solto; o ⋯ tem Dividir, Aplicar plano e Excluir, cada um com ícone
+OK  T6 T1 (parcelas) e P1 (a conferir) abertos; T2 e P2 (um cultivo) recolhidos
+OK  T10 "‹ Trocar safra" embaixo, com a seta de voltar (14/10: "faltou setinha pra trás")
+OK  T7 área de ações sem descrição: só "Informar colheita de P1 ›" e os botões ("Aplicar plano em 4 cultivos")
+OK  T8 390: as 3 primeiras (Talhão, Cultura, Plano agronômico)
+OK  T11 390: sem "Dividir" nas linhas; o toque no T7 abre o painel com "Dividir T7 em parcelas", que abre a divisão
+OK  T9 sem erro de JS
+RESULTADO: 14/14

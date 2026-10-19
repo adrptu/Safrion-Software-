@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/ma_unica_test.py", line 9, in <module>
+    from areas.maquinas import REDIRECIONA
+ImportError: cannot import name 'REDIRECIONA' from 'areas.maquinas' (<sp-pcm>/.base99537ca/tools/prototipo/v37/gen37/areas/maquinas.py)

@@ -1,0 +1,12 @@
+P1 aplicado
+  safra.js = var do pacote
+  dados2.py = var do pacote
+P2 aplicado
+  safra.js = var do pacote
+  dados2.py = var do pacote
+P0nR23 aplicado
+  safra.js = var do pacote
+  dados2.py = var do pacote
+P2nR23 aplicado
+  safra.js = var do pacote
+  dados2.py = var do pacote

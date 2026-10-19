@@ -1,0 +1,38 @@
+# verificacao do pacote TABR · base cdc185f · candidata 8f19e0d · 2026-10-10T01:19Z
+worktree temporaria em cdc185f: cdc185f
+git apply --check diff-cdc185f-8f19e0d.patch -> rc=0
+git apply diff-cdc185f-8f19e0d.patch -> rc=0
+caminhos conferidos: 34 · divergencias: 0
+arvore igual a 8f19e0d nos caminhos tocados -> rc=0
+git apply -R (volta a base) -> rc=0; status: ''
+worktree temporaria removida -> rc=0
+RESULTADO TABR: OK
+
+# teste do bundle num repositorio novo, so com o historico ate cdc185f (o que o origin/claude/prototipo-v44 tem) · 2026-10-10T01:19Z
+repositorio novo com base=cdc185f e 147 commits
+<sp-proto>/docs/integracao/TABR/tabr.bundle is okay
+The bundle contains this ref:
+8f19e0d6bd27e2aaa5805d1f628459190db4e919 refs/heads/claude/v44-tabelas-r
+The bundle requires these 3 refs:
+24da80bcb329a15e2ad6d5fe0b1f4fe23a38b5c8 
+ecc8b00eee9a87aa57f585660440b1ccc2abf4fd 
+cdc185f551a9513d72734b18e4a869f921917c00 
+The bundle uses this hash algorithm: sha1
+== git fetch tabr.bundle 8f19e0d (sha curto)
+fatal: couldn't find remote ref 8f19e0d
+rc=128
+== git fetch tabr.bundle 8f19e0d6bd27e2aaa5805d1f628459190db4e919 (sha completo)
+From <sp-proto>/docs/integracao/TABR/tabr.bundle
+ * branch            8f19e0d6bd27e2aaa5805d1f628459190db4e919 -> FETCH_HEAD
+rc=0 FETCH_HEAD=8f19e0d
+== git fetch tabr.bundle claude/v44-tabelas-r:refs/heads/tabr
+From <sp-proto>/docs/integracao/TABR/tabr.bundle
+ * [new branch]      claude/v44-tabelas-r -> tabr
+rc=0 tabr=8f19e0d
+fsck --connectivity-only rc=0
+ 34 files changed, 1597 insertions(+), 328 deletions(-)
+
+# gitleaks 8.30.1, executado em 2026-10-10T01:23Z a partir da raiz da sp-proto
+$ gitleaks dir --config <repo>/.gitleaks.toml --redact --no-banner docs/integracao/TABR
+1:23AM INF scanned ~1868638 bytes (1.87 MB) in 230ms
+1:23AM INF no leaks found

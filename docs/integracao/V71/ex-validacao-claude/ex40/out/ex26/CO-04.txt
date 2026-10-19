@@ -1,0 +1,100 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Recebimento da produção
+Recebimento da produção
+i
+1 carga a segregar · 1 retorno a receber bloqueado
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Cargas e retornos recebidos
+6 de 6
+ENTRADA · ORIGEM
+⇅
+PESO RECEBIDO
+⇅
+LOCAL
+⇅
+CONDIÇÃO
+⇅
+AMOSTRA
+⇅
+DIVERGÊNCIA
+⇅
+LOTE CRIADO
+⇅
+AÇÃO
+⇅
+RC-13
+retorno PV-030 · a caminho
+900 sc previstos
+Armazém Sede · área de bloqueio
+Bloqueado
+a coletar
+—
+L27-020 · soja (retorno)
+Receber bloqueado
+CG-1207
+OC-0510 · T7
+3.130 kg
+Packing Sede
+Avaria térmica parcial
+AM-3315 coletada
+—
+pendente · segregar
+Segregar carga
+CG-1206
+OC-0510 · T7
+3.180 kg
+Packing Sede
+Íntegra
+AM-3312 coletada
+−30 kg (0,9% · na tolerância)
+L39-118 · mamão
+Conferir carga
+CG-1103
+OC-0508 · C1
+4.120 kg
+Terreiro/armazém
+Íntegra
+AM-3288 coletada
+—
+L27-022 · café bica
+Solicitar inspeção
+CG-0988
+OC-0501 · T3
+9.840 kg
+Silo 2 (secador)
+Grão úmido 17,2%
+AM-3140 coletada
+—
+em processo · OB-0106
+Encaminhar processo
+RC-12
+retorno PV-027 · recebido
+300 kg
+Packing Sede · área de bloqueio
+Bloqueado
+AM-3320 coletada
+—
+L26-118 · mamão (retorno)
+Abrir inspeção
+Tela: Recebimento da produção · 1 carga a segregar · 1 retorno a receber bloqueado

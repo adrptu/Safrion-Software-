@@ -1,0 +1,109 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Comercial › Painel comercial
+‹
+Comercial
+Painel comercial
+i
+Mamão Estoque, Mamão S41 em déficit · 2 períodos suspensos (saca a conferir)
+Registrar a saca do PV-030
+A RECEBER (A VENCER)
+R$ 91.470,00
+próximo: Frutas Real R$ 91.470,00 em 15/10
+VENCIDO (COBRAR)
+R$ 0,00
+nada vencido
+ENTREGUE NOS ÚLTIMOS 30 DIAS
+R$ 91.470,00
+saídas de venda desde 27/08
+Oferta e compromissos
+Todas 2
+Déficit 1
+Suspenso 1
+4 semanas
+Safra
+Recolher tudo
+Colunas
++2
+PRODUTO › PERÍODO
+⇅
+OFERTA
+⇅
+COMPROMISSOS
+⇅
+LIVRE PARA VENDER
+⇅
+▾
+Mamão Formosa · fruta de campo
+Déficit
+Estoque
+0 kg apto
+10.000 kg
+PV-036
+déficit 10.000 kg
+Déficit
+S41 (05/10–11/10)
+sem versão publicada
+30.000 kg
+PV-038
+déficit 30.000 kg
+▾
+Soja em grão
+Estoque (2025/26)
+38.420 sc apto
+0 sc + saca a conferir
+PV-030
+suspenso
+saca a conferir: PV-030
+Safra 2026/27
+68.180 sc publicada
+0 sc + saca a conferir
+CT-203, CRE-0095, BT-090
+suspenso
+saca a conferir: CT-203, CRE-0095, BT-090
+Preço e recebimento
+2 de 2
+Agrupar por
+▾
+Colunas
++2
+PRODUTO
+⇅
+PREÇO MÉDIO REALIZADO
+⇅
+A RECEBER
+⇅
+PREÇO MÉDIO CONTRATADO
+⇅
+REFERÊNCIA DE MERCADO
+⇅
+VENCIDO
+⇅
+Mamão Formosa · fruta de campo
+R$ 3,00/kg
+R$ 91.470,00
+R$ 3,05/kg
+R$ 3,10/kg
+CEAGESP · São Paulo · 22/09 (sintético, ex-VE-02)
+R$ 0,00
+Soja em grão
+à parte: CRE-0095, BT-090 (liquidação em produto)
+fora da média: PV-030, CT-203 (saca a conferir)
+—
+R$ 0,00
+—
+R$ 129,40/sc
+CEPEA/Esalq · Paraná · 22/09 (sintético, ex-VE-02)
+R$ 0,00
+Restaurar demonstração
+Tela: Painel comercial · Mamão Estoque, Mamão S41 em déficit · 2 períodos suspensos (saca a conferir)

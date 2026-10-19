@@ -1,0 +1,14 @@
+pa_lista_2 exit=0 · RESULTADO: 24 ok · 0 falhas
+pa_lista_3 exit=0 · RESULTADO: 24 ok · 0 falhas
+pa_lista_antes_0e1c368 exit=1 · RESULTADO: 13 ok · 11 falhas
+patest exit=0 · RESULTADO: 46 ok · OK
+acao_familias exit=0 · RESULTADO: 8 ok · 0 falhas (familias)
+acao_v3 exit=0 · RESULTADO: 10 ok · 0 falhas (v3)
+comp_matriz exit=0 · RESULTADO: 3 ok · 0 falhas (matriz)
+comp_interacao exit=1 · RESULTADO: 8 ok · 2 falhas (interacao)
+comp_ajustes2 exit=0 · RESULTADO: 2 ok · 0 falhas (ajustes2)
+etapas_celular exit=1 · 
+etapas_celular_alt exit=0 · RESULTADO: 14 ok · 0 falhas (celular)
+agrofit exit=0 · RESULTADO: 17/17 ok · 36 s []
+varredura exit=0 · RESULTADO: 140/140 páginas sem erro
+links_ocultos exit=0 · TOTAL 8 · falhas 0

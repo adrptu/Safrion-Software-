@@ -1,0 +1,6 @@
+tabelas_cad_test.py rc=0 612s :: RESULTADO: 206/206 ok
+paginas_scan_test.py rc=0 574s :: RESULTADO: 4 ok · 0 falhas (148 páginas)
+ds_1510_test.py rc=0 380s :: RESULTADO: 17 ok · 0 falhas
+ds_1610_test.py rc=0 292s :: RESULTADO: 14 ok · 0 falhas
+cartoes_test.py rc=0 568s :: RESULTADO: 70/70
+FIM

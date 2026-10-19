@@ -1,0 +1,11 @@
+REPROVA R1 · tanque/vazão/ha por carga/L por carga iguais (O.S. = app = cadastro a05) · O.S. (3000.0, 100.0, 30.0, 15.0) · app (2000.0, 120.0, 16.7, 8.3)
+REPROVA R2 · insumo com "usado" tem requisição e movimento · [('OS-0421', 'Adjuvante espalhante', '47,5 L', False), ('OS-0420', 'MAP 11-52', '7.500 kg', False)]
+REPROVA R3 · OS-0420 com a mesma instrução no painel, na O.S. completa e no SU-07 · painel ['MAP 11-52', 'Semente de soja 58 W'] · completa ['KCl 60', 'Semente de soja 58 W', 'TS nematicida'] · SU-07 ['KCl 60', 'Semente de soja 58 W']
+REPROVA R4 · app da OS-0421 mostra os 15 L que faltam · MB-02det só diz "Com você 65 L"; CA-01det tem "A ENTREGAR 15 L": True
+REPROVA R5 · entregue = número inteiro de embalagens · [('OS-0504', 'Abamectina 18 EC', 31.4, 6.28), ('OS-0508', 'Tebuconazol 200 EC', 63.99, 12.798), ('OS-0506', 'Sulfato de potássio', 3293.1, 131.724), ('OS-0507', 'Nitrato de amônio', 1777.75, 71.11)]
+REPROVA R6 · OS-0417 entregue ≤ necessidade · entregue 5000.0 kg × necessidade 3500.0 kg
+REPROVA R7 · OS-0504 com recurso alocado e checado · painel OS-0504 sem Recursos alocados; conjunto "Trator 02 MF 7719 + Pulverizador PJ-3030 36 m · 21,6 ha/h"
+REPROVA R8 · OS-0424 horas ≤ janela ou aviso · 5.9 h numa janela de 5.0 h, sem aviso
+REPROVA R9 · passo de limpeza depois de 2,4-D · PJ-3030 25/09: OS-0421 06–11 + OS-0430 13:00–20:24; 26/09 OS-0421 06–12; nenhum passo de limpeza
+REPROVA R10 · ficha com vazão alvo por bico · ficha só tem "leque 110-015 · 3 bar"; espaçamento não cadastrado
+RESUMO: 10 de 10 reprovam hoje

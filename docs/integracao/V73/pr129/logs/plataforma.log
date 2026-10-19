@@ -1,0 +1,24 @@
+OK    A12a BO-02 em 23/09: mensalidades vigentes R$ 6.278,46 · 2 faturas abertas R$ 939,00 · área cobrada 2.945,23 ha (medida 2.958,23 ha) 
+OK    A12b organizações por estado: Ativa 3 · Inadimplente 1 · Em avaliação 1 · Cancelada 1; selo "2 eventos a conciliar" 
+OK    A11a BO-02: uma primária (Conciliar pagamentos) 
+OK    A14a BO-02: as 2 grades têm ordenação e filtro por coluna e um campo de busca só, para as duas (13/10/2026); R$ e ha na célula 
+OK    A12c linhas do seed: Aurora inadimplente (ago/2026 vencida, 3 tentativas), Bela Vista com evento a conciliar, Boa Esperança em avaliação (dia 5 de 30), Dois Rios cancelada 
+OK    A13 detalhe da organização: área por fazenda e faturas; nenhum talhão, cultura ou safra; link de consulta contratual ao CF-05 
+OK    A12d conciliar (clique duplo, mesma chave): um recibo CON-0001; Bela Vista paga (evt_1JKT5) e a recusa da Aurora registrada; 1 fatura aberta R$ 299,00 
+OK    A12e tudo conciliado: primária Conciliar pagamentos desabilitada com o motivo; a recusa aparece uma vez na Aurora, com quem conciliou 
+OK    A12f pagamento feito no CF-05 aparece Paga no BO-02 (set/2026, R$ 5.140,46), com quem pagou e quem aceitou o contrato 
+OK    A12i contestação aberta e nada a conciliar: primária Resolver contestação abre a Santa Rita; Registrar resolução (manter) volta a primária desabilitada 
+OK    A12j trial da Boa Esperança em 01/10: ON-01 e BO-02 dizem "dia 13 de 30" (mesma data simulada, nada fixo) 
+OK    A11b BO-01: uma primária (Simular área); telas irmãs Assinaturas e cobrança · Planos e preços 
+OK    A14b BO-01: parâmetros (Avaliação, Essencial, Completo) com "a decidir pelo proprietário"; R$ 24,00/ha·ano no Completo 
+OK    A14c simulação calculada no navegador: 20 ha 199/299 (mínimo) · 149,5 ha 224,25 · 500 ha 750/1.000 · 1.000 ha 1.500/2.000 · 5.000 ha 7.500/10.000 
+OK    A14d BO-01: as 2 grades têm ordenação e filtro e um campo de busca só, para as duas (13/10/2026) 
+OK    A12g Simular área começa na área medida (2.570,23 ha): Essencial R$ 3.855,35 e Completo R$ 5.140,46 por mês 
+OK    A12g2 com um talhão de 50 ha no cadastro a simulação começa em 2.620,23 ha (lida do cadastro, revisão PLAT achado 8) 
+OK    A12h Simular acima de 5.000 ha: recusa com "proposta empresarial, a decidir pelo proprietário" 
+OK    A15 390 px BO-02: sem rolagem lateral da página, primária alcançável, resumo 2 × 2 
+OK    A15b 390 px BO-02: detalhe da organização dentro da tela, com fechar alcançável 
+OK    A15c 390 px BO-01: sem rolagem lateral, primária alcançável 
+OK    A0 sem erro de JavaScript nas telas visitadas 
+
+RESULTADO: 22 ok · 0 falhas

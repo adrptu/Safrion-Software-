@@ -1,0 +1,25 @@
+  FALHOU CD-01 Talhões: colunas Fazenda › talhão | Sistema | Área cultivável | Polígono | Diferença | Parcelas na safra 2026/27 | Situação · ['Talhão', 'Área cultivável', 'Polígono', 'Diferença', 'Safra 2026/27', 'Situação']
+  ok  CD-01 Talhões: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Talhão', 'Área cultivável', 'Polígono', 'Diferença', 'Safra 2026/27', 'Situação']
+  ok  CD-01 Talhões: filtro (▾) e ordenação no título em todas as 6 colunas · [True, True, True, True, True, True]
+  ok  CD-01 Talhões: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  FALHOU CD-01 Talhões: Situação em chip em todas as linhas com valor (32) · [None, False, False, False, False, False]
+  FALHOU CD-01: T1 Sequeiro | 312,0 ha | 312,4 ha | +0,1 % | 2 parcelas (número) | Em dia; P1 Pivô central · ({}, {})
+  FALHOU CD-01: pivô da Lagoa Grande (círculo do KML) dito uma vez, na Situação; Polígono fica "—" · {}
+  ok  CD-01: ordenar Área cultivável (decrescente) pelo número dentro de cada fazenda · [['80,8 ha', '77,4 ha', '75,1 ha', '75,0 ha'], ['312,0 ha', '298,0 ha', '204,0 ha', '96,0 ha']]
+  FALHOU CD-01: filtro Sistema = Pivô central (texto da célula) deixa só pivôs · {None}
+  FALHOU CD-01 Água: colunas Ponto de água | Fazenda | Documento | Uso | Curso d’água | Vazão | Vencimento | Situação · ['Ponto de água', 'Fazenda', 'Uso', 'Vazão', 'Situação']
+  ok  CD-01 Água: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha" · ['Ponto de água', 'Fazenda', 'Uso', 'Vazão', 'Situação']
+  ok  CD-01 Água: filtro (▾) e ordenação no título em todas as 5 colunas · [True, True, True, True, True]
+  ok  CD-01 Água: unidade junto do valor nas colunas com unidade (nenhuma) · []
+  FALHOU CD-01 Água: Situação em chip em todas as linhas com valor (16) · [False, True, True, True, False, False]
+  FALHOU CD-01 Água (defeito): a outorga do ponto 1 aparece como Outorga (antes "Certidão"); o ponto 6 é Certidão · ({'Ponto de água': 'Ponto de água 1 (demonstração) Certidão SINT-001/0000', 'Fazenda': 'Lagoa Grande', 'Uso': 'Captação superficial Rio A (demonstração)', 'Vazão': '180 m³/h 20 h/dia · 12 meses', 'Situação': '● Vigente até 30/04/2031'}, {'Ponto de água': 'Ponto de água 6 (demonstração) Certidão SINT
+  FALHOU CD-01 Água: ponto 1 = Captação superficial | Rio A | 180 m³/h | 30/04/2031 | Vigente · {'Ponto de água': 'Ponto de água 1 (demonstração) Certidão SINT-001/0000', 'Fazenda': 'Lagoa Grande', 'Uso': 'Captação superficial Rio A (demonstração)', 'Vazão': '180 m³/h 20 h/dia · 12 meses', 'Situação': '● Vigente até 30/04/2031'}
+  FALHOU CD-01 Água (defeito): a faixa "precisa de atenção" diz Outorga SINT-003/0000 (antes "Certidão SINT-003/0000") · 2 outorgas vencidas Certidão SINT-003/0000 · Ribeirão B (demonstração), Certidão SINT-012/0000 · Poço tubular Renovar outorga › 2 outorgas em renovação Certidão SINT-004/0000 · Ribeirão B (demonstraçã
+Traceback (most recent call last):
+  File "<sp-tabr>/tools/prototipo/v37/_base_gen37/tabelas_cad_test.py", line 79, in <module>
+    g.ordena('Vazão'); vz = [x for x in g.col('Vazão') if x != '—']; m3 = [num(x) * (3.6 if x.endswith('L/s') else 1) for x in vz]
+                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-tabr>/tools/prototipo/v37/_base_gen37/tabelas_cad_test.py", line 79, in <listcomp>
+    g.ordena('Vazão'); vz = [x for x in g.col('Vazão') if x != '—']; m3 = [num(x) * (3.6 if x.endswith('L/s') else 1) for x in vz]
+                                                                           ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for *: 'NoneType' and 'int'

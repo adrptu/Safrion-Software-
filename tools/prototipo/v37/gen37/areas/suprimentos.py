@@ -28,6 +28,7 @@ observacoes (dados locais coerentes com dados2/dados; declarados):
 - OS-0420 segue 30/70 ha de dados.OS (o card 60/40 do PRD fica para reconciliação).
 """
 import json, os, datetime as _dt
+from pathlib import Path
 from engine import (grid, esc, icon, chip, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, GRAYS, SH, DISP,
                     BTN_ST, EXTRA, EXTRAJS, _MINI, _MINIP)
 import engine as E
@@ -73,9 +74,13 @@ DIESEL=dict(ped='PC-093',ctr='CT-2026-03',q=15000,preco=5.84,tanque=12400,res=30
 PLANO_FA=round(D2.demanda('S2627')['Fungicida A']['bruta'],1)            # 625,2 L
 SOL_FA=round(D2.demanda('S2627')['Fungicida A']['liq'],1)                 # 145,2 L
 LIVRE_FA=F02['fisico']-F02['quarentena']-F02['reservado']                  # 480 L
+# revisão do CTL-4 (S4): com a demanda única (O.S. pelo pendente, plano sem a parte delas) o Fungicida A não tem pendência na SOL-2026-07 e o
+# DEMO-18 deixa de ter conflito; SU-03 e SU-03det mostram a reserva da OS-0424 e o uso da safra que o lote cobre (nunca "pendência 0 L")
+CONFL_FA=SOL_FA>0.05
 
 # ======================= blocos, botões e KPIs =======================
 def bloco(titulo,desc,corpo,acao='',tit_hole=False):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     t=titulo if tit_hole else esc(titulo)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 260px;">'
@@ -208,13 +213,18 @@ def _origens():
             for i,p in enumerate(a['prods']):
                 dose=D2.AJUSTES.get(c['id'],{}).get(f"{a['id']}|{i}",p['dose'])
                 nm=D2.prod_nome(p['prod'],c)
-                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat(),q=dose*c['area'],
+                out.setdefault(nm,[]).append(dict(t=f"{c['local']} · {a['nome']}",dt=dt.isoformat() if dt is not None else None,q=dose*c['area'],
                     memo=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha",
                     o=[dict(t=f"Cultivo {c['local']} · {c['cultura']} {c['variedade']} · {nf(c['area'])} ha"),
                        dict(t=f"Plano {pl['nome']} v{pl['versao']} · {a['nome']} · {a['g']['tipo']} {a['g']['dias'] if a['g']['dias'] is not None else ''}".strip()),
                        dict(t=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha = {nf(dose*c['area'],1 if p['un']=='L' else 0)} {p['un']}"),
                        dict(t='Abrir em Planejar safra',h='SAF.dc.html')]))
     return out
+def _sup_man_js():
+    import dados_manutencao as DM
+    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sup_necessidades.js'), encoding='utf-8') as f:
+        return DM.js_prefixo() + f.read()
+
 def su01():
     fname='SU-01.dc.html'; E._reset_screen(fname)
     dem=D2.demanda('S2627'); org=_origens()
@@ -235,13 +245,17 @@ def su01():
         res=sum(l['reservado'] for l in lots); disp=D2.ESTOQUE.get(nm,0); cond=sum(l['quarentena'] for l in lots)
         firm=D2.RECEB.get(nm,0); ped=next((p for p in D2.PEDIDOS if p['item']==nm and p['a_entregar']>0),None)
         oo=org.get(nm,[]); tot=sum(x['q'] for x in oo); falta=max(0.0,tot-disp-firm)
-        data=min(x['dt'] for x in oo); lead=_lead(o['grupo'])+SEG
+        if not oo: continue   # CTL-4: insumo que só uma O.S. usa (Ureia da OS-0418) não tem origem do plano nesta tela antiga (oculta)
+        sem_data=any(x['dt'] is None for x in oo)
+        data=min((x['dt'] for x in oo if x['dt'] is not None),default=None); lead=_lead(o['grupo'])+SEG
         if falta>0.001:
             nfalta+=1
-            if _faixa((_dt.date.fromisoformat(data)-_dt.timedelta(days=lead)).isoformat())=='atrasada': natr+=1
-        pf=([ch(f'{nq(falta)} {un}','red')] if falta>0.001 else [ch('Coberta','green')])+([BR,mut(f'{nq(min(cond,falta))} {un} coberto se o laudo aprovar')] if cond and falta>0.001 else [])
+            if data and not sem_data and _faixa((_dt.date.fromisoformat(data)-_dt.timedelta(days=lead)).isoformat())=='atrasada': natr+=1
+        pf=([ch(f'{nq(falta)} {un}','red')] if falta>0.001 else [ch('Cobertura a conferir · sem data','yellow')] if sem_data else [ch('Coberta','green')])+([BR,mut(f'{nq(min(cond,falta))} {un} coberto se o laudo aprovar')] if cond and falta>0.001 else [])
+        if sem_data: pf += [BR,mut('Projeção parcial · há origem sem data')]
         acao=([lk('Ver contrato','SU-05det.dc.html')] if cond else [lk('Em cotação','CMP.dc.html')]) if falta>0.001 else ([lk('Ver laudo','SU-06.dc.html')] if cond else [mut('—')])
-        kids=[R(f'{nm}|{i}',dict(item=x['t'],data=x['dt'],dem=round(x['q'],1)),dict(item=[txt(x['t'])],dem=[txt(f"{nq(x['q'])} {un}"),BR,mut(x['memo'])]),o=x['o']) for i,x in enumerate(oo)]
+        if sem_data: acao=[lk('Conferir datas no plano','SAF.dc.html')]
+        kids=[R(f'{nm}|{i}',dict(item=x['t'],data=x['dt'],dem=round(x['q'],1)),dict(item=[txt(x['t'])],pedir=[mut('Sem data · conferir âncora no plano')] if x['dt'] is None else [],dem=[txt(f"{nq(x['q'])} {un}"),BR,mut(x['memo'])]),o=x['o']) for i,x in enumerate(oo)]
         memo=[dict(t=f'Demanda {nf(tot,d)} {un} = soma de {len(oo)} origens (expanda a linha)'),
               dict(t=f'Utilizável {nf(util,d)} {un} · reservado {nf(res,d)} · disponível {nf(disp,d)} {un}'+(f' · lotes {", ".join(l["lote"] for l in lots)}' if lots else '')),
               dict(t=f'Recebimento firme {nf(firm,d)} {un}'+(f' · {ped["id"]} ({FORN[ped["f"]]}) · {ped["previsao"][:5]}' if ped else '')),
@@ -249,8 +263,9 @@ def su01():
               *([dict(t=f'Se o laudo de 27/09 aprovar: {nf(min(cond,falta),d)} {un} cobertos e a falta firme cai para {nf(falta-min(cond,falta),d)} {un} (carga 4 do CT-2026-11)',h='SU-06.dc.html')] if cond and falta>0.001 else []),
               dict(t=f'Falta firme = {nf(tot,d)} − {nf(disp,d)} − {nf(firm,d)} = {nf(falta,d)} {un}' if falta>0.001 else f'Sem falta firme · sobra {nf(disp+firm-tot,d)} {un}'),
               dict(t=f'Pedir até = data necessária − prazo do fornecedor ({lead-SEG} d) − segurança ({SEG} d)')]
+        if sem_data: memo.append(dict(t='Projeção parcial: quantidade preservada; origens sem data fora da cronologia. Confira a âncora no plano antes de confirmar cobertura ou atraso.',h='SAF.dc.html'))
         if falta>0.001: memo.append(dict(t='Liberar a carga 4 do CT-2026-11 · abrir o contrato',h='SU-05det.dc.html') if cond else dict(t=f'Na SOL-2026-07 · abrir em Compra de insumos',h='CMP.dc.html'))
-        rows.append(R(nm,dict(item=nm,data=data,dem=round(tot,1),disp=disp,firm=firm,cond=cond,falta=round(falta,1),un=un),
+        rows.append(R(nm,dict(item=nm,data=data,dem=round(tot,1),disp=disp,firm=firm,cond=cond,falta=round(falta,1),un=un,semData=sem_data),
             dict(item=[b(nm),mut(f"{o['grupo']} · {len(oo)} {'origem' if len(oo)==1 else 'origens'}")],dem=[txt(f'{nq(tot)} {un}')],
                  disp=[txt(f'{nq(disp)} {un}')]+([mut(f'res. {nq(res)}')] if res else []),
                  firm=([txt(f'{nq(firm)} {un}'),mut(ped["id"])] if firm else [mut('—')])+([BR,mut(f'+{nq(cond)} {un} condicionado ao laudo de 27/09')] if cond else []),falta=pf,acao=acao),
@@ -261,39 +276,36 @@ def su01():
         dict(item=[b('Diesel S10'),mut('Combustível · frota do plantio')],dem=[txt(f"{nf(DIESEL['demanda'])} L")],disp=[txt(f"{nf(DIESEL['tanque']-DIESEL['res'])} L"),mut(f"res. {nf(DIESEL['res'])}")],
              firm=[txt(f"{nf(DIESEL['q'])} L"),mut(DIESEL['ped'])],falta=[ch(f'{nf(dfalta)} L','red')],acao=[lk('Ver contrato','SU-05.dc.html')]),
         o=[dict(t='Programação do plantio (PCP): 35.400 L entre 25/09 e 05/10'),dict(t=f'Falta firme = 35.400 − 9.400 − 15.000 = {nf(dfalta)} L'),dict(t='Contrato Ipiranga CT-2026-03',h='SU-05.dc.html')],lead=2+SEG))
-    rows.append(R('Rolamento 6310',dict(item='Rolamento 6310',data='2026-10-02',dem=4,disp=0,firm=0,cond=0,falta=3,un='un'),
-        dict(item=[b('Rolamento 6310'),mut('Peças · colhedora, preventiva')],dem=[txt('4 un')],disp=[txt('0 un'),mut('res. 1')],firm=[mut('—')],
-             falta=[ch('3 un','red')],acao=[lk('Cotar','SU-04.dc.html')]),
-        o=[dict(t='Plano de manutenção da colhedora (PCM) · OM-0234 · troca em 02/10'),dict(t='Falta firme = 4 − 0 − 0 = 3 un'),dict(t='Cotação COT-113',h='SU-04.dc.html')],lead=7))
-    nfalta+=2; natr+=sum(1 for r in rows[-2:] if _faixa((_dt.date.fromisoformat(r['v']['data'])-_dt.timedelta(days=r['lead'])).isoformat())=='atrasada')
+    nfalta+=1; natr+=int(_faixa((_dt.date.fromisoformat(rows[-1]['v']['data'])-_dt.timedelta(days=rows[-1]['lead'])).isoformat())=='atrasada')
     g=grid([dict(k='item',l='Item · origem',w=210),dict(k='falta',l='Falta firme',t='num',a='r'),dict(k='pedir',l='Pedir até · necessária',t='date'),
             dict(k='dem',l='Demanda',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='firm',l='Receb. firmes',t='num',a='r',w=170),
             dict(k='acao',l='Próxima ação')],
         rows,gid='g_nec',tree=True,total=False,so={'k':'pedir','d':False},
         edit=dict(m='origin',leafOnly=False,title='Necessidade',fields=[fs('item','Item ou origem',ro=True),fs('data','Data necessária','date',ro=True)]))
-    faltas=[r['v']['item'] for r in rows if r['v']['falta']>0.001]
+    faltas=[r['v']['item'] for r in rows if r['v']['falta']>0.001 and not r['v'].get('semData')]
     valor=sum(o['valor'] for o in dem.values())
     pn={'rep':dict(title='Reprogramar proposta de reposição',sub='Muda a data necessária e recalcula o “pedir até”. Nenhuma cotação nova é enviada.',ok='Reprogramar',
         fields=[fs('item','Item','sel',opts=faltas,req=True,**{'def':faltas[0]}),fs('data','Nova data necessária','date',req=True),fs('motivo','Motivo','txt',req=True,help='Ex.: janela de plantio deslocada pela chuva.')])}
-    js(pn,r'''
+    js(pn,_sup_man_js()+r'''
 CHECK.rep=(self,d)=>(d.data<HOJE?{data:'A data não pode ser anterior a hoje (23/09).'}:null);
 RUN.rep=(self,d)=>{ let lead=0; setRows(self,'g_nec',rows=>{ const r=rows.find(x=>x.v.item===d.item); if(r){ r.v.data=d.data; lead=r.lead; } });
   return d.item+' reprogramado para '+dm(d.data)+' · pedir até '+dm(addd(d.data,-lead))+' · nenhuma cotação nova enviada'; };
-function PREVALS(self,v){ RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
-  if(!r.lead) return; const pa=addd(V.data,-r.lead); V.pedir=pa;
+function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M(k.v.data?'necessária '+dm(k.v.data):'Sem data · conferir âncora no plano')]; });
+  if(!r.lead) return; const pa=supPedirAte(V.data,{prazo:r.lead,seguranca:0}); V.pedir=pa;
+  if(V.semData || !V.data){ V.pedir=null; r.p.pedir=[M('Sem data · projeção parcial'),M(V.data?'primeira data conhecida '+dm(V.data):'Conferir âncora no plano')]; r.s.pedir=''; return; }
   r.p.pedir=((V.falta>0.001)?[faixa(pa)]:[M('—')]).concat([BRK,M('necessária '+dm(V.data))]); r.s.pedir=(V.falta>0.001)?pa:''; }); }
 function EXTRAVALS(self,v){ pnVals(self,v); }''')
     painel()
-    corpo=(kpis([('Itens com falta firme',str(nfalta),'SOL-2026-07 em cotação + KCl, diesel e rolamento'),('Pedido atrasado',str(natr),'o “pedir até” já passou'),
-                 ('Condicionado à qualidade','10 t','KCl 60% · K26-11 · laudo 27/09'),('Valor da falta firme',f'R$ {nf(valor/1000,1)} mil','SOL-2026-07 · preço de referência')])
-           + bloco('Necessidade líquida por data','Confira a falta firme de cada item e abra a cotação; expanda o item para ver a origem da demanda.',g
-                   + nota('KCl 60%: falta firme 140 − 50 − 40 = 50 t; as 10 t em quarentena não entram e ficam como coberto se o laudo aprovar, somadas uma única vez. Clique na linha para ver a memória de cálculo.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas; o valor da falta firme entra no selo do cabeçalho
+    corpo=(bloco('Necessidade líquida por data','Confira a falta firme de cada item e abra a cotação; expanda o item para ver a origem da demanda.',g
+                   + nota('KCl 60%: falta firme 140 − 50 − 40 = 50 t.'),
                    acao=mini('open_rep','Reprogramar proposta','Muda a data necessária de um item sem enviar nova cotação','calendar')))
     HEIGHTS37[fname]=1760
     shell37('SU-01','Necessidades e cobertura',corpo,fname=fname,
       subtitle='Necessidade líquida por data com origem, físico apto, reservas, entregas firmes e data limite de compra.',
-      status=(f'{nfalta} itens com falta firme · {natr} atrasados','red'),primary_html=prima('CMP.dc.html','Abrir cotação da SOL-2026-07'),
-      footer='Revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (SU-01 · CAL-01).')
+      status=(f'{nfalta} itens com falta firme · {natr} atrasados · R$ {nf(valor/1000,1)} mil','red'),primary_html=prima('CMP.dc.html','Abrir cotação da SOL-2026-07'),
+      footer='Revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (SU-01 · CAL-01). '
+             'As toneladas em quarentena não entram na falta firme e ficam como coberto se o laudo aprovar, somadas uma única vez; a linha abre a memória de cálculo.')
 
 # ================= SU-02 · Políticas de estoque =================
 DEPOS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Tanque Sede','Almox. oficina']
@@ -319,31 +331,41 @@ def su02():
     pn={'exc':dict(title='Submeter exceção versionada',sub='A exceção vale só no período informado e passa pela alçada do gestor.',ok='Submeter exceção',
         fields=[fs('grp','Item/grupo','sel',opts=[p[1] for p in POL],req=True,**{'def':'Peças de manutenção'}),fs('alt','Alteração','txt',req=True,**{'def':'mínimo 2 → 4 un durante a colheita'}),
                 fs('ini','Início','date',req=True,**{'def':'2026-10-01'}),fs('fim','Fim','date',req=True,**{'def':'2026-12-20'}),fs('just','Justificativa','area',req=True)])}
-    js(pn,r'''
-CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
-RUN.exc=(self,d)=>{ setRows(self,'g_pol',rows=>{ const r=rows.find(x=>x.v.grp===d.grp); if(r) r.v.estado='Exceção submetida · aguarda gestor'; });
-  return 'Exceção de '+d.grp+' submetida ('+dm(d.ini)+' a '+dm(d.fim)+') · aguarda o gestor · a política vigente não muda até a aprovação'; };
-function PREVALS(self,v){ RW(self,'g_pol').forEach(r=>{ const V=r.v;
+    for key,title,ok in [('aprovar','Revisar proposta de política','Aprovar proposta'),('publicar','Publicar versão aprovada','Publicar versão')]:
+        pn[key]=dict(title=title,sub='Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo.',ok=ok,
+                     fields=[fs('id','Política','txt',ro=True,req=True,cond=dict(k='_meta',eq='mostrar')),fs('rev','Revisão da proposta','num',ro=True,req=True,cond=dict(k='_meta',eq='mostrar'))])
+    pn['simular']=dict(title='Simular antecedência',sub='Calcula prazo mais segurança; não presume consumo nem risco de ruptura.',ok='Simular',
+                       fields=[fs('id','Política','sel',opts=[r['v']['grp'] for r in rows],req=True,**{'def':rows[0]['v']['grp']})])
+    seedrows=[dict(id=r['id'],v=r['v']) for r in rows]
+    root=os.path.dirname(os.path.dirname(__file__))
+    service=Path(root,'sup_politicas.js').read_text(encoding='utf-8')
+    adapter=Path(root,'sup_politicas_ui.js').read_text(encoding='utf-8')
+    js(pn,service+'\nconst SUP_POL_SEED=supPolSeed('+json.dumps(seedrows,ensure_ascii=False)+');\n'+adapter+r'''
+// selo do cabeçalho pelo estado das políticas (composição do integrador, PR #107)
+function supPolSelo(v,ps){ if(!ps) return hstatus(v,'Políticas ilegíveis · confira os dados','red'); const qs=Object.values(ps.politicas).map(p=>p.proposta).filter(Boolean), ap=qs.filter(q=>q.estado==='Aprovada').length, ag=qs.length-ap;
+  if(!qs.length) return hstatus(v,'Políticas vigentes · nenhuma proposta pendente','green');
+  hstatus(v,[ag?ag+(ag===1?' proposta aguardando gestor':' propostas aguardando gestor'):'',ap?ap+(ap===1?' aprovada a publicar':' aprovadas a publicar'):''].filter(Boolean).join(' · '),'yellow'); }
+function PREVALS(self,v){ const ps=supPolRefresh(self); supPolSelo(v,ps); if(!ps)return; RW(self,'g_pol').forEach(r=>{ const V=r.v;
   r.p.grp=[B(V.grp),M(V.dep)]; r.s.grp=V.grp+' '+V.dep;
   r.p.abc=[T(V.abc+' ·'),chipc(V.crit,V.crit==='Alta'?'red':(V.crit==='Média'?'yellow':'gray'))]; r.s.abc=V.abc+' '+V.crit;
   r.p.seg=[T(nf(V.seg)+' d · '+nf(V.prazo)+' d')]; r.s.seg=String(V.seg);
-  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v);
-  self.g2after=(gid,rows,r)=>{ if(gid==='g_pol'&&r){ const m=String(r.v.estado).match(/v(\d+)/); const nv='v'+(m?Number(m[1])+1:2);
-    r.v.estado='Proposta '+nv+' · aguarda gestor'; self.setState({g2toast:'Proposta '+nv+' de '+r.v.grp+' salva · aguarda aprovação do gestor; a versão vigente segue valendo'}); } }; }''',
-    simsd=dict(sim='Simulação do Diesel S10: mínimo de 40 % cobre 9 dias do pico do plantio sem ruptura · a política vigente não foi alterada',
-               pub='Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita.'))
+  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); supPolActions(self,ps); }
+
+CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
+RUN.exc=(self,d)=>{const s=supPolCurrent(),n=supPolClone(s);const id=Object.keys(n.politicas).find(k=>n.politicas[k].vigente.grp===d.grp);if(!id)throw Error('Política não encontrada.');const p=n.politicas[id];p.excecoes=(p.excecoes||[]).concat([{alteracao:d.alt,inicio:d.ini,fim:d.fim,just:d.just,estado:'Submetida'}]);n.rev++;supPolCommit(n,s.rev);return 'Exceção registrada para análise; não altera a política vigente.';};
+function EXTRAVALS(self,v){pnVals(self,v);supPolBind(self,v);}''')
     painel()
     corpo=(bloco('Políticas por item e depósito','Confira segurança, prazo e limites de cada política; clique na linha para propor uma nova versão.',
-                 g+nota('Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.'),
-                 acao=mini('sim_sim','Simular cobertura','Simula o efeito de uma política sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend'))
-           + bloco('Publicação de vigência','Publique só a versão aprovada; a simulação e as propostas não alteram a política vigente.',
-                   nota('Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).'),acao=mini('sim_pub','Publicar vigência','Publica a versão aprovada','check')))
+                 g,
+                 acao=mini('sim_sim','Simular antecedência','Prazo mais segurança de uma política, sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend')))
+    # EX-50(a)-SUP (PR #107): revisar, aprovar e publicar ficam na própria linha; sem bloco de publicação com nota fixa
     HEIGHTS37[fname]=900
     shell37('SU-02','Políticas de estoque',corpo,fname=fname,
       subtitle='Política por item e local com segurança, prazo, lote, múltiplo, validade e justificativa; exceções versionadas.',
-      status=('1 proposta aguardando gestor','yellow'),primary_html=primb('open_exc','Submeter exceção'),
-      footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65).')
+      status=(MARK,'gray'),primary_html=primb('open_exc','Submeter exceção'),
+      footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65). '
+             'Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.')
+    dyn_status(fname)
 
 # ================= SU-03 · Saldos e lotes de materiais =================
 LOTES_X=[  # além de dados2.LOTES: sobras da REQ-031, lote zerado com custódia da OS-0420, consignado, diesel e café (produção)
@@ -375,7 +397,7 @@ def su03():
            dict(t=f"Retido {nq(l['quarentena'])} {un}" + (f" · {l['ret']}" if l['ret'] else '')),
            dict(t=f"Utilizável {nq(util)} − reservado {nq(l['reservado'])} = disponível {nq(disp)} {un}"),
            dict(t=(f"Custódia em campo {nq(l['cust'])} {un} com a {l['cos']} — fora do físico do depósito" if l['cust'] else 'Sem custódia em campo'))]
-        if l['lote']=='F26-02': o.append(dict(t='Reserva planejada da safra em conflito',h='SU-03det.dc.html'))
+        if l['lote']=='F26-02': o.append(dict(t='Reserva planejada da safra em conflito' if CONFL_FA else 'Reservas do lote e uso da safra',h='SU-03det.dc.html'))
         o+= [dict(t='Ver movimentos do lote',h='SU-08.dc.html'),dict(t='Requisitar para uma O.S.',h='SU-07.dc.html')]
         if l['ret']: o.append(dict(t='Inspecionar',h='SU-06.dc.html'))
         pit=[b(f"{l['item']} · {l['lote']}")]+([mut('consignado')] if 'consignado' in l['prop'] else [])
@@ -387,7 +409,7 @@ def su03():
                  val=([txt(f'R$ {nf(val/1000,1)} mil')] if val else [mut('do proprietário' if 'consignado' in l['prop'] else ('fora do total' if l['item']=='Café beneficiado' else '—'))])),o=o))
     g=grid([dict(k='item',l='Item · lote',w=230),dict(k='loc',l='Local'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='ret',l='Retido'),
             dict(k='util',l='Utilizável',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='cust',l='Custódia',t='num',a='r'),
-            dict(k='val',l='Valor',t='num',a='r')],rows,gid='g_sal',total=False,
+            dict(k='val',l='Valor',t='num',a='r',pre='R$ ',agg='sum')],rows,gid='g_sal',total=True,   # TAB-07: o valor em insumos é a linha de total
         edit=dict(m='origin',title='Saldo',fields=[fs('item','Item · lote',ro=True),fs('loc','Local',ro=True)]))
     pn={'res':dict(title='Reservar saldo para ordem',sub='A reserva nunca passa do disponível do lote e fica ligada à ordem de destino.',ok='Reservar',
         fields=[fs('os','Ordem de destino','sel',opts=[f"OS-0421 · Fungicida 1ª aplicação (REQ-035 · faltam {nq(R35['solicitado']-R35['entregue'])} L)"],req=True,**{'def':f"OS-0421 · Fungicida 1ª aplicação (REQ-035 · faltam {nq(R35['solicitado']-R35['entregue'])} L)"}),
@@ -405,24 +427,25 @@ function PREVALS(self,v){ RW(self,'g_sal').forEach(r=>{ const V=r.v, u=' '+V.un;
 function EXTRAVALS(self,v){ pnVals(self,v); }''' % (R35['solicitado']-R35['entregue']))
     painel()
     ncust=len([l for l in _lotes() if l['cust']])
-    corpo=(kpis([('Conflito de reserva','1',f'F26-02 · pendência {nq(SOL_FA)} L'),('Lotes retidos','3','K26-11 · M26-05 · L27-013'),
-                 ('Custódia em campo',f'{ncust} ordens','OS-0417 · OS-0421 · OS-0420'),('Valor em insumos',f'R$ {nf(tot/1e6,2)} mi','próprio · sem café e consignado')])
-           + bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
-                   g+nota('Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas; o valor em insumos é o total da coluna Valor
+    corpo=(bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
+                   g,
                    acao=alink('SU-08.dc.html','Ver movimentos','Abre o extrato de movimentos','lista')))
     HEIGHTS37[fname]=1000
     shell37('SU-03','Saldos e lotes de materiais',corpo,fname=fname,
       subtitle='Estoque por item, lote, proprietário e local com custódias; cada saldo mostra fonte e documento de origem.',
-      status=('1 conflito de reserva · 3 lotes retidos','red'),primary_html=primb('open_res','Reservar para ordem','box'),
-      footer='Os saldos são os mesmos do processo Estoque; requisitar, transferir e inspecionar abrem o registro de destino (SU-07, SU-08, SU-06).')
+      status=('1 conflito de reserva · 3 lotes retidos','red') if CONFL_FA else ('3 lotes retidos','yellow'),primary_html=primb('open_res','Reservar para ordem','box'),
+      footer='Os saldos são os mesmos do processo Estoque; requisitar, transferir e inspecionar abrem o registro de destino (SU-07, SU-08, SU-06). '
+             'Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário.')
 
 # ---- SU-03det · F26-02 · reserva em conflito (DEMO-18 nos saldos de dados2) ----
 def su03det():
     fname='SU-03det.dc.html'; E._reset_screen(fname); PARENT37[fname]='SU-03.dc.html'
+    if not CONFL_FA: return su03det_sem_conflito(fname)
     org=_origens()['Fungicida A']
     a1=round(sum(x['q'] for x in org if '1ª' in x['t']),1); a2=round(sum(x['q'] for x in org if '2ª' in x['t']),1)
     rows=[R('fis',dict(m='Físico no lote',q=F02['fisico']),dict(q=[b(f"{nq(F02['fisico'])} L")],sit=[txt('validade 03/2028 · NF 4390')]),o=[dict(t='Almox. defensivos · sem quarentena'),dict(t='Movimentos do lote',h='SU-08.dc.html')]),
-          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida P2)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
+          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida T1-B)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
           R('plano',dict(m='Reserva planejada · Safra 2026/27',q=PLANO_FA),dict(),o=[dict(t=f'1ª aplicação (DAP 45) · T1-A, T1-B e T2 = {nq(a1)} L'),dict(t=f'2ª aplicação (DAP 60) · T1-A, T1-B e T2 = {nq(a2)} L'),dict(t='Abrir em Planejar safra',h='SAF.dc.html')]),
           R('disp',dict(m='Disponível no lote',q=LIVRE_FA),dict(),o=[dict(t=f"Físico {nq(F02['fisico'])} − reservado {nq(F02['reservado'])} = {nq(LIVRE_FA)} L; nunca fica negativo")]),
           R('pend',dict(m='Pendência sem saldo',q=0),dict(),o=[dict(t=f'Coberta pela SOL-2026-07 (líquido de Fungicida A = {nq(SOL_FA)} L)'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')])]
@@ -465,6 +488,57 @@ function EXTRAVALS(self,v){ const dec=self.state.dec;
       footer='DEMO-18 · várias reservas válidas podem coexistir em partes do lote; reenvio devolve o mesmo recibo; vencimento retira elegibilidade sem apagar histórico (ESTOS-02/03).')
     dyn_status(fname)
 
+def su03det_sem_conflito(fname):
+    """SU-03det sem conflito (revisão do CTL-4, S4): o lote F26-02, a reserva da OS-0424 e o uso da safra de hoje em diante pela demanda única.
+    Revisão do 853a6a8 (achado 6, S3): lote, reserva, uso da safra e pendência de compra são lidos AO VIVO do cenário compartilhado e da mesma
+    demanda do Planejar safra e da Compra (dados2.js_dem_viva: demFazenda sobre cenDemEntradas) — nunca "sem pendência de compra" da semente
+    enquanto a demanda pede complemento (ex.: 30 L devolvidos bloqueados viram qualidade pendente; uma O.S. nova vira pendência)."""
+    import cenario
+    rows=[R('fis',dict(m='Físico no lote',q=F02['fisico']),dict(q=[b(f"{nq(F02['fisico'])} L")],sit=[txt('validade 03/2028 · NF 4390')]),o=[dict(t='Almox. defensivos'),dict(t='Movimentos do lote',h='SU-08.dc.html')]),
+          R('os24',dict(m='Reserva confirmada · OS-0424 (fungicida T1-B)',q=F02['reservado']),dict(q=[txt(f"{nq(F02['reservado'])} L")],sit=[ch('Confirmada · recibo RS-7741','green')]),o=[dict(t='Requisição REQ-039 · separar pelo FEFO',h='SU-07.dc.html')]),
+          R('uso',dict(m='Uso da safra 2026/27 de hoje em diante',q=0),dict(q=[mut('—')],sit=[mut('calculando')]),o=[dict(t='Abrir a demanda no Planejar safra',h='SAF.dc.html#saf=S2627&passo=demanda')]),
+          R('disp',dict(m='Disponível no lote',q=LIVRE_FA),dict(q=[b(f"{nq(LIVRE_FA)} L")],sit=[txt('livre para outras ordens; nunca fica negativo')]),o=[dict(t=f"Físico {nq(F02['fisico'])} − reservado {nq(F02['reservado'])} = {nq(LIVRE_FA)} L")]),
+          R('pend',dict(m='Pendência de compra',q=0),dict(q=[mut('—')],sit=[mut('calculando')]),o=[dict(t='A Compra de insumos e o Planejar safra leem a mesma demanda'),dict(t='Abrir a Compra de insumos',h='CMP.dc.html')])]
+    g=grid([dict(k='m',l='Medida',w=600),dict(k='q',l='Quantidade',t='num',a='r'),dict(k='sit',l='Situação',w=600)],rows,gid='g_lot',search=False,total=False,
+        edit=dict(m='origin',title='Saldo do lote',fields=[fs('m','Medida',ro=True)]))
+    js({},cenario.js_prefixo()+D2.js_dem_viva('S2627')+r"""
+/* lote F26-02, reserva da OS-0424 e a demanda única do Fungicida A na Safra 2026/27, do cenário vivo (Estoque, O.S. e app mudam e a tela acompanha) */
+function faViva(){ const c=cenGet(); const l=c.lotes['Fungicida A|F26-02']||{fisico:0,quarentena:0,reservado:0}; const r=c.reqs['REQ-039']; const it=r&&r.itens.find(i=>i.prod==='Fungicida A');
+  const o=c.ordens['OS-0424']||{}; const res=(it&&r.estado!=='Cancelada'&&['A liberar','Liberadas','Em execução'].indexOf(o.etapa)>=0)?cenResPropria(c,'REQ-039',it,l):0;
+  const d=demViva('Fungicida A')||{liq:0,cond:0,bruta:0,evs:[]}; const own=(d.evs||[]).filter(e=>e.tipo==='dem'&&e.own); const isOS=e=>/^OS-/.test(String(e.chave||''));
+  return {l,res,disp:cenDisp(l),liq:d.liq||0,cond:d.cond||0,bruta:d.bruta||0,qos:own.filter(isOS).reduce((a,e)=>a+e.q,0),qpl:own.filter(e=>!isOS(e)).reduce((a,e)=>a+e.q,0),
+    oss:own.filter(isOS).map(e=>e.chave+' '+nf(e.q,1)+' L').join(', ')}; }
+function PREVALS(self,v){ const x=faViva(); const rs=RW(self,'g_lot'); const R_=(id)=>rs.find(r=>r.id===id)||{v:{},p:{}};
+  const F=R_('fis'), O=R_('os24'), U=R_('uso'), Dp=R_('disp'), Pe=R_('pend'); const L=x.l;
+  F.v.q=L.fisico; F.p.q=[B(nf(L.fisico)+' L')]; F.p.sit=[T('validade 03/2028 · NF 4390')].concat(L.quarentena>1e-9?[BRK,chipc(nf(L.quarentena)+' L em quarentena · aguardam laudo','yellow')]:[]);
+  O.v.q=x.res; O.p.q=[T(x.res>1e-9?nf(x.res)+' L':'—')]; O.p.sit=x.res>1e-9?[chipc('Confirmada · recibo RS-7741','green')]:[M('sem reserva presa (entregue ou cancelada)')];
+  U.v.q=Math.round(x.bruta*10)/10; U.p.q=[T(nf(x.bruta,1)+' L')];
+  /* falta firme e qualidade pendente juntas: as duas à vista, a ação segue a da compra firme (revisão do 16fb55e, ajuste 1) */
+  const QP=x.cond>0.05?[chipc('Qualidade pendente · '+nf(x.cond,1)+' L','yellow')]:[];
+  U.p.sit=x.liq>0.05?[chipc('Falta '+nf(x.liq,1)+' L','yellow')].concat(QP):(x.cond>0.05?QP:[chipc('Coberto pelo lote','green')]);
+  U.o=[{t:'O.S. abertas pelo que falta tirar do almoxarifado: '+nf(x.qos,1)+' L'+(x.oss?' ('+x.oss+')':'')},{t:'Plano sem O.S. (sem a parte que as ordens já cobrem): '+nf(x.qpl,1)+' L'},{t:'Abrir a demanda no Planejar safra',h:'SAF.dc.html#saf=S2627&passo=demanda'}];
+  Dp.v.q=x.disp; Dp.p.q=[B(nf(x.disp)+' L')]; Dp.o=[{t:'Físico '+nf(L.fisico)+' − bloqueado '+nf(L.quarentena)+' − reservado '+nf(L.reservado)+' = '+nf(x.disp)+' L'}];
+  Pe.v.q=x.liq; Pe.p.q=[T(x.liq>0.05?nf(x.liq,1)+' L':'—')];
+  Pe.p.sit=x.liq>0.05?[chipc('Pendência de compra · '+nf(x.liq,1)+' L','yellow')].concat(QP.length?QP.concat([M('fora da compra · o gestor libera ou reprova no Estoque')]):[]).concat([{k:'link',t:'Ver no Planejar safra',h:'SAF.dc.html#saf=S2627&passo=demanda'}])
+    :(x.cond>0.05?[chipc('Qualidade pendente · '+nf(x.cond,1)+' L','yellow'),M('condicionada ao laudo · sem nova compra automática')]:[chipc('Sem pendência de compra','green')]);
+  Pe.o=[{t:'A Compra de insumos e o Planejar safra leem a mesma demanda: '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L de Fungicida A nesta safra'+(x.cond>0.05?'; mais '+nf(x.cond,1)+' L dependem do laudo da quarentena (fora da compra, sem nova compra automática)':''):(x.cond>0.05?nf(x.cond,1)+' L dependem do laudo da quarentena':'o estoque apto cobre o Fungicida A desta safra'))},{t:'Abrir a Compra de insumos',h:'CMP.dc.html'}]; }
+function EXTRAVALS(self,v){ cenOuvir(self); const x=faViva();
+  if(x.liq>0.05) hstatus(v,'Pendência de compra · '+nf(x.liq,1)+' L','yellow'); else if(x.cond>0.05) hstatus(v,'Qualidade pendente · '+nf(x.cond,1)+' L','yellow'); else hstatus(v,'Sem conflito · livre '+nf(x.disp)+' L','green');
+  v.ct_falta=x.liq>0.05?('Comprar '+nf(x.liq,1)+' L (complemento no Planejar safra)'+(x.cond>0.05?' · mais '+nf(x.cond,1)+' L aguardam o laudo da quarentena (o gestor libera ou reprova no Estoque)':'')):(x.cond>0.05?('Laudo da quarentena ('+nf(x.cond,1)+' L condicionados)'):'Nada a decidir');
+  v.ct_prox=x.liq>0.05?'Enviar o complemento no Planejar safra':(x.cond>0.05?'O gestor libera ou reprova a qualidade no Estoque':'Acompanhar as O.S. da safra');
+  v.tl=[{t:'23/09 10:02:01 · OS-0424 pede 65 L → confirmada (recibo RS-7741)'},{t:'23/09 10:04 · reenvio da OS-0424 devolve o mesmo recibo RS-7741, sem nova dedução'},
+        {t:'demanda única de agora: uso da safra de hoje em diante '+nf(x.bruta,1)+' L · '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L'+(x.cond>0.05?' + '+nf(x.cond,1)+' L condicionados ao laudo':''):(x.cond>0.05?nf(x.cond,1)+' L condicionados ao laudo':'o lote cobre'))}]; }""")
+    tl=f'<div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: {MUTED}; line-height: 1.5;"><sc-for list="{H("tl")}" as="x" hint-placeholder-count="3"><div>{H("x.t")}</div></sc-for></div>'
+    corpo=(continuity('Reservas do lote','Lote F26-02 · Fungicida A',H('ct_falta'),H('ct_prox'))
+           + bloco('Saldo do lote','Confira o reservado, o uso da safra e o disponível; clique na linha para ver a origem.',g)
+           + bloco('Linha do tempo das reservas','Confira a ordem dos pedidos de reserva: reenvio devolve o mesmo recibo, sem saldo negativo.',tl))
+    HEIGHTS37[fname]=760
+    shell37('SU-03','Lote F26-02 · reservas',corpo,fname=fname,crumbs_extra=['Fungicida A · F26-02'],
+      subtitle="Lote F26-02 de Fungicida A: a reserva da OS-0424 e o uso da Safra 2026/27 pela demanda única, a mesma do Planejar safra e da Compra de insumos, com o estoque de agora.",
+      status=(MARK,'gray'),primary_html=prima('SAF.dc.html#saf=S2627&passo=demanda','Ver a demanda no Planejar safra'),
+      footer='DEMO-18 · várias reservas válidas podem coexistir em partes do lote; reenvio devolve o mesmo recibo; vencimento retira elegibilidade sem apagar histórico (ESTOS-02/03).')
+    dyn_status(fname)
+
 # ================= SU-04 · Solicitações e cotações =================
 FRETE_KG=0.06; FRETE_PCT=0.015
 FORN_PECAS=['Rolamentos Centro-Oeste','Casa das Peças','JD Peças Rio Verde']
@@ -486,15 +560,12 @@ def su04():
         its=grupos[gname]; cot=_cotacao(gname,its); conv=[f['nome'] for f in D2.FORNECEDORES if f['homologado'] and gname in f['grupos']]
         best=cot[0] if cot else None; nresp=len(cot)
         rows.append(R('G'+gname,dict(cot=f'SOL-2026-07 · {gname}',itens=len(its),forn=len(conv),resp=nresp,melhor=round(best['tot']) if best else 0,estado='enviada',tipo='Enviada em 23/09 · consulta'),
-            dict(cot=[b(f'SOL-2026-07 · {gname}'),mut('Planejar safra · etapa 6')],itens=[txt(f'{len(its)} {"item" if len(its)==1 else "itens"}'),mut(', '.join(list(its)[:2])+('…' if len(its)>2 else ''))],
+            dict(cot=[b(f'SOL-2026-07 · {gname}'),mut('Planejar safra · demanda de insumos')],itens=[txt(f'{len(its)} {"item" if len(its)==1 else "itens"}'),mut(', '.join(list(its)[:2])+('…' if len(its)>2 else ''))],
                  forn=[txt(f'{len(conv)} homologados')],resp=[ch(f'{nresp}/{len(conv)}','green' if nresp==len(conv) else 'yellow')],
                  melhor=([txt(f"R$ {nf(best['tot'])}"),mut(best['nome'])] if best else [mut('—')]),
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),
             ro=True,o=[dict(t=f"{c['nome']}: mercadoria R$ {nf(c['merc'])} + frete R$ {nf(c['frete'])} = R$ {nf(c['tot'])} · {c['prazo']} d · {c['cond']}") for c in cot]
                      +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')]))
-    rows.append(R('COT-113',dict(cot='COT-113 · Rolamento 6310 2RS',itens=1,forn=3,resp=0,melhor=0,estado='rascunho',tipo='Rascunho',esp='Rolamento 6310 2RS · colhedora',qtd=3,ent='2026-10-02',local='Almox. oficina',dest='; '.join(FORN_PECAS)),
-        dict(cot=[b('COT-113 · Rolamento 6310 2RS'),mut('Necessidades · falta firme 3 un')],itens=[txt('1 item'),mut('3 un')],forn=[txt('3 sugeridos')],resp=[mut('—')],melhor=[mut('—')]),
-        o=[dict(t='Origem: falta firme do rolamento 6310 (PCM · OM-0234)',h='SU-01.dc.html')]))
     rows.append(R('COT-110',dict(cot='COT-110 · Kit filtros + óleo 15W40',itens=1,forn=3,resp=1,melhor=0,estado='aguardando',tipo='Enviada em 21/09 · consulta'),
         dict(cot=[b('COT-110 · Kit filtros + óleo 15W40'),mut('Manutenção · OM-0234')],itens=[txt('1 item'),mut('1 kit')],forn=[txt('3 convidados')],resp=[ch('1/3','yellow')],melhor=[mut('—')],
              estado=[ch('Até 24/09','yellow')]),ro=True,o=[dict(t='Respostas até 24/09; depois disso compara com as recebidas')]))
@@ -517,24 +588,21 @@ const BEST=%s, ALC=%s;
 function PREVALS(self,v){ const sel=self.state.selp;
   RW(self,'g_cmp').forEach((r,i)=>{ r.p.tot=[i===0?B('R$ '+nf(r.v.tot)):T('R$ '+nf(r.v.tot))];
     r.p.sit=(sel===r.id)?[chipc('Selecionada','green')]:(i===0?[chipc('Melhor equalizado','green')]:[M('+R$ '+nf(r.v.tot-RW(self,'g_cmp')[0].v.tot))]); });
-  const c=RF(self,'g_cot','COT-113'); if(c){ const env=!!self.state.env113; c.ro=env; c.v.tipo=env?'Enviada em 23/09 · consulta':'Rascunho'; c.p.estado=env?[chipc('Enviada · respostas até 26/09','green')]:[chipc('Rascunho','gray')];
-    c.p.forn=[T((String(c.v.dest||'').split(';').filter(x=>x.trim()).length)+(env?' convidados':' sugeridos'))]; c.p.itens=[T('1 item'),M(nf(c.v.qtd)+' un')]; } }
+  }
 function EXTRAVALS(self,v){
-  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); };
-  v.env113=()=>{ if(self.state.env113) return toast(self,'COT-113 já foi enviada · nada reenviado'); const c=RF(self,'g_cot','COT-113'); const n=String(c.v.dest||'').split(';').filter(x=>x.trim()).length;
-    if(!n) return toast(self,'Escolha ao menos um destinatário: clique na linha da COT-113'); self.setState({env113:true,g2toast:'COT-113 enviada a '+n+' convidados · respostas até 26/09 (simulado · nenhuma mensagem real enviada)'}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
-    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
-                 + nota('O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.'),
-                 acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
+  v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
+    # EX-50(a)-SUP (PR #106): sem rascunho fictício; falta de manutenção é conferida em Necessidades (SU-01), não enviada daqui
+    corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação.',g)
            + bloco(f'Comparação equalizada · SOL-2026-07 · Fertilizantes','Compare mercadoria, frete, prazo e condição no mesmo critério e selecione a proposta.',gc
                    + nota('Itens: '+', '.join(n+' '+nf(o['qtd'])+' '+o['un'] for n,o in fert.items())+f". Alçada pelo valor: {_alcada(best['tot'])} (até R$ 300 mil)."),
                    acao=alink('SU-05.dc.html','Aprovar contratação','Abre contratos e pedidos','doc')))
     HEIGHTS37[fname]=1190
     shell37('SU-04','Solicitações e cotações',corpo,fname=fname,
       subtitle='Cotações nascem da necessidade (SOL-2026-07 e faltas de manutenção); a comparação equaliza propostas e a seleção registra justificativa.',
-      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar · 1 rascunho','yellow'),
+      status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar','yellow'),
       primary_html=primb('sel_prop',f"Selecionar {best['nome']}",'check'),
-      footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17).')
+      footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17). '
+             'O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.')
 
 # ================= SU-05 · Contratos, pedidos e entregas =================
 C=dict(id='CT-2026-11',f=FORN['F01'],item='KCl 60%',contratado=140,liberado=PC88['qtd']//1000,recebido=PC88['recebido']//1000,apto=PC88['apto']//1000,
@@ -611,12 +679,12 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); }''',
                conf='Fertisul confirmou a carga 3 (40 t) para 02/10 · programação atualizada sem alterar o contratado (simulado · nenhuma mensagem real enviada)',
                pico=f"Pico projetado {_rs(C['exp'])} em 02/10 (carga 3) · dentro do limite de {_rs(C['limite'])} · emitir a carga 4 antes de receber a 3 levaria o pico a {_rs(C['pico'])} (conflito)"))
     painel()
-    corpo=(kpis([('Conflitos','1','carga 4 · CT-2026-11'),('A receber até 26/09','3','NF 4533 · PC-093 · PC-094'),('Liberado a entregar',_rs(C['exp']+DIESEL_EXP),'KCl · diesel'),('Contratos vigentes','3','Fertisul · Ipiranga · Santa Rita Insumos')])
-           + bloco('Contratos de fornecimento','Confira contratado, liberado e exposição de cada contrato; clique na linha para ajustar condição e vigência.',gctr
-                   + nota('O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo contratual.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Contratos de fornecimento','Confira contratado, liberado e exposição de cada contrato; clique na linha para ajustar condição e vigência.',gctr
+                   ,
                    acao=mini('open_ctr','Formalizar contrato','Cria o contrato a partir da proposta selecionada','doc'))
            + bloco('Pedidos','Confira o que falta entregar em cada pedido; clique na linha para ajustar chegada, uso e depósito.',gped
-                   + nota('Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimentos.'),
+                   ,
                    acao=mini('sim_ped','Emitir pedido','Programa o próximo pedido de diesel contra o contrato','cart')+mini('sim_conf','Confirmar fornecedor','Registra a confirmação da carga pelo fornecedor','check')+alink('SU-06.dc.html','Receber','Abre Recebimentos para conferir a entrega','truck'))
            + bloco('Programação de entregas','Simule o pico de exposição e o ritmo de cargas antes de liberar; o que passa do limite vira conflito.',
                    f'<div style="padding: 0 0 10px;">{bar}</div>'+panes,acao=mini('sim_pico','Simular pico de exposição','Calcula o pico por data sem liberar nada','trend')))
@@ -624,7 +692,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); }''',
     shell37('SU-05','Contratos, pedidos e entregas',corpo,fname=fname,
       subtitle='Contratos, pedidos e programação de entregas com saldos explícitos e exposição em R$ quando há limite.',
       status=('1 conflito de liberação','red'),primary_html=prima('SU-05det.dc.html','Resolver conflito da carga 4'),
-      footer='Proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / PCE-08. Antecipação e prazo têm títulos próprios (GE-04).')
+      footer='Proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / PCE-08. Antecipação e prazo têm títulos próprios (GE-04). '
+             'O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo contratual. Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimentos.')
 
 # ---- SU-05det · contrato CT-2026-11 · Fertisul · KCl 60% ----
 def su05det():
@@ -766,9 +835,9 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_re
     self.setState({g2toast:'NF 4533 conferida: '+qq(c,'kg')+' · apto '+nf(r.v.apto)+' · retido '+nf(r.v.quar)+' kg · PC-090 a entregar 20.000 → '+nf(r.v.aberto)+' kg · título a encaminhar (aceite físico ≠ aprovação financeira)'}); }; }'''
     js(pn,code.replace('__DOK__',str(DIESEL['preco'])).replace('__DNF__',str(PRECO_NF_DIESEL)).replace('__DQ__',str(DIESEL['q'])))
     painel()
-    corpo=(kpis([('Divergências abertas',H('k_div'),H('k_div_s')),('Em quarentena',H('k_quar'),H('k_quar_s')),('A receber',H('k_pend'),H('k_pend_s')),('Pedidos com saldo aberto',H('k_ab'),H('k_ab_s'))])
-           + bloco('Conferência de pedido, documento e material','Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.',
-                   g+nota('Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Conferência de pedido, documento e material','Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.',
+                   g,
                    acao=mini('ler','Ler documento/QR','Lê a chave da NF e localiza o pedido (simulado)','doc')+mini('open_seg','Segregar lote','Retém parte do apto de um lote','alert')
                         +mini('open_div','Resolver diferença','Decide a divergência de preço da NF 8812','cash')))
     HEIGHTS37[fname]=880
@@ -777,7 +846,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_re
     shell37('SU-06','Recebimentos e divergências',corpo,fname=fname,
       subtitle='Conferência de pedido, documento e material; parcial mantém o saldo aberto e documento duplicado não cria segunda entrada.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='DEMO-02: PC-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (SU-06 · FO-18).')
+      footer='DEMO-02: PC-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (SU-06 · FO-18). '
+             'Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez.')
     dyn_status(fname)
 
 # ================= SU-07 · Requisições e entregas =================
@@ -793,7 +863,7 @@ def _reqs():
          dict(id='REQ-037',os='OS-0420',tipo='Plantio soja 58 W · T4',item=R37['item'],lote=R37['lote'],un='kg',sol=R37['solicitado'],ent=R37['entregue'],cons=R37['consumido'],
               cust=R37['custodia'],resp='Carlos',local='campo T4',data='2026-09-26',st='devp',ro=True),
          dict(id='REQ-038',os='OS-0418',tipo='Fertirrigação · P1',item=R38['item'],lote='—',un='kg',sol=R38['solicitado'],ent=0,cons=0,cust=0,resp='João',local='casa de bombas P1',data='2026-09-29',st='agr',ro=False),
-         dict(id='REQ-039',os='OS-0424',tipo='Fungicida · P2',item=R39['item'],lote=R39['lote'],un='L',sol=R39['solicitado'],ent=0,cons=0,cust=0,resp='Marcos',local='campo P2',data='2026-09-24',st='sep',ro=False),
+         dict(id='REQ-039',os='OS-0424',tipo='Fungicida · T1-B',item=R39['item'],lote=R39['lote'],un='L',sol=R39['solicitado'],ent=0,cons=0,cust=0,resp='Marcos',local='campo T1-B',data='2026-09-24',st='sep',ro=False),
          dict(id='REQ-040',os='OS-0425',tipo='Adubação 1ª parcela · café C1',item=R40['item'],lote=R40['lote'],un='kg',sol=R40['solicitado'],ent=0,cons=0,cust=0,resp='Paula',local='café C1',data='2026-10-15',st='parc',ro=False)]
     return out
 def su07():
@@ -870,15 +940,16 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_req');
     js(pn,code.replace('__R36__',str(SEM_RESID)).replace('__KS__',str(kcl_saldo)).replace('__V3T__',str(R37['consumido']+R37['resid_v3']))
             .replace('__N26__',str(R40['disp'])).replace('__PEN__',str(R40['solicitado']-R40['disp'])))
     painel()
-    corpo=(kpis([('Em custódia',H('k_cu'),H('k_cu_s')),('Fila de separação',H('k_se'),H('k_se_s')),('Impedidas',H('k_im'),H('k_im_s')),('Sobras a receber',f"{R31['custodia']} sc",'REQ-031 · OS-0417 em conferência')])
-           + bloco('Fila de separação por ordem','Separe e entregue só o saldo autorizado da versão aprovada; clique na linha para ajustar recebedor, local e data.',
-                   g+nota('Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no campo não repete a saída. Entrega parcial libera só a parcela executável.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Fila de separação por ordem','Separe e entregue só o saldo autorizado da versão aprovada; clique na linha para ajustar recebedor, local e data.',
+                   g,
                    acao=mini('open_sol','Solicitar','Cria requisição a partir da versão aprovada da O.S.','doc')+alink('MB-05.dc.html','Ler QR no app','Confere a entrega pelo app de campo','box')))
     HEIGHTS37[fname]=1080
     shell37('SU-07','Requisições e entregas',corpo,fname=fname,
       subtitle='Fila de separação por ordem com solicitado, entregue, consumido e custódia; o detalhe concilia a devolução.',
       status=('2 impedidas · 10 sc de sobras a receber','red'),primary_html=prima('SU-07det.dc.html','Receber devolução da REQ-031'),
-      footer='Entrega só da versão aprovada pelo agrônomo; excesso e substituição exigem revisão (SU-07 · FO-09 · cap. 42).')
+      footer='Entrega só da versão aprovada pelo agrônomo; excesso e substituição exigem revisão (SU-07 · FO-09 · cap. 42). '
+             'Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no campo não repete a saída. Entrega parcial libera só a parcela executável.')
 
 # ---- SU-07det · REQ-031 · OS-0417 · MAP 11-52 (DEMO-03) ----
 def su07det():
@@ -935,7 +1006,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
           +mini('do_conc','Conciliar custódia','Tenta conciliar; recusa enquanto houver saldo em custódia','check')+'</sc-if>')
     corpo=(continuity('Término físico · consumo 70 sc','OS-0417 em conferência',H('ct_falta'),H('ct_prox'))
            + bloco('Balanço da requisição','Confira entregue, consumido, devolvido e o saldo em custódia; clique na linha para ver a origem.',g
-                   + nota('É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utilizável do depósito; só o recebimento conferido transfere a custódia.'),acao=acts)
+                   ,acao=acts)
            + bloco('Linha do tempo','Acompanhe cada entrega, apontamento e devolução desta requisição.',tl))
     prim=(f'<sc-if value="{H("open")}" hint-placeholder-val="{T()}">{primb("try_rec","Receber devolução","truck")}</sc-if>'
           f'<sc-if value="{H("zero")}" hint-placeholder-val="{F()}">{primb("do_conc","Conciliar custódia","check")}</sc-if>'
@@ -944,12 +1015,14 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
     shell37('SU-07',f"REQ-031 · OS-0417 · {R31['item']}",corpo,fname=fname,crumbs_extra=['REQ-031'],
       subtitle=f'Devolução parcial: {E0} entregues − {C0} consumidas − {V0} recebidas = {K0} sc sob custódia; o encerramento espera a conciliação.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='DEMO-03 · item recebido em quarentena não vira apto; calda pronta não volta como produto puro (ESTOS-04/05/06 · OSFASE-05).')
+      footer='DEMO-03 · item recebido em quarentena não vira apto; calda pronta não volta como produto puro (ESTOS-04/05/06 · OSFASE-05). '
+             'É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utilizável do depósito; só o recebimento conferido transfere a custódia.')
     dyn_status(fname)
 
 # ================= SU-08 · Transferências e movimentos =================
 def su08():
     fname='SU-08.dc.html'; E._reset_screen(fname)
+    import cenario
     M=[('tr452','23/09 10:12','TR-0452','Transferência','Galpão Boa Vista → Almox. defensivos','Glifosato 480 · G26-15',200,'L','própria','reforço da dessecação','transito'),
        ('dv031','23/09 09:41','Devolução REQ-031','Devolução recebida','Custódia OS-0417 → Galpão 2','MAP 11-52 · M26-05',20,'sc','própria','sobras de campo · quarentena','conf'),
        ('mv8821','22/09 16:20','MV-8821','Saída p/ custódia de ordem','Almox. defensivos → OS-0421','Fungicida A · F26-02',160,'L','própria','REQ-035','conf'),
@@ -970,67 +1043,30 @@ def su08():
          'nf5520':[dict(t='Transferência entre empresas com NF 5520 · muda o proprietário do saldo')],
          'pe012':[dict(t='R$ 195 (50 kg × R$ 3,90/kg) · alçada do gestor de suprimentos (até R$ 50 mil)')],
          'nf4501':[dict(t='Entrada do PC-088 · 50.000 kg aptos + 10.000 kg em quarentena'),dict(t='Ver o recebimento',h='SU-06.dc.html')]}
-    rows=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    historico=[R(i,dict(dh=dh,doc=doc,mov=mv,od=od,it=it,q=q,un=un,prop=pr,mot=mo,st=st),{},o=ORG[i]) for i,dh,doc,mv,od,it,q,un,pr,mo,st in M]
+    rows=[]
     g=grid([dict(k='doc',l='Documento · data',w=170),dict(k='mov',l='Movimento · motivo',w=200),dict(k='od',l='Origem → destino',w=200),dict(k='it',l='Item · lote',w=190),
             dict(k='q',l='Quantidade',t='num',a='r'),dict(k='est',l='Estado',w=200)],rows,gid='g_mov',total=False,
         edit=dict(m='ro',title='Movimento',fields=[fs('doc','Documento',ro=True),fs('mov','Movimento',ro=True),fs('od','Origem → destino',ro=True),fs('it','Item · lote',ro=True),fs('mot','Motivo',ro=True)]))
-    LOCS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Tanque Sede','Galpão Boa Vista']
-    ESTORNAVEIS=['MV-8788 · KCl 60% 4.800 kg → OS-0420','MV-8821 · Fungicida A 160 L → OS-0421','NF 5520 · Diesel S10 2.000 L → Boa Vista Ltda']
-    pn={'trf':dict(title='Transferir entre locais',sub='A transferência fica em trânsito até a confirmação no destino.',ok='Iniciar transferência',
-          fields=[fs('it','Item · lote','sel',opts=['KCl 60% · K26-11','MAP 11-52 · M26-07','Glifosato 480 · G26-14','Semente de soja 58 W · S58-0801'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=1,u='kg ou L'),fs('o','Origem','sel',opts=LOCS,req=True,**{'def':'Galpão 2'}),fs('d','Destino','sel',opts=LOCS,req=True,**{'def':'Galpão 1'}),
-                  fs('mot','Motivo','txt',req=True,help='Ex.: abastecer a frente de plantio.')]),
-        'per':dict(title='Registrar perda em alçada',sub='A perda entra no extrato só depois da aprovação na alçada; o saldo não muda antes disso.',ok='Submeter perda',
-          fields=[fs('it','Item · lote','sel',opts=['MAP 11-52 · M26-07','KCl 60% · K26-11','Glifosato 480 · G26-14'],req=True,**{'def':'MAP 11-52 · M26-07'}),
-                  fs('q','Quantidade','num',req=True,min=0.1,u='kg ou L'),fs('causa','Causa','txt',req=True),fs('ev','Evidência','txt',req=True,help='Ex.: foto, laudo, boletim.'),
-                  fs('apr','Aprovador','sel',opts=['Ana (gestora)','Gerente da fazenda'],req=True,**{'def':'Ana (gestora)'})]),
-        'est':dict(title='Estornar com vínculo',sub='O estorno cria um movimento novo que referencia o original; nada é apagado.',ok='Estornar com vínculo',
-          fields=[fs('orig','Movimento original','sel',opts=ESTORNAVEIS,req=True,**{'def':ESTORNAVEIS[0]}),fs('mot','Motivo','txt',req=True,help='Ex.: quantidade digitada errada.')])}
-    code=r'''
-const ST={transito:['Em trânsito','yellow'],conf:['Confirmado','green'],estorno:['Estorno lançado','gray'],estornado:['Estornado · ver ES-0071','gray'],gestor:['Aguarda gestor','yellow'],aprov:['Aprovada · lançada','green']};
-function qq(n,un){ return nf(n,(n%1)?1:0)+' '+un; }
-function un(it){ return /Glifosato|Fungicida|Diesel/.test(it)?'L':'kg'; }
-CHECK.trf=(self,d)=>(d.o===d.d?{d:'O destino precisa ser diferente da origem.'}:null);
-CHECK.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const r=RW(self,'g_mov').find(x=>x.v.doc===doc); return (r&&r.v.st==='estornado')?{orig:doc+' já foi estornado · nada estornado de novo.'}:null; };
-function add(self,row){ setRows(self,'g_mov',rows=>{ rows.unshift(row); }); }
-function nx(self,k,base){ const n=(self.state[k]||base)+1; self.setState({[k]:n}); return n; }
-RUN.trf=(self,d)=>{ const n=nx(self,'ntr',452); const id='TR-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Transferência',od:d.o+' → '+d.d,it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.mot,st:'transito'},s:{},p:{},o:[{t:'Em trânsito; o saldo só muda de local ao confirmar no destino'}]});
-  return id+' iniciada: '+qq(q,un(d.it))+' de '+d.it+' em trânsito '+d.o+' → '+d.d+' · confirme no destino'; };
-RUN.per=(self,d)=>{ const n=nx(self,'npe',12); const id='PE-0'+n; const q=g2num(d.q);
-  add(self,{id:id,v:{dh:'23/09 agora',doc:id,mov:'Perda em alçada',od:d.it.split(' · ')[0]+' → perda',it:d.it,q:q,un:un(d.it),prop:'própria',mot:d.causa,st:'gestor'},s:{},p:{},o:[{t:'Evidência: '+d.ev},{t:'Aprovador: '+d.apr}]});
-  return id+' submetida a '+d.apr+' · o saldo só baixa depois da aprovação'; };
-RUN.est=(self,d)=>{ const doc=d.orig.split(' · ')[0]; const n=nx(self,'nes',71); const id='ES-00'+n; let src=null;
-  setRows(self,'g_mov',rows=>{ src=rows.find(x=>x.v.doc===doc); src.v.st='estornado'; src.v.est_ref=id;
-    const p=src.v.od.split(' → '); rows.unshift({id:id,v:{dh:'23/09 agora',doc:id,mov:'Estorno · vínculo '+doc,od:p[1]+' → '+p[0],it:src.v.it,q:src.v.q,un:src.v.un,prop:src.v.prop,mot:d.mot,st:'estorno'},s:{},p:{},o:[{t:'Estorna o '+doc+'; o original segue no extrato'}]}); });
-  return id+' lançado com vínculo ao '+doc+' · o original fica no extrato como estornado'; };
-function PREVALS(self,v){ RW(self,'g_mov').forEach(r=>{ const V=r.v;
-  r.p.doc=[B(V.doc),BRK,M(V.dh)]; r.s.doc=V.doc+' '+V.dh; r.p.q=[T(qq(V.q,V.un))];
-  r.p.mov=[T(V.mov),BRK,M(V.mot)]; r.s.mov=V.mov+' '+V.mot; r.p.od=[T(V.od)].concat(V.prop!=='própria'?[BRK,M(V.prop)]:[]);
-  const s=ST[V.st]||[V.st,'gray']; const t=V.st==='estornado'?'Estornado · ver '+(V.est_ref||'ES-0071'):s[0];
-  r.p.est=[chipc(t,s[1])].concat(V.st==='transito'?[BRK,{k:'act',t:'Confirmar recebimento',fn:'conf:'+r.id}]:(V.st==='gestor'?[BRK,{k:'act',t:'Aprovar perda',fn:'apr:'+r.id}]:[])); r.s.est=t; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_mov');
-  const tr=rs.filter(x=>x.v.st==='transito'), pe=rs.filter(x=>x.v.st==='gestor'), es=rs.filter(x=>x.v.st==='estorno');
-  v.k_tr=String(tr.length); v.k_tr_s=tr.map(x=>x.v.doc).join(' · ')||'nada em trânsito'; v.k_pe=String(pe.length); v.k_pe_s=pe.map(x=>x.v.doc).join(' · ')||'nenhuma aguardando';
-  v.k_es=String(es.length); v.k_es_s=es.map(x=>x.v.doc).join(' · ');
-  const parts=[]; if(tr.length) parts.push(tr.length+' em trânsito'); if(pe.length) parts.push(pe.length+(pe.length>1?' perdas':' perda')+' em alçada');
-  hstatus(v,parts.join(' · ')||'Sem pendência no extrato',parts.length?'yellow':'green');
-  v.conf=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='transito') return toast(self,(r?r.v.doc:id)+' já confirmada no destino · nada muda');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='conf'; }); toast(self,r.v.doc+' confirmada no destino: '+qq(r.v.q,r.v.un)+' de '+r.v.it+' saem do trânsito e entram em '+r.v.od.split(' → ')[1]); };
-  v.apr=(id)=>{ const r=RF(self,'g_mov',id); if(!r||r.v.st!=='gestor') return toast(self,(r?r.v.doc:id)+' já aprovada · nada lançado de novo');
-    setRows(self,'g_mov',rows=>{ rows.find(x=>x.id===id).v.st='aprov'; }); toast(self,r.v.doc+' aprovada por Ana (gestora) · '+qq(r.v.q,r.v.un)+' baixados de '+r.v.it+' com vínculo à perda'); }; }'''
-    js(pn,code)
+    pn={'trf':dict(title='Prévia de transferência',sub='Não registra movimento nem altera saldo.',ok='Conferir prévia',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('d','Destino','txt',req=True),fs('mot','Motivo','txt',req=True)]),
+        'per':dict(title='Submeter perda',sub='Cria ajuste pendente (AL-09); aprove aqui em Revisar perda. O saldo só muda após aprovação.',ok='Submeter perda',fields=[fs('it','Item · lote · local','sel',opts=[],req=True),fs('q','Quantidade','num',req=True,min=0.01),fs('causa','Motivo','txt',req=True),fs('ev','Evidência','txt',req=True)]),
+        'est':dict(title='Prévia de estorno',sub='Estorno genérico sem comando: não altera original nem cria vínculo. Entregas: confira a devolução no Estoque ou na O.S.',ok='Conferir prévia',fields=[fs('orig','Movimento original','sel',opts=[],req=True),fs('mot','Motivo','txt',req=True)]),
+        'aprovar':dict(title='Revisar perda',sub='A aprovação revalida o ajuste e altera o físico do lote; reservas são preservadas.',ok='Aprovar perda',fields=[fs('id','Ajuste',ro=True)])}
+    code=(Path(__file__).resolve().parent.parent/'sup_movimentos_ui.js').read_text()
+    js(pn,cenario.js_prefixo()+'\nconst SUP_MOV_HIST='+json.dumps(historico,ensure_ascii=False)+';\n'+code)
     painel()
-    corpo=(kpis([('Em trânsito',H('k_tr'),H('k_tr_s')),('Perdas aguardando gestor',H('k_pe'),H('k_pe_s')),('Estornos lançados',H('k_es'),H('k_es_s'))])
-           + bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
-                   g+nota('Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.'),
-                   acao=mini('open_per','Registrar perda','Submete perda à alçada do gestor','alert')+mini('open_est','Estornar com vínculo','Cria estorno que referencia o movimento original','doc')
+    # EX-50(a)-SUP (PR #108) + TAB-07: sem cartões de resumo; o selo do cabeçalho conta as perdas pendentes. Perda é o comando real (principal);
+    # transferência e estorno genérico ainda não têm comando canônico, então ficam como prévia
+    corpo=(bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
+                   g,
+                   acao=mini('open_trf','Prévia de transferência','Mostra origem, destino, lote e unidade; não registra nem altera saldo','truck')+mini('open_est','Prévia de estorno','Confere o movimento a estornar; não altera o original nem cria vínculo','doc')
                         +alink('SU-07.dc.html','Devolver','Devoluções de campo entram pela requisição','truck')))
     HEIGHTS37[fname]=1180
     shell37('SU-08','Transferências e movimentos',corpo,fname=fname,
-      subtitle='Extrato imutável e transferências entre locais, custódias e empresas; cada linha com documento e confirmação.',
-      status=(MARK,'gray'),primary_html=primb('open_trf','Transferir entre locais','truck'),
-      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32).')
+      subtitle='Extrato imutável dos movimentos de estoque; perda passa pela alçada do gestor (AL-09) antes de baixar o saldo.',
+      status=(MARK,'gray'),primary_html=primb('open_per','Registrar perda','alert'),
+      footer='Perda vira ajuste pendente e só baixa o físico do lote na aprovação AL-09; reservas são preservadas (SU-08 · FO-32). '
+             'Transferência entre locais e estorno genérico ainda não têm comando: aparecem só como prévia, sem alterar saldo. Correção não apaga a operação original; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================
@@ -1100,9 +1136,9 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     setRows(self,'g_inv',rows=>{ rows.find(y=>y.id===id).v.st='aguarda'; }); toast(self,id+' submetido a '+r.v.apr+' · R$ '+nf(r.v.val)+' dentro da alçada do gestor · o saldo só muda depois da aprovação'); }; }'''
     js(pn,code)
     painel()
-    corpo=(kpis([('Ajustes aguardando gestor',H('k_ag'),H('k_ag_s')),('Diferenças a submeter',H('k_di'),H('k_di_s')),('Contagens planejadas',H('k_pl'),H('k_pl_s'))])
-           + bloco('Contagens cegas por local, item e lote','Planeje, conte e trate cada diferença com causa, evidência e aprovador; clique na linha para completar os dados.',
-                   g+nota('O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.'),
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Contagens cegas por local, item e lote','Planeje, conte e trate cada diferença com causa, evidência e aprovador; clique na linha para completar os dados.',
+                   g,
                    acao=mini('open_plan','Planejar contagem','Cria contagem cega com corte de movimentos','calendar')+alink('MB-05.dc.html','Contar no app','Abre a contagem no app de campo','box')))
     prim=(f'<sc-if value="{H("has2609")}" hint-placeholder-val="{T()}">{primb("apr2609","Aprovar ajuste INV-2609","check")}</sc-if>'
           f'<sc-if value="{H("no2609")}" hint-placeholder-val="{F()}">{prima("SU-08.dc.html","Ver efeito no extrato")}</sc-if>')
@@ -1110,5 +1146,9 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     shell37('SU-09','Inventários e ajustes',corpo,fname=fname,
       subtitle='Contagens cegas com corte de movimentos, recontagem, causa e alçada; ajuste aprovado vira movimento no extrato.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem CF-02 (SU-09 · FO-32).')
+      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
+             'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)
+
+
+

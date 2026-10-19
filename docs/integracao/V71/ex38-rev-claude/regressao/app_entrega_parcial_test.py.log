@@ -1,0 +1,10 @@
+  FALHA MB-01: OS-0430 com entrega parcial pede retirada e não oferece Iniciar
+  OK  MB-02det: FALTA "retirar os insumos com Rui", item a item, rodapé Retirar no almoxarifado
+  OK  MB-03: sem botão; mbIniciar recusa com o texto da web e nada muda: Iniciar bloqueado: REQ-53 sem entrega · 2,4-D 806 160 L, Óleo mineral 80 L a ent
+  OK  resto entregue: rodapé Confirmar recebimento · OS-0430, ainda sem Iniciar
+  OK  com os três componentes confirmados o turno abre (Em execução)
+  FALHA fracionada: após 20 ha (custódia 0/0/0) o cartão pede retirada de 280/140/70 L e não oferece Iniciar
+  OK  sem erros JS []
+5/7 ok · FALHAS: 2
+ - MB-01: OS-0430 com entrega parcial pede retirada e não oferece Iniciar
+ - fracionada: após 20 ha (custódia 0/0/0) o cartão pede retirada de 280/140/70 L e não oferece Iniciar

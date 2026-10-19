@@ -1,0 +1,13 @@
+app_cenario_test.py exit=0 21s :: 15/15 ok · FALHAS: 0 
+app_entrega_parcial_test.py exit=0 22s :: 7/7 ok · FALHAS: 0 
+app_mb02det_test.py exit=0 11s :: 8/8 ok · FALHAS: 0 
+app_mb03_turno_test.py exit=0 13s :: 11/11 ok · FALHAS: 0 
+app_mb03x_test.py exit=0 12s :: 7/7 ok · FALHAS: 0 
+app_mb04_test.py exit=0 11s :: 6/6 ok · FALHAS: 0 
+app_os0424_test.py exit=0 366s :: 9/9 ok · FALHAS: 0 
+app_restaurar_test.py exit=0 424s :: 4/4 ok · FALHAS: 0 
+app_saldo_zero_test.py exit=0 701s :: 12/12 ok · FALHAS: 0 
+ap_unico_test.py nav exit=0 745s :: 23/23 ok · FALHAS: 0 RESULTADO nav: 23/23 
+os_ator_test.py exit=0 807s :: RESULTADO: 15/15 ok 
+os_cenario_test.py exit=1 1137s :: RESULTADO: 17/20 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov; devolução recebida no Estoque: bloqueio some, trilha mostra Devolvido 20 L e surge Conferir e encerrar; encerrar: cenário Encerradas, apontamentos conferidos, painel somente consulta 
+os_v39_bloq_test.py exit=0 735s :: RESULTADO: 12/12 ok 

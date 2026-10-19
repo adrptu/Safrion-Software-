@@ -1,0 +1,204 @@
+# Arquivos alterados pela candidata TABR 8f19e0d sobre a base cdc185f
+# Gerado com git (sem reexecutar testes). Status: A acrescentado, M modificado, D apagado, R renomeado.
+
+## 1. Efeito líquido (git diff --name-status cdc185f 8f19e0d)
+M	tools/prototipo/v37/gen37/areas/cad_ativos_pessoas.py
+M	tools/prototipo/v37/gen37/areas/cad_culturas.py
+M	tools/prototipo/v37/gen37/areas/cad_fazendas.py
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+M	tools/prototipo/v37/gen37/areas/cad_produtos_estrutura.py
+M	tools/prototipo/v37/gen37/areas/cadastros.py
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+M	tools/prototipo/v37/gen37/cada_cd03_test.py
+M	tools/prototipo/v37/gen37/cada_cd04_test.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_a.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_b.py
+M	tools/prototipo/v37/gen37/cadc_cd02_test.py
+M	tools/prototipo/v37/gen37/cadc_cd06_test.py
+M	tools/prototipo/v37/gen37/cadc_cd07_test.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd02.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd06.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd07.py
+M	tools/prototipo/v37/gen37/cadf_det_test.py
+M	tools/prototipo/v37/gen37/cadf_fix_det_test.py
+M	tools/prototipo/v37/gen37/cadf_fix_lista_test.py
+M	tools/prototipo/v37/gen37/cadf_test.py
+M	tools/prototipo/v37/gen37/cadp_fix_test.py
+M	tools/prototipo/v37/gen37/cadp_test.py
+M	tools/prototipo/v37/gen37/cd05test.py
+M	tools/prototipo/v37/gen37/cd05vtest.py
+M	tools/prototipo/v37/gen37/dados_irrigacao.py
+M	tools/prototipo/v37/gen37/irr_fluxo_test.py
+M	tools/prototipo/v37/gen37/irtest.py
+M	tools/prototipo/v37/gen37/os_irrig_filtro_test.py
+M	tools/prototipo/v37/gen37/os_v39_selo_agua_test.py
+A	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+A	tools/prototipo/v37/gen37/tabelas_cad_test.py
+A	tools/prototipo/v37/gen37/tabelas_irr_test.py
+A	tools/prototipo/v37/gen37/tabelas_lib.py
+
+## 2. Por commit, do mais antigo ao mais novo, com o autor
+# Commits comuns: arquivos do commit contra o pai (--name-status).
+# Merges: só os arquivos que o merge mudou em relação a TODOS os pais (--cc), isto é, resolução de conflito ou ajuste;
+# o que veio da branch única pelo merge não é trabalho da frente e não aparece.
+
+=== 2a0c781abbb6d84ecae720274104e94cbf587820
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:50:51 +0000
+    pais: 24da80bcb329a15e2ad6d5fe0b1f4fe23a38b5c8
+    TABELAS-FOCO CD-01: talhões, água e detalhe do talhão com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/cad_fazendas.py
+M	tools/prototipo/v37/gen37/areas/cadastros.py
+=== 79667b10798a1d786d0cc5cf2bbc31e164e163a3
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:50:51 +0000
+    pais: 2a0c781abbb6d84ecae720274104e94cbf587820
+    TABELAS-FOCO CD-02: culturas e rendimentos com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/cad_culturas.py
+=== 415152dca20291fad12b5f5be39a000876816d58
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:50:52 +0000
+    pais: 79667b10798a1d786d0cc5cf2bbc31e164e163a3
+    TABELAS-FOCO CD-03 e CD-04: máquinas e pessoas com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/cad_ativos_pessoas.py
+=== b37b1d05f69fc37ebf9f3d9c786798b2ee40b9a2
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:50:52 +0000
+    pais: 415152dca20291fad12b5f5be39a000876816d58
+    TABELAS-FOCO CD-05: parceiros com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+=== 0fcf9979c37614a1ad8dfeb3dad7516531e9cf98
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:50:52 +0000
+    pais: b37b1d05f69fc37ebf9f3d9c786798b2ee40b9a2
+    TABELAS-FOCO CD-06 e CD-07: itens, locais e estrutura com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/cad_produtos_estrutura.py
+=== 4d9c1936ce23312df8af49f8f4f6437736376ead
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 03:58:40 +0000
+    pais: 0fcf9979c37614a1ad8dfeb3dad7516531e9cf98
+    TABELAS-FOCO CD-05: trilha da grade acompanha as colunas do papel
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+M	tools/prototipo/v37/gen37/areas/cadastros.py
+=== 6e71b3fc44bb5768c5682330f311dfc01ce3399c
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 04:13:40 +0000
+    pais: 4d9c1936ce23312df8af49f8f4f6437736376ead
+    TABELAS-FOCO Irrigação: IR-01..IR-04 e IR-03det com uma variável por coluna
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+=== e392e64dd9f32f9eb8b97fc1db30bc1925e5b290
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 04:38:03 +0000
+    pais: 6e71b3fc44bb5768c5682330f311dfc01ce3399c
+    TABELAS-FOCO Cadastros e Irrigação: testes de unidade e de navegador
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+A	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+A	tools/prototipo/v37/gen37/tabelas_cad_test.py
+A	tools/prototipo/v37/gen37/tabelas_irr_test.py
+A	tools/prototipo/v37/gen37/tabelas_lib.py
+=== c161f29387de8c971916cfdfb98bc5826efac303
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:58:41 +0000
+    pais: e392e64dd9f32f9eb8b97fc1db30bc1925e5b290
+    TABELAS-FOCO IR-01: passadas, pendência e próxima passada em colunas
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+M	tools/prototipo/v37/gen37/irr_fluxo_test.py
+M	tools/prototipo/v37/gen37/irtest.py
+M	tools/prototipo/v37/gen37/tabelas_irr_test.py
+=== cbc87f5f45cf609c9cb6e2f295dc7b3d4b53742b
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:59:06 +0000
+    pais: c161f29387de8c971916cfdfb98bc5826efac303
+    TABELAS-FOCO CD-04 e CD-05: calendário, acesso, papéis e motivo sem perda
+M	tools/prototipo/v37/gen37/areas/cad_ativos_pessoas.py
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+M	tools/prototipo/v37/gen37/cada_cd04_test.py
+M	tools/prototipo/v37/gen37/cadp_fix_test.py
+M	tools/prototipo/v37/gen37/cadp_test.py
+M	tools/prototipo/v37/gen37/cd05test.py
+M	tools/prototipo/v37/gen37/tabelas_cad_test.py
+=== 48a412c3fcb22438060717ea3f9f83ee3d1877e1
+    autor: Claude <noreply@anthropic.com> · 2026-10-06 06:59:24 +0000
+    pais: cbc87f5f45cf609c9cb6e2f295dc7b3d4b53742b
+    TABELAS-FOCO Cadastros: testes antigos adaptados e teste de unidade robusto
+M	tools/prototipo/v37/gen37/cada_cd03_test.py
+M	tools/prototipo/v37/gen37/cadc_cd02_test.py
+M	tools/prototipo/v37/gen37/cadc_cd06_test.py
+M	tools/prototipo/v37/gen37/cadc_cd07_test.py
+M	tools/prototipo/v37/gen37/cadf_det_test.py
+M	tools/prototipo/v37/gen37/cadf_fix_det_test.py
+M	tools/prototipo/v37/gen37/cadf_test.py
+M	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+=== 37577a643e9a1faffdae06b301062443233865a0
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:21:35 +0000
+    pais: 48a412c3fcb22438060717ea3f9f83ee3d1877e1
+    TABELAS-FOCO IR-03: testes da O.S. de água leem Lâmina e Passadas em colunas
+M	tools/prototipo/v37/gen37/os_irrig_filtro_test.py
+M	tools/prototipo/v37/gen37/os_v39_selo_agua_test.py
+=== def9dc8e997f60ad5afa2fd800b7e416f8dd5785
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 11:21:54 +0000
+    pais: 37577a643e9a1faffdae06b301062443233865a0 ecc8b00eee9a87aa57f585660440b1ccc2abf4fd
+    Merge claude/prototipo-v44 (ecc8b00: CTL-3, Colheita e Planejar safra) em claude/v44-tabelas-r
+=== a881cbe45036c3677b134f32c266095953cee2d0
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 12:01:56 +0000
+    pais: def9dc8e997f60ad5afa2fd800b7e416f8dd5785
+    TABELAS-FOCO Irrigação: Pendência sem repetir a Situação, Tipo e grandezas com uma variável
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+M	tools/prototipo/v37/gen37/dados_irrigacao.py
+M	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+M	tools/prototipo/v37/gen37/tabelas_irr_test.py
+=== a6b949b1419c878b37c125c0a01235b3bb078974
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 12:02:08 +0000
+    pais: a881cbe45036c3677b134f32c266095953cee2d0
+    TABELAS-FOCO Cadastros: fluxo do cadastro na grade também a 390 px
+M	tools/prototipo/v37/gen37/tabelas_cad_test.py
+=== 8356a0777173abca6dc37bbd1252fb95b3e42a03
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 12:49:23 +0000
+    pais: a6b949b1419c878b37c125c0a01235b3bb078974
+    TABELAS-FOCO CD-07: código excluído no rascunho sem "Excluído" repetido; testes antigos do CD-02
+M	tools/prototipo/v37/gen37/areas/cad_produtos_estrutura.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_a.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_b.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd02.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd07.py
+=== ecc8fcec86a73a02460487d23d5a8fd5767536ab
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:33:16 +0000
+    pais: 8356a0777173abca6dc37bbd1252fb95b3e42a03
+    TABELAS-FOCO IR-04: a unidade do sensor vem da grandeza (não se pede de novo)
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+M	tools/prototipo/v37/gen37/tabelas_irr_test.py
+=== 300835d28cda43f110192beb728830c8c401a9ff
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:33:21 +0000
+    pais: ecc8fcec86a73a02460487d23d5a8fd5767536ab cdc185f551a9513d72734b18e4a869f921917c00
+    Merge claude/prototipo-v44 (cdc185f: varredura espera conteúdo; saídas da SAF) em claude/v44-tabelas-r
+=== 3636e3319c4972d6c7f2f05c03daa904c72a45bd
+    autor: Claude <noreply@anthropic.com> · 2026-10-09 13:40:34 +0000
+    pais: 300835d28cda43f110192beb728830c8c401a9ff
+    TABELAS-FOCO IR-04: teste de unidade da unidade do sensor (B5)
+M	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+=== 8f19e0d6bd27e2aaa5805d1f628459190db4e919
+    autor: Claude <noreply@anthropic.com> · 2026-10-10 01:15:34 +0000
+    pais: 3636e3319c4972d6c7f2f05c03daa904c72a45bd
+    TABR: correções da revisão
+M	tools/prototipo/v37/gen37/areas/cad_ativos_pessoas.py
+M	tools/prototipo/v37/gen37/areas/cad_culturas.py
+M	tools/prototipo/v37/gen37/areas/cad_fazendas.py
+M	tools/prototipo/v37/gen37/areas/cad_parceiros.py
+M	tools/prototipo/v37/gen37/areas/cad_produtos_estrutura.py
+M	tools/prototipo/v37/gen37/areas/irrigacao.py
+M	tools/prototipo/v37/gen37/cada_cd03_test.py
+M	tools/prototipo/v37/gen37/cada_cd04_test.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_a.py
+M	tools/prototipo/v37/gen37/cadc_cd0102_b.py
+M	tools/prototipo/v37/gen37/cadc_cd06_test.py
+M	tools/prototipo/v37/gen37/cadc_cd07_test.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd06.py
+M	tools/prototipo/v37/gen37/cadc_fix_cd07.py
+M	tools/prototipo/v37/gen37/cadf_det_test.py
+M	tools/prototipo/v37/gen37/cadf_fix_lista_test.py
+M	tools/prototipo/v37/gen37/cadf_test.py
+M	tools/prototipo/v37/gen37/cadp_fix_test.py
+M	tools/prototipo/v37/gen37/cadp_test.py
+M	tools/prototipo/v37/gen37/cd05vtest.py
+M	tools/prototipo/v37/gen37/dados_irrigacao.py
+M	tools/prototipo/v37/gen37/irr_fluxo_test.py
+M	tools/prototipo/v37/gen37/irtest.py
+M	tools/prototipo/v37/gen37/os_irrig_filtro_test.py
+M	tools/prototipo/v37/gen37/os_v39_selo_agua_test.py
+M	tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py
+M	tools/prototipo/v37/gen37/tabelas_cad_test.py
+M	tools/prototipo/v37/gen37/tabelas_irr_test.py
+M	tools/prototipo/v37/gen37/tabelas_lib.py
+
+## 3. Autores na faixa
+     20 Claude <noreply@anthropic.com>

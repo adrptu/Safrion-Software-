@@ -1,0 +1,6 @@
+ M ../RETOMADA-NUVEM.md
+ M areas/processo_safra.py
+ M partest.py
+ M saf_cmp_continuidade_test.py
+ M safra.js
+ M tabelas_saf_test.py

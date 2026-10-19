@@ -1,0 +1,391 @@
+# Correção da TABR (agente TABR:corrigir que fez o commit 8f19e0d): testes de unidade, sondas, mutante M-e (tabr_mut_ncol.sh) e testes finais registrados no transcript
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T22:56:18.928Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && git diff tabelas_lib.py tabelas_cad_irr_unit.py irr_fluxo_test.py irtest.py cadc_cd0102_a.py
+<persisted-output>
+Output too large (31.3KB). Full output saved to: <sessao>/tool-results/bg7gqo4yj.txt
+
+Preview (first 2KB):
+diff --git a/tools/prototipo/v37/gen37/cadc_cd0102_a.py b/tools/prototipo/v37/gen37/cadc_cd0102_a.py
+index fc5870c..da7bc34 100644
+--- a/tools/prototipo/v37/gen37/cadc_cd0102_a.py
++++ b/tools/prototipo/v37/gen37/cadc_cd0102_a.py
+@@ -8,15 +8,18 @@ t=T(); J=t.J
+ try:
+     t.goto('CD-02.dc.html'); t.clk('Operações e rendimentos')
+     t.chk('CD-02 sem erro JS', not t.errs(), t.errs())
+-    # TABELAS-FOCO (06/10/2026): uma variável por coluna (11 colunas, antes 7 com "largura · velocidade · eficiência" numa célula); a página
+-    # não rola de lado a 1440 px e a grade rola dentro da própria caixa com a 1ª coluna à vista (item 6, mesmo critério de ostest e est_fix1)
+-    sw=J("(()=>{const t=document.querySelectorAll('[role=table]')[0]; const sc=t.closest('.g2rola')||t.parentElement; const R=sc.getBoundingClientRect(); const h=t.querySelector('[role=columnheader]').getBoundingClientRect(); const ox=getComputedStyle(sc).overflowX; return [document.documentElement.scrollWidth<=innerWidth+1, sc.scrollWidth<=sc.clientWidth+1||ox==='auto'||ox==='scroll', h.left>=R.left-1&&h.right<=R.right+1];})()")
+-    t.chk('rendimentos: a página não rola de lado a 1440 px; a grade cabe ou rola dentro da caixa, com a 1ª coluna à vista', all(sw), sw)
++    # TABELAS-FOCO (06/10/2026): uma variável por coluna. Revisão TABR (09/10/2026, A1): voltam os critérios de antes ("sem rolagem lateral a
++    # 1440 px" e "no máximo 7 colunas"): modo, largura, velocidade e eficiência, que formam o rendimento, ficam no painel do rendimento
++    sw=J("(()=>{const s=document.querySelectorAll('[role=table]')[0].closest('.g2rola')||document.querySelectorAll('[role=table]')[0].parentElement; return [s.scrollWidth,s.clientWidth];})()")
++    t.chk('rendimentos sem rolagem lateral a 1440 px', sw[0]<=sw[1]+1, sw)
++    t.chk('no máximo 7 colunas', J("document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]').length")<=7)
+...
+</persisted-output>
+
+### 2026-10-09T22:56:26.228Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && git diff tabelas_cad_test.py tabelas_irr_test.py | head -400; ls -la /tmp/TABR* 2>/dev/null; ls -lat <scratchpad>/ | head -40
+<persisted-output>
+Output too large (71.4KB). Full output saved to: <sessao>/tool-results/b8trgcn3p.txt
+
+Preview (first 2KB):
+diff --git a/tools/prototipo/v37/gen37/tabelas_cad_test.py b/tools/prototipo/v37/gen37/tabelas_cad_test.py
+index 10233c5..ecc8e2b 100644
+--- a/tools/prototipo/v37/gen37/tabelas_cad_test.py
++++ b/tools/prototipo/v37/gen37/tabelas_cad_test.py
+@@ -5,6 +5,12 @@ TF03 por grade: colunas próprias (sem rótulo composto), unidade junto do valor
+ Situação em chip; 390 px rolando dentro da caixa. Defeitos reproduzidos: outorga aparecia como "Certidão" (CD-01 Água) e a Safra Mamão
+ da Lagoa Grande aparecia nas parcelas de talhão da Santa Rita (CD-01det). Fluxo do cadastro na grade (CD-03), a 1440 e a 390 px (toque): normal
+ (salvar o custo e a célula/ordem acompanham), recusa (número inválido não grava) e repetição (salvar de novo não duplica). Vazio continua vazio.
++Revisão TABR (09/10/2026): a Situação logo depois da identificação, à vista sem rolar a 1440 e a 1280 px, e as grades cabem na caixa a
++1440 px (A1; CD-05 rola só os contatos); capacidade só numa grandeza (CD-03 pelo filtro de Classe, CD-06 pelo filtro Tanque/Silo; A4);
++o filtro marcado continua no menu do papel (A5); motivo e verbo da pessoa não alocável e o "Disponível até" vencido em vermelho (A3);
++"No rascunho" só com rascunho (A8); calibração a vencer no chip (A10); fonte do rendimento em texto, não chip de estado (A11); a vazão
++ordena em m³/h (mutante M-a: tabelas_cad_irr_unit B1 e B1b; a ordem na tela não distingue com os valores do cenário) e a capacidade da classe Irrigação aparece (mutante M-k);
++o detalhe do PV01 (Lagoa Grande) mostra a parcela que a lista conta (pré-existente).
+ Uso: python3 tabelas_cad_test.py [pasta de capturas]   (< 3 min)"""
+ import sys, os, re, time, json
+ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+@@ -75,7 +81,7 @@ try:
+     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
+     # ================= CD-01 Talhões =================
+     abre('CD-01.dc.html'); aba('Talhões'); g = Grade(J, 0)
+...
+</persisted-output>
+
+### 2026-10-09T22:57:03.974Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && grep -nE "A1|A2|A3|A4|A5|A6|A7|A8|A9|A10|A11|M-[a-z]|revisão TABR|Revisão TABR" tabelas_cad_test.py tabelas_irr_test.py | cut -c1-260
+tabelas_cad_test.py:8:Revisão TABR (09/10/2026): a Situação logo depois da identificação, à vista sem rolar a 1440 e a 1280 px, e as grades cabem na caixa a
+tabelas_cad_test.py:9:1440 px (A1; CD-05 rola só os contatos); capacidade só numa grandeza (CD-03 pelo filtro de Classe, CD-06 pelo filtro Tanque/Silo; A4);
+tabelas_cad_test.py:10:o filtro marcado continua no menu do papel (A5); motivo e verbo da pessoa não alocável e o "Disponível até" vencido em vermelho (A3);
+tabelas_cad_test.py:11:"No rascunho" só com rascunho (A8); calibração a vencer no chip (A10); fonte do rendimento em texto, não chip de estado (A11); a vazão
+tabelas_cad_test.py:12:ordena em m³/h (mutante M-a: tabelas_cad_irr_unit B1 e B1b; a ordem na tela não distingue com os valores do cenário) e a capacidade da classe Irrigação aparece (mutante M-k);
+tabelas_cad_test.py:124:    # pré-existente (revisão TABR): a lista conta 1 parcela no PV01 da Lagoa Grande; o detalhe mostra a mesma (antes a Safra Mamão com 0 ha e 29,9 ha livres)
+tabelas_cad_test.py:149:    chk('CD-02 (A11): a Fonte é texto; só a premissa a validar é chip (pendência com "Validar ›")', [x for x, _ in fch] == ['Derriçadeiras portáteis · equipe de 6'], fch)
+tabelas_cad_test.py:152:    chk('CD-02 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade)', [fv('larg'), fv('vel'), fv('efic')] == ['36', '8', '75'], [fv('larg'), fv('vel'), fv('efic')])
+tabelas_cad_test.py:164:    chk('CD-03 (A10): calibração que vence em 15 dias diz isso no chip (Packing linha 1: "Calibração a vencer" e "Registrar calibração"; antes "Apta" verde e só a data em amarelo)',
+tabelas_cad_test.py:166:    # A4: a capacidade muda de grandeza com a classe; a coluna entra quando o filtro de Classe deixa uma só (rótulo e unidade da classe)
+tabelas_cad_test.py:168:    chk('CD-03 (A4, M-k): Classe = Irrigação → coluna Vazão em m³/h depois da Classe, com a vazão das 3 instalações', [h for h, _ in hs] == CD3[:3] + ['Vazão'] + CD3[3:] and dict(hs).get('Vazão') == 'm³/h'
+tabelas_cad_test.py:171:    chk('CD-03 (A4): ordenar a Vazão pelo número', crescente(vz2, True), g.col('Vazão'))
+tabelas_cad_test.py:174:    chk('CD-03 (A4): Trator + Pulverizador (cv e L) → sem coluna de capacidade; só Trator → Potência em cv', hs2 == CD3 and hs3 == CD3[:3] + ['Potência'] + CD3[3:] and pt and all(x.endswith(' cv') for x in pt), (hs2, hs3, pt))
+tabelas_cad_test.py:175:    limpa(J); chk('CD-03 (A4): Limpar filtros tira a coluna de capacidade', g.labels() == CD3, g.labels())
+tabelas_cad_test.py:201:    chk('CD-04 (A3): Lucas Não alocável em O.S. (motivo na dica: NR-31 vencida) · Renovar NR-31 | Campo 2 | Safrista | 31/07/2027 | R$ 38,00/h | NR-31 | 15/08/2026',
+tabelas_cad_test.py:203:    # A3: contrato encerrado (Disponível até no passado) diz o motivo e o próximo passo, e a data fica em vermelho (a reprodução do revisor: Carlos até 01/09/2026)
+tabelas_cad_test.py:210:    chk('CD-04 (A3): Carlos com "Disponível até" 01/09/2026 → "Não alocável em O.S." com o motivo (contrato encerrado) e "Renovar contrato ›"; a data em vermelho',
+tabelas_cad_test.py:215:    chk('CD-04 (A1): calendário e acesso ao app no painel da pessoa (saíram da grade)', cal[0] == 'Da equipe' and cal[1] in ('Com login', 'Sem login', 'Acesso solicitado'), cal)
+tabelas_cad_test.py:233:    chk('CD-05 Clientes (M-e): com 10 colunas (2 a mais que em Todos) cada célula fica sob o seu cabeçalho', len(g.labels()) == 10 and g.desalinhadas() == 0, (len(g.labels()), g.desalinhadas()))
+tabelas_cad_test.py:239:    # A5: em Todos, Papéis = Cliente; em Transportadores (0 linhas) o menu de Papéis continua com "Cliente" marcado (antes sumia do menu)
+tabelas_cad_test.py:244:    chk('CD-05 (A5): Papéis = Cliente e depois Transportadores → 0 linhas e o menu de Papéis mostra "Cliente 0" marcado', n0 == 0 and ['Cliente 0', True] in mm, (n0, mm))
+tabelas_cad_test.py:265:    # A4: L (tanque) e sc de 60 kg (silo) são grandezas diferentes: a capacidade entra com o filtro Tanque ou Silo, com a unidade dele
+tabelas_cad_test.py:268:    chk('CD-06 Locais (A4): sem coluna de capacidade em Todos; Tanque → Capacidade em L (15.000 L); Silo → em sc de 60 kg (60.000 sc de 60 kg)',
+tabelas_cad_test.py:282:    chk('CD-07 (A1): origem, vínculos e TOP no painel do código (3.1.01 Estrutura gerencial · grupos … · TOP 1201; SOJA Culturas e cultivares)', p31[0] == 'Estrutura gerencial' and p31[2] == '1201' and p31[1] and pso[0] == 'Cultur
+tabelas_cad_test.py:288:    # A8: depois de publicar, "No rascunho" sai (não fica uma coluna vazia em todas as linhas); com rascunho novo, volta
+tabelas_cad_test.py:292:    chk('CD-07 (A8): depois de "Publicar estrutura", a coluna "No rascunho" sai e as células seguem sob os cabeçalhos', h_pub == CD7[:-1] and al7 == 0, (h_pub, al7))
+tabelas_cad_test.py:293:    # A1: a Situação à vista sem rolar a grade a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos, no fim)
+tabelas_cad_test.py:307:    chk('CD (A1): Situação à vista sem rolar a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos)', not larg, larg)
+tabelas_irr_test.py:10:Revisão TABR (09/10/2026): estado, pendência e próximo passo logo depois da identificação, à vista sem rolar a 1440 e a 1280 px, e as
+tabelas_irr_test.py:11:grades IR-01..IR-03 cabem na caixa a 1440 px (A1); a linha do setor não mistura duas ordens: a próxima passada é da ordem da coluna Ordem e a
+tabelas_irr_test.py:12:pendência de outra ordem diz qual é (A2); a Vazão do IR-02 não junta o pico da captação com a vazão do setor (A4); ordem encerrada sem selo
+tabelas_irr_test.py:13:na Pendência (A6); passadas necessárias no painel (A7); estado salvo de versão antiga descartado (A9); o tipo da pendência no chip e o
+tabelas_irr_test.py:14:detalhe na dica, responsável sem a função (A11); o Fim da ordem é o fim da última passada (mutante M-m); no IR-03det a Duração é a
+tabelas_irr_test.py:74:    chk(f'fluxo {tam} (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira', len(fp) == 2 and instante(o22.get('Fim')) == max(fp) and min(fp) < max(fp), (o22.get('Fim'), fp))
+tabelas_irr_test.py:93:    # A2: a OS-0419 (Liberada, hoje 20:00) cobre o déficit; a divergência e o "Conferir medição" são da OS-0394, que a pendência nomeia; antes a
+tabelas_irr_test.py:95:    chk('IR-01 (A2): Pivô 2 = A conferir | Divergência na OS-0394 (−3,8 % na dica) | Conferir medição | 11,2 mm | 12,44 mm | OS-0419 | 87 % | hoje 20:00 (a próxima passada é da OS-0419, a ordem da linha)',
+tabelas_irr_test.py:98:    chk('IR-01 (A11): a pendência tem o tipo no chip e o detalhe na dica (Pivô 1 Falta insumo · Ureia 45% · amanhã 21:00; Gotejo T7 Conflito · parada da B3 · hoje 14:00)',
+tabelas_irr_test.py:103:    chk('IR-01 (A11): o chip mostra só "Falta insumo"; "Ureia 45%" fica na dica (title) e no texto do leitor de tela', vis[:1] == ['Ureia 45%'] and vis[2] == 1, vis)
+tabelas_irr_test.py:117:    chk('IR-01 painel (A1, A7): Pivô 2 com fonte do déficit, 2 passadas necessárias, OS-0419 cobre 87 % · resta 1,5 mm, responsável João e Milho · V10',
+tabelas_irr_test.py:140:    chk('IR-02 (A4): sem coluna de Vazão que juntava o pico da captação (166) e a vazão do setor; o pico de hoje é aviso da captação (166 de 400 L/s)',
+tabelas_irr_test.py:160:    chk('IR-03 (A6): a OS-0392 encerrada não tem pendência (o "Encerrada automaticamente" fica no detalhe)', o92.get('Etapa') == 'Encerradas' and o92.get('Pendência') == '—', o92)
+tabelas_irr_test.py:161:    chk('IR-03 (A11): Responsável só com a pessoa (OS-0423 Caio; antes "Caio · PCP")', o23.get('Responsável') == 'Caio', o23)
+tabelas_irr_test.py:186:    # pré-existente (revisão TABR): a Duração é a da janela da linha; a OS-0394 rodou ontem 20:00–22:06 → 2,1 h (antes 14,5 h previstas ao lado do horário real)
+tabelas_irr_test.py:233:    # A9: estado salvo com a semente anterior (v=2: a estação com "mm/dia · mm", sem o vento) é descartado; a mesma versão seria aceita
+tabelas_irr_test.py:236:    chk('IR-04 (A9): estado salvo de versão anterior (v=2, estação "mm/dia · mm") é descartado: a estação volta a mm/dia, mm, km/h', es.get('Unidade') == 'mm/dia, mm, km/h', es)
+tabelas_irr_test.py:237:    # A1: estado, pendência e próximo passo à vista sem rolar a grade (1440 e 1280 px, fazenda única e "Todas"); a 1440 px IR-01..IR-03 cabem na caixa
+tabelas_irr_test.py:250:    chk('IR (A1): Situação/Etapa/Estado, Pendência e Próximo passo à vista sem rolar a 1440 e 1280 px (Santa Rita e Todas); IR-01, IR-02 e IR-03 cabem na caixa a 1440 px', not larg, larg)
+
+### 2026-10-09T22:57:49.457Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && sed -n 218,250p tabelas_cad_test.py; grep -n "def ncol_dinamico" -A25 areas/cadastros.py
+    g.filtra('Habilidades', ['Operar trator']); fl = sorted(r.get('Pessoa') for r in g.dicts())
+    chk('CD-04: filtro Habilidades = Operar trator → Beto, Carlos, Lucas, Marcos (pertinência, não texto)', fl == ['Beto', 'Carlos', 'Lucas', 'Marcos'], fl)
+    limpa(J); g.ordena('Validade da habilitação'); vh = [instante(x) for x in g.col('Validade da habilitação') if instante(x)]
+    chk('CD-04: ordenar Validade da habilitação por data', crescente(vh), g.col('Validade da habilitação'))
+    # ================= CD-05 =================
+    abre('CD-05.dc.html'); aba('Parceiros'); g = Grade(J, 0)
+    d = tf03('CD-05 Parceiros', g, ['Parceiro', 'Situação do papel', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados'])
+    sv = next((r for r in d if r.get('Parceiro') == 'Sementes Vale'), {}); cv = next((r for r in d if r.get('Parceiro') == 'Coop. Vale'), {})
+    chk('CD-05: Sementes Vale WhatsApp 65 99555-6677 "não autorizado" (Canais = E-mail); Coop. Vale com dois papéis e dois estados',
+        sv.get('WhatsApp') == '65 99555-6677 não autorizado' and sv.get('Canais autorizados') == 'E-mail' and cv.get('Papéis') == 'Fornecedor, Cliente' and cv.get('Situação do papel') == 'Homologado Limite vigente', (sv, cv))
+    g.filtra('Canais autorizados', ['WhatsApp']); fl = g.dicts()
+    chk('CD-05: filtro Canais autorizados = WhatsApp (por item da lista)', fl and all('WhatsApp' in r.get('Canais autorizados', '') for r in fl) and len(fl) < len(d), len(fl))
+    limpa(J)
+    J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith('Clientes')).click()"); time.sleep(.6)
+    dc = tf03('CD-05 Clientes', g, ['Parceiro', 'Situação do papel', 'CPF/CNPJ', 'Papéis', 'Limite de crédito', 'Validade da análise de crédito', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados'])
+    chk('CD-05 Clientes (M-e): com 10 colunas (2 a mais que em Todos) cada célula fica sob o seu cabeçalho', len(g.labels()) == 10 and g.desalinhadas() == 0, (len(g.labels()), g.desalinhadas()))
+    rh = next((r for r in dc if r.get('Parceiro') == 'Rede Hortifrúti BA'), {})
+    chk('CD-05 Clientes: Rede Hortifrúti BA R$ 40.000 | 31/08/2026 | Limite vencido', [rh.get(k) for k in ('Limite de crédito', 'Validade da análise de crédito', 'Situação do papel')] == ['R$ 40.000', '31/08/2026', 'Limite vencido'], rh)
+    g.ordena('Limite de crédito', desc=True); lc = [num(x) for x in g.col('Limite de crédito')]
+    chk('CD-05 Clientes: ordenar Limite de crédito pelo número', crescente(lc, True), g.col('Limite de crédito'))
+    J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith('Todos')).click()"); time.sleep(.5)
+    # A5: em Todos, Papéis = Cliente; em Transportadores (0 linhas) o menu de Papéis continua com "Cliente" marcado (antes sumia do menu)
+    papel = lambda t: (J(f"[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()"), time.sleep(.6))
+    g.filtra('Papéis', ['Cliente']); papel('Transportadores'); n0 = len(g.dicts())
+    g._menu('Papéis'); mm = J("[...document.querySelectorAll('[role=dialog] label')].map(l=>[l.innerText.replace(/\\s+/g,' ').trim(), l.querySelector('input').checked])") or []
+    J("(()=>{const b=[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
+    chk('CD-05 (A5): Papéis = Cliente e depois Transportadores → 0 linhas e o menu de Papéis mostra "Cliente 0" marcado', n0 == 0 and ['Cliente 0', True] in mm, (n0, mm))
+    limpa(J); papel('Todos')
+    aba('Cobertura'); g = Grade(J, 0)
+    d = tf03('CD-05 Cobertura', g, ['Grupo de insumo', 'Fornecedores que recebem cotação', 'Situação'])
+    se = next((r for r in d if r.get('Grupo de insumo') == 'Sementes'), {}); co = next((r for r in d if r.get('Grupo de insumo') == 'Combustível'), {})
+    chk('CD-05 Cobertura: a Situação diz o estado (o número fica ao lado): Sementes 2 Com concorrência; Combustível 0 Sem fornecedor',
+        [se.get('Fornecedores que recebem cotação'), se.get('Situação')] == ['2', 'Com concorrência'] and co.get('Fornecedores que recebem cotação') == '0' and co.get('Situação', '').startswith('Sem fornecedor'), (se, co))
+202:def ncol_dinamico(fname,holes):
+203-    """grade cujas colunas mudam no navegador (ex.: colunas do papel no CD-05; Fazenda só em "Todas" na Irrigação): troca o nº fixo de
+204-    colunas da i-ésima grade da página (ordem do HTML) pelo buraco holes[i] (None mantém), para a trilha do grid acompanhar as colunas."""
+205-    import os
+206-    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); alvo='grid-template-columns: var(--g2cols, repeat('
+207-    partes=s.split(alvo); assert len(partes)-1>=len(holes), (fname,len(partes)-1,holes)
+208-    for i,h in enumerate(holes):
+209-        if h is None: continue
+210-        q=partes[i+1]; j=q.index(','); assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
+211-    open(p,'w',encoding='utf-8').write(alvo.join(partes))
+212-def estado_html(key):
+213-    return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
+214-def acoes_form(gid):
+215-    """ações do painel lateral (Excluir, Abrir talhão…) com estilo vindo do estado (fa.st): destrutiva em vermelho, bloqueada esmaecida."""
+216-    old=f'onClick="{{{{fa.go}}}}" style="{BTN_ST(False,True)}"'
+217-    for i,x in enumerate(E.EXTRA):
+218-        if f'{gid}_F.open' in x and old in x:
+219-            E.EXTRA[i]=x.replace(old,'onClick="{{fa.go}}" style="{{fa.st}}"'); return
+220-    raise AssertionError('formulário sem bloco de ações: '+gid)
+221-
+222-CADXJS=r'''
+223-// ===== padrão visual dos cadastros =====
+224-const CADT={yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],green:['#1E7A4C','#E4F3E9']};
+225-const CAD_TAB=[__TABOFF__,__TABON__];
+226-// situação da linha como chip (TABELAS-FOCO, proprietário 04/10/2026): verde quando ok, cinza quando neutro; exceção em chip com o próximo passo
+227-function sitOk(t){ return [chipc(t,'green')]; }
+
+### 2026-10-09T22:58:09.244Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 tabelas_cad_irr_unit.py > /tmp/TABR-unit.log 2>&1; echo exit=$?; grep -vE '^OK ' /tmp/TABR-unit.log | head -20; tail -1 /tmp/TABR-unit.log
+exit=0
+RESULTADO: 43/43 ok
+RESULTADO: 43/43 ok
+
+### 2026-10-09T22:58:25.829Z
+$ mkdir -p /tmp/TABR-fx && cat > /tmp/TABR-fx/run.sh <<'EOF'
+  [corpo do heredoc omitido]
+acao_unica_test.py cadc_test.py cd05vtest.py cftest.py componentes_test.py etapas_celular_test.py g2test.py irr_estado_test.py verif_cad.py verif_cad2.py
+
+### 2026-10-09T23:04:44.367Z
+$ grep -E "\(A1\)|\(A2\)|M-m|M-e|\(A5\)|\(A3\)" /tmp/TABR-fx/05-tabelas_irr_test.log /tmp/TABR-fx/05-tabelas_cad_test.log | cut -c1-420
+/tmp/TABR-fx/05-tabelas_irr_test.log:  ok  IR-01 (A2): Pivô 2 = A conferir | Divergência na OS-0394 (−3,8 % na dica) | Conferir medição | 11,2 mm | 12,44 mm | OS-0419 | 87 % | hoje 20:00 (a próxima passada é da OS-0419, a ordem da linha) · {'Setor': 'Pivô 2', 'Situação': 'A conferir', 'Pendência': 'Divergência na OS-0394 : −3,8 %', 'Próximo passo': 'Conferir medição', 'Déficit hoje': '11,2 mm', 'N
+/tmp/TABR-fx/05-tabelas_irr_test.log:  ok  fluxo 1440 (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira · ('26/09 06:02', [(2026, 9, 25, 362), (2026, 9, 26, 362)])
+/tmp/TABR-fx/05-tabelas_irr_test.log:  ok  IR (A1): Situação/Etapa/Estado, Pendência e Próximo passo à vista sem rolar a 1440 e 1280 px (Santa Rita e Todas); IR-01, IR-02 e IR-03 cabem na caixa a 1440 px · []
+/tmp/TABR-fx/05-tabelas_irr_test.log:  ok  fluxo 390 px (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira · ('26/09 06:02', [(2026, 9, 25, 362), (2026, 9, 26, 362)])
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-02 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade) · ['36', '8', '75']
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-04 (A3): Lucas Não alocável em O.S. (motivo na dica: NR-31 vencida) · Renovar NR-31 | Campo 2 | Safrista | 31/07/2027 | R$ 38,00/h | NR-31 | 15/08/2026 · {'Pessoa': 'Lucas', 'Situação': 'Não alocável em O.S. : NR-31 vencida em 15/08/2026 Renovar NR-31 ›', 'Equipe': 'Campo 2', 'Habilidades': 'Operar trator, Operar colhedora', 'Vínculo': 'Safrista', 'Disponível 
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-04 (A3): Carlos com "Disponível até" 01/09/2026 → "Não alocável em O.S." com o motivo (contrato encerrado) e "Renovar contrato ›"; a data em vermelho · ('Não alocável em O.S. : Contrato encerrado em 01/09/2026 Renovar contrato ›', '01/09/2026', 'rgb(180, 35, 24)')
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-04 (A1): calendário e acesso ao app no painel da pessoa (saíram da grade) · ['Da equipe', 'Com login']
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-05 Clientes (M-e): com 10 colunas (2 a mais que em Todos) cada célula fica sob o seu cabeçalho · (10, 0)
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-05 (A5): Papéis = Cliente e depois Transportadores → 0 linhas e o menu de Papéis mostra "Cliente 0" marcado · (0, [['Cliente 0', True], ['Transportador 2', False]])
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD-07 (A1): origem, vínculos e TOP no painel do código (3.1.01 Estrutura gerencial · grupos … · TOP 1201; SOJA Culturas e cultivares) · (['Estrutura gerencial', 'grupos Fertilizantes, Corretivos', '1201'], ['Culturas e cultivares', '3 cultivares', ''])
+/tmp/TABR-fx/05-tabelas_cad_test.log:  ok  CD (A1): Situação à vista sem rolar a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos) · []
+
+### 2026-10-09T23:05:00.976Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && grep -n "desalinhadas" tabelas_cad_test.py tabelas_irr_test.py | cut -c1-200; sed -n 164,176p tabelas_cad_test.py | cut -c1-300; sed -n 262,272p tabelas_cad_test.py | cut -c1-300
+tabelas_cad_test.py:233:    chk('CD-05 Clientes (M-e): com 10 colunas (2 a mais que em Todos) cada célula fica sob o seu cabeçalho', len(g.labels()) == 10 and g.desalinhadas() == 0, (len(g.labels())
+    chk('CD-03 (A10): calibração que vence em 15 dias diz isso no chip (Packing linha 1: "Calibração a vencer" e "Registrar calibração"; antes "Apta" verde e só a data em amarelo)',
+        pk.get('Situação') == 'Calibração a vencer Registrar calibração ›' and pk.get('Próxima calibração') == '01/10/2026', pk)
+    # A4: a capacidade muda de grandeza com a classe; a coluna entra quando o filtro de Classe deixa uma só (rótulo e unidade da classe)
+    g.filtra('Classe', ['Irrigação']); hs = g.heads(); vz = g.col('Vazão')
+    chk('CD-03 (A4, M-k): Classe = Irrigação → coluna Vazão em m³/h depois da Classe, com a vazão das 3 instalações', [h for h, _ in hs] == CD3[:3] + ['Vazão'] + CD3[3:] and dict(hs).get('Vazão') == 'm³/h'
+        and len(vz) == 3 and all(un_ok(x, 'm³/h') and x != '—' for x in vz), (hs, vz))
+    g.ordena('Vazão', desc=True); vz2 = [num(x) for x in g.col('Vazão')]
+    chk('CD-03 (A4): ordenar a Vazão pelo número', crescente(vz2, True), g.col('Vazão'))
+    g.filtra('Classe', ['Trator', 'Pulverizador']); hs2 = g.labels()
+    g.filtra('Classe', ['Trator']); pt = g.col('Potência'); hs3 = g.labels()
+    chk('CD-03 (A4): Trator + Pulverizador (cv e L) → sem coluna de capacidade; só Trator → Potência em cv', hs2 == CD3 and hs3 == CD3[:3] + ['Potência'] + CD3[3:] and pt and all(x.endswith(' cv') for x in pt), (hs2, hs3, pt))
+    limpa(J); chk('CD-03 (A4): Limpar filtros tira a coluna de capacidade', g.labels() == CD3, g.labels())
+    g.ordena('Custo R$/h', desc=True); ch = [num(x) for x in g.col('Custo R$/h') if x != '—']
+    chk('CD-06: ordenar Preço de referência pelo número dentro do grupo', bl and all(crescente([num(x) for x in b if x != '—'], True) or len([x for x in b if x != '—']) < 2 for b in bl), bl[:2])
+    aba('Locais'); g = Grade(J, 0)
+    d = tf03('CD-06 Locais', g, ['Local', 'Fazenda', 'Tipo', 'Itens com este local padrão'])
+    # A4: L (tanque) e sc de 60 kg (silo) são grandezas diferentes: a capacidade entra com o filtro Tanque ou Silo, com a unidade dele
+    qtipo = lambda t: (J(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()"), time.sleep(.5))
+    qtipo('Tanque'); ht = g.heads(); ct = g.col('Capacidade'); qtipo('Silo'); hsl = g.heads(); cs_ = g.col('Capacidade'); qtipo('Todos')
+    chk('CD-06 Locais (A4): sem coluna de capacidade em Todos; Tanque → Capacidade em L (15.000 L); Silo → em sc de 60 kg (60.000 sc de 60 kg)',
+        'Capacidade' not in g.labels() and dict(ht).get('Capacidade') == 'L' and ct == ['15.000 L'] and dict(hsl).get('Capacidade') == 'sc de 60 kg' and cs_ == ['60.000 sc de 60 kg'], (ht, ct, hsl, cs_))
+    # ================= CD-07 =================
+    abre('CD-07.dc.html'); g = Grade(J, 0)
+    CD7 = ['Dimensão › código', 'Situação', 'Nome', 'Início da vigência', 'Fim da vigência', 'Conta no ERP (Sankhya)', 'No rascunho']
+
+### 2026-10-09T23:05:19.404Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && sed -n 14,80p tabelas_cad_test.py | cut -c1-250
+Uso: python3 tabelas_cad_test.py [pasta de capturas]   (< 3 min)"""
+import sys, os, re, time, json
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+from comp_lib import Chrome, servir
+from tabelas_lib import Grade, limpa, num, un_ok, instante, crescente
+OUT = sys.argv[1] if len(sys.argv) > 1 else None
+if OUT: os.makedirs(OUT, exist_ok=True)
+OK, FAIL = [], []
+def chk(n, cond, info=''):
+    (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''), flush=True)
+
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+def shot(n):
+    if OUT: c.shot(os.path.join(OUT, n + '.png'))
+ERRS = []
+def abre(pg, w=1.4):
+    try: e = J("window.__errs") or []
+    except Exception: e = []
+    ERRS.extend(e); c.goto(f'http://127.0.0.1:{p}/{pg}', w)
+def aba(nome):
+    r = J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.offsetParent&&b.innerText.trim().startsWith({json.dumps(nome)})); if(!b) return false; b.click(); return true;}})()"); time.sleep(.6); return r
+def grupos(g):
+    """linhas da árvore com a marca de grupo (linha com seta)."""
+    return J(f"[...([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[{g.i}].querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[!!r.querySelector('button[aria-label^=\"Expandir\"]
+def por_grupo(g, col):
+    """valores da coluna nas folhas, um bloco por grupo (a árvore ordena dentro do nível)."""
+    hs = g.labels(); k = hs.index(col); out = []; cur = None
+    for grp, cells in grupos(g):
+        if grp: cur = []; out.append(cur)
+        elif cur is not None: cur.append(cells[k])
+    return [b for b in out if len(b) > 1]
+def tf03(nome, g, esperado, ficha=False, extra=()):
+    """TF03 da grade: colunas exatas, uma variável por coluna, filtro e ordem em todas, unidade junto do valor, situação em chip."""
+    hs = g.heads(); ls = [h for h, _ in hs]
+    chk(f'{nome}: colunas {" | ".join(esperado)}', ls == esperado, ls)
+    chk(f'{nome}: nenhum rótulo composto (" · ", " / ") e custo como "Custo R$/h"/"Custo R$/ha"',
+        not any(' · ' in h or ' / ' in h for h in ls) and all(h.startswith('Custo R$/') for h, u in hs if u.startswith('R$/')), ls)
+    if not ficha:
+        m = g.com_menu(); chk(f'{nome}: filtro (▾) e ordenação no título em todas as {len(m)} colunas', m and all(m), m)
+    d = g.dicts(); ruins = [(h, r.get(h)) for h, u in hs if u for r in d if not un_ok(r.get(h, ''), u, extra)]
+    chk(f'{nome}: unidade junto do valor nas colunas com unidade ({", ".join(h + " " + u for h, u in hs if u) or "nenhuma"})', not ruins, ruins[:4])
+    if 'Situação' in ls or 'Situação do papel' in ls:
+        col = 'Situação' if 'Situação' in ls else 'Situação do papel'; ch = [x for x in g.chips(col) if x is not None]
+        chk(f'{nome}: {col} em chip em todas as linhas com valor ({len(ch)})', ch and all(ch), g.chips(col)[:6])
+    return d
+
+def fluxo_custo(g, tam, val, cel):
+    """CD-03: salvar o custo do Trator 03 → célula e ordem por custo acompanham (normal); "abc" mostra "Use um número" e não grava (recusa);
+    salvar de novo sem mudar não duplica a linha nem muda o valor (repetição)."""
+    def abre_linha(nome): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf({json.dumps(nome)})===0); r&&r.querySelector('[role=cell] span').click();}})()"); time.sleep(.5)
+    def campo(fid, v): J(f"""(()=>{{const i=document.querySelector('#{fid}'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(v)}); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(
+    def salvar(): J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
+    linha = lambda: next((r for r in g.dicts() if r.get('Máquina ou instalação') == 'Trator 03'), {})
+    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', val); salvar(); t3 = linha()
+    g.ordena('Custo R$/h', desc=True); ordem = [r.get('Máquina ou instalação') for r in g.dicts()]; ch = [num(x) for x in g.col('Custo R$/h') if x != '—']
+    chk(f'CD-03 fluxo {tam} (normal): salvar {val} → célula "{cel}" e a ordem por custo põe o Trator 03 entre os de 180 e os de 150',
+        t3.get('Custo R$/h') == cel and crescente(ch, True) and ordem.index('Trator 03') == ordem.index('Trator 02') + 1, (t3.get('Custo R$/h'), ordem[:6]))
+    abre_linha('Trator 03'); campo('fx_g_atv_custo_h', 'abc'); salvar()
+    err = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
+    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
+    J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Descartar alterações'); b&&b.click();})()"); time.sleep(.3)
+    chk(f'CD-03 fluxo {tam} (recusa): custo "abc" mostra "Use um número" e não grava (célula segue {cel})', 'Use um número' in err and linha().get('Custo R$/h') == cel, (err[-160:], linha().get('Custo R$/h')))
+    abre_linha('Trator 03'); salvar(); n3 = [r.get('Máquina ou instalação') for r in g.dicts()].count('Trator 03')
+    chk(f'CD-03 fluxo {tam} (repetição): salvar de novo sem mudar não duplica a linha nem muda o valor', n3 == 1 and linha().get('Custo R$/h') == cel, n3)
+
+try:
+    c.aparelho(1440, 900, 1, False)
+
+### 2026-10-09T23:06:01.886Z
+$ cd /tmp && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 600 python3 <scratchpad>/tabr_probe_ncol.py <sp-tabr>/tools/prototipo/v37/gen37 2>&1 | tail -8
+CD-05 Clientes 1440 {'ncol': 10, 'desal': 0, 'rola': 402, 'c0': False, 'tpl': 'var(--g2cols, repeat(10, auto))'}
+CD-03 Irrigação 1440 {'ncol': 7, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(7, auto))'}
+CD-06 Tanque 1440 {'ncol': 5, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(5, auto))'}
+CD-05 Clientes 2560 {'ncol': 10, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(10, auto))'}
+CD-03 Irrigação 2560 {'ncol': 7, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(7, auto))'}
+CD-06 Tanque 2560 {'ncol': 5, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(5, auto))'}
+
+### 2026-10-09T23:08:33.208Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+compila
+
+### 2026-10-09T23:36:39.860Z
+$ S=<scratchpad>; cat > $S/tabr_mut_ncol.sh <<'EOF'
+  [corpo do heredoc omitido]
+ok
+
+### 2026-10-10T00:52:16.326Z
+$ bash <scratchpad>/tabr_mut_ncol.sh 2>&1 | grep -v agent-proxy
+mutados: areas/cad_ativos_pessoas.py:1 areas/cad_parceiros.py:1 areas/cad_produtos_estrutura.py:1 
+FALHA=0
+CD-05 Clientes 1440 {'ncol': 10, 'desal': 0, 'rola': 116, 'c0': False, 'tpl': 'var(--g2cols, repeat(8, auto))'}
+CD-03 Irrigação 1440 {'ncol': 7, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(6, auto))'}
+CD-06 Tanque 1440 {'ncol': 5, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(4, auto))'}
+CD-05 Clientes 2560 {'ncol': 10, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(8, auto))'}
+CD-03 Irrigação 2560 {'ncol': 7, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(6, auto))'}
+CD-06 Tanque 2560 {'ncol': 5, 'desal': 0, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(4, auto))'}
+restaurado FALHA=0
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+ 6 files changed, 184 insertions(+), 123 deletions(-)
+
+### 2026-10-10T00:55:47.733Z
+$ S=<scratchpad>; cat > $S/tabr_probe_geo.py <<'EOF'
+  [corpo do heredoc omitido]
+12:env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 600 python3 $S/tabr_probe_geo.py $G $S/mutgeo 2>&1 | tail -4
+
+### 2026-10-10T00:55:51.078Z
+$ bash <scratchpad>/tabr_mut_ncol.sh 2>&1 | grep -v agent-proxy | cut -c1-900
+mutados: areas/cad_ativos_pessoas.py:1 areas/cad_parceiros.py:1 areas/cad_produtos_estrutura.py:1 
+FALHA=0
+CD-05 Clientes [["Parceiro", 265, 319, 236], ["Situação do pa", 501, 319, 150], ["CPF/CNPJ", 651, 319, 142], ["Papéis", 793, 319, 137], ["Limite de créd", 930, 319, 136], ["Validade da an", 1066, 319, 211], ["Contato", 1277, 319, 100], ["WhatsApp", 1377, 319, 146], ["E-mail", 265, 354, 236], ["Canais autoriz", 501, 354, 150]]
+CD-03 Irrigação [["Máquina ou ins", 265, 299, 229], ["Situação", 494, 299, 306], ["Classe  · 1", 800, 299, 149], ["Vazão", 949, 299, 134], ["Custo R$/h", 1083, 299, 164], ["Conjuntos", 1247, 299, 160], ["Próxima calibr", 265, 334, 229]]
+restaurado FALHA=0
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+ 6 files changed, 184 insertions(+), 123 deletions(-)
+
+### 2026-10-10T00:58:58.988Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+compila
+./tabelas_cad_test.py:167:    g.filtra('Classe', ['Irrigação']); hs = g.heads(); vz = g.col('Vazão'); al3 = g.desalin
+./tabelas_cad_test.py:234:    chk('CD-05 Clientes (M-e): com 10 colunas (2 a mais que em Todos) cada célula fica sob o 
+./tabelas_cad_test.py:268:    qtipo('Tanque'); ht = g.heads(); ct = g.col('Capacidade'); al6 = g.desalinhadas(); qtipo('
+12:env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 600 python3 $S/tabr_probe_ncol.py $G 2>&1 | tail -6
+
+### 2026-10-10T00:59:03.827Z
+$ bash <scratchpad>/tabr_mut_ncol.sh 2>&1 | grep -v agent-proxy | cut -c1-300
+mutados: areas/cad_ativos_pessoas.py:1 areas/cad_parceiros.py:1 areas/cad_produtos_estrutura.py:1 
+FALHA=0
+CD-05 Clientes 1440 {'ncol': 10, 'desal': 1, 'rola': 116, 'c0': False, 'tpl': 'var(--g2cols, repeat(8, auto))'}
+CD-03 Irrigação 1440 {'ncol': 7, 'desal': 1, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(6, auto))'}
+CD-06 Tanque 1440 {'ncol': 5, 'desal': 1, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(4, auto))'}
+CD-05 Clientes 2560 {'ncol': 10, 'desal': 1, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(8, auto))'}
+CD-03 Irrigação 2560 {'ncol': 7, 'desal': 1, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(6, auto))'}
+CD-06 Tanque 2560 {'ncol': 5, 'desal': 1, 'rola': 0, 'c0': False, 'tpl': 'var(--g2cols, repeat(4, auto))'}
+restaurado FALHA=0
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+ 6 files changed, 184 insertions(+), 123 deletions(-)
+
+### 2026-10-10T01:00:25.816Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+compila
+unit exit=0 RESULTADO: 43/43 ok
+tabelas_cad_test exit=0 RESULTADO: 142/142 ok
+tabelas_irr_test exit=0 RESULTADO: 94/94 ok
+
+### 2026-10-10T01:09:29.528Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && grep -n "al7" tabelas_cad_test.py | cut -c1-260
+294:    h_pub = g.labels(); al7 = J("""(()=>{const t=([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[0]; const hs=[...t.querySelectorAll('[role=columnheader]')]; const hl=hs.map(h=>Math.round(h.getBoundingClientRect().left));
+296:    chk('CD-07 (A8): depois de "Publicar estrutura", a coluna "No rascunho" sai e as células seguem sob os cabeçalhos', h_pub == CD7[:-1] and al7 == 0, (h_pub, al7))
+
+### 2026-10-10T01:09:33.177Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && sed -n 294,295p tabelas_cad_test.py | cut -c1-600
+    h_pub = g.labels(); al7 = J("""(()=>{const t=([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent))[0]; const hs=[...t.querySelectorAll('[role=columnheader]')]; const hl=hs.map(h=>Math.round(h.getBoundingClientRect().left));
+      return [...t.querySelectorAll('[role=row]')].filter(r=>r.querySelector('[role=cell]')).filter(r=>{const cs=[...r.querySelectorAll('[role=cell]')]; return cs.length!==hs.length||cs.some((c,i)=>Math.abs(Math.round(c.getBoundingClientRect().left)-hl[i])>1);}).length;})()""")
+
+### 2026-10-10T01:09:38.556Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+294:    h_pub = g.labels(); al7 = g.desalinhadas()
+295:    chk('CD-07 (A8): depois de "Publicar estrutura", a coluna "No rascunho" sai e as células seguem sob os cabeçal
+exit=0 RESULTADO: 142/142 ok

@@ -1,0 +1,81 @@
+OK Agrícola: quatro estados; não conta cancelada, encerrada nem BEN
+OK Suprimentos: lote sobreposto conta nos indicadores pertinentes; requisição por registro, item coberto e cancelada excluídos
+OK Gráfico de estoque: cada lote físico conta uma só vez
+OK Painéis não alteram cenário
+OK Manutenção: serviço vencido sem ordem; quatro abertas, uma executando e um ativo bloqueado
+OK Gráfico manutenção: fases abertas
+OK Plano inativo não cria pendência
+OK Próxima revisão fora da janela não cria pendência
+OK PAGR ausente nunca vira zero
+OK PMAN ausente nunca vira zero
+OK PSUP ausente nunca vira zero
+OK Sem ordem com o seed: a mesma conta da visão (manSemOrdem)
+OK Sem ordem com achados vazios (coleção válida): só os vencimentos
+OK Sem ordem sem a coleção de achados: Sem dados, e os demais indicadores seguem
+OK Achado sem estado: Sem dados
+OK Coleções vazias válidas: zero agrícola
+OK Coleções vazias válidas: zero suprimentos
+OK Saldo físico ausente não produz total parcial
+OK Custódia ausente não vira demanda falsa
+OK Estado ausente impede contagem parcial de O.S.
+OK agrPainelRef: não muda o estado (JSON igual antes e depois)
+
+node:assert:150
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba)
++ actual - expected
+... Skipped lines
+
+  [
+    [
+      'OS-0418',
+      'Suprimentos'
+    ],
+...
+    ],
++   [
++     'OS-0593',
++     'Suprimentos'
++   ],
++   [
++     'OS-0594',
++     'Suprimentos'
++   ]
+  ]
+
+    at chk (/tmp/painel01-yhk9halj/oracle.js:5642:43)
+    at Object.<anonymous> (/tmp/painel01-yhk9halj/oracle.js:5676:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    [ 'OS-0418', 'Suprimentos' ],
+    [ 'OS-0420', 'Manutenção' ],
+    [ 'OS-0431', 'PCP' ],
+    [ 'OS-0502', 'Suprimentos' ],
+    [ 'OS-0507', 'Manutenção' ],
+    [ 'OS-0593', 'Suprimentos' ],
+    [ 'OS-0594', 'Suprimentos' ]
+  ],
+  expected: [
+    [ 'OS-0418', 'Suprimentos' ],
+    [ 'OS-0420', 'Manutenção' ],
+    [ 'OS-0431', 'PCP' ],
+    [ 'OS-0502', 'Suprimentos' ],
+    [ 'OS-0507', 'Manutenção' ]
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.22.0
+rc=1

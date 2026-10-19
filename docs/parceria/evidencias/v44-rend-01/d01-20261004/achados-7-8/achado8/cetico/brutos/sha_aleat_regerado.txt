@@ -1,0 +1,6 @@
+7f491a5368b44225a11d6d17ecdf57890a7fe2a7818b089fd3792b753851f72b  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/cetico/ent/aleat.json
+b2111214d0e3a80946929aa1aba4e49dee17bbcb0714ae52bf961df7e59ea917  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/cetico/ent/aleat_Qx2.json
+176186c4f614d6146f81697ed3de9f81317d2434d53b740c38e4567dc639e8d1  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/cetico/ent/aleat_janx2.json
+7f491a5368b44225a11d6d17ecdf57890a7fe2a7818b089fd3792b753851f72b  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/entradas/aleat.json
+b2111214d0e3a80946929aa1aba4e49dee17bbcb0714ae52bf961df7e59ea917  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/entradas/aleat_Qx2.json
+176186c4f614d6146f81697ed3de9f81317d2434d53b740c38e4567dc639e8d1  /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/r2_7_8/achado8/entradas/aleat_janx2.json

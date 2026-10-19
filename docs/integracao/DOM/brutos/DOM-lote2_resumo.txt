@@ -1,0 +1,9 @@
+os_v39_liberar_test.py exit=0 449s :: RESULTADO: 20/20 ok 
+est_cenario_test.py exit=0 507s :: RESULTADO: 15/15 ok 
+est_fix2_test.py exit=0 1058s :: RESULTADO: 11/11 ok 
+esttest.py 1 exit=0 1372s :: RESULTADO: 22/22 ok RESULTADO: OK 
+esttest.py 2 exit=0 393s :: RESULTADO: 23/23 ok RESULTADO: OK 
+esttest.py 3 exit=0 189s :: RESULTADO: 19/19 ok RESULTADO: OK 
+tabelas_est_test.py exit=0 155s :: RESULTADO: 34/34 ok 
+tabelas_os_test.py exit=0 34s :: RESULTADO: 38/38 ok 
+carencia_test.py fluxo exit=0 73s :: RESULTADO: 41/41 verificações 

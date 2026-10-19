@@ -1,0 +1,26 @@
+  OK  MB-01 Marcos: Minha fila só com O.S. (sem OM) e o cartão "Máquina" (MB-09) na vaga vazia
+  OK  Ver como Zé (c.app.usuario): a OM-0233 na Minha fila com "Teste pendente" e a primária "Continuar serviço · OM-0233"
+  OK  MB-09det: o painel da OM-0233 em 390 px, com "Não opere" no Trator T1 bloqueado
+  OK  MB-09det sem rolagem lateral a 390 px (390 px)
+  OK  Teste: 2ª tentativa Aprovado com foto, gravada no cenário (só por acréscimo)
+  OK  Concluir pela regra única: OM-0233 Em conferência e a primária vira "Declarar Trator T1 apto"
+  OK  (a) app: Trator T1 apto por Zé (responsável técnico) em 7 toques (especificado: 7)
+  OK  recusa: Marcos abre a OM-0233 só para ver ("Ação de Zé, executante"); sem Concluir e sem teste
+  OK  MB-09 Marcos: Trator 03 herdado do turno da OS-0421, primária "Registrar abastecimento", 390 px sem rolagem lateral
+  OK  recusa: sem volume o app diz o que falta e nada grava
+  OK  repetição: duplo toque em "Registrar abastecimento" grava 1 lançamento (1)
+  OK  (e) app sem sinal: 6 toques (especificado: 6); fica no aparelho e o servidor não muda
+  OK  "Salvar e registrar outro": 2º tíquete na fila e a tela limpa a máquina (fica só a data)
+  OK  volta do sinal: os 2 lançamentos entram uma vez só; tocar de novo não reenvia
+  OK  sem sinal: teste e conclusão ficam no aparelho (2 na fila); o servidor segue Em execução
+  OK  OM mudada no escritório: na volta os 2 registros viram "Conflito a resolver · Otávio" e nada é aplicado em silêncio
+  OK  tela MA: o painel da OM-0233 mostra os 2 conflitos do app e o selo do cabeçalho conta os registros a resolver
+  OK  Otávio aplica os registros sobre o estado de agora: OM-0233 Em conferência e o selo sai
+  OK  MB-04 Equipamento sem máquina: pede a máquina e nada grava
+  OK  MB-04 Equipamento com máquina grava o achado SM-0153 (Relato, ligado à OS-0421) pela mesma função da tela MA
+  OK  tela MA · Sem ordem: o SM-0153 vindo do app aparece para o Otávio decidir
+  FALHA A8 · Ver como João no app: a OM-0228 (eletricista, NR-10) na Minha fila · Minha fila Siga a ordem da janela; o botão diz o próximo passo. OS-0421 · Pulverização · Fungicida 1ª aplicação T1+T2 · 
+  OK  S4 · Zé (mecânico) lança o abastecimento: o operador nunca é ele por padrão; sem operador o app pede, e grava o escolhido (Carlos) · [[], "Não opere · bloqueado · Pressão hidráulica baixa · SM-0147 e INSP-105 · OM-0233 | Informe: operador.", "Carlos"]
+  OK  sem erros JS nas telas []
+23/24 ok · FALHAS: 1
+ - A8 · Ver como João no app: a OM-0228 (eletricista, NR-10) na Minha fila · Minha fila Siga a ordem da janela; o botão diz o próximo passo. OS-0421 · Pulverização · Fungicida 1ª aplicação T1+T2 · 

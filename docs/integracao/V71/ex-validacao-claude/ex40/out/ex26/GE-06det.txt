@@ -1,0 +1,86 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Indicadores operacionais › OS-0409
+Detalhar · custo de pulverização
+i
+21% acima da meta
+Abrir plano de ação
+VEIO DE
+Indicadores · painel agronômico
+→
+ESTÁ AQUI
+Custo de pulverização por ha tratado — R$ 48,40 vs. meta R$ 40,00
+→
+FALTA
+causa confirmada e ação com dono
+→
+PRÓXIMA AÇÃO
+Abrir plano de ação
+Ficha do indicador
+Unidade · denominador
+R$/ha · 120 ha·operação (95 ha do P1 + 25 ha reaplicados)
+Período
+set/2026 · OS-0409 (encerrada)
+Cobertura
+100% dos apontamentos sincronizados · 0 conflitos
+Meta · responsável
+R$ 40,00/ha (base V1 aprovada) · Ana (gestora)
+Causas com decomposição
+CAUSA
+⇅
+EFEITO
+⇅
+EVIDÊNCIA
+⇅
+HIPÓTESE A VALIDAR
+⇅
+Área tratada acima do plano
++R$ 800
+120 vs. 100 ha·op
+reaplicação de 25 ha após chuva — checar
+Consumo unitário +10%
++R$ 480
+2,2 vs. 2,0 L/ha
+calda ajustada pelo agrônomo — validar
+Preço do produto +10%
++R$ 528
+R$ 22 vs. R$ 20/L
+compra fora do contrato? — conferir pedido
+Documentos de origem
+DOCUMENTO
+⇅
+O QUE SUSTENTA
+⇅
+DATA
+⇅
+ABRIR
+⇅
+OS-0409 · pulverização
+ordem encerrada · 95 ha + reaplicação de 25 ha
+08–12/09
+Abrir ordens
+Apontamentos da O.S.
+ha tratados e calda por turno
+08–12/09
+Abrir apontamentos
+Requisições
+264 L retirados do estoque
+08–12/09
+Abrir requisições
+Recebimento NF 8842
+preço real R$ 22,00/L
+05/09
+Abrir recebimento
+Tela: Detalhar · custo de pulverização · 21% acima da meta

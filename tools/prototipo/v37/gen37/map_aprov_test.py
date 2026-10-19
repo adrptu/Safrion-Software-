@@ -25,14 +25,17 @@ try:
     chk('1 Aprovações sem O.S.: 4 decisões (inventário, Diesel, orçamento e acesso) · 4 pendentes · 1 vence hoje',
         len(rs)==4 and not any(r.startswith('OS-0') for r in rs) and '4 pendentes · 1 vence hoje' in head() and J("document.documentElement.scrollHeight")<=HOV.get('IN-02.dc.html',900), [rs,head(),J("document.documentElement.scrollHeight")])
     # 2 · a O.S. não passa por revisão: a OS-0418 abre A liberar, já impedida pelo Estoque (Ureia 45 % sem lote), sem selo nem recibo do agrônomo
-    ir('OS.dc.html'); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0418')); r&&r.click();})()"); time.sleep(.4)
+    # v135: a linha começa pelo selo de impedimento ("Falta insumo OS-0418 …"); acha a linha pelo ID, não pelo começo do texto
+    ir('OS.dc.html'); J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.split(/\\s+/).indexOf('OS-0418')>=0); r&&r.click();})()"); time.sleep(.4)
     po=J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     chk('2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"',
         'Liberar bloqueado: sem lote de Ureia 45%' in po and not any(x in po for x in ('Aguardando agrônomo','Aprovada pelo agrônomo','AP-2201','Revisar versão')), po[:400])
     # 3 · Mapa na abertura: nenhuma decisão pendente; OS-0418 e OS-0430 a liberar pelo agrônomo; o T4 só com a máquina
-    ir('IN-04.dc.html',900); lb=J("(()=>{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('T4:')); return e?e.getAttribute('aria-label'):'';})()")
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    ir('IN-04.dc.html',900); lb=J("(()=>{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='T4'); return e?e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'):'';})()")
     nm=(J("(document.querySelector('[role=group][aria-label^=\"Indicadores de\"]')||{innerText:''}).innerText") or '').replace('\n',' ')
-    chk('3 Mapa: sem "Decisões pendentes", "A liberar (agrônomo) 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar (agrônomo) 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
+    chk('3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
     # 4-5 · devolução de sobras vai ao Estoque do menu (nunca ao módulo oculto SU-07)
     ir('IN-01.dc.html'); a1=J("[...document.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Receber devolução').map(a=>a.getAttribute('href'))")
     chk('4 Meu dia: "Receber devolução" → EST.dc.html', a1==['EST.dc.html'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a1)
@@ -42,4 +45,5 @@ finally:
     try:
         if c: c.close()
     finally: srv.terminate()
-print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(1 if FAIL else 0)   # v135: a falha não fica mais escondida atrás de rc=0

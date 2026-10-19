@@ -1,0 +1,15 @@
+OK    1 Fazenda: AG-01 sem contexto = Lagoa Grande (igual ao Mapa) · Santa Rita escolhida no AG-01 persiste ao recarregar e abre o Mapa na Santa Rita · #VIS-051 leva AG-01 e Mapa para a Lagoa Grande 
+FALHA 2 AG-01 (Lagoa Grande): VIS-060 "Vistoria atrasada · prevista para 17/09 · 6 dias" com "Programar vistoria", que abre o formulário no Pivô 17 × ácaro-rajado ['VIS-060 Pivô 17 Mamão produção · Lagoa Grande Ácaro-rajado Praga 3 / 15 % folhas com ácaro 20/20 pontos 10/09/2026 Lúcia Vistoria atrasada prevista para 17/09 · 6 dias ⋯', ['PV17', 'mamao-acaro']]
+OK    3 AG-01 (Santa Rita): VIS-006 (P1 percevejo, prevista 11/09) atrasada mesmo com a VIS-014 aberta em outro alvo do P1 
+OK    4 1280 × 800: AG-01, AG-03 e AG-04 sem rolagem lateral (Próximo passo à vista) 
+FALHA 5 Mapa T7 (7 dias) = AG-01: "Ácaro-rajado · perto do NC" com o botão "Seguir monitorando" · sem texto de bastidor na fonte ['T7: Ácaro-rajado · perto do NC', ['BUTTON', 'Seguir monitorando'], 'VIS-008 T7 Mamão produção · Santa Rita Ácaro-rajado Praga 12 / 15 % folhas com ácaro 20/20 pontos 08/09/2026 Marcos Perto do NC 80 % do NC ⋯', -1]
+OK    6 VIS-017 concluída com 2 de 16 → AG-01 "Coleta incompleta" com "Completar coleta" (MB-06#VIS-017) → o app abre o ponto 3 e reabre a coleta 
+OK    7 App: 500 em "% folíolos com ácaro" recusado (passa de 100) · tocar no ponto 01 abre "Corrigir o ponto 1" e grava 5 → 6 
+OK    8a Cancelar a OS-0440 (Inseticida B): VIS-013 "O.S. cancelada" → "Decidir controle"; Inseticida B sem trava de nº máximo, rotação citando 08/09 e não a cancelada 
+OK    8b Nova decisão: RA-0143 (DIA-009 · REC-019) e OS-0441; clique duplo não lança erro 
+OK    8c Rastreabilidade: REC-015 "Cancelado · substituído pelo REC-019"; REC-019 com OS-0441; DIA-009 abre a OS-0441; sem DIA-011 duplicado 
+OK    9 Erradicação com 999 ha no Pivô 22 (62,07 ha): trava "Área maior que o talhão (62,07 ha)" e botão bloqueado 
+OK    10 AG-01det#VIS-016: "Sincronizar agora" é botão que sincroniza ali mesmo (6 de 12 pontos) 
+OK    11 Teclado: Enter abre, Esc fecha e devolve o foco à linha VIS-013; Tab e Shift+Tab ficam dentro do painel 
+OK    12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 1 link para o REC-014 (o primário do cabeçalho; AÇÃO v3.1) 
+RESULTADO 12/14

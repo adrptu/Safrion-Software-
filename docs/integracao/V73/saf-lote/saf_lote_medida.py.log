@@ -1,0 +1,6 @@
+A antes · painel por talhão: 29 cliques · 64 teclas · 6 cultivos
+B depois · Editar talhões (aplicar + coluna): 11 cliques · 30 teclas · 6 cultivos
+C depois · Editar talhões (colar planilha): 3 cliques · 2 teclas · 6 cultivos
+cultivos gravados: [('P1', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 66, 95), ('P2', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 65, 80), ('T1', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 64, 312), ('T2', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 62, 298), ('T3', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 63, 96), ('T4', 'Soja', '58 W', 'SOJA-AT', '2027-10-15', 60, 204)]
+C: Colados 6 × 5: 30 células. Nada foi salvo ainda.
+RESULTADO: OK · os três caminhos gravam os mesmos 6 cultivos

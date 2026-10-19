@@ -1,0 +1,5 @@
+acao_unica_test_responsivo exit=1 (281s) | RESULTADO: 1 ok · 2 falhas (responsivo)
+etapas_celular_test_complemento exit=1 (186s) | RESULTADO: 7 ok · 2 falhas (complemento)
+etapas_celular_test_desktop exit=1 (226s) | RESULTADO: 0 ok · 1 falhas (desktop)
+componentes_test_ajustes exit=1 (456s) | RESULTADO: 2 ok · 2 falhas (ajustes)
+FIM

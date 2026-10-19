@@ -1,0 +1,59 @@
+  ok  F01 → menu com 1 item; Índice com 1 link
+  ok  F02 · F03 → Sai: faixa e "3 etapas" do PM
+  ok  F04 → detalhe do plano: "‹ Planos" e "Publicar vN"
+  ok  F05 → menu ⋯ do cabeçalho com Restaurar
+  ok  F06 · F07 → endereços e redirecionamentos; Tab preso só no painel aberto pelo usuário
+  ok  F08 · F09 · F10 → visão Planos (grade, filtro Grupo, "4 ativos sem plano"); filtro "Sem plano" em Ativos
+  ok  F11 · F12 · F13 · F14 · F15 · F16 · F17 · F19 · F20 · F23 · F24 → detalhe do plano e painéis Serviço, Novo/Editar plano e Publicar
+  ok  F18 → expandir por serviço; "Expandir tudo" sai
+  ok  F21 → detalhe do plano › Ativos vinculados só leitura (sem Gerar)
+  ok  F22 → painel Vínculo com marco pré-preenchido (D-41)
+  ok  F25 · F26 → cartões de Sem ordem; selo de impedimentos; filtro "Com conflito" em Ordens
+  ok  F27 · F28 · F29 → Sem ordem (até 30 d) e bloco "O que vence" do ativo
+  ok  F30 → item com OM sai de Sem ordem; o ativo mostra a OM
+  ok  F31 · F32 → painel do vencimento; primária de Sem ordem; sem "Ver ordens"
+  ok  F33 · F55 · F83 → OM › Janela e equipe › Impacto na produção (AL)
+  ok  F34 → "Mover janela" para toda OM a liberar/liberada
+  ok  F35 → 1b: "Pedir decisão da gerência" (fica para o 1b; hoje a ponte "Liberar mesmo assim")
+  ok  F36 · F37 · F38 → cartão "Aptos agora"; colunas Leitura e Condição; filtro de condição
+  ok  F39 · F40 → agenda lida de AL no detalhe; "Elegíveis" sai
+  ok  F41 → colunas Próxima manutenção e Em aberto
+  ok  F42 · F44 → Sai: uso 30 d fixo
+  ok  F43 · F54 → painel Condição (Bloquear, Restringir, Encerrar restrição, responsável técnico)
+  ok  F45 · F46 · F57 · F82 · F102 → Sai: navegação repetida e selos fixos
+  ok  F47 · F48 → cartão "Achados críticos"; Sem ordem › Achados; bloco Achados do ativo
+  ok  F49 → "Registrar achado" (Sem ordem e ativo) com componente; app MB-04
+  ok  F50 · F51 · F52 → painel do achado: Vincular · Gerar com o achado · Criar ordem corretiva · Fechar sem serviço
+  ok  F53 → IDs como links #om=
+  ok  F56 → Sai: KPI-PCM-07 fixo (Pareto)
+  ok  F58 → Sai: cartões de fase (fase só nos chips)
+  ok  F59 · F60 · F61 → Ordens: chips de fase, Lista e Kanban, colunas Pendência e Executante
+  ok  F62 → comando só no painel (nenhum botão nas linhas)
+  ok  F63 → Sai: link de bloco
+  ok  F64 · F65 · F84 · F85 · F93 → painel da OM: cabeçalho, faixa de continuidade, primária
+  ok  F66 → "Liberar serviço" exige executante (com uma pessoa habilitada, ela vem pré-escolhida: AC-PCM-31)
+  ok  F67 → 1b: selo "Falta peça" com dono (SC → CMP#sol= no 1b)
+  ok  F68 · F69 · F78 → Módulo no 1b/1c; até lá pontes rotuladas para o Otávio
+  ok  F70 → painel da OM; cartão do MB-01
+  ok  F71 · F86 → tarefas por tipo; "Incluir tarefa" em Corretiva e Pendência
+  ok  F72 → Sai: pré-marcar como feito
+  ok  F73 · F74 · F97 → função única de leitura; trava e aviso na conclusão; decisão no painel da leitura
+  ok  F75 → chip "Previsto" ou valor digitado
+  ok  F76 → Peças: Planejado · Situação · Aplicado
+  ok  F77 · F90 → "Concluir serviço", uma regra
+  ok  F79 · F92 → "Encerrar ordem · R$ x", uma regra
+  ok  F80 · F81 → Origem no painel; Pendência por "Não feito"
+  ok  F87 → Sai: só mensagem (cada resposta grava)
+  ok  F88 · F89 → Teste com tentativas; Declarar apto / Manter
+  ok  F91 → peças retiradas exigidas no Encerrar
+  ok  F94 → Sai: tanque fixo
+  FALHA F95 · F96 → modo Abastecimentos; painel da leitura; app MB-09 · 
+  ok  F98 · F99 → Sai: conferir/desvio fixos (desvio é filtro e achado)
+  ok  F100 · F101 → "Corrigir com estorno"; coluna Consumo
+  ok  F103 · F104 → MB-01, MB-09 "Máquina", MB-09det = painel da OM, MB-04 → achado; sem sinal
+  ok  F105 · F106 · F109 · F111 → links de fora direto ao registro (MA#om=, MA#ativo=, …)
+  ok  F107 · F108 → CD-03 e O.S. leem a condição única; calibração no CD-03
+  ok  F110 → 1c: Compras recebe a SC de manutenção (fica para o 1c; hoje "Solicitar compra (simulado · Compras recebe no 1c)")
+  ok  cobertura: F01..F111 com destino, uma vez cada (111/111)
+  ok  fim: sem erro de JS
+RESULTADO: 57/58 ok · FALHAS: F95 · F96 → modo Abastecimentos; painel da leitura; app MB-09

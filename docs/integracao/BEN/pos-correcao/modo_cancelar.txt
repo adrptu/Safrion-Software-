@@ -1,0 +1,33 @@
+    if 'cancelar' in MODOS:
+        # integração BEN (09/10), achado 2: ordem em A liberar que não libera (caixas acima do livre; entrada que mudou com o estorno da carga)
+        # prendia o lote sem saída (sem Cancelar, sem editar, sem incluir entrada). Agora "Cancelar a ordem" (rascunho: nada reservado)
+        print('== cancelar · ordem em A liberar sem como liberar tem saída: Cancelar a ordem (motivo) e o lote abre outra ordem')
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-132', 'aside')
+        cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '1169'); p = pan()
+        t.chk('C1 · 1.169 caixas (acima das 540 livres): o aviso aparece no campo antes do toque', 'Acima das 540 un livres no Estoque: a liberação fica impedida até o Estoque ter as caixas.' in p, p[:900])
+        clk('Criar ordem', 'aside'); tc = toast()
+        t.chk('C1 · a ordem nasce com o aviso de que a liberação fica impedida e quem resolve', 'OB-0113 criada (A liberar)' in tc and 'Atenção: 540 un livres no Estoque para 1.169 un' in tc, tc)
+        ir('BEN.dc.html#OB-0113'); r0 = rev(); clk('Autorizar rota e liberar', 'aside'); p = pan(); bt = J(BTNS) or []
+        t.chk('C1 · liberação recusada (540 de 1.169), nada gravado; o próximo passo e o painel oferecem "Cancelar a ordem"', 'Liberação recusada · 1 causa' in p and rev() == r0 and 'Cancelar a ordem' in bt and 'Cancelar a ordem (nada foi reservado)' in p, [bt, p[:600]])
+        clk('Cancelar a ordem', 'aside'); r1 = rev(); clk('Confirmar cancelamento da OB-0113', 'aside'); p = pan()
+        t.chk('C1 · sem motivo o cancelamento é recusado e nada é gravado', 'Informe o motivo do cancelamento.' in p and rev() == r1 and cen("c.ordens['OB-0113'].etapa") == 'A liberar', p[-300:])
+        setv('#pf_mc', 'caixas insuficientes no Estoque'); clk('Confirmar cancelamento da OB-0113', 'aside'); tc = toast()
+        st = cen("[c.ordens['OB-0113'].etapa, (c.ordens['OB-0113'].ben.canc||{}).quem, c.producao.lotes['L39-132'].ordem||'', c.ordens['OB-0113'].req||'']")
+        t.chk('C1 · OB-0113 Canceladas por Igor, com o motivo; nada reservado e o L39-132 livre', st == ['Canceladas', 'Igor (responsável de produção)', '', ''] and 'OB-0113 cancelada por Igor' in tc, [st, tc])
+        p = pan(); kb = J("ROWTXT('OB-0113')") or ''
+        t.chk('C1 · painel e lista: Canceladas, sem ação primária nem "Atrasada", motivo à vista', 'Canceladas' in kb and 'Atrasada' not in kb and J("PPRIM()") == [] and 'caixas insuficientes no Estoque' in p, [kb, J("PPRIM()"), p[:500]])
+        clk('Fechar', 'aside'); clk('+ Nova ordem'); clk('L39-132', 'aside'); cxv = J("(document.querySelector('aside [id^=pf_cx_]')||{}).value"); clk('Criar ordem', 'aside')
+        ir('BEN.dc.html#OB-0114'); clk('Autorizar rota e liberar', 'aside'); st = cen("[c.ordens['OB-0114']&&c.ordens['OB-0114'].etapa, c.producao.lotes['L39-132'].ordem]")
+        t.chk('C1 · o L39-132 abre a OB-0114 com o valor inicial (540) e ela libera', cxv == '540' and st == ['Liberadas', 'OB-0114'], [cxv, st, toast()])
+        # (C2) carga estornada com a ordem em A liberar (a BEN-D19 permite: rascunho): a entrada não confere mais e a ordem tinha só uma entrada
+        ir('BEN.dc.html', limpa=True); perfil('Igor'); ir('BEN.dc.html'); clk('+ Nova ordem'); clk('L39-131', 'aside')
+        cx = J("(document.querySelector('aside [id^=pf_cx_]')||{}).id"); setv('#' + cx, '500'); clk('Criar ordem', 'aside')
+        ir('CARGA.dc.html'); row('CG-2106'); clk('Estornar', 'aside'); setv('#pf_mot', 'ticket trocado na balança'); clk('Confirmar estorno', 'aside')
+        t.chk('C2 · a CG-2106 é estornada com a ordem ainda em A liberar (BEN-D19): o L39-131 fica com 12.180 kg', cen("c.producao.cargas['CG-2106'].st") == 'Estornada' and cen("c.producao.movs.filter(m=>m.lote==='L39-131'&&m.fis!==false).reduce((a,m)=>a+m.kg,0)") == 12180, toast())
+        ir('BEN.dc.html#OB-0113'); clk('Autorizar rota e liberar', 'aside'); p = pan(); bt = J(BTNS) or []
+        t.chk('C2 · liberação recusada ("24.120 kg na ordem, 12.180 kg no lote") e a ordem de uma entrada só oferece "Cancelar a ordem"', 'L39-131: 24.120 kg na ordem, 12.180 kg no lote.' in p and 'Cancelar a ordem' in bt and cen("c.ordens['OB-0113'].etapa") == 'A liberar', [bt, p[:600]])
+        clk('Cancelar a ordem', 'aside'); setv('#pf_mc', 'carga CG-2106 estornada'); clk('Confirmar cancelamento da OB-0113', 'aside')
+        clk('Fechar', 'aside'); clk('+ Nova ordem'); p = pan()
+        t.chk('C2 · cancelada a OB-0113, o L39-131 volta à ordem nova com o saldo de agora (12.180 kg)', cen("c.ordens['OB-0113'].etapa") == 'Canceladas' and 'L39-131 · 12.180 kg' in p, p[:600])
+        shot('cancelar')
+        t.chk('cancelar sem erro de JS', not t.errs(), t.errs())

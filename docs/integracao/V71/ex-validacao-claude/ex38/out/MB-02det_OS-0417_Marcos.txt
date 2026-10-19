@@ -1,0 +1,45 @@
+OS-0421 · Pulverização
+Em execução
+i
+Pulverização · Fungicida 1ª aplicação · T1+T2 · 350 ha
+Com sinal
+Sem sinal
+Nada aguardando sinal
+Ver envios
+VEIO DE
+Minhas ordens
+ESTÁ AQUI
+OS-0421 · Em execução
+FALTA
+saldo de 160 ha
+PRÓXIMA AÇÃO
+Iniciar turno
+Instrução liberada
+Pronta para o próximo turno
+Versão: v2
+Janela: 20–26/09
+Local: T1+T2 · 350 ha
+Andamento: Realizado 190 de 350 ha · saldo 160 ha
+Equipe/conjunto: Marcos · Pulverizador PJ-3030 + Trator 03
+Preparo por tanque: 2.000 L de calda · 120 L/ha · cobre 16,7 ha · 8,3 L de Fungicida A (0,5 L/ha de Fungicida A)
+Insumos · REQ-035
+Fungicida A · 0,5 L/ha × 350 ha = 175 L
+lote F26-02 · galão 5 L · entregue 160 L · consumido 95 L
+Com você 65 L
+Adjuvante espalhante · 0,25 L/ha × 350 ha = 87,5 L
+fora da REQ-035 · nada com você
+Peça ao escritório antes de usar
+Apontamentos
+3 turnos anteriores
+Dia 4 · 23/09 · 40 ha
+Provisório
+Dia 5 · 24/09 · 50 ha
+Previsto
+Dia 6 · 25/09 · 50 ha
+Previsto
+Dia 7 · 26/09 · 60 ha
+Previsto
+Registrar ocorrência
+Ver retirada
+Iniciar turno · OS-0421
+Tela: OS-0421 · Pulverização · Em execução

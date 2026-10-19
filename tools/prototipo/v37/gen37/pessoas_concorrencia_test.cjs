@@ -1,0 +1,28 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const root=__dirname+'/';
+const ps=[{id:'p1',v:{nome:'Pessoa A',sit:'Ativa',equipe:'Oficina'}}],es=[{id:'e1',v:{nome:'Oficina',cal:'seg–sex · 07–17h'}}];let c={},seq=0;
+const ctx=vm.createContext({PESSOAS0:{v:'demo',pessoas:ps,equipes:es},CONF0:{v:'conf',pessoas:[],ev:[],hoje:'2026-09-26'},G2_PERFIS:[],G2_PAPEIS:[],g2perfisDe:()=>[{k:'Gestor',papeis:{gestor:'gestor'}}],cenGet:()=>c,g2st:(s,id)=>s.state.g2[id]||{},RW:(s,id)=>s.state.g2[id].rows,g2perfil:()=> 'Gestor'});
+for(const f of ['configuracoes.js','pessoas_estado.js'])vm.runInContext(fs.readFileSync(root+f,'utf8'),ctx);
+ctx.confChave=()=>String(++seq);ctx.cenMudar=(_,fn)=>{let next=JSON.parse(JSON.stringify(c));try{const r=fn(next);c=next;return r}catch(e){return {erro:e.message}}};
+const py=fs.readFileSync(root+'areas/cad_ativos_pessoas.py','utf8');vm.runInContext(py.slice(py.indexOf('function c4fonte('),py.indexOf('function c4hdia(')),ctx);
+const grid=fs.readFileSync(root+'g2lib.js','utf8');vm.runInContext(grid.slice(grid.indexOf('function g2persiste('),grid.indexOf('function g2dirty(')),ctx);
+const handlers=[];ctx.window={addEventListener(type,cb){assert.equal(type,'storage');handlers.push(cb)}};ctx.CEN_KEY='cenario-teste';
+const cenario=fs.readFileSync(root+'cenario.js','utf8');vm.runInContext(cenario.slice(cenario.indexOf('function cenOuvir('),cenario.indexOf('// Regra única de quantidade')),ctx);
+const self={state:{g2:{}},setState(p){Object.assign(this.state,p)}};ctx.c4fonte(self);self.g2persist=()=>ctx.c4grava(self);
+const draft={rid:'e1',draft:{nome:'Oficina',cal:'seg–sex · 08–16h'}};self.state.g2.g_eq.fm=draft;
+ctx.pessoasGravar(c,ps,[{id:'e1',v:{nome:'Oficina',cal:'seg–sex · 08–14h'}}],0,'externo','Gestor');
+ctx.c4fonte(self);assert.equal(self.__c4rev,0);assert.equal(self.state.g2.g_eq.fm,draft);assert.equal(self.state.g2.g_eq.rows[0].v.cal,'seg–sex · 07–17h');
+const before=self.state.g2;self.state.g2=JSON.parse(JSON.stringify(before));self.state.g2.g_eq.rows[0].v.cal=draft.draft.cal;self.state.g2.g_eq.fm=null;
+assert.equal(ctx.g2persiste(self,'g_eq',before,{fm:draft},'Não salvo'),false);assert.match(self.state.g2.g_eq.fm.errG,/mudaram/);assert.equal(self.state.g2.g_eq.fm.draft.cal,'seg–sex · 08–16h');assert.equal(c.cadPessoas.equipes[0].v.cal,'seg–sex · 08–14h');assert.equal(c.cadPessoas.rev,1);
+ctx.c4fonte(self);assert.equal(self.__c4rev,0);self.state.g2.g_eq.fm=null;ctx.c4fonte(self);assert.equal(self.__c4rev,1);assert.equal(self.state.g2.g_eq.rows[0].v.cal,'seg–sex · 08–14h');
+console.log('PASS: funções reais c4fonte/c4grava/g2persiste preservam rascunho aberto, recusam revisão obsoleta, restauram estado e atualizam fonte após fechar. Transação e setState adaptados; não é execução UI.');
+// Evento entre abas: listener real; janela e render adaptados para exercício focal.
+handlers.length=0;
+const idle={state:{g2:{}},setState(p){Object.assign(this.state,p);ctx.c4fonte(this)}};ctx.c4fonte(idle);ctx.c4fonte(idle);
+assert.equal(handlers.length,1,'CD04 deve registrar uma única escuta antes de ler a fonte');
+ctx.pessoasGravar(c,ps,[{id:'e1',v:{nome:'Oficina',cal:'seg–sex · 09–15h'}}],1,'externo2','Gestor');
+handlers[0]({key:'outra-chave'});assert.equal(idle.__c4rev,1);
+handlers[0]({key:ctx.CEN_KEY});assert.equal(idle.__c4rev,2);assert.equal(idle.state.g2.g_eq.rows[0].v.cal,'seg–sex · 09–15h');
+idle.state.g2.g_eq.fm={draft:{cal:'rascunho'}};
+ctx.pessoasGravar(c,ps,es,2,'externo3','Gestor');handlers[0]({key:ctx.CEN_KEY});assert.equal(idle.__c4rev,2);assert.equal(idle.state.g2.g_eq.fm.draft.cal,'rascunho');
+console.log('PASS evento storage: lista ociosa atualiza, chave alheia ignorada, inscrição única e formulário aberto preservado.');

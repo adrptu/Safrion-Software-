@@ -1,0 +1,34 @@
+OK    · N1 Planejar safra › etapa 4 (2026/27): R$ 430.255,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)
+OK    · N2 compra em dobro desfeita: Fungicida A "0,0 L · Coberto pelo estoque" (nunca 145,2 L); compra a menos desfeita: MAP "80.000 kg" em 18/10/2026 e Ureia da OS-0418 "1.140 kg" em 24/09/2026 · coluna "Antes de hoje sem O.S." (nunca "Já realizado")
+OK    · N3 memória do Fungicida A: a OS-0421 conta pelo pendente (15 L), a reserva da OS-0424 conta uma vez e o plano entra só na parte sem O.S.
+OK    · N4 Compra › etapa 2 lê a mesma demanda: total R$ 430.255,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)
+OK    · N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 aguardando pedido · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 80.000 kg"; T1 Fungicida A "Estoque cobre"; a fonte diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra
+OK    · N6 Mapa › Insumos (Lagoa Grande): PV13 Glifosato "Falta 293 L" — o estoque da Santa Rita não cobre outra fazenda
+OK    · R1 recusa: cancelar a OS-0418 sem motivo é recusado ("Informe o motivo do cancelamento."), a ordem segue A liberar e a Ureia continua 1.140 kg na demanda
+OK    · I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 426.721,00 · 13 insumos a comprar
+OK    · I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia
+OK    · U1 a SOL-2026-07 ainda pede os 1.140 kg de Ureia da OS-0418 cancelada: a linha fica "0 kg · Acima da demanda · 1.140 kg · SOL-2026-07", a faixa conta "1 insumo acima da demanda" e a primária é "Atualizar SOL-2026-07" (nunca comprar a mais em silêncio)
+OK    · U2 atualizar: a SOL-2026-07 perde só a Ureia (toast com 1.140 kg e R$ 3.534,00), a linha some e a primária volta a "Abrir Compra de insumos ›"
+OK    · U3 a Compra lê a versão nova da SOL-2026-07: total R$ 426.721,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia
+OK    · U4 repetição: com a SOL já atualizada não há o que atualizar; a primária segue "Abrir Compra de insumos ›"
+OK    · P1 repetição: recarregar duas vezes dá a mesma conta (R$ 426.721,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente)
+OK    · P2 repetição: a OS-0418 cancelada não oferece cancelar de novo; o comando repetido é recusado e a demanda não muda
+OK    · P3 restaurar a demonstração volta aos números da semente (R$ 430.255,00 · 14 insumos)
+OK    · V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 430.255,00 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)
+OK    · V2 Mapa › Insumos depois da entrega: C1 continua "Falta 14.800 kg" (o mesmo de antes)
+OK    · C1 Compra › etapa 2 com a OS-0418 cancelada: a Ureia mostra "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07" e a faixa conta "1 insumo acima da demanda de agora" (o NPK entregue não aparece)
+OK    · R2 Compra › etapa 4 (DEM-08): Ureia sai em Casa do Adubo "Chega primeiro", sem justificativa pendente; escolher a Coop. Vale (mais cara e mais tardia) é recusado sem justificativa
+OK    · C2 a mesma Ureia avisa na etapa 4 (comparação) e na 5 (aprovação): "Acima da demanda · 1.140 kg", sem trava
+OK    · Q1 o perfil Zé (mecânico) não atualiza a SOL: "Atualizar a SOL-2026-07: decisão de Ana (gestora). Nada foi alterado." e o registro não muda
+OK    · Q2 Ana (gestora) atualiza: o envio original fica (23/09/2026 10:40 por Ana (gestora)), a versão nova grava quem e quando ("Ureia 45% −1.140 kg"), o toast avisa que a cotação em andamento recomeça e a Compra mostra "atualizada em … por Ana (gestora)" sem aviso de acima da demanda
+FALHA · P1 pedido emitido e depois complemento (MAP 62.500 → 80.000 kg): a versão nova guarda o pedido emitido; com a OS-0418 cancelada a Ureia fica "Acima da demanda · 1.140 kg" com "Pedido já emitido", a primária é "Abrir Compra de insumos ›" (não "Atualizar"), a SOL mantém os 1.140 kg e a Compra avisa "pedido já emitido: o excedente entra no estoque" · ('Enviar para cotação', 'Complemento', 'Complemento SOL-2026-07-C1 enviado com só a diferença: 1 insumos, R$ 68.250,00. A solicitação original não foi duplicada. Atualizada por Ana (gestora).', {'comp': 1, 'pedEmit': True, 'ureia': 1140, 'map': 80000}, 'OS-0418 cancelada sem execução. Cancelada por Ana (gestora).', 'Acima da demanda · 1.140 kg', 'Atualizar SOL-2026-07', ['Insumo · Fertilizantes', '×', 'Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem.'], 1140, 
+FALHA · A1 "Aplicar plano em 4 cultivos" na tela e complemento enviado: a versão da SOL guarda o plano da conta e a Compra não avisa "acima da demanda" (com o plano da semente avisaria os insumos do complemento à toa) · ('ok', 'ok', 'Soja alta tecnologia v6 aplicado a 4 cultivos. Com pendência: P2: sobreposição prevista de 11 dias. A dessecação da Soja alta tecnologia cai em 05/11/2026 e o Milho AG 8700 (Safra 2025/26) está previsto até 15/11/2026. Mude o plantio para 06/12/2026 ou depois, ou confirme a colheita do milho. Plano operacional, recursos e demanda recalculados.', 'Valor da necessidade líquida R$ 1.205.542,10 · 19 insumos a comprar · solicitação SOL-2026-07 em cotação', 'Complemento SOL-2026-07-C1 en
+OK    · M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 430.255,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop
+OK    · M2 390 px · Mapa › Insumos: sem rolagem horizontal; T4 "MAP 11-52 · 17.500 kg" e "Falta 80.000 kg"
+OK    · M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 430.255,00
+OK    · E1 sem erro JS nas telas abertas (Planejar safra, Compra, Mapa, O.S.)
+
+RESULTADO: 27 ok · 2 falhas
+  - P1 pedido emitido e depois complemento (MAP 62.500 → 80.000 kg): a versão nova guarda o pedido emitido; com a OS-0418 cancelada a Ureia fica "Acima da demanda · 1.140 kg" com "Pedido já emitido", a primária é "Abrir Compra de insumos ›" (não "Atualizar"), a SOL mantém os 1.140 kg e a Compra avisa "pedido já emitido: o excedente entra no estoque"
+  - A1 "Aplicar plano em 4 cultivos" na tela e complemento enviado: a versão da SOL guarda o plano da conta e a Compra não avisa "acima da demanda" (com o plano da semente avisaria os insumos do complemento à toa)
+rc=1

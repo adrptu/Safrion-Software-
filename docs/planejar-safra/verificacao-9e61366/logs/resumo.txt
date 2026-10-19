@@ -1,0 +1,45 @@
+### ocupacao_test 04:29:04
+exit=0 RESULTADO: 65 ok · 0 falhas (tudo) 
+### saf_operacoes_test 04:35:28
+exit=0 RESULTADO: 87 ok · 0 falhas (tudo) 
+### tabelas_saf_test 04:43:17
+exit=0 RESULTADO: 24/24 ok 
+### rend_fluxo 04:46:52
+exit=0 RESULTADO: 18/18 OK 
+### rend_telas 04:52:59
+exit=0 RESULTADO: 5/5 OK 
+### rend_bordas 04:55:17
+exit=0 RESULTADO: 9/9 OK 
+### rend_bordas2 04:56:28
+exit=0 RESULTADO: 5/5 OK 
+### partest 05:09:57
+exit=0 RESULTADO: 45 ok · 2 falhas 
+### saf_cmp_continuidade 05:13:17
+exit=0 OK    · 4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data RESULTADO: 31 ok · 0 falhas 
+### acao_unica_saf 05:20:13
+exit=0 OK    6 SAF · filtro sem resultado: 0 linhas, "Limpar…" dentro da lista (secundário) e a área mantém o passo da etapa; no máximo uma primária  RESULTADO: 10 ok · 0 falhas (saf) 
+### acao_unica_v3 05:22:49
+exit=0 RESULTADO: 10 ok · 0 falhas (v3) 
+### acao_unica_gemini 05:25:13
+exit=0 RESULTADO: 3 ok · 0 falhas (gemini) 
+### etapas_celular 05:27:08
+exit=0 RESULTADO: 14 ok · 0 falhas (celular) 
+### saftest 05:32:49
+exit=0 
+### cmptest 05:34:30
+exit=0 FALHAS: nenhuma 
+### saf38test 05:41:02
+exit=1 
+### psfix38test 05:43:19
+exit=1 
+### tabelas_os_test 05:44:01
+exit=0 RESULTADO: 38/38 ok 
+### tabelas_est_test 05:51:44
+exit=0 RESULTADO: 34/34 ok 
+### testes_pedido 05:58:37
+exit=0 
+### varredura 06:00:14
+exit=0 RESULTADO: 144/144 páginas sem erro 
+### acoes_duplicadas 06:12:43
+exit=0 RESULTADO: 144 páginas · 0 com ação repetida · erros 0 
+### FIM 06:19:19

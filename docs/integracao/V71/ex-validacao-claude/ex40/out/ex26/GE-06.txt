@@ -1,0 +1,121 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Indicadores operacionais
+Indicadores operacionais
+i
+4 indicadores fora da meta
+Abrir plano de ação
+Painéis por processo
+5 de 5
+INDICADOR
+⇅
+PROCESSO
+⇅
+FÓRMULA · FONTE
+⇅
+META · PERÍODO
+⇅
+REALIZADO · TENDÊNCIA
+⇅
+CAUSA APONTADA
+⇅
+AÇÃO
+⇅
+Custo de pulverização
+Agronômico
+R$ ÷ ha tratado (apontado)
+apontamentos · 100%
+R$ 40,00/ha
+set/26
+R$ 48,40/ha ↑
+consumo +10% · preço +10%
+Detalhar
+Ritmo de plantio
+Programação
+ha plantados ÷ dia útil
+programação · 100%
+35 ha/dia
+janela out/26
+em risco ↓
+OS-0420 impedida · OM-0233
+Ver ações
+Aderência ao programado
+Campo
+O.S. no dia previsto ÷ total
+ordens de campo · 100%
+≥ 90%
+últimos 30 d
+86% ↓
+reprogramações por chuva
+Ver ordens
+Perda no beneficiamento
+Beneficiamento
+descarte ÷ entrada (t)
+packing · 100%
+≤ 4%
+set/26
+5% ↑
+classificação classe B alta
+Ver packing
+Uso de água no pivô 2
+Irrigação
+mm aplicados ÷ mm programados pelo balanço
+telemetria · 100%
+≤ 100%
+OS-0419 · balanço 23/09
+10,81 de 10,81 mm
+—
+Ver irrigação
+Desempenho dos ativos
+ATIVO · CLASSE
+⇅
+DISPONIBILIDADE
+⇅
+UTILIZAÇÃO
+⇅
+MTBF
+⇅
+MTTR
+⇅
+CUSTO/H REALIZADO
+⇅
+Trator T1 · JD 6M 155
+62% · bloqueado
+—
+184 h
+9,5 h
+R$ 158/h
+Trator 02 · MF 7719
+97%
+81%
+412 h
+2,1 h
+R$ 141/h
+Pulverizador PJ-3030
+94%
+76%
+367 h
+3,4 h
+R$ 96/h
+Pivô 2
+99%
+62% da volta
+—
+—
+R$ 38/h
+Parâmetros
+Propor parâmetro agronômico
+Propor regra ou alçada
+Tela: Indicadores operacionais · 4 indicadores fora da meta

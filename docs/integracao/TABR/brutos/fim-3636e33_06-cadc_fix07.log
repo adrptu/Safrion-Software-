@@ -1,0 +1,33 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadc_test.py fix07
+OK  publicada a v6: selo amarelo pela tradução pendente · ['Cadastros › Estrutura gerencial Estrutura gerencial v6 em vigor · 1 tradução pendente', 'yellow']
+OK  excluir PRJ-PIVO3 entra no rascunho v7 e o código continua visível até publicar (Situação "Sai na v7" | No rascunho "Excluído") · [True, 'Cadastros › Estrutura gerencial Estrutura gerencial v6 em vigor · rascunho v7 com 1 alteração', 'PRJ-PIVO3 Expansão pivô 3 · investimento Estrutura gerencial 01/08/2026 31/12/2027 — — — Sai na v7 Excluído', 'Exclusão de PRJ-PIVO3 · Expansão pivô 3 · investimento no rascunho v7: o código sai 
+OK  código marcado para exclusão não oferece "Excluir" de novo (painel em consulta)
+OK  código excluído abre só em consulta, dizendo quando sai · Código · PRJ-PIVO3
+×
+Excluído no rascunho v7: o código sai da estrutura quando a versão for publicada; até lá, só consulta.
+Código
+Nome
+Dimensão
+Empresa
+Natureza
+Centro de resultado
+Centro de responsa
+OK  publicar a v7 tira o código excluído e preserva a v6 · ['Simulação: estrutura v7 publicada para novos lançamentos com 22 de 22 códigos · 1 código excluído · v6 preservada.', 'Cadastros › Estrutura gerencial Estrutura gerencial v7 em vigor']
+OK  sem rascunho e sem pendência: selo verde · ['Cadastros › Estrutura gerencial Estrutura gerencial v7 em vigor', 'green']
+OK  código novo excluído sai do rascunho na hora · ['Cadastros › Estrutura gerencial Estrutura gerencial v7 em vigor · rascunho v8 com 1 alteração', 'Cadastros › Estrutura gerencial Estrutura gerencial v7 em vigor', 'Excluído do rascunho v8: PRJ-X · Teste (não chegou a ser publicado).']
+OK  prévia não lista como novo o 3.1.07 já cadastrado · Prévia do ERP (Sankhya)
+simulada · nenhum dado real é lido
+NOVOS NO ERP
+CC-ARM · Armazém · apoio · centro 312
+ALTERADO NO ERP
+3.1.07 · TOP — → 1203
+3.1.02 · Defensivos → Defensivos agrícolas
+SEM CONTA NO ERP
+PRJ-PIVO3 · Expansão pivô 3 · investimento
+Trazer 3 mudanças para o rascunho
+Descartar prévi
+OK  importação mantém um só 3.1.07 na Natureza e traz o CC-ARM · [1, 'Rascunho v6: 1 código novo e 2 códigos alterados vindos do ERP · nada foi publicado.']
+OK  segunda importação não repete as mudanças · Simulação: o ERP não tem mudanças novas para o rascunho.
+OK  nenhum erro de JS
+RESULTADO: OK 11/11
+[exit 0]

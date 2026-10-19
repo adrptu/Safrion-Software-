@@ -1,0 +1,804 @@
+From 19aeb94a0e41c620cde077fbdcac3342387a2304 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 16:07:53 +0000
+Subject: [PATCH 1/5] =?UTF-8?q?NAV-1:=20Planos=20agron=C3=B4micos=20em=20l?=
+ =?UTF-8?q?ista=20=E2=86=92=20detalhe,=20sem=20etapas=20falsas;=20cultivo?=
+ =?UTF-8?q?=20abre=20no=20Planejar=20safra?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+CONSOLIDADO §3.1 (N2-PA e X-AGR-6), como o PM da PCM (D-03):
+- sai a faixa de 3 etapas (NOMES/steps_state), as etapas "impedidas", o
+  avanço que só navegava ("Revisar e publicar ›"/"Ver versões e cultivos ›")
+  e o bloco "Nada a publicar";
+- lista = biblioteca atual; detalhe por PA.dc.html#plano=<id> (lido ao
+  carregar e no hashchange; id inexistente abre a lista com aviso); voltar
+  devolve rolagem e foco ao cartão; Esc sem painel volta à lista;
+- detalhe: atividades (dose na tabela), cultivos e versões sempre visíveis;
+  com rascunho, as alterações vN × vM logo acima de "Publicar versão vN"
+  (um clique; desabilitado com o motivo sem atividade ou com a inclusão de
+  insumo aberta); sem rascunho, nenhuma primária;
+- X-AGR-6: chip "Na vN · vM publicada" e "Abrir cultivo no Planejar safra ›"
+  → SAF.dc.html#saf=<safra>&passo=cultivos&cult=<id>;
+- botões pelo design system de 09/10: "Criar plano" verde no cabeçalho só
+  na lista (BOT-02/03, no lugar de "Novo plano"); "Incluir atividade" e
+  "Incluir insumo" brancos com "+"; rodapés com o verbo do efeito.
+Regras puras extraídas (paRascNo, paAcoes, paPubFaz, paSitCult, paNovoErro,
+paNovoFaz, paDescartaNo) e testadas sem navegador.
+
+Executado:
+- build.py → 0 FALHA (140 artboards); montar_render.py ok
+- pa_regras_test.py → 11/11 (na base cdc185f: 0/11, funções ausentes)
+- pa_lista_test.py com ANTES=_render da base → 16 ok · 0 falhas
+  (na base: 2 ok · 12 falhas: faixa, "impedida", sem #plano=, link na etapa 1)
+- cliques para mudar uma dose e publicar: cdc185f 5 → 4 (mesmo cenário,
+  4 teclas nos dois)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ .../v37/gen37/areas/processo_planos.py        | 241 +++++++++++-------
+ tools/prototipo/v37/gen37/pa_lista_test.py    | 226 ++++++++++++++++
+ tools/prototipo/v37/gen37/pa_regras_test.py   |  81 ++++++
+ 3 files changed, 455 insertions(+), 93 deletions(-)
+ create mode 100644 tools/prototipo/v37/gen37/pa_lista_test.py
+ create mode 100644 tools/prototipo/v37/gen37/pa_regras_test.py
+
+diff --git a/tools/prototipo/v37/gen37/areas/processo_planos.py b/tools/prototipo/v37/gen37/areas/processo_planos.py
+index 2c0e116..74af0fd 100644
+--- a/tools/prototipo/v37/gen37/areas/processo_planos.py
++++ b/tools/prototipo/v37/gen37/areas/processo_planos.py
+@@ -1,12 +1,14 @@
+ # -*- coding: utf-8 -*-
+-"""Agrícola › Planos agronômicos — uma só tela de trabalho (PA.dc.html) com 3 etapas:
+-1 Escolha o plano (biblioteca por cultura, cards) · 2 Edite as atividades (Gatilho + atividade → Insumos e doses)
+-· 3 Publique a versão (diferenças, cultivos que continuam na versão antiga, histórico).
+-Salvar grava num rascunho v(n+1); publicar cria a nova versão; cultivos aplicados nunca são alterados aqui."""
++"""Agrícola › Planos agronômicos (PA.dc.html) · NAV-1 (docs/navegacao/ESPECIFICACAO.md): lista → detalhe, sem etapas.
++Lista: biblioteca por cultura (cartões) com filtro por cultura; "Criar plano" no cabeçalho (BOT-02/03/05).
++Detalhe (PA.dc.html#plano=<id>, como o PM da PCM, D-03): atividades (dose na tabela; "Incluir atividade" secundária no bloco),
++cultivos que usam o plano, versões e, com rascunho, as alterações vN × vM logo acima de "Publicar versão vN" (Próximo passo).
++Salvar grava num rascunho v(n+1); publicar cria a nova versão; cultivos aplicados nunca são alterados aqui (a adoção é por
++cultivo, no Planejar safra: PRD 40.3)."""
+ import json, os
+ from engine import grid, esc, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, GRAYS, DISP, BTN_ST, EXTRA, EXTRAJS, _MINI, _MINIP
+ import engine as E
+-from ui37 import shell37, steps_state, HEIGHTS37
++from ui37 import shell37, HEIGHTS37
+ import dados2 as D2
+ 
+ H = lambda s: '{{' + s + '}}'
+@@ -15,7 +17,10 @@ T = lambda: H('true')
+ def IF(cond, html, dflt=False): return f'<sc-if value="{H(cond)}" hint-placeholder-val="{T() if dflt else F()}">{html}</sc-if>'
+ def FOR(lst, as_, html, n=2): return f'<sc-for list="{H(lst)}" as="{as_}" hint-placeholder-count="{n}">{html}</sc-for>'
+ 
+-NOMES = ['Escolha o plano', 'Edite as atividades', 'Publique a versão']
++# "+" de Criar e Incluir (BOT-05): o mesmo desenho em todos os botões desse papel, sempre com rótulo; aria-hidden (o nome é o rótulo)
++def MAIS(tam=14): return (f'<svg width="{tam}" height="{tam}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" '
++                          f'stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 5v14M5 12h14"/></svg>')
++ICO = 'display: inline-flex; align-items: center; gap: 6px;'
+ 
+ # ---- dados locais coerentes com dados2 (declarados em observações) ----
+ # versão do plano aplicada a cada cultivo quando difere da versão publicada atual (safra encerrada usou versões anteriores)
+@@ -117,8 +122,27 @@ function paDiff(p){ if(!p||!p.rasc) return []; const pub={}; p.atividades.forEac
+     if(ch.length) out.push({k:'Alterada',c:'y',n:a.nome,t:ch.join(' · ')}); });
+   p.atividades.forEach(o=>{ if(!seen[o.id]) out.push({k:'Excluída',c:'r',n:o.nome,t:paGat(o.g).t+' · '+o.op}); });
+   return out; }
+-// abrir um plano guarda a posição da biblioteca; ao voltar à etapa 1, a rolagem volta e o foco vai ao cartão aberto por último
+-function paOpen(self,id){ const p=paPlan(self,id); try{ self.__paPos=[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>[e,e.scrollTop]); }catch(e){} self.setState({pid:id,step:2,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null,g2toast:'Plano aberto: '+p.nome+(p.rasc?' · rascunho v'+p.rasc.v:'')}); }
++// ---------- lista → detalhe (NAV-1 · SEL-02): endereço #plano=<id>, voltar com posição e foco ----------
++// endereço: lido ao carregar e no hashchange, gravado ao abrir (replaceState, como a MA da PCM); id inexistente abre a lista, sem erro
++function paHashId(h){ const m=/[#&]plano=([^&]*)/.exec(String(h||'')); if(!m||!m[1]) return ''; try{ return decodeURIComponent(m[1]); }catch(e){ return m[1]; } }
++function paHashSet(id){ try{ const h=id?'#plano='+encodeURIComponent(id):''; if((location.hash||'')!==h) history.replaceState(null,'',location.pathname+location.search+h); }catch(e){} }
++// abrir um plano guarda a posição da biblioteca; ao voltar, a rolagem volta e o foco vai ao cartão aberto por último (ult)
++function paOpen(self,id,o){ o=o||{}; const p=paPlan(self,id); if(!p) return;
++  if(!self.state.pid){ try{ self.__paPos=[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>[e,e.scrollTop]); }catch(e){} }
++  if(o.hash!==false) paHashSet(id);
++  g2etapa(self,{pid:id,ult:id,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null,g2toast:o.msg||('Plano aberto: '+p.nome+(p.rasc?' · rascunho v'+p.rasc.v:''))}); }
++function paLista(self,msg){ paHashSet(''); self.__paVolta=true; const patch={pid:null,del:null,disc:false,flash:null,ied:null,iadd:null,rmv:null}; if(msg) patch.g2toast=msg; self.setState(patch); }
++// Esc no detalhe (sem painel, edição ou confirmação aberta e fora de campo) volta à lista; em fase de captura, antes de qualquer fechamento
++function paEsc(self,e){ if(e.key!=='Escape'||e.defaultPrevented||!self.state.pid) return; const st=self.state;
++  if(st.fm||st.np||st.ied||st.iadd||st.disc||st.del||st.g2ac) return; const t=e.target;
++  if(t&&t.closest&&(t.closest('aside[role=dialog]')||t.closest('[role=listbox]')||/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
++  if(document.querySelector('aside[role=dialog]')) return; e.preventDefault(); paLista(self); }
++function paHashIni(self){ if(self.__paHash) return; self.__paHash=1;
++  const aplica=()=>{ let h=''; try{ h=location.hash||''; }catch(e){} const id=paHashId(h); const cur=self.state.pid||''; if(id===cur) return;
++    if(!id){ if(cur) paLista(self); return; }
++    if(paPlan(self,id)){ paOpen(self,id,{hash:false}); return; }
++    paHashSet(''); if(cur) paLista(self); self.setState({g2toast:'Plano “'+id+'” não encontrado neste navegador: escolha um plano da biblioteca.'}); };
++  setTimeout(aplica,0); try{ window.addEventListener('hashchange',aplica); document.addEventListener('keydown',(e)=>paEsc(self,e),true); }catch(e){} }
+ // ---------- biblioteca ----------
+ // Filtro rápido por cultura: "Todas" ou uma cultura; tocar de novo na cultura escolhida volta a "Todas".
+ const PA_QCH='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+@@ -127,7 +151,7 @@ function paCuf(self,cu){ const f=self.state.cuf||''; return cu.indexOf(f)<0?'':f
+ function paQf(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu);
+   const ch=(t,n,on,go)=>({t:t,n:String(n),on:String(!!on),go:go,st:PA_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
+   return [ch('Todas',ps.length,!f,()=>self.setState({cuf:''}))].concat(cu.map(c=>ch(c,ps.filter(p=>p.cultura===c).length,f===c,()=>self.setState({cuf:f===c?'':c})))); }
+-function paLib(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu); const sel=self.state.pid;
++function paLib(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=paCuf(self,cu); const sel=self.state.ult;
+   return cu.filter(c=>!f||c===f).map(c=>{ const cs=ps.filter(p=>p.cultura===c);
+     return {t:c, n:cs.length+(cs.length>1?' planos':' plano'), cards:cs.map(p=>{ const atv=paShown(p); const tp=[];
+       atv.forEach(a=>{ const t=PA_TAG[a.g.tipo]; if(tp.indexOf(t)<0) tp.push(t); }); tp.sort((a,b)=>PA_TORD.indexOf(a)-PA_TORD.indexOf(b));
+@@ -136,14 +160,14 @@ function paLib(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=p
+         gats:tp.map(t=>({t})), semgat:!tp.length, apl:nc?('Aplicado em '+nc+(nc>1?' cultivos':' cultivo')):'Sem cultivos aplicados', apl2:nc?paAplCurto(p.id):'', aplst:nc?'font-weight:700;':'color:#65736A;',
+         st:'display:flex;flex-direction:column;gap:9px;padding:12px 15px;border-radius:12px;text-align:left;font-family:inherit;color:#15201A;min-width:0;width:100%;box-sizing:border-box;cursor:pointer;',
+         cur:String(p.id===sel), lab:'Abrir plano '+p.nome, open:()=>paOpen(self,p.id)}; })}; }); }
+-// ---------- etapa 2 · filtro rápido por operação: "Todas" ou uma operação; tocar de novo volta a "Todas" ----------
++// ---------- detalhe · filtro rápido por operação: "Todas" ou uma operação; tocar de novo volta a "Todas" ----------
+ // as operações seguem a ordem do catálogo (PA0.ops); a escolha vale entre planos e cai para "Todas" se o plano não tiver a operação
+ function paOps(atv){ const tem={}; atv.forEach(a=>{ tem[a.op]=(tem[a.op]||0)+1; }); const ord=PA0.ops.filter(o=>tem[o]).concat(Object.keys(tem).filter(o=>PA0.ops.indexOf(o)<0).sort()); return ord.map(o=>({op:o,n:tem[o]})); }
+ function paOpf(self,ops){ const f=self.state.opf||''; return ops.some(o=>o.op===f)?f:''; }
+ function paOpChips(self,todas,ops,f){
+   const ch=(t,n,on,go,lab)=>({t:t,n:String(n),on:String(!!on),go:go,lab:lab,st:PA_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
+   return [ch('Todas',todas.length,!f,()=>self.setState({opf:''}),'Mostrar todas as operações')].concat(ops.map(o=>ch(o.op,o.n,f===o.op,()=>self.setState({opf:f===o.op?'':o.op}),(f===o.op?'Mostrar todas as operações':'Mostrar só '+o.op)))); }
+-// ---------- etapa 2 · gatilho e atividade na mesma linha; expansão direta dos insumos ----------
++// ---------- detalhe · gatilho e atividade na mesma linha; expansão direta dos insumos ----------
+ function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]; const del=self.state.del===a.id; const o=pub[a.id];
+   let chg=''; if(p.rasc&&p.versao){ if(!o) chg='Nova'; else if(paNorm(o)!==paNorm(a)) chg='Alterada'; }
+   const gat=paGat(a.g); const np=a.prods.length; const nv=p.rasc?p.rasc.v:p.versao+1; const fl=self.state.flash===a.id;
+@@ -158,9 +182,10 @@ function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]
+ // ---------- drill-down editável: dose, retirar e incluir insumo direto na tabela ----------
+ // grava no rascunho como o formulário (cria a v(n+1) na primeira mudança); o formulário continua para gatilho, operação e nome
+ const PA_DOSE_ST='font-family:inherit;font-size:12.8px;font-variant-numeric:tabular-nums;text-align:right;width:78px;padding:4px 6px;border-radius:8px;box-sizing:border-box;background:#fff;color:#15201A;';
+-function paRasc(self,aid,fn){ const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===self.state.pid); const novo=!p.rasc;
++function paRascNo(ps0,pid,aid,fn){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); const novo=!p.rasc;
+   if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)}; fn(p.rasc.atividades.find(x=>x.id===aid)); const nc=paCults(p.id).length;
+-  return {ps, fim:(novo&&p.versao)?(' Rascunho v'+p.rasc.v+' criado; a v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.'):' Gravado no rascunho v'+p.rasc.v+'.'}; }
++  return {ps, novo, v:p.rasc.v, fim:(novo&&p.versao)?(' Rascunho v'+p.rasc.v+' criado; a v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.'):' Gravado no rascunho v'+p.rasc.v+'.'}; }
++function paRasc(self,aid,fn){ return paRascNo(paPlans(self),self.state.pid,aid,fn); }
+ function paFoco(id,sel){ setTimeout(()=>{ const el=document.getElementById(id); if(el){ el.focus(); if(sel&&el.select) el.select(); } },0); }
+ function paDoseId(aid,prod){ return 'pa-dose-'+aid+'-'+String(prod).replace(/[^A-Za-z0-9]/g,'_'); }
+ function paDoseIni(self,a,x){ self._paEsc=false; self.setState({ied:{aid:a.id,prod:x.prod,val:paQ(x.dose),err:''},iadd:null}); paFoco(paDoseId(a.id,x.prod),true); }
+@@ -227,16 +252,18 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
+   const apl=paApl(p.id); const nd=paDiff(p).length; const nv=p.rasc?p.rasc.v:p.versao+1;
+   v.ban_r=!!p.rasc;
+   v.ed_show=p.versao>0&&!p.rasc; v.ed_t='Editar cria o rascunho v'+(p.versao+1)+'; a v'+p.versao+' publicada e os cultivos que a usam não mudam.';   // estado sempre visível (PRD 4.2)
+-  if(p.versao===0) v.ban_t='Rascunho v1 · ainda não publicado. Publique na etapa 3 para poder aplicar em Planejar safra.';
++  if(p.versao===0) v.ban_t='Rascunho v1 · ainda não publicado. Publique a versão v1 para poder aplicar em Planejar safra.';
+   else if(p.rasc) v.ban_t='Rascunho v'+p.rasc.v+' · '+nd+(nd===1?' alteração não publicada. ':' alterações não publicadas. ')+(apl?'Aplicado em '+apl+' — não serão alterados.':'Nenhum cultivo usa este plano.');
+   v.disc=!!self.state.disc&&!!p.rasc; v.nodisc=!v.disc;
+   v.disc_t=p.versao?('Descartar o rascunho v'+(p.rasc?p.rasc.v:'')+' e suas '+nd+' alterações? A v'+p.versao+' publicada continua valendo.'):'Descartar este plano novo? Ele ainda não foi publicado e será removido da biblioteca.';
+   v.disc_ask=()=>self.setState({disc:true}); v.disc_no=()=>self.setState({disc:false}); v.disc_yes=()=>paDiscard(self,p.id);
+-  v.ban_pub=()=>g2etapa(self,{step:3,del:null});
+ }
+-function paDiscard(self,pid){ const ps=paClone(paPlans(self)); const i=ps.findIndex(x=>x.id===pid); const p=ps[i];
+-  if(p.versao===0){ ps.splice(i,1); self.setState({pl:ps,pid:null,step:1,disc:false,g2toast:'Plano novo descartado: '+p.nome+'.'}); return; }
+-  const v=p.rasc.v; p.rasc=null; self.setState({pl:ps,disc:false,g2toast:'Rascunho v'+v+' descartado. A v'+p.versao+' publicada continua valendo.'}); }
++// descartar: plano novo (v0) sai da biblioteca; plano publicado perde só o rascunho e continua na versão em vigor
++function paDescartaNo(ps0,pid){ const ps=paClone(ps0); const i=ps.findIndex(x=>x.id===pid); const p=ps[i]; if(!p||!p.rasc) return {ps:ps0,erro:'Sem rascunho para descartar.'};
++  if(p.versao===0){ ps.splice(i,1); return {ps,saiu:true,msg:'Plano novo descartado: '+p.nome+'.'}; }
++  const v=p.rasc.v; p.rasc=null; return {ps,saiu:false,msg:'Rascunho v'+v+' descartado. A v'+p.versao+' publicada continua valendo.'}; }
++function paDiscard(self,pid){ const r=paDescartaNo(paPlans(self),pid); if(r.erro) return; self.setState({pl:r.ps,disc:false});
++  if(r.saiu) paLista(self,r.msg); else self.setState({g2toast:r.msg}); }
+ function paDel(self,pid,aid){ const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===pid); const novo=!p.rasc;
+   if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)}; const a=p.rasc.atividades.find(x=>x.id===aid); p.rasc.atividades=p.rasc.atividades.filter(x=>x.id!==aid);
+   self.setState({pl:ps,del:null,g2toast:'“'+a.nome+'” excluída do rascunho v'+p.rasc.v+(novo&&p.versao?' (criado agora)':'')+'.'+(p.versao?' A v'+p.versao+' publicada não muda.':'')}); }
+@@ -246,13 +273,13 @@ function paEdit(self,aid){ const p=paPlan(self,self.state.pid); if(!p) return; c
+   const antes=!!a&&a.g.tipo==='DAP'&&Number(a.g.dias)<0;
+   const d=a?{op:a.op,nome:a.nome,outra:(PA0.atvs[a.op]||[]).indexOf(a.nome)<0,tipo:(antes?'DAPA':a.g.tipo),dias:(a.g.tipo==='DATA'?'':String(Math.abs(Number(a.g.dias)))),data:(a.g.data||'')}
+            :{op:paOpf(self,paOps(paWork(p))),nome:'',outra:false,tipo:'DAP',dias:'',data:''};
+-  self.setState({fm:{aid:aid||null,draft:d,orig:JSON.stringify(d),errs:{},warn:false,rm:null},del:null,ied:null,iadd:null}); }
++  self.setState({fm:{aid:aid||null,draft:d,orig:JSON.stringify(d),errs:{},warn:false,rm:null},del:null,ied:null,iadd:null}); paFoco('fm_op'); }
+ function paFmUpd(self,patch,errk){ const cur=self.state.fm; const nd=Object.assign({},cur.draft,patch); const ne=Object.assign({},cur.errs||{}); (errk||Object.keys(patch)).forEach(k=>{ delete ne[k]; });
+   self.setState({fm:Object.assign({},cur,{draft:nd,errs:ne,warn:false})}); }
+ function paIst(err,w){ return 'font-family:inherit;font-size:14px;padding:8px 10px;border-radius:10px;box-sizing:border-box;'+(w?'width:'+w+';':'width:100%;')+'border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:#fff;color:#15201A;'; }
+ function paFm(self,v){ const fm=self.state.fm; v.fm_open=!!fm; if(!fm) return; const p=paPlan(self,self.state.pid); if(!p){ v.fm_open=false; return; } const d=fm.draft; const er=fm.errs||{};
+   const nv=p.rasc?p.rasc.v:p.versao+1; const nc=paCults(p.id).length; const a0=fm.aid?paWork(p).find(x=>x.id===fm.aid):null;
+-  v.fm_titulo=a0?('Atividade · '+a0.nome):'Nova atividade';
++  v.fm_titulo=a0?('Atividade · '+a0.nome):'Nova atividade'; v.fm_savet=a0?'Salvar':'Incluir atividade';
+   v.fm_sub=p.nome+' · salvar grava no rascunho v'+nv+(p.versao?('; a v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.'):'.');
+   v.fm_tipos=PA_TIPOS; v.fm_tipo=d.tipo; v.fm_settipo=(e)=>paFmUpd(self,{tipo:e.target.value},['g']);
+   v.fm_isData=d.tipo==='DATA'; v.fm_isDias=d.tipo!=='DATA';
+@@ -294,14 +321,15 @@ function paSave(self){ const fm=self.state.fm; const d=fm.draft; const er={}; le
+   const nc=paCults(p.id).length;
+   const msg=(novo&&p.versao)?('Rascunho v'+p.rasc.v+' criado com a alteração. A v'+p.versao+' publicada'+(nc?paUsam(nc):'')+' não mudam.')
+                             :((fm.aid?'Atividade salva':'Atividade incluída')+' no rascunho v'+p.rasc.v+'.');
+-  // atividade nova: abre na lista com "+ Incluir insumo" pronto; se o filtro por operação a esconderia, volta a "Todas"
++  // atividade nova: abre na lista com "Incluir insumo" pronto; se o filtro por operação a esconderia, volta a "Todas"
+   const nova=!fm.aid; const opf=self.state.opf||'';
+   self.setState({pl:ps,fm:null,xg,xa,flash:atv.id,g2toast:msg+(nova?' Inclua os insumos na tabela.':''),opf:(opf&&opf!==atv.op)?'':opf,
+     iadd:nova?{aid:atv.id,prod:'',dose:'',err:''}:null,ied:null,g2ac:null});
+   if(nova) paFoco(paAcId('pa-add-'+atv.id)); }
+ // ---------- novo plano ----------
+-function paNewPlan(self){ const d={nome:'',cultura:paCuf(self,paCulturas(paPlans(self))),base:''}; self.setState({np:{draft:d,orig:JSON.stringify(d),errs:{},warn:false}}); }
+-function paNp(self,v){ const np=self.state.np; v.np_open=!!np; v.np_titulo='Novo plano'; v.np_sub='O plano nasce como rascunho v1; publique na etapa 3 para aplicar em Planejar safra.'; if(!np) return; const d=np.draft; const er=np.errs||{};
++// o painel recebe o foco no 1º campo ao abrir (Esc fecha; ao fechar, o foco volta a quem abriu: g2lib, painel modal)
++function paNewPlan(self){ const d={nome:'',cultura:paCuf(self,paCulturas(paPlans(self))),base:''}; self.setState({np:{draft:d,orig:JSON.stringify(d),errs:{},warn:false}}); paFoco('np_nome'); }
++function paNp(self,v){ const np=self.state.np; v.np_open=!!np; v.np_titulo='Novo plano'; v.np_sub='O plano nasce como rascunho v1; publique a versão para aplicar em Planejar safra.'; v.np_savet='Criar plano'; if(!np) return; const d=np.draft; const er=np.errs||{};
+   const upd=(patch)=>{ const cur=self.state.np; const ne=Object.assign({},cur.errs||{}); Object.keys(patch).forEach(k=>{ delete ne[k]; }); self.setState({np:Object.assign({},cur,{draft:Object.assign({},cur.draft,patch),errs:ne,warn:false})}); };
+   v.np_nome=d.nome; v.np_setnome=(e)=>upd({nome:e.target.value}); v.np_en=er.nome||''; v.np_hen=!!er.nome; v.np_nst=paIst(er.nome);
+   v.np_cults=[{v:'',t:'Escolha a cultura'}].concat(PA0.culturas.map(c=>({v:c,t:c}))); v.np_cult=d.cultura; v.np_setcult=(e)=>upd({cultura:e.target.value,base:''}); v.np_ec=er.cultura||''; v.np_hec=!!er.cultura; v.np_cst=paIst(er.cultura);
+@@ -311,22 +339,42 @@ function paNp(self,v){ const np=self.state.np; v.np_open=!!np; v.np_titulo='Novo
+   v.np_close=()=>{ const cur=self.state.np; if(JSON.stringify(cur.draft)!==cur.orig){ self.setState({np:Object.assign({},cur,{warn:true})}); return; } self.setState({np:null}); };
+   v.np_discard=()=>self.setState({np:null}); v.np_keep=()=>self.setState({np:Object.assign({},self.state.np,{warn:false})});
+   v.np_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.np_close(); } };
+-  v.np_save=()=>{ const cur=self.state.np; const dd=cur.draft; const e={}; const nome=String(dd.nome||'').trim();
+-    if(!nome) e.nome='Informe o nome do plano.'; else if(paPlans(self).some(p=>p.cultura===dd.cultura&&p.nome.toLowerCase()===nome.toLowerCase())) e.nome='Já existe um plano com este nome nesta cultura.';
+-    if(!dd.cultura) e.cultura='Escolha a cultura.';
++  v.np_save=()=>{ const cur=self.state.np; const dd=cur.draft; const e=paNovoErro(paPlans(self),dd);
+     if(Object.keys(e).length){ self.setState({np:Object.assign({},cur,{errs:e,warn:false})}); return; }
+-    const base=dd.base?paPlan(self,dd.base):null; const id='NP'+Date.now().toString(36);
+-    const atv=base?paClone(base.atividades).map((a,i)=>Object.assign(a,{id:id+'_'+i})):[];
+-    const ps=paPlans(self).concat([{id,nome,cultura:dd.cultura,versao:0,atividades:[],rasc:{v:1,atividades:atv},hist:[]}]);
+-    self.setState({pl:ps,np:null,pid:id,step:2,xg:{},xa:{},g2toast:'Plano “'+nome+'” criado como rascunho v1'+(base?' a partir de '+base.nome+' v'+base.versao:'')+'. Ajuste as atividades e publique na etapa 3.'}); }; }
++    const r=paNovoFaz(paPlans(self),dd,'NP'+Date.now().toString(36));
++    self.setState({pl:r.ps,np:null,xg:{},xa:{}});
++    paOpen(self,r.id,{msg:'Plano “'+r.nome+'” criado como rascunho v1'+(r.base?' a partir de '+r.base.nome+' v'+r.base.versao:'')+'. Ajuste as atividades e publique a versão v1.'}); }; }
++// regras do novo plano (puras, testadas em pa_regras_test.py): nome obrigatório e único por cultura (sem diferenciar maiúsculas); cópia só das atividades
++function paNovoErro(ps,dd){ const e={}; const nome=String(dd.nome||'').trim();
++  if(!nome) e.nome='Informe o nome do plano.'; else if(ps.some(p=>p.cultura===dd.cultura&&p.nome.toLowerCase()===nome.toLowerCase())) e.nome='Já existe um plano com este nome nesta cultura.';
++  if(!dd.cultura) e.cultura='Escolha a cultura.'; return e; }
++function paNovoFaz(ps,dd,id){ const nome=String(dd.nome||'').trim(); const base=dd.base?(ps.find(p=>p.id===dd.base)||null):null;
++  const atv=base?paClone(base.atividades).map((a,i)=>Object.assign(a,{id:id+'_'+i})):[];
++  return {id,nome,base,ps:ps.concat([{id,nome,cultura:dd.cultura,versao:0,atividades:[],rasc:{v:1,atividades:atv},hist:[]}])}; }
+ // ---------- publicar ----------
+-function paPub(self){ const pid=self.state.pid; const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===pid);
+-  if(!p||!p.rasc){ self.setState({g2toast:'Nada a publicar: edite as atividades na etapa 2.'}); return; }
+-  if(!p.rasc.atividades.length){ self.setState({g2toast:'Inclua ao menos uma atividade antes de publicar.'}); return; }
+-  p.versao=p.rasc.v; p.atividades=p.rasc.atividades; p.rasc=null; p.hist=[{v:p.versao,at:PA0.hoje}].concat(p.hist||[]);
+-  const apl=paApl(pid);
+-  self.setState({pl:ps,g2toast:'Versão v'+p.versao+' publicada.'+(apl?' Os cultivos continuam como estavam ('+apl+'); decida a adoção em Planejar safra.':' Já pode ser aplicada em Planejar safra.')}); }
+-function paS3(self,v,p){ const nd=paDiff(p); v.s3_has=!!p.rasc; v.s3_none=!p.rasc;
++// Próximo passo do detalhe (BOT-01/02): "Publicar versão vN" só com rascunho; desabilitado com o motivo (VIS-04) sem atividade ou com a
++// inclusão de insumo aberta (dano evitado: publicar uma versão sem o insumo que está sendo digitado); sem rascunho, nenhuma primária
++function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const v=p.rasc.v; const t='Publicar versão v'+v;
++  if(!p.rasc.atividades.length){ const w='Inclua ao menos uma atividade para publicar a v'+v+'.'; return {prim:{t,dis:w},nota:w}; }
++  if(ui.iadd){ const w='Conclua ou cancele a inclusão do insumo para publicar a v'+v+'.'; return {prim:{t,dis:w},nota:w}; }
++  return {prim:{t,dis:''},nota:''}; }
++// publicar (puro): a versão do rascunho vira a vigente e entra no histórico; os cultivos (PA0.cultivos) não mudam (PRD 40.3)
++function paPubFaz(ps0,pid,hoje){ const ps=paClone(ps0); const p=ps.find(x=>x.id===pid); if(!p||!p.rasc) return {erro:'Sem rascunho para publicar.'};
++  const w=paAcoes(p).prim.dis; if(w) return {erro:w};
++  p.versao=p.rasc.v; p.atividades=p.rasc.atividades; p.rasc=null; p.hist=[{v:p.versao,at:hoje}].concat(p.hist||[]); return {ps,p}; }
++function paPub(self){ const pid=self.state.pid; const ac=paAcoes(paPlan(self,pid),{iadd:!!self.state.iadd}); if(!ac.prim||ac.prim.dis) return;
++  const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
++  self.setState({pl:r.ps,disc:false,del:null,g2toast:'Versão v'+r.p.versao+' publicada.'+(apl?' Os cultivos continuam como estavam ('+apl+'); decida a adoção em Planejar safra.':' Já pode ser aplicada em Planejar safra.')});
++  /* o comando sai da tela com o rascunho: o foco vai aos cultivos (onde está a adoção) ou, sem cultivos, ao nome do plano */
++  setTimeout(()=>{ try{ const h=document.getElementById(apl?'pa-cv-tit':'pa-det-tit'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); h.scrollIntoView({block:'start'}); } }catch(e){} },40); }
++// situação do cultivo no plano (X-AGR-6): versão aplicada × publicada; a adoção é por cultivo no Planejar safra, aberto no próprio cultivo
++function paSitCult(c,p){ const lk=(!c.ro&&c.ver<p.versao)?[{k:'link',t:'Abrir cultivo no Planejar safra ›',h:'SAF.dc.html#saf='+c.safra+'&passo=cultivos&cult='+c.id}]:[];
++  if(c.ro) return [{k:'chip',t:'Safra encerrada · fica na v'+c.ver,c:'gray'}];
++  if(p.rasc) return [{k:'chip',t:'Continua na v'+c.ver+' ao publicar',c:'yellow'}].concat(lk);
++  if(c.ver<p.versao) return [{k:'chip',t:'Na v'+c.ver+' · v'+p.versao+' publicada',c:'yellow'}].concat(lk);
++  return [{k:'chip',t:'Na versão em vigor',c:'green'}]; }
++// ---------- detalhe · cultivos que usam o plano, versões e, com rascunho, as alterações acima do Próximo passo ----------
++function paDet(self,v,p){ const nd=paDiff(p); v.alt_tem=!!p.rasc;
+   v.dif=nd.map(d=>({k:d.k,st:paChip(d.c),n:d.n,t:d.t})); v.dif_vazio=!!p.rasc&&!nd.length;
+   const nv=p.rasc?p.rasc.v:p.versao;
+   v.dif_tit=p.versao?('Alterações do rascunho v'+nv+' em relação à v'+p.versao):'Primeira versão do plano (v1)';
+@@ -335,39 +383,30 @@ function paS3(self,v,p){ const nd=paDiff(p); v.s3_has=!!p.rasc; v.s3_none=!p.ras
+   const apl=paApl(p.id);
+   v.imp=apl?('Aplicado em '+apl+' — não serão alterados. '+(p.rasc?'Depois de publicar a v'+nv+', decida a adoção por cultivo em Planejar safra.':'A adoção de uma versão nova é decidida por cultivo em Planejar safra.')):'Nenhum cultivo usa este plano; publicar não altera nenhuma safra.';
+   v.imp_st='padding:9px 12px;border-radius:10px;font-size:12.8px;font-weight:700;'+(apl?'background:#FFF3D6;color:#8A5A00;':'background:#EEF1EE;color:#5B6660;');
+-  v.tem_cv=paCults(p.id).length>0;
++  v.tem_cv=paCults(p.id).length>0; v.cv_vazio=!v.tem_cv; v.imp_cv=v.tem_cv&&!p.rasc;
+   const bv=paByVer(p.id);
+   v.hist=(p.rasc?[{t:'v'+p.rasc.v,at:'rascunho em edição',st:'Rascunho',stst:paChip('y'),uso:'—'}]:[]).concat((p.hist||[]).map(h=>{ const u=(bv[h.v]||[]).length;
+-    return {t:'v'+h.v, at:'publicada em '+h.at, st:(h.v===p.versao?'Em vigor':'Substituída'), stst:paChip(h.v===p.versao?'g':'n'), uso:u?(u+(u>1?' cultivos':' cultivo')):'nenhum cultivo'}; })); }
++    return {t:'v'+h.v, at:'publicada em '+h.at, st:(h.v===p.versao?'Em vigor':'Substituída'), stst:paChip(h.v===p.versao?'g':'n'), uso:u?(u+(u>1?' cultivos':' cultivo')):'nenhum cultivo'}; }));
++  const np=(p.hist||[]).length; const vig=(p.hist||[]).find(h=>h.v===p.versao);
++  v.hist_res=(p.versao?('v'+p.versao+' em vigor'+(vig&&vig.at!=='—'?' desde '+vig.at:'')):'Nenhuma versão publicada')+(p.rasc?' · rascunho v'+p.rasc.v+' em edição':'')+(np?' · '+np+(np>1?' versões publicadas':' versão publicada'):'');
++  v.hist_open=!!self.state.histOpen; v.hist_sym=v.hist_open?'▾':'▸'; v.hist_lab=(v.hist_open?'Recolher':'Mostrar')+' as versões do plano';
++  v.hist_tog=()=>self.setState({histOpen:!self.state.histOpen}); }
+ function PREVALS(self,v){ const G=GRIDS.find(g=>g.id==='g_cv'); if(!G) return; const pid=self.state.pid; const p=pid?paPlan(self,pid):null;
+-  G.rows=p?paCults(pid).map(c=>{ let sit;
+-    if(c.ro) sit=[{k:'chip',t:'Safra encerrada · fica na v'+c.ver,c:'gray'}];
+-    else if(p.rasc) sit=[{k:'chip',t:'Continua na v'+c.ver+' ao publicar',c:'yellow'}];
+-    else if(c.ver<p.versao) sit=[{k:'chip',t:'Na v'+c.ver+' · decidir adoção da v'+p.versao,c:'yellow'},{k:'link',t:'Decidir em Planejar safra ›',h:'SAF.dc.html'}];
+-    else sit=[{k:'chip',t:'Na versão em vigor',c:'green'}];
++  G.rows=p?paCults(pid).map(c=>{ const sit=paSitCult(c,p);
+     return {id:c.id,ro:true,v:{saf:c.safraNome,local:c.local,cult:c.cultura+' '+c.variedade,area:c.area,ver:'v'+c.ver},s:{sit:sit[0].t},p:{local:[{k:'b',t:c.local}],ver:[{k:'tag',t:'v'+c.ver}],sit}}; }):[]; }
+-function EXTRAVALS(self,v){ const st=self.state; const step=st.step||1; const pid=st.pid||null; const p=pid?paPlan(self,pid):null;
+-  for(let i=1;i<=3;i++) v['s'+i]=(step===i);
+-  const whys={}; if(!p){ whys[2]='Escolha um plano'; whys[3]='Escolha um plano'; } else if(!p.rasc) whys[3]='Nada a publicar';
+-  g2steps(self,v,'stp',3,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
++function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.pid||null; const p=pid?paPlan(self,pid):null;
++  v.lista=!p; v.det=!!p;
+   v.lib=paLib(self); v.pa_qf=paQf(self);
+-  if(step===1&&self.__paPos){ const pos=self.__paPos; self.__paPos=null; setTimeout(()=>{ try{ pos.forEach(([e,t])=>{ e.scrollTop=t; }); const c=document.querySelector('main .g2card[aria-current=true]'); if(c){ c.scrollIntoView({block:'nearest'}); c.focus({preventScroll:true}); } }catch(e){} },0); }
+-  v.ctx_pl=p?(p.nome+' · '+(p.rasc?'rascunho v'+p.rasc.v:'v'+p.versao)):'Nenhum plano escolhido';
+-  if(p){ paS2(self,v,p); paS3(self,v,p); } else { v.grp=[]; v.dif=[]; v.hist=[]; }
++  // volta à lista: a rolagem volta à posição guardada e o foco vai ao cartão aberto por último (sem ele, ao "Criar plano")
++  if(!p&&self.__paVolta){ const pos=self.__paPos||[]; self.__paVolta=false; self.__paPos=null; setTimeout(()=>{ try{ pos.forEach(([e,t])=>{ e.scrollTop=t; }); const c=document.querySelector('main .g2card[aria-current=true]')||document.querySelector('header [data-acao=criar]'); if(c){ if(c.classList.contains('g2card')) c.scrollIntoView({block:'nearest'}); c.focus({preventScroll:true}); } }catch(e){} },0); }
++  v.ctx_pl=p?(p.nome+' · '+(p.rasc?'rascunho v'+p.rasc.v:'v'+p.versao)):'Biblioteca · '+paPlans(self).length+' planos';
++  if(p){ paS2(self,v,p); paDet(self,v,p); } else { v.grp=[]; v.dif=[]; v.hist=[]; v.pa_opf=[]; }
+   paFm(self,v); paNp(self,v);
+-  // ---- área de ações (UX-ACAO-UNICA-20261003 · DS-02, DS-33 §74.5.7.1, DS-61): uma primária e uma rota de avanço por etapa ----
+-  // Etapa 1: abrir o plano é a ação do cartão; Novo plano é secundário junto da biblioteca. Etapa 2: Incluir atividade é secundário
+-  // junto da lista; o avanço é Revisar e publicar (com rascunho) ou Ver versões. Etapa 3: Publicar é o comando, com verbo e versão.
+-  // volta à biblioteca: a posição e o foco no cartão aberto são restaurados por __paPos (abaixo); as demais trocas começam no topo
+-  const ir=(i,t)=>({t:'‹ '+t,fn:()=>(i===1?self.setState({step:1,del:null,disc:false}):g2etapa(self,{step:i,del:null,disc:false})),to:i,a:'voltar'});
++  // Criar plano (lista, cabeçalho) e Incluir atividade (bloco Atividades) são as entradas dos painéis; Publicar é o Próximo passo do detalhe
+   v.pa_novo=()=>paNewPlan(self); v.pa_incl=()=>paEdit(self,null);
+-  let A={};
+-  if(step>1&&!p) A={nota:'Nenhum plano aberto: abra um plano da biblioteca.',prim:{t:'‹ Biblioteca de planos',fn:()=>g2etapa(self,{step:1}),to:1,a:'voltar'}};
+-  else if(step===2) A={volta:ir(1,'Biblioteca de planos'),prim:{t:(p.rasc?'Revisar e publicar':'Ver versões e cultivos')+' ›',fn:()=>g2etapa(self,{step:3,del:null,disc:false}),to:3,a:'avancar'}};
+-  else if(step===3) A=p.rasc?{volta:ir(2,'Atividades do plano'),prim:{t:'Publicar versão v'+p.rasc.v,fn:()=>paPub(self),a:'comando'}}
+-                           :{volta:ir(2,'Atividades do plano'),nota:'Nada a publicar: salvar uma alteração nas atividades cria o rascunho da próxima versão.'};
+-  g2acoes(v,'aa',A);
+-  v.go2=()=>self.setState({step:2}); }
++  let A={}; const ac=p?paAcoes(p,{iadd:!!st.iadd}):null;
++  if(p) A={volta:{t:'‹ Biblioteca de planos',fn:()=>paLista(self),a:'voltar'},nota:ac.nota,prim:ac.prim?{t:ac.prim.t,fn:()=>paPub(self),a:'comando'}:null};
++  g2acoes(v,'aa',A); v.aa_pdis=!!(ac&&ac.prim&&ac.prim.dis); v.aa_pwhy=(ac&&ac.prim&&ac.prim.dis)||''; }
+ '''
+ 
+ 
+@@ -381,7 +420,8 @@ def bloco(titulo, desc, corpo, acao='', hole=False):
+ 
+ 
+ def aside(pre, titulo_hole, sub_hole, corpo, w=560):
+-    """Painel lateral pela direita com Salvar/Cancelar e aviso de alterações não salvas (holes: {pre}_open/_close/_key/_save/_warn/_discard/_keep/_nerr)."""
++    """Painel lateral pela direita com Cancelar e o verbo do efeito (BOT-02: {pre}_savet, ex.: "Incluir atividade", "Criar plano", "Salvar")
++    e aviso de alterações não salvas (holes: {pre}_open/_close/_key/_save/_savet/_warn/_discard/_keep/_nerr)."""
+     return IF(f'{pre}_open',
+         f'<div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+         f'<button type="button" aria-label="Fechar" onClick="{H(pre+"_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+@@ -394,7 +434,7 @@ def aside(pre, titulo_hole, sub_hole, corpo, w=560):
+         + IF(f'{pre}_warn', f'<div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
+              f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div>')
+         + f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid {LINE};">'
+-          f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H(pre+"_save")}" style="{BTN_ST(True,True)}">Salvar</button></div>'
++          f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H(pre+"_save")}" style="{BTN_ST(True,True)}">{H(pre+"_savet")}</button></div>'
+         f'</aside></div>')
+ 
+ 
+@@ -406,13 +446,13 @@ ERR = f'font-size: 12px; font-weight: 700; color: {RED};'
+ def err(hole_has, hole_msg): return IF(hole_has, f'<span role="alert" style="{ERR}">{H(hole_msg)}</span>')
+ 
+ 
+-PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:38px 175px minmax(0,1fr) 80px 115px 38px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-editar{border:0;background:transparent;padding:6px 0;font:inherit;font-size:13.5px;font-weight:700;color:#1E7A4C;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-expandir.g2car,.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:38px minmax(90px,1fr) minmax(0,2fr) 38px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 3}.pa-gatilho{grid-column:2;grid-row:1 / 3}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir{grid-column:4;grid-row:1 / 3}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n'
++PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:38px 175px minmax(0,1fr) 80px 115px 38px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-editar{border:0;background:transparent;padding:6px 0;font:inherit;font-size:13.5px;font-weight:700;color:#1E7A4C;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-expandir.g2car,.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:38px minmax(90px,1fr) minmax(0,2fr) 38px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 3}.pa-gatilho{grid-column:2;grid-row:1 / 3}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir{grid-column:4;grid-row:1 / 3}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n'
+ 
+ def build():
+     fname = 'PA.dc.html'; E._reset_screen(fname)
+     EXTRA.append('<style>'+PA_LINHA_CSS+'</style>')
+     dd = _dados()
+-    # ---------- etapa 1 · biblioteca por cultura (cards compactos) ----------
++    # ---------- lista · biblioteca por cultura (cards compactos) ----------
+     card = (f'<button type="button" class="g2card" aria-current="{H("c.cur")}" onClick="{H("c.open")}" aria-label="{H("c.lab")}" style="{H("c.st")}">'
+             f'<span style="display: flex; align-items: flex-start; gap: 8px; width: 100%;"><b style="font-size: 14.5px; flex-grow: 1; line-height: 1.3;">{H("c.nome")}</b>'
+             f'<span style="font-size: 12px; font-weight: 700; color: {MUTED}; white-space: nowrap; padding-top: 2px;">{H("c.ver")}</span></span>'
+@@ -435,13 +475,17 @@ def build():
+     qf = (f'<div role="group" aria-label="Filtrar planos por cultura" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">'
+           + FOR('pa_qf', 'qc', f'<button type="button" aria-pressed="{H("qc.on")}" onClick="{H("qc.go")}" style="{H("qc.st")}">{H("qc.t")} <span style="opacity: .75;">{H("qc.n")}</span></button>', 6)
+           + '</div>')
+-    # UX-ACAO-UNICA-20261003: criar e incluir são secundários junto da lista/seção (escolher o plano é a ação do cartão); avançar,
+-    # voltar e publicar ficam na área de ações única ao fim do conteúdo (engine.area_acoes + g2acoes)
+-    acao_bloco = f'<button type="button" onClick="{H("pa_novo")}" style="{E.BTN_ST(False, True)}">Novo plano</button>'
+-    incl_sec = f'<button type="button" data-acao="adicionar" onClick="{H("pa_incl")}" style="{E.BTN_ST(False, True)}">Incluir atividade</button>'
+-    s1 = bloco('Biblioteca de planos por cultura', 'Abra um plano para editar as atividades ou crie um novo; cada plano tem versões publicadas.', qf + lib, acao=acao_bloco)
++    # Botões de criar e incluir (design system 09/10, BOT-01 a BOT-06):
++    # - "Criar plano": registro novo e independente → verde, tamanho padrão, no cabeçalho da tela do menu, à direita do título; só na lista
++    #   (no detalhe o cabeçalho fica sem verde e o verde é o Próximo passo).
++    # - "Incluir atividade": item dentro do plano → branco e compacto no cabeçalho do bloco Atividades, sempre no mesmo lugar (também
++    #   com o plano vazio: bloco comum não tem verde).
++    # - "Incluir insumo": item dentro da atividade → mini, ao pé da tabela da atividade. Todos com o mesmo "+" e o rótulo.
++    criar_cab = IF('lista', f'<button type="button" data-acao="criar" onClick="{H("pa_novo")}" style="{E.BTN_ST(True)} {ICO}">{MAIS(15)}Criar plano</button>', True)
++    incl_sec = f'<button type="button" data-acao="adicionar" onClick="{H("pa_incl")}" style="{E.BTN_ST(False, True)} {ICO}">{MAIS(14)}Incluir atividade</button>'
++    s1 = bloco('Biblioteca de planos por cultura', 'Abra um plano para editar as atividades ou crie um novo; cada plano tem versões publicadas.', qf + lib)
+ 
+-    # ---------- etapa 2 · plano aberto ----------
++    # ---------- detalhe · plano aberto (PA.dc.html#plano=<id>) ----------
+     prod_hdr = (f'<div style="display: grid; grid-template-columns: 120px minmax(0, 1fr) 150px 120px 110px 32px; gap: 10px; padding: 6px 0 4px; {SEC} font-size: 10px;">'
+                 f'<span>Grupo</span><span>Produto</span><span style="text-align: right;">Dose/ha</span><span style="text-align: right;">Preço unitário</span><span style="text-align: right;">Custo/ha</span><span></span></div>')
+     prod_row = (f'<div style="display: grid; grid-template-columns: 120px minmax(0, 1fr) 150px 120px 110px 32px; gap: 10px; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: center;">'
+@@ -460,11 +504,11 @@ def build():
+                f'<span style="display: inline-flex; align-items: center; gap: 5px;"><input id="{H("a.addDoseId")}" aria-label="Dose por hectare" value="{H("a.addDose")}" onChange="{H("a.addSetD")}" onKeyDown="{H("a.addTecla")}" inputMode="decimal" style="{H("a.addIst")}">'
+                f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("a.addUn")}</span></span>'
+                f'<span style="font-size: 12px; color: {MUTED}; flex-grow: 1; min-width: 120px;">{H("a.addInfo")}</span>'
+-               f'<button type="button" onClick="{H("a.addOk")}" style="{_MINIP}">Incluir</button><button type="button" onClick="{H("a.addNao")}" style="{_MINI}">Cancelar</button></div>'
++               f'<button type="button" onClick="{H("a.addOk")}" style="{_MINI}">Incluir</button><button type="button" onClick="{H("a.addNao")}" style="{_MINI}">Cancelar</button></div>'
+                + IF('a.addTemErr', f'<div role="alert" style="font-size: 12px; color: {RED}; padding-top: 4px;">{H("a.addErr")}</div>'))
+     inl = (IF('a.rmvTem', f'<div role="status" style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("a.rmvT")}</span>'
+                           f'<button type="button" onClick="{H("a.volta")}" style="{_MINI}">Desfazer</button></div>')
+-           + IF('a.addOff', f'<div style="padding-top: 8px;"><button type="button" aria-label="{H("a.addLab")}" onClick="{H("a.addIni")}" style="{_MINI}">+ Incluir insumo</button></div>', True)
++           + IF('a.addOff', f'<div style="padding-top: 8px;"><button type="button" aria-label="{H("a.addLab")}" onClick="{H("a.addIni")}" style="{_MINI} {ICO} gap: 4px;">{MAIS(12)}Incluir insumo</button></div>', True)
+            + IF('a.addOn', add_row))
+     atv = (f'<div class="pa-atividade" style="{H("a.rst")}">'
+            f'<div class="pa-atividade-linha">'
+@@ -487,7 +531,7 @@ def build():
+                           f'<span style="font-size: 13.5px; font-weight: 800;">{H("g.t")}</span><span style="font-size: 12.3px; color: {MUTED};">{H("g.d")}</span></div>'
+                           f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("g.n")}</span></div>'
+                           + FOR('g.gats', 't', gat, 2) + '</div>', 1)
+-    head2 = (f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"><h2 style="margin: 0; font-family: {DISP}; font-size: 20px; letter-spacing: -.02em;">{H("p_nome")}</h2>'
++    head2 = (f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"><h2 id="pa-det-tit" style="margin: 0; font-family: {DISP}; font-size: 20px; letter-spacing: -.02em;">{H("p_nome")}</h2>'
+              f'<span style="{H("p_est_st")}">{H("p_est")}</span><span style="font-size: 13px; color: {MUTED};">{H("k2")}</span></div>'
+              + IF('ed_show', f'<p style="margin: 4px 0 0; font-size: 12.5px; color: {MUTED};">{H("ed_t")}</p>'))
+     banner = (IF('ban_r', f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
+@@ -497,35 +541,46 @@ def build():
+                       f'<button type="button" onClick="{H("disc_yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Descartar rascunho</button><button type="button" onClick="{H("disc_no")}" style="{_MINI}">Manter</button></span>')
+                  + '</div>'))
+     xbtn = f'<button type="button" class="g2xtog" onClick="{H("x_tog")}" style="flex-shrink: 0;">{E.seta_xtog(H("x_up"),H("x_down"))}{H("x_lab")}</button>'
+-    vazio = bloco('Nenhuma atividade ainda', 'Inclua a primeira atividade: defina o gatilho, a operação e os produtos com dose por hectare.',
+-                  f'<div><button type="button" data-acao="adicionar" onClick="{H("pa_incl")}" style="{_MINIP} font-size: 13px; padding: 8px 12px;">Incluir atividade</button></div>')
++    # plano vazio: o bloco Atividades continua com "Incluir atividade" no mesmo lugar; o Próximo passo diz o que falta para publicar
++    vazio = f'<div style="padding: 12px 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px; color: {MUTED};">Nenhuma atividade ainda. Inclua a primeira: defina o gatilho e a operação; depois, os insumos com dose por hectare.</div>'
+     qf_op = (f'<div role="group" aria-label="Filtrar atividades por operação" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+              + FOR('pa_opf', 'qo', f'<button type="button" aria-pressed="{H("qo.on")}" title="{H("qo.lab")}" onClick="{H("qo.go")}" style="{H("qo.st")}">{H("qo.t")} <span style="opacity: .75;">{H("qo.n")}</span></button>', 5)
+              + '</div>')
+     # barra da coleção (v3 · DS-33): filtros rápidos no começo, expandir/recolher (apresentação) no fim; "Incluir atividade" (filho) no
+     # cabeçalho da seção, à direita, separado do avanço
+     barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px;"><div style="flex-grow: 1; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn + '</div>')
+-    s2 = head2 + banner + IF('vazio', vazio) + IF('tem_atv', bloco('Atividades do plano', 'Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.', barra + f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', acao=incl_sec))
++    atividades = bloco('Atividades do plano', 'Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.',
++                       IF('vazio', vazio) + IF('tem_atv', barra + f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True), acao=incl_sec)
+ 
+-    # ---------- etapa 3 · publicar ----------
++    # ---------- detalhe · cultivos, versões e, com rascunho, as alterações logo acima do Próximo passo ----------
+     g_cv = grid([dict(k='saf', l='Safra'), dict(k='local', l='Talhão ou parcela'), dict(k='cult', l='Cultura e variedade'),
+                  dict(k='area', l='Área', t='num', a='r', u='ha'), dict(k='ver', l='Versão aplicada'), dict(k='sit', l='Situação', w=420)],
+                 [], edit=dict(m='none'), search=False, total=False, gid='g_cv')
++    imp = f'<div style="{H("imp_st")}">{H("imp")}</div>'
+     dif = (FOR('dif', 'd', f'<div style="display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
+                            f'<span><span style="{H("d.st")}">{H("d.k")}</span></span><span><b>{H("d.n")}</b> <span style="color: {MUTED};">· {H("d.t")}</span></span></div>', 2)
+            + IF('dif_vazio', f'<div style="font-size: 13px; color: {MUTED};">O rascunho está igual à versão publicada.</div>')
+-           + f'<div style="font-size: 13px; font-weight: 700; padding-top: 6px; border-top: 1px solid {LINE};">{H("dif_custo")}</div>')
+-    s3 = (IF('s3_has', bloco(H('dif_tit'), 'Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos.', dif, hole=True))
+-          + IF('s3_none', bloco('Nada a publicar', 'Edite as atividades na etapa 2; salvar cria o rascunho da próxima versão.',
+-                                ''))
+-          + bloco('Cultivos que usam este plano', 'Confira quem continua na versão em que foi aplicado; a troca de versão é decidida por cultivo em Planejar safra.',
+-                  f'<div style="{H("imp_st")}">{H("imp")}</div>' + IF('tem_cv', g_cv))
+-          + bloco('Versões', 'Consulte as versões do plano e quantos cultivos usam cada uma.',
+-                  FOR('hist', 'h', f'<div style="display: grid; grid-template-columns: 48px 180px 110px minmax(0, 1fr); gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
+-                                   f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span><span>{H("h.uso")}</span></div>', 2)))
++           + f'<div style="font-size: 13px; font-weight: 700; padding-top: 6px; border-top: 1px solid {LINE};">{H("dif_custo")}</div>' + imp)
++    cultivos = bloco('<span id="pa-cv-tit">Cultivos que usam este plano</span>', 'Confira quem continua na versão em que foi aplicado; a troca de versão é decidida por cultivo em Planejar safra.',
++                     IF('imp_cv', imp) + IF('tem_cv', g_cv) + IF('cv_vazio', f'<div style="font-size: 13px; color: {MUTED};">Nenhum cultivo usa este plano.</div>'), hole=True)
++    linha_v = (f'<div style="display: grid; grid-template-columns: 48px 180px 110px minmax(0, 1fr); gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
++               f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span><span>{H("h.uso")}</span></div>')
++    versoes = (f'<section aria-label="Versões" style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
++               f'<div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px 10px;"><h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">'
++               f'<button type="button" class="pa-disc" aria-expanded="{H("hist_open")}" aria-controls="pa-versoes" aria-label="{H("hist_lab")}" onClick="{H("hist_tog")}"><span aria-hidden="true" style="width: 12px;">{H("hist_sym")}</span>Versões</button></h3>'
++               f'<div style="font-size: 12.8px; color: {MUTED};">{H("hist_res")}</div></div>'
++               + IF('hist_open', f'<div id="pa-versoes" style="padding: 0 16px 14px;">' + FOR('hist', 'h', linha_v, 2) + '</div>') + '</section>')
++    alteracoes = IF('alt_tem', bloco(H('dif_tit'), 'Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos.', dif, hole=True))
++    s2 = head2 + banner + atividades + cultivos + versoes + alteracoes
+ 
+-    corpo = ''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{T() if i == 1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
+-                    for i, s in enumerate([s1, s2, s3], 1)) + E.area_acoes('aa', 'Ações da etapa')
++    # Próximo passo do detalhe (BOT-01/02): "‹ Biblioteca de planos" à esquerda e "Publicar versão vN" à direita, com o motivo quando
++    # desabilitado (VIS-04). O componente comum (engine.area_acoes) ainda não leva "disabled": o atributo entra aqui, conferido no build.
++    area = E.area_acoes('aa', 'Próximo passo')
++    alvo = 'class="acoes-prim" data-acao="{{aa_primA}}"'
++    assert area.count(alvo) == 1, 'engine.area_acoes mudou: rever o disabled do Publicar (processo_planos)'
++    area = area.replace(alvo, f'class="acoes-prim" disabled="{H("aa_pdis")}" title="{H("aa_pwhy")}" data-acao="{{{{aa_primA}}}}"')
++    corpo = (IF('lista', f'<div style="display: flex; flex-direction: column; gap: 14px;">{s1}</div>', True)
++             + IF('det', f'<div style="display: flex; flex-direction: column; gap: 14px;">{s2}</div>') + area)
+ 
+     # ---------- painel: atividade (gatilho, nome, operação, produtos e doses) ----------
+     fm_body = (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="fm_op" style="{LBL}">Operação</label><select id="fm_op" value="{H("fm_op")}" onChange="{H("fm_setop")}" style="{H("fm_ost")}">'
+@@ -552,10 +607,10 @@ def build():
+     EXTRA.append(aside('np', 'np_titulo', 'np_sub', np_body, w=460))
+ 
+     EXTRAJS[0] = 'const PA0 = ' + json.dumps(dd, ensure_ascii=False) + ';\n' + JS
+-    HEIGHTS37[fname] = 1500
++    HEIGHTS37[fname] = 1000   # tela de trabalho com rolagem interna (mesma altura de quando tinha a faixa de etapas), como a MA da PCM
+     shell37('PA', 'Planos agronômicos', corpo, fname=fname,
+             subtitle='Mantenha os planos padrão por cultura: gatilho, atividades, produtos e doses. Cada alteração vira uma nova versão; cultivos já aplicados não mudam sozinhos.',
+-            steps=steps_state(NOMES), primary_html=None,  # a ação principal mora no bloco onde age (Novo plano, Incluir atividade, Publicar versão)
++            primary_html=criar_cab,   # sem faixa de etapas (NAV-1): lista → detalhe
+             ctx=('Fazenda Santa Rita', H('ctx_pl'), None), search=False)
+     return fname
+ 
+diff --git a/tools/prototipo/v37/gen37/pa_lista_test.py b/tools/prototipo/v37/gen37/pa_lista_test.py
+new file mode 100644
+index 0000000..cf450c8
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/pa_lista_test.py
+@@ -0,0 +1,226 @@
++# -*- coding: utf-8 -*-
++"""NAV-1 · Planos agronômicos sem etapas falsas (lista → detalhe) e o link do cultivo para o Planejar safra (X-AGR-6).
++Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-01..06, SEL-02, VIS-04), no Chrome headless:
++  L1  sem faixa de etapas (.etp-ind) e sem "impedida", na lista e no detalhe
++  L2  lista: um cartão por plano; o único verde é "Criar plano", no cabeçalho, à direita do título (BOT-01/02/03/05)
++  L3  cartão → detalhe com #plano=SOJA-AT; sem rascunho, nenhuma primária; "‹ Biblioteca de planos" no Próximo passo; Atividades,
++      Cultivos e Versões visíveis; "Incluir atividade" branco e compacto no cabeçalho do bloco Atividades, com "+"
++  L4  F5 reabre o mesmo plano; #plano=XYZ abre a lista, sem erro; trocar o endereço para #plano=MILHO-SF abre o Milho
++  L5  mudar uma dose na tabela: UMA primária "Publicar versão v7"; o bloco de alterações v7 × v6 logo acima do Próximo passo
++  L6  repetição: 2ª mudança no mesmo rascunho v7; publicar: v7 em vigor, sem primária, cultivos "Na v6 · v7 publicada" com o link
++      ao cultivo no Planejar safra (#saf=S2627&passo=cultivos&cult=c1)
++  L7  erro e recusa: dose 0 recusada sem criar rascunho; inclusão de insumo aberta desabilita Publicar com o motivo; plano novo em
++      branco: Publicar desabilitado com o motivo; nome repetido na cultura recusado
++  L8  o link abre o Planejar safra na etapa 2 com o painel do cultivo c1 (T1-A)
++  L9  teclado: Tab chega ao cartão, Enter abre; Esc fecha o painel e devolve o foco a "Incluir atividade"; Esc (sem painel) volta
++      à lista com o foco no cartão aberto
++  L10 voltar devolve a posição de rolagem da biblioteca e o foco no último cartão aberto (1440 × 900)
++  L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; mudar a dose e publicar com a primária na tela
++  L12 cliques para "mudar uma dose e publicar" (abrir o plano, abrir a atividade, tocar a dose, digitar 0,6 + Enter, publicar):
++      medidos na execução real; com ANTES=<_render da base> mede também a base cdc185f no mesmo cenário (1 a menos)
++  L13 sem erro de JavaScript
++Uso (de gen37/): python3 pa_lista_test.py           (RENDER_DIR=<outro _render> roda contra outro build; sai 1 se falhar)
++                 ANTES=<_render da base> python3 pa_lista_test.py   (inclui a medida da base em L12)
++Emulação no Chrome headless; não é aparelho físico."""
++import sys, os, time, json
++HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
++from comp_lib import Chrome, servir
++from contextlib import contextmanager
++import dados2 as D2
++R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render'); ANTES = os.environ.get('ANTES') or ''
++PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
++OK = []; FAIL = []
++def chk(nome, cond, info=''):
++    (OK if cond else FAIL).append(nome); print(('OK   ' if cond else 'FALHA'), nome, ('' if cond else str(info)[:1500]), flush=True)
++@contextmanager
++def secao(nome):
++    """um trecho que quebra (ex.: na base, sem o endereço #plano=) vira falha nomeada e o roteiro segue para o próximo trecho"""
++    try: yield
++    except Exception as ex: chk(nome + ' · o roteiro não chegou ao fim do trecho', False, repr(ex)[:300])
++def info(t, v): print('     (informativo)', t, str(v)[:900], flush=True)
++p, srv = servir(R); p0, srv0 = (servir(ANTES) if ANTES else (None, None)); c = None; ERRL = []
++N = "(s=>(s||'').replace(/\\s+/g,' ').trim())"
++# estado de comandos: primárias verdes visíveis (cabeçalho e conteúdo), área do Próximo passo, faixa, blocos
++EST = r"""(()=>{const n=s=>(s||'').replace(/\s+/g,' ').trim(); const vis=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };
++ const verde=e=>getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)';
++ const prims=[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>vis(e)&&verde(e)&&!e.closest('.menu-lat')&&!e.closest('[aria-pressed]')&&e.getAttribute('aria-pressed')===null).map(e=>({t:n(e.innerText),cab:!!e.closest('header'),dis:!!e.disabled,why:e.title||''}));
++ const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota')].filter(vis).map(e=>(e.dataset.acao||'nota')+':'+n(e.innerText)):[];
++ const tit=[...document.querySelectorAll('main h3')].filter(vis).map(h=>n(h.innerText));
++ return {prims, area, rot:a?a.getAttribute('aria-label'):'', faixa:!!document.querySelector('.etp-ind,.etp'), impedida:/impedid/i.test(document.body.innerText), tit, hash:location.hash,
++   h2:n((document.querySelector('main h2')||{}).innerText||''), cards:document.querySelectorAll('main .g2card').length, dialogo:!!document.querySelector('aside[role=dialog]')};})()"""
++def J(x): return c.js(x)
++def est(): return J(EST)
++def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
++def errs(): return [e for e in (J("window.__errs||[]") or []) if "reading 'g2toast'" not in e]
++def abre(url, w=1440, h=900, e=1, t=False, porta=None, limpa=True, espera=.7):
++    if c.alvo: ERRL.extend(errs())
++    c.aparelho(w, h, e, t); base = f'http://127.0.0.1:{porta or p}/'
++    if limpa: c.goto(base + 'Main.dc.html', .2); J("localStorage.clear(); sessionStorage.clear()")
++    c.goto(base + url, espera)
++def recarrega():
++    """F5 de verdade (navegar para o mesmo endereço com âncora não recarrega: é navegação na própria página)"""
++    c.call('Page.reload', {'ignoreCache': False}); time.sleep(.6)
++    for _ in range(60):
++        try:
++            if J("document.readyState")=='complete' and J("!!document.body && document.body.innerText.length>50"): break
++        except Exception: pass
++        time.sleep(.2)
++    time.sleep(.6)
++def shot(nome): c.shot(os.path.join(PROBE, f'pa_lista_{nome}.png'))
++CLIQUES = [0]
++def centro(sel):
++    return J(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
++def clique(sel, toque=False, w=.45):
++    """clique (ou toque) de verdade no centro do elemento, contado; sel é uma expressão JS que devolve o elemento"""
++    xy = centro(sel)
++    if not xy: return 'NÃO ACHEI: ' + sel[:80]
++    CLIQUES[0] += 1
++    if toque: c.toque(*xy)
++    else:
++        c.mouse(*xy); c.mouse(*xy, 'mousePressed', 'left'); c.mouse(*xy, 'mouseReleased', 'left')
++    time.sleep(w); return 'ok'
++def btn(txt, raiz='document'): return f"[...{raiz}.querySelectorAll('button,a')].find(b=>b.getClientRects().length&&{N}(b.innerText)==={json.dumps(txt)})"
++def btnc(txt, raiz='document'): return f"[...{raiz}.querySelectorAll('button,a')].find(b=>b.getClientRects().length&&{N}(b.innerText).startsWith({json.dumps(txt)}))"
++def lab(txt): return f"[...document.querySelectorAll('button')].find(b=>b.getClientRects().length&&(b.getAttribute('aria-label')||'').startsWith({json.dumps(txt)}))"
++CARD = lambda nome: f"document.querySelector('main .g2card[aria-label={json.dumps('Abrir plano ' + nome)}]')"
++def digita(txt):
++    c.call('Input.insertText', {'text': txt}); time.sleep(.15)
++def mudar_dose(val, toque=False, abrir=True):
++    """Fungicida 1ª aplicação · Fungicida A: abre a atividade (se fechada), toca a dose, digita e confirma com Enter"""
++    if abrir and J(f"!!{lab('Mostrar insumos de Fungicida 1ª aplicação')}"): clique(lab('Mostrar insumos de Fungicida 1ª aplicação'), toque)
++    clique(lab('Alterar a dose de Fungicida A'), toque, .3)
++    J("document.activeElement&&document.activeElement.select&&document.activeElement.select()"); digita(val); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
++def publicar_ate(toque=False):
++    """anda pelo caminho que a tela oferece até 'Publicar versão v7' (na base passa por 'Revisar e publicar ›') e publica"""
++    for _ in range(3):
++        if J(f"!!{btnc('Publicar versão v7')}"): break
++        if clique("document.querySelector('[data-acoes] [data-acao=avancar]')", toque, .6) != 'ok': break
++    return clique(btnc('Publicar versão v7'), toque, .6)
++def cenario_cliques(porta, toque=False, w=1440, h=900):
++    """mudar uma dose (Fungicida A 0,5 → 0,6 L/ha) e publicar a v7, do índice do menu (lista) até a versão publicada"""
++    abre('PA.dc.html', w, h, 3 if toque else 1, toque, porta=porta); CLIQUES[0] = 0
++    clique(CARD('Soja alta tecnologia'), toque, .7); mudar_dose('0,6', toque); r = publicar_ate(toque)
++    return CLIQUES[0], 3 + 1, r, toast()   # teclas: "0,6" (3) + Enter
++try:
++    c = Chrome()
++    # ---------------- L1-L3 · lista e detalhe sem etapas ----------------
++    with secao('L1-L3'):
++        abre('PA.dc.html'); l = est(); shot('1440_lista')
++        chk('L1a lista sem faixa de etapas e sem "impedida"', not l['faixa'] and not l['impedida'], l)
++        criar = J(f"(()=>{{const b={btn('Criar plano')}; if(!b) return null; const cs=getComputedStyle(b); const h1=document.querySelector('header h1').getBoundingClientRect(), r=b.getBoundingClientRect(); return {{cab:!!b.closest('header'), dir:r.left>h1.right, mais:!!b.querySelector('svg'), alt:Math.round(r.height), fs:cs.fontSize}};}})()")
++        chk(f'L2 lista: {len(D2.PLANOS)} cartões; o único verde é "Criar plano", no cabeçalho à direita do título, com "+" e tamanho padrão (BOT-01/02/03/04/05); nenhum "Novo plano"',
++            l['cards'] == len(D2.PLANOS) and [x['t'] for x in l['prims']] == ['Criar plano'] and l['prims'][0]['cab'] and criar and criar['dir'] and criar['mais'] and criar['fs'] == '14px'
++            and not J(f"!!{btn('Novo plano')}") and not l['area'], [l, criar])
++        clique(CARD('Soja alta tecnologia'), w=.7); d = est(); shot('1440_detalhe')
++        inc = J(f"(()=>{{const b={btn('Incluir atividade')}; if(!b) return null; const s=b.closest('section'); const h=s&&s.querySelector('h3'); const cs=getComputedStyle(b); return {{bg:cs.backgroundColor, fs:cs.fontSize, mais:!!b.querySelector('svg'), bloco:h?h.innerText.trim():'', topo:Math.abs(b.getBoundingClientRect().top-h.getBoundingClientRect().top)<30}};}})()")
++        chk('L1b detalhe sem faixa de etapas e sem "impedida"', not d['faixa'] and not d['impedida'], d)
++        chk('L3 cartão → detalhe #plano=SOJA-AT; sem rascunho nenhuma primária; Próximo passo só com "‹ Biblioteca de planos"; Atividades, Cultivos e Versões visíveis; "Incluir atividade" branco, compacto, com "+", no cabeçalho do bloco Atividades',
++            d['hash'] == '#plano=SOJA-AT' and d['h2'] == 'Soja alta tecnologia' and d['prims'] == [] and d['area'] == ['voltar:‹ Biblioteca de planos'] and d['rot'] == 'Próximo passo'
++            and 'Atividades do plano' in d['tit'] and 'Cultivos que usam este plano' in d['tit'] and any(t.endswith('Versões') for t in d['tit'])
++            and inc and inc['bg'] == 'rgb(255, 255, 255)' and inc['fs'] == '13px' and inc['mais'] and inc['bloco'] == 'Atividades do plano' and inc['topo'], [d, inc])
++    # ---------------- L4 · endereço ----------------
++    with secao('L4'):
++        recarrega(); f5 = est()
++        c.goto(f'http://127.0.0.1:{p}/Main.dc.html', .2); c.goto(f'http://127.0.0.1:{p}/PA.dc.html#plano=XYZ', .8); x = est(); tx = toast(); ex = errs()
++        J("location.hash='#plano=MILHO-SF'"); time.sleep(.7); mi = est()
++        chk('L4 F5 reabre o mesmo plano; #plano=XYZ abre a lista sem erro (endereço limpo, aviso); trocar o endereço para #plano=MILHO-SF abre o Milho safrinha',
++            f5['h2'] == 'Soja alta tecnologia' and f5['hash'] == '#plano=SOJA-AT' and x['cards'] == len(D2.PLANOS) and x['h2'] == '' and x['hash'] == '' and 'não encontrado' in tx and not ex
++            and mi['h2'] == 'Milho safrinha', [f5['h2'], x, tx, ex, mi['h2']])
++    # ---------------- L5-L6 · mudar a dose, repetição e publicar ----------------
++    with secao('L5-L6'):
++        abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); t1 = toast(); m = est(); shot('1440_rascunho')
++        ordem = J(r"""(()=>{const a=document.querySelector('[data-acoes]'); const ss=[...document.querySelectorAll('main section')].filter(s=>s.getClientRects().length); const u=ss[ss.length-1]; if(!a||!u) return {ultimo:'',depois:false,texto:''};
++          return {ultimo:(u.querySelector('h3')||{innerText:''}).innerText.trim(), depois:!!(u.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING), texto:u.innerText.replace(/\s+/g,' ')};})()""")
++        chk('L5 mudar a dose na tabela: rascunho v7; UMA primária "Publicar versão v7" no Próximo passo; o bloco "Alterações do rascunho v7 em relação à v6" (dose, custo, impacto) é o último antes dele; cultivos "Continua na v6 ao publicar"',
++            'Rascunho v7 criado' in t1 and [x['t'] for x in m['prims']] == ['Publicar versão v7'] and not m['prims'][0]['dis'] and 'comando:Publicar versão v7' in m['area']
++            and ordem['ultimo'] == 'Alterações do rascunho v7 em relação à v6' and ordem['depois'] and 'Fungicida A: 0,5 → 0,6 L/ha' in ordem['texto'] and 'Custo de insumos' in ordem['texto'] and 'não serão alterados' in ordem['texto']
++            and J("document.querySelector('main').innerText.includes('Continua na v6 ao publicar')"), [t1, m, ordem])
++        mudar_dose('0,7', abrir=False); t2 = toast(); m2 = est()
++        clique(btn('Publicar versão v7'), w=.7); t3 = toast(); m3 = est(); shot('1440_publicado'); foco = J("(document.activeElement&&document.activeElement.id)||''")
++        lk = J("[...document.querySelectorAll('main a')].filter(a=>a.getClientRects().length&&a.innerText.trim()==='Abrir cultivo no Planejar safra ›').map(a=>a.getAttribute('href'))")
++        corpo = J("document.querySelector('main').innerText")
++        clique(lab('Mostrar as versões'), w=.4); vs = J("(document.getElementById('pa-versoes')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
++        chk('L6 repetição: a 2ª mudança fica no rascunho v7 (uma primária); publicar: v7 em vigor e v6 substituída, sem primária nem bloco de alterações; o foco vai aos cultivos; c1, c2, c3 "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra',
++            'Gravado no rascunho v7' in t2 and [x['t'] for x in m2['prims']] == ['Publicar versão v7'] and 'Versão v7 publicada' in t3 and m3['prims'] == [] and m3['area'] == ['voltar:‹ Biblioteca de planos']
++            and not any(t.startswith('Alterações do rascunho') for t in m3['tit']) and corpo.count('Na v6 · v7 publicada') == 3
++            and lk == ['SAF.dc.html#saf=S2627&passo=cultivos&cult=c1', 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c2', 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c3']
++            and 'v7 publicada em' in vs and 'Em vigor' in vs and 'Substituída' in vs and 'Safra encerrada · fica na v5' in corpo and foco == 'pa-cv-tit', [t2, m2['prims'], t3, m3, lk, vs, corpo.count('Na v6 · v7 publicada'), foco])
++    # ---------------- L8 · link ao Planejar safra ----------------
++    with secao('L8'):
++        clique("[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Abrir cultivo no Planejar safra ›')", w=1.6)
++        sf = J("(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const cur=document.querySelector('.etp-ind [aria-current=step]'); const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return {url:location.pathname.split('/').pop()+location.hash, etapa:cur?n(cur.innerText):'', painel:d?n(d.innerText).slice(0,160):''};})()"); shot('1440_saf_cultivo')
++        chk('L8 o link abre o Planejar safra na etapa 2 (Cultivos) da 2026/27 com o painel do cultivo c1 (T1-A)',
++            sf['url'] == 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c1' and sf['etapa'].startswith('2') and 'T1-A' in sf['painel'], sf)
++    # ---------------- L7 · erro e recusa ----------------
++    with secao('L7'):
++        abre('PA.dc.html#plano=SOJA-AT')
++        clique(lab('Mostrar insumos de Fungicida 1ª aplicação')); clique(lab('Alterar a dose de Fungicida A'), w=.3)
++        J("document.activeElement.select()"); digita('0'); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.4)
++        e0 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); r0 = est()
++        c.tecla('Escape', 'Escape', 27); time.sleep(.3); r0b = est()
++        clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4); mudar_dose('0,6', abrir=False)   # inclusão aberta + rascunho
++        clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4); ia = est(); nota = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
++        clique(btn('Cancelar', "document.querySelector('main')"), w=.4); ib = est()
++        chk('L7a dose 0 recusada junto ao campo sem criar rascunho; Esc cancela e o detalhe continua sem primária; com a inclusão de insumo aberta, "Publicar versão v7" desabilitado com o motivo (nota e dica); Cancelar devolve',
++            'Informe a dose por hectare, maior que zero.' in e0 and r0['prims'] == [] and r0b['prims'] == [] and r0b['h2'] == 'Soja alta tecnologia'
++            and len(ia['prims']) == 1 and ia['prims'][0]['dis'] and ia['prims'][0]['why'] == 'Conclua ou cancele a inclusão do insumo para publicar a v7.' and nota == ia['prims'][0]['why']
++            and len(ib['prims']) == 1 and not ib['prims'][0]['dis'], [e0, r0, r0b, ia, nota, ib])
++        clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.6)
++        clique(btn('Criar plano'), w=.5)
++        J("(()=>{const s=document.querySelector('#np_cult'); const P=HTMLSelectElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(s,'Soja'); s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
++        J("(()=>{const i=document.querySelector('#np_nome'); const P=HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'soja ALTA tecnologia'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
++        rodape = J("[...document.querySelectorAll('aside[role=dialog] .pe-form button')].map(b=>b.innerText.trim())")
++        clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.4); dup = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
++        J("(()=>{const i=document.querySelector('#np_nome'); const P=HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'Soja teste'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
++        clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.8); nv = est(); nota2 = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
++        chk('L7b plano novo: rodapé "Cancelar · Criar plano"; nome repetido na cultura recusado; em branco abre o detalhe #plano= com "Publicar versão v1" desabilitado e o motivo; o bloco Atividades mantém "Incluir atividade"',
++            rodape == ['Cancelar', 'Criar plano'] and 'Já existe um plano com este nome nesta cultura.' in dup and nv['h2'] == 'Soja teste' and nv['hash'].startswith('#plano=NP')
++            and len(nv['prims']) == 1 and nv['prims'][0]['t'] == 'Publicar versão v1' and nv['prims'][0]['dis'] and nota2 == 'Inclua ao menos uma atividade para publicar a v1.'
++            and J(f"!!{btn('Incluir atividade')}") and 'Nenhuma atividade ainda' in J("document.querySelector('main').innerText"), [rodape, dup[-200:], nv, nota2])
++        clique(btn('Descartar rascunho'), w=.3); clique(btn('Descartar rascunho', "document.querySelector('main [role=alert]')"), w=.6); dsc = est()
++        chk('L7c descartar o plano novo volta à lista (sem endereço) e ele sai da biblioteca', dsc['cards'] == len(D2.PLANOS) and dsc['hash'] == '' and 'Plano novo descartado' in toast(), dsc)
++    # ---------------- L9 · teclado ----------------
++    with secao('L9'):
++        abre('PA.dc.html'); J("document.activeElement&&document.activeElement.blur()"); k = 0
++        while k < 40 and J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''") != 'Abrir plano Soja alta tecnologia': c.tab(); k += 1
++        c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.7); k1 = est(); fh = J("(document.activeElement&&document.activeElement.id)||''")
++        J(f"{btn('Incluir atividade')}.focus()"); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.5); dl = est()['dialogo'] and J("(document.activeElement&&document.activeElement.id)||''") == 'fm_op'
++        c.tecla('Escape', 'Escape', 27); time.sleep(.5); k2 = est(); fv = J(f"document.activeElement==={btn('Incluir atividade')}")
++        c.tecla('Escape', 'Escape', 27); time.sleep(.6); k3 = est(); fc = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''")
++        chk('L9 teclado: Tab chega ao cartão e Enter abre o detalhe (foco no título do plano); Enter em "Incluir atividade" abre o painel com o foco no 1º campo; Esc fecha e o foco volta ao botão; Esc de novo volta à lista com o foco no cartão aberto',
++            k < 40 and k1['hash'] == '#plano=SOJA-AT' and fh == 'pa-det-tit' and dl and not k2['dialogo'] and k2['h2'] == 'Soja alta tecnologia' and fv and k3['cards'] == len(D2.PLANOS) and k3['hash'] == '' and fc == 'Abrir plano Soja alta tecnologia',
++            [k, k1['hash'], fh, dl, k2['dialogo'], fv, k3['hash'], fc])
++    # ---------------- L10 · posição ----------------
++    with secao('L10'):
++        abre('PA.dc.html', 1440, 700); ult = J("[...document.querySelectorAll('main .g2card')].pop().getAttribute('aria-label')")
++        clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
++        ROL = "[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
++        clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.7); dep = J(ROL); fcs = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''")
++        cur = J("(document.querySelector('main .g2card[aria-current=true]')||{getAttribute:()=>''}).getAttribute('aria-label')")
++        chk('L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto', max(dep) > 100 and fcs == ult and cur == ult, [dep, fcs, ult, cur])
++    # ---------------- L11 · 390 px (toque) ----------------
++    with secao('L11'):
++        abre('PA.dc.html', 390, 844, 3, True); a = J(r"""(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Criar plano'); const r=b?b.getBoundingClientRect():null;
++          return {lado:document.documentElement.scrollWidth>innerWidth+1, criar:!!r&&r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight};})()"""); shot('390_lista')
++        clique(CARD('Soja alta tecnologia'), True, .8); mudar_dose('0,6', True)
++        b = J(r"""(()=>{const e=document.querySelector('[data-acoes] [data-acao=comando]'); const r=e?e.getBoundingClientRect():null; const t=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
++          return {lado:document.documentElement.scrollWidth>innerWidth+1, prim:e?e.innerText.trim():'', naTela:!!r&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth&&!!t&&e.contains(t)};})()"""); shot('390_rascunho')
++        clique("document.querySelector('[data-acoes] [data-acao=comando]')", True, .7); t390 = toast()
++        chk('L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; depois de mudar a dose, "Publicar versão v7" na tela, sem nada por cima; publicar pelo toque',
++            not a['lado'] and a['criar'] and not b['lado'] and b['prim'] == 'Publicar versão v7' and b['naTela'] and 'Versão v7 publicada' in t390, [a, b, t390])
++    # ---------------- L12 · cliques medidos (mesmo cenário) ----------------
++    with secao('L12'):
++        n1, tec1, r1, tt1 = cenario_cliques(p)
++        res = {'depois': (n1, tec1, 'Versão v7 publicada' in tt1)}
++        if ANTES:
++            n0, tec0, r0_, tt0 = cenario_cliques(p0); res['antes cdc185f'] = (n0, tec0, 'Versão v7 publicada' in tt0)
++        info('cliques e teclas para mudar uma dose e publicar (cliques, teclas, publicou)', res)
++        chk('L12 mudar uma dose e publicar: 4 cliques (abrir o plano, abrir a atividade, tocar a dose, publicar) + "0,6" e Enter; com ANTES, 1 a menos que a base no mesmo cenário',
++            res['depois'] == (4, 4, True) and (not ANTES or (res['antes cdc185f'][2] and res['antes cdc185f'][0] - n1 == 1)), res)
++    ERRL.extend(errs()); chk('L13 sem erro de JavaScript', not ERRL, ERRL[:5])
++finally:
++    if c: c.close()
++    srv.terminate()
++    if srv0: srv0.terminate()
++print(f'RESULTADO: {len(OK)} ok · {len(FAIL)} falhas', flush=True)
++sys.exit(1 if FAIL else 0)
+diff --git a/tools/prototipo/v37/gen37/pa_regras_test.py b/tools/prototipo/v37/gen37/pa_regras_test.py
+new file mode 100644
+index 0000000..b79e369
+--- /dev/null
++++ b/tools/prototipo/v37/gen37/pa_regras_test.py
+@@ -0,0 +1,81 @@
++# -*- coding: utf-8 -*-
++"""NAV-1 · regras dos Planos agronômicos (PA), sem navegador: monta o JS real da tela (areas/processo_planos.py: PA0 + JS) no node
++e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
++  U1 endereço #plano=<id> (lido ao carregar e no hashchange; vazio ou inexistente = lista)
++  U2 rascunho v(n+1) na 1ª mudança, a versão publicada não muda; U3 a 2ª mudança fica no mesmo rascunho
++  U4 diferenças vN × vM (dose, inclusão, exclusão, gatilho)
++  U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão vN"; desabilitado com motivo sem atividade
++     e com a inclusão de insumo aberta
++  U6 publicar cria a vN, põe no histórico e não muda os cultivos; U7 recusa sem rascunho e com rascunho vazio
++  U8 situação do cultivo (X-AGR-6): chip "Na vN · vM publicada" e link ao cultivo no Planejar safra (#saf&passo=cultivos&cult)
++  U9 novo plano: nome obrigatório e único por cultura; U10 copiar de uma base só traz as atividades; U11 descartar
++Uso (de gen37/): python3 pa_regras_test.py   (sai 1 se algum caso falhar)
++Reprodução na base: GEN=<gen37 da base> python3 pa_regras_test.py (as funções que não existem lá contam como falha)."""
++import os, sys, json, subprocess, tempfile
++HERE = os.path.dirname(os.path.abspath(__file__)); GEN = os.environ.get('GEN') or HERE
++sys.path.insert(0, GEN); os.chdir(GEN)
++import areas.processo_planos as P
++src = ('const PA0 = ' + json.dumps(P._dados(), ensure_ascii=False) + ';\n' + P.JS + r'''
++const R=[]; const ok=(n,c,info)=>{ R.push(!!c); console.log((c?'OK    ':'FALHA ')+n+(c?'':' · '+JSON.stringify(info===undefined?null:info).slice(0,500))); };
++const tem=(...fs)=>fs.every(f=>{ try{ return eval('typeof '+f)==='function'; }catch(e){ return false; } });
++const caso=(n,fs,f)=>{ if(!tem(...fs)){ ok(n,false,'sem '+fs.join(', ')); return; } try{ f(); }catch(e){ ok(n,false,'erro: '+e.message); } };
++const ps0=PA_BASE; const soja=()=>ps0.find(p=>p.id==='SOJA-AT');
++const doseFung=(ps,v)=>paRascNo(ps,'SOJA-AT',soja().atividades.find(a=>a.nome==='Fungicida 1ª aplicação').id,(a)=>{ a.prods.find(x=>x.prod==='Fungicida A').dose=v; });
++caso('U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista',['paHashId'],()=>{
++  const r=[paHashId('#plano=SOJA-AT'),paHashId('#x=1&plano=MILHO-SF'),paHashId('#plano=Soja%20teste'),paHashId(''),paHashId('#saf=S2627'),paHashId('#plano=')];
++  ok('U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista', JSON.stringify(r)===JSON.stringify(['SOJA-AT','MILHO-SF','Soja teste','','','']), r); });
++caso('U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam',['paRascNo'],()=>{
++  const r=doseFung(ps0,0.6); const p=r.ps.find(x=>x.id==='SOJA-AT'); const a6=p.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
++  const a7=p.rasc.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
++  ok('U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam', r.novo&&r.v===7&&p.versao===6&&a6===0.5&&a7===0.6&&!soja().rasc&&/Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam/.test(r.fim), [r.novo,r.v,p.versao,a6,a7,r.fim]); });
++caso('U3 a 2ª mudança fica no mesmo rascunho v7',['paRascNo'],()=>{
++  const r1=doseFung(ps0,0.6); const r2=paRascNo(r1.ps,'SOJA-AT',soja().atividades[0].id,(a)=>{ a.prods[0].dose=2.5; });
++  ok('U3 a 2ª mudança fica no mesmo rascunho v7', !r2.novo&&r2.v===7&&/Gravado no rascunho v7/.test(r2.fim), [r2.novo,r2.v,r2.fim]); });
++caso('U4 diferenças v7 × v6: dose alterada, insumo incluído, atividade excluída e gatilho mudado',['paRascNo','paDiff'],()=>{
++  let r=doseFung(ps0,0.6); const atv=soja().atividades; const herb=atv.find(a=>a.nome==='Herbicida pós-emergente'); const des=atv.find(a=>a.nome==='Dessecação pré-plantio');
++  r=paRascNo(r.ps,'SOJA-AT',atv.find(a=>a.nome==='Fungicida 1ª aplicação').id,(a)=>{ a.prods.push({grupo:'Inseticidas',prod:'Inseticida B',dose:0.2,un:'L',preco:90}); });
++  const ps=paClone(r.ps); const p=ps.find(x=>x.id==='SOJA-AT'); p.rasc.atividades=p.rasc.atividades.filter(a=>a.id!==herb.id); p.rasc.atividades.find(a=>a.id===des.id).g={tipo:'DAP',dias:-25,data:null};
++  const d=paDiff(p); const t=d.map(x=>x.k+': '+x.n+' · '+x.t).join(' | ');
++  ok('U4 diferenças v7 × v6: dose alterada, insumo incluído, atividade excluída e gatilho mudado', /Alterada: Fungicida 1ª aplicação · Fungicida A: 0,5 → 0,6 L\/ha · inclui Inseticida B 0,2 L\/ha/.test(t)&&/Excluída: Herbicida pós-emergente/.test(t)&&/gatilho: DAP −20 → DAP −25/.test(t), t); });
++caso('U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7"; sem atividade ou com a inclusão de insumo aberta, desabilitado com o motivo',['paAcoes','paRascNo'],()=>{
++  const sem=paAcoes(soja()); const p7=doseFung(ps0,0.6).ps.find(x=>x.id==='SOJA-AT'); const com=paAcoes(p7); const ab=paAcoes(p7,{iadd:true});
++  const vaz=paClone(p7); vaz.rasc.atividades=[]; const zv=paAcoes(vaz);
++  ok('U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7"; sem atividade ou com a inclusão de insumo aberta, desabilitado com o motivo',
++     sem.prim===null&&com.prim.t==='Publicar versão v7'&&!com.prim.dis&&!com.nota&&zv.prim.dis==='Inclua ao menos uma atividade para publicar a v7.'&&zv.nota===zv.prim.dis
++     &&ab.prim.dis==='Conclua ou cancele a inclusão do insumo para publicar a v7.', [sem,com,zv,ab]); });
++caso('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo',['paPubFaz','paRascNo'],()=>{
++  const antes=JSON.stringify(PA0.cultivos); const r=paPubFaz(doseFung(ps0,0.6).ps,'SOJA-AT',PA0.hoje); const p=r.p;
++  const d=p.atividades.find(a=>a.nome==='Fungicida 1ª aplicação').prods.find(x=>x.prod==='Fungicida A').dose;
++  ok('U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo', !r.erro&&p.versao===7&&p.rasc===null&&d===0.6&&p.hist[0].v===7&&p.hist[0].at===PA0.hoje&&p.hist[1].v===6
++     &&JSON.stringify(PA0.cultivos)===antes&&PA0.cultivos.filter(c=>c.plano==='SOJA-AT').map(c=>c.ver).join(',')==='6,6,6,5,5', [r.erro,p&&p.versao,p&&p.hist]); });
++caso('U7 publicar recusa sem rascunho e com o rascunho sem atividade',['paPubFaz'],()=>{
++  const a=paPubFaz(ps0,'SOJA-AT',PA0.hoje); const ps=paClone(ps0); const p=ps.find(x=>x.id==='SOJA-PD'); p.rasc={v:4,atividades:[]}; const b=paPubFaz(ps,'SOJA-PD',PA0.hoje);
++  ok('U7 publicar recusa sem rascunho e com o rascunho sem atividade', a.erro==='Sem rascunho para publicar.'&&b.erro==='Inclua ao menos uma atividade para publicar a v4.', [a.erro,b.erro]); });
++caso('U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link',['paSitCult','paPubFaz','paRascNo'],()=>{
++  const c1=PA0.cultivos.find(c=>c.id==='c1'), e1=PA0.cultivos.find(c=>c.id==='e1'); const p6=soja(); const p7r=doseFung(ps0,0.6).ps.find(x=>x.id==='SOJA-AT'); const p7=paPubFaz(doseFung(ps0,0.6).ps,'SOJA-AT',PA0.hoje).p;
++  const a=paSitCult(c1,p6), b=paSitCult(c1,p7r), c=paSitCult(c1,p7), d=paSitCult(e1,p7);
++  ok('U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link',
++     a.length===1&&a[0].t==='Na versão em vigor'&&b.length===1&&b[0].t==='Continua na v6 ao publicar'&&c[0].t==='Na v6 · v7 publicada'&&c[0].c==='yellow'
++     &&c[1]&&c[1].k==='link'&&c[1].t==='Abrir cultivo no Planejar safra ›'&&c[1].h==='SAF.dc.html#saf=S2627&passo=cultivos&cult=c1'&&d.length===1&&d[0].t==='Safra encerrada · fica na v5', [a,b,c,d]); });
++caso('U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória',['paNovoErro'],()=>{
++  const a=paNovoErro(ps0,{nome:'  ',cultura:'Soja'}), b=paNovoErro(ps0,{nome:'soja ALTA tecnologia',cultura:'Soja'}), c=paNovoErro(ps0,{nome:'Soja alta tecnologia',cultura:'Milho'}), d=paNovoErro(ps0,{nome:'X',cultura:''});
++  ok('U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória',
++     a.nome==='Informe o nome do plano.'&&b.nome==='Já existe um plano com este nome nesta cultura.'&&!Object.keys(c).length&&d.cultura==='Escolha a cultura.', [a,b,c,d]); });
++caso('U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base, ids novos, base intacta',['paNovoFaz'],()=>{
++  const r=paNovoFaz(ps0,{nome:'Soja teste',cultura:'Soja',base:'SOJA-PD'},'NPx'); const n=r.ps.find(p=>p.id==='NPx'); const b=r.ps.find(p=>p.id==='SOJA-PD');
++  ok('U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base, ids novos, base intacta',
++     n.versao===0&&n.rasc.v===1&&n.rasc.atividades.length===b.atividades.length&&n.rasc.atividades.every(a=>a.id.startsWith('NPx_'))&&b.atividades.every(a=>!a.id.startsWith('NPx_'))&&!b.rasc&&r.ps.length===ps0.length+1, [n.rasc.atividades.length,b.atividades.length]); });
++caso('U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6',['paDescartaNo','paNovoFaz','paRascNo'],()=>{
++  const r=paNovoFaz(ps0,{nome:'Soja teste',cultura:'Soja',base:''},'NPy'); const a=paDescartaNo(r.ps,'NPy'); const b=paDescartaNo(doseFung(ps0,0.6).ps,'SOJA-AT');
++  const pb=b.ps.find(p=>p.id==='SOJA-AT');
++  ok('U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6', a.saiu&&!a.ps.some(p=>p.id==='NPy')&&!b.saiu&&pb.rasc===null&&pb.versao===6&&b.msg==='Rascunho v7 descartado. A v6 publicada continua valendo.', [a.msg,b.msg]); });
++const nf=R.filter(x=>!x).length; console.log('RESULTADO '+(R.length-nf)+'/'+R.length); if(nf) process.exitCode=1;
++''')
++f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8'); f.write(src); f.close()
++try:
++    r = subprocess.run(['node', f.name], capture_output=True, text=True, timeout=120)
++finally:
++    os.unlink(f.name)
++print(r.stdout.strip()); print(r.stderr.strip()[-2000:]) if r.stderr.strip() else None
++lin = r.stdout.splitlines(); n = sum(1 for l in lin if l.startswith(('OK ', 'FALHA '))); fa = sum(1 for l in lin if l.startswith('FALHA '))
++sys.exit(0 if r.returncode == 0 and n == 11 and not fa else 1)
+-- 
+2.43.0
+

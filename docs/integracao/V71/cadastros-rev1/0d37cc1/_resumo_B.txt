@@ -1,0 +1,31 @@
+cadastros_padrao_test.py rc=0 304s :: RESULTADO: 44/44
+cad_gravacao_falha_test.py rc=0 55s :: RESULTADO: 7/7 ok
+cad_inicio_test.py rc=0 44s :: RESULTADO: 16 ok · 0 falhas
+cada_cd03_test.py rc=0 18s :: RESULTADO: OK 14/14
+cada_cd04_test.py rc=0 19s :: RESULTADO: OK 15/15
+cada_fix03_test.py rc=0 19s :: RESULTADO: OK 11/11
+cada_fix04_test.py rc=0 16s :: RESULTADO: OK 12/12
+cadc_cd02_test.py rc=0 29s :: RESULTADO: OK 15/15
+cadc_cd06_test.py rc=0 26s :: RESULTADO: OK 14/14
+cadc_cd07_test.py rc=0 34s :: RESULTADO: OK 14/14
+cadc_fix_cd06.py rc=0 39s :: RESULTADO: OK 13/13
+cadc_fix_cd07.py rc=0 19s :: RESULTADO: OK 11/11
+cadf_det_test.py rc=0 13s :: RESULTADO: OK 13/13
+cadf_fix_det_test.py rc=0 17s :: RESULTADO: OK 9/9
+cadf_fix_lista_test.py rc=0 25s :: RESULTADO: OK 11/11
+cadf_test.py rc=0 24s :: RESULTADO: OK 15/15
+cadp_fix_test.py rc=0 26s :: RESULTADO: OK 15/15
+cadp_test.py rc=0 14s :: RESULTADO: OK 15/15
+cadp_vtest.py rc=0 21s :: RESULTADO: OK 12/12
+cd05test.py rc=0 25s :: RESULTADO: OK 33/33
+cd05vtest.py rc=0 19s :: RESULTADO: OK 12/12
+cd08_cultura_test.py rc=0 43s :: RESULTADO: 5/5 ok
+credito_menu_test.py rc=0 34s :: RESULTADO: 16/16
+ds_padrao_test.py rc=0 88s :: RESULTADO: 17 ok · 0 falhas
+outorga_unit_test.py rc=0 2s :: RESULTADO 27/27
+tabelas_cad_irr_unit.py rc=1 1s :: RESULTADO: 44/51 ok · FALHAS: A1 CD-02: grades g_cv, g_rend publicadas; C15 (TABR-CTX-01) CD-03, roteiro do Codex: Trator · Potência = 78 cv → limpar só Classe tira a coluna, o filtro e a ordem 
+ctl5_test.py rc=0 83s :: RESULTADO 30/30 []
+cadc_cd0102_a.py rc=1 3s :: RESULTADO: FALHOU 3/4
+cadc_cd0102_b.py rc=1 8s :: RESULTADO: FALHOU 1/4
+cadc_fix_cd02.py rc=0 17s :: RESULTADO: FALHOU 5/8
+FIM

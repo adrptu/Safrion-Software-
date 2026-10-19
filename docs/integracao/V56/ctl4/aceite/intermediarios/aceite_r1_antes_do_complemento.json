@@ -1,0 +1,1668 @@
+{
+ "item1": {
+  "antes": {
+   "cen": {
+    "req031": [
+     {
+      "prod": "MAP 11-52",
+      "entregue": 5000,
+      "consumido": 3500,
+      "devolvido": 1000,
+      "custodia": 500
+     }
+    ],
+    "os0417": "Em conferência",
+    "lotes": [
+     {
+      "lote": "M26-07",
+      "fisico": 90000,
+      "reservado": 0,
+      "quarentena": 0
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "MAP 11-52": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "MAP 11-52",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "79.500 kg",
+      "FALTA EM": "18/10/2026",
+      "VALOR": "R$ 310.050,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "170.000 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "90.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,90/kg"
+     }
+    },
+    "memo": {
+     "MAP 11-52": [
+      "Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 250,00 kg/ha × 160 ha = 40.000,0 kg → saldo 7.500 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 250,00 kg/ha × 196 ha = 49.000,0 kg → saldo 0 kg · falta 41.500 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 250,00 kg/ha × 152 ha = 38.000,0 kg → saldo 0 kg · falta 38.000 kg",
+      "Necessidade líquida = soma das faltas desta safra = 79.500 kg · falta a partir de 18/10/2026",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "MAP 11-52": {
+      "GRUPO · INSUMO": "MAP 11-52",
+      "BRUTA": "170.000",
+      "ESTOQUE APTO": "90.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "79.500",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "18/10/2026",
+      "PREÇO REF.": "3,90",
+      "VALOR": "R$ 310.050,00",
+      "NA COMPRA": "A cotar"
+     }
+    },
+    "memo": {
+     "MAP 11-52": [
+      "Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 250,00 kg/ha × 160 ha = 40.000,0 kg → saldo 7.500 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 250,00 kg/ha × 196 ha = 49.000,0 kg → saldo 0 kg · falta 41.500 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 250,00 kg/ha × 152 ha = 38.000,0 kg → saldo 0 kg · falta 38.000 kg",
+      "Necessidade líquida = soma das faltas desta safra = 79.500 kg · falta a partir de 18/10/2026",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "MAP 11-52": "MAP 11-52 · 17.500 kg · Falta 79.500 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolver · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos · REQ-036 · OS-0420 · Semente de soja 58 W · entregue · reservado 5.200 kg · lote S58-0801 · entregue 1.560 · em custódia 0 · consumido 1.560 · Cultivo da safra 2"
+   },
+   "pt": {
+    "total": "Total",
+    "linhas": {
+     "MAP 11-52": {
+      "ITEM": "MAP 11-52",
+      "QUANTIDADE": "79.500 kg",
+      "PREÇO": "R$ 3,783/kg",
+      "TOTAL": "R$ 300.748,50"
+     }
+    }
+   },
+   "est": [
+    {
+     "ITEM › LOTE": "▾ MAP 11-52 1 lote",
+     "ITEM": "MAP 11-52",
+     "LOCAL": "Galpão 2",
+     "FÍSICO": "90.000 kg",
+     "RESERVADO": "—",
+     "BLOQUEADO": "—",
+     "DISPONÍVEL": "90.000 kg",
+     "EM CONFERÊNCIA": "—",
+     "EM CUSTÓDIA (FORA DO DEPÓSITO)": "500 kg",
+     "O.S. COM CUSTÓDIA": "OS-0417",
+     "SITUAÇÃO DO LOTE": "",
+     "VALIDADE": ""
+    },
+    {
+     "ITEM › LOTE": "M26-07",
+     "ITEM": "MAP 11-52",
+     "LOCAL": "Galpão 2",
+     "FÍSICO": "90.000 kg",
+     "RESERVADO": "—",
+     "BLOQUEADO": "—",
+     "DISPONÍVEL": "90.000 kg",
+     "EM CONFERÊNCIA": "",
+     "EM CUSTÓDIA (FORA DO DEPÓSITO)": "",
+     "O.S. COM CUSTÓDIA": "",
+     "SITUAÇÃO DO LOTE": "Disponível",
+     "VALIDADE": "—"
+    }
+   ]
+  },
+  "linha": "ok",
+  "set": "ok",
+  "recibo": "500 kg de MAP 11-52 devolvidos ao disponível. Custódia de MAP 11-52 na OS-0417: 500 kg → 0 kg · encerramento liberado.",
+  "depois": {
+   "cen": {
+    "req031": [
+     {
+      "prod": "MAP 11-52",
+      "entregue": 5000,
+      "consumido": 3500,
+      "devolvido": 1500,
+      "custodia": 0
+     }
+    ],
+    "os0417": "Em conferência",
+    "lotes": [
+     {
+      "lote": "M26-07",
+      "fisico": 90500,
+      "reservado": 0,
+      "quarentena": 0
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "MAP 11-52": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "MAP 11-52",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "79.500 kg",
+      "FALTA EM": "18/10/2026",
+      "VALOR": "R$ 310.050,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "170.000 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "90.500 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,90/kg"
+     }
+    },
+    "memo": {
+     "MAP 11-52": [
+      "Estoque apto hoje: 90.500 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 250,00 kg/ha × 160 ha = 40.000,0 kg → saldo 7.500 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 250,00 kg/ha × 196 ha = 49.000,0 kg → saldo 0 kg · falta 41.500 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 250,00 kg/ha × 152 ha = 38.000,0 kg → saldo 0 kg · falta 38.000 kg",
+      "Necessidade líquida = soma das faltas desta safra = 79.500 kg · falta a partir de 18/10/2026",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "MAP 11-52": {
+      "GRUPO · INSUMO": "MAP 11-52",
+      "BRUTA": "170.000",
+      "ESTOQUE APTO": "90.500",
+      "A RECEBER": "0",
+      "NECESSIDADE": "79.500",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "18/10/2026",
+      "PREÇO REF.": "3,90",
+      "VALOR": "R$ 310.050,00",
+      "NA COMPRA": "A cotar"
+     }
+    },
+    "memo": {
+     "MAP 11-52": [
+      "Estoque apto hoje: 90.500 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 250,00 kg/ha × 160 ha = 40.000,0 kg → saldo 7.500 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 250,00 kg/ha × 196 ha = 49.000,0 kg → saldo 0 kg · falta 41.500 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 250,00 kg/ha × 152 ha = 38.000,0 kg → saldo 0 kg · falta 38.000 kg",
+      "Necessidade líquida = soma das faltas desta safra = 79.500 kg · falta a partir de 18/10/2026",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "MAP 11-52": "MAP 11-52 · 17.500 kg · Falta 79.500 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 170.000 kg · estoque apto 90.500 kg · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos · REQ-036 · OS-0420 · Semente de soja 58 W · entregue · reservado 5.200 kg · lote S58-0801 · entregue 1.560 · em custódia 0 · consumido 1.560 · Cultivo da safra 2026/27 sem plano: a necessidade "
+   },
+   "pt": {
+    "total": "Total",
+    "linhas": {
+     "MAP 11-52": {
+      "ITEM": "MAP 11-52",
+      "QUANTIDADE": "79.500 kg",
+      "PREÇO": "R$ 3,783/kg",
+      "TOTAL": "R$ 300.748,50"
+     }
+    }
+   },
+   "est": [
+    {
+     "ITEM › LOTE": "▾ MAP 11-52 1 lote",
+     "ITEM": "MAP 11-52",
+     "LOCAL": "Galpão 2",
+     "FÍSICO": "90.500 kg",
+     "RESERVADO": "—",
+     "BLOQUEADO": "—",
+     "DISPONÍVEL": "90.500 kg",
+     "EM CONFERÊNCIA": "—",
+     "EM CUSTÓDIA (FORA DO DEPÓSITO)": "—",
+     "O.S. COM CUSTÓDIA": "—",
+     "SITUAÇÃO DO LOTE": "",
+     "VALIDADE": ""
+    },
+    {
+     "ITEM › LOTE": "M26-07",
+     "ITEM": "MAP 11-52",
+     "LOCAL": "Galpão 2",
+     "FÍSICO": "90.500 kg",
+     "RESERVADO": "—",
+     "BLOQUEADO": "—",
+     "DISPONÍVEL": "90.500 kg",
+     "EM CONFERÊNCIA": "",
+     "EM CUSTÓDIA (FORA DO DEPÓSITO)": "",
+     "O.S. COM CUSTÓDIA": "",
+     "SITUAÇÃO DO LOTE": "Disponível",
+     "VALIDADE": "—"
+    }
+   ]
+  }
+ },
+ "item2": {
+  "antes": {
+   "cen": {
+    "lotes": [
+     {
+      "lote": "S58-0801",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     }
+    ],
+    "movs": []
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "12.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "20.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "12.000",
+      "A RECEBER": "20.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "Semente de soja 58 W": "Semente de soja 58 W · 3.640 kg · Pedido a receber · PC-090 · 05/10 · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque apto 12.000 kg · a receber 20.000 kg · MAP 11-52 · 17.500 kg · Falta 79.500 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolver · falta a partir de 18/10/2026 "
+   }
+  },
+  "nf": [
+   "ok",
+   "Recebimento NF 4533 conferido: 20.000 kg de Semente de soja 58 W no lote S58-0926 (validade 06/2027). Disponível 12.000 kg → 12.000 kg; 20.000 kg em quarentena ficam fora do disponível."
+  ],
+  "quar": {
+   "cen": {
+    "lotes": [
+     {
+      "lote": "S58-0801",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     },
+     {
+      "lote": "S58-0926",
+      "fisico": 20000,
+      "quarentena": 20000,
+      "quarRep": 0,
+      "rep": null
+     }
+    ],
+    "movs": [
+     {
+      "tipo": "recebimento-nf",
+      "qtd": 20000,
+      "apto": false,
+      "doc": "NF 4533",
+      "obs": "Aguarda laudo de germinação (aceite CTL-4-FIX)"
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação · 1 insumo com qualidade pendente (R$ 146.832,00 condicionados ao laudo, fora da compra)",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Qualidade pendente · 15.456 kg",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "12.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg + 20.000 kg em quarentena, cobertura condicionada à qualidade (lote S58-0926 · NF 4533: laudo pendente) = 32.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 28.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Falta condicionada à qualidade: 15.456 kg a partir de 15/10/2026 se o laudo reprovar · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Decidir a qualidade no Estoque (o gestor libera ou reprova com o laudo) ›",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos · qualidade pendente: Semente de soja 58 W 15.456 kg condicionados ao laudo (o gestor decide no Estoque; sem nova compra automática)",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "12.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Qualidade pendente · 15.456 kg condicionada ao laudo · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg + 20.000 kg em quarentena, cobertura condicionada à qualidade (lote S58-0926 · NF 4533: laudo pendente) = 32.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 28.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Falta condicionada à qualidade: 15.456 kg a partir de 15/10/2026 se o laudo reprovar · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "Semente de soja 58 W": "Semente de soja 58 W · 3.640 kg · Qualidade pendente · 15.456 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque apto 12.000 kg · se o laudo reprovar, falta a partir de 15/10/2026 · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (re"
+   },
+   "pt": {
+    "total": "Total",
+    "linhas": {
+     "MAP 11-52": {
+      "ITEM": "MAP 11-52",
+      "QUANTIDADE": "79.500 kg",
+      "PREÇO": "R$ 3,783/kg",
+      "TOTAL": "R$ 300.748,50"
+     },
+     "Semente de soja 58 W": {}
+    }
+   }
+  },
+  "lib": [
+   "ok",
+   "20.000 kg do lote S58-0926 liberados com o laudo LAB-1 por Ana (gestora). Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu). Disponível de Semente de soja 58 W: 12.000 kg → 32.000 kg."
+  ],
+  "liberado": {
+   "cen": {
+    "lotes": [
+     {
+      "lote": "S58-0801",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     },
+     {
+      "lote": "S58-0926",
+      "fisico": 20000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     }
+    ],
+    "movs": [
+     {
+      "tipo": "recebimento-nf",
+      "qtd": 20000,
+      "apto": false,
+      "doc": "NF 4533",
+      "obs": "Aguarda laudo de germinação (aceite CTL-4-FIX)"
+     },
+     {
+      "tipo": "inspecao",
+      "qtd": 20000,
+      "doc": "LAB-1",
+      "obs": ""
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "32.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 32.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 28.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "32.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 32.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 28.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "Semente de soja 58 W": "Semente de soja 58 W · 3.640 kg · Estoque cobre · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque apto 32.000 kg · MAP 11-52 · 17.500 kg · Falta 79.500 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolver · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos "
+   }
+  },
+  "nf2": [
+   "ok",
+   "Recebimento NF 4533 conferido: 20.000 kg de Semente de soja 58 W no lote S58-0926 (validade 06/2027). Disponível 12.000 kg → 12.000 kg; 20.000 kg em quarentena ficam fora do disponível."
+  ],
+  "rep": [
+   "ok",
+   "20.000 kg do lote S58-0926 reprovados com o laudo LAB-2 por Ana (gestora) (germinação 71%): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada."
+  ],
+  "reprovado": {
+   "cen": {
+    "lotes": [
+     {
+      "lote": "S58-0801",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     },
+     {
+      "lote": "S58-0926",
+      "fisico": 20000,
+      "quarentena": 20000,
+      "quarRep": 20000,
+      "rep": {
+       "laudo": "LAB-2",
+       "motivo": "germinação 71%",
+       "quem": "Ana (gestora)",
+       "em": "01:43"
+      }
+     }
+    ],
+    "movs": [
+     {
+      "tipo": "recebimento-nf",
+      "qtd": 20000,
+      "apto": false,
+      "doc": "NF 4533",
+      "obs": "Aguarda laudo de germinação (aceite CTL-4-FIX)"
+     },
+     {
+      "tipo": "inspecao-reprovada",
+      "qtd": 20000,
+      "doc": "LAB-2",
+      "obs": ""
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 575.137,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Enviar para cotação",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "15.456 kg",
+      "FALTA EM": "15/10/2026",
+      "VALOR": "R$ 146.832,00",
+      "SITUAÇÃO": "Complemento",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "15.456 kg",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "12.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 0 kg · falta 5.264 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 0 kg · falta 10.192 kg",
+      "Reprovado: 20.000 kg do lote S58-0926 (NF 4533) · laudo LAB-2: germinação 71% · segregado para devolução ao fornecedor, não cobre: a falta é firme",
+      "Necessidade líquida = soma das faltas desta safra = 15.456 kg · falta a partir de 15/10/2026",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 4 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 575.137,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "12.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "15.456",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "15/10/2026",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 146.832,00",
+      "NA COMPRA": "—"
+     }
+    },
+    "memo": {
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 0 kg · falta 5.264 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 0 kg · falta 10.192 kg",
+      "Reprovado: 20.000 kg do lote S58-0926 (NF 4533) · laudo LAB-2: germinação 71% · segregado para devolução ao fornecedor, não cobre: a falta é firme",
+      "Necessidade líquida = soma das faltas desta safra = 15.456 kg · falta a partir de 15/10/2026",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "mapa": {
+    "Semente de soja 58 W": "Semente de soja 58 W · 3.640 kg · Falta 15.456 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque apto 12.000 kg · falta a partir de 15/10/2026 · Suprimentos compra na Compra de insumos · MAP 11-52 · 17.500 kg · Falta 79.500 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolve"
+   }
+  }
+ },
+ "item3": {
+  "antes": {
+   "cen": {
+    "os0425": {
+     "etapa": "Liberadas",
+     "osc": null
+    },
+    "req040": {
+     "estado": "Reservada",
+     "itens": [
+      {
+       "prod": "NPK 20-05-20",
+       "entregue": 0,
+       "custodia": 0,
+       "devolvido": 0
+      }
+     ]
+    },
+    "lote": {
+     "prod": "NPK 20-05-20",
+     "lote": "N26-03",
+     "local": "Galpão 1",
+     "un": "kg",
+     "fisico": 8000,
+     "quarentena": 0,
+     "reservado": 8000,
+     "validade": "—"
+    }
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "NPK 20-05-20",
+      "1º USO": "15/10/2026",
+      "NECESSIDADE LÍQUIDA": "14.800 kg",
+      "FALTA EM": "15/10/2026",
+      "VALOR": "R$ 50.320,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "22.800 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "8.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "8.000 kg",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,40/kg"
+     }
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO · INSUMO": "NPK 20-05-20",
+      "BRUTA": "22.800",
+      "ESTOQUE APTO": "8.000 res. 8.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "14.800",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "15/10/2026",
+      "PREÇO REF.": "3,40",
+      "VALOR": "R$ 50.320,00",
+      "NA COMPRA": "A cotar"
+     }
+    }
+   },
+   "mapa": {
+    "NPK 20-05-20": "NPK 20-05-20 · 22.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 2ª parcela +1 · precisa de 22.800 kg · estoque apto 8.000 kg · falta a partir de 15/10/2026 · Suprimentos compra na Compra de insumos · Fungicida C · 30,4 L · Falta 30 L · a partir de 20/01 · C1 · Fungicida para ferrugem · precisa de 30 L · estoque apto 0 L · falta a partir de 20/01/2027 · Suprimentos compra na Compra de insumos · KCl 60% "
+   }
+  },
+  "ent_linha": "ok",
+  "ent_qtd": "8000",
+  "ent_recibo": "8.000 kg de NPK 20-05-20 entregues a Paula (OS-0425). Aguarda confirmação no app.",
+  "entregue": {
+   "cen": {
+    "os0425": {
+     "etapa": "Liberadas",
+     "osc": null
+    },
+    "req040": {
+     "estado": "Entregue",
+     "itens": [
+      {
+       "prod": "NPK 20-05-20",
+       "entregue": 8000,
+       "custodia": 8000,
+       "devolvido": 0
+      }
+     ]
+    },
+    "lote": {
+     "prod": "NPK 20-05-20",
+     "lote": "N26-03",
+     "local": "Galpão 1",
+     "un": "kg",
+     "fisico": 0,
+     "quarentena": 0,
+     "reservado": 0,
+     "validade": "—"
+    }
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "NPK 20-05-20",
+      "1º USO": "15/10/2026",
+      "NECESSIDADE LÍQUIDA": "14.800 kg",
+      "FALTA EM": "15/10/2026",
+      "VALOR": "R$ 50.320,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "14.800 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "0 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,40/kg"
+     }
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO · INSUMO": "NPK 20-05-20",
+      "BRUTA": "14.800",
+      "ESTOQUE APTO": "0",
+      "A RECEBER": "0",
+      "NECESSIDADE": "14.800",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "15/10/2026",
+      "PREÇO REF.": "3,40",
+      "VALOR": "R$ 50.320,00",
+      "NA COMPRA": "A cotar"
+     }
+    }
+   },
+   "mapa": {
+    "NPK 20-05-20": "NPK 20-05-20 · 14.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 2ª parcela +1 · precisa de 14.800 kg · estoque apto 0 kg · falta a partir de 15/10/2026 · Suprimentos compra na Compra de insumos · Fungicida C · 30,4 L · Falta 30 L · a partir de 20/01 · C1 · Fungicida para ferrugem · precisa de 30 L · estoque apto 0 L · falta a partir de 20/01/2027 · Suprimentos compra na Compra de insumos · KCl 60% · 5."
+   }
+  },
+  "canc_btn": "ok",
+  "canc_confirma_txt": "OS-0425 · Adubação 1ª parcela · café · × · Liberadas · Entrega sem saldo suficiente · C1 · 38 ha · janela 15/10 · Paula · A liberar · Liberadas · Em execução · Em conferência · Encerradas · PRÓXIMO PASSO · Confira máquina, equipe e insumos e inicie a execução na janela 15/10. · Iniciar bloqueado: NPK 20-05-20 8.000 kg entregue a Paula, aguardando confirmação no app. · Quem resolve: Paula confirma o recebimento no app. · Ver no app · › · O lote N26-03 cobre 26,7 dos 38 ha; Suprimentos completa a entrega até 15/10. · Cancelar OS-0425 sem execução: a ordem sai do quadro e fica em Canceladas. Cancela a requisição REQ-040. 8.000 kg de NPK 20-05-20 já entregue fica em custódia com Paula até a devolução no Estoque. · Voltar · Confirmar cancelamento · INSUMOS E DOSES · PRODUTO · DOSE · NA ORDEM · USADO · SITUAÇÃO · NPK 20-05-20 · Fertilizantes · padrão do plano v2 · 300 kg/ha · 11.400 kg · — · Entregue · aguardando confirmação no app · Reservado 8.000 kg · lote N26-03 · › Entregue 8.000 kg (8 × big bag 1.000 kg) a Paula · › Aguardando confirmação no app · › Consumido · › Em custódia 8.000 kg · › Devolvido · FICHAS DE EXECUÇÃO · 4 cargas (distribuidor 3.000 kg): 10 ha por carga; última 8 ha · NPK 20-05-20 3.000 kg por carga · ATIVIDADE · Adubação a lanço · Adubação 1ª parcela · Trator 03 + Distribuidor 3 t · SITUAÇÃO ATUAL · REQ-040 pede 11.400 kg de NPK 20-05-20; o lote N26-03 tem 8.000 kg · Suprimentos completa … · ORIGEM · 2 registros",
+  "canc_ok": "ok",
+  "canc_recibo": "Custódia a devolver: 8.000 kg de NPK 20-05-20 com Paula.\nQuem resolve: Rui (almoxarife) recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos. | OS-0425 cancelada sem execução. Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque. Cancelada por Ana (gestora).",
+  "os_cancelada_painel": "OS-0425 · Adubação 1ª parcela · café · × · Canceladas · Custódia a devolver · C1 · 38 ha · janela 15/10 · Paula · A liberar · Liberadas · Em execução · Em conferência · Encerradas · PRÓXIMO PASSO · Ordem cancelada sem execução: somente consulta. · Custódia a devolver: 8.000 kg de NPK 20-05-20 com Paula. · Quem resolve: Rui (almoxarife) recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos. · Receber devolução · › · INSUMOS E DOSES · PRODUTO · DOSE · NA ORDEM · USADO · SITUAÇÃO · NPK 20-05-20 · Fertilizantes · padrão do plano v2 · 300 kg/ha · 11.400 kg · — · Ordem cancelada · 8.000 kg em custódia com Paula · receber devolução no Estoque · ATIVIDADE · Adubação a lanço · Adubação 1ª parcela · Trator 03 + Distribuidor 3 t · SITUAÇÃO ATUAL · Cancelada sem execução por Ana (gestora) às 01:46: Talhão replanejado (aceite CTL-4-FIX). Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque. · ORIGEM · 2 registros",
+  "os_cancelada_links": [
+   "Receber devolução\n›>EST.dc.html"
+  ],
+  "cancelada": {
+   "cen": {
+    "os0425": {
+     "etapa": "Canceladas",
+     "osc": {
+      "canPor": "Ana (gestora)",
+      "canEm": "01:46",
+      "cond": "Cancelada sem execução por Ana (gestora) às 01:46: Talhão replanejado (aceite CTL-4-FIX). Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque.",
+      "dono": "Rui (almoxarife)",
+      "prazo": "receber a devolução",
+      "insx": "REQ-040 cancelada · 8.000 kg de NPK 20-05-20 em custódia · receber devolução",
+      "fase": "Canceladas"
+     }
+    },
+    "req040": {
+     "estado": "Cancelada",
+     "itens": [
+      {
+       "prod": "NPK 20-05-20",
+       "entregue": 8000,
+       "custodia": 8000,
+       "devolvido": 0
+      }
+     ]
+    },
+    "lote": {
+     "prod": "NPK 20-05-20",
+     "lote": "N26-03",
+     "local": "Galpão 1",
+     "un": "kg",
+     "fisico": 0,
+     "quarentena": 0,
+     "reservado": 0,
+     "validade": "—"
+    }
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "NPK 20-05-20",
+      "1º USO": "15/10/2026",
+      "NECESSIDADE LÍQUIDA": "14.800 kg",
+      "FALTA EM": "15/10/2026",
+      "VALOR": "R$ 50.320,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "22.800 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "0 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,40/kg"
+     }
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO · INSUMO": "NPK 20-05-20",
+      "BRUTA": "22.800",
+      "ESTOQUE APTO": "0",
+      "A RECEBER": "0",
+      "NECESSIDADE": "14.800",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "15/10/2026",
+      "PREÇO REF.": "3,40",
+      "VALOR": "R$ 50.320,00",
+      "NA COMPRA": "A cotar"
+     }
+    }
+   },
+   "mapa": {
+    "NPK 20-05-20": "NPK 20-05-20 · 22.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 1ª parcela +1 · precisa de 22.800 kg · estoque apto 0 kg + 8.000 kg em custódia a devolver · falta a partir de 15/10/2026 · Suprimentos compra na Compra de insumos · Fungicida C · 30,4 L · Falta 30 L · a partir de 20/01 · C1 · Fungicida para ferrugem · precisa de 30 L · estoque apto 0 L · falta a partir de 20/01/2027 · Suprimentos compra n"
+   }
+  },
+  "dev_linha": "ok",
+  "dev_recibo": "8.000 kg de NPK 20-05-20 devolvidos ao disponível. Custódia de NPK 20-05-20 na OS-0425: 8.000 kg → 0 kg.",
+  "devolvida": {
+   "cen": {
+    "os0425": {
+     "etapa": "Canceladas",
+     "osc": {
+      "canPor": "Ana (gestora)",
+      "canEm": "01:46",
+      "cond": "Cancelada sem execução por Ana (gestora) às 01:46: Talhão replanejado (aceite CTL-4-FIX). Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque.",
+      "dono": "Rui (almoxarife)",
+      "prazo": "receber a devolução",
+      "insx": "REQ-040 cancelada · 8.000 kg de NPK 20-05-20 em custódia · receber devolução",
+      "fase": "Canceladas"
+     }
+    },
+    "req040": {
+     "estado": "Cancelada",
+     "itens": [
+      {
+       "prod": "NPK 20-05-20",
+       "entregue": 8000,
+       "custodia": 0,
+       "devolvido": 8000
+      }
+     ]
+    },
+    "lote": {
+     "prod": "NPK 20-05-20",
+     "lote": "N26-03",
+     "local": "Galpão 1",
+     "un": "kg",
+     "fisico": 8000,
+     "quarentena": 0,
+     "reservado": 0,
+     "validade": "—"
+    }
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "NPK 20-05-20",
+      "1º USO": "15/10/2026",
+      "NECESSIDADE LÍQUIDA": "14.800 kg",
+      "FALTA EM": "15/10/2026",
+      "VALOR": "R$ 50.320,00",
+      "SITUAÇÃO": "Em cotação",
+      "SOLICITAÇÃO": "SOL-2026-07",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "22.800 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "8.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "0 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 3,40/kg"
+     }
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "NPK 20-05-20": {
+      "GRUPO · INSUMO": "NPK 20-05-20",
+      "BRUTA": "22.800",
+      "ESTOQUE APTO": "8.000",
+      "A RECEBER": "0",
+      "NECESSIDADE": "14.800",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "15/10/2026",
+      "PREÇO REF.": "3,40",
+      "VALOR": "R$ 50.320,00",
+      "NA COMPRA": "A cotar"
+     }
+    }
+   },
+   "mapa": {
+    "NPK 20-05-20": "NPK 20-05-20 · 22.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 1ª parcela +1 · precisa de 22.800 kg · estoque apto 8.000 kg · falta a partir de 15/10/2026 · Suprimentos compra na Compra de insumos · Fungicida C · 30,4 L · Falta 30 L · a partir de 20/01 · C1 · Fungicida para ferrugem · precisa de 30 L · estoque apto 0 L · falta a partir de 20/01/2027 · Suprimentos compra na Compra de insumos · KCl 60% "
+   }
+  },
+  "A11": {
+   "antes": {
+    "s2627": {
+     "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+     "prim": "Abrir Compra de insumos ›",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "23/09/2026",
+       "NECESSIDADE LÍQUIDA": "0,0 L",
+       "FALTA EM": "—",
+       "VALOR": "R$ 0,00",
+       "SITUAÇÃO": "Coberto pelo estoque",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "520,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "545,0 L",
+       "USADO ANTES DA COMPRA": "—",
+       "RESERVADO": "65,0 L",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    },
+    "s27sf": {
+     "total": "Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada",
+     "prim": "Enviar para cotação",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "25/05/2027",
+       "NECESSIDADE LÍQUIDA": "23,0 L",
+       "FALTA EM": "25/05/2027",
+       "VALOR": "R$ 3.332,10",
+       "SITUAÇÃO": "A enviar",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "47,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "545,0 L",
+       "USADO ANTES DA COMPRA": "520,5 L",
+       "RESERVADO": "—",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    }
+   },
+   "apontar": "X.cenApontar is not a function",
+   "cen_apontado": {
+    "req035": [
+     {
+      "prod": "Fungicida A",
+      "entregue": 160,
+      "consumido": 95,
+      "custodia": 65,
+      "devolvido": 0
+     }
+    ],
+    "os": "Em execução"
+   },
+   "apontado": {
+    "s2627": {
+     "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+     "prim": "Abrir Compra de insumos ›",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "23/09/2026",
+       "NECESSIDADE LÍQUIDA": "0,0 L",
+       "FALTA EM": "—",
+       "VALOR": "R$ 0,00",
+       "SITUAÇÃO": "Coberto pelo estoque",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "520,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "545,0 L",
+       "USADO ANTES DA COMPRA": "—",
+       "RESERVADO": "65,0 L",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    },
+    "s27sf": {
+     "total": "Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada",
+     "prim": "Enviar para cotação",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "25/05/2027",
+       "NECESSIDADE LÍQUIDA": "23,0 L",
+       "FALTA EM": "25/05/2027",
+       "VALOR": "R$ 3.332,10",
+       "SITUAÇÃO": "A enviar",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "47,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "545,0 L",
+       "USADO ANTES DA COMPRA": "520,5 L",
+       "RESERVADO": "—",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    }
+   },
+   "dev_linha": "ok",
+   "dev_set": "ok",
+   "dev_recibo": "40 L de Fungicida A devolvidos ao disponível. Custódia de Fungicida A na OS-0421: 65 L → 25 L.",
+   "cen_devolvido": {
+    "req035": [
+     {
+      "prod": "Fungicida A",
+      "entregue": 160,
+      "consumido": 95,
+      "custodia": 25,
+      "devolvido": 40
+     }
+    ],
+    "lotes": [
+     {
+      "lote": "F26-02",
+      "fisico": 585
+     }
+    ]
+   },
+   "devolvido": {
+    "s2627": {
+     "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+     "prim": "Abrir Compra de insumos ›",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "23/09/2026",
+       "NECESSIDADE LÍQUIDA": "0,0 L",
+       "FALTA EM": "—",
+       "VALOR": "R$ 0,00",
+       "SITUAÇÃO": "Coberto pelo estoque",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "560,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "585,0 L",
+       "USADO ANTES DA COMPRA": "—",
+       "RESERVADO": "65,0 L",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    },
+    "s27sf": {
+     "total": "Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada",
+     "prim": "Enviar para cotação",
+     "linhas": {
+      "Fungicida A": {
+       "GRUPO": "Fungicidas",
+       "INSUMO": "Fungicida A",
+       "1º USO": "25/05/2027",
+       "NECESSIDADE LÍQUIDA": "23,0 L",
+       "FALTA EM": "25/05/2027",
+       "VALOR": "R$ 3.332,10",
+       "SITUAÇÃO": "A enviar",
+       "SOLICITAÇÃO": "—",
+       "A COMPLEMENTAR": "—",
+       "DEMANDA BRUTA": "47,5 L",
+       "ANTES DE HOJE SEM O.S.": "—",
+       "ESTOQUE APTO": "585,0 L",
+       "USADO ANTES DA COMPRA": "560,5 L",
+       "RESERVADO": "—",
+       "RECEBIMENTOS PREVISTOS": "0,0 L",
+       "RECEBIDO APÓS A FALTA": "—",
+       "COBERTA EM": "—",
+       "PREÇO": "R$ 145,00/L"
+      }
+     }
+    }
+   }
+  }
+ },
+ "item4": {
+  "semente": {
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "KCl 60%": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "KCl 60%",
+      "1º USO": "04/11/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "78.900 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "50.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "40.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 2,40/kg"
+     },
+     "Semente de soja 62 X": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 62 X",
+      "1º USO": "25/10/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "7.904 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "0 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "8.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     },
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "12.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "20.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "KCl 60%": [
+      "Estoque apto hoje: 50.000 kg + 10.000 kg em quarentena, cobertura condicionada à qualidade (lote K26-11: laudo pendente) = 60.000 kg",
+      "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg",
+      "04/11/2026 · T1-A · Adubação de cobertura · 120,00 kg/ha × 160 ha = 19.200,0 kg → saldo 80.800 kg",
+      "07/11/2026 · T2 · Adubação de cobertura · 120,00 kg/ha × 298 ha = 35.760,0 kg → saldo 45.040 kg",
+      "14/11/2026 · T1-B · Adubação de cobertura · 120,00 kg/ha × 152 ha = 18.240,0 kg → saldo 26.800 kg",
+      "19/06/2027 · C1 · Adubação pós-colheita · 150,00 kg/ha × 38 ha = 5.700,0 kg → saldo 21.100 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 21.100 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 62 X": [
+      "Estoque apto hoje: 0 kg",
+      "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 52,00 kg/ha × 152 ha = 7.904,0 kg → saldo 96 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 96 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "KCl 60%": {
+      "GRUPO · INSUMO": "KCl 60%",
+      "BRUTA": "78.900",
+      "ESTOQUE APTO": "50.000",
+      "A RECEBER": "40.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "2,40",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto 10.000 kg em quarentena não contam"
+     },
+     "Semente de soja 62 X": {
+      "GRUPO · INSUMO": "Semente de soja 62 X",
+      "BRUTA": "7.904",
+      "ESTOQUE APTO": "0",
+      "A RECEBER": "8.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     },
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "12.000",
+      "A RECEBER": "20.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     }
+    },
+    "memo": {
+     "KCl 60%": [
+      "Estoque apto hoje: 50.000 kg + 10.000 kg em quarentena, cobertura condicionada à qualidade (lote K26-11: laudo pendente) = 60.000 kg",
+      "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg",
+      "04/11/2026 · T1-A · Adubação de cobertura · 120,00 kg/ha × 160 ha = 19.200,0 kg → saldo 80.800 kg",
+      "07/11/2026 · T2 · Adubação de cobertura · 120,00 kg/ha × 298 ha = 35.760,0 kg → saldo 45.040 kg",
+      "14/11/2026 · T1-B · Adubação de cobertura · 120,00 kg/ha × 152 ha = 18.240,0 kg → saldo 26.800 kg",
+      "19/06/2027 · C1 · Adubação pós-colheita · 150,00 kg/ha × 38 ha = 5.700,0 kg → saldo 21.100 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 21.100 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 62 X": [
+      "Estoque apto hoje: 0 kg",
+      "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 52,00 kg/ha × 152 ha = 7.904,0 kg → saldo 96 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 96 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 12.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 8.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 3.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   }
+  },
+  "nf_parcial": [
+   "ok",
+   "Recebimento NF 4533 conferido: 12.000 kg de Semente de soja 58 W no lote S58-0926 (validade 06/2027). Disponível 12.000 kg → 24.000 kg."
+  ],
+  "parcial": {
+   "cen": {
+    "lotes": [
+     {
+      "lote": "S58-0801",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     },
+     {
+      "lote": "S58-0926",
+      "fisico": 12000,
+      "quarentena": 0,
+      "quarRep": 0,
+      "rep": null
+     }
+    ],
+    "movs": [
+     {
+      "tipo": "recebimento-nf",
+      "qtd": 12000,
+      "apto": true,
+      "doc": "NF 4533",
+      "obs": "Entrega parcial: 8.000 kg seguem no PC-090 (aceite CTL-4-FIX)"
+     }
+    ]
+   },
+   "saf": {
+    "total": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+    "prim": "Abrir Compra de insumos ›",
+    "linhas": {
+     "KCl 60%": {
+      "GRUPO": "Fertilizantes",
+      "INSUMO": "KCl 60%",
+      "1º USO": "04/11/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "78.900 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "50.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "40.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 2,40/kg"
+     },
+     "Semente de soja 62 X": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 62 X",
+      "1º USO": "25/10/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "7.904 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "0 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "8.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     },
+     "Semente de soja 58 W": {
+      "GRUPO": "Sementes",
+      "INSUMO": "Semente de soja 58 W",
+      "1º USO": "23/09/2026",
+      "NECESSIDADE LÍQUIDA": "0 kg",
+      "FALTA EM": "—",
+      "VALOR": "R$ 0,00",
+      "SITUAÇÃO": "Coberto pelo estoque",
+      "SOLICITAÇÃO": "—",
+      "A COMPLEMENTAR": "—",
+      "DEMANDA BRUTA": "27.456 kg",
+      "ANTES DE HOJE SEM O.S.": "—",
+      "ESTOQUE APTO": "24.000 kg",
+      "USADO ANTES DA COMPRA": "—",
+      "RESERVADO": "—",
+      "RECEBIMENTOS PREVISTOS": "8.000 kg",
+      "RECEBIDO APÓS A FALTA": "—",
+      "COBERTA EM": "—",
+      "PREÇO": "R$ 9,50/kg"
+     }
+    },
+    "memo": {
+     "KCl 60%": [
+      "Estoque apto hoje: 50.000 kg + 10.000 kg em quarentena, cobertura condicionada à qualidade (lote K26-11: laudo pendente) = 60.000 kg",
+      "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg",
+      "04/11/2026 · T1-A · Adubação de cobertura · 120,00 kg/ha × 160 ha = 19.200,0 kg → saldo 80.800 kg",
+      "07/11/2026 · T2 · Adubação de cobertura · 120,00 kg/ha × 298 ha = 35.760,0 kg → saldo 45.040 kg",
+      "14/11/2026 · T1-B · Adubação de cobertura · 120,00 kg/ha × 152 ha = 18.240,0 kg → saldo 26.800 kg",
+      "19/06/2027 · C1 · Adubação pós-colheita · 150,00 kg/ha × 38 ha = 5.700,0 kg → saldo 21.100 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 21.100 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 62 X": [
+      "Estoque apto hoje: 0 kg",
+      "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 52,00 kg/ha × 152 ha = 7.904,0 kg → saldo 96 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 96 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 24.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 20.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 15.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +8.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver SOL-2026-07 na Compra de insumos ›",
+      "Fechar"
+     ]
+    }
+   },
+   "cmp": {
+    "k2": "SOL-2026-07 · Safra 2026/27 · enviada em 23/09/2026 10:40 por Ana (gestora) · 14 insumos a comprar · R$ 428.305,00 a preço de referência · 5 insumos cobertos por estoque e pedidos",
+    "tot": [
+     "Total R$ 428.305,00"
+    ],
+    "prim": "Solicitar cotações ›",
+    "linhas": {
+     "KCl 60%": {
+      "GRUPO · INSUMO": "KCl 60%",
+      "BRUTA": "78.900",
+      "ESTOQUE APTO": "50.000",
+      "A RECEBER": "40.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "2,40",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto 10.000 kg em quarentena não contam"
+     },
+     "Semente de soja 62 X": {
+      "GRUPO · INSUMO": "Semente de soja 62 X",
+      "BRUTA": "7.904",
+      "ESTOQUE APTO": "0",
+      "A RECEBER": "8.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     },
+     "Semente de soja 58 W": {
+      "GRUPO · INSUMO": "Semente de soja 58 W",
+      "BRUTA": "27.456",
+      "ESTOQUE APTO": "24.000",
+      "A RECEBER": "8.000",
+      "NECESSIDADE": "0",
+      "UN.": "kg",
+      "FALTA A PARTIR DE": "—",
+      "PREÇO REF.": "9,50",
+      "VALOR": "R$ 0,00",
+      "NA COMPRA": "Coberto"
+     }
+    },
+    "memo": {
+     "KCl 60%": [
+      "Estoque apto hoje: 50.000 kg + 10.000 kg em quarentena, cobertura condicionada à qualidade (lote K26-11: laudo pendente) = 60.000 kg",
+      "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg",
+      "04/11/2026 · T1-A · Adubação de cobertura · 120,00 kg/ha × 160 ha = 19.200,0 kg → saldo 80.800 kg",
+      "07/11/2026 · T2 · Adubação de cobertura · 120,00 kg/ha × 298 ha = 35.760,0 kg → saldo 45.040 kg",
+      "14/11/2026 · T1-B · Adubação de cobertura · 120,00 kg/ha × 152 ha = 18.240,0 kg → saldo 26.800 kg",
+      "19/06/2027 · C1 · Adubação pós-colheita · 150,00 kg/ha × 38 ha = 5.700,0 kg → saldo 21.100 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 21.100 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 62 X": [
+      "Estoque apto hoje: 0 kg",
+      "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg",
+      "25/10/2026 · T1-B · Plantio e adubação de base · 52,00 kg/ha × 152 ha = 7.904,0 kg → saldo 96 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 96 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ],
+     "Semente de soja 58 W": [
+      "Estoque apto hoje: 24.000 kg",
+      "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 52,00 kg/ha × 70 ha = 3.640,0 kg → saldo 20.360 kg",
+      "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 52,00 kg/ha × 102 ha = 5.304,0 kg → saldo 15.056 kg",
+      "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +8.000,0 kg → saldo 23.056 kg",
+      "15/10/2026 · T1-A · Plantio e adubação de base · 52,00 kg/ha × 160 ha = 8.320,0 kg → saldo 14.736 kg",
+      "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 52,00 kg/ha × 196 ha = 10.192,0 kg → saldo 4.544 kg",
+      "Sem falta nesta safra · saldo depois do último uso: 4.544 kg",
+      "Ver no Planejar safra · demanda de insumos ›",
+      "Fechar"
+     ]
+    }
+   }
+  }
+ },
+ "erros_js": []
+}

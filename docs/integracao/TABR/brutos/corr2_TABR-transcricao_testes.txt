@@ -1,0 +1,86 @@
+# Correção da TABR, 2ª tentativa (agente TABR:corrigir interrompido, 21:19-22:53): unidade, mutantes e sondas
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T21:20:40.706Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && timeout 600 python3 tabelas_cad_irr_unit.py > /tmp/TABR-unit.log 2>&1; echo "exit $?"; grep -E "^FALHA" /tmp/TABR-unit.log; tail -1 /tmp/TABR-unit.log
+exit 0
+RESULTADO: 41/41 ok
+
+### 2026-10-09T21:27:07.889Z
+$ S=<scratchpad>/mutv/v37/gen37; cd $S && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+mutantes aplicados
+0
+render 0
+FALHA B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio · [('180 m³/h', 180.0), ('1,0 L/s', 1.0), ('0,5 L/s', 
+FALHA B1b vazão em L/s da grade publicada ordena pelo valor em m³/h (0,5 L/s → 1,8; 1,0 L/s → 3,6) · [('1,0 L/s', 1.0), ('0,5 L/s', 0.5), ('1,0 L/s', 1.0
+FALHA C11 (M-i) CD-04: com duas habilitações datadas, a validade que vale é a que vence primeiro (NR-10 10/12/2026, não NR-31 31/08/2027) · 2027-08-31
+FALHA C13 (A4) CD-03: capacidade só com uma grandeza no filtro de Classe, com rótulo e unidade dela (Irrigação → Vazão m³/h; Trator → Potência cv; Tr
+RESULTADO: 37/41 ok · FALHAS: B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" �
+
+### 2026-10-09T21:27:15.912Z
+$ S=<scratchpad>/mutv/v37/gen37; cd $S && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 tabelas_irr_test.py > ../../mut-irr.log 2>&1; echo "exit $?"; grep -vE "^\s*ok " ../../mut-irr.log | cut -c1-260 | head; 
+exit 1
+  FALHOU fluxo 1440 (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira · ('25/09 06:02', [(2026, 9, 25, 362), (2026, 9, 26, 362)])
+  FALHOU fluxo 390 px (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira · ('25/09 06:02', [(2026, 9, 25, 362), (2026, 9, 26, 362)])
+RESULTADO: 91/93 ok · FALHAS: fluxo 1440 (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira; fluxo 390 px (M-m): o Fim da OS-0422 no IR-03 é o fim da última passada (2 passadas), não o da primeira
+
+### 2026-10-09T21:35:07.760Z
+$ S=<scratchpad>/mutv/v37/gen37; cd $S && env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 tabelas_cad_test.py > ../../mut-cad.log 2>&1; echo "exit $?"; grep -vE "^\s*ok " ../../mut-cad.log | cut -c1-260 | head; cat /tmp/TABR-rv/resumo.txt
+exit 1
+  FALHOU CD-03 (A4, M-k): Classe = Irrigação → coluna Vazão em m³/h depois da Classe, com a vazão das 3 instalações · ([['Máquina ou instalação', ''], ['Situação', ''], ['Classe', ''], ['Custo R$/h', 'R$/h'], ['Conjuntos', ''], ['Próxima calibr
+  FALHOU CD-03 (A4): ordenar a Vazão pelo número · ['', '', '']
+RESULTADO: 137/139 ok · FALHAS: CD-03 (A4, M-k): Classe = Irrigação → coluna Vazão em m³/h depois da Classe, com a vazão das 3 instalações; CD-03 (A4): ordenar a Vazão pelo número
+05-tabelas_cad_test                exit=0  RESULTADO: 139/139 ok
+05-tabelas_irr_test                exit=0  RESULTADO: 93/93 ok
+00-build                           exit=0  
+00-montar                          exit=0  
+01-varredura                       exit=0  RESULTADO: 140/140 páginas sem erro
+02-duplicadas                      exit=0  RESULTADO: 140 páginas · 0 com ação repetida · erros 0
+03-unit                            exit=0  RESULTADO: 41/41 ok
+
+### 2026-10-09T21:43:16.158Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+11:    no chip e capacidade só com uma grandeza (A10, A4); B6 versão do estado salvo da irrigação (A9); B7 parcelas da lista = do detalhe
+12:    (PV01 da Lagoa Grande, pré-existente); C14 duração da passada = fim − início da mesma linha (IR-03det, pré-existente).
+82:# B7 (revisão TABR, pré-existente): a lista (CD-01, "Parcelas na safra") e o detalhe do talhão (CD-01det) contam as mesmas parcelas em todo
+92:chk('B7 parcelas da lista = parcelas do detalhe em todo talhão (PV01: Pivô 1 com 29,92 ha na Safra Mamão)', not div and pv01 == [('Pivô 1', 29.92)], (div[:4], pv01))
+
+### 2026-10-09T21:43:47.319Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+done
+
+### 2026-10-09T21:44:02.827Z
+$ cd <sp-tabr>/tools/prototipo/v37/gen37 && python3 - <<'EOF'
+  [corpo do heredoc omitido]
+ok
+tabelas_cad_test.py:13:o detalhe do PV01 (Lagoa Grande) mostra a parcela que a lista conta (pré-existente).
+tabelas_cad_test.py:124:    # pré-existente (revisão TABR): a lista conta 1 parcela no PV01 da Lagoa Grande; o detalhe
+tabelas_cad_test.py:125:    abre('CD-01det.dc.html#talhao=PV01'); dl = Grade(J, 1).dicts(); pv1 = next((r for r in dl if
+tabelas_cad_test.py:127:    chk('CD-01det PV01 (Lagoa Grande): a parcela Pivô 1 da Safra Mamão aparece (Mamão | 29,9 
+tabelas_irr_test.py:15:da janela da linha (OS-0394: 2,1 h, não as 14,5 h previstas; pré-existente).
+
+### 2026-10-09T21:44:34.983Z
+$ S=<scratchpad>/novo; rm -rf $S; mkdir -p $S && cd <sp-tabr>/tools/prototipo && tar --exclude='v37/gen37/_probe' --exclude='__pycache__' -cf - v37 | tar -xf - -C $S && cd $S/v37/gen37 && python3 build.py > ../../build.log 2>&1; grep -c FALHA ../../build.log; tail -1 ../../build.log; python3 montar_render.py | tail -1; timeout 600 python3 tabelas_cad_irr_unit.py > ../../unit.log 2>&1; grep -E "^FALHA" ../../unit.log | cut -c1-200; tail -1 ../../unit.log | cut -c1-100
+0
+140 artboards → <scratchpad>/novo/v37/gen37/project · menu vigente: 45 · ocultos: 95
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+RESULTADO: 43/43 ok
+
+### 2026-10-09T21:44:51.709Z
+$ M=<scratchpad>/mutv/v37/gen37; cp <sp-tabr>/tools/prototipo/v37/gen37/tabelas_cad_irr_unit.py $M/ && cd $M && timeout 600 python3 tabelas_cad_irr_unit.py 2>&1 | grep -E "^FALHA (B7|C14)" | cut -c1-260
+FALHA B7 parcelas da lista = parcelas do detalhe em todo talhão (PV01: Pivô 1 com 29,92 ha na Safra Mamão) · ([('PV01', 0, 1), ('PV02', 0, 1), ('PV03', 0, 1), ('PV04', 0, 1)], [])
+FALHA C14 IR-03det: Duração = Fim − Início da mesma linha (feita 20:00–22:06 → 126 min, não os 870 previstos; programada → 870; sem início → 870; em execução com pausa de 30 min → 630) · None
+
+### 2026-10-09T22:49:25.996Z
+$ S=<scratchpad>/novo/v37/gen37; G=<sp-tabr>/tools/prototipo/v37/gen37; for f in areas/cad_parceiros.py areas/cad_fazendas.py areas/irrigacao.py tabelas_cad_irr_unit.py tabelas_cad_test.py tabelas_irr_test.py cadc_cd06_test.py cadc_cd07_test.py; do cmp -s $G/$f $S/$f || { echo "atualiza $f"; cp $G/$f $S/$f; }; done; cd $S && python3 build.py > ../../build.log 2>&1; grep -c FALHA ../../build.log; python3 montar_render.py | tail -1; env CHROME_BIN=<chrome> flock /tmp/cdpD.lock env CDP_GL=1 timeout 900 python3 cadp_fix_test.py > ../../cadpfix.log 2>&1; echo "exit $?"; grep -E "FALHOU|RESULTADO" ../../cadpfix.log | cut -c1-300
+atualiza areas/cad_parceiros.py
+0
+_render montado: 140 páginas + 20 arquivos do site · dados reais locais: 5/5
+exit 0
+RESULTADO: OK 15/15

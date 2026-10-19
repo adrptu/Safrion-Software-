@@ -1,0 +1,18 @@
+PASSOU biblioteca com um cartão por plano da fonte (8), sem faixa de etapas 
+PASSOU cartão enxuto: nome e "Abrir plano →" no alto; selo "Publicado · v6", atividades, custo e gatilhos; sem cultivos nem linha de rodapé 
+PASSOU cartão do café com gatilhos Data e Após a colheita 
+PASSOU abrir o cartão leva ao detalhe do plano (#plano=SOJA-AT), sem primária enquanto não há rascunho 
+PASSOU gatilhos DAP em ordem numérica com negativos 
+PASSOU VISOES-2: só o número na coluna do gatilho; seção com "8 atividades · R$ 2.099,90/ha"; título sem sublinhado; ícone do tipo 
+PASSOU menos é mais (14/10): sem a linha "cultura · atividades · R$/ha · gatilhos" nem "Editar cria o rascunho" abaixo do título 
+PASSOU a seta da atividade mostra os insumos sem abrir edição 
+FALHOU o nome da atividade abre o painel com o gatilho DAP 45 e o resumo dos 2 insumos 
+Traceback (most recent call last):
+  File "/tmp/claude-0/seta_scr/base_run/tools/prototipo/v37/gen37/patest.py", line 67, in <module>
+    check('cancelar com alteração avisa antes de descartar', 'Há alterações não salvas' in J("document.querySelector('aside[role=dialog]').innerText"))
+                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/seta_scr/base_run/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'innerText')
+    at <anonymous>:1:45

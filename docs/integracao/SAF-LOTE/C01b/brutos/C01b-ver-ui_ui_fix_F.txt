@@ -1,0 +1,13 @@
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) soja 2027: [('B1-A', 90)]
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) parcela sugerida pelo painel (área 120): B1
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) parcela sugerida com 30 ha: B1
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) recusa: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+FALHA · fix 1440x900 F(parcela sugerida p/ perene) · café 30 ha (cabe na soma: 30 + 90 = 120) não é recusado por causa do nome sugerido · Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 01/06/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 01/06/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) soja replanejada para 2027-07-05 como a mensagem pede: ('(painel fechado)', [('B1-A', '2027-07-05')])
+     (medido) fix 1440x900 F(parcela sugerida p/ perene) café de novo depois de seguir a mensagem: Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 05/07/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 05/07/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+FALHA · fix 1440x900 F(parcela sugerida p/ perene) · seguir a saída da mensagem ("replaneje esse soja para …") resolve · Corrija os campos destacados; o que você preencheu foi mantido. | B1-A tem Soja da BV 2027 primeiro desde 05/07/2027. O plano geraria insumo e O.S. sobre lavoura em campo. B1-A tem Soja da BV 2027 primeiro a partir de 05/07/2027. Para o café com o plano começar depois do cultivo anterior (01/01/2020), replaneje esse soja para 05/07/2027 ou depois.
+OK    · fix 1440x900 F(parcela sugerida p/ perene) · sem erro de JS
+
+RESULTADO fix: 1 ok · 2 falhas (F desktop)
+  - fix 1440x900 F(parcela sugerida p/ perene) · café 30 ha (cabe na soma: 30 + 90 = 120) não é recusado por causa do nome sugerido
+  - fix 1440x900 F(parcela sugerida p/ perene) · seguir a saída da mensagem ("replaneje esse soja para …") resolve

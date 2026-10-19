@@ -1,0 +1,7 @@
+      dados crus: {"cus": [{"id": "Santa Rita|2026/27|Soja", "cult": "Soja", "d": null, "parcial": true, "nome": "Soja · Santa Rita 2026/27"}, {"id": "Santa Rita|2026/27|Mamão Formosa", "cult": "Mamão Formosa", "d": null, "parcial": false, "nome": "Mamão Formosa · Santa Rita 2026/27"}, {"id": "Santa Rita|2026/27|Café", "cult": "Café", "d": null, "parcial": false, "nome": "Café · Santa Rita 2026/27"}, {"id": "Lagoa Grande|2026/27|Mamão Formosa", "cult": "Mamão Formosa", "d": 0, "parcial": false, "nome": "Mamão Formosa · Lagoa Grande 2026/27"}], "pre": [{"cu": "Mamão Formosa", "prod": "Mamão Formosa · fruta de ca
+OK    L1 sem meta: chips cinza e um aviso só, "Meta não configurada", no título do bloco
+OK    L2 meta de custo 5/10: a cor e o texto de cada chip de custo seguem o oráculo; o título passa a "Meta de preço não configurada"
+OK    L3 meta de venda 0/−2: a cor e o texto de cada chip de preço seguem o oráculo; com as duas metas, o aviso some
+OK    L4 o cartão de custo (Agrícola) e o de preço médio (Comercial) mostram o resultado da meta igual ao da Alavanca
+OK    L5 nenhum erro de JavaScript
+RESULTADO: 5/5 ok

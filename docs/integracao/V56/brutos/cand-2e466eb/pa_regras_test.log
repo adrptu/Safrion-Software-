@@ -1,0 +1,19 @@
+OK    U1 endereço: #plano=SOJA-AT → SOJA-AT; com outro parâmetro antes; codificado; vazio, sem plano= ou só "#plano=" → lista
+OK    U2 1ª mudança de dose na v6 cria o rascunho v7; a v6 publicada e a fonte não mudam
+OK    U3 a 2ª mudança fica no mesmo rascunho v7
+OK    U4 diferenças v7 × v6: dose alterada, insumo incluído, insumo retirado, atividade excluída e gatilho mudado
+OK    U5 Próximo passo: sem rascunho nenhuma primária; com rascunho "Publicar versão v7" e o resumo na nota; desabilitado com o motivo sem atividade, com a dose em edição (R1/R2), com a inclusão aberta e com o rascunho igual à v6 (R3)
+OK    U6 publicar cria a v7 (em vigor, no histórico com a data de hoje) e não muda nenhum cultivo
+OK    U7 publicar recusa sem rascunho, com o rascunho sem atividade e com o rascunho igual à versão publicada (R3: nenhuma v7 vazia, nenhum cultivo marcado)
+OK    U8 situação do cultivo (X-AGR-6): em vigor; com rascunho "Continua na v6 ao publicar"; depois de publicar "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; safra encerrada sem link
+OK    U8b o link do cultivo leva a safra e o cultivo de cada um nas três safras abertas: S27SF (d1, Milho safrinha) e LG2627 (lg01, Lagoa Grande)
+OK    U9 novo plano: nome obrigatório; repetido na mesma cultura recusado (sem diferenciar maiúsculas); o mesmo nome em outra cultura passa; cultura obrigatória
+OK    U10 novo plano copiando de uma base: rascunho v1 com as atividades da versão publicada da base (mesmo com a base em rascunho), ids novos, base intacta
+OK    U11 descartar: plano novo sai da biblioteca; plano publicado perde só o rascunho e segue na v6
+OK    U12 resumo na nota: 1 alteração; 3 alterações com "e mais 1"; plano novo "A v1 publica N atividades"
+OK    U13 dose na tabela: 0, vazio, "−2" (menos tipográfico) e "-2" recusados sem criar rascunho; 0,6 grava; a saída do campo marca a hora e o que mudou (R1)
+OK    U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7
+OK    U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto
+OK    U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4): plano trocado ou atividade inexistente fecham sem gravar
+OK    U17 salvar o painel da atividade sem mudar nada não cria rascunho (R3: nenhum rascunho igual à versão publicada)
+RESULTADO 18/18

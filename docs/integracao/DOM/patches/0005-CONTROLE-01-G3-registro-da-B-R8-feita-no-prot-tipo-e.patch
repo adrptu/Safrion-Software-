@@ -1,0 +1,37 @@
+From 7f26b3b863f0eb24552e51bb9e6e192518f08583 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 13:32:26 +0000
+Subject: [PATCH 5/6] =?UTF-8?q?CONTROLE-01=20G3:=20registro=20da=20B-R8=20?=
+ =?UTF-8?q?feita=20no=20prot=C3=B3tipo=20e=20da=20precis=C3=A3o=20escolhid?=
+ =?UTF-8?q?a?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A tarefa pede registrar a escolha da precisão/tolerância. Uma linha sob o
+portão G3 do plano: classificação S2 (Codex 6064114787 §2), commits, o
+que a regra faz e a precisão (centésimo da unidade, a de cenQtd, sem
+tolerância; LIM_DISP é alçada de área dispensada, não tolerância de
+consumo).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ docs/controle-01/PLANO.md | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/docs/controle-01/PLANO.md b/docs/controle-01/PLANO.md
+index f9cb842..c2c6b42 100644
+--- a/docs/controle-01/PLANO.md
++++ b/docs/controle-01/PLANO.md
+@@ -55,6 +55,7 @@ Os números de teste de cada frente vêm das execuções dos desenhos em `ctl/`.
+   - O CTL-3 tira o texto do HEAD, mas o histórico continua.
+   - O Codex confere com o proprietário antes de qualquer publicação.
+ - **G3 · B-R8.** Fechamento com dose efetiva abaixo da aprovada. Carrega o resto do dano da B e está "severidade a classificar". Se o Codex classificar como S2, vira o CTL-11, antes da homologação.
++  - Classificada S2 pelo Codex (6064114787 §2). Feita no protótipo em 09/10 (`e2d1040`, `f0a0cd8`, `dbc1acc`, branch `claude/v44-dom`): o consumo fica como informado; o apontamento e a O.S. ganham o selo "Divergência de consumo/dose" (planejado × informado por produto, com unidade); a revisão técnica do agrônomo (aceitar com motivo ou registrar a correção) é exigida antes do encerramento. Precisão: centésimo da unidade (`cenQtd`), sem tolerância; `LIM_DISP` (20 %) é alçada de área dispensada, não tolerância de consumo.
+ - **G4 · CTL-7.** Precisa estar integrado antes da homologação (motivo no §2, CTL-7).
+ 
+ **Regra de pilha:**
+-- 
+2.43.0
+

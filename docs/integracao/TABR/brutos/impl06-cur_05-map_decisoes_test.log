@@ -1,0 +1,20 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 map_decisoes_test.py
+OK    1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões" 
+OK    2 Integrado: T1 amarelo "OS-0430 a liberar" (mesma contagem do cabeçalho) 
+OK    3 Integrado T1: "NESTE TALHÃO" com Satélite, Lavoura, Pragas e doenças, Carência e destino, Irrigação, Ordens de serviço, Insumos e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto 
+OK    4 T1 (Ordens de serviço): OS-0430 A liberar · primário "Liberar para execução" · "Ajustar antes de liberar" → O.S. da OS-0430 · rodapé "Nova O.S. neste talhão" · sem revisão · nenhum destino repetido 
+OK    5 P1: OS-0418 com Liberar bloqueado pelo Estoque · primário "Ajustar antes de liberar" → O.S. da OS-0418 · OS-0417: "Receber devolução no Estoque" (EST) · sem IN-02det · nenhum destino repetido 
+OK    6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA-04#OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido 
+OK    7 T7: sem ordem na camada Ordens de serviço · na camada Irrigação, um só botão "Resolver conflito" (primário) → IR-03det#OS-0423:conflito 
+OK    8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg) 
+OK    9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras" 
+OK    10 O.S.: OS-0430 liberada direto pela tela O.S. 
+OK    11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador 
+OK    12 T1 volta ao verde no Integrado; em Ordens de serviço ("Ver ordens") a OS-0430 está Liberadas, sem "Ajustar antes de liberar", sem repetir destino 
+OK    13 sem rolagem (≤ 900) 
+OK    14 "Acompanhar OM-0233" (MA-04#OM-0233): o painel da OM-0233 viva abre pela âncora 
+OK    15 Mapa: confirmação "aprova esta versão e libera" e liberar a OS-0430 grava CMD-42 e CMD-06 (v1, Ana) 
+OK    16 Mapa · OS-0430 com Glifosato 7,5 L/ha: "Liberar bloqueado… dose fora da bula: 1,5–3 L/ha", quem resolve Ana (agrônoma), sem "Liberar para execução" 
+
+16 ok · 0 falhas []
+[exit 0]

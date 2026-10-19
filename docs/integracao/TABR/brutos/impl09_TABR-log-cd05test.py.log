@@ -1,0 +1,34 @@
+OK  sem erro JS
+OK  não homologado: não recebe cotação
+OK  Combustível começa sem fornecedor · Combustível 0 Sem fornecedor Homologar fornecedor ›
+OK  abre formulário lateral · Parceiro · Agro Norte
+OK  grupos já marcados
+OK  grupo Combustível marcado
+OK  erro junto ao campo e-mail · E-mail inválido (ex.: compras@empresa.com.br).
+OK  formulário continua aberto
+OK  digitado preservado
+OK  grupo marcado preservado
+OK  WhatsApp inválido barrado
+OK  salvou e fechou
+OK  aviso de salvo
+OK  linha atualizada (grupos na linha; e-mail salvo no painel) · ['Agro Norte 33.567.890/0001-77 Herbicidas, Fungicidas, Inseticidas, Adjuvantes, Combustível Marcelo Tavares 65 99888-1122 vendas@agronorte.com.br E-mail, WhatsApp Sim', 'vendas@agronorte.com.br']
+OK  cobertura de Combustível recalculada · Combustível 1 Sem concorrência
+OK  aviso: não recebe cotação · Salvo: Agro Norte não recebe cotação enquanto não for homologado.
+OK  Combustível volta a sem fornecedor · Combustível 0 Sem fornecedor Homologar fornecedor ›
+OK  crédito sem campos de fornecedor · ['CPF ou CNPJ', 'Nome ou razão social', 'Papéis', 'Nome do contato', 'E-mail', 'WhatsApp', 'Canais autorizados', 'Linhas de crédito', 'Garantias aceitas', 'Gerente do crédito', 'E-mail do gerente', 'Telefone do gerente']
+OK  homologar exige grupo e e-mail · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o e-mail: a cotação é enviada por ele. | Marque ao menos um grupo para homologar.
+OK  cancelar preserva e fecha
+OK  coluna Parceiro · CPF/CNPJ
+OK  WhatsApp sem autorização mostra o aviso · Sementes Vale 55.789.012/0001-39 Fornecedor Otávio Lima 65 99555-6677 não autorizado comercial@sementesvale.com.br E-mail Homologado
+OK  canal autorizado sem aviso · Fertisul 12.345.678/0001-95 Fornecedor Rafael Moura 65 99911-2233 cotacoes@fertisul.com.br E-mail, WhatsApp Homologado
+OK  pessoa física com CPF · Adão Ferreira 123.456.789-09 Prestador Adão Ferreira 65 99102-3344 — WhatsApp Ativo
+OK  formulário tem CPF ou CNPJ, contato e canais · ['CPF ou CNPJ', 'Nome ou razão social', 'Papéis', 'Nome do contato', 'E-mail', 'WhatsApp', 'Canais autorizados', 'Grupos homologados', 'Homologado']
+OK  contato preenchido
+OK  canais do cadastro marcados
+OK  homologar exige e-mail autorizado e contato · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o nome do contato para homologar. | Marque E-mail: sem autorização o fornecedor não recebe cotação.
+OK  cobertura não muda antes de salvar · Fertilizantes 3 Com concorrência
+OK  12 dígitos barrado · Corrija os campos destacados; o que você preencheu foi mantido. | Informe CPF (11 dígitos) ou CNPJ (14 dígitos). | Escolha ao menos uma opção.
+OK  CPF repetido barrado · Corrija os campos destacados; o que você preencheu foi mantido. | CPF já cadastrado em Adão Ferreira. | Escolha ao menos uma opção.
+OK  canal WhatsApp sem número barrado · Corrija os campos destacados; o que você preencheu foi mantido. | Informe o WhatsApp ou desmarque o canal. | Escolha ao menos uma opção.
+OK  pessoa física com CPF de 11 dígitos salva · Joana Prado 987.654.321-00 Prestador — — — — Ativo
+RESULTADO: OK 33/33

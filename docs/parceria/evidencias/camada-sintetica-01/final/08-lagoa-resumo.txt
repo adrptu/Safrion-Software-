@@ -1,0 +1,12 @@
+map_decisoes_test.py         exit=0   23s  
+map_irrig_filtro_test.py     exit=0   24s  
+carencia_test.py             exit=1    0s  
+mip_unit_test.py             exit=1    0s  
+mip_correcoes_test.py        exit=1   70s  RESULTADO 13/14
+mip_fluxo_test.py            exit=0   44s  RESULTADO 15/15
+mip_test.js                  exit=1    0s  
+irr_estado_test.py           exit=0   13s  FALHA 18 sem leitura do hidrômetro: Em conferência, nada creditado; informar leitura encerra e credita Área
+irr_fluxo_test.py            exit=0  134s  
+os_v39_bloq_test.py          exit=0   13s  RESULTADO: 11/11 ok
+os_v39_liberar_test.py       exit=1   11s  RESULTADO: 10/13 ok · FALHAS: confirmação diz que não há insumo a reservar; toast sem requisição vazia;
+os_v39_selo_agua_test.py     exit=0   11s  RESULTADO: 12/12 ok

@@ -1,0 +1,82 @@
+{
+  "source_hash": "d96875f8348ccde6073e2780da510b2ca72cc974f27af096567d5181176e9677",
+  "a": {
+    "view": "A",
+    "source_period": [
+      "2027-02-01",
+      "2027-02-15"
+    ],
+    "occurrences": [
+      {
+        "id": "A1",
+        "dt": "2027-02-10",
+        "cls": "cal",
+        "h": 100
+      }
+    ],
+    "cell": {
+      "mi": 0,
+      "mes": "fev/27",
+      "d": 340,
+      "dThis": 100,
+      "dOth": 240,
+      "cap": 160,
+      "porUn": 160,
+      "ocup": 212.5,
+      "nec": 3,
+      "red": true,
+      "soma": true,
+      "own": true,
+      "ge": false,
+      "pendSR": 0
+    },
+    "verdict": {
+      "R": "R2",
+      "cor": "red",
+      "txt": "Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1, somando a B (240,0 h)."
+    }
+  },
+  "b": {
+    "view": "B",
+    "source_period": [
+      "2027-02-01",
+      "2027-02-15"
+    ],
+    "occurrences": [
+      {
+        "id": "B1",
+        "dt": "2027-02-10",
+        "cls": "cal",
+        "h": 40
+      },
+      {
+        "id": "B2",
+        "dt": "2027-02-28",
+        "cls": "depois",
+        "h": 200
+      }
+    ],
+    "cell": {
+      "mi": 0,
+      "mes": "fev/27",
+      "d": 140,
+      "dThis": 40,
+      "dOth": 100,
+      "cap": 160,
+      "porUn": 160,
+      "ocup": 87.5,
+      "nec": 1,
+      "red": false,
+      "soma": false,
+      "own": true,
+      "ge": false,
+      "pendSR": 0
+    },
+    "verdict": {
+      "R": "R4",
+      "cor": "yellow",
+      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra."
+    }
+  },
+  "same_total": false
+}

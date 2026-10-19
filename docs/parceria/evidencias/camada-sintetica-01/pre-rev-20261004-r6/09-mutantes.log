@@ -1,0 +1,26 @@
+== sem mutante
+RESULTADO: 14/14
+== mutante U1-filtro-volume (irrigacao_estado.js)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]
+== mutante U2-sem-recusa (irrigacao_estado.js)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]
+== mutante U3-mip-sem-finito (mip.js)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]
+== mutante U3-ajuste-sem-finito (areas/processo_os.py)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]
+== mutante U4-casas (areas/irrigacao.py)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]
+== mutante U5-dose-1-casa (irrigacao_estado.js)
+FALHOU 14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra
+RESULTADO: 13/14
+[exit 1]

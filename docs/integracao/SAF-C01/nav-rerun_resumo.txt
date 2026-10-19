@@ -1,0 +1,2 @@
+saf_revisao_test.py rc=0 159s · RESULTADO: 42 ok · 0 falhas
+FIM

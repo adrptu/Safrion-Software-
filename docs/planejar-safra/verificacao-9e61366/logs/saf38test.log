@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "<sp-saf>/tools/prototipo/v37/gen37/saf38test.py", line 43, in <module>
+    etapa(3); oper0 = total_oper(); print('   Operadores e equipe · demanda total antes:', oper0)
+                      ^^^^^^^^^^^^
+  File "<sp-saf>/tools/prototipo/v37/gen37/saf38test.py", line 36, in total_oper
+    return J(r"""(()=>{const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent)[1].querySelectorAll('[role=row]'); let on=false;
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-saf>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

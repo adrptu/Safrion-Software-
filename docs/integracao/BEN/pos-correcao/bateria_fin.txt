@@ -1,0 +1,2 @@
+ben_fluxo_test.py exit=0 :: RESULTADO: OK 85/85
+varredura.py exit=0 :: RESULTADO: 141/141 páginas sem erro

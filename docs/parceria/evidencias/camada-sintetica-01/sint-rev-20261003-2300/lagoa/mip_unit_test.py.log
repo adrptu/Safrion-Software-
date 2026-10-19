@@ -1,0 +1,39 @@
+$ CDP_GL=1 timeout 900 python3 mip_unit_test.py
+OK   dados_mip.verificar (datas, pontos × protocolo, médias citadas)
+OK   área do Pivô 22 no MIP = fonte única (dados_lagoa_fonte)
+OK   VIS-011: média 13,0 com 13 válidos (ponto 11 em recoleta) → foco
+OK   VIS-013: 5,1 / 4 adultos/folíolo · acima do NC (R5)
+OK   resultados da semente
+OK   VIS-051 em controle pela OS-0504 do cenário
+OK   VIS-051: alerta de rotação IRAC 6 e colheita suspensa (mamão, carência 14 d)
+OK   feijão × mosca-branca: só os 4 registrados
+OK   Inseticida B: alerta de rotação IRAC 1B, sem trava
+OK   Acaricida D em 28/09: trava de carência (14 d passa da colheita 10/10)
+OK   dose acima da bula trava
+OK   emitir: OS-0440 em A liberar com Ciantraniliprole 47,5 L
+OK   emitir: DIA-009 registrada, REC-015 com RA-0142, decisão na VIS-013
+OK   não duplica a O.S. da mesma vistoria
+OK   seguir monitorando (abaixo do NC): VIS-018 programada para 29/09
+OK   programar no T7: VIS-019 com 20 pontos
+OK   não duplica talhão × alvo aberto
+OK   combinação fora do protocolo é recusada
+OK   meleira: O.S. de erradicação OS-0441 sem produto
+OK   app: ponto 10 da VIS-014 registrado
+OK   concluir com 10 de 14 → coleta incompleta
+OK   sincronizar VIS-016: 6 de 12 → incompleta; decidir com 6 → acima do NC
+OK   foco: 6 reboleiras (média 9,0) e 7 reboleiras (média 10,5) ficam "foco"; 7 > 30 % é reboleira larga
+OK   VIS-060 e VIS-006: "Vistoria atrasada" com "Programar vistoria"; VIS-012 seguida pela VIS-015 sem atraso
+OK   Mapa (7 dias) do T7 mostra a VIS-008 perto do NC, igual ao AG-01
+OK   cancelar a OS-0440: Inseticida B sem trava de nº máximo e rotação citando 08/09 (não a cancelada)
+OK   histórico mostra a aplicação da OS-0440 como cancelada
+OK   decidir de novo: mesmo DIA-009 → REC-019/RA-0143/OS-0441; REC-015 "Cancelado" substituído pelo REC-019
+OK   erradicação com 999 ha no Pivô 22 (62,1 ha) trava
+OK   500 em "% folíolos com ácaro" é recusado
+OK   ponto 10 com GPS fora vai para recoleta
+OK   corrigir o ponto 8 (20 → 2)
+OK   concluir com 10 de 14 → coleta incompleta, coletável no app
+OK   "Completar coleta": o app reabre a VIS-014 no ponto 11
+OK   depois dos pontos sem contagem, o app pede a recoleta do ponto 10
+OK   recoleta do ponto 10 entra na média
+RESULTADO 34/34
+[exit 0]

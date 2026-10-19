@@ -1,0 +1,15 @@
+OK 3 operações de4h em8h: primeira que estoura é C
+OK janelas adjacentes sem interseção global são viáveis
+OK janela de1h expira antes da segunda operação
+OK virada de dia preserva data e fim exato
+OK deslocamento entre O.S. impede janela antes viável
+OK primeiro deslocamento conta e espera não é operação
+OK dados ausentes e inválidos nunca presumem viabilidade
+OK parâmetro explícito e fonte obrigatórios, sem padrão
+OK sem dado intermediário não calcula sucessor nem oculta prefixo
+OK entrada vazia e IDs ausentes/duplicados
+OK não altera ordem, dados ou parâmetros congelados
+OK precisão de1ms conservadora e fronteira inclusiva
+OK overflow não vira horário viável ou exceção
+13 cenários passaram
+rc=0

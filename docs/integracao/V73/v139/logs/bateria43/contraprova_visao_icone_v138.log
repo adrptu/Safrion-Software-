@@ -1,0 +1,2 @@
+FALHA VIS-08 seletores de visão só com ícone nas telas do menu (112 seletores em 66 telas; exceções com motivo: 2) · [('BEN.dc.html', 'Visão das ordens', ['Lista', 'Cartões', 'Kanban']), ('CD-01.dc.html', 'Visualização da lista', ['Lista', 'Mapa']), ('CD-01.dc.html', 'Visualização da lista', ['Lista', 'Mapa']), ('SAF.dc.html', 'Visão', ['{{w.t}}'])]
+RESULTADO: 0/1

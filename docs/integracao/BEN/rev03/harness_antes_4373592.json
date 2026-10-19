@@ -1,0 +1,206 @@
+{
+  "candidate": "bbe8417cd99b763875639e7cc2f7b15e044e4ed3",
+  "executor": "Node local, solicitado pelo Gemini real",
+  "cases": [
+    {
+      "name": "origem por lote preservada ao complementar, estornar e devolver",
+      "passed": false,
+      "before": {
+        "old": {
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "CX26-01",
+          "local": "Packing",
+          "un": "un",
+          "fisico": 0,
+          "quarentena": 0,
+          "reservado": 0,
+          "validade": "—"
+        },
+        "new": {
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "QA-CX-02",
+          "local": "Packing",
+          "un": "un",
+          "fisico": 1000,
+          "quarentena": 0,
+          "reservado": 0,
+          "validade": ""
+        }
+      },
+      "after": {
+        "old": {
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "CX26-01",
+          "local": "Packing",
+          "un": "un",
+          "fisico": 0,
+          "quarentena": 0,
+          "reservado": 0,
+          "validade": "—"
+        },
+        "new": {
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "QA-CX-02",
+          "local": "Packing",
+          "un": "un",
+          "fisico": 1540,
+          "quarentena": 0,
+          "reservado": 100,
+          "validade": ""
+        }
+      },
+      "original": {
+        "tipo": "consumo",
+        "os": "OB-0113",
+        "req": "REQ-041",
+        "prod": "Caixa de mamão Formosa 10 kg",
+        "lote": "CX26-01",
+        "qtd": 540,
+        "un": "un",
+        "quem": "Igor (responsável de produção)",
+        "origem": "web",
+        "sinc": true,
+        "det": "Caixa de mamão Formosa 10 kg 540",
+        "id": "MV-1003",
+        "at": "23:04"
+      },
+      "reversal": {
+        "tipo": "estorno-consumo",
+        "os": "OB-0113",
+        "req": "REQ-041",
+        "prod": "Caixa de mamão Formosa 10 kg",
+        "lote": "QA-CX-02",
+        "qtd": 540,
+        "un": "un",
+        "quem": "Igor (responsável de produção)",
+        "origem": "web",
+        "sinc": true,
+        "det": "Caixa de mamão Formosa 10 kg 540",
+        "ref": "MV-1003",
+        "id": "MV-1006",
+        "at": "23:04"
+      },
+      "complement": {
+        "msg": "100 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113 do QA-CX-02 (o CX26-01 tinha 0 un livres): REQ-041 com 640 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.)."
+      },
+      "reverse": {
+        "msg": "S-01 estornado: Pesagem refeita · diferença 6.900 kg (56,10 %) → 12.300 kg (100,00 %) · 540 un de caixa voltam à custódia."
+      },
+      "returned": {
+        "msg": "540 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível."
+      },
+      "movements": [
+        {
+          "tipo": "reserva",
+          "req": "REQ-041",
+          "os": "OB-0113",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "CX26-01",
+          "qtd": 540,
+          "un": "un",
+          "quem": "Sistema",
+          "origem": "web",
+          "id": "MV-1001",
+          "at": "23:04"
+        },
+        {
+          "tipo": "entrega",
+          "req": "REQ-041",
+          "os": "OB-0113",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "CX26-01",
+          "qtd": 540,
+          "un": "un",
+          "quem": "Rui (almoxarife) → Igor",
+          "origem": "web",
+          "id": "MV-1002",
+          "at": "23:04"
+        },
+        {
+          "tipo": "consumo",
+          "os": "OB-0113",
+          "req": "REQ-041",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "CX26-01",
+          "qtd": 540,
+          "un": "un",
+          "quem": "Igor (responsável de produção)",
+          "origem": "web",
+          "sinc": true,
+          "det": "Caixa de mamão Formosa 10 kg 540",
+          "id": "MV-1003",
+          "at": "23:04"
+        },
+        {
+          "tipo": "reserva",
+          "req": "REQ-041",
+          "os": "OB-0113",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "QA-CX-02",
+          "qtd": 100,
+          "un": "un",
+          "quem": "Igor (responsável de produção)",
+          "origem": "web",
+          "det": "complemento da OB-0113",
+          "id": "MV-1005",
+          "at": "23:04"
+        },
+        {
+          "tipo": "estorno-consumo",
+          "os": "OB-0113",
+          "req": "REQ-041",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "QA-CX-02",
+          "qtd": 540,
+          "un": "un",
+          "quem": "Igor (responsável de produção)",
+          "origem": "web",
+          "sinc": true,
+          "det": "Caixa de mamão Formosa 10 kg 540",
+          "ref": "MV-1003",
+          "id": "MV-1006",
+          "at": "23:04"
+        },
+        {
+          "tipo": "devolucao",
+          "req": "REQ-041",
+          "os": "OB-0113",
+          "prod": "Caixa de mamão Formosa 10 kg",
+          "lote": "QA-CX-02",
+          "qtd": 540,
+          "un": "un",
+          "quem": "Rui (almoxarife)",
+          "origem": "web",
+          "apto": true,
+          "id": "MV-1007",
+          "at": "23:04"
+        }
+      ]
+    },
+    {
+      "name": "versao vencida recusa sem escrita",
+      "passed": true,
+      "error": "A OB-0113 mudou depois que você abriu: Em execução · 1 registros válidos · diferença 6.900 kg. Confira e registre de novo.",
+      "unchanged": true
+    },
+    {
+      "name": "perfil sem papel de producao recusa sem escrita",
+      "passed": true,
+      "error": "Pedir caixas para a OB-0113: decisão de Igor (responsável de produção). Nada foi alterado.",
+      "unchanged": true
+    },
+    {
+      "name": "recibo repetido e payload conflitante",
+      "passed": true,
+      "repeat": {
+        "msg": "Já feito: 100 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113 do QA-CX-02 (o CX26-01 tinha 0 un livres): REQ-041 com 640 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.).",
+        "nada": true,
+        "repetido": true,
+        "id": ""
+      },
+      "error": "Este registro (QA-I) já foi gravado com outro conteúdo: conflito, nada gravado.",
+      "unchanged": true
+    }
+  ],
+  "passed": false
+}

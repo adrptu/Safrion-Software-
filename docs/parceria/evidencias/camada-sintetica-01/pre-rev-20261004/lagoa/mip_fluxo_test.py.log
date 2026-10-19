@@ -1,0 +1,18 @@
+$ CDP_GL=1 timeout 900 flock /tmp/cdp9333.lock python3 mip_fluxo_test.py
+OK    1 AG-01 "Pragas e doenças" (Santa Rita): selo "1 acima do NC sem decisão", VIS-013 primeiro com "Decidir controle", primário único "Programar vistoria" 
+OK    2 Fazenda Lagoa Grande: VIS-051…060 no AG-01 (10), VIS-051 em controle pela OS-0504 
+OK    3 AG-01.dc.html#VIS-053 abre o painel da meleira (Pivô 9) e troca a fazenda para Lagoa Grande · próximo passo "Confirmar foco" 
+OK    4 Mapa P1: "Mosca-branca · acima do NC" (+2: VIS-014 em coleta e VIS-006 atrasada, iguais ao AG-01) · primário "Decidir controle" abre a decisão da VIS-013 
+OK    5 Mapa T7 "Seguir monitorando" (botão, não link) registra na VIS-008 e programa VIS-018 (ácaro-rajado), que persiste e aparece no AG-01 como Programada · "Coletar no app" 
+OK    6 Decidir controle (VIS-013): só os 4 registrados para feijão × mosca-branca · Inseticida B com alerta de rotação (IRAC 1B) 
+OK    7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado 
+OK    8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440" 
+OK    9 OS.dc.html#OS-0440: A liberar com Ciantraniliprole 100 OD (sem lote: a trava de estoque é a da liberação) e origem VIS-013 · RA-0142 
+OK    10 Mapa P1 depois de emitir: "Mosca-branca · em controle" · primário "Abrir OS-0440" 
+OK    11 VIS-015 abaixo do NC → "Seguir monitorando" registra e programa VIS-019 para 29/09 
+OK    12 Meleira (PV09): Confirmar foco → "Gerar O.S. de erradicação" → OS-0441 em A liberar sem produto 
+OK    13 AG-01det#VIS-051: rota do Pivô 6 com 20 pontos e média válida 18 % (NC 15) · voltar leva a AG-01.dc.html#VIS-051 
+OK    14 App MB-06#VIS-014: "Registrar e ir ao ponto 11" grava o ponto 10 · AG-01 mostra 10 de 14 coletados 
+OK    15 AG-03: DIA-009 Registrada (sem "Bloqueado" por laudo) · AG-04: REC-015 com RA-0142 e OS-0440 
+RESULTADO 15/15
+[exit 0]

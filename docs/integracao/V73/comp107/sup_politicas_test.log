@@ -1,0 +1,12 @@
+PASS propor preserva vigente e entrada
+PASS simular não aprova nem modifica
+PASS publicar sem aprovação é rejeitado
+PASS aprovação exige papel pertinente
+PASS edição após aprovação invalida aceite
+PASS publicação cria versão e recibo; repetição não duplica
+PASS nova proposta não reutiliza recibo anterior
+PASS falha na gravação conserva proposta e vigente
+PASS conflito de versão rejeita escrita
+PASS dados corrompidos não viram seed silenciosamente
+PASS dias fracionários e valores inválidos rejeitados
+11 testes aprovados

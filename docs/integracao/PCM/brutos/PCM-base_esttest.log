@@ -1,0 +1,154 @@
+===== parte 1 =====
+faixa: Confira recebimentos | Entregue por O.S. | Receba devoluções | Confira saldos | Faça contagens | Acompanhe movimentos
+  OK  abre na seção Confira recebimentos
+KCl: ▾ KCl 60% 1 lote KCl 60% Galpão 2 60.000 kg — 10.000 kg 50.000 kg — — —
+  OK  etapa 4 abre direto; KCl físico 60 t, quarentena 10 t, disponível 50 t
+k1: 1 nota a conferir · em quarentena: KCl 60% 10.000 kg · pedidos com saldo a entregar: PC-088 40.000 kg, PC-090 20.000 kg, PC-091 8.000 kg
+primário: 
+abrir NF 4533: ok Recebimento · NF 4533
+  OK  semente: campo Validade do lote editável
+erro soma: Corrija os campos destacados; o que você preencheu foi mantido. | Apta + quarentena deve somar a conferida (20.000 kg). | Informe a validade do lote (mês/ano, ex.: 06/2027). | Informe o motivo da quarentena ou da divergência.
+  OK  apta + quarentena ≠ conferida dá erro no campo
+  OK  semente sem validade não salva
+erro motivo: Corrija os campos destacados; o que você preencheu foi mantido. | Informe a validade do lote (mês/ano, ex.: 06/2027). | Informe o motivo da quarentena ou da divergência.
+  OK  quarentena exige motivo
+  OK  validade em formato inválido dá erro
+vencido: Corrija os campos destacados; o que você preencheu foi mantido. | Lote vencido em 08/2026: registre toda a quantidade em quarentena (Apta para uso = 0).
+  OK  lote já vencido exige toda a quantidade em quarentena
+toast: Recebimento NF 4533 conferido: 20.000 kg de Semente de soja 58 W no lote S58-0926 (validade 03/2027). Disponível 12.000 kg → 30.000 kg; 2.000 kg em quarentena ficam fora do disponível.
+  OK  recebimento salvo com validade
+linha: NF 4533 24/09/2026 23/09/2026 PC-090 Ver pedido Coop. Vale Semente de soja 58 W S58-0926 20.000 kg 20.000 kg 18.000 kg 2.000 kg Aguarda laudo — validade 03/2027
+  OK  linha mostra quarentena aguardando laudo e a validade
+  OK  recebimento gravado no lote do cenário (20 t, 2 t em quarentena)
+  OK  fertilizante (PC-088): validade travada em Sem validade
+duplicado: Corrija os campos destacados; o que você preencheu foi mantido. | NF 4533 já foi lançada: documento duplicado não cria segunda entrada.
+  OK  NF duplicada não cria segunda entrada (sem exigir validade de fertilizante)
+lote novo: S58-0926 Semente de soja 58 W Câmara fria 20.000 kg — 2.000 kg Liberar após inspeção 18.000 kg Em quarentena 03/2027
+  OK  saldo: lote S58-0926 20 t físico, 2 t quarentena, 18 t disponível
+  OK  lote novo entra com a validade informada (FEFO usa)
+item: ▾ Semente de soja 58 W 2 lotes Semente de soja 58 W Câmara fria 32.000 kg — 2.000 kg 30.000 kg — — —
+  OK  disponível do item 12 t + 18 t = 30 t
+  OK  origem do lote registra a validade do recebimento
+sem laudo: ok
+  OK  CTL-3: sem laudo o KCl segue com 10 t bloqueadas e o erro aparece junto ao campo
+com laudo: ok
+toast: 10.000 kg do lote K26-11 liberados com o laudo LAB-0917 por Ana (gestora). Disponível de KCl 60%: 50.000 kg → 60.000 kg.
+KCl após: ▾ KCl 60% 1 lote KCl 60% Galpão 2 60.000 kg — — 60.000 kg — — —
+  OK  KCl disponível 60 t após a inspeção; botão some do lote
+  OK  CTL-3: a origem do lote registra o laudo e quem liberou
+  OK  nota NF 4501 passa a Quarentena liberada
+  OK  sem erro de script
+RESULTADO: 22/22 ok
+===== parte 2 =====
+k2: 5 itens a entregar · 0 aguardando confirmação no app · 3 só consulta (O.S. fora de Liberadas e Em execução) · 3 bloqueados por O.S. impedida
+REQ-038: ok Entrega · REQ-038 × Consulta: OS-0418 aguarda a liberação na O.S. (agrônomo). Entregue só para O.S. liberada ou em execução; sobras e custódia ficam em Receba d
+  OK  REQ-038 bloqueada abre em consulta com motivo
+REQ-036: REQ-036 OS-0420 Em execução Semente de soja 58 W lote S58-0801 saco 40 kg 5.200 kg 1.560 kg 3.640 kg — Bloqueada O.S. impedida · OM-0233 OS-0420 impedida pela OM-0233 (Trator T1 bloqueado): entregue quando o ativo for liberado ou substituído na O.S.
+  OK  REQ-036 (OS-0420 impedida) bloqueada com selo e motivo
+  form: Entrega · REQ-036 × Bloqueada: OS-0420 impedida pela OM-0233 (Trator T1 bloqueado): entregue quando o ativo for liberado ou substituído na O.S. Nova entrega só com a O.S. apta; o que já foi entregue continua registrado. Lote reservado Quantidade a entregar kg 
+  OK  REQ-036: subtítulo não diz que nada foi entregue
+  OK  REQ-036 só consulta
+REQ-031: REQ-031 OS-0417 Em conferência MAP 11-52 lote M26-07 saco 50 kg 5.000 kg 5.000 kg 1.000 kg — O.S. em conferência · sem nova entrega 5.000 kg solicitado − 3.500 kg consumido − 500 kg em custódia
+  OK  REQ-031 (em conferência) somente consulta com selo; saldo 5.000 − 3.500 − 500 = 1.000 kg
+  OK  REQ-031 abre só consulta
+REQ-040: ok 8000
+erro: Corrija os campos destacados; o que você preencheu foi mantido. | Acima do saldo a entregar: 8.000 kg (8.000 kg solicitado − 0 kg consumido − 0 kg em custódia).
+  OK  entrega acima do saldo: erro com a conta
+  OK  valor digitado preservado
+toast: 8.000 kg de NPK 20-05-20 entregues a Paula (OS-0425). Aguarda confirmação no app.
+linha: REQ-040 OS-0425 Liberadas NPK 20-05-20 lote N26-03 big bag 1.000 kg 8.000 kg 8.000 kg — — Entrega completa Aguardando confirmação no app O.S. pede 11.400 kg, reservado 8.000 kg
+  OK  REQ-040 entregue (8.000 kg), aguardando confirmação no app
+REQ-035 antes: REQ-035 OS-0421 Em execução Fungicida A lote F26-02 galão 5 L 175 L 160 L 15 L 3 galões Parcial faltam 15 L
+  OK  REQ-035: 175 − 95 − 65 em custódia = 15 L a entregar
+k3: Em custódia: REQ-022 31,4 L de Abamectina 18 EC com Wesley (OS-0504) · REQ-023 1.673,1 kg de Sulfato de potássio com Joaquim (OS-0506) · REQ-023 743,6 kg de Nitrato de amônio com Joaquim (OS-0506) · REQ-024 1.142,75 kg de Nitrato de amônio com Joaquim (OS-0507) · REQ-024 45,71 kg de Ácido bórico com Joaquim (OS-0507) · REQ-031 500 kg de MAP 11-52 com Paula (OS-0417) · REQ-035 65 L de Fungicida A com Marcos (OS-0421) · REQ-040 8.000 kg de NPK 20-05-20 com Paula (OS-0425)
+antes: REQ-031 OS-0417 MAP 11-52 lote M26-07 5.000 kg 3.500 kg 1.000 kg 500 kg com Paula Bloqueado 500 kg em custódia
+  OK  OS-0417 com encerramento bloqueado por 500 kg
+  OK  REQ-036 (bloqueada, já entregue) continua visível em devoluções
+primário: ok
+  OK  devolução acima da custódia: erro
+toast: 500 kg de MAP 11-52 devolvidos ao disponível. Custódia de MAP 11-52 na OS-0417: 500 kg → 0 kg · encerramento liberado.
+depois: REQ-031 OS-0417 MAP 11-52 lote M26-07 5.000 kg 3.500 kg 1.500 kg — — Pode encerrar custódia zero
+  OK  custódia 500 → 0, devolvido 1.500 kg, encerramento liberado
+  OK  REQ-040 aparece com 8.000 kg em custódia
+toast: 30 L de Fungicida A devolvidos ao disponível. Custódia de Fungicida A na OS-0421: 65 L → 35 L.
+REQ-035 depois: REQ-035 OS-0421 Em execução Fungicida A lote F26-02 galão 5 L 175 L 160 L 45 L 9 galões Parcial faltam 45 L
+  OK  após devolução de 30 L: 45 L a entregar
+  OK  ajuda da quantidade mostra a conta
+  OK  46 L acima do saldo: erro
+toast: 45 L de Fungicida A entregues a Marcos (OS-0421). Aguarda confirmação no app.
+REQ-035 reentrega: REQ-035 OS-0421 Em execução Fungicida A lote F26-02 galão 5 L 175 L 205 L — — Entrega completa Aguardando confirmação no app —
+  OK  reentrega legítima de 45 L aceita
+MAP lote: M26-07 MAP 11-52 Galpão 2 90.500 kg — — 90.500 kg Disponível —
+  OK  MAP físico 90.000 + 500 kg devolvidos
+NPK: ['0 kg', '8.000 kg', 'OS-0425']
+  OK  NPK disponível 0, 8 t em custódia (OS-0425)
+Fungicida A lote: F26-02 Fungicida A Almox. defensivos 530 L 65 L — 465 L Disponível 03/2028
+  OK  Fungicida A: 545 + 30 devolvidos − 45 reentregues = 530 L; reserva da OS-0424 (65 L) preservada
+  OK  sem erro de script
+RESULTADO: 23/23 ok
+===== parte 3 =====
+k5: 1 contagem a fazer · 1 ajuste aguardando aprovação
+a contar: INV-2611 — Glifosato 480 G26-14 Almox. defensivos oculto até contar a contar — A contar —
+  OK  A contar: saldo do sistema oculto
+primário: ok
+  OK  formulário da contagem não mostra o saldo
+toast: Contagem INV-2611 registrada: diferença −20 L · AJ-71 aguarda o gestor. O saldo não muda até aprovar · informe a causa antes da aprovação.
+  OK  salvar sempre grava (sem exigir causa ao contar)
+linha: INV-2611 AJ-71 Glifosato 480 G26-14 Almox. defensivos 1.200 L 1.180 L −20 L Ajuste aguardando aprovação informe a causa Recontar Aprovar ajuste
+  OK  diferença vira ajuste aguardando aprovação; pede causa
+  OK  linha oferece Recontar e Aprovar ajuste
+glifosato: G26-14 Glifosato 480 Almox. defensivos 1.200 L — — 1.200 L Disponível 11/2027
+  OK  saldo NÃO muda sem aprovação
+origem: Saldo · G26-14 × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Sem movimentos desde o início da demonstração. Ajuste INV-2611 −20 L aguardando aprovação · não aplicado ao saldo Fechar
+  OK  origem mostra ajuste pendente não aplicado
+aprovar sem causa: ok Informe a causa da diferença de INV-2611 na contagem antes de aprovar o ajuste.
+  OK  aprovar sem causa pede a causa na contagem
+  OK  contagem salva: quantidade e contador travados
+toast: Causa da diferença de INV-2611 registrada: 2 bombonas avariadas descartadas sem baixa. Quantidade e contador seguem travados; o ajuste aguarda aprovação.
+  OK  causa registrada sem mudar a contagem
+recontar: ok Recontagem de INV-2611 aberta: outro contador conta sem ver o saldo; a contagem anterior fica registrada na origem da linha.
+  OK  Recontar reabre a contagem com quantidade em branco
+  OK  recontagem também é cega (sem contagem anterior no formulário)
+  OK  linha volta a ocultar o saldo
+  OK  recontagem exige contador diferente
+toast: Contagem INV-2611 registrada: diferença −15 L · AJ-72 aguarda o gestor. O saldo não muda até aprovar · informe a causa antes da aprovação.
+recontada: INV-2611 AJ-72 Glifosato 480 G26-14 Almox. defensivos 1.200 L 1.185 L −15 L Ajuste aguardando aprovação informe a causa Recontar Aprovar ajuste
+  OK  recontagem registrada: diferença −15 L
+origem: Contagem · INV-2611 × Contagem registrada: quantidade e contador ficam travados. Informe a causa da diferença; para conferir de novo, use Recontar na linha. Item · lote K26-11 · KCl 60% · Galpão 2 M26-07 · MAP 11-52 · Galpão 2 F26-02 · Fungicida A · Almox. defensivos G26-14 · Glifosato 480 · Almox. defensivos S58-0801 · Semente de soja 58 W · Câmara fria N26-03 · NPK 20-05-20 · Galpão 1 O26-05 · Ó
+  OK  contagem anterior fica na origem da linha
+aprovar: ok Ajuste INV-2611 (AJ-72) aprovado por Ana (gestora): −15 L no lote G26-14. Físico 1.200 L → 1.185 L. Fica revisão posterior pendente (Ana registrou a contagem e decidiu).
+  OK  CTL-3 (padrão 2): Ana registrou a contagem e aprovou: a decisão vale e fica revisão posterior
+glifosato: G26-14 Glifosato 480 Almox. defensivos 1.185 L — — 1.185 L Disponível 11/2027
+  OK  após aprovação o físico vai a 1.185 L
+  OK  sem erro de script
+RESULTADO: 19/19 ok
+===== parte 4 =====
+  OK  menu lateral: seletor de perfil começa em Ana
+perfil Rui: ok Perfil de demonstração: Rui · Almoxarife (não é segurança de acesso).
+  OK  trocar de perfil avisa que não é segurança de acesso
+INV-2609 (Rui): INV-2609 — MAP 11-52 M26-07 Galpão 2 90.000 kg 89.400 kg −600 kg Ajuste aguardando aprovação Recontar aprova: Ana (gestora)
+  OK  Rui vê "aprova: Ana (gestora)" no lugar de Aprovar ajuste; Recontar continua
+K26-11 (Rui): K26-11 KCl 60% Galpão 2 60.000 kg — 10.000 kg aguarda laudo · Ana (gestora) libera 50.000 kg Em quarentena —
+  OK  Rui vê "aguarda laudo · Ana (gestora) libera" no lote em quarentena
+  OK  comando direto como Rui é recusado e nada muda
+contar: ok
+toast: Contagem INV-2611 registrada: diferença −20 L · AJ-71 aguarda o gestor. O saldo não muda até aprovar.
+  OK  Rui registra a contagem de Paula: o ajuste guarda quem registrou; a linha diz quem aprova
+perfil Ana: ok
+  OK  de volta a Ana, a linha oferece Aprovar ajuste
+aprovar: ok Ajuste INV-2611 (AJ-71) aprovado por Ana (gestora): −20 L no lote G26-14. Físico 1.200 L → 1.180 L.
+  OK  Ana aprova a contagem registrada por Rui: sem revisão posterior
+  OK  G26-14 vai a 1.180 L
+liberar K26-11: ok
+perfil Rui: ok
+  OK  Ana abre o laudo do K26-11 e troca para Rui: o painel do laudo fecha e a linha diz quem libera (quarentena segue 10.000 kg)
+relato: Turno fechado: 10 ha em 2 h. A ordem continua em execução. Consumo em conferência: Fungicida A 85 L relatados, 65 L em custódia · Rui (almoxarife) confere; Ana (gestora) aceita o excedente.
+aceitar: ok
+perfil Rui: ok
+  OK  Ana abre o aceite dos 20 L acima da custódia e troca para Rui: "Confirmar aceite" some, a linha diz "aceite: Ana (gestora)"; F26-02 segue 545 L
+perfil Paula: ok
+toast: 320 L de Glifosato 480 entregues a Marcos (OS-0430). Aguarda confirmação no app.
+  OK  Paula entrega o Glifosato da OS-0430 pela tela: a trilha grava "Paula (almoxarife) → Marcos"
+  OK  sem erro de script
+RESULTADO: 13/13 ok
+RESULTADO: OK

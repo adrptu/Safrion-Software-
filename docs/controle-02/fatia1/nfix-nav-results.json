@@ -1,0 +1,42 @@
+[
+  {
+    "nome": "os-cenario",
+    "exit": 1,
+    "summary": [
+      "  FALHA A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov · (['A liberar', False, 6], 'PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses abaixo e libera; se precisar, ajusta antes de liberar. Os insumos são reservados no Estoque. Pendência com Ana (agrônoma) · antes de 25/09 Liberar para execução Ajustar antes de liberar Cancelar sem execuçã",
+      "RESULTADO: 11/12 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov",
+      "Traceback (most recent call last):"
+    ]
+  },
+  {
+    "nome": "os-v39",
+    "exit": 0,
+    "summary": [
+      "RESULTADO: 13/13 ok"
+    ]
+  },
+  {
+    "nome": "dose-nav",
+    "exit": 1,
+    "summary": [
+      "4/4 ok · FALHAS: 0",
+      "Traceback (most recent call last):",
+      "    FALHAS += dose_divergente_nav.rodar()"
+    ]
+  },
+  {
+    "nome": "ap-unico-nav",
+    "exit": 0,
+    "summary": [
+      "23/23 ok · FALHAS: 0",
+      "RESULTADO nav: 23/23"
+    ]
+  },
+  {
+    "nome": "diaria-nav",
+    "exit": 0,
+    "summary": [
+      "RESULTADO: 0/0 ok"
+    ]
+  }
+]

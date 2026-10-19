@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Shell v3.7: menu de 13 áreas do cap. 4.1, contexto do cap. 4.2, faixa de continuidade e rodapé de demonstração."""
-import json, os
+import json, os, re
 from engine import (INK,MUTED,LINE,BG,SURF,ACC,ACCS,SH,SIDE,SIDE_TX,SIDE_MUTED,DISP,FONT,YEL,YELS,RED,REDS,GRAY,GRAYS,
                     icon,esc,chip,btn,act,chev,engine,extra_html,wid,reg,wget,_reset_screen,FIRST_TBL,CHIP_ON,CHIP_OFF,HL)
 import engine as E
@@ -27,78 +27,172 @@ H_OVR=json.load(open(_OVR_P)) if os.path.exists(_OVR_P) else {}  # alturas medid
 def _h(fname,H): return H_OVR.get(fname) or HEIGHTS37.get(fname,H)
 PRIMHREF={}   # fid -> destino do botão primário
 PARENT37={}   # fname -> fname de volta
+# botão de voltar com rótulo, ao lado do título (13/10/2026, proprietário: "botão de voltar fácil para todos cadastros"): fname -> (rótulo, destino)
+VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # CD-08 Operações e rendimentos (13/10)
 
 # Menu vigente por decisão do proprietário (25/09/2026): Mapa · Cadastros · Agrícola · Suprimentos.
 # 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
 # 02/10/2026: Manutenção ganha "Planos de manutenção" (PM) como 1º item; MA-03 vira "Vencimentos e paradas" (sem dois itens com o mesmo nome).
+# 05/10/2026 (pedido "PCM /manutenção também tem telas e menus demais... faça o melhor num só"; PCM simplificado v2, D-01/D-02): o grupo Manutenção
+#   passa a 1 item, "Manutenção" → MA.dc.html (link direto), com as visões Sem ordem · Ordens · Ativos · Planos; a posição de 01/10 fica.
+# 06/10/2026: grupo Produção logo depois de Agrícola (colheita de ponta a ponta, docs/colheita · D-01): no máximo 3 itens.
+# 09/10/2026 (SOLO-01, D-01): Análises de solo (AG-02) em Agrícola, entre Planos agronômicos e Planejar safra (o laudo vira sugestão nas doses do plano).
+# 06/10/2026: grupo Comercial logo depois de Produção (comercial e logística, docs/comercial · D-C01): planejamento, execução e controle, no máximo 3 itens.
 # Os demais módulos ficam ocultos do menu, preservados no canvas (página "Módulos ocultos").
+# v55 (10/10/2026): o Beneficiamento (BEN.dc.html) sai da navegação até a rodada 3 do BEN: os defeitos S2 de saldo e reserva de caixas
+#   estão em correção em outra frente e a tela não estreia no artefato. O código fica na branch, sem perda; só deixa de ser alcançável:
+#   sem aba irmã em Cargas (CARGA vira tela única), sem link de tela visível (Cargas e Estoque de produto mostram a ordem em texto) e,
+#   no canvas, na página "Módulos ocultos". Chave única, lida por ui37, areas/producao.py e build.py: reativar é BEN_PUBLICADO=True.
+# 13/10/2026 (proprietário: "coloque beneficiamento dentro de menu produção. Packing house, industria, etc" e "coloque tudo de produção, dentro
+#   de Agrícola"): rodada 3 do BEN e os 3 S2 da revisão (A1, A2, A8) corrigidos com teste de regressão (BEN-D33 a BEN-D39): o Beneficiamento
+#   volta à navegação como cartão próprio de Agrícola, logo depois de Recebimento; Cargas aponta a ordem do lote em processo (atalho e linha),
+#   sem a faixa de telas (seria um 2º caminho para o mesmo cartão).
+BEN_PUBLICADO=True
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
- ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
-   ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
- ('Manutenção','wrench',[('Planos de manutenção','PM.dc.html'),('Ativos e disponibilidade','MA-01.dc.html'),('Solicitações e inspeções','MA-02.dc.html'),
-   ('Vencimentos e paradas','MA-03.dc.html'),('Ordens de manutenção','MA-04.dc.html'),('Abastecimentos e desempenho','MA-05.dc.html')]),
- ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')])]
+ ('Painel','grafico',[('Painel','PG.dc.html')]),   # PAINEL-03 (18/10/2026, proprietário: "um painel só que navega pelos módulos ... centralizar e unificar o painel de gestão de tudo que importa num só lugar"): o painel único abre em Prioridades; o "Painel" de cada módulo abre a aba dele (PG.dc.html#mod=…)
+ ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
+ ('Agrícola','leaf',[('Painel','PG.dc.html#mod=agr'),('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento','CARGA.dc.html')]+([('Beneficiamento','BEN.dc.html')] if BEN_PUBLICADO else [])+[('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
+ ('Manutenção','wrench',[('Painel','PG.dc.html#mod=man'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
+ ('Suprimentos','cart',[('Painel','PG.dc.html#mod=sup'),('Compras','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
+ ('Comercial','Vendas',[('Painel','PG.dc.html#mod=com'),('Contratos e pedidos','VEN.dc.html'),('Oferta e compromissos','PCOM.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
+ ('Crédito','cash',[('Painel','PG.dc.html#mod=cre'),('Ficha do grupo','GE-08.dc.html#vis=ficha'),('Dossiês','GE-08.dc.html#vis=dossie'),('Pedidos e contratos','GE-08.dc.html#vis=contratos'),('Liberações e garantias','GE-08.dc.html#vis=liberacoes')]),   # 14/10/2026 (proprietário: "crie o menu de crédito"; depois "coloque os submenus de crédito como os demais"): a GE-08 (PRD; DEMO-10) abre pela tela de entrada do Crédito, um cartão por visão (como a Manutenção); sem visão no endereço, a GE-08 mostra tudo (links de outras telas)   # CRE F2 (52cfe856, Codex, 16/10): as 4 entradas são Ficha do grupo, Dossiês, Pedidos e contratos e Liberações e garantias; os documentos para crédito ficam na ficha ("Ver documentos") e no #vis=documentos. Menu e tela de entrada saem desta lista (base verde 2, 18/10)
+ ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Metas e limites','CF-06.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
+# 13/10/2026 (proprietário: "troque a posição do menu comercial com suprimentos. e manutenção logo abaixo de agrícola"): Agrícola ·
+#   Manutenção · Suprimentos · Comercial.
+# 13/10/2026 (proprietário: "tire todos submenus de todos os módulos e coloque na tela como fizemos com cadastros e deixe a barra lateral dos
+# menus somente recolhido com os ícones e tooltip sem opção de expandir. Mas reduza texto ao mínimo essencial de cada submenu ... sempre com
+# opção de voltar rápido e fácil. use sempre ícones mais intuitivos"): cada módulo com mais de uma tela abre a sua tela de entrada (cartões
+# com ícone e nome curto, areas/modulos.py); o Mapa abre direto. Cada tela do módulo volta por "‹ Módulo".
+# 13/10/2026 (proprietário: "o menu de manutenção está sem os submenus na tela igual os demais"): a Manutenção também abre a sua tela de
+# entrada, um cartão por visão da tela única MA (Sem ordem · Ordens · Ativos · Planos); a chave do CURTO37 com #vis= vale para o cartão.
+HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html','Manutenção':'MOD-MAN.dc.html','Crédito':'MOD-CRE.dc.html'}
+# 14/10/2026 (proprietário: "faça um teste nesses sub menus como se fosse um fluxograma com setas de linhas curvas, separando em 3 fases/blocos
+#   (input, processamento, output, mas sem escrever isso, apenas para o modo de organizar o fluxo). Assim o usuario entende onde as coisas
+#   começam e terminam e a ordem correta do fluxo de processos"): a tela de entrada do módulo com fluxo mostra os cartões em blocos, na ordem
+#   do processo, ligados por setas curvas (areas/modulos.py), sem título de bloco. Teste só no Agrícola; os demais módulos seguem em grade (desde 17/10, DS-MAN, também a Manutenção em blocos).
+#   Cada cartão do módulo aparece uma vez (o build confere); um href fora do menu (BEN_PUBLICADO=False) fica de fora.
+# 14/10/2026 (depois, proprietário: "Tire as setas, alinhe cada submenu no seu macro contexto e coloque titulos em cima dos blocos visuais de
+#   cada macro contexto"): sem setas; cartões alinhados no bloco; cada bloco com o título do macro contexto.
+FLUXO37={'Agrícola':[('Planejamento',['AG-07.dc.html','AG-02.dc.html','PA.dc.html','SAF.dc.html','GE-02.dc.html']),
+                     ('Execução',['AG-01.dc.html','OS.dc.html','IR-01.dc.html','COLH.dc.html']),
+                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PG.dc.html#mod=agr'])],
+         # DS-MAN (17/10/2026, proprietário: "Design system de manutenção ainda não está no padrão"): a entrada da Manutenção nos mesmos blocos do
+         # Agrícola, na ordem do processo (14/10: "onde as coisas começam e terminam"): o cadastro do que se mantém, a execução e o resultado
+         # ATIVO-UNICO (proprietário, 18/10: "Tem cadastro de ativos no módulo manutenção e cadastros"): o cadastro do ativo é só em Cadastros ›
+         # Máquinas (CD-03); aqui Ativos e Planos são o planejamento da manutenção, na mesma régua do Agrícola
+         'Manutenção':[('Planejamento',['MA.dc.html#vis=ativos','MA.dc.html#vis=planos']),
+                       ('Execução',['MA.dc.html#vis=semordem','MA.dc.html#vis=ordens']),
+                       ('Resultados',['PG.dc.html#mod=man'])]}
+CURTO37={'PG.dc.html#mod=agr':('Painel','grafico'),'PG.dc.html#mod=man':('Painel','grafico'),'PG.dc.html#mod=sup':('Painel','grafico'),'PG.dc.html#mod=com':('Painel','grafico'),'PG.dc.html#mod=cre':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
+ 'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
+ 'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),
+ 'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'BEN.dc.html':('Beneficiamento','fabrica'),'PROD.dc.html':('Estoque de produto','armazem'),
+ 'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Oferta e compromissos','scale'),'IV.dc.html':('Inteligência','trend'),
+ 'MA.dc.html#vis=semordem':('Sem ordem','clock'),'MA.dc.html#vis=ordens':('Ordens','wrench'),'MA.dc.html#vis=ativos':('Ativos','truck'),'MA.dc.html#vis=planos':('Planos','calendar'),
+ 'GE-08.dc.html#vis=ficha':('Ficha do grupo','prancheta'),'GE-08.dc.html#vis=dossie':('Dossiês','pasta'),'GE-08.dc.html#vis=contratos':('Pedidos e contratos','doc'),'GE-08.dc.html#vis=liberacoes':('Liberações e garantias','cash'),'GE-08.dc.html#vis=documentos':('Documentos','prancheta'),   # 16/10/2026: documentos para crédito saíram dos Cadastros
+ 'CMP.dc.html':('Compras','cart'),'EST.dc.html':('Estoque','box'),'IC.dc.html':('Inteligência','trend'),
+ 'CF-06.dc.html':('Metas e limites','engrenagem'),'CF-01.dc.html':('Usuários e alçadas','users'),'CF-04.dc.html':('Auditoria','historico'),'CF-03.dc.html':('Integrações','tomada'),'CF-05.dc.html':('Assinatura','card')}
+# outras pontas do protótipo (antes só no índice, que saiu em 13/10: o artefato abre direto no Mapa)
+OUTROS37=('Outros acessos','grid','MOD-OUT.dc.html',[('App de campo','MB-01.dc.html','celular'),('Portal do parceiro','PT-01.dc.html','users'),
+                                                    ('Onboarding','ON-01.dc.html','check'),('Backoffice','BO-02.dc.html','escudo')])
+VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv if not _hv.startswith('PG.dc.html')})   # o painel único (PAINEL-03) é item próprio da barra: não volta a um módulo
+# CAB-1 (DS-MODULOS-2, 17/10/2026; proprietário: "aplicacao do design system padrao, referencia modulo agricola ainda nao foi para demais
+# modulos"): Onboarding e Backoffice abrem por "Outros acessos" e voltam por ele, com o mesmo "‹ Módulo" das telas do menu
+VOLTA37.update({'ON-01.dc.html':(OUTROS37[0],OUTROS37[2]),'BO-02.dc.html':(OUTROS37[0],OUTROS37[2])})
+# Telas fora do menu (legado ainda gerado, abertas por links): o mesmo cabeçalho do Agrícola. "‹ Módulo" pelo prefixo, para o módulo do menu
+# onde o assunto mora hoje (Campo, Planejamento, Irrigação e Gestão moram em Agrícola; Colheita, Vendas e Logística em Comercial); o caminho
+# diz o mesmo módulo. O detalhe (crumbs_extra) continua voltando à sua lista pela seta.
+VOLTA_PREF={'AG':'Agrícola','CA':'Agrícola','PL':'Agrícola','IR':'Agrícola','GE':'Agrícola','SU':'Suprimentos','CO':'Comercial','VE':'Comercial',
+            'LO':'Comercial','MA':'Manutenção','CF':'Configurações','CD':'Cadastros','IN':'Mapa','PT':'Portal do parceiro','BO':OUTROS37[0],'ON':OUTROS37[0]}
+_VOLTA_DEST={'Mapa':'IN-04.dc.html','Portal do parceiro':'PT-01.dc.html',OUTROS37[0]:OUTROS37[2],'Cadastros':'CD.dc.html'}
+def volta_modulo(fname):
+    """(rótulo, destino) do "‹ Módulo" de uma tela fora do menu, pelo prefixo; None quando o prefixo não tem módulo."""
+    nome=VOLTA_PREF.get(fname[:2])
+    return (nome,HUB37.get(nome) or _VOLTA_DEST.get(nome)) if nome else None
+INICIO37='IN-04.dc.html'   # o protótipo começa no Mapa (1º item do menu)
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
- 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes que pertencem a um item do menu
+ 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes e telas irmãs que pertencem a um item do menu (o BEN é item próprio de Agrícola desde 13/10)
 def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):
+        if HUB37.get(nome)==f: return i,f   # tela de entrada do módulo
+    for i,(nome,ic,items) in enumerate(MENU2):
         for lab,h in items:
+            h=h.split('#')[0]   # subitem que abre uma visão da mesma tela (Manutenção: MA.dc.html#vis=…) pertence à tela
             if h==f or (f.startswith(h.replace('.dc.html','')) and f!=h and h not in ('IN-04.dc.html',) and f[:len(h)-8]==h[:-8]): return i,h
     return None,None
 def oculto(fname):
-    return menu_item(fname)[0] is None and fname!='Main.dc.html'
+    return menu_item(fname)[0] is None and fname not in ('Main.dc.html',OUTROS37[2]) and fname not in {h for _,h,_ in OUTROS37[3]}   # pontas de Outros acessos não são ocultas
+def subnav_st(cur):
+    """estilo do subitem do menu (ativo ou não); a Manutenção usa os dois no navegador para destacar a visão aberta."""
+    return ('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
+            + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
 def navbar(fid,fname=None):
-    """Barra lateral: macro menus expansíveis (estado real na tela); item ativo destacado."""
-    import engine as _E
+    """Barra lateral sempre recolhida (13/10/2026): um ícone por módulo, com o nome na dica (title → g2dica) e no nome acessível; o módulo
+    com mais de uma tela abre a tela de entrada (HUB37). Sem submenus e sem expandir. Por último, "Outros acessos" (app, portal, backoffice)."""
     fname=fname or ffile(fid)
-    act_i,act_h=menu_item(fname)
-    out=[]
-    for i,(nome,ic,items) in enumerate(MENU2):
-        on=(i==act_i)
-        if len(items)==1:
-            h=items[0][1]
-            st=(f'display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; '
-                + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
-            out.append(f'<a href="{h}" title="{esc(nome)}" style="{st}">{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
-            continue
-        _E.NAVSPEC.append({'open':on})
-        k=len(_E.NAVSPEC)-1
-        out.append(f'<button type="button" aria-expanded="{{{{nav{k}_open}}}}" onClick="{{{{nav{k}_tog}}}}" title="{esc(nome)}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: {"rgba(255,255,255,.10)" if on else "transparent"}; color: {"#fff" if on else SIDE_TX};">'
-                   f'{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt" style="flex-grow: 1;">{esc(nome)}</span><span class="ml-txt" aria-hidden="true" style="font-size: 11px; color: {SIDE_MUTED};">{{{{nav{k}_sym}}}}</span></button>')
-        subs=''
-        for lab,h in items:
-            cur=(h==act_h)
-            s2=('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
-                + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
-            subs+=f'<a href="{h}" style="{s2}">{esc(lab)}</a>'
-        out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div class="ml-sub" style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
+    act_i,_=menu_item(fname)
+    def item(nome,ic,h,on):
+        st=('display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: 10px; min-height: 44px; text-decoration: none; '
+            + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
+        return (f'<a href="{h}" title="{esc(nome)}" aria-label="{esc(nome)}"' + (' aria-current="page"' if on else '') + f' style="{st}">'
+                f'{icon(ic,20,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
+    out=[item(nome,ic,HUB37.get(nome) or items[0][1].split('#')[0],i==act_i) for i,(nome,ic,items) in enumerate(MENU2)]
+    out.append(f'<span aria-hidden="true" style="height: 1px; margin: 6px 8px; background: rgba(255,255,255,.12);"></span>')
+    out.append(item(OUTROS37[0],OUTROS37[1],OUTROS37[2],fname==OUTROS37[2]))
     return ''.join(out)
 
-# voltar/avançar do processo: setas ‹ › juntas à direita da faixa de etapas (pedido do Adrianus, 01/10/2026);
-# as etapas continuam clicáveis; cada seta tem lugar fixo para a faixa não pular na primeira e na última etapa
-_SETA=f'width: 28px; height: 28px; border-radius: 999px; border: 1px solid {LINE}; background: #fff; color: {INK}; font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0 0 2px;'
-# Faixa estreita (celular, quadro do site, zoom de 200 %; revisão QUALIDADE-ARTEFATO-20261003 item 3): abaixo do limite de largura da
-# própria faixa, ela mostra só "Etapa i de n · Nome" com ‹ ›, e a lista completa abre sob demanda (caixa nativa: toque e teclado, sem JS).
-# Limite por número de etapas, medido no Chrome (soma das etapas em até 2 linhas + setas); acima dele nada muda.
+# ---------------- progresso do processo e telas do módulo (UX-ACAO-UNICA-20261003 · DS-31 v2 · DS-33 §74.5.7.1) ----------------
+# Pedido do Adrianus (03/10/2026): no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a
+# etapa por três caminhos; "com tantas opções o usuário fica perdido". Esta decisão REVOGA as setas ‹ › e a lista de etapas
+# navegável de 01/10 (QUALIDADE…/RESPONSIVIDADE): não há os dois padrões. Dois componentes, cada um com uma função:
+# 1) indicador de progresso do processo guiado (SAF, CMP, PA, PM): lista ordenada que só informa atual/concluída/pendente/impedida,
+#    com a palavra do estado para leitor de tela (cor nunca sozinha); sem clique, sem handler, sem hover de ação e sem parada de Tab.
+#    Avanço e retorno ficam na área de ações ao fim do conteúdo (engine.area_acoes + g2acoes). No estreito: "Etapa i de n · Nome";
+#    a lista completa abre sob demanda e continua só informando (tocar em qualquer lugar fecha).
+# 2) telas irmãs de um módulo de trabalho paralelo (Estoque, Irrigação, Manutenção e módulos ocultos): é navegação (seções/telas,
+#    em qualquer ordem), não progresso; rotulada como tal, sem número de etapa e sem setas, com a pendência de cada tela escrita.
+#    É o único caminho entre as telas irmãs (as do menu também estão no menu lateral, que é o nível Menu do master-detail).
 _ETP_LIM={3:520,4:640,5:740}
 def _etp_lim(n): return _ETP_LIM.get(n,520 if n<3 else 900)
-def _etp_abre(i,n,nome):
-    """Etapa atual em texto + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque."""
-    t=f'Etapa {i} de {n} · {esc(nome)}' if i else f'{n} etapas'
-    return (f'<input type="checkbox" id="etp-c{i}" class="etp-chk" aria-controls="etp-lista" aria-label="{t} · mostrar todas as etapas">'
-            f'<label for="etp-c{i}" class="etp-atual" title="Mostrar todas as etapas"><span style="flex-grow: 1; min-width: 0;">{t}</span><span class="etp-seta" aria-hidden="true">▾</span></label>'
+# cartões do processo (15/10): abaixo da soma dos cartões no mínimo (número, nome em até 2 linhas, contagem, setas) a faixa vira rótulo + folha
+_ETP_LIM_IND={4:820,6:1180}
+def _etp_lim_ind(n): return _ETP_LIM_IND.get(n,_etp_lim(n))
+def _etp_abre(i,n,nome,secao=False):
+    """Rótulo da faixa estreita + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque.
+    Progresso: "Etapa i de n · Nome". Telas do módulo: o nome da tela atual (não é etapa)."""
+    if secao:
+        t=esc(nome); aria=f'Tela atual: {esc(nome)} · mostrar todas as telas'; dica='Mostrar todas as telas'
+    else:
+        t=f'Etapa {i} de {n} · {esc(nome)}' if i else f'{n} etapas'; aria=f'{t} · mostrar todas as etapas'; dica='Mostrar todas as etapas'
+    return (f'<input type="checkbox" id="etp-c{i}" class="etp-chk" aria-controls="etp-lista" aria-label="{aria}">'
+            f'<label for="etp-c{i}" class="etp-atual" title="{dica}"><span style="flex-grow: 1; min-width: 0;">{t}</span><span class="etp-seta" aria-hidden="true">▾</span></label>'
             f'<label for="etp-c{i}" class="etp-fundo" aria-hidden="true"></label>')
-def _com_setas(itens,n,ant='',prox='',abre=''):
-    # cada etapa ocupa o tamanho do seu texto (sem colunas iguais); as duas setas ficam juntas à direita, cada uma na sua vaga fixa
-    vaga=lambda x: f'<span class="etp-vaga" style="width: 30px; flex-shrink: 0; display: inline-flex; justify-content: center;">{x}</span>'
+def _etp_lista(abre,itens,tag='div',attrs=''):
     return (f'<div style="display: flex; align-items: center; gap: 6px;">{abre}'
-            f'<div id="etp-lista" class="etp-itens" style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px;">{itens}</div>'
-            f'<span style="display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; padding-left: 6px;">{vaga(ant)}{vaga(prox)}</span></div>')
-def _etp_nav(label,n,corpo):
-    return (f'<nav aria-label="{esc(label)}" class="etp etp-l{_etp_lim(n)}" style="position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;">'
-            + corpo + '</nav>')   # sem o rótulo visível "Etapas do processo" (01/10, pedido do proprietário); fica no aria-label
+            f'<{tag} id="etp-lista" class="etp-itens"{attrs} style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px; margin: 0; padding: 0; list-style: none;">{itens}</{tag}></div>')
+# SEP-20261015 (a): sem borda inferior; a faixa branca sobre o fundo cinza e a sombra já separam (a borda ficava colada na mudança de fundo)
+_ETP_CX=f'position: sticky; top: 0; z-index: 30; background: {SURF}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;'
+def _etp_progresso(n,corpo):
+    # sem nav: indicador não é navegação (DS-31 v2); o nome acessível "Etapas do processo" fica na lista ordenada
+    return f'<div class="etp etp-ind etp-l{_etp_lim_ind(n)}" style="{_ETP_CX}">{corpo}</div>'
+def _etp_telas(label,n,corpo):
+    return f'<nav aria-label="{esc(label)}" class="etp etp-sec etp-l{_etp_lim(n)}" style="{_ETP_CX}">{corpo}</nav>'
+_SEC_IT=('display: flex; flex-direction: column; justify-content: center; gap: 1px; padding: 6px 10px; border-radius: 10px; text-decoration: none; color: '+INK+'; '
+         'font-family: inherit; font-size: 12.5px; line-height: 1.2; border: 0; cursor: pointer; text-align: left; min-width: 0; ')
+def secoes_nav(itens,n,i,nome,label):
+    """Telas irmãs de um módulo (links ou botões já montados): navegação sem número de etapa e sem setas."""
+    return _etp_telas(label,n,_etp_lista(_etp_abre(i,n,nome,secao=True),itens))
+def secao_item(t,cur,href=None,fn=None,why='',why_hole=None):
+    """Um item da navegação de telas: atual em destaque tonal com traço inferior e aria-current; pendência da tela escrita."""
+    st=_SEC_IT+(f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC}; font-weight: 800;' if cur else 'background: transparent; font-weight: 600;')
+    w=(f'<sc-if value="{{{{{why_hole}_has}}}}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED};">{{{{{why_hole}_why}}}}</span></sc-if>' if why_hole
+       else (f'<span style="font-size: 11px; font-weight: 700; color: {RED};">{esc(why)}</span>' if why else ''))
+    inner=f'<span>{esc(t)}</span>{w}'
+    cur_at=' aria-current="page"' if cur else ''
+    if fn: return f'<button type="button" onClick="{{{{{fn}}}}}"{cur_at} style="{st}">{inner}</button>'
+    return f'<a href="{href or "#"}"{cur_at} style="{st}">{inner}</a>'
+
 # Casca em tela estreita ou baixa (só CSS; em 1280 px ou mais de largura e mais de 560 px de altura nada muda, salvo a linha do
 # título quebrar quando não cabe): título e comando principal nunca saem da tela; menu aberto passa por cima do conteúdo;
 # conteúdo largo demais rola na horizontal em vez de ser cortado; a lista da tela nunca fica espremida.
@@ -122,6 +216,7 @@ _ESTICA=(f'{_S1}:has(.g2caixa,.rola)',f'{_S1}:has(.g2caixa,.rola)>div:last-child
 _CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}'
     '.ml-fundo{display:none}'
     'main[data-scroll]{scroll-padding-block:8px}'   # o foco levado à vista pela rolagem fica com o contorno inteiro (não rente à borda)
+    'main[data-scroll]>*{flex-shrink:0!important}'   # cortes visuais (13/10): na coluna flex que rola, o bloco não encolhe para a janela; senão o conteúdo transborda da caixa e a barra de ações (logo depois dela) fica no meio da tela com a lista correndo por baixo
     '@media (max-width: 1023px){'
     '.menu-lat:not(.rec){position:absolute;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px);z-index:35;box-shadow:12px 0 32px -12px rgba(21,32,26,.45)}'
     '.menu-lat:not(.rec)+.ml-tog+div{margin-left:68px}'
@@ -130,14 +225,15 @@ _CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-t
     '}'
     '@media (pointer: coarse){.menu-lat a,.menu-lat>button{min-height:44px;box-sizing:border-box;display:flex!important;align-items:center}'
     '.ml-tog{width:32px;height:32px}.menu-lat.rec+.ml-tog{left:calc(52px + env(safe-area-inset-left,0px))}.ml-tog{left:calc(216px + env(safe-area-inset-left,0px))}}')
-_CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
+_CSS_ESTREITA=(f'@media (max-width: 640px){{.mf-tela select{{min-height:44px!important}}.g2-info{{width:44px!important;height:44px!important}}}}'   # NAV-2CB-TOQUE-01 (Codex, 13/10): listas da faixa com alvo de 44 px no celular
+    f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
     f'@media (max-width: 1279px){{{_RAIZ}>div{{flex-wrap:wrap}}}}'    # demais linhas do cabeçalho; em 1440 px igual à base
     f'@media (max-width: 640px){{{_RAIZ}{{padding:10px 14px!important;gap:8px!important}}'
     f'{_RAIZ} h1{{white-space:normal!important;flex-shrink:1!important;min-width:0;font-size:20px!important}}'
     f'{_RAIZ}>div>span{{max-width:100%!important;min-width:0}}'
     f'{_RAIZ}>div:nth-child(2)>span[style*="nowrap"],{_RAIZ}>div:nth-child(2)>span>span[style*="nowrap"]{{white-space:normal!important;max-width:100%;box-sizing:border-box}}'   # situação longa quebra em vez de sair da tela
     f'main[data-scroll]{{padding:12px 14px 18px!important;overflow-x:auto!important}}'
-    f'nav.etp{{padding:6px 10px!important}}'
+    f'.etp{{padding:6px 10px!important}}'
     + ','.join(_TIT) + '{flex-wrap:wrap}'                              # título do bloco e sua ação: a ação desce em vez de cobrir o título
     + ','.join(f'{s} :is(label,select)' for s in _TIT) + '{min-width:0;max-width:100%}'
     + f'{_KPI}{{flex-wrap:wrap}}{_KPI}>*{{flex-basis:90px}}{_KPI}>*>div:nth-child(2)>span{{display:block;line-height:1.35;margin-top:4px}}'          # dois indicadores por linha; a lista da tela sobe
@@ -146,49 +242,42 @@ _CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do
     # tela baixa (celular deitado, zoom de 200 %): cabeçalho, faixa e conteúdo rolam juntos; a faixa de etapas fica presa no alto
     '@media (max-height: 560px){.ml-tog+div{overflow-y:auto;scroll-padding-top:calc(var(--etp-h,0px) + 8px)}main[data-scroll]{flex:1 0 auto!important}}')   # foco não fica sob a faixa presa (altura medida pelo g2lib)
 def _etp_css():
-    """Regras da faixa de etapas: base (desktop igual) + modo estreito por container query, um bloco por limite.
-    No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque;
-    tocar na etapa atual também fecha. Alvos de toque de 44 px (PRD, ações de campo)."""
+    """Regras das duas faixas: base (desktop igual) + modo estreito por container query, um bloco por limite.
+    No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque.
+    Progresso (15/10): tocar numa etapa leva a ela e fecha a folha; travada, diz o motivo. Telas do módulo: tocar noutra tela leva a ela; na atual, fecha.
+    Alvos de toque de 44 px (PRD, ações de campo)."""
     def estreita(p):
         r=[('.etp-itens','display:none!important'),
            ('.etp-chk','display:block;position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none'),
            ('.etp-atual',f'display:flex;align-items:center;gap:8px;flex-grow:1;min-width:0;min-height:44px;box-sizing:border-box;padding:7px 10px;border-radius:10px;background:{ACCS};box-shadow:inset 0 -2px 0 {ACC};color:{INK};font-size:13px;font-weight:800;line-height:1.25;cursor:pointer'),
            ('.etp-chk:focus-visible',f'outline:none'),('.etp-chk:focus-visible+.etp-atual',f'outline:2px solid {ACC};outline-offset:2px'),   # o anel fica no rótulo visível, não na caixa invisível de 1 px
            ('.etp-chk:checked+.etp-atual .etp-seta','transform:rotate(180deg)'),
-           ('.etp-vaga','width:46px!important'),('.etp-vaga:empty','display:none!important'),   # sem seta (1ª/última etapa): o rótulo usa o espaço
-           ('.etp-vaga>:is(a,button)','width:44px!important;height:44px!important;font-size:20px!important'),
            ('.etp-chk:checked~.etp-fundo','display:block;position:fixed;inset:0;z-index:30;background:rgba(21,32,26,.32);cursor:default'),
            ('.etp-chk:checked~.etp-itens',f'display:flex!important;flex-direction:column;position:fixed;left:8px;right:8px;bottom:8px;max-width:560px;margin:0 auto;box-sizing:border-box;gap:2px;padding:6px;background:{SURF};border:1px solid {LINE};border-radius:14px;box-shadow:0 18px 40px -12px rgba(21,32,26,.5);max-height:calc(100% - 16px);overflow-y:auto;z-index:31;pointer-events:none'),
            ('.etp-chk:checked~.etp-itens>*','min-width:0!important;min-height:44px;box-sizing:border-box'),
-           ('.etp-chk:checked~.etp-itens>:not([aria-current=step])','pointer-events:auto')]
+           ('.etp-chk:checked~.etp-itens>a:not([aria-current]),.etp-chk:checked~.etp-itens>button:not([aria-current=true]),.etp-chk:checked~.etp-itens .etp-ir','pointer-events:auto')]
         return ''.join(f'{p} {s}{{{d}}}' for s,d in r)
-    lims=sorted(set(_ETP_LIM.values())|{520,900})
+    lims=sorted(set(_ETP_LIM.values())|set(_ETP_LIM_IND.values())|{520,900})
     return ('.etp{container:etp/inline-size}.etp-chk,.etp-atual,.etp-fundo{display:none}.etp-seta{transition:transform .15s ease}'
             '.etp-itens>*{min-width:min-content!important}'   # nenhuma etapa fica mais estreita que a maior palavra: sem texto por cima da vizinha
+            '.etp-ind .etp-ir{display:flex;align-items:center;gap:10px;width:100%;min-width:0;box-sizing:border-box;padding:8px 12px;border:0;border-radius:12px;background:transparent;'
+            'font:inherit;color:inherit;text-align:left;cursor:pointer}'   # o cartão inteiro leva à etapa (15/10)
+            '.etp-ind .etp-ir[aria-disabled=true]{cursor:not-allowed}.etp-ind [aria-current=step] .etp-ir{cursor:default}'
+            '.etp-ind .etp-ir:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}'
+            '@media (hover:hover){.etp-ind .etp-it:not([aria-current=step]):has(.etp-ir[aria-disabled=false]):hover{border-color:#1E7A4C!important;background:#F2F8F4!important}}'   # hover verde só onde leva (VIS-02)
+            '.etp-ind .etp-itens{gap:22px!important}.etp-ind .etp-it:not(:last-child)::after{content:"›" / "";position:absolute;right:-16px;top:50%;transform:translateY(-52%);'
+            'font-size:20px;font-weight:700;color:#9AA59E;pointer-events:none}'   # seta entre os cartões (15/10), sem entrar na leitura
+            '@media (hover:hover){.etp-sec .etp-itens>:not([aria-current=page]):not([aria-current=true]):hover{background:#F2F8F4!important;text-decoration:underline;text-underline-offset:3px}}'
             + ''.join(f'@container etp (max-width: {L-1}px){{{estreita(f".etp-l{L}")}}}' for L in lims))
-def steps_bar(steps,current=None,label='Etapas do processo'):
-    """Faixa de etapas por links (módulos sequenciais): colunas iguais que sempre cabem; nome quebra em até 2 linhas.
-    steps: [dict(t, href=None, fn=None, why='', cur=bool, tip)]"""
-    n=len(steps); items=''
-    for i,s in enumerate(steps,1):
-        cur=s.get('cur',False) if current is None else (i==current)
-        why=s.get('why') or ''
-        badge=(f'background: {ACC}; color: #fff;' if cur else (f'background: {REDS}; color: {RED};' if why else f'background: {GRAYS}; color: {INK};'))
-        num=f'<span style="width: 22px; height: 22px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; flex-shrink: 0; {badge}">{i}</span>'
-        whyh=(f'<span style="display: block; font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{why}</span>' if why else '')
-        inner=f'{num}<span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 12px; line-height: 1.2; font-weight: {800 if cur else 600};">{esc(s["t"])}</span>{whyh}</span>'
-        st=('display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 10px; text-decoration: none; color: '+INK+'; font-family: inherit; border: 0; cursor: pointer; text-align: left; min-width: 0; '
-            + (f'background: {ACCS}; box-shadow: inset 0 -2px 0 {ACC};' if cur else 'background: transparent;'))
-        aria=' aria-current="step"' if cur else ''
-        if s.get('fn'): items+=f'<button type="button" onClick="{{{{{s["fn"]}}}}}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</button>'
-        else: items+=f'<a href="{s.get("href","#")}" title="{esc(s.get("tip") or s["t"])}"{aria} style="{st}">{inner}</a>'
-    c=current if current is not None else next((i for i,s in enumerate(steps,1) if s.get('cur')),None)
-    def viz(s,sim,dica):
-        if s.get('fn'): return f'<button type="button" onClick="{{{{{s["fn"]}}}}}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</button>'
-        return f'<a href="{s.get("href","#")}" aria-label="{dica}: {esc(s["t"])}" title="{dica}: {esc(s["t"])}" style="{_SETA}">{sim}</a>'
-    ant=viz(steps[c-2],'‹','Etapa anterior') if c and c>1 else ''
-    prox=viz(steps[c],'›','Próxima etapa') if c and c<n else ''
-    return _etp_nav(label,n,_com_setas(items,n,ant,prox,_etp_abre(c,n,steps[c-1]['t']) if c else _etp_abre(0,n,'')))
+def steps_bar(steps,current=None,label=None):
+    """Telas irmãs de um módulo de trabalho paralelo, por links (MA-01…05, módulos ocultos): navegação, não progresso.
+    Sem número de etapa e sem setas (UX-ACAO-UNICA-20261003); o atual leva aria-current="page"; a pendência da tela fica escrita.
+    steps: [dict(t, href, why='', cur=bool, tip)]"""
+    n=len(steps)
+    c=current if current is not None else next((i for i,s in enumerate(steps,1) if s.get('cur')),0)
+    itens=''.join(secao_item(s['t'],i==c,href=s.get('href','#'),why=s.get('why') or '') for i,s in enumerate(steps,1))
+    lab=label if label and label not in ('Etapas','Etapas do processo') else 'Telas do módulo'
+    return secoes_nav(itens,n,c,steps[c-1]['t'] if c else '',lab)
 
 def continuity(veio,aqui,falta,proxima):
     """Faixa do cap. 4.2: Veio de → Está aqui → Falta → Próxima ação."""
@@ -205,78 +294,158 @@ def demo_badge():
             f'<span style="width: 7px; height: 7px; border-radius: 999px; background: {YEL}; flex-shrink: 0;"></span><span class="ml-txt">DEMONSTRAÇÃO · dados fictícios</span></div>')
 
 def perfil_pill(perfil):
+    """avatar do perfil no pé da barra recolhida (13/10/2026): a dica diz o perfil; na equipe da fazenda o toque no avatar abre a lista de
+    perfis de demonstração (o seletor fica por cima do avatar, transparente; g2lib.js G2_PERFIS é a fonte única). Portal e backoffice: fixos."""
     ini=perfil[0].upper()
-    return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
-            f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
-            f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
+    av=('position: relative; width: 32px; height: 32px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 13px; '
+        'display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;').replace('{ACC}',ACC)
+    pe='display: flex; align-items: center; justify-content: center; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.08);'
+    if perfil=='Ana · Gestora':
+        return (f'<div style="{pe}"><label title="Perfil de demonstração: {{{{perfil_k}}}} · tocar para trocar" style="{av} cursor: pointer;">{{{{perfil_ini}}}}'
+            f'<select aria-label="Trocar perfil de demonstração" value="{{{{perfil_k}}}}" onChange="{{{{perfil_set}}}}" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; border: 0;">'
+            f'<sc-for list="{{{{perfil_opts}}}}" as="o" hint-placeholder-count="5"><option value="{{{{o.v}}}}" style="color: {INK};">{{{{o.t}}}}</option></sc-for></select></label></div>')
+    return f'<div style="{pe}"><span title="{esc(perfil)}" style="{av}">{ini}</span></div>'
 
-# Filtros do topo por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
+# Filtros de fazenda e safra por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
+# 13/10/2026 (proprietário: "tire o macro filtro fazenda e safra do topo e coloque nas telas para evitar confusão"): saem da barra do topo e
+# ficam na própria tela, numa faixa "Filtros desta tela" acima dos dados que filtram (shell37); as ligações (mf_*) não mudam.
 MACRO = {
-    'IN-04.dc.html': dict(faz='filtro'),
-    'OS.dc.html': dict(faz='filtro', saf='filtro'),
-    'SAF.dc.html': dict(faz='contexto', saf='contexto'),
+    'IN-04.dc.html': dict(faz='filtro', saf='lista', cult='filtro'),   # 15/10/2026 (proprietário): Safra e Cultura no Mapa; as safras vêm da fazenda (mf_saf_opts)
+    'OS.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10 (proprietário): Cultura e Talhão no filtro principal da O.S.
+    'SAF.dc.html': dict(faz='tela', saf='contexto', trocar=False),   # 14/10/2026 (proprietário): "Trocar safra" fica embaixo, nos botões do fluxo; SAF-FAZ-3 (15/10): as fazendas da safra a tela desenha (chips ✓ e "+ Fazenda", mf_ini)
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
+    'COLH.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10: Cultura e Talhão onde ajudam (colheita é por cultura e talhão)
+    'CARGA.dc.html': dict(faz='filtro', saf='filtro', cult='filtro'),
+    'PROD.dc.html': dict(faz='filtro', saf='filtro', cult='filtro'),
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
-def _macro_html(fname, ctx):
+# faixa "Filtros" (funil + seletores): o mesmo desenho em toda tela que filtra dados (14/10/2026, proprietário: "em manutenção os filtros não
+# estavam seguindo o padrão que definimos"). MF_SEL e MF_LBL são o seletor e o rótulo; faixa_filtros monta a faixa (shell37 e telas com filtros próprios)
+MF_SEL = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')   # alvo de toque ≥ 32 px
+MF_LBL = 'display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;'
+def faixa_campo(rot, ctl):
+    """filtro da tela na faixa: rótulo (MF_LBL) + controle (seletor ou grupo de chips com aria-pressed), sem quebrar entre os dois"""
+    return f'<span style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;"><span style="{MF_LBL.format(MUTED=MUTED)}">{rot}</span>{ctl}</span>'
+def volta_pilula(rot, href):
+    """botão "‹ Módulo" do cabeçalho (CAB-1): o mesmo em toda tela que volta ao módulo ou à tela de entrada"""
+    return (f'<a href="{href}" class="volta37" aria-label="Voltar para {esc(rot)}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px 0 10px; '
+            f'border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {INK}; font-size: 13px; font-weight: 700; flex-shrink: 0;">'
+            f'<span aria-hidden="true" style="font-size: 16px; line-height: 1;">‹</span>{esc(rot)}</a>')
+# contexto só de leitura (fazenda da safra, safra, parceiro) na faixa "Trabalhando em": pílula cinza, o mesmo desenho do _macro_html
+CTX_LAB = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
+def faixa_filtros(inner, rot='Filtros', fim=''):
+    cab = (f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if rot == 'Filtros'
+           else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{rot}</span>')
+    return (f'<div class="mf-tela" role="group" aria-label="{rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
+            f'padding: 8px 14px; min-height: 48px; box-sizing: border-box; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'   # 14/10 (proprietário: "trabalhando em… ficou muito estreito"): o mesmo respiro com ou sem ação no fim
+            f'{cab}{inner}' + (f'<span style="margin-left: auto;">{fim}</span>' if fim else '') + '</div>')
+def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)
-    sel = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')
-    lab = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
+    sel = MF_SEL
+    lab = CTX_LAB
     if cfg is None:
         return ''
     out = ''
     if cfg.get('faz') == 'filtro':
         out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Fazenda'
-                f'<select aria-label="Filtrar por fazenda" value="{{{{mf_faz}}}}" onChange="{{{{mf_setfaz}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<select aria-label="Filtrar por fazenda" value="{{{{mf_faz}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setfaz}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + FAZENDAS) + '</select></label>')
     elif cfg.get('faz') == 'contexto':
         out += f'<span title="Fazenda da safra aberta" style="{lab}">{esc(ctx[0]) if ctx and ctx[0] else "Fazenda Santa Rita"}</span>'
     if cfg.get('saf') == 'filtro':
         out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Safra'
-                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + SAFRAS_MF) + '</select></label>')
+    elif cfg.get('saf') == 'lista':   # opções da tela (mf_saf_opts), sem "Todas"
+        out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Safra'
+                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<sc-for list="{{{{mf_saf_opts}}}}" as="o" hint-placeholder-count="3"><option value="{{{{o.v}}}}">{{{{o.t}}}}</option></sc-for></select></label>')
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
-                f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
-    return out + f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
+                + (f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>' if cfg.get('trocar', True) else ''))
+    # Cultura e Talhão (13/10/2026, proprietário: "em ordem de serviço coloque no filtro principal da tela... também cultura e talhão"): as opções
+    # vêm da tela (mf_cult_opts, mf_tal_opts: só o que existe no recorte de Fazenda e Safra); o Talhão é o mesmo filtro da coluna Talhão
+    for k, rot, al in (('cult', 'Cultura', 'Filtrar por cultura'), ('tal', 'Talhão', 'Filtrar por talhão')):
+        if cfg.get(k) == 'filtro':
+            out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">{rot}'
+                    f'<select aria-label="{al}" value="{{{{mf_{k}}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_set{k}}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                    f'<sc-for list="{{{{mf_{k}_opts}}}}" as="o" hint-placeholder-count="3"><option value="{{{{o.v}}}}">{{{{o.t}}}}</option></sc-for></select></label>')
+    return out + (f'<span style="width: 1px; height: 18px; background: {LINE};"></span>' if sep else '')
 
+# Faixa de cobrança (PLAT-01, R11): só nas telas web da organização (fora de BO, ON e PT; não no próprio CF-05, que já mostra o estado e a
+# primária). Amarela em atraso (nada restrito), vermelha inadimplente (ampliar a área suspenso). "Pagar fatura" é link de texto para o CF-05,
+# nunca botão verde (não vira 2ª primária). O app de campo (mobile37) nunca mostra cobrança. Texto e cor vêm de assinAvisoVals (assinatura.js).
+def faixa_cobranca(fid,fname):
+    if fid[:2] in ('BO','ON','PT') or fname.startswith('CF-05'): return ''
+    return (f'<sc-if value="{{{{assin_fx}}}}" hint-placeholder-val="{{{{false}}}}"><div role="note" aria-label="Cobrança" class="assin-fx" style="{{{{assin_fx_st}}}}">'
+            # celular: só o essencial, com o link na mesma linha do texto (revisão PLAT, achado 12: a faixa ocupava 123 px)
+            f'<style>.assin-fx-m{{display:none}}@media (max-width:640px){{.assin-fx-w{{display:none}}.assin-fx-m{{display:inline}}.assin-fx{{display:block!important;padding:6px 10px!important}}.assin-fx>a{{margin-left:6px;white-space:nowrap}}}}</style>'
+            f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None,mf_ini='',mf_extra='',voltar_dyn=None):
+    # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
     if steps: H=max(900,min(H,1000))  # processos: tela de trabalho com rolagem interna; faixa de etapas sempre visível
     mi,mh=menu_item(fname)
     if mi is not None:
-        m={'area':MENU2[mi][0],'submenu':next(l for l,h in MENU2[mi][2] if h==mh)}
+        vs=[l for l,h in MENU2[mi][2] if h.split('#')[0]==mh]   # vários subitens da mesma tela (visões da Manutenção): o caminho diz o grupo, como antes
+        m={'area':MENU2[mi][0],'submenu':vs[0] if len(vs)==1 else MENU2[mi][0]}
     else:
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
-    crumbs=[m['area'],m['submenu']]+(crumbs_extra or [])
+    if fname==OUTROS37[2]: m={'area':OUTROS37[0],'submenu':OUTROS37[0]}
+    if fname in VOLTA37 and not crumbs_extra: m={'area':m['area'],'submenu':title}   # cadastro aberto pela tela inicial: o caminho diz qual
+    _oc=oculto(fname); _area0=m['area']
+    vmod=volta_modulo(fname) if _oc else None   # CAB-1 (DS-MODULOS-2): tela fora do menu volta ao módulo e o caminho diz o mesmo módulo
+    if vmod: m=dict(m,area=vmod[0])
+    crumbs=([m['area']] if m['area']==m['submenu'] and not crumbs_extra else [m['area'],m['submenu']])+(crumbs_extra or [])   # "Cadastros", não "Cadastros › Cadastros"
     back=PARENT37.get(fname) or ffile(fid) if crumbs_extra else (PARENT37.get(fname) or fname)
-    first=(MENU2[mi][2][0][1].replace('.dc.html','') if mi is not None else next((f for f in MAPA if MAPA[f]['area']==m['area']),fid))
     _sep=f' <span style="color: {MUTED};">›</span> '
     parts=[]
     for i,c in enumerate(crumbs):
-        if i==0 and ffile(first)!=fname: parts.append(f'<a href="{ffile(first)}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
-        elif i==1 and crumbs_extra: parts.append(f'<a href="{(mh or ffile(fid))}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
+        if i==1 and crumbs_extra: parts.append(f'<a href="{(mh or ffile(fid))}" style="color: {MUTED}; text-decoration: none;">{esc(c)}</a>')
         elif i<len(crumbs)-1: parts.append(f'<span style="color: {MUTED};">{esc(c)}</span>')
         else: parts.append(f'<span>{esc(c)}</span>')
     crumb=_sep.join(parts)
-    if oculto(fname):
-        ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in (tuple(ctx)+('Módulo oculto no menu · preservado',)) if c)
-        ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
+    if crumbs==[title]: crumb=''   # tela de entrada do módulo: o caminho repetiria o título (13/10, mais essencial)
+    if _oc:
+        # CAB-2 (DS-MODULOS-2, 17/10/2026): o contexto (fazenda, safra, parceiro) sai do topo e vai para a faixa "Trabalhando em" da FIL-01,
+        # o mesmo lugar e desenho das telas do menu (Compras, Planejar safra); o que o caminho já diz (módulo) não se repete
+        ctxp=''
+        _cx=[c for c in tuple(ctx) if c and c not in (m['area'],_area0)]
+        if _cx: body=faixa_filtros(''.join(f'<span title="Contexto desta tela" style="{CTX_LAB}">{esc(c)}</span>' for c in _cx),'Trabalhando em')+body
     else:
-        ctxp=_macro_html(fname,ctx)
+        ctxp=''   # Fazenda e Safra não ficam mais no topo (13/10/2026): vão para a tela, junto dos dados
+        mf=_macro_html(fname,ctx,sep=False)+mf_extra   # FIL-02 (15/10/2026): filtro da tela (chips, seletor) entra na mesma faixa, não numa linha própria
+        if mf:
+            _filtra=('filtro' in (MACRO.get(fname) or {}).values()) or bool(mf_extra)   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
+            # 14/10/2026 (proprietário: "Em vez de filtros desta tela… coloque Filtros: · teste o símbolo de filtro junto ou sozinho"): testadas as três
+            # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
+            # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".
+            _rot='Filtros' if _filtra else 'Trabalhando em'
+            _fx=faixa_filtros(mf_ini+mf,_rot,mf_fim)   # mf_ini: seletor da tela no começo da faixa (Compras: o tipo de compra, V69)
+            if mf_if: _fx=f'<sc-if value="{{{{{mf_if}}}}}" hint-placeholder-val="{{{{true}}}}">{_fx}</sc-if>'   # V69: a faixa só vale numa parte da tela (Compras: a safra é dos insumos)
+            body=_fx + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'
           f'{icon("lista",13,MUTED)}Buscar ID, talhão, ativo, lote, pessoa…</span>') if search else '<span style="flex-grow: 1;"></span>'
-    prim=primary_html or (btn(primary,True,href=primary_href) if primary else '')
+    # BOT-08 (15/10/2026): verde é comando; o destino que só abre outra tela (Abrir, Ver, Voltar, Consultar, Ir) é link secundário
+    navega=bool(primary and primary_href and re.match(r'^(Abrir|Ver|Voltar|Consultar|Ir|Acessar)\b',str(primary)))
+    prim=primary_html or (btn(primary,not navega,href=primary_href) if primary else '')
+    prim=E.recolhe_cabecalho(title,prim) if prim else ''   # MAIS-02 (17/10/2026): à direita do título, a primária e o ⋯ com as outras ações
     controw=cont if cont else ''
-    foot=f'<div style="display: flex; align-items: center; gap: 10px; padding: 12px 32px; border-top: 1px solid {LINE}; background: {SURF};"><span style="width: 8px; height: 8px; border-radius: 999px; background: {ACC};"></span><div style="font-size: 13px; color: {MUTED};">{esc(footer)}</div></div>' if footer else ''
+    # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"):
+    # a regra que ficava numa faixa no rodapé vira uma dica (ⓘ ao lado do título, com nome acessível; abre no hover, no foco e no toque)
+    foot=''
+    info=(f'<button type="button" class="g2-info" aria-label="Regras desta tela" data-dica="{esc(footer)}" style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 999px; '
+          f'border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-family: inherit; font-size: 15px; font-weight: 700; cursor: help; display: inline-flex; align-items: center; justify-content: center;">i</button>') if footer else ''
     voltar=f'<a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a>' if crumbs_extra else ''
+    if not crumbs_extra and (fname in VOLTA37 or vmod): voltar=volta_pilula(*(VOLTA37.get(fname) or vmod))
+    if voltar_dyn: voltar=voltar_dyn   # PAINEL-03: a tela decide no navegador para onde volta (aba do módulo → tela de entrada dele)
     html=f'''<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -292,7 +461,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
 <style>
 html,body{{height:100%;overflow:hidden}}
 .menu-lat{{width:232px;transition:width .18s ease}}.menu-lat.rec{{width:68px}}.menu-lat.rec .ml-txt,.menu-lat.rec .ml-sub{{display:none!important}}
-.menu-lat.rec a,.menu-lat.rec button{{justify-content:center}}.menu-lat.rec .ml-topo{{flex-direction:column;gap:8px;padding:2px 0 8px}}.menu-lat.rec .ml-topo>a{{padding:0;flex-grow:0}}
+.menu-lat.rec a,.menu-lat.rec button{{justify-content:center}}
 .ml-tog{{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));left:calc(219px + env(safe-area-inset-left,0px));z-index:40;width:26px;height:26px;border:1px solid {LINE};border-radius:999px;background:#fff;color:{INK};cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 4px rgba(21,32,26,.22);transition:left .18s ease}}
 .menu-lat.rec+.ml-tog{{left:calc(55px + env(safe-area-inset-left,0px))}}@media (hover:hover){{.ml-tog:hover{{background:{ACCS};color:{ACC}}}}}.ml-tog:focus-visible{{outline:2px solid {ACC};outline-offset:2px}}body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
 a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
@@ -302,24 +471,23 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div data-root="1" style="position: relative; width: 100%; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
 <nav aria-label="Menu" class="menu-lat {{{{menu_cls}}}}" style="flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow-x: clip; overflow-y: auto;">
-<div class="ml-topo" style="display: flex; align-items: center; gap: 6px; padding: 2px 4px 8px 0;"><a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none; flex-grow: 1; min-width: 0;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{icon("Agronomia",16,"#fff")}</span><span class="ml-txt" style="white-space: nowrap;">Talhão à O.S.</span></a>
-</div>
 {navbar(fid,fname)}
 <div style="flex-grow: 1;"></div>
 {demo_badge()}
 {perfil_pill(perfil)}
 </nav>
-<button type="button" class="ml-tog" onClick="{{{{menu_tog}}}}" aria-label="{{{{menu_tog_lab}}}}" title="{{{{menu_tog_lab}}}}" aria-expanded="{{{{menu_aberto}}}}"><sc-if value="{{{{menu_aberto}}}}" hint-placeholder-val="{{{{true}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></sc-if><sc-if value="{{{{menu_rec}}}}" hint-placeholder-val="{{{{false}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></sc-if></button>
+<span class="ml-tog" aria-hidden="true" style="display: none;"></span>
 <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;">
 <header style="padding: 14px 32px 14px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 10px;">
 <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;">{ctxp}<span>{crumb}</span>{srch}</div>
 <div style="display: flex; align-items: center; gap: 12px;">
-{voltar}<h1 style="margin: 0; font-family: {DISP}; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">{esc(title)}</h1>
+{voltar}<h1 style="margin: 0; font-family: {DISP}; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">{esc(title)}</h1>{info}
 <span style="flex-shrink: 0; max-width: 300px;">{st}</span>
 <span style="flex-grow: 1;"></span>
 {prim}
 </div>
-{f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.35; max-width: 900px; margin-top: -4px;">{esc(subtitle)}</div>' if subtitle else ''}
+
+{faixa_cobranca(fid,fname)}
 {controw}
 {chipsrow}
 </header>
@@ -329,7 +497,6 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </main>
 {foot}
 </div>
-<div class="ml-fundo" aria-hidden="true" onClick="{{{{menu_tog}}}}"></div>
 {extra_html()}
 {E.G2_TOAST}
 </div>
@@ -344,13 +511,13 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
     _reset_screen(fname)  # engine() NÃO limpa o registro; sem isto, widgets/drawers vazam para a tela seguinte
     return fname
 
-def mobile37(fid,title,sub,status,primary,body,fname=None,H=844,back='MB-01.dc.html',primary_href=None):
+def mobile37(fid,title,sub,status,primary,body,fname=None,H=844,back='MB-01.dc.html',primary_href=None,dica=''):
     """Tela móvel MB: cabeçalho simples, CTA grande, badge de demonstração; reseta o registro após gravar."""
     fname=fname or ffile(fid)
     E.HEIGHTS[fname]=_h(fname,H)
     E.MPARENT[fname]=back
     if primary_href: E.PHREF[fname]=primary_href
-    E.mobile(fname,title,sub,status,primary,body)
+    E.mobile(fname,title,sub,status,primary,body,dica=dica)   # dica: regras da tela no ⓘ do cabeçalho (14/10/2026)
     _reset_screen(fname)
     return fname
 
@@ -449,21 +616,39 @@ def tabs(opts,contents,active=0,label='Visão',chips=False):
         on=f'font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid {INK}; background: {INK}; color: #fff; cursor: pointer; white-space: nowrap;'
         off=f'font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
     s,bs=seg_buttons(opts,active,on=on,off=off)
-    bar=(f'<div role="tablist" aria-label="{esc(label)}" style="display: inline-flex; flex-wrap: wrap; gap: {6 if chips else 2}px; '
+    # seletor exclusivo de visão da mesma coleção (DS-33 §74.5.7.1 · DS-36 v2): grupo de botões com aria-pressed, não abas de processo
+    bar=(f'<div role="group" aria-label="{esc(label)}" style="display: inline-flex; flex-wrap: wrap; gap: {6 if chips else 2}px; '
          + ('' if chips else f'padding: 3px; border-radius: 999px; background: {GRAYS};') + '">' + ''.join(bs) + '</div>')
     panes=''.join(f'<sc-if value="{HL(s+"_v"+str(i))}" hint-placeholder-val="{HL("true") if i==active else HL("false")}">{c}</sc-if>' for i,c in enumerate(contents))
     return bar,panes
 
 
 def steps_state(names,pre='stp',label='Etapas do processo'):
-    """Faixa de etapas (estado da tela): colunas iguais que sempre cabem na largura; destaque, impedimento e navegação vêm do JS (g2steps)."""
+    """Indicador de progresso do processo guiado (estado da tela; g2steps preenche): lista ordenada com número ou ✓, nome, palavra do
+    estado para leitor de tela e motivo do impedimento. Não navega: sem botão, sem handler, sem parada de Tab (DS-31 v2)."""
     n=len(names); items=''
     for i,t in enumerate(names,1):
-        items+=(f'<button type="button" onClick="{{{{{pre}{i}_go}}}}" aria-current="{{{{{pre}{i}_cur}}}}" title="{esc(t)}" style="{{{{{pre}{i}_st}}}}">'
-                f'<span style="{{{{{pre}{i}_bst}}}}">{i}</span><span style="display: flex; flex-direction: column; min-width: 0;"><span style="{{{{{pre}{i}_tst}}}}">{esc(t)}</span>'
-                f'<sc-if value="{{{{{pre}{i}_hasWhy}}}}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{{{{{pre}{i}_why}}}}</span></sc-if></span></button>')
+        h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        # 15/10/2026 (proprietário, referência de fluxo em cartões: "esses ícones e setas para fluxo de processos ficou melhor, mais intuitivo, torne
+        # mais bonito com nosso design system e substitua o atual"): cartão por etapa com número (ou ✓ / !), nome, linha de situação com ponto de
+        # cor e, quando a tela informa, a contagem à direita; seta › entre os cartões (CSS, fora da leitura). O nome quebra em até 2 linhas; o cartão encolhe até ~92 px de texto.
+        # 15/10/2026, depois (proprietário: "permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela"): cada cartão é
+        # um botão que leva à etapa (revoga o "só informa" de 03/10, DS-31 v2); etapa travada diz o motivo ao toque (aria-disabled + dica)
+        items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><button type="button" class="etp-ir" onClick="{h("go")}" aria-disabled="{h("dis")}" data-dica="{h("tt")}">'
+                f'<span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
+                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 92px; flex: 1 1 auto; contain: inline-size;"><span class="etp-nome" style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
+                f'<span aria-hidden="true" style="{h("sst")}"><span style="{h("dot")}"></span>{h("sub")}</span></span>'
+                f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="{h("cst")}">{h("cnt")}</span></sc-if></button></li>')
     # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada
     abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'step\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t)}</sc-if>' for i,t in enumerate(names,1))
-    return _etp_nav(label,n,_com_setas(items,n,
-                         f'<sc-if value="{{{{has_prev}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{prev}}}}" aria-label="Etapa anterior" title="{{{{prev_t}}}}" style="{_SETA}">‹</button></sc-if>',
-                         f'<sc-if value="{{{{has_next}}}}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{{{{next}}}}" aria-label="Próxima etapa" title="{{{{next_t}}}}" style="{_SETA}">›</button></sc-if>',abre))
+    return _etp_progresso(n,_etp_lista(abre,items,'ol',f' aria-label="{esc(label)}"'))
+def secoes_state(names,pre='stp',label='Seções'):
+    """Seções de uma tela de trabalho paralelo (Estoque): navegação entre visões em qualquer ordem (g2secoes preenche).
+    Sem número de etapa e sem setas; a seção atual leva aria-current="true"; a pendência de cada uma fica escrita."""
+    n=len(names); items=''
+    for i,t in enumerate(names,1):
+        h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        items+=(f'<button type="button" onClick="{h("go")}" aria-current="{h("cur")}" style="{h("st")}"><span>{esc(t)}</span>'
+                f'<sc-if value="{h("hasWhy")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED};">{h("why")}</span></sc-if></button>')
+    abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'true\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t,secao=True)}</sc-if>' for i,t in enumerate(names,1))
+    return _etp_telas(label,n,_etp_lista(abre,items))

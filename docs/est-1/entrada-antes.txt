@@ -1,0 +1,15 @@
+FALHA recebimento vencido recusa parte apta 5 sem escrita parcial: aceitou parte apta
+FALHA recebimento vencido recusa parte apta 2 sem escrita parcial: aceitou parte apta
+FALHA data futura informada não libera lote existente vencido: aceitou lote existente
+OK recebimento vencido em quarentena conserva físico e replay
+FALHA devolução vencida apta é recusada sem baixar custódia: devolução apta aceita
+OK devolução vencida em quarentena recupera físico e baixa custódia
+FALHA formulário da devolução explica quarentena sem apagar rascunho: sem erro junto da condição
+OK limite mensal 31/12/2026 validade 12/2026
+FALHA limite mensal 01/01/2027 validade 12/2026: resultado incorreto: {"msg":"Recebimento NF 99997 conferido: 5 kg de Semente de soja 58 W no lote EST1-ENTRADA (validade 12/2026). Disponível 12.000 kg → 12.005 kg."}
+OK limite mensal 29/02/2028 validade 02/2028
+FALHA limite mensal 01/03/2028 validade 02/2028: resultado incorreto: {"msg":"Recebimento NF 99997 conferido: 5 kg de Semente de soja 58 W no lote EST1-ENTRADA (validade 02/2028). Disponível 12.000 kg → 12.005 kg."}
+RESULTADO 4/11
+RESULTADO 4/11
+
+exit=1

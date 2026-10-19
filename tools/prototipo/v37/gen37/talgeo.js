@@ -76,8 +76,34 @@ function tgLerGeoJSON(texto){ let j; try{ j = JSON.parse(texto); }catch(e){ thro
       else out.push({ nome, pasta: '', tipo: 'Ponto', centro: pt, ring: null, ha: 0, decl: null }); return; }
     out.push({ nome, pasta: '', tipo: g.type || 'Sem geometria', ring: null, ha: 0, decl: null }); });
   return out; }
+// MAPA-REAL F1 (proprietário, 18/10/2026: "quero baixar uma fazenda real kml para fazer os testes"): o .kmz que o Google Earth exporta é um zip
+// com o doc.kml dentro. Abre no navegador (DecompressionStream 'deflate-raw'), sem biblioteca e sem rede: o arquivo não sai do aparelho.
+// arquivo truncado, deslocamento fora do arquivo ou deflate corrompido: a pessoa vê o motivo e o que fazer, nunca o erro técnico do leitor
+// (revisão do Codex 6252555281: "Offset is outside the bounds of the DataView" chegava à tela)
+const TG_KMZ_RUIM = 'KMZ ilegível: o arquivo está corrompido ou incompleto. Abra no Google Earth e salve como .kml, ou tente outro arquivo.';
+async function tgKmzTexto(buf){ try { return await tgKmzTexto0(buf); }
+  catch (e) { const m = String((e && e.message) || e); if (/^(KMZ |O KMZ |Este navegador )/.test(m)) throw e; throw new Error(TG_KMZ_RUIM); } }
+async function tgKmzTexto0(buf){ const u = new Uint8Array(buf), dv = new DataView(u.buffer, u.byteOffset, u.byteLength); let e = -1;
+  for (let i = u.length - 22; i >= Math.max(0, u.length - 65557); i--){ if (dv.getUint32(i, true) === 0x06054b50){ e = i; break; } }
+  if (e < 0) throw new Error('KMZ ilegível: o arquivo não é um .kmz válido.');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true), alvo = null, lidos = 0;
+  for (let k = 0; k < n && p + 46 <= u.length; k++){ if (dv.getUint32(p, true) !== 0x02014b50) break; lidos++;
+    const met = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const nome = new TextDecoder().decode(u.subarray(p + 46, p + 46 + nl));
+    if (/\.kml$/i.test(nome) && (!alvo || /(^|\/)doc\.kml$/i.test(nome))) alvo = { met, csz, off };
+    p += 46 + nl + xl + cl; }
+  // diretório central fora do arquivo ou cortado: arquivo ilegível, não "sem .kml" (mapa_kmz K6)
+  if (!alvo) throw new Error(lidos < n ? TG_KMZ_RUIM : 'O KMZ não tem arquivo .kml dentro.');
+  if (alvo.off + 30 > u.length || dv.getUint32(alvo.off, true) !== 0x04034b50) throw new Error(TG_KMZ_RUIM);
+  const ini = alvo.off + 30 + dv.getUint16(alvo.off + 26, true) + dv.getUint16(alvo.off + 28, true);
+  if (ini + alvo.csz > u.length) throw new Error(TG_KMZ_RUIM);
+  const dados = u.subarray(ini, ini + alvo.csz);
+  if (alvo.met === 0) return new TextDecoder().decode(dados);
+  if (alvo.met !== 8) throw new Error('KMZ com compactação não suportada: abra no Google Earth e salve como .kml.');
+  if (typeof DecompressionStream !== 'function') throw new Error('Este navegador não abre KMZ: abra no Google Earth e salve como .kml.');
+  return await new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text(); }
 function tgLer(nomeArq, texto){ const n = String(nomeArq || '').toLowerCase();
-  if (/\.kmz$/.test(n)) throw new Error('KMZ é compactado: abra no Google Earth e salve como .kml.');
+  if (/\.kmz$/.test(n)) throw new Error('KMZ é compactado: o texto do .kml vem de tgKmzTexto (leitura assíncrona do arquivo).');
   if (/\.kml$/.test(n) || /^\s*</.test(texto)) return tgLerKML(texto);
   return tgLerGeoJSON(texto); }
 // o que a feição importada vira: talhão (polígono ou pivô) ou registro da fazenda (perímetro, reserva, APP, água)

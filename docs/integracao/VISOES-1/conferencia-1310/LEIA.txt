@@ -1,0 +1,12 @@
+Conferência VISOES-1 de 13/10/2026 (executado, trava /tmp/cdpL.lock, cada teste uma vez).
+- Candidata: _render de df0f272 (build 0 FALHA, montar 142 páginas, dados sintéticos).
+  Unidade: OK 22/22 (node 30/30). comp: 9/0. celular: 9/0. e7: 2/0.
+  e2e: 38/1. O único vermelho foi o E1c recém-escrito: ele contava a linha do grupo ('grp') como ordem. Era defeito
+  do teste: o produto mostrava T2 = 102 ha = Total. O E1c foi corrigido em d5ca449 e rodado de novo
+  (cand_E1c_E8b.log: 3/0).
+- Antes das correções: E1c e E8b no _render de c6061fd (antes_E1c_E8b.log), os dois vermelhos (T2 = 452 ha;
+  8 blocos com a Safra 2025/26). Os vermelhos dos outros testes de regressão estão em ../revisao/antes/.
+- Mutante pushState (mutar_push.py, aplicado no _render de df0f272): o E5b fica vermelho (mut_push_E5.log). O mutante
+  morre.
+- Não rodados de novo (não mudei código de produto): ds_test, ostest, os_cenario e a varredura. Os resultados
+  em df0f272 estão em ../revisao/depois/ (rodados em 10/10 por quem corrigiu).

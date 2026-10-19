@@ -1,0 +1,17 @@
+evalmachine.<anonymous>:30
+  (outras||[]).forEach(s=>{ if(!('ini' in s)||!('fim' in s)) throw new Error('capSaf: a safra '+s.id+' chegou sem o período (ini e fim)'); }); }
+                                                             ^
+
+Error: capSaf: a safra B chegou sem o período (ini e fim)
+    at evalmachine.<anonymous>:30:68
+    at Array.forEach (<anonymous>)
+    at capContrato (evalmachine.<anonymous>:30:16)
+    at Object.capSaf (evalmachine.<anonymous>:31:49)
+    at view (<sp-safc02>/docs/planejar-safra/verificacao-saf-c02/harness_original.js:14:16)
+    at Object.<anonymous> (<sp-safc02>/docs/planejar-safra/verificacao-saf-c02/harness_original.js:19:9)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+
+Node.js v22.22.0

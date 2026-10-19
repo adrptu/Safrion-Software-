@@ -19,6 +19,7 @@ try:
         try: c=Chrome(port=free()); break
         except Exception: time.sleep(2)
     J=c.js; c.size(1440,900); U=f'http://127.0.0.1:{p}/'
+    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})   # V2-3: teste de domínio lê colunas fora do "Abre com"
     CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
     SETV="""((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem campo'; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok';})"""
     def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.45); return r
@@ -27,7 +28,8 @@ try:
     def ir_hash(pg): ir(pg,1.5); time.sleep(.4)   # outra página: carga nova; mesma página: o hashchange abre o registro
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
-    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha moram no ⋯ da própria linha; o texto da linha termina com os itens desse ⋯
+    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>(r.innerText+' '+[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).join(' ')).replace(/\\s+/g,' ').trim())") or []
     def mapa(tal,lay='MIP/MID'):
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(dict(mf_faz='Santa Rita',lay=lay,tsel=[tal])))})"); ir('IN-04.dc.html',1.5)
     pan=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''
@@ -48,7 +50,8 @@ try:
     chk('3 AG-01.dc.html#VIS-053 abre o painel da meleira (Pivô 9) e troca a fazenda para Lagoa Grande · próximo passo "Confirmar foco"',
         a.startswith('VIS-053 · Meleira (virose) · Pivô 9') and 'Confirmar foco' in a and J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")=='Lagoa Grande', a[:300])
     # 4 · mesma situação no Mapa e no AG-01
-    mapa('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('P1:'))"); pr=prim('P1')
+    # MUX-F1 (17/10/2026): rótulo da camada em data-rotulo (o aria-label agora é o nome completo). Oráculo obsoleto na forma de achar; a asserção não muda
+    mapa('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('P1:'))"); pr=prim('P1')
     chk('4 Mapa P1: "Mosca-branca · acima do NC" (+2: VIS-014 em coleta e VIS-006 atrasada, iguais ao AG-01) · primário "Decidir controle" abre a decisão da VIS-013',
         lab=='P1: Mosca-branca · acima do NC · +2' and pr==['Decidir controle','AG-01.dc.html#VIS-013:decidir'], [lab,pr])
     # 5 · no mapa o verbo faz o que diz: "Seguir monitorando" (VIS-008 perto do NC) registra e programa a revisita, que persiste e chega ao AG-01
@@ -64,11 +67,13 @@ try:
         nomes==['Ciantraniliprole 100 OD','Acaricida D','Inseticida B','Piriproxifem 100 EC'] and any('Inseticida B' in x and 'Rotação' in x for x in chips), [nomes,chips])
     # 7 · trava de carência × colheita (10/10) com a data de aplicação
     J("[...document.querySelectorAll('aside input[name=dc_prod]')][1].click()"); time.sleep(.3)
+    setv('aside #dc_dose','0,4')   # AGRO-02: produto e dose são escolha explícita do RT (o formulário não preenche a dose)
     setv('aside input[aria-label="Data da aplicação"]','2026-09-28'); a=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
     chk('7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado',
         'Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09.' in a and dis is True, [a[a.find('Carência'):a.find('Carência')+160],dis])
     # 8 · emitir: receituário RA + O.S. em A liberar
     setv('aside input[aria-label="Data da aplicação"]','2026-09-24'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][0].click()"); time.sleep(.3)
+    setv('aside #dc_dose','0,5')   # AGRO-02: trocar de produto limpa a dose; o RT digita a do novo produto
     clk('Emitir receituário e gerar O.S.','aside'); t1=T(); a=aside()
     chk('8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440"',
         'Receituário RA-0142 emitido (DIA-009 · REC-015) · OS-0440 em A liberar' in t1 and 'Em controle' in a and 'OS-0440 · A liberar' in a
@@ -78,7 +83,7 @@ try:
     chk('9 OS.dc.html#OS-0440: A liberar com Ciantraniliprole 100 OD (sem lote: a trava de estoque é a da liberação) e origem VIS-013 · RA-0142',
         a.startswith('OS-0440') and 'A liberar' in a and 'Ciantraniliprole 100 OD' in a and 'VIS-013' in org and 'RA-0142' in org, [a[:300],org])
     # 10 · o mapa mostra o controle emitido
-    mapa('P1'); pr=prim('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('aria-label')).find(x=>x.startsWith('P1:'))")
+    mapa('P1'); pr=prim('P1'); lab=J("[...document.querySelectorAll('svg [role=button]')].map(e=>e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo')).find(x=>x.startsWith('P1:'))")
     chk('10 Mapa P1 depois de emitir: "Mosca-branca · em controle" · primário "Abrir OS-0440"', pr==['Abrir OS-0440','OS.dc.html#OS-0440'] and 'em controle' in (lab or ''), [pr,lab])
     # 11 · abaixo do NC: seguir monitorando programa a próxima no ritmo semanal
     ir_hash('AG-01.dc.html#VIS-015'); clk('Seguir monitorando','aside'); t1=T()
@@ -108,3 +113,4 @@ finally:
     finally: srv.terminate()
 print('RESULTADO', f'{len(OK)}/{len(OK)+len(FAIL)}')
 sys.exit(1 if FAIL else 0)
+

@@ -100,19 +100,24 @@ def _usos(p):
         sem = [u for u in us if str(u['carencia']).startswith('sem restri') and u['conferido']]
         na = [u for u in us if u['carencia'] in (A._PRE, A._TS)]
         alvos = ', '.join(u['alvo'] for u in us)
+        al = [u['alvo'] for u in us]   # lista (o texto da referência tem vírgula entre parênteses): a trava do alvo usa esta (carAlvoRef, CTL-5)
         if conf:
             d = max(x[0] for x in conf); maior = max(x[0] for x in num)
-            out[c] = dict(dias=d, conf=True, na=False, alvos=alvos,
+            out[c] = dict(dias=d, conf=True, na=False, alvos=alvos, al=al,
                           txt=f'{d} dias (bula conferida)' + (f'; uso não conferido indica {maior} dias' if maior > d else ''))
         elif num:
             d = max(x[0] for x in num)
-            out[c] = dict(dias=d, conf=False, na=False, alvos=alvos, txt=f'{d} dias · uso não conferido na bula (prazo provisório)')
+            out[c] = dict(dias=d, conf=False, na=False, alvos=alvos, al=al, txt=f'{d} dias · uso não conferido na bula (prazo provisório)')
         elif sem:
-            out[c] = dict(dias=0, conf=True, na=False, alvos=alvos, txt='sem restrições na bula (conferida)')
+            out[c] = dict(dias=0, conf=True, na=False, alvos=alvos, al=al, txt='sem restrições na bula (conferida)')
         elif na:
-            out[c] = dict(dias=None, conf=True, na=True, alvos=alvos, txt=na[0]['carencia'])
+            out[c] = dict(dias=None, conf=True, na=True, alvos=alvos, al=al, txt=na[0]['carencia'])
         else:
-            out[c] = dict(dias=None, conf=False, na=False, alvos=alvos, txt=str(us[0]['carencia']))
+            out[c] = dict(dias=None, conf=False, na=False, alvos=alvos, al=al, txt=str(us[0]['carencia']))
+    import dados_mip as DM   # Frente E: usos por ha (dose, unidade, nº máximo, conferido) pela mesma derivação do AG-01 (dados_mip.uso)
+    for c, r in out.items():
+        r['fx'] = [dict(dmin=x['dmin'], dmax=x['dmax'], un=x['un'], mx=x['mx'], conf=x['conf'], calda=x['calda'])
+                   for x in (DM.uso(p, u) for u in por[c]) if x]
     return out
 
 
@@ -123,7 +128,7 @@ def _produtos():
         adj = p['classe'] == 'Adjuvante'
         for n in dict.fromkeys(p['nomes_fazenda'] + [p['nome']]):   # ordem estável (set variava com o hash do processo e a página mudava a cada build)
             out[n] = dict(ingr=' + '.join(_ingr(p['ingrediente'])), classe=p['classe'], defn=True, adj=adj, ficha=p['id'],
-                          usos={} if adj else _usos(p))
+                          usos={} if adj else _usos(p), sit=p['situacao'])
     # insumos que não são agrotóxicos (fertilizante, corretivo, semente, muda): fora da carência
     DEF = ('Herbicida', 'Fungicida', 'Inseticida', 'Acaricida', 'Nematicida')
     for pl in D2.PLANOS + DL.PLANOS:
@@ -137,6 +142,12 @@ def _produtos():
         if x['item'] not in out:
             out[x['item']] = dict(ingr='', classe=x['grupo'], defn=any(x['grupo'].startswith(g) for g in DEF + ('Herbicidas', 'Fungicidas', 'Inseticidas')),
                                   adj=False, ficha='', usos={})
+    # itens cadastrados fora dos planos, com o grupo declarado no CD-06 (SOLO-01, A4): o Calcário dolomítico da calagem incluída pela análise
+    # de solo é corretivo, fora do registro de agrotóxico (sem isto, a O.S. dele contava como agrotóxico sem registro e nunca liberava)
+    import dados_cad as DC
+    for n, x in DC.ITENS_NOVOS.items():
+        if n not in out:
+            out[n] = dict(ingr='', classe=x['grupo'], defn=any(x['grupo'].startswith(g) for g in DEF), adj=False, ficha='', usos={})
     return out
 
 
@@ -206,9 +217,48 @@ def card():
         for c, u in p['usos'].items():
             if isinstance(u.get('dias'), int): maxcar[c] = max(maxcar.get(c, 0), u['dias'])
     jan = {o['id']: o['janela'] for o in D.ORDENS + D.ORDENS_LG}
-    return dict(hoje=HOJE, tal=tal, nomes=_nomes(tal), prod=prod, maxcar=maxcar, jan=jan, dest=DESTINOS, quem=QUEM, car0=CAR0,
+    import dados_mip as DM   # Frente E: safra de cada O.S. e aplicações de antes do sistema (caderno de campo: APL sem O.S., ciclo atual do MIP)
+    saf = {o['id']: o['saf'] for o in D.ORDENS + D.ORDENS_LG}
+    apl0 = [dict(tal=a['tal'], p=DM.GRUPO[a['prod']]['nome'], d=a['data'], saf='2026/27') for a in DM.APL if not a['os']]
+    return dict(hoje=HOJE, tal=tal, nomes=_nomes(tal), prod=prod, maxcar=maxcar, jan=jan, saf=saf, apl0=apl0, dest=DESTINOS, quem=QUEM, car0=CAR0,
                 lmr=L['lmr'], lmrf=dict(fonte=L['fonte'], link=L['link'], extraido=L['extraido'], atualizacao=L['atualizacao'], recorte=L['recorte']),
                 fonte_car='bula de referência (Agrofit demonstrativo: usos conferidos em bula pública do ingrediente; não substitui a bula do produto comercial)')
+
+
+# ------------------------------------------------------------------ local e cultura da ordem (O.S., Mapa, app, CO-06 e AG-07: uma regra só)
+JS_LOCAL = r'''
+function carNome(t){ return (CARD.tal[t]||{}).nome||t; }
+// local da O.S. → talhões do mapa ('Pivô 6' → PV06 · 'T1-A' → T1, parcela T1-A · 'T1+T2' → T1 e T2)
+function carTals(nome){ const s=String(nome||''); const out=[]; const add=(tid,parc)=>{ if(CARD.tal[tid]&&!out.some(x=>x.tid===tid&&x.parc===parc)) out.push({tid,parc}); };
+  if(CARD.nomes[s]){ const t=CARD.nomes[s]; add(t,t===s?null:(s.indexOf(t+'-')===0?s:null)); return out; }
+  (s.match(/Pivô\s*\d+/g)||[]).forEach(x=>{ const n=Number(x.replace(/\D/g,'')); add('PV'+('0'+n).slice(-2),null); });
+  (s.match(/\b(T|P|C)\d+(-[A-Z])?\b/g)||[]).forEach(x=>{ const m=/^((?:T|P|C)\d+)(-[A-Z])?$/.exec(x); add(m[1],m[2]?x:null); });
+  return out; }
+// cultura de um talhão da ordem: a do cultivo da ordem nova (outra safra); senão a do talhão (trava legal da O.S. e "Usar na O.S." do AG-07)
+function carCult(o,tid){ const cv=String((o&&o.osc&&o.osc.novo&&o.osc.novo.cultura)||'').split(' ')[0]; return cv||((CARD.tal[tid]||{}).cult||''); }
+// operação que aplica defensivo: só nela entra produto vindo da Consulta Agrofit (CTL-5, revisão S3-1; dano evitado: reservar e consumir
+// agrotóxico em calagem, sexagem, fertirrigação ou colheita, com estoque e custo errados e aplicação registrada que não aconteceu)
+const CAR_OPS_DEF=['Pulverização','Tratamento de sementes'];
+function carOpDef(op){ return CAR_OPS_DEF.indexOf(String(op||''))>=0; }
+// alvo × referência conferida da fazenda (P = CARD.prod[produto], cu = cultura): devolve o alvo como a referência o escreve, ou '' se ela não o
+// cobre. Casa o nome inteiro, o nome antes de " · " ou " (" e cada item entre parênteses, sem acento e sem caixa. Herbicida: a referência
+// lista grupos de plantas daninhas (não espécies), e a espécie registrada vale. Regra única: AG-07 ("Usar na O.S.") e trava da O.S. (CTL-5, S3-3).
+function carAlvoRef(P,cu,alvo){ const u=P&&P.usos?P.usos[cu]:null; const a=String(alvo||'').trim(); if(!u||!a) return '';
+  const n=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim(); const na=n(a);
+  for(const r of (u.al||[])){ const cab=r.split(' · ')[0], base=cab.split(' (')[0].trim(); if(na===n(r)||na===n(cab)||na===n(base)) return base;
+    const par=/\(([^)]*)\)/.exec(cab); if(par){ const it=par[1].split(',').map(x=>x.trim()).find(x=>n(x)===na); if(it) return it; } }
+  if(/^Herbicida/.test(P.classe||'')&&(u.al||[]).length) return a.charAt(0).toLowerCase()+a.slice(1);
+  return ''; }
+'''
+
+
+def js_local():
+    """só o local, a cultura e a operação das ordens e o alvo da referência (AG-07 · Usar na O.S.): talhões com nome e cultura, alvos da
+    referência por produto e JS_LOCAL, sem o motor de carência."""
+    tal = _talhoes()
+    prod = {k: dict(classe=v['classe'], usos={cu: dict(al=u['al']) for cu, u in v['usos'].items()}) for k, v in _produtos().items() if v['usos']}   # alvo × referência (carAlvoRef)
+    c = dict(tal={k: dict(nome=v['nome'], cult=v['cult']) for k, v in tal.items()}, nomes=_nomes(tal), prod=prod)
+    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS_LOCAL
 
 
 # ------------------------------------------------------------------ motor (JS puro: O.S., Mapa, CO-06 e testes no jsc)
@@ -222,13 +272,6 @@ function carIso(s,ref){ s=String(s||'').trim(); let m=/^(\d{4})-(\d{2})-(\d{2})/
 function carAdd(iso,n){ const d=new Date(iso+'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 function carBr(iso){ if(!iso) return '—'; const a=String(iso).split('-'); return a[2]+'/'+a[1]; }
 function carNum(n,d){ return Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:(d===undefined?1:d)}); }
-function carNome(t){ return (CARD.tal[t]||{}).nome||t; }
-// local da O.S. → talhões do mapa ('Pivô 6' → PV06 · 'T1-A' → T1, parcela T1-A · 'T1+T2' → T1 e T2)
-function carTals(nome){ const s=String(nome||''); const out=[]; const add=(tid,parc)=>{ if(CARD.tal[tid]&&!out.some(x=>x.tid===tid&&x.parc===parc)) out.push({tid,parc}); };
-  if(CARD.nomes[s]){ const t=CARD.nomes[s]; add(t,t===s?null:(s.indexOf(t+'-')===0?s:null)); return out; }
-  (s.match(/Pivô\s*\d+/g)||[]).forEach(x=>{ const n=Number(x.replace(/\D/g,'')); add('PV'+('0'+n).slice(-2),null); });
-  (s.match(/\b(T|P|C)\d+(-[A-Z])?\b/g)||[]).forEach(x=>{ const m=/^((?:T|P|C)\d+)(-[A-Z])?$/.exec(x); add(m[1],m[2]?x:null); });
-  return out; }
 function carRegra(p,cult){ const P=CARD.prod[p]; if(!P) return {def:false,desconhecido:true};
   if(!P.defn) return {def:false}; if(P.adj) return {def:true,adj:true};
   const u=(P.usos||{})[cult]; if(!u) return {def:true,semUso:true,ingr:P.ingr,ficha:P.ficha};
@@ -252,7 +295,7 @@ function carPush(arr,x){ if(!arr.some(y=>y.t===x.t)) arr.push(x); return arr; }
 // posterior não conta para aquele lote. Sem corte (situação do talhão), toda aplicação apontada conta, mesmo com data depois da consultada.
 function carAplic(cen,tid,ate,corte){ const T=CARD.tal[tid]||{}; const cult=T.cult||''; const apl=[], pend=[], prev=[]; ate=ate||CARD.hoje;
   Object.keys((cen&&cen.ordens)||{}).forEach(id=>{ const o=cen.ordens[id]; const ts=carTals(o.talhao).filter(x=>x.tid===tid); if(!ts.length) return;
-    const reais=(o.ap||[]).filter(a=>a.st!=='Previsto'); const canc=o.etapa==='Canceladas';
+    const reais=(o.ap||[]).filter(a=>a.st!=='Previsto'&&a.st!==CEN_AP_DESC); const canc=o.etapa==='Canceladas';
     if(canc&&!reais.length) return;   // cancelada sem apontamento nunca conta; com apontamento, a aplicação aconteceu (fato) e conta
     const defs=(o.ins||[]).filter(x=>{ const r=carRegraC(cen,x.p,cult); return r.def||r.desconhecido; }); if(!defs.length) return;   // fora de todo cadastro: possível defensivo
     const parcO=ts[0].parc; const J=carJanela(o);
@@ -296,11 +339,17 @@ function carRot(e){ if(e.k==='curso') return 'carência até '+carAte(e.det.fim)
 function carOps(cen){ return ((CARD.car0||{}).ops||[]).concat(((cen&&cen.car)||{}).ops||[]); }
 function carLotes(cen){ const L={};
   Object.keys((cen&&cen.ordens)||{}).forEach(id=>{ const o=cen.ordens[id]; if(!carEhColheita(o)) return; const ts=carTals(o.talhao); if(!ts.length) return;
-    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto') return; const lid=carLid(id,a.dia);
+    (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC||a.st===CEN_AP_DUP) return; const lid=carLid(id,a.dia);
       L[lid]={id:lid,tipo:'campo',os:id,tal:ts[0].tid,parc:a.parc||ts[0].parc||null,d:carIso(a.d),ha:Number(a.ha)||0,st:a.st,sinc:a.sinc!==false,pais:[],pos:[],q:'colheita '+id+' dia '+a.dia}; }); });
   carOps(cen).forEach(op=>{ if(op.k==='mistura'||op.k==='divisao') (op.novos||[]).forEach(n=>{ L[n.id]={id:n.id,tipo:op.k,pais:(op.de||[]).slice(),d:op.d,pos:[],q:n.q||'',fonte:op.fonte||''}; });
     if(op.k==='pos'&&L[op.lote]) L[op.lote].pos.push(op); });
   return L; }
+// o que já foi registrado sobre o lote (destino, liberação, pós-colheita, mistura ou divisão, laudo): o relato que o originou não é estornado por cima
+function carLoteUso(cen,lid){ const C=(cen&&cen.car)||{}; const out=[];
+  if(carDestino(cen,lid)) out.push('destino'); if(((C.lib||{})[lid]||[]).length) out.push('liberação comercial');
+  carOps(cen).forEach(op=>{ if(op.k==='pos'&&op.lote===lid) out.push('operação de pós-colheita'); if((op.k==='mistura'||op.k==='divisao')&&(op.de||[]).indexOf(lid)>=0) out.push(op.k==='mistura'?'mistura':'divisão'); });
+  if(((CARD.car0||{}).laudos||[]).concat(C.laudos||[]).some(x=>(x.escopo||[]).indexOf(lid)>=0)) out.push('laudo');
+  return out.filter((v,i,a)=>a.indexOf(v)===i); }
 function carAncestrais(L,lid,seen){ seen=seen||{}; if(seen[lid]) return []; seen[lid]=1; const l=L[lid]; if(!l) return []; let out=[l]; (l.pais||[]).forEach(p=>{ out=out.concat(carAncestrais(L,p,seen)); }); return out; }
 function carDestino(cen,lid){ const d=(((cen&&cen.car)||{}).dest||{}); return (d[lid]!==undefined)?d[lid]:(((CARD.car0||{}).dest||{})[lid]||''); }
 function carLaudos(cen,L,lid){ const l=L[lid]; const ok=[lid]; if(l&&l.tipo==='divisao') (l.pais||[]).forEach(p=>ok.push(p));   // divisão: a amostra do lote de origem representa as partes; mistura precisa da própria amostra
@@ -394,7 +443,7 @@ function carAvisoAplic(c,o){ if(!o||carEhColheita(o)||(o.etapa!=='A liberar'&&o.
   return null; }
 // colheita apontada dentro da carência (app ou web): fato registrado, nunca impedido → conferência com dono
 function carColhidoEmCarencia(c,o){ if(!o||!carEhColheita(o)) return []; const out=[]; const ts=carTals(o.talhao); if(!ts.length) return out;
-  (o.ap||[]).forEach(a=>{ if(a.st==='Previsto') return; const d=carIso(a.d); if(!d) return; const e=carEstado(c,ts[0].tid,d,a.parc||ts[0].parc,d);
+  (o.ap||[]).forEach(a=>{ if(a.st==='Previsto'||a.st===CEN_AP_DESC) return; const d=carIso(a.d); if(!d) return; const e=carEstado(c,ts[0].tid,d,a.parc||ts[0].parc,d);
     const r=e.ativos.filter(x=>x.d<=d)[0]; if(r) out.push({dia:a.dia,d,lote:carLid(o.id,a.dia),r}); }); return out; }
 // comandos sobre o cenário (só dentro de cenMudar): destino do lote (reavalia e preserva a avaliação anterior) e janela da colheita
 function carc_destino(c,lid,dest){ const L=carLotes(c); if(!L[lid]) throw new Error('Lote '+lid+' não encontrado.'); if(dest&&!CARD.dest[dest]) throw new Error('Destino sem cadastro.');
@@ -435,6 +484,14 @@ function carMerge(o,co,c){ if(!co||typeof CARD==='undefined') return; try{
   const cc=carColhidoEmCarencia(c,co); if(cc.length){ o.carCol=cc; o.selos=o.selos.concat([{t:'Colhido em carência · conferir',c:'red'}]);
     if(co.etapa==='Em execução'||co.etapa==='Em conferência'){ o.dono=CARD.quem.ag; o.prazo='conferir '+cc.map(x=>x.lote).join(', ')+' (colhido em carência)'; } }
   }catch(e){} }
+// aplicações do produto no talhão (ou na parcela) na safra da ordem, sem a própria: O.S. que já autorizou ou fez a aplicação (Liberadas em diante;
+// cancelada só com apontamento) + caderno de campo (dados_mip.APL sem O.S.). Ordem ainda A liberar não conta: a primeira a liberar ocupa a vaga.
+// Devolve a lista do que contou (OS-…, caderno dd/mm) para a mensagem nomear com quem resolver.
+function carSaf(o){ const s=String((o&&o.osc&&o.osc.novo&&o.osc.novo.saf)||(CARD.saf||{})[o&&o.id]||''); const m=/\d{4}\/\d{2}/.exec(s); return m?m[0]:s; }
+function carNap(c,tid,parc,p,o){ const sf=carSaf(o), FEZ=['Liberadas','Em execução','Em conferência','Encerradas'];
+  const os=Object.keys((c&&c.ordens)||{}).map(k=>c.ordens[k]).filter(h=>h.id!==o.id&&carSaf(h)===sf&&(FEZ.indexOf(h.etapa)>=0||(h.ap||[]).some(a=>a.st!=='Previsto'&&a.st!==CEN_AP_DESC))
+    &&(h.ins||[]).some(x=>x.p===p)&&carTals(h.talhao).some(y=>y.tid===tid&&(!y.parc||!parc||y.parc===parc))).map(h=>h.id);
+  return os.concat((CARD.apl0||[]).filter(a=>a.tal===tid&&a.p===p&&a.saf===sf).map(a=>'caderno '+a.d.slice(8,10)+'/'+a.d.slice(5,7))); }
 // gancho de teste/inspeção (o script da tela roda isolado): carencia_test.py lê e muda o cenário pelas mesmas funções
 try{ window.__car={carEstado,carAvaliar,carLotes,carBloqColheita,carAvisoAplic,carColhidoEmCarencia,carc_janela,carc_destino,carc_bula,carc_liberar_lote,carJanela,cenGet,cenMudar}; }catch(e){}
 '''
@@ -446,7 +503,7 @@ def js_nucleo(app=False):
     if app:
         c = dict(c, lmr={}, car0={}, prod={k: dict(v, usos={cu: {kk: u[kk] for kk in ('dias', 'conf', 'na', 'txt')} for cu, u in v['usos'].items()})
                                           for k, v in c['prod'].items()})
-    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS
+    return 'const CARD = ' + json.dumps(c, ensure_ascii=False).replace('</', '<\\/') + ';\n' + JS + JS_LOCAL
 
 
 if __name__ == '__main__':

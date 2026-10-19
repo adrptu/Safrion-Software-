@@ -1,0 +1,8 @@
+OK item diferente recusa comando apto=5 quarentena=0 sem alterar estoque/recibo
+OK item diferente recusa comando apto=0 quarentena=5 sem alterar estoque/recibo
+OK item diferente recusa comando apto=2 quarentena=3 sem alterar estoque/recibo
+OK erro junto da divergência mantém preenchimento
+OK mesmo item continua recebível: Sem divergência
+OK mesmo item continua recebível: Avaria
+RESULTADO 6/6
+RESULTADO 6/6

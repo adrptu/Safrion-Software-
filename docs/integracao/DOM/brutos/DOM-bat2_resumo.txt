@@ -1,0 +1,8 @@
+est_cenario_test.py exit=0 24s :: RESULTADO: 15/15 ok 
+esttest.py 4 exit=0 50s :: RESULTADO: 13/13 ok RESULTADO: OK 
+esttest.py 2 exit=0 543s :: RESULTADO: 23/23 ok RESULTADO: OK 
+map_decisoes_test.py exit=0 768s :: 18 ok · 0 falhas [] 
+map_irrig_filtro_test.py exit=0 970s :: 15 ok · 0 falhas [] 
+producao_fluxo_test.py revisao exit=0 510s :: RESULTADO: OK 18/18 
+os_ator_test.py exit=0 624s :: RESULTADO: 15/15 ok 
+FIM

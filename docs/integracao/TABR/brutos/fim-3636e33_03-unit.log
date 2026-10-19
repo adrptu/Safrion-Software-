@@ -1,0 +1,36 @@
+$ python3 tabelas_cad_irr_unit.py
+OK    A1 CD-01: grades g_tal, g_amb, g_agua publicadas
+OK    A1 CD-01det: grades g_idt, g_parc publicadas
+OK    A1 CD-02: grades g_cv, g_rend publicadas
+OK    A1 CD-03: grades g_atv publicadas
+OK    A1 CD-04: grades g_pes publicadas
+OK    A1 CD-05: grades g_forn, g_cob publicadas
+OK    A1 CD-06: grades g_itm, g_loc publicadas
+OK    A1 CD-07: grades g_dim publicadas
+OK    A1 IR-01: grades g_set publicadas
+OK    A1 IR-02: grades g_ag publicadas
+OK    A1 IR-03: grades g_os publicadas
+OK    A1 IR-03det: grades g_pas, g_trl publicadas
+OK    A1 IR-04: grades g_src, g_cap, g_des publicadas
+OK    A1 CD-05: colunas por papel (Fornecedor, Cliente, Parceiro de crédito, Transportador, Prestador) publicadas
+OK    A1 CD-05: coluna dinâmica "Motivo da suspensão" publicada
+OK    A2 240 colunas: nenhum rótulo composto (" · ", " / ", " e ")
+OK    A3 nenhuma coluna numérica com a unidade só no formato antigo (u/pre): a unidade vai na célula com data-un
+OK    A3 nenhum cabeçalho com unidade entre parênteses ("Área (ha)")
+OK    A4 custo por unidade rotulado "Custo R$/h", "Custo R$/ha"
+OK    A5 colunas de medida (área, lâmina, vazão, custo…) com a unidade na célula (data-un)
+OK    A6 datas e instantes tipados como data (ordenam por data): vencimento, plantio, início e fim, quando, atualização, validade
+OK    B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio
+OK    B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio
+OK    B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)
+OK    C1 documento da água: outorga é "Outorga …" (antes saía "Certidão …"); certidão é "Certidão …"
+OK    C2 situação da água só com o estado e o próximo passo (a data fica em Vencimento; o processo no painel)
+OK    C3 situação por papel (só o estado; o valor fica na coluna do papel): dois papéis = dois estados; vencido, sem limite, não homologado, sem RNTRC, suspenso; filtro de um papel mostra só o dele
+OK    C4 cultura × estádio do setor: Milho | V10, Feijão | R5, Mamão | (vazio), Mamão | fase do mamão (Lagoa Grande)
+OK    C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e a célula mostra o texto relativo
+OK    C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO
+OK    C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia
+OK    B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)
+OK    B5 cadastrar sensor: o formulário não pede Unidade; cada grandeza do seletor tem a sua unidade (UN_GR) e ela é a mesma da semente
+RESULTADO: 33/33 ok
+[exit 0]

@@ -1,0 +1,144 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Ordem de Serviço
+‹
+Agrícola
+Ordem de Serviço
+i
+2 em execução · 3 impedidas
+Criar ordem
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Cultura
+Todas
+Café
+Milho
+Soja
+Talhão
+Todos
+C1
+P1
+Sem talhão
+T1
+T1-A
+T1-B
+T2
+T3
+T4
+Ordens por fase
+Todas
+10
+A liberar
+3
+Liberadas
+2
+Em execução
+2
+Em conferência
+1
+Encerradas
+2
+Canceladas
+0
+10 de 10
+Agrupar por
+▾
+Colunas
++12
+O.S.
+⇅
+ATIVIDADE
+⇅
+TALHÃO
+⇅
+PRAZO
+⇅
+FASE
+⇅
+PROGRESSO
+⇅
+OS-0415
+Dessecação pós-colheita
+T3
+—
+Encerradas
+100,0 %
+OS-0417
+Adubação de cobertura
+P1
+24/09
+Em conferência
+100,0 %
+Falta insumo
+OS-0418
+Fertirrigação · reclassificada
+P1
+—
+A liberar
+0,0 %
+Impedida
+OS-0420
+Plantio · Soja 58 W
+T4
+até 24/09
+Em execução
+30,0 %
+OS-0421
+Pulverização · Fungicida 1ª aplicação
+T1
+T2
+hoje
+Em execução
+54,3 %
+OS-0424
+Pulverização · Fungicida A
+T1-B
+—
+Liberadas
+0,0 %
+OS-0425
+Adubação 1ª parcela · café
+C1
+até 15/10
+Liberadas
+0,0 %
+OS-0430
+Dessecação pré-plantio
+T1-A
+antes de 25/09
+A liberar
+0,0 %
+Falta máquina
+OS-0431
+Plantio · Soja 58 W
+T2
+antes de 24/09 06:00
+A liberar
+0,0 %
+Lote bloqueado
+OB-0104
+Beneficiamento · grãos
+—
+—
+Encerradas
+—
+Restaurar demonstração
+Tela: Ordem de Serviço · 2 em execução · 3 impedidas

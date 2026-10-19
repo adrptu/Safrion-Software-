@@ -1,0 +1,54 @@
+acoes_duplicadas||../ferramentas/acoes_duplicadas.py /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/V56/base055/tools/prototipo/v37/gen37 /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/V56/logs/base/acoes_duplicadas.json
+ds_test|DS_PARTES=A,B,C,D,E,G|ds_test.py
+componentes_matriz||componentes_test.py matriz
+componentes_rotacao||componentes_test.py rotacao
+componentes_interacao||componentes_test.py interacao
+componentes_ajustes||componentes_test.py ajustes
+componentes_ajustes2||componentes_test.py ajustes2
+tabelas_cad_test||tabelas_cad_test.py
+tabelas_irr_test||tabelas_irr_test.py
+irtest||irtest.py
+irr_fluxo_test||irr_fluxo_test.py
+irr_estado_test||irr_estado_test.py
+map_irrig_filtro_test||map_irrig_filtro_test.py
+cada_cd03_test||cada_cd03_test.py
+cada_fix03_test||cada_fix03_test.py
+cadc_cd06_test||cadc_cd06_test.py
+cadc_fix_cd06||cadc_fix_cd06.py
+cadc_cd02_test||cadc_cd02_test.py
+ctl5_test||ctl5_test.py
+agrofit_test||agrofit_test.py
+carencia_test||carencia_test.py
+ficha_pivo_test||ficha_pivo_test.py
+praga_alvo_test||praga_alvo_test.py
+solo_saf_test||solo_saf_test.py
+solo_os_test||solo_os_test.py
+solo_ag02_test||solo_ag02_test.py
+solo_rev_test||solo_rev_test.py
+tabelas_os_test||tabelas_os_test.py
+tabelas_saf_test||tabelas_saf_test.py
+tabelas_est_test||tabelas_est_test.py
+map_aprov_test||map_aprov_test.py
+map_decisoes_test||map_decisoes_test.py
+pa_lista_test||pa_lista_test.py
+patest||patest.py
+acao_familias||acao_unica_test.py familias
+acao_v3||acao_unica_test.py v3
+acao_responsivo||acao_unica_test.py responsivo
+acao_saf||acao_unica_test.py saf
+etapas_celular||etapas_celular_test.py celular
+etapas_complemento||etapas_celular_test.py complemento
+etapas_desktop||etapas_celular_test.py desktop
+etapas_faixa||etapas_celular_test.py faixa
+comercial_revisao_test||comercial_revisao_test.py
+comercial_fluxo_test||comercial_fluxo_test.py
+producao_fluxo_test||producao_fluxo_test.py
+reserva_duplo_clique_test||reserva_duplo_clique_test.py
+partest||partest.py
+dose_divergente_nav||dose_divergente_test.py nav
+cafe_apurar_nav||cafe_apurar_test.py nav
+ostest||ostest.py
+os_cenario_test||os_cenario_test.py
+osacoes||osacoes.py
+varredura||varredura.py
+ma_unica_test||ma_unica_test.py

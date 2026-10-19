@@ -1,0 +1,13 @@
+OK    F1 Colheita, Recebimento e Estoque de produto: Cultura na faixa; "Soja" deixa só linhas de soja (menos que antes); "Todas" volta tudo
+OK    F2 1440 Colheita: Café → só C1; P1 mantém exatamente suas folhas e exclui as demais
+OK    F2 390 Colheita: Café → só C1; P1 mantém exatamente suas folhas e exclui as demais
+OK    F3 O.S. › Tabela agrupada por Talhão: o total de O.S. distintas à vista ("N O.S. · X ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total")
+OK    F3 O.S.: trocar a fazenda tira o talhão do filtro com aviso, pelo nome ("Pivô 4"), não pelo ID
+OK    F5 Pragas e doenças: Cultura com as culturas que têm vistoria na fazenda; "Feijão" deixa só as vistorias de feijão (lista e chip "Todas"); o Talhão segue a Cultura
+OK    F5 Pragas e doenças: Talhão "Pivô 4" deixa só as vistorias dele; trocar para Santa Rita tira o talhão do filtro com aviso pelo nome
+OK    F5 Pragas e doenças: abrir VIS-011 (soja) pelo link com "Feijão" no filtro tira só a Cultura e mostra a linha
+OK    F6 Cultura e Talhão voltam ao recarregar e ao sair e voltar (Colheita 1440 e 390 px, Recebimento, Estoque de produto)
+OK    F4 390 px: listas da faixa com alvo ≥ 44 px e sem rolagem lateral
+OK    F4 sem erro de JS
+RESULTADO: 11 ok · 0 falhas
+rc=0

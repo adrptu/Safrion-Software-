@@ -1,0 +1,54 @@
+diff --git a/tools/prototipo/v37/gen37/areas/processo_os.py b/tools/prototipo/v37/gen37/areas/processo_os.py
+index d21242d..3484c16 100644
+--- a/tools/prototipo/v37/gen37/areas/processo_os.py
++++ b/tools/prototipo/v37/gen37/areas/processo_os.py
+@@ -863,8 +863,12 @@ function EXTRAVALS(self,v){
+     /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
+     const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
+     const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
+-    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{}; const t=(cur[dia]||{}).t||'';
+-      osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:null},(e)=>dvSet(dia,{err:e})); };
++    /* DOM-REV-20261009-01 (S3): gravar a revisão de um dia limpa só o rascunho desse dia; o dos outros dias da mesma ordem fica,
++       e o foco vai para o próximo dia ainda em revisão (quem usa o teclado continua de onde estava) */
++    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; const t=(cur[dia]||{}).t||'';
++      const resto=Object.assign({},cur); delete resto[dia];
++      const r=osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:resto},(e)=>dvSet(dia,{err:e}));
++      if(!r.erro) setTimeout(()=>{ const el=document.querySelector('aside[role=dialog] textarea[id^="dv_"]'); if(el) el.focus(); },60); };
+     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
+       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
+       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
+diff --git a/tools/prototipo/v37/gen37/dose_divergente_nav.py b/tools/prototipo/v37/gen37/dose_divergente_nav.py
+index 4b8f1bb..fbbbab2 100644
+--- a/tools/prototipo/v37/gen37/dose_divergente_nav.py
++++ b/tools/prototipo/v37/gen37/dose_divergente_nav.py
+@@ -128,6 +128,30 @@ def rodar():
+         a.ok(dd.startswith('Dia 2 guardado como duplicidade') and 'Duplicidade · não somado' in l2 and SELO not in l2 and 'A revisão técnica abre quando o apontamento somar' not in l2 and SELO not in linha(OS),
+              f'guardado como duplicidade ({dd[:60]}): a linha do dia 2 sem divergência nem promessa de revisão; lista sem selo: ' + l2[:240])
+         shot('dose_div_8_dup_guardado.png'); guard()
++        # 10 · DOM-REV-20261009-01 (S3): dois dias divergentes na mesma ordem, os dois motivos escritos; Ana confirma o dia 1 pelo teclado →
++        #      só o dia 1 grava, o rascunho do dia 2 continua no campo e o foco vai para ele; depois o dia 2 confirma pelo teclado
++        def tecla(k, code, vk, text=None):
++            d = {'type': 'keyDown', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk}
++            if text: d['text'] = text
++            a.c.call('Input.dispatchKeyEvent', d); a.c.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk}); time.sleep(.12)
++        def escrever(fid, txt):   # foco no campo, digita (insertText) e sai com Tab, como quem usa o teclado
++            J(f"document.getElementById({json.dumps(fid)}).focus()"); a.c.call('Input.insertText', {'text': txt}); time.sleep(.15); tecla('Tab', 'Tab', 9)
++        def val(fid): return J(f"(()=>{{const e=document.getElementById({json.dumps(fid)}); return e?e.value:null;}})()")
++        def ativo(): return J("(()=>{const e=document.activeElement; return e?(e.id||e.innerText||e.tagName).trim():'';})()") or ''
++        a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração'); time.sleep(.3); web()
++        p0 = cmd(f"(W.osc_liberar(c,'{OS}',false,'','Ana'), c.reqs[c.ordens['{OS}'].req].itens.forEach(i=>W.cenEntregar(c,c.ordens['{OS}'].req,i.prod,i.solicitado,'Marcos','Rui')), W.cenConfirmarRecebimento(c,c.ordens['{OS}'].req), W.cenIniciarTurno(c,'{OS}'), c.app.turno=null, "
++                 f"W.osc_apontar(c,'{OS}','25/09',10,{{'Glifosato 480':20,'2,4-D 806':0,'Óleo mineral':5}},[],'W-RASC-1'), W.osc_apontar(c,'{OS}','26/09',10,{{'Glifosato 480':20,'2,4-D 806':10,'Óleo mineral':0}},[],'W-RASC-2'))")
++        perfil('Ana'); web(); ordem(OS); pan()
++        T1 = 'Calda sem 2,4-D no dia 1: deriva no vizinho, controle conferido'; T2 = 'Reaplicar Óleo mineral 0,5 L/ha nos 10 ha do dia 2 em nova O.S.'
++        escrever('dv_2', T2); escrever('dv_1', T1); foco1 = ativo()
++        tecla('Enter', 'Enter', 13, '\r'); time.sleep(.5); t = toast(); pan(); f2 = ativo(); v2 = val('dv_2')
++        a.ok(p0.startswith('Apontamento do dia 2') and foco1 == 'Aceitar com motivo' and f'aceita por Ana (agrônoma): {T1}' in t and a.cen(REV) == '1:Aceita:Ana (agrônoma)'
++             and v2 == T2 and val('dv_1') is None and f2 == 'dv_2',
++             f'dois dias divergentes: Enter em "Aceitar com motivo" do dia 1 grava só o dia 1; o texto do dia 2 fica ({v2!r}) e o foco vai para ele ({foco1} → {f2}): {p0[:40]} · ' + t[:120])
++        tecla('Tab', 'Tab', 9); tecla('Tab', 'Tab', 9); fco = ativo(); tecla('Enter', 'Enter', 13, '\r'); time.sleep(.5); t = toast()
++        a.ok(fco == 'Registrar correção' and a.cen(REV) == '1:Aceita:Ana (agrônoma),2:Correção decidida:Ana (agrônoma)' and f'Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430: {T2}' in t,
++             f'dia 2 pelo teclado (Tab até "Registrar correção" e Enter) grava o rascunho preservado, só a decisão confirmada: {fco} · ' + t[:160])
++        shot('dose_div_9_dois_dias.png'); guard()
+         a.c.size(390, 1800); a.abrir('MB-01'); a.clk('Restaurar demonstração')
+     finally:
+         a.fim()

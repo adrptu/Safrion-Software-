@@ -25,9 +25,11 @@ try:
     def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.35); return r
     def faz(v): J(f"({SETV})('select[aria-label=\"Filtrar por fazenda\"]',{json.dumps(v)})"); time.sleep(.4)
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label'),e.getAttribute('fill')]:[null,null];}})()")
-    labs=lambda: J(f"{SV}.map(x=>x.getAttribute('aria-label')||'')") or []
-    tap=lambda t: (J(f"{SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')).dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'),e.getAttribute('fill')]:[null,null];}})()")
+    labs=lambda: J(f"{SV}.map(x=>x.getAttribute('data-talhao')+': '+x.getAttribute('data-rotulo'))") or []
+    tap=lambda t: (J(f"{SV}.find(x=>x.getAttribute('data-talhao')==='{t}').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))"),time.sleep(.35))
     pan=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''
     href=lambda t,txt: J(f"(()=>{{const a=[...document.querySelectorAll('aside[aria-label^=\"{t}\"] a')].filter(a=>a.innerText.trim()==={json.dumps(txt)}); return a.map(x=>x.getAttribute('href'));}})()")
     # "Abrir ordem" de cada ordem do painel: [id da ordem do cartão, destino]
@@ -49,7 +51,9 @@ try:
     chk('2 cabeçalho: OS-0420 e OS-0431 impedidas · 2 a liberar (OS-0418 e OS-0430), sem "decisões"', 'OS-0420 e OS-0431 impedidas · 2 a liberar' in head() and 'decis' not in head(), head())
     # 3-6 · barra de 01/10 (Irrigação de volta, Pragas e doenças); as ordens de água vivem na camada Irrigação
     rail=J(f"{RAIL}.map(b=>b.innerText.trim())") or []
-    chk('3 barra: Integrado, Satélite, Lavoura, Pragas e doenças, Carência e destino (MAPA-CARENCIA-LMR-20261003), Irrigação, Ordens de serviço, Insumos, Custos', rail==['Integrado','Satélite','Lavoura','Pragas e doenças','Carência e destino','Irrigação','Ordens de serviço','Insumos','Custos'], rail)
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): os nove nomes da DEC-2609-12; Carência e destino e Insumos viraram filtros (mapa9_test.py)
+    chk('3 barra: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos',
+        rail==['Integrado','Satélite','Solo','Pragas e doenças','Ordens de serviço','Irrigação','Estádio','Colheita e produtividade','Custos'], rail)
     l7,f7=lab('T7'); l2,f2=lab('P2')
     # 01/10: o Integrado fala da irrigação sem citar a ordem de água como O.S. (ela é do módulo Irrigação); 02/10: a cor vem do estado da irrigação
     chk('4 Integrado: T7 vermelho (irrigação em conflito); P2 amarelo (irrigação · conferir medição da passagem parcial), sem número de ordem de água', 'irrigação em conflito' in (l7 or '') and 'OS-0423' not in (l7 or '') and f7=='#C8553D' and 'conferir medição' in (l2 or '') and 'OS-0394' not in (l2 or '') and f2=='#D4B25A', [l7,f7,l2,f2])
@@ -78,13 +82,13 @@ try:
     faz('Santa Rita')
     # 11-12 · cenário compartilhado: outra tela muda a OS-0424 (turno fechado) e devolve a sobra da OS-0417
     s=cenario.seed(); s['rev']=7
-    s['ordens']['OS-0424'].update(etapa='Em execução',realizado=20,saldo=60)
+    s['ordens']['OS-0424'].update(etapa='Em execução',realizado=20,saldo=108)   # G1 do CTL-1: OS-0424 na soja do T1-B (128 ha), não mais no milho do P2
     it=s['reqs']['REQ-031']['itens'][0]; it['devolvido']+=it['custodia']; it['custodia']=0
     J(f"localStorage.setItem('talhao-os-cenario-v1',{json.dumps(json.dumps(s,ensure_ascii=False))}); window.dispatchEvent(new StorageEvent('storage',{{key:'talhao-os-cenario-v1'}}))"); time.sleep(.4)
-    camada('Ordens de serviço'); tap('P2'); t2=pan('P2')
-    chk('11 cenário (camada Ordens de serviço): OS-0424 aparece Em execução com 20/80 ha · saldo 60 ha (sem recarregar) · P2 sem as ordens de água OS-0419/OS-0422',
-        'OS-0424 · Pulverização · Fungicida A' in t2 and '20/80 ha · saldo 60 ha · janela 24/09' in t2 and 'Em execução' in t2 and not any(x in t2 for x in AGUA), t2[:500].replace('\n',' / '))
-    tap('P2'); tap('P1'); t1=pan('P1')
+    camada('Ordens de serviço'); tap('P2'); t2=pan('P2'); tap('P2'); tap('T1'); tt1=pan('T1')
+    chk('11 cenário (camada Ordens de serviço): OS-0424 (T1-B) aparece Em execução com 20/128 ha · saldo 108 ha no T1 (sem recarregar) · P2 sem a OS-0424 e sem as ordens de água OS-0419/OS-0422',
+        'OS-0424 · Pulverização · Fungicida A' in tt1 and '20/128 ha · saldo 108 ha' in tt1 and 'Em execução' in tt1 and 'OS-0424' not in t2 and not any(x in t2 for x in AGUA), (t2[:200].replace('\n',' / '), tt1[:700].replace('\n',' / ')))
+    tap('T1'); tap('P1'); t1=pan('P1')
     chk('12 cenário: sobra da OS-0417 recebida → sem custódia, sem selo "Sobras a receber" e sem "Receber sobras"', '95/95 ha' in t1 and 'custódia' not in t1 and 'Receber sobras' not in t1 and 'Sobras a receber' not in t1, t1[:500].replace('\n',' / '))
     J("localStorage.removeItem('talhao-os-cenario-v1')")
     # 13-14 · caixa de Aprovações (sem O.S.) e Agenda
@@ -97,8 +101,12 @@ try:
         'Renovar política' not in b and 'Resolver conflito · OS-0423' in rg('OS-0423') and 'parada da B3' in rg('OS-0423') and 'Caio' in rg('OS-0423') and 'Definir janela · OS-0422' in rg('OS-0422') and 'João' in rg('OS-0422'), [rg('OS-0423'), rg('OS-0422')])
     # 15 · contagens do mapa = tela O.S. (Santa Rita, cenário limpo): ordens de água fora da camada Ordens de serviço e de "Ordens abertas"
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.2)
-    os_rows=J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
-    ids=[r.split(' ')[0] for r in os_rows if r.startswith('OS-')]; abertas=[r.split(' ')[0] for r in os_rows if r.startswith('OS-') and 'Encerradas' not in r]
+    # mesma safra do Mapa (o IN-04 filtra a safra exata, como a lista: PRD 8.4); o ID vem de qualquer coluna da linha, porque a
+    # 1ª célula pode ser o selo ("Falta insumo", "Impedida")
+    J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por safra\"]'); if(s){ s.value='2026/27'; s.dispatchEvent(new Event('change',{bubbles:true})); }})()"); time.sleep(.6)
+    os_rows=J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.getClientRects().length).map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    _id=lambda r: (re.search(r'OS-\d{4}',r) or [None])[0]
+    ids=[_id(r) for r in os_rows if _id(r)]; abertas=[_id(r) for r in os_rows if _id(r) and 'Encerradas' not in r]
     fz=J("(document.querySelector('select[aria-label=\"Filtrar por fazenda\"]')||{}).value")
     chk('15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423',
         fz=='Santa Rita' and len(ids)>0 and num('Ordens',n_os)==len(ids) and num('Ordens abertas',n_int)==len(abertas)
@@ -108,3 +116,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(0 if OK and not FAIL else 1)   # falha ou nenhuma verificação não sai verde (mesma guarda do PR #72)

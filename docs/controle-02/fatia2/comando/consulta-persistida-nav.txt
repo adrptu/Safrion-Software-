@@ -1,0 +1,32 @@
+  OK  1440: listagem não mostra consulta de safra não escolhida
+  OK  1440: legado sem aprovação fictícia e contexto visível
+  OK  1440: foco entra no painel
+  OK  1440: busca filtra conteúdo
+  OK  1440: sem rolagem horizontal
+  OK  1440: Shift+Tab contém foco no painel
+  OK  1440: Escape fecha e devolve foco
+  OK  1440: consulta preserva rascunho, contexto e armazenamento
+  OK  1440: fixture histórica compara só a área alterada
+  OK  1440: consulta conteúdo completo sem substituir o plano
+  OK  1440: conteúdo histórico consultável sem restaurar versão
+  OK  1440: primária volta ao contexto
+  OK  1440: botão lê histórico persistido após reload (fixture)
+  OK  1440: leitura persistida não escreve armazenamento
+  OK  1440: outra safra não herda R1
+  OK  390: listagem não mostra consulta de safra não escolhida
+  OK  390: legado sem aprovação fictícia e contexto visível
+  OK  390: foco entra no painel
+  OK  390: busca filtra conteúdo
+  OK  390: sem rolagem horizontal
+  OK  390: Shift+Tab contém foco no painel
+  OK  390: Escape fecha e devolve foco
+  OK  390: consulta preserva rascunho, contexto e armazenamento
+  OK  390: fixture histórica compara só a área alterada
+  OK  390: consulta conteúdo completo sem substituir o plano
+  OK  390: conteúdo histórico consultável sem restaurar versão
+  OK  390: primária volta ao contexto
+  OK  390: botão lê histórico persistido após reload (fixture)
+  OK  390: leitura persistida não escreve armazenamento
+  OK  390: outra safra não herda R1
+  OK  sem erro de script na tela
+RESULTADO: 31/31 ok

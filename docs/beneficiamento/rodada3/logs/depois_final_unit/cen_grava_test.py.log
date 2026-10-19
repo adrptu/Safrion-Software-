@@ -1,0 +1,21 @@
+
+— gravação normal: confirma e grava
+OK    sem erro e sem aviso
+OK    gravado e lido de volta
+
+— modo estrito com a cota cheia: erro recuperável e nada muda (memória, armazenamento e cenGet)
+OK    erro com o motivo e o caminho
+OK    armazenamento idêntico
+OK    memória e cenGet iguais ao estado anterior (rev 1)
+OK    repetir depois de liberar espaço grava uma vez (rev +1)
+
+— modo padrão com a cota cheia: a mudança vale nesta aba, com aviso, e a cópia antiga não a esconde
+OK    mensagem com o aviso e naoGravado
+OK    cenGet mostra a mudança (não volta à cópia antiga)
+OK    a cópia antiga saiu do armazenamento
+
+— erro do comando continua sem gravar, nos dois modos
+OK    erro devolvido e armazenamento idêntico
+
+RESULTADO_JS OK
+RESULTADO 10/10

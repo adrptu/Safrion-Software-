@@ -1,0 +1,5 @@
+UTC 9606 comparações PASS
+America/Sao_Paulo 9606 comparações PASS
+Pacific/Kiritimati 9606 comparações PASS
+canonica: 45 regressões PASS (C3, divergências 2/4, primeira Colheita, sem data)
+PASS: 28818 comparações originais; adaptador 9606 ; origens; imutabilidade; 3 mutantes detectados

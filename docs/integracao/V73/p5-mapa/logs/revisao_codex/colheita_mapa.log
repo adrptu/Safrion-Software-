@@ -1,0 +1,8 @@
+OK    C1 barra do mapa: "Colheita e produtividade" logo depois de "Estádio", com o desenho de Colheita
+OK    C2 rótulo de cada talhão = situação da Previsão e colheita (Lagoa Grande 23 pivôs, Santa Rita 8 talhões; "+N" com mais cultivos)
+OK    C3 faixa da Lagoa Grande = contagem por situação {'Em colheita': 1, 'Programada': 0, 'Prevista': 0, 'Colhida': 1, 'Sem previsão': 9} e A receber 1
+OK    C4 Pivô 19: Previsão "72,9 t · S39 (v1)" e Colhido "36,42 t" iguais aos da COLH, "1 carga na balança"; primário para a COLH do cultivo
+OK    C5 o caminho do painel (seção ou primário) abre a COLH com o painel do Pivô 19
+OK    F1 faixa de filtros na O.S., no Mapa e na Colheita: grupo "Filtros", só o funil com a dica "Filtros", sem "Filtros desta tela"
+OK    F2 390 px: O.S. sem rolagem lateral; sem erro de JS
+RESULTADO: 7 ok · 0 falhas

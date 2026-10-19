@@ -1,0 +1,7 @@
+0 5x6 partes fixas, todas 10 h ['424/5', '2576/5', '50']
+1 6x5 partes fixas, todas 10 h ['100', '500', '50']
+2 5x6 T4+P5 sem janela (prestador) ['1064/11', '5536/11', '50']
+3 caso 9: 5x6 janelas variadas (perf_casos ['3000', 0, '255']
+4 controle 4x5 partes fixas, todas 10 h ['265/4', '2135/4', '65']
+5 controle 4x6 partes fixas, todas 10 h ['1260/19', '10140/19', '65']
+6 controle 5x5 partes fixas, todas 10 h ['1780/21', '10820/21', '50']

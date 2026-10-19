@@ -1,0 +1,189 @@
+# Ancestralidade CTL-4 × v55 × v56 (2026-10-12T22:57:08Z); repositório: /home/user/sp-camada-sintetica (os commits não existem em /home/user/Safrion-Software-)
+c5d337a5c1e1ce671b6c56bde0db77d58266955b 2026-10-09 18:21:36 +0000 CTL-4: pttest acompanha a SOL-2026-07 da demanda única (Portal do parceiro)
+853a6a8df0a8476a907589e691c7f750709ce317 2026-10-10 01:42:42 +0000 CTL4: correções da revisão
+0c0931ff08d38d9e85e0a9e20092cdec8b9b095f 2026-10-10 11:32:05 +0000 docs(integracao): V55 — brutos da regressão do recorte do BEN (6cce975 × 47ff754) e varredura de DOM
+0ad2d0d6bc71fe7a5ca23d257d036356f10940a2 2026-10-10 11:34:03 +0000 Integração COM: o PV-031 do packing (BEN-1) entra no Comercial com preço e unidade; testes do BEN com quem age na reserva
+2e466eba846db9f9b1613c690616a6de5cad1d8e 2026-10-12 21:51:19 +0000 Integra a v55 publicada (0c0931f) na v56: RESP-01, partest T1-C, COMP-02 e pacotes V55
+5d2119ce4c1141c6a5ef906314e04ab275db34c6 2026-10-12 21:56:38 +0000 docs(integracao): V55 — recibo da publicação (versão 55, 1791632564-8fe1, fonte 0c0931f)
+merge v56 (git -C /home/user/sp-v56 log --merges -1): 2e466eba846db9f9b1613c690616a6de5cad1d8e pais: 0ad2d0d6bc71fe7a5ca23d257d036356f10940a2 0c0931ff08d38d9e85e0a9e20092cdec8b9b095f
+HEAD int/v56 agora: 885a68c7c23959cc52b3b04bb7ae1b22180fed40 (5d2119c só acrescenta docs/integracao/V55/publicacao.md:  1 file changed, 176 insertions(+))
+merge-base(853a6a8,0c0931f) = cdc185f551a9513d72734b18e4a869f921917c00
+
+## git log --oneline cdc185f551a9513d72734b18e4a869f921917c00..853a6a8 (commit | ancestral de 0c0931f | 0ad2d0d | 2e466eb | 5d2119c)
+853a6a8 CTL4: correções da revisão                                          0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+c5d337a CTL-4: pttest acompanha a SOL-2026-07 da demanda única (Portal do par 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+6665c38 CTL-4: cmptest lê o aviso do convite adicional antes da 1ª resposta  0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+3149604 CTL-4: docstring de dados2.demanda sem "etapa 4" (guarda estática N7  0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+21487ed CTL-4 · DEM-08: Compra aprovada volta a mostrar os pedidos (o pedido  0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+702633b CTL-4: o realizado da O.S. sai da demanda sem recomprar o aplicado (ca 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+f9ca37f Merge de claude/prototipo-v44 (cdc185f) na CTL-4                       0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+0801411 CTL-4: a quantidade a comprar tem 0,01 da unidade e o valor sai dela ( 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+9de6b50 CTL-4: teste de navegador do fluxo da demanda única (desktop e 390 px 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+1b0bcf7 CTL-4 · DEM-09: SOL enviada acima da demanda de agora fica visível e 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+802a65b CTL-4 · C2: a fonte do Mapa › Insumos diz qual demanda mostra       0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+d8f98dd CTL-4: casos do cenário vivo no teste de unidade da demanda           0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+2fd3d0a CTL-4: Portal do parceiro conta os itens da SOL e a especificação da 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+ffb3da6 CTL-4 · C2: Mapa › Insumos lê a mesma demanda (DEM-05)             0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+ac02935 CTL-4 · C1: demanda líquida única por fazenda lendo o realizado das 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+cfbf7d2 CTL-4 · DEM-08: Compra sem proposta a tempo escolhe a que chega prime 0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+17d2ab4 CTL-4: teste que reproduz o dano da demanda (vermelho na base)         0c0931f:nao 0ad2d0d:nao 2e466eb:nao 5d2119c:nao
+total: 17
+
+## patch-id (git cherry 2e466eb 853a6a8 cdc185f551a9513d72734b18e4a869f921917c00): '+' = mudança ausente na v56
++ 17d2ab47aa9f2cd3c7444665280fcb6c7bf1a837
++ cfbf7d256f9e5f48111cddbf8ab8a6dd8f059b8f
++ ac0293526ae1d38a9589a4ff0159cf415b162b52
++ ffb3da6d41517bcebcb308ee8c2ff068dafb7a16
++ 2fd3d0ad6de8afd3fecd6ba6019002e838d0ce6c
++ d8f98ddbe3b7c1ed8f68436259564c94b6350604
++ 802a65bad8c4a3e210124f0912dc06ff1033f1b1
++ 1b0bcf776fbe6f80ac446f9e027f3a569d902099
++ 9de6b50d226617a6badd12d221394f57bab66b77
++ 0801411ab20ccd5d75cce3523ae43fdd84ab4259
++ 702633baea57415bb64c2a64ac191a9781525d64
++ 21487ed9080ee6a1861166bc9b7f9577e8da662e
++ 3149604e375711e955dfb5db178cac85a6bc8c5b
++ 6665c3848504ebfd22dc756f4c1f0a7115fad961
++ c5d337a5c1e1ce671b6c56bde0db77d58266955b
++ 853a6a8df0a8476a907589e691c7f750709ce317
+
+## git cherry 0c0931f 853a6a8 cdc185f551a9513d72734b18e4a869f921917c00
++ 17d2ab47aa9f2cd3c7444665280fcb6c7bf1a837
++ cfbf7d256f9e5f48111cddbf8ab8a6dd8f059b8f
++ ac0293526ae1d38a9589a4ff0159cf415b162b52
++ ffb3da6d41517bcebcb308ee8c2ff068dafb7a16
++ 2fd3d0ad6de8afd3fecd6ba6019002e838d0ce6c
++ d8f98ddbe3b7c1ed8f68436259564c94b6350604
++ 802a65bad8c4a3e210124f0912dc06ff1033f1b1
++ 1b0bcf776fbe6f80ac446f9e027f3a569d902099
++ 9de6b50d226617a6badd12d221394f57bab66b77
++ 0801411ab20ccd5d75cce3523ae43fdd84ab4259
++ 702633baea57415bb64c2a64ac191a9781525d64
++ 21487ed9080ee6a1861166bc9b7f9577e8da662e
++ 3149604e375711e955dfb5db178cac85a6bc8c5b
++ 6665c3848504ebfd22dc756f4c1f0a7115fad961
++ c5d337a5c1e1ce671b6c56bde0db77d58266955b
++ 853a6a8df0a8476a907589e691c7f750709ce317
+
+## git diff --stat cdc185f551a9513d72734b18e4a869f921917c00 853a6a8 (arquivos da CTL-4)
+ docs/controle-01/desenho/FRENTE-C.md                   |  22 +++++++-
+ docs/planejar-safra/etapa-unica-3-4-5/ESPECIFICACAO.md |   5 +-
+ tools/prototipo/v37/gen37/areas/inicio.py              |  75 ++++++++++-----------------
+ tools/prototipo/v37/gen37/areas/mobile.py              |  17 ++++---
+ tools/prototipo/v37/gen37/areas/parceiros.py           |   4 +-
+ tools/prototipo/v37/gen37/areas/processo_compras.py    |  59 ++++++++++++++--------
+ tools/prototipo/v37/gen37/areas/processo_safra.py      |  11 ++--
+ tools/prototipo/v37/gen37/areas/suprimentos.py         |  42 ++++++++++++++--
+ tools/prototipo/v37/gen37/cal01.js                     | 127 +++++++++++++++++++++++++++++++++++++++++++---
+ tools/prototipo/v37/gen37/cal01_test.py                |  17 ++++---
+ tools/prototipo/v37/gen37/cenario.js                   |  48 ++++++++++++++++++
+ tools/prototipo/v37/gen37/cmptest.py                   |  38 ++++++++------
+ tools/prototipo/v37/gen37/dados.py                     |   7 ++-
+ tools/prototipo/v37/gen37/dados2.py                    | 269 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------
+ tools/prototipo/v37/gen37/demanda_unica_nav_test.py    | 212 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tools/prototipo/v37/gen37/demanda_unica_test.py        | 378 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tools/prototipo/v37/gen37/pttest.py                    |   6 +--
+ tools/prototipo/v37/gen37/quantidade_test.py           |   3 +-
+ tools/prototipo/v37/gen37/saf_cmp_continuidade_test.py |  44 +++++++++-------
+ tools/prototipo/v37/gen37/safra.js                     | 119 ++++++++++++++++++++++++++-----------------
+ tools/prototipo/v37/gen37/sutest.py                    |   8 +--
+ tools/prototipo/v37/gen37/tabelas_saf_test.py          |  15 +++---
+ 22 files changed, 1287 insertions(+), 239 deletions(-)
+
+## git diff --stat 0c0931f 0ad2d0d -- <arquivos da CTL-4>
+ tools/prototipo/v37/gen37/areas/inicio.py         |   7 +++--
+ tools/prototipo/v37/gen37/areas/mobile.py         |   5 ++--
+ tools/prototipo/v37/gen37/areas/processo_safra.py |  43 ++++++++++++++++++++++++----
+ tools/prototipo/v37/gen37/dados.py                |  13 ++++++++-
+ tools/prototipo/v37/gen37/dados2.py               |   5 +++-
+ tools/prototipo/v37/gen37/safra.js                | 220 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------------------
+ 6 files changed, 236 insertions(+), 57 deletions(-)
+
+## git diff --stat 0c0931f 2e466eb -- <arquivos da CTL-4>
+ tools/prototipo/v37/gen37/areas/inicio.py         |   7 +++--
+ tools/prototipo/v37/gen37/areas/mobile.py         |   5 ++--
+ tools/prototipo/v37/gen37/areas/processo_safra.py |  43 ++++++++++++++++++++++++----
+ tools/prototipo/v37/gen37/dados.py                |  13 ++++++++-
+ tools/prototipo/v37/gen37/dados2.py               |   5 +++-
+ tools/prototipo/v37/gen37/safra.js                | 220 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------------------
+ 6 files changed, 236 insertions(+), 57 deletions(-)
+
+## funções da demanda viva por versão (git grep -c 'function X(' em cenario.js/cal01.js)
+c5d337a cenOsDem=1 cenEstDem=0 cenDemEntradas=0 demFazenda=1 demSolSit=1 demSolRevisar=1
+853a6a8 cenOsDem=1 cenEstDem=1 cenDemEntradas=1 demFazenda=1 demSolSit=1 demSolRevisar=1
+0c0931f cenOsDem=0 cenEstDem=0 cenDemEntradas=0 demFazenda=0 demSolSit=0 demSolRevisar=0
+0ad2d0d cenOsDem=0 cenEstDem=0 cenDemEntradas=0 demFazenda=0 demSolSit=0 demSolRevisar=0
+2e466eb cenOsDem=0 cenEstDem=0 cenDemEntradas=0 demFazenda=0 demSolSit=0 demSolRevisar=0
+
+## o que a v56 muda nos arquivos da CTL-4 que tocam a demanda (linhas com cenGet/solo/demanda no safra.js e processo_safra.py)
++  if(P.fn==='ajustar'){ N.hasLib=true; N.libt=P.btn; N.libh='OS.dc.html#'+o.id+':ajustar'; }   /* SOLO-01 · revisão A6: plano mudado pela análise, o ajuste abre na O.S. (o Mapa não tem o formulário) */
+-     ('f8','Amostragem de solo','Santa Rita · T2','Coletar 0–20 cm para a recomendação de plantio','no prazo','Sem responsável',None,('Abrir análises','AG-02.dc.html')),
++     # f8 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063; a coleta é operação do plano
+-     ('g5','2026-09-26','Amostragem de solo · T2 (0–20 cm)','Sem responsável','Normal','recomendação de plantio',None,'28/09',('Abrir origem','AG-02.dc.html')),
++     # g5 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063
++    import cenario, dados_solo as DSO
++    from areas.analise_solo import SOLO_UI_JS, porque_html
++    # análise de solo (SOLO-01): o estado compartilhado (cenario.js + solo.js) e os laudos (SOLO0) entram no Planejar safra; 0 colisões de nome (solo_unit_test)
++    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()
++    # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
++              # SOLO-01 §3.2: sugestão da análise sob a linha do produto, em texto cinza, sem cor de alerta; ações secundárias que preenchem o rascunho
++    # ---------- painéis da análise de solo (SOLO-01): Sugestões pelas análises (lote) e Por quê ----------
++    from areas.analise_solo import _overlay, _cabeca
++        # origem da dose na memória (R21 da análise de solo): o ajuste do talhão diz "(ajustado pelo usuário)", como a etapa 4 do Planejar safra
++/* ---- análise de solo (SOLO-01): aceites do cenário compartilhado, uma leitura por cenrev; a dose efetiva de cada chave (ajuste manual da
++   sessão, senão aceite, senão padrão), as atividades incluídas e as retiradas pela análise vêm de soloAtividades (solo.js, R14/R16) ---- */
++function soloSaf(self){ const k=self.state.cenrev||0; if(!self.__sac||self.__sac.k!==k){ const c=cenGet(); self.__sac={k,c,ac:((c.solo||{}).aceites)||{},ls:soloLaudos(c,SOLO0)}; } return self.__sac; }
++function soloCu(self,saf,c){ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return null; const S=safList(self)[saf]||{};
++function soloAlvoSaf(self){ const S=safList(self); const cs=[]; const sn={};
++  return soloAlvo(cs,sn); }
++function soloSugsSaf(self,saf,c,limpo){ const cu=soloCu(self,saf,c); if(!cu) return {sug:[],info:[],cu:null}; const x=soloSaf(self);
++  const R=soloSugestoes({S0:SOLO0,ls:x.ls,aceites:ac,c:x.c,adj:limpo?{}:(adjOf(self)[c.id]||{}),alvo:soloAlvoSaf(self),todas:!!limpo},cu); R.cu=cu; return R; }
++function soloNacSaf(self,c){ return soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length; }
++function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self); const AC=soloSaf(self).ac;
++    soloAtividades({id:c.id,plano:pl},adj[c.id]||{},AC).atvs.forEach(x=>{ const a=x.a; const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
++  { const gs=GR('g_sug'); if(gs) gs.rows=sgRows(self); }   /* Sugestões pelas análises (SOLO-01 §3.4) */
++  try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
++    registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
++  const nac=rows.reduce((a,r)=>a+soloNacSaf(self,r),0);   /* R16 (A13): o aceite guarda o plano; trocar o plano faz o uso da análise deixar de valer, sem apagá-lo */
++function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length+soloNacSaf(self,r); const ro=!!r.ro;
++  if(pl) soloAcAtivos(soloSaf(self).ac,cid,pl.id).forEach(x=>{ if(x.tipo==='incluir') return; const at=pl.atividades.find(q=>String(q.id)===String(x.atv.id)); const i=at?at.prods.findIndex(q=>q.prod===x.prod):-1; if(i<0) return;
++  const SG=soloSugsSaf(self,saf,c,true); const area=Number(c.v.area)||0; const sugBy={}; SG.sug.forEach(s=>{ if(s.tipo!=='incluir'&&!s.nega) sugBy[s.atv.id+'|'+s.prod]=s; });
++  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); const acDe=(A,prod)=>acSt.find(x=>x.tipo!=='incluir'&&String(x.atv.id)===A&&x.prod===prod)||null;
++  const acMan=(A,prod)=>{ const x=soloSaf(self).ac[c.id+'|'+A+'|'+prod]; return !!(x&&(x.st==='ativo'||x.st==='substituído por ajuste manual')); };
++  const cenC=soloSaf(self).c; const ngAc=(a0)=>a0?soloNega(cenC,a0):'';
++                if(s.tipo==='retirar'&&!removed) sg={d:'retirar ('+(s.motivo||'pela análise')+')',q:soloQtdTxt(-cenQtd(curD||0,area),p.un,true)+(s.unico?' · a '+a.nome+' sai do '+c.v.local+' (único insumo)':''),u:'Retirar pela análise'};
++                else if(s.tipo==='dose'&&(removed||curD===null||prCmp(curD,s.sug)!==0)) sg={d:soloDoseTxt(s.sug,s.un),q:soloQtdTxt(prSub(cenQtd(s.sug,area),cenQtd(curD||0,area)),p.un,true)+' no talhão',u:'Usar '+soloDoseTxt(s.sug,s.un)}; }
++  v.lp_incl=incG.map(x=>{ const ng=ngAc(x); return {t:x.atv.nome+' · '+x.prod, d:soloDoseTxt(x.dose,x.un)+' · '+soloBr(x.dt)+' · '+soloQtdTxt(cenQtd(x.dose,area),x.un,false)+(ng?' · '+ng+': não se desfaz':''), chip:'incluída pela análise · '+x.laudo,
++    .concat(incP.map(s=>({t:s.atv.nome+' · '+s.prod, d:soloDoseTxt(s.sug,s.un)+' · '+soloBr(s.dt)+' · '+soloQtdTxt(cenQtd(s.sug,area),s.un,false), chip:'incluída pela análise · '+s.laudo.id+' (a salvar)',
++  v.lp_incSug=ro?[]:SG.sug.filter(s=>s.tipo==='incluir'&&!s.nega&&!(lp.incl||{})[s.k]).filter(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); return !g0||prCmp(g0.dose,s.sug)!==0; })
++    .map(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); const fid='lp_inc_'+tipoInc(s);
++      return {d:(g0?s.atv.nome+' '+soloDoseTxt(s.sug,s.un)+' (incluída '+soloDoseTxt(g0.dose,g0.un)+')':'incluir '+s.atv.nome+' · '+s.prod+' '+soloDoseTxt(s.sug,s.un)+' em '+soloBr(s.dt)),
++        q:soloQtdTxt(g0?prSub(cenQtd(s.sug,area),cenQtd(g0.dose,area)):cenQtd(s.sug,area),s.un,true), u:g0?'Usar '+soloDoseTxt(s.sug,s.un):'Incluir '+tipoInc(s), pqId:'pq_'+fid,
++      return {d:'retirar a '+s.atv.nome+' incluída ('+(s.motivo||'pela análise')+')', q:soloQtdTxt(s.dif,s.un,true), u:'Retirar pela análise', pqId:'pq_'+fid,
++  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); 
++  const tk=(k)=>(/\|solo:[^|]+:(cal|ges)\|/.exec(k)||[])[1]||'';
++  let msgSolo='';
++  if(aceitar.length||desfazer.length){ const r=cenMudar(null,cc=>soloAceitar(cc,{cid:c.id,aceitar,desfazer},cur.chave,g2perfil().k));
++    if(r.erro){ self.setState({lp:Object.assign({},cur,{cmdErr:r.erro})}); return; } msgSolo=r.msg; }
++  const nac=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length;   /* revisão A7 (S4): sem mudança, diz o que vale de fato */
++  const semMud=!partes.length&&!msgSolo?(nac?'Sem mudanças em '+c.v.local+': valem o plano padrão e '+nac+(nac>1?' usos':' uso')+' da análise. ':'Sem ajustes em '+c.v.local+': vale o plano padrão. '):'';
++  self.setState({adj,lp:null,pq:null,cenrev:Date.now(),g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local+'. ':'')+(msgSolo?msgSolo.replace(/\.$/,'')+' em '+c.v.local+'. ':'')+semMud+'Plano operacional, recursos e demanda recalculados; o plano padrã
++function sgSugs(self,saf,manter){ const out=[]; cultRows(self,saf).forEach(c=>{ const R=soloSugsSaf(self,saf,c,false); R.sug.forEach(s=>{ if(!s.nega||(manter&&manter[s.k])) out.push({s,c,cu:R.cu}); }); }); return out; }   /* manter: linha negada no último en
++    r.p.pad=[{k:'txt',t:efV?soloDoseTxt(s.ef,s.un):(s.padrao===null?'—':soloDoseTxt(s.padrao,s.un))}].concat(s.efOrig&&s.efOrig!=='padrão'?[{k:'br'},{k:'mut',t:s.efOrig==='análise'?'pela análise':'ajustado pelo usuário'}]:[]); r.s.pad=r.p.pad[0].t;
++    r.p.sug=[{k:'b',t:s.tipo==='retirar'?(s.incl0?'retirar a inclusão':'retirar'):(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un)+(s.desf?' (padrão)':''))}]; r.s.sug=r.p.sug[0].t;
++    r.v.dif=s.dif; r.p.dif=[{k:'txt',t:soloQtdTxt(s.dif,s.un,true)}]; r.s.dif=r.p.dif[0].t; r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp;
++    const r=cenMudar(null,cc=>soloAceitarLote(cc,itens,self.state.sg.chave,g2perfil().k));
++  if(pq&&pq.from==='lp'&&self.state.lp){ const c=cultRows(self,self.state.saf).find(r=>r.id===self.state.lp.cid); if(c){ const R=soloSugsSaf(self,self.state.saf,c,true); s=R.sug.find(x=>x.k===pq.k)||null; cu=R.cu; }
++    if(s&&!s.nega) prim={t:s.tipo==='retirar'?'Retirar pela análise':(s.tipo==='incluir'?'Incluir '+(/:ges$/.test(s.atv.id)?'gessagem':'calagem'):'Usar '+soloDoseTxt(s.sug,s.un)),go:()=>{ lpUsarPq(self,s); }}; }
++  soloPqVals(self,v,s,{cu,prim,ver:s?'AG-02.dc.html#'+s.laudo.id:'',fechar:()=>self.setState({pq:null})}); }
+
+## commits da v56 (0c0931f..0ad2d0d) que tocam esses arquivos
+afc38fa Integra SOLO (d324855) na branch única: análise de solo e recomendação (AG-02 no menu Agrícola, "Análise sugere" na dose do plano, O.S. com origem da dose e selo "Plano mudou pela análise"), com as correções da revisão
+7cd0082 Integra CTL5 (f82ea6d) na branch única: CTL-5, outorga com fonte única (cadastro Água; trava na data da janela), AG-07 só consulta com "Usar na O.S.", Praga-alvo no AG-07 e ficha do pivô (CD-03/IR-01)
+d324855 SOLO: correções da revisão
+f82ea6d CTL5: correções da revisão (adicional)
+4db6151 SOLO: memória da demanda igual no Planejar safra e na Compra (origem do ajuste do talhão também no dados2)
+20a868e CTL5 · Ficha do pivô no detalhe do equipamento, aberta pela Irrigação
+9d4ff31 Merge branch 'claude/prototipo-v44' into claude/v44-controle-05
+d068db1 SOLO P4-P5: a análise como sugestão na dose do plano, Por quê e Sugestões pelas análises
+69dfeda SOLO P3: Análises de solo (AG-02) no menu Agrícola, água no solo e limpeza do AG-04

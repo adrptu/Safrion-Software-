@@ -2,7 +2,11 @@
 """Jornada da irrigação ponta a ponta (02/10/2026): o mesmo estado gravado (localStorage 'talhao-os-irrigacao-v1') em IR-01..IR-04,
 IR-03det e na camada Irrigação do Mapa. Conflito resolvido continua resolvido ao recarregar e some do Mapa; OS-0394 conferida (hidrômetro
 prevalece); OS-0419 iniciada e terminada → conferência automática (−1,9 %) → balanço do Pivô 2 creditado uma vez (1,7 mm) → Mapa e IR-01
-mudam; Lagoa Grande: Programar irrigação no PV02 recupera a tarefa única OS-0601 (sem duplicar); grades sem rolagem lateral a 1280 e 1440 px.
+mudam; Lagoa Grande: Programar irrigação no PV02 recupera a tarefa única OS-0601 (sem duplicar); páginas sem rolagem lateral a 1280 e 1440 px.
+TABELAS-FOCO (06/10/2026): no IR-01 a situação é chip e o rótulo composto ("janela a definir · OS-0422", "programada · hoje 21:00",
+"falta insumo · OS-0418") virou colunas: Ordem, Situação, Pendência e Próxima passada (a fonte do déficit fica no painel do setor).
+Revisão TABR (09/10/2026, A1): volta o critério de largura de antes das colunas novas: a 1440 px as grades IR cabem na caixa (sem rolar de
+lado); a 1280 px a página não rola e situação/etapa, pendência e próximo passo ficam à vista sem rolar a grade.
 Capturas em _probe/fluxo_*.png. Uso: python3 irr_fluxo_test.py"""
 import sys, os, time, subprocess, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -29,8 +33,14 @@ try:
     dlg = lambda: (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or '')
     ROW = lambda txt: J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'—';}})()""")
     def goto(pg, w=1.6): c.goto(U(pg), wait=w); time.sleep(.4)
+    def painel(txt, k):
+        """campo do painel do setor no IR-01 (revisão TABR: fonte do déficit e responsável saíram da grade para o painel)"""
+        J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})===0); r&&(r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.5)
+        v = J(f"(document.querySelector('#fx_g_set_{k}')||{{}}).value") or ''; clk('Cancelar', 'aside[role=dialog]'); return v
     erros = []
     def errs(nome): e = J("window.__err||''") or ''; (erros.append(nome + ': ' + e) if e else None)
+    def setv(sel, val):
+        return J(f"""(()=>{{const e=document.querySelector({json.dumps(sel)}); if(!e) return 'sem'; const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),'value'); d.set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
     c.size(1440, 1000); goto('IR-01.dc.html', 1.0)
     J("localStorage.removeItem('talhao-os-irrigacao-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear();")
     # 1 · conflito da OS-0423: link direto do Mapa (#OS-0423:conflito) abre o painel com opções calculadas
@@ -46,7 +56,9 @@ try:
     chk('4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito', 'Liberadas' in ROW('OS-0423') and 'Conflito' not in ROW('OS-0423'), ROW('OS-0423'))
     # 2 · Mapa (Santa Rita): o T7 deixa de estar em conflito
     J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Santa Rita\"}')"); goto('IN-04.dc.html', 2.0); errs('IN-04')
-    lab = lambda t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label'),e.getAttribute('fill')]:[null,null];}})()")
+    # MUX-F1 (17/10/2026): o talhão é um botão com data-talhao e o rótulo da camada em data-rotulo (o aria-label agora é o nome completo:
+    # "T4, 204 ha, …"). Oráculo obsoleto na forma de achar; a asserção não muda
+    lab = lambda t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'),e.getAttribute('fill')]:[null,null];}})()")
     l7 = lab('T7'); chk('5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite)', l7[0] and 'conflito' not in l7[0] and l7[1] != '#C8553D', l7)
     J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>(b.getAttribute('title')||'').startsWith('Mostrar Irrigação')).click()"); time.sleep(.6)
     chk('6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394"', 'programada · hoje 15:00' in (lab('T7')[0] or '') and 'conferir medição · OS-0394' in (lab('P2')[0] or ''), [lab('T7'), lab('P2')])
@@ -54,22 +66,28 @@ try:
     # 3 · OS-0394: conferir a medição (hidrômetro prevalece)
     goto('IR-03det.dc.html#OS-0394:conferir'); time.sleep(.5)
     chk('7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados', 'Conferir medição · OS-0394' in dlg() and '1.206' in dlg(), dlg()[:300])
-    clk('Validar e encerrar', 'aside[role=dialog]'); t = toast()
+    setv('#cm_mot', 'Hidrômetro conferido em campo'); clk('Aceitar com motivo', 'aside[role=dialog]'); t = toast()
     chk('8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm)', 'Encerradas' in head() and 'hidrômetro prevalece' in t and '11,2 mm' in t, [t, head()])
     # 4 · OS-0419: iniciar → término com a leitura da telemetria → conferência automática → crédito
     goto('IR-03det.dc.html#OS-0419'); clk('Iniciar irrigação'); t = toast()
     chk('9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120)', 'Em execução' in head() and '20:02' in t and 'EX-5120' in t, [t, head()])
     goto('IR-03det.dc.html#OS-0419')
-    chk('10 recarregar: segue Em execução e o primário é Confirmar término (Pausar só agora)', 'Em execução' in head() and 'Confirmar término' in head() and J("[...document.querySelectorAll('main button')].some(b=>b.innerText.trim()==='Pausar')"), head())
-    clk('Confirmar término'); d = dlg()
-    chk('11 Confirmar término: volta completa e hidrômetro preenchido pela telemetria (8480 m³)', 'Volta completa · 80 ha' in d and J("document.querySelector('#tm_vol').value") == '8480', [d[:300], J("(document.querySelector('#tm_vol')||{}).value")])
+    chk('10 recarregar: segue Em execução e o primário é Registrar término antecipado (Pausar só agora)', 'Em execução' in head() and 'Registrar término antecipado' in head() and J("[...document.querySelectorAll('main button')].some(b=>b.innerText.trim()==='Pausar')"), head())
+    clk('Registrar término antecipado'); d = dlg()
+    chk('11 término não inventa área/telemetria: campos vazios e motivo temporal necessário', J("document.querySelector('#tm_cob').value") == '' and J("document.querySelector('#tm_vol').value") == '' and 'Simulado' in d, d[:300])
+    clk('Cancelar', 'aside[role=dialog]')
+    # Fixture explícita de tempo decorrido; não é uma ação de produto nem prova de relógio real.
+    J("(()=>{const k='talhao-os-irrigacao-v1'; const s=JSON.parse(localStorage.getItem(k)); const o=s.ordens['OS-0419']; const p=o.passadas.find(p=>p.st==='Em execução'); const pz=(o.exec.pausas||[]).filter(z=>z.n===p.n&&z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+z.fim-z.ini,0); o.trilha.push({q:p.iniReal+p.dur+pz,ev:'Fixture: tempo decorrido'}); localStorage.setItem(k,JSON.stringify(s)); return 1;})()")
+    goto('IR-01.dc.html', 1.0)   # Recarrega de fato: mesma URL com # não recarrega a página
+    goto('IR-03det.dc.html#OS-0419'); clk('Confirmar término')
+    setv('#tm_cob', '80'); setv('#tm_vol', '8480')
     c.shot(os.path.join(SH, 'fluxo_3_termino.png'))
     clk('Confirmar término', 'aside[role=dialog]'); t = toast()
-    chk('12 término → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm', 'Encerradas' in head() and '−1,9 %' in t and 'agora 1,7 mm' in t, [t, head()])
+    chk('12 leitura explícita no tempo decorrido → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm', 'Encerradas' in head() and '−1,9 %' in t and 'agora 1,7 mm' in t, [t, head()])
     trl = J("[...document.querySelectorAll('[role=table]')].pop().innerText.replace(/\\s+/g,' ')") or ''
     chk('13 trilha com início, término (amanhã 10:33) e conferência automática', 'Início' in trl and 'amanhã 10:33' in trl and 'Conferência automática' in trl, trl[-400:])
     goto('IR-01.dc.html'); errs('IR-01')
-    r2 = ROW('Pivô 2'); chk('14 IR-01: Pivô 2 com 1,7 mm e próximo passo da OS-0422 (Definir janela)', '1,7 mm' in r2 and 'janela a definir · OS-0422' in r2 and 'Definir janela' in r2, r2)
+    r2 = ROW('Pivô 2'); chk('14 IR-01: Pivô 2 com 1,7 mm e próximo passo da OS-0422 (Definir janela)', '1,7 mm' in r2 and 'OS-0422' in r2 and 'A programar' in r2 and 'Definir janela' in r2, r2)
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('Pivô 2')>=0); (r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.5)
     d = dlg(); chk('15 painel do setor: aplicação da OS-0419 creditada uma vez (8.480 m³ = 10,6 mm × 90 % = 9,54 mm líquidos)', d.count('OS-0419 · volta completa') == 1 and '9,54 mm líquidos' in d, d[:600])
     c.shot(os.path.join(SH, 'fluxo_4_ir01_p2.png'))
@@ -86,11 +104,12 @@ try:
     n = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).ordens).filter(o=>o.setor==='PV02').length")
     chk('18 PV02 continua com uma só ordem', n == 1, n)
     goto('IR-01.dc.html')
-    nlg = J("[...document.querySelectorAll('[role=row].g2ed')].length"); r = ROW('Pivô 2 ')
-    chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo', nlg == 23 and 'programada · hoje 21:00' in r and 'demonstrativo' in r, [nlg, r])
+    # base verde 19/10/2026: conta só a tabela dos setores (g_set); desde a AGUA-SOLO-IRR (18/10) a Água no solo (g_agua) fica na mesma tela
+    # e a medição do Pivô 2 somava uma 24ª linha (oráculo obsoleto na forma de contar; a asserção de 23 pivôs não muda)
+    nlg = J("[...document.querySelectorAll('[data-g2g=g_set] [role=row].g2ed')].length"); r = ROW('Pivô 2 ')
+    f2 = painel('Pivô 2 ', 'defT')
+    chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor)', nlg == 23 and 'OS-0601' in r and 'Programada' in r and 'hoje 21:00' in r and 'demonstrativo' in f2, [nlg, r, f2])
     # 7 · correções da verificação v43 (03/10): estado limpo
-    def setv(sel, val):
-        return J(f"""(()=>{{const e=document.querySelector({json.dumps(sel)}); if(!e) return 'sem'; const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),'value'); d.set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
     def esc():
         for ty in ('keyDown', 'keyUp'): c.call('Input.dispatchKeyEvent', {'type': ty, 'key': 'Escape', 'code': 'Escape', 'windowsVirtualKeyCode': 27})
         time.sleep(.4)
@@ -117,7 +136,8 @@ try:
     chk('26 Agenda (IN-03) lê o estado: OS-0423 resolvida vira Iniciar irrigação · João, prioridade Normal, sem selo de conflito', 'Iniciar irrigação · OS-0423' in r23 and 'João' in r23 and 'Normal' in r23 and 'Conflito' not in r23, r23)
     # fertirrigação OS-0418 parada por falta de insumo: mesma situação da O.S. e água sem o produto
     goto('IR-01.dc.html'); r1 = ROW('Pivô 1')
-    chk('27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João', 'falta insumo · OS-0418' in r1 and 'Programar só água' in r1 and 'João' in r1, r1)
+    d1 = painel('Pivô 1', 'donoT')
+    chk('27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João (responsável no painel do setor)', 'OS-0418' in r1 and 'Impedida Falta insumo' in r1 and 'Programar só água' in r1 and d1 == 'João', [r1, d1])
     goto('IR-02.dc.html#programar=P1'); time.sleep(.5); clk('Programar só água', 'aside[role=dialog]'); tt = toast()
     chk('28 IR-02#programar=P1: Programar só água cria e libera a ordem de água; OS-0418 segue parada', 'criada' in tt and 'Liberadas' in tt and 'OS-0418 segue parada' in tt, tt)
     # v2 durante a execução, liberada na O.S.: a irrigação segue a O.S. (sem beco sem saída)
@@ -133,14 +153,16 @@ try:
     chk('30 Restaurar demonstração (Estoque) volta a irrigação à semente: OS-0419 Liberadas sem v2 órfã', 'Liberadas' in h3 and 'Iniciar irrigação' in h3 and 'v2' not in h3, h3[-140:])
     # passagem parcial: crédito só na faixa coberta
     clk('Iniciar irrigação'); goto('IR-03det.dc.html#OS-0419:termino'); time.sleep(.3)
-    J("[...document.querySelectorAll('aside[role=dialog] input[type=radio]')][1].click()"); time.sleep(.3); setv('#tm_cob', '40'); setv('#tm_vol', ''); clk('Confirmar término', 'aside[role=dialog]')
-    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); clk('Validar e encerrar', 'aside[role=dialog]'); tt = toast()
+    setv('#tm_cob', '40'); setv('#tm_vol', '3800'); setv('#tm_mot', 'Tempo do sensor a conferir'); clk('Registrar término antecipado', 'aside[role=dialog]')
+    chk('31a área sem tempo compatível permanece Em conferência e não credita antes da validação', 'Em conferência' in head() and J("JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).setores.P2.bal.ap.some(a=>a.os==='OS-0419')") is False, head())
+    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); setv('#cm_mot', 'Área e leitura verificadas; horário do sensor incorreto'); clk('Aceitar com motivo', 'aside[role=dialog]'); tt = toast()
     goto('IR-01.dc.html'); r2 = ROW('Pivô 2')
     chk('31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte', 'faixa de 40,0 ha' in tt and '11,2 mm' in r2, [tt, r2])
     # contexto: fazenda do Mapa ↔ Irrigação
     goto('IR-01.dc.html'); setv('select[aria-label="Filtrar por fazenda"]', 'Lagoa Grande'); time.sleep(.4); setv('select[aria-label="Filtrar por fazenda"]', 'Santa Rita'); time.sleep(.4)
-    goto('IN-04.dc.html', 2.4); mf = J("(document.querySelector('header select')||{}).value")
-    setv('header select', 'Lagoa Grande'); time.sleep(1.2); goto('IR-01.dc.html'); irf = J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")
+    # 13/10/2026: o filtro de fazenda do Mapa saiu do topo e fica na faixa "Filtros desta tela" (.mf-tela)
+    goto('IN-04.dc.html', 2.4); mf = J("(document.querySelector('.mf-tela select')||{}).value")
+    setv('.mf-tela select', 'Lagoa Grande'); time.sleep(1.2); goto('IR-01.dc.html'); irf = J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")
     chk('32 fazenda acompanha: escolhida na Irrigação abre o Mapa nela; trocada no Mapa, a Irrigação abre na do Mapa', mf == 'Santa Rita' and irf == 'Lagoa Grande', [mf, irf])
     # filtro rápido preservado ao voltar
     J("sessionStorage.setItem('irr-faz','Santa Rita')"); goto('IR-03.dc.html'); clk('A liberar'); n1 = J("document.querySelectorAll('[role=row].g2ed').length")
@@ -148,18 +170,22 @@ try:
     n2 = J("document.querySelectorAll('[role=row].g2ed').length")
     chk('33 IR-03: filtro rápido (A liberar) continua ao voltar do registro', n1 == n2 and (J("location.pathname") or '').endswith('IR-03.dc.html'), [n1, n2])
     errs('jornada v43')
-    # 6 · largura: sem rolagem lateral nas grades a 1280 e 1440 px
+    # 6 · largura (revisão TABR A1): a 1440 px nenhuma grade IR rola de lado; a 1280 px a página não rola e o estado, a pendência e o próximo passo
+    # ficam à vista sem rolar a grade (antes das colunas novas, nenhuma grade rolava a 1280; com uma variável por coluna, o resto pode rolar)
     larg = []
     for w in (1280, 1440):
         c.size(w, 1000)
         for pg in ('IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-04.dc.html'):
-            goto(pg, 1.2); o = J("[...document.querySelectorAll('.g2rola')].filter(e=>e.offsetParent).map(e=>e.scrollWidth-e.clientWidth)") or []
+            goto(pg, 1.2); o = J("""[document.documentElement.scrollWidth-innerWidth].concat([...document.querySelectorAll('.g2rola')].filter(e=>e.offsetParent).map(e=>{ const R=e.getBoundingClientRect();
+              const hs=[...e.querySelectorAll('[role=table]>[role=row] [role=columnheader]')]; const fora=hs.filter(h=>['Situação','Etapa','Estado','Pendência','Próximo passo'].indexOf(h.textContent.replace(/[⇅▾▴▼▲]/g,'').trim())>=0&&h.getBoundingClientRect().right>R.right+1).length;
+              return fora?99:(%s?e.scrollWidth-e.clientWidth:0); }))""" % ('true' if w == 1440 else 'false')) or []
             if any(x > 1 for x in o): larg.append((w, pg, o))
             if w == 1280: c.shot(os.path.join(SH, 'fluxo_6_' + pg.replace('.dc.html', '') + '_1280.png'))
-    chk('20 sem rolagem lateral nas grades IR a 1280 e 1440 px (Lagoa Grande, 23 pivôs)', not larg, larg)
+    chk('20 sem rolagem lateral nas grades IR a 1440 px; a 1280 px a página não rola e estado, pendência e próximo passo ficam à vista (Lagoa Grande, 23 pivôs)', not larg, larg)
     chk('21 nenhuma tela com erro de execução', not erros, erros)
 finally:
     try:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+sys.exit(1 if FAIL else 0)   # base verde 19/10/2026: com falha, a saída 0 escondia o vermelho do runner (a falha 19 passou como rc=0)

@@ -1,0 +1,26 @@
+== fluxo · tarefa do proprietário (§11.7) de ponta a ponta, com cliques e campos medidos
+OK  (1) menu: Produção com 3 itens (Previsão e colheita, Recebimento e beneficiamento, Estoque de produto), antes de Manutenção · [['Previsão e colheita', 'COLH.dc.html'], ['Recebimento e beneficiamento', 'CARGA.dc.html'], ['Estoque de produto', 'PROD.dc.html']]
+FALHOU (1) Cargas mostra a faixa de telas: Cargas e recebimento (atual) | Beneficiamento, com a pendência escrita (1 a liberar)
+FALHOU (1) Cargas: a carga recebida em processo (L39-131) diz o próximo passo "Abrir ordem de beneficiamento · Igor" · CG-2105 · TK-4490 Mamão Formosa Pivô 19 · OS-0505 colhida 21/09 recebida 21/09 09:40 12.180 kg 12.180 kg L39-131 Galpão de frutas Lagoa Grande Recebida aguarda ordem de beneficiamento · Igor (responsável de produção)
+OK  BEN abre sem erro de JS
+FALHOU (1) no Beneficiamento: faixa com Beneficiamento atual (aria-current) e o item do menu "Recebimento e beneficiamento" em destaque; título Beneficiamento · [[], ['Recebimento e beneficiamento']]
+FALHOU Kanban com exatamente 5 fases e a contagem da semente (A liberar 1, Em execução 1)
+FALHOU sem verde no cabeçalho do Beneficiamento (navegar não é primária; a decisão fica no painel da ordem) · ['Registrar pesagem']
+FALHOU (2) com a OB-0112 aberta há um verde só na página, o do painel ("Autorizar rota e liberar"; BOT-01) · ['Registrar pesagem']
+FALHOU (2) painel da OB-0112 lista as duas causas antes do toque, cada uma com dono e atalho (caixas: conferir a NF 7731; a sobra da OB-0110 citada)
+FALHOU (2) OB-0112 A liberar: balanço sem diferença nem recuperação antes de começar ("Entrada a processar"; nada "acima da faixa" nem 100,00 %)
+FALHOU (2) "Autorizar rota e liberar" recusa com as 2 causas; nada gravado (fase e revisão iguais) · ['', 0, 0]
+FALHOU (2) depois da recusa o rodapé fecha com "Fechar" (não "Cancelar", ao lado de "Cancelar a ordem")
+FALHOU (3) OB-0110 Em execução: balanço com as razões de K01 (A 80,00 %, B 15,00 %, descarte 5,00 %, recuperação 95,00 %) e primária "Enviar para conferência" · [[], '']
+RESULTADO: FALHOU 2/13
+Traceback (most recent call last):
+  File "/home/user/sp-v55/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 188, in <module>
+    clk(CONC, 'aside'); et = cen("c.ordens['OB-0110'].etapa"); tc = toast(); ch = J(CHIP)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-v55/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 90, in cen
+    def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-v55/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

@@ -1,0 +1,17 @@
+== sem mutante
+RESULTADO: 13/13
+== mutante Q2-sem-exponencial (cenario.js)
+[exit 1]
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+
+Node.js v22.22.0
+
+== mutante Y1-v2-zero (irrigacao_estado.js)
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com 
+RESULTADO: 12/13
+[exit 1]
+FALHOU 12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com o setor já coberto é recusada com a ca
+OK    13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outra passada programada, a v2 recusada manda
+OK    10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 6) e nenhum tot: arredondado por conta própria
+RESULTADO: 12/13
+[nota] Q2: o teste quebra no carregamento com "Error: Quantidade fora da faixa: 1e-7 × 49.31." (cenDec sem o expoente recusa a dose 1e-7); mutante morto (exit 1).

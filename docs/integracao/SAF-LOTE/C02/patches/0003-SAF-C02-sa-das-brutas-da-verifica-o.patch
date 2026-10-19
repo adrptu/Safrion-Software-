@@ -1,0 +1,1682 @@
+From 16716710a62879ddd44a52473d899bdf16282566 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 21:37:46 +0000
+Subject: [PATCH 3/3] =?UTF-8?q?SAF-C02:=20sa=C3=ADdas=20brutas=20da=20veri?=
+ =?UTF-8?q?fica=C3=A7=C3=A3o?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Harness do Codex rodado de novo: base 16d6734 igual a antes.json byte a
+byte; depois.json na correção (só o source_hash muda; 140 h nas duas
+vistas, same_total true); o harness original na correção agora recusa
+com erro explícito de contrato. Saídas brutas em saidas/: propriedade e
+simetria, unidade, navegador (simetria 38/0, varredura 140/140, bateria
+do SAF igual à da 62b0904), build e montar_render. Caminhos de máquina
+trocados por marcadores; dados sintéticos.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ .../verificacao-saf-c02/LEIA-ME.md            |  18 +-
+ .../verificacao-saf-c02/depois.json           |   2 +-
+ .../saidas/acao_unica_test-saf.log            |  12 +
+ .../saidas/acao_unica_test-v3.log             |  13 +
+ .../verificacao-saf-c02/saidas/build.log      |   1 +
+ .../saidas/camada_test-62b0904.log            |  17 +
+ .../saidas/camada_test.log                    |  18 +
+ ...de_unit-testes-novos-no-codigo-62b0904.log | 103 +++++
+ .../saidas/capacidade_unit.log                | 103 +++++
+ .../saidas/etapas_celular_test.log            |  17 +
+ .../saidas/harness-antes-base16d6734.json     |  82 ++++
+ .../harness-original-na-correcao.err.txt      |  17 +
+ .../saidas/links_ocultos_test.log             |   9 +
+ .../saidas/min-float-62b0904.json             |   1 +
+ .../saidas/min-float-correcao.json            |   1 +
+ .../saidas/montar_render.log                  |   1 +
+ .../verificacao-saf-c02/saidas/partest.log    |  56 +++
+ .../saidas/prop-r3-correcao.json              |  16 +
+ .../saidas/prop3-correcao.json                |   1 +
+ .../rend_multiconjuntos_test-bordas.log       |  15 +
+ .../saidas/rend_multiconjuntos_test-fluxo.log |  29 ++
+ .../saidas/rend_multiconjuntos_test-telas.log |   6 +
+ .../saidas/rend_multiconjuntos_unit.log       | 425 ++++++++++++++++++
+ ...pacidade_simetrica_test-render-62b0904.log |  50 +++
+ .../saidas/saf_capacidade_simetrica_test.log  |  40 ++
+ .../saidas/saf_cmp_continuidade_test.log      |  33 ++
+ .../saidas/saf_operacoes_test.log             |  89 ++++
+ .../saidas/saf_revisao_test.log               |  44 ++
+ .../saidas/semh-62b0904.json                  |  18 +
+ .../saidas/semh-correcao.json                 |  18 +
+ .../saidas/simetria-10000-sem777.json         |  36 ++
+ .../saidas/simetria-2000-sem20261009.txt      |  40 ++
+ .../saidas/tabelas_saf_test.log               |  26 ++
+ .../saidas/txt-3000-62b0904.json              |   1 +
+ .../saidas/txt-3000-correcao.json             |   1 +
+ .../verificacao-saf-c02/saidas/varredura.log  |   1 +
+ 36 files changed, 1358 insertions(+), 2 deletions(-)
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-saf.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-v3.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/build.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/camada_test-62b0904.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/camada_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit-testes-novos-no-codigo-62b0904.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/etapas_celular_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/harness-antes-base16d6734.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/harness-original-na-correcao.err.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/links_ocultos_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/min-float-62b0904.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/min-float-correcao.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/montar_render.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/partest.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/prop-r3-correcao.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/prop3-correcao.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-bordas.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-fluxo.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-telas.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_unit.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test-render-62b0904.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/saf_cmp_continuidade_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/saf_operacoes_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/saf_revisao_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/semh-62b0904.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/semh-correcao.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/simetria-10000-sem777.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/simetria-2000-sem20261009.txt
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/tabelas_saf_test.log
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-62b0904.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-correcao.json
+ create mode 100644 docs/planejar-safra/verificacao-saf-c02/saidas/varredura.log
+
+diff --git a/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md b/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
+index 40828e3..316d381 100644
+--- a/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
++++ b/docs/planejar-safra/verificacao-saf-c02/LEIA-ME.md
+@@ -7,10 +7,26 @@ Achado: Codex, adendo de 09/10/2026 no PR #47 (comentário 6079770308). Correç
+ | `harness_original.js` | `bc141473d2cc4063652bc7335feaa142f9bc75781f7f4254cbad060dd3725308` | harness do comentário, copiado sem mudança |
+ | `antes.json` | `0f00e6e1c2c7831536fa426af6aab5843f2fb4750f0dc6ea6951154a35d8a874` | saída bruta na base (`CHECA_HASH=1`, fonte d96875f8…e9677): A 340 h (R2), B 140 h (R4), `same_total: false` |
+ | `harness_adaptado.js` | `7bcf243e672c229039786ee6236dfd58b8a2010132492f644d3f368bde9db6d4` | mesma fixture; única mudança na linha 14 |
+-| `depois.json` | `49eb8b9e23b3bdc88eb8ae14d2c90ad44fb40f6b24087ae7b370664518fcf9ce` | saída bruta depois da correção (fonte 1f18e705…cd56a): A 140 h (R4, cita a B2 fora da conta), B 140 h (R4), `same_total: true` |
++| `depois.json` | `5a463f6bed14ae3d257a9ad93c6c6cfd510cb7192d5054334e8cb7b537ce2506` | saída bruta depois das correções da verificação (fonte 9e329c43…b8b95): A 140 h (R4, cita a B2 fora da conta), B 140 h (R4), `same_total: true`. Só o `source_hash` mudou em relação à saída da 62b0904 (fonte 1f18e705…cd56a, sha256 da saída 49eb8b9e…f9ce) |
+ 
+ **Adaptação (linha 14):** a nova assinatura do `capSaf` recebe o período de cada outra safra, para etiquetar as ocorrências dela pela origem. O item de `outras` passa de `{id, nome, oc}` para `{id, nome, ini, fim, oc}`, com `ini` e `fim` de `period[oid]`. Fixture, recursos, meses e saída não mudam. Sem `CHECA_HASH`, porque a fonte mudou.
+ 
++**Harness original na correção:** sem `ini` e `fim` nas outras safras, o `capSaf` agora recusa com erro explícito ("capSaf: a safra B chegou sem o período (ini e fim)"), em vez de somar tudo em silêncio e voltar aos 340 h (achado da 3ª verificação). Por isso o original só roda na base.
++
++## Saídas brutas (`saidas/`, correções da verificação)
++
++Executadas com `SAFRION_DADOS=sintetico` (a worktree não tem dado real: `REAL=False`). Caminhos de máquina trocados por marcadores (`<fora-do-repo>`, `<copia-62b0904>`, `<chrome>`). "real" no nome de um caso de teste é o cenário do protótipo, sintético.
++
++| Grupo | Arquivos | Resultado |
++|---|---|---|
++| Harness | `harness-antes-base16d6734.json`, `harness-original-na-correcao.err.txt` | base: byte a byte igual a `antes.json`; original na correção: erro explícito de contrato |
++| Propriedade e simetria (scripts das verificações independentes, fora do repositório) | `simetria-2000-sem20261009.txt`, `simetria-10000-sem777.json`, `txt-3000-*.json`, `min-float-*.json`, `prop3-correcao.json`, `prop-r3-correcao.json`, `semh-*.json` | correção: 0 falhas; `txt` 0 divergências (62b0904: 9); 3 safras: "5 %" nas três vistas (62b0904: "4 %", "4 %", "5 %"); "≥" nas duas vistas |
++| Unidade | `capacidade_unit.log`, `capacidade_unit-testes-novos-no-codigo-62b0904.log`, `rend_multiconjuntos_unit.log`, `links_ocultos_test.log`, `camada_test.log`, `camada_test-62b0904.log` | 101/0; testes novos no código da 62b0904: 5 falhas; 106/106; 8/0; 16/17 (o 16, versão do cenário, já falhava na 62b0904) |
++| Navegador | `saf_capacidade_simetrica_test.log`, `…-render-62b0904.log`, `varredura.log` e os demais `*_test*.log`, `partest.log` | 38/0 (no render da 62b0904: 10 falhas, só os casos novos); varredura 140/140; demais iguais aos da 62b0904, partest 46/1 (T1-C, vermelho conhecido) |
++| Gerador | `build.log`, `montar_render.log` | 140 páginas, 0 FALHA; "dados da Lagoa Grande: sintéticos 5/5" |
++
++Os testes de navegador do SAF (exceto `saf_capacidade_simetrica_test` e a varredura) rodaram sobre o build anterior à troca dos links do PL-03; entre os dois builds só mudou `areas/planejamento.py` (PL-02, PL-04 e PL-05).
++
+ Comandos (executados; caminhos a partir da raiz do repositório):
+ 
+ ```text
+diff --git a/docs/planejar-safra/verificacao-saf-c02/depois.json b/docs/planejar-safra/verificacao-saf-c02/depois.json
+index 539b0cf..8cae3cc 100644
+--- a/docs/planejar-safra/verificacao-saf-c02/depois.json
++++ b/docs/planejar-safra/verificacao-saf-c02/depois.json
+@@ -1,5 +1,5 @@
+ {
+-  "source_hash": "1f18e705cdcbd7ee736dee2f175bcf50ad69fe4ede2305b0dfb9b949c13cd56a",
++  "source_hash": "9e329c43a83b9d5091d88bdb2dacc20f997f5ab2b04ab17f8db506e34b9b8b95",
+   "a": {
+     "view": "A",
+     "source_period": [
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-saf.log b/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-saf.log
+new file mode 100644
+index 0000000..b8b0711
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-saf.log
+@@ -0,0 +1,12 @@
++OK    1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa 
++OK    2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla 
++OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária 
++OK    3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado 
++OK    4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota) 
++OK    5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027 
++OK    6 SAF · filtro sem resultado: 0 linhas, "Limpar…" dentro da lista (secundário) e a área mantém o passo da etapa; no máximo uma primária 
++OK    7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 4 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640) 
++OK    8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 4 tem "Enviar para cotação" como comando (não avanço); 4→2→4 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos" 
++OK    9 sem erro de JS (SAF) 
++
++RESULTADO: 10 ok · 0 falhas (saf)
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-v3.log b/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-v3.log
+new file mode 100644
+index 0000000..3be5481
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/acao_unica_test-v3.log
+@@ -0,0 +1,13 @@
++OK    23 seleção ativa (SAF etapa 2, T1-A): 0 duplicatas, uma primária ("Aplicar plano" do lote, na barra da lista); a área fica com a nota e o avanço secundário, sem outra primária de aplicar; busca visível e "Limpar seleção" uma vez 
++OK    24 painel modal aberto (Aplicar plano): 0 duplicatas e uma primária no painel; aria-modal; 33 Tabs/Shift+Tab nunca saem do painel; ao fechar o foco volta a "Aplicar plano…" da área 
++OK    25 decisão de saída (PA · Incluir atividade): "Continuar editando" a única primária, "Descartar alterações" separado e Salvar/Cancelar fora enquanto a decisão está aberta; continuar editando devolve Salvar/Cancelar e o texto 
++OK    26 impedimento (PA etapa 3 sem rascunho) e consulta (SAF S2526 encerrada, etapa 6): 0 primária e 0 duplicata 
++OK    27 360×800, 768×1024 e zoom 200 % (SAF etapas 2 e 6, CMP etapa 2, PA, O.S.): 0 duplicata, no máximo uma primária e nenhuma seta 
++OK    28 v3.1 · T1-A selecionado → busca "P1" (campo segue focado) → soma P1 → abre o detalhe de P1 e fecha: "2 selecionados · 1 fora da vista…" antes e depois, busca "P1" mantida, etapa 2 
++OK    29 tipo por função: "Expandir/Recolher tudo" sem fundo e sem borda; filtro rápido escolhido (SAF), visão atual (O.S. Lista) e chip de fase escolhido sem o verde cheio da primária 
++OK    29b controle negativo da verificação: SAF etapa 3 limpa (0 duplicata, 1 primária, 0 avanço fora da área, 0 controle no indicador); com uma cópia do avanço injetada no cabeçalho a medida acusa duplicata, 2 primárias e avanço fora da área 
++     (informativo) duplicatas e primárias por estado [('SAF etapa 2 · seleção ativa', 0, ['Aplicar plano']), ('SAF etapa 2 · painel Aplicar plano', 0, ['Aplicar plano em 4 cultivos']), ('PA · decisão de saída aberta', 0, ['Continuar editando']), ('PA etapa 3 · nada a publicar', 0, []), ('SAF S2526 etapa 6 · consulta', 0, []), ('SAF#saf=S2627&etapa=2 @360x800', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @360x800', 0, ['Abrir Compra de insumos ›']), ('CMP#saf=S2627 @360x800', 0, ['Solicitar cotações ›']), ('PA @360x800', 0, []), ('OS @360x800', 0, ['Nova ordem']), ('SAF#saf=S2627&etapa=2 @768x1024', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @768x1024', 0, ['Abrir Compra de insumos ›']), ('CMP#saf=S2627 @768x1024', 0, ['Solicitar cotações ›']), ('PA @768x1024', 0, []), ('OS @768x1024', 0, ['Nova ordem']), ('SAF#saf=S2627&etapa=2 @zoom200', 0, ['Aplicar plano em 4 cultivos']), ('SAF#saf=S2627&etapa=6 @zoom2
++OK    31 v3.1 · 0 ação repetida nas 17 páginas do merge que seguem geradas; AG-01det: 1 link para a OS-0420 em repouso e, com ela encerrada, o elo volta a ser link sem repetir; MB-01 → MB-05#ordem nomeia a ordem e o MB-05 sem âncora não 
++OK    30 sem erro de JS (v3) 
++
++RESULTADO: 10 ok · 0 falhas (v3)
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/build.log b/docs/planejar-safra/verificacao-saf-c02/saidas/build.log
+new file mode 100644
+index 0000000..c54a50a
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/build.log
+@@ -0,0 +1 @@
++140 artboards → tools/prototipo/v37/gen37/project · menu vigente: 45 · ocultos: 95
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test-62b0904.log b/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test-62b0904.log
+new file mode 100644
+index 0000000..8c1ae6b
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test-62b0904.log
+@@ -0,0 +1,17 @@
++OK    1 fonte sintética: REAL falso, DIR = dados_lagoa_sintetico/saida, rótulo "Demonstração sintética", nada do real importado
++OK    2 determinístico: 2 gerações idênticas byte a byte e iguais à saída em uso (11 arquivos)
++OK    3 estrutura: chaves e quantidades do esquema (23 pivôs, 2 cenas, 5 índices, cadastro 3/19/16, 4 cantos, KML 2/18/16)
++OK    4 IDs PV01–PV24 sem PV16, mesma ordem e mesmos valores no KML, resumo, pixels, GeoJSON e cadastro
++OK    5 áreas: raio = √(ha·10⁴/π) (±0,01 m), círculo do GeoJSON ≈ ha (< 1 %), pivôs sem sobreposição, imóvel > soma dos pivôs
++OK    6 pixels: pix = 4·n bytes, q de cada índice com n bytes, dono < 23, todos dentro do círculo do dono, n·100 m² ≈ ha (±3 %), nuvem só em 10/09
++OK    7 mediana de cada pivô e índice = recalculada dos pixels quantizados (q/125 − 1); nuvem % do pivô coerente; cena mais recente primeiro (padrão do mapa)
++OK    8 narrativa: NDVI médio cresce com a fase (preparo < plantio < formação < produção); Pivô 12 lavoura velha em 10/09 e solo exposto em 25/09
++OK    9 CAR "SINTETICO-…", outorga "SINT-nnn/0000", cenas "SINTETICO-S2-…", local no mar (lat < −34) e varrer_categorias TOTAL 0 na saída e nas fontes
++OK    10 sem a camada: o import falha com "Sem dados da Lagoa Grande … gere dados_lagoa_sintetico/"
++OK    11 saída adulterada: em_dia() acusa e garantir() refaz com os mesmos bytes
++OK    12 SINT-G01: carimbo com 1 arquivo, com arquivo a mais ou com "arquivos" fora do formato → em_dia False; garantir() refaz as 11 saídas; carimbo íntegro → True
++OK    13 SINT-C01: PIVOS_HA = área do mapa = cadastro = TALHOES = CULTIVOS = área de cada O.S. (igualdade exata, sem tolerância); 22+ áreas com decimais
++OK    14 SINT-C02: realizado ≤ área, saldo = área − realizado, apontamentos = realizado, fechadas 100 %, fração/texto/reserva/estoque/calcário coerentes — com a área sintética e com áreas ×1,13
++OK    15 PRE-REV P5/P6: base das fertirrigações = realizado semeado da O.S.; área das decisões do MIP ligadas = área da O.S. e ≤ área do talhão
++FALHOU 16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases · {'cen': [4, True], 'mip': [2, True], 'irr': [2, True]}
++RESULTADO: 15/16
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test.log
+new file mode 100644
+index 0000000..c9a7e3c
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/camada_test.log
+@@ -0,0 +1,18 @@
++OK    1 fonte sintética: REAL falso, DIR = dados_lagoa_sintetico/saida, rótulo "Demonstração sintética", nada do real importado
++OK    2 determinístico: 2 gerações idênticas byte a byte e iguais à saída em uso (11 arquivos)
++OK    3 estrutura: chaves e quantidades do esquema (23 pivôs, 2 cenas, 5 índices, cadastro 3/19/16, 4 cantos, KML 2/18/16)
++OK    4 IDs PV01–PV24 sem PV16, mesma ordem e mesmos valores no KML, resumo, pixels, GeoJSON e cadastro
++OK    5 áreas: raio = √(ha·10⁴/π) (±0,01 m), círculo do GeoJSON ≈ ha (< 1 %), pivôs sem sobreposição, imóvel > soma dos pivôs
++OK    6 pixels: pix = 4·n bytes, q de cada índice com n bytes, dono < 23, todos dentro do círculo do dono, n·100 m² ≈ ha (±3 %), nuvem só em 10/09
++OK    7 mediana de cada pivô e índice = recalculada dos pixels quantizados (q/125 − 1); nuvem % do pivô coerente; cena mais recente primeiro (padrão do mapa)
++OK    8 narrativa: NDVI médio cresce com a fase (preparo < plantio < formação < produção); Pivô 12 lavoura velha em 10/09 e solo exposto em 25/09
++OK    9 CAR "SINTETICO-…", outorga "SINT-nnn/0000", cenas "SINTETICO-S2-…", local no mar (lat < −34) e varrer_categorias TOTAL 0 na saída e nas fontes
++OK    10 sem a camada: o import falha com "Sem dados da Lagoa Grande … gere dados_lagoa_sintetico/"
++OK    11 saída adulterada: em_dia() acusa e garantir() refaz com os mesmos bytes
++OK    12 SINT-G01: carimbo com 1 arquivo, com arquivo a mais ou com "arquivos" fora do formato → em_dia False; garantir() refaz as 11 saídas; carimbo íntegro → True
++OK    13 SINT-C01: PIVOS_HA = área do mapa = cadastro = TALHOES = CULTIVOS = área de cada O.S. (igualdade exata, sem tolerância); 22+ áreas com decimais
++OK    14 SINT-C02: realizado ≤ área, saldo = área − realizado, apontamentos = realizado, fechadas 100 %, fração/texto/reserva/estoque/calcário coerentes — com a área sintética e com áreas ×1,13
++OK    15 PRE-REV P5/P6: base das fertirrigações = realizado semeado da O.S.; área das decisões do MIP ligadas = área da O.S. e ≤ área do talhão
++FALHOU 16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases · {'cen': [4, True], 'mip': [2, True], 'irr': [2, True]}
++OK    17 montar_render com a camada sintética: "dados da Lagoa Grande: sintéticos", nunca "reais"
++RESULTADO: 16/17
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit-testes-novos-no-codigo-62b0904.log b/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit-testes-novos-no-codigo-62b0904.log
+new file mode 100644
+index 0000000..08cf756
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit-testes-novos-no-codigo-62b0904.log
+@@ -0,0 +1,103 @@
++OK    · C11 paridade JS = Python · base S2627
++OK    · C11 paridade JS = Python · base S27SF
++OK    · C11 paridade JS = Python · base LG2627
++OK    · C11 paridade JS = Python · base S2526
++OK    · C11 paridade JS = Python · Colhedoras 0
++OK    · C11 paridade JS = Python · SOJA-AT nos sem plano
++OK    · C11 paridade JS = Python · Tratores 5
++OK    · C11 paridade JS = Python · Operadores 5
++OK    · C11 paridade JS = Python · LG Operadores 10
++OK    · C11 paridade JS = Python · LG Operadores 5
++OK    · C11 paridade JS = Python · Operadores 0
++OK    · C11 paridade JS = Python · Tratores 1
++OK    · C11 paridade JS = Python · larg 12
++OK    · C11 paridade JS = Python · pess 3
++OK    · C1 S2627 Colhedoras fev/27 81,07 %, precisa de 1
++OK    · C2 S2627 Tratores fev/27 (122,00 + 67,31 da Safrinha) ÷ 699,20 = 27,08 %, precisa de 2; maior uso em fev/27
++OK    · C3 S2627 pulv maior uso dez/26 25,97 %
++OK    · C3 S2627 plant maior uso out/26 31,67 %
++OK    · C3 S2627 dist maior uso nov/26 15,51 %
++OK    · C3 S2627 oper maior uso mai/27 42,17 %
++OK    · C3 Operadores out/26 precisa de 2
++OK    · C4 horas de Operadores no calendário · S2627 1.241,95
++OK    · C4 horas de Operadores no calendário · S27SF 460,40
++OK    · C4 horas de Operadores no calendário · LG2627 86.839,80
++OK    · C4 horas de Operadores no calendário · S2526 0,00
++OK    · C5 LG2627 Operadores nov/26 1.584,40 %, precisa de 127
++OK    · C5 LG2627 Operadores out/26 1.305,79 %, precisa de 105
++OK    · C5 LG2627 Operadores mai/27 173,95 % (14) e ago/27 66,49 % (10)
++OK    · C5 LG2627 Operadores em falta em 9 meses
++OK    · C5 LG2627 Tratores out/26 233,51 %, precisa de 10; falta de out/26 a jan/27
++OK    · C6 Colhedoras = 0: fev/27 122,00 h, não calculável, precisa de 1 (falta); 3 pendentes
++OK    · C6 Tratores e Operadores de fev/27 iguais à base
++OK    · C7 S27SF maior uso Colhedoras jul/27 55,86 %; fev/27 só da S2627 não conta
++OK    · C8 S2526: 21 ocorrências fora do calendário, nenhuma demanda, não soma outras
++OK    · C9 com SOJA-AT nos sem plano: Colhedoras fev/27 182,00 ÷ 150,48 = 120,95 %, precisa de 2
++OK    · C10 Tratores 4 → 5: fev/27 21,66 % (189,31 ÷ 874,00)
++OK    · C12 invariância da demanda · Colhedoras 0 (366,92 / 116,67 / 62,70 / 40,22 / 122,00 / 1.241,95)
++OK    · C12 invariância da demanda · Operadores 5 (366,92 / 116,67 / 62,70 / 40,22 / 122,00 / 1.241,95)
++OK    · C12 base: horas por recurso
++OK    · C12 Operadores 0: o Plantio passa ao prestador e Operadores cai para 1.116,55
++OK    · C13 Operadores 8 → 5: mai/27 67,47 %, precisa de 6 (falta); 1 pendente C1 · Colheita · sem recurso na fazenda
++OK    · C14 LG Operadores 8 → 10: nov/26 1.267,52 %, pendentes 56 → 0, falta em 7 meses
++OK    · C14 LG Operadores 8 → 5: pendentes 56 → 91
++OK    · C15 serialização 300 ha: 1 colhedora 40,00 h e 120,00 ha sem conjunto; 2 colhedoras 66,67 h e saldo 0
++OK    · C16 Operadores 0: 30 pendentes; toda célula de Operadores desta safra não calculável e em falta
++OK    · C17 Tratores 1: fev/27 108,30 %, precisa de 2, tem 1; sozinha 69,79 %
++OK    · C17 veredito R2 "somando a Safrinha 2027 (67,3 h)"
++OK    · C18 S27SF encerrada: S2627 Tratores fev/27 17,45 %; Operadores fev/27 19,82 %
++OK    · C19 S2627 Operadores nov/26 4,95 %: LG2627 e S2526 não entram
++OK    · C20 fmtOcup: <1 % · 1 % · <1 % · — · não calculável · 1.584 %
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S2627
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S27SF
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base LG2627
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S2526
++OK    · C21 negativo: Plantadeiras out/26 Σ horas-conjunto = 125,40, não 62,70
++OK    · C22 largura 12 m na Adubação de cobertura: 595,73 h · R$ 272.513,18 · 1.275,84 h-homem · Adubação a lanço 74,11 h · Distribuidores nov/26 31,02 %
++OK    · C22 3 pessoas no Plantio: Operadores 1.304,65 h · out/26 16,41 % · R$ 266.999,64
++OK    · C23 resumo por cultura S2627 (§4.3)
++OK    · C23 Σ custo de operação por cultura = plano_op · Σ insumos = R$ 1.398.550,00
++OK    · C23 LG2627 Mamão parcial (56 ocorrências pendentes), nunca R$ 4.072,16
++OK    · C24 partição do calendário S2627 = antes + fora + depois + calendário
++OK    · C24 partição do calendário S27SF = antes + fora + depois + calendário
++OK    · C24 partição do calendário LG2627 = antes + fora + depois + calendário
++OK    · C24 partição do calendário S2526 = antes + fora + depois + calendário
++OK    · V1 veredito S2627 (R4)
++OK    · V12 veredito S27SF (R5)
++OK    · V8 veredito LG2627 (R2)
++OK    · V11 veredito S2526 (R1)
++OK    · V13 veredito Colhedoras = 0
++OK    · V10/C9 veredito com SOJA-AT nos sem plano começa por Colhedoras
++OK    · P2 veredito Operadores 8 → 5
++OK    · S3.1 d3 em 20/05/2027: 2 ocorrências depois do fim, e nenhuma hora delas na capacidade de ago/27 (JS e Python)
++OK    · S3.1 veredito diz "Fora da conta: 2 ocorrências depois do fim da safra" e não cita ago/27
++OK    · S3.1 paridade JS = Python com ocorrências depois do fim
++OK    · S3.1 classe_oc (Python) = classeOc (tela): antes · depois · fora · cal
++OK    · SAF-C02 A↔B com o mesmo período (01 a 15/02/2027): 140 h nas duas vistas (A1 100 + B1 40), cabe com 1; era 340 h com a A aberta
++OK    · SAF-C02 vista A: a B2 (200 h) fica fora da conta com número, motivo e horas; amarelo (R4), nunca verde
++OK    · SAF-C02 vista B: a B2 fora da conta como "depois do fim da safra" (R4), sem citar a A
++OK    · SAF-C02 capSaf guarda a carga excluída da outra safra (B2: depois do fim, fev/27, 200 h)
++OK    · SAF-C02 controle (B2 dentro do período, 01 a 28/02/2027): 340 h nas duas vistas, precisa de 3, tem 1
++OK    · SAF-C02 controle: R2 nas duas; a A soma a B (240,0 h), a B falta sozinha
++OK    · SAF-C02 antes do início (11 a 28/02/2027 nas duas): 250 h nas duas vistas (A2 50 + B2 200); A1 e B1 fora
++OK    · SAF-C02 antes do início: cada vista cita a própria e a da outra com o motivo "antes do início dela"
++OK    · SAF-C02 paridade JS = Python (dados2.cap_saf) nas 6 vistas da fixture, com a carga excluída
++OK    · SAF-C02 outras safras: só abertas e da mesma fazenda (S27SF, XA); outra fazenda (XF, LG2627) e encerrada (XE, S2526) fora; com a encerrada aberta na tela, nada soma
++OK    · SAF-C02 real: jul/27 Tratores 61,7 h nas duas vistas e no espelho (poda 25,3 + dessecação 4,4 + colheita T1-A 32,0); era 140,3 h com a S2627 aberta
++OK    · SAF-C02 real: demanda de todo recurso × mês igual nas duas vistas (JS e Python)
++OK    · SAF-C02 real: veredito da S2627 identifica a colheita da Safrinha fora da conta (número, motivo e horas dos recursos que a S2627 usa em jul/27)
++OK    · SAF-C02 real: veredito da S27SF diz "2 ocorrências depois do fim da safra" e não cita a S2627 (nada dela fora em jul/27)
++OK    · SAF-C02 real: custo preservado — o custo de operação da S27SF não muda com o período e inclui as 2 colheitas fora da conta
++OK    · SAF-C02 real: paridade JS = Python da carga fora da conta (g.fora, desta safra e das outras)
++OK    · SAF-C02 S3.1 com a S2627 aberta: nenhuma hora da Safrinha depois do fim dela em ago/27 (JS e Python); veredito igual ao V1
++OK    · SAF-C02 propriedade: 150 sorteios (372 vistas) — demanda igual com qualquer safra aberta, = Σ elegíveis pela origem, JS = Python
++FALHA · SAF-C02 verificação · 3 safras abertas (0,1 + 0,1 + 7,0 h em 160 h): a mesma demanda bit a bit e "5 %" nas 3 vistas, JS e Python (era "4 %" em A e B) · ([(7.199999999999999, '4 %'), (7.199999999999999, '4 %'), (7.2, '5 %')], [(7.199999999999999, '4 %'), (7.199999999999999, '4 %'), (7.2, '5 %')])
++FALHA · SAF-C02 verificação · R1 com a S27SF em ago/27: "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" e a contagem antes do início, sem "fora do calendário" · (14, 14, {'R': 'R1', 'cor': 'gray', 'txt': 'Capacidade não calculada: as 14 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).'})
++FALHA · SAF-C02 verificação · R1 misto (antes do início e fora do calendário): "nenhuma … no período dela (10/02/2027 a 31/03/2027) dentro do calendário do protótipo (fev/27)" com as contagens; todas fora do calendário: o texto de sempre · ({'R': 'R1', 'cor': 'gray', 'txt': 'Capacidade não calculada: as 2 ocorrências desta safra ficam fora do calendário do protótipo (fev/27).'}, {'R': 'R1', 'cor': 'gray', 'txt': 'Capacidade não calculada: a ocorrência desta safra fica fora do calendário do protótipo (fev/27).'})
++FALHA · SAF-C02 verificação · "≥" da área sem horas da B na mesma célula nas duas vistas (140 h), JS e Python; antes só na vista da B · ([{'d': 140, 'dThis': 100, 'dOth': 40, 'cap': 160, 'ocup': 87.5, 'nec': 1, 'red': False, 'soma': False, 'own': True, 'ge': False, 'txt': '88 %'}, {'d': 140, 'dThis': 40, 'dOth': 100, 'cap': 160, 'ocup': 87.5, 'nec': 1, 'red': False, 'soma': False, 'own': True, 'ge': True, 'txt': '88 %'}], [False, True])
++FALHA · SAF-C02 verificação · contrato: outra safra sem ini e fim, ou ocorrência desta sem cls → erro explícito em JS e em Python; com os dois, sem erro · ({'erro': None}, {'erro': None}, {'erro': None}, [None, None])
++OK    · SAF-C02 verificação · outra safra sem período (ini e fim nulos): todas as ocorrências dela no calendário contam, como na vista dela (340 h), JS = Python
++OK    · SAF-C02 verificação · S2627 até 30/06/2027 e S27SF aberta: R4 (era R5) com a poda da S2627 fora da conta (Tratores 25,3 h e Operadores e equipe 25,3 h): sem verde com carga excluída
++OK    · C11 paridade JS = Python em 200 combinações (unidades, jornada, turnos, disponibilidade, absenteísmo e cfg_override)
++
++RESULTADO: 96 OK · 5 FALHA
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit.log b/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit.log
+new file mode 100644
+index 0000000..0c58f19
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/capacidade_unit.log
+@@ -0,0 +1,103 @@
++OK    · C11 paridade JS = Python · base S2627
++OK    · C11 paridade JS = Python · base S27SF
++OK    · C11 paridade JS = Python · base LG2627
++OK    · C11 paridade JS = Python · base S2526
++OK    · C11 paridade JS = Python · Colhedoras 0
++OK    · C11 paridade JS = Python · SOJA-AT nos sem plano
++OK    · C11 paridade JS = Python · Tratores 5
++OK    · C11 paridade JS = Python · Operadores 5
++OK    · C11 paridade JS = Python · LG Operadores 10
++OK    · C11 paridade JS = Python · LG Operadores 5
++OK    · C11 paridade JS = Python · Operadores 0
++OK    · C11 paridade JS = Python · Tratores 1
++OK    · C11 paridade JS = Python · larg 12
++OK    · C11 paridade JS = Python · pess 3
++OK    · C1 S2627 Colhedoras fev/27 81,07 %, precisa de 1
++OK    · C2 S2627 Tratores fev/27 (122,00 + 67,31 da Safrinha) ÷ 699,20 = 27,08 %, precisa de 2; maior uso em fev/27
++OK    · C3 S2627 pulv maior uso dez/26 25,97 %
++OK    · C3 S2627 plant maior uso out/26 31,67 %
++OK    · C3 S2627 dist maior uso nov/26 15,51 %
++OK    · C3 S2627 oper maior uso mai/27 42,17 %
++OK    · C3 Operadores out/26 precisa de 2
++OK    · C4 horas de Operadores no calendário · S2627 1.241,95
++OK    · C4 horas de Operadores no calendário · S27SF 460,40
++OK    · C4 horas de Operadores no calendário · LG2627 86.839,80
++OK    · C4 horas de Operadores no calendário · S2526 0,00
++OK    · C5 LG2627 Operadores nov/26 1.584,40 %, precisa de 127
++OK    · C5 LG2627 Operadores out/26 1.305,79 %, precisa de 105
++OK    · C5 LG2627 Operadores mai/27 173,95 % (14) e ago/27 66,49 % (10)
++OK    · C5 LG2627 Operadores em falta em 9 meses
++OK    · C5 LG2627 Tratores out/26 233,51 %, precisa de 10; falta de out/26 a jan/27
++OK    · C6 Colhedoras = 0: fev/27 122,00 h, não calculável, precisa de 1 (falta); 3 pendentes
++OK    · C6 Tratores e Operadores de fev/27 iguais à base
++OK    · C7 S27SF maior uso Colhedoras jul/27 55,86 %; fev/27 só da S2627 não conta
++OK    · C8 S2526: 21 ocorrências fora do calendário, nenhuma demanda, não soma outras
++OK    · C9 com SOJA-AT nos sem plano: Colhedoras fev/27 182,00 ÷ 150,48 = 120,95 %, precisa de 2
++OK    · C10 Tratores 4 → 5: fev/27 21,66 % (189,31 ÷ 874,00)
++OK    · C12 invariância da demanda · Colhedoras 0 (366,92 / 116,67 / 62,70 / 40,22 / 122,00 / 1.241,95)
++OK    · C12 invariância da demanda · Operadores 5 (366,92 / 116,67 / 62,70 / 40,22 / 122,00 / 1.241,95)
++OK    · C12 base: horas por recurso
++OK    · C12 Operadores 0: o Plantio passa ao prestador e Operadores cai para 1.116,55
++OK    · C13 Operadores 8 → 5: mai/27 67,47 %, precisa de 6 (falta); 1 pendente C1 · Colheita · sem recurso na fazenda
++OK    · C14 LG Operadores 8 → 10: nov/26 1.267,52 %, pendentes 56 → 0, falta em 7 meses
++OK    · C14 LG Operadores 8 → 5: pendentes 56 → 91
++OK    · C15 serialização 300 ha: 1 colhedora 40,00 h e 120,00 ha sem conjunto; 2 colhedoras 66,67 h e saldo 0
++OK    · C16 Operadores 0: 30 pendentes; toda célula de Operadores desta safra não calculável e em falta
++OK    · C17 Tratores 1: fev/27 108,30 %, precisa de 2, tem 1; sozinha 69,79 %
++OK    · C17 veredito R2 "somando a Safrinha 2027 (67,3 h)"
++OK    · C18 S27SF encerrada: S2627 Tratores fev/27 17,45 %; Operadores fev/27 19,82 %
++OK    · C19 S2627 Operadores nov/26 4,95 %: LG2627 e S2526 não entram
++OK    · C20 fmtOcup: <1 % · 1 % · <1 % · — · não calculável · 1.584 %
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S2627
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S27SF
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base LG2627
++OK    · C21 Σ cargaRec das ocorrências = demanda desta safra em cada recurso e mês · base S2526
++OK    · C21 negativo: Plantadeiras out/26 Σ horas-conjunto = 125,40, não 62,70
++OK    · C22 largura 12 m na Adubação de cobertura: 595,73 h · R$ 272.513,18 · 1.275,84 h-homem · Adubação a lanço 74,11 h · Distribuidores nov/26 31,02 %
++OK    · C22 3 pessoas no Plantio: Operadores 1.304,65 h · out/26 16,41 % · R$ 266.999,64
++OK    · C23 resumo por cultura S2627 (§4.3)
++OK    · C23 Σ custo de operação por cultura = plano_op · Σ insumos = R$ 1.398.550,00
++OK    · C23 LG2627 Mamão parcial (56 ocorrências pendentes), nunca R$ 4.072,16
++OK    · C24 partição do calendário S2627 = antes + fora + depois + calendário
++OK    · C24 partição do calendário S27SF = antes + fora + depois + calendário
++OK    · C24 partição do calendário LG2627 = antes + fora + depois + calendário
++OK    · C24 partição do calendário S2526 = antes + fora + depois + calendário
++OK    · V1 veredito S2627 (R4)
++OK    · V12 veredito S27SF (R5)
++OK    · V8 veredito LG2627 (R2)
++OK    · V11 veredito S2526 (R1)
++OK    · V13 veredito Colhedoras = 0
++OK    · V10/C9 veredito com SOJA-AT nos sem plano começa por Colhedoras
++OK    · P2 veredito Operadores 8 → 5
++OK    · S3.1 d3 em 20/05/2027: 2 ocorrências depois do fim, e nenhuma hora delas na capacidade de ago/27 (JS e Python)
++OK    · S3.1 veredito diz "Fora da conta: 2 ocorrências depois do fim da safra" e não cita ago/27
++OK    · S3.1 paridade JS = Python com ocorrências depois do fim
++OK    · S3.1 classe_oc (Python) = classeOc (tela): antes · depois · fora · cal
++OK    · SAF-C02 A↔B com o mesmo período (01 a 15/02/2027): 140 h nas duas vistas (A1 100 + B1 40), cabe com 1; era 340 h com a A aberta
++OK    · SAF-C02 vista A: a B2 (200 h) fica fora da conta com número, motivo e horas; amarelo (R4), nunca verde
++OK    · SAF-C02 vista B: a B2 fora da conta como "depois do fim da safra" (R4), sem citar a A
++OK    · SAF-C02 capSaf guarda a carga excluída da outra safra (B2: depois do fim, fev/27, 200 h)
++OK    · SAF-C02 controle (B2 dentro do período, 01 a 28/02/2027): 340 h nas duas vistas, precisa de 3, tem 1
++OK    · SAF-C02 controle: R2 nas duas; a A soma a B (240,0 h), a B falta sozinha
++OK    · SAF-C02 antes do início (11 a 28/02/2027 nas duas): 250 h nas duas vistas (A2 50 + B2 200); A1 e B1 fora
++OK    · SAF-C02 antes do início: cada vista cita a própria e a da outra com o motivo "antes do início dela"
++OK    · SAF-C02 paridade JS = Python (dados2.cap_saf) nas 6 vistas da fixture, com a carga excluída
++OK    · SAF-C02 outras safras: só abertas e da mesma fazenda (S27SF, XA); outra fazenda (XF, LG2627) e encerrada (XE, S2526) fora; com a encerrada aberta na tela, nada soma
++OK    · SAF-C02 real: jul/27 Tratores 61,7 h nas duas vistas e no espelho (poda 25,3 + dessecação 4,4 + colheita T1-A 32,0); era 140,3 h com a S2627 aberta
++OK    · SAF-C02 real: demanda de todo recurso × mês igual nas duas vistas (JS e Python)
++OK    · SAF-C02 real: veredito da S2627 identifica a colheita da Safrinha fora da conta (número, motivo e horas dos recursos que a S2627 usa em jul/27)
++OK    · SAF-C02 real: veredito da S27SF diz "2 ocorrências depois do fim da safra" e não cita a S2627 (nada dela fora em jul/27)
++OK    · SAF-C02 real: custo preservado — o custo de operação da S27SF não muda com o período e inclui as 2 colheitas fora da conta
++OK    · SAF-C02 real: paridade JS = Python da carga fora da conta (g.fora, desta safra e das outras)
++OK    · SAF-C02 S3.1 com a S2627 aberta: nenhuma hora da Safrinha depois do fim dela em ago/27 (JS e Python); veredito igual ao V1
++OK    · SAF-C02 propriedade: 150 sorteios (372 vistas) — demanda igual com qualquer safra aberta, = Σ elegíveis pela origem, JS = Python
++OK    · SAF-C02 verificação · 3 safras abertas (0,1 + 0,1 + 7,0 h em 160 h): a mesma demanda bit a bit e "5 %" nas 3 vistas, JS e Python (era "4 %" em A e B)
++OK    · SAF-C02 verificação · R1 com a S27SF em ago/27: "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" e a contagem antes do início, sem "fora do calendário"
++OK    · SAF-C02 verificação · R1 misto (antes do início e fora do calendário): "nenhuma … no período dela (10/02/2027 a 31/03/2027) dentro do calendário do protótipo (fev/27)" com as contagens; todas fora do calendário: o texto de sempre
++OK    · SAF-C02 verificação · "≥" da área sem horas da B na mesma célula nas duas vistas (140 h), JS e Python; antes só na vista da B
++OK    · SAF-C02 verificação · contrato: outra safra sem ini e fim, ou ocorrência desta sem cls → erro explícito em JS e em Python; com os dois, sem erro
++OK    · SAF-C02 verificação · outra safra sem período (ini e fim nulos): todas as ocorrências dela no calendário contam, como na vista dela (340 h), JS = Python
++OK    · SAF-C02 verificação · S2627 até 30/06/2027 e S27SF aberta: R4 (era R5) com a poda da S2627 fora da conta (Tratores 25,3 h e Operadores e equipe 25,3 h): sem verde com carga excluída
++OK    · C11 paridade JS = Python em 200 combinações (unidades, jornada, turnos, disponibilidade, absenteísmo e cfg_override)
++
++RESULTADO: 101 OK · 0 FALHA
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/etapas_celular_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/etapas_celular_test.log
+new file mode 100644
+index 0000000..60b6756
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/etapas_celular_test.log
+@@ -0,0 +1,17 @@
++OK    1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02, MA-01) 
++OK    2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA) 
++OK    3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas) 
++OK    4 390 px · tabelas em região rolável na horizontal; o conteúdo não rola de lado; nenhum texto ou comando cortado fora de região rolável nem texto sobre texto 
++     (informativo) campos cortados pela própria caixa da área: {}
++OK    5 325 px (quadro do site) · Compras sem sobreposição, "Etapa 1 de 6 · Escolha a safra", título inteiro 
++OK    6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável 
++OK    7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (6 telas) 
++OK    8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição 
++OK    9 teclado · Tab chega ao rótulo da etapa atual, Espaço abre a lista em folha (6 etapas, sem sobreposição) e o Tab seguinte não entra nela: a lista só informa (UX-ACAO-UNICA) 
++OK    10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço "Solicitar cotações ›" da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA) 
++OK    11 "‹ Demanda" (área de ações) volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27 
++OK    12 painel lateral em 390 px · cobre a faixa e o cabeçalho (largura da tela) e o rascunho digitado sobrevive à troca de zoom 
++OK    13 O.S. em 390 px · painel da ordem ocupa a largura e nada do cabeçalho fica por cima 
++OK    14 sem erro de JS nas telas visitadas 
++
++RESULTADO: 14 ok · 0 falhas (celular)
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/harness-antes-base16d6734.json b/docs/planejar-safra/verificacao-saf-c02/saidas/harness-antes-base16d6734.json
+new file mode 100644
+index 0000000..c4167ad
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/harness-antes-base16d6734.json
+@@ -0,0 +1,82 @@
++{
++  "source_hash": "d96875f8348ccde6073e2780da510b2ca72cc974f27af096567d5181176e9677",
++  "a": {
++    "view": "A",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "A1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 100
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 340,
++      "dThis": 100,
++      "dOth": 240,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 212.5,
++      "nec": 3,
++      "red": true,
++      "soma": true,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R2",
++      "cor": "red",
++      "txt": "Falta recurso: Tratores precisam de 3 em fev/27 e você tem 1, somando a B (240,0 h)."
++    }
++  },
++  "b": {
++    "view": "B",
++    "source_period": [
++      "2027-02-01",
++      "2027-02-15"
++    ],
++    "occurrences": [
++      {
++        "id": "B1",
++        "dt": "2027-02-10",
++        "cls": "cal",
++        "h": 40
++      },
++      {
++        "id": "B2",
++        "dt": "2027-02-28",
++        "cls": "depois",
++        "h": 200
++      }
++    ],
++    "cell": {
++      "mi": 0,
++      "mes": "fev/27",
++      "d": 140,
++      "dThis": 40,
++      "dOth": 100,
++      "cap": 160,
++      "porUn": 160,
++      "ocup": 87.5,
++      "nec": 1,
++      "red": false,
++      "soma": false,
++      "own": true,
++      "ge": false,
++      "pendSR": 0
++    },
++    "verdict": {
++      "R": "R4",
++      "cor": "yellow",
++      "txt": "Na estimativa mensal, cabe nos 100 ha com plano. Fora da conta: 1 ocorrência depois do fim da safra."
++    }
++  },
++  "same_total": false
++}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/harness-original-na-correcao.err.txt b/docs/planejar-safra/verificacao-saf-c02/saidas/harness-original-na-correcao.err.txt
+new file mode 100644
+index 0000000..53033dc
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/harness-original-na-correcao.err.txt
+@@ -0,0 +1,17 @@
++evalmachine.<anonymous>:30
++  (outras||[]).forEach(s=>{ if(!('ini' in s)||!('fim' in s)) throw new Error('capSaf: a safra '+s.id+' chegou sem o período (ini e fim)'); }); }
++                                                             ^
++
++Error: capSaf: a safra B chegou sem o período (ini e fim)
++    at evalmachine.<anonymous>:30:68
++    at Array.forEach (<anonymous>)
++    at capContrato (evalmachine.<anonymous>:30:16)
++    at Object.capSaf (evalmachine.<anonymous>:31:49)
++    at view (docs/planejar-safra/verificacao-saf-c02/harness_original.js:14:16)
++    at Object.<anonymous> (docs/planejar-safra/verificacao-saf-c02/harness_original.js:19:9)
++    at Module._compile (node:internal/modules/cjs/loader:1706:14)
++    at Object..js (node:internal/modules/cjs/loader:1839:10)
++    at Module.load (node:internal/modules/cjs/loader:1441:32)
++    at Function._load (node:internal/modules/cjs/loader:1263:12)
++
++Node.js v22.22.0
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/links_ocultos_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/links_ocultos_test.log
+new file mode 100644
+index 0000000..0d95cd0
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/links_ocultos_test.log
+@@ -0,0 +1,9 @@
++OK    E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar 
++OK    E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 
++OK    E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia) 
++OK    E2 nenhuma ordem de beneficiamento ou manutenção em A liberar no cenário (OB-0104 Encerradas) 
++OK    E3 "Nova ordem" só emite atividade agrícola do plano 
++OK    L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis) 
++OK    L2 todo o resto da varredura está na lista residual, por par e com motivo 
++OK    L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (MA-04, visível e com âncora no estado da manutenção), não para PL-05 
++TOTAL 8 · falhas 0
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-62b0904.json b/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-62b0904.json
+new file mode 100644
+index 0000000..dd8c622
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-62b0904.json
+@@ -0,0 +1 @@
++[{"vista":"A","d":7.199999999999999,"ocup":4.499999999999999,"txt":"4 %","nec":1},{"vista":"B","d":7.199999999999999,"ocup":4.499999999999999,"txt":"4 %","nec":1},{"vista":"C","d":7.2,"ocup":4.5,"txt":"5 %","nec":1}]
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-correcao.json b/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-correcao.json
+new file mode 100644
+index 0000000..a8a1f41
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/min-float-correcao.json
+@@ -0,0 +1 @@
++[{"vista":"A","d":7.2,"ocup":4.5,"txt":"5 %","nec":1},{"vista":"B","d":7.2,"ocup":4.5,"txt":"5 %","nec":1},{"vista":"C","d":7.2,"ocup":4.5,"txt":"5 %","nec":1}]
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/montar_render.log b/docs/planejar-safra/verificacao-saf-c02/saidas/montar_render.log
+new file mode 100644
+index 0000000..3fd2265
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/montar_render.log
+@@ -0,0 +1 @@
++_render montado: 140 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/partest.log b/docs/planejar-safra/verificacao-saf-c02/saidas/partest.log
+new file mode 100644
+index 0000000..a0787be
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/partest.log
+@@ -0,0 +1,56 @@
++  ok  sem erro de JS ao abrir
++   linhas: ['T1 2 parcelas · área toda alocada Dividir Soja 58 W, 62 X 312 ha 15/10 a 25/10/2026 por parcela Soja alta tecnologia v6 1 ajuste local', 'T1-A parcela Soja 58 W 160 ha 15/10/2026 64 sc/ha Soja alta tecnologia Ajustar insumos v6', 'T1-B parcela Soja 62 X 152 ha 25/10/2026 62 sc/ha Soja alta tecnologia Ajustar insumos v6 1 ajuste deste talhão', 'T2 talhão inteiro Dividir Soja 58 W 298 ha 18/10/2026 63 sc/ha Soja alta tecnologia v6']
++  ok  T1 aparece como linha do talhão com 2 parcelas · ['T1 2 parcelas · área toda alocada Dividir Soja 58 W, 62 X 312 ha 15/10 a 25/10/2026 por parcela Soja alta tecnologia v6 1 ajuste local', 'T1-A parcela Soja 58 W 160 ha 15/10/2026 64 sc/ha Soja alta tecnologia Ajustar insumos v6', 'T1-B parcela Soja 62 X 152 ha 25/10/2026 62 sc/ha Soja alta tecnologia Ajustar insumos v6 1 ajuste deste talhão']
++  ok  T1-A e T1-B são sublinhas
++   faixa: Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir
++  ok  faixa "Nesta safra 1.165" e 9 cultivos (folhas) · ('Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir', 9)
++   etapa 3: Custo de operação R$ 264.617,07 · Total 561,8 h
++   k6: Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
++  ok  abre Dividir T2
++  ok  proposta inicial T2-A/T2-B 149/149 · ['T2-A', '149', 'T2-B', '149']
++  ok  T2-C adicionada (sem área livre → vazia) · ['T2-A', '149', 'T2-B', '149', 'T2-C', '']
++  ok  T2-C copia plano de T2-B
++  ok  distribui 99,33/99,33/99,34 · ['T2-A', '99,33', 'T2-B', '99,33', 'T2-C', '99,34']
++  ok  selo Área conferida
++  ok  salvou T2 em 3 parcelas · T2 dividido em 3 parcelas. Plano operacional, recursos e demanda recalculados.
++  ok  T2 tem sublinhas T2-A..C
++  ok  horas-conjunto e custo de operação (etapa 3) idênticos após dividir T2 · Custo de operação R$ 264.617,07 · Total 561,8 h
++  ok  k6 idêntico após dividir T2 · Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
++  ok  T4 em 5 × 40,8 · ['T4-A', '40,8', 'T4-B', '40,8', 'T4-C', '40,8', 'T4-D', '40,8', 'T4-E', '40,8']
++  ok  salvou T4 em 5 · T4 dividido em 5 parcelas. Plano operacional, recursos e demanda recalculados.
++  ok  5 sublinhas de T4
++  ok  faixa e folhas (15 cultivos, mesma área) · ('Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir', 15)
++  ok  total da tabela 1.165 ha (unidade na célula, cabeçalho "Área": decisão de 05/10/2026) · Total 1.165 ha
++  ok  27 parcelas: última é T1-AA · ['T1-Z', '', 'T1-AA', '']
++  ok  soma exata 312 ha em 27 parcelas · 312.0
++  FALHOU T1-C copia ajuste do T1-B
++  ok  salvou T1 em 27 parcelas · T1 dividido em 27 parcelas. Plano operacional, recursos e demanda recalculados.
++  ok  27 sublinhas de T1
++  ok  T1-B mantém o ajuste
++  ok  selo Excede em 42 ha · Dividir T3 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 96 ha · alocado 13
++  ok  erro de excesso e não salvou · Dividir T3 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 96 ha · alocado 138 ha · livre 0 ha Excede em 42 ha As parcelas somam 138 ha; o talhão tem 96 ha. Reduza 42 ha. PARCELA ÁREA (HA) CULTURA VARIEDADE PLANTIO ME
++  ok  selo 5 ha livres
++  ok  salvou T3 com área livre · T3 dividido em 2 parcelas · 5 ha livres. Plano operacional, recursos e demanda recalculados.
++  ok  linha do T3 mostra 5 ha livres
++  ok  clique na linha do talhão abre o painel
++  ok  erros de campo (variedade e nome repetido) · a tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades × Nome T4-A repetido Soja Milho Feijão Café Mamão Formosa sc/ha Sem plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades × Soja Milho Feijão Café Mamão Formosa sc/ha Sem plano Soja alta tecnologia v6 · 8 atividades Soja padrão v3 · 4 atividades × + Adicionar parcela Distribuir área igualmente Cancelar Salvar divisão
++  ok  aviso de alterações não salvas
++  ok  descartou e fechou
++  ok  excluir parcela com plano pede confirmação
++  ok  T2 volta a talhão inteiro · T2 volta a talhão inteiro. Plano operacional, recursos e demanda recalculados.
++  ok  linha T2 talhão inteiro
++   etapa 3 depois das divisões: Custo de operação R$ 264.617,07 · Total 561,8 h
++   campos do formulário: Cultura|Variedade|Plano agronômico|Plantio|Plantio a partir de|Parcela|Área|Colheita prevista|Meta de produtividade|Unidade da meta|Ocupação prevista
++  ok  formulário bloqueia soma acima do talhão (M1: período e máximo) ·  Safra 2026/27). Máximo 95 ha nesse período. Colheita prevista Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02). Meta de produtividade Unidade da meta Unidade de mercado da cultura (CD-02, DEC-0510-03). Ocupação prevista Ajustar insumos e doses de T3-A Escolha um plano agronômico de Soja e salve; depois ajuste os insumos só deste talhão. Cancelar Salvar
++  ok  Safrinha: T1 com 1 parcela e 152 ha livres a partir de 21/02/2027 · ['T1 1 parcela · 152 ha livres Milho Híbrido AG 8700 160 ha 20/02/2027 por parcela Milho safrinha v4', 'T1-A parcela Milho Híbrido AG 8700 160 ha 20/02/2027 180 sc/ha Milho safrinha Ajustar insumos v4']
++  ok  sem "Adicionar cultivo"
++  ok  Planejar › no T4 livre vira parcela T4-F com 104 ha livres · Cultivo incluído como parcela T4-F · 104 ha livres em T4 · plano Milho safrinha.
++  ok  T4 continua A conferir e a ocupação da soja (c4) continua na linha · ▾ T4 Planejar › A conferir : 104 ha a conferir: saída da soja da Safra 2026/27 estimada em 15/02/2027 (sem plano, CD-02) 104 ha 16/02/2027 est. 100 ha Milho AG 8700 Milho safrinha v4 28/02/2027 por parcela — 1 parcela
++  ok  T2 planejado não oferece Planejar ›, só Dividir · ▾ T2 Dividir
++  ok  Dividir T2 + 50 ha: "Excede em 50 ha" · Dividir T2 em parcelas × Defina quantas parcelas precisar e os dados de cada uma; a soma não pode passar da área do talhão. 2 parcelas Talhão 298 ha · alocado 348 ha · livre 0 ha Excede em 50 ha PARCE
++  ok  salvou T2 com 2 parcelas na Safrinha · T2 dividido em 2 parcelas. Plano operacional, recursos e demanda recalculados.
++  ok  safra encerrada sem "Dividir" · ['T1 talhão inteiro Soja 58 W 312 ha 12/10/2025 62 sc/ha Soja alta tecnologia Ver insumos v6', 'T2 talhão inteiro Soja 58 W 298 ha 16/10/2025 61 sc/ha Soja alta tecnologia Ver insumos v6']
++  ok  sem erro de JS no fim
++
++RESULTADO: 46 ok · 1 falhas
++  - T1-C copia ajuste do T1-B
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/prop-r3-correcao.json b/docs/planejar-safra/verificacao-saf-c02/saidas/prop-r3-correcao.json
+new file mode 100644
+index 0000000..e0c3ffe
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/prop-r3-correcao.json
+@@ -0,0 +1,16 @@
++{
++ "views": 998,
++ "viewsComCargaPertinenteFora": 204,
++ "falhas": {
++  "cons": 0,
++  "verde": 0,
++  "cita": 0,
++  "sim": 0
++ },
++ "ex": {
++  "cons": [],
++  "verde": [],
++  "cita": [],
++  "sim": []
++ }
++}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/prop3-correcao.json b/docs/planejar-safra/verificacao-saf-c02/saidas/prop3-correcao.json
+new file mode 100644
+index 0000000..fc2e3fa
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/prop3-correcao.json
+@@ -0,0 +1 @@
++{"sorteios":400,"vistas":1200,"falhas":0,"cargas_fora_conferidas":3197}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-bordas.log b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-bordas.log
+new file mode 100644
+index 0000000..e4b3a7f
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-bordas.log
+@@ -0,0 +1,15 @@
++janela 0: ('ok', 'Cálculo incompleto: Tratamento de sementes com 3 ocorrências pendentes (sem horas na janela). Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Tratamento de sementes · Máquina TSI na sede · equipe de 2: 40,00 ha/h · R$ 3,40/ha. Tratamento de sementes: 15,3 → 0,0 h.')
++OK    · B1a janela 0 h (rendimento 40 ha/h válido): a Situação diz "sem horas na janela · pendente", não "sem rendimento"
++OK    · B1b linhas de operação e atividade com todas as ocorrências pendentes não mostram 0,0 h nem R$ 0
++OK    · B1c o veredito diz que o cálculo está incompleto pelas ocorrências pendentes (R3)
++A: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Pulverização: 116,7 → 126,4 h.')
++incluir: ok
++B: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Configuração incluída em Controle de ácaro · B prestador 12 m: 7,20 ha/h. A área de Controle de ácaro agora se divide entre 2 configurações. Pulverização: 126,4 → 123,4 h.')
++A em sequência: ('ok', 'Cálculo incompleto: Pulverização com 25,8 ha sem conjunto, sequência que não cabe na janela. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Controle de ácaro · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m: 3,60 ha/h · R$ 50,00/ha. Pulverização: 123,4 → 117,7 h.')
++OK    · B2a sequência numa janela de 3 h: "sem conjunto" = espelho 25,8 ha; horas-conjunto 3,0 h
++OK    · B2b o conflito continua à vista com o motivo (precisam de 7,78 h para os 42 ha; a janela tem 3 h) e a área que não cabe é explicada
++OK    · B2c necessário = atendido + saldo na ocorrência ("Neste talhão") e em cada configuração ("Nesta configuração") = espelho
++OK    · B2d S5 na tela (50 % + 50 %, janela 3 h): necessário, atendido e saldo do espelho; motivo com as 8,75 h da demanda inteira
++OK    · B3 Enter na linha da atividade abre o formulário Rendimento ("Só esta atividade")
++OK    · B4 sem erros de JS
++RESULTADO: 9/9 OK
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-fluxo.log b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-fluxo.log
+new file mode 100644
+index 0000000..2e431c0
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-fluxo.log
+@@ -0,0 +1,29 @@
++OK    · 1 Total de horas-conjunto da g_op = espelho dados2.plano_op
++OK    · 1b custo de operação da etapa = espelho
++OK    · 1c horas-homem e diesel (Resumo da safra) = espelho
++OK    · 2 T2 (298 ha): duas configurações com área, horas-conjunto e R$/ha do espelho; Σ área = 298 ha
++OK    · 2b "Neste talhão": decorrido do espelho, menor que as horas-conjunto
++OK    · 3 um conjunto só (Dessecação pré-plantio em T2): sem linhas de configuração, horas = 298 ÷ 21,6
++incluir: ok
++OK    · 4a "+ Outra configuração" abre "Nova configuração" com a atividade à vista e "Por classe" sem patrimônio
++salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Configuração incluída em Adubação de cobertura · Trator 75 cv + distribuidor 12 m: 6,72 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Adubação a lanço: 40,2 → 55,7 h · Distribuidores nov/26: 16 % → 23 %.')
++OK    · 4b a atividade passa a 2 conjuntos; a anterior (Trator 03 + Distribuidor 3 t, 18 ha/h) continua; a nova com 6,72 ha/h
++OK    · 4c horas e custo recalculados no lugar (mudam)
++OK    · 5a "Nesta configuração" no formulário aberto pela configuração
++salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Plantio e adubação de base · Prestador · plantadeira 12 linhas (6 m): 2,93 ha/h · R$ 109,40/ha. Plantio: 125,4 → 125,3 h.')
++OK    · 5b T2 com 30 % fixo no prestador: área 89,4 + 208,6 = 298 ha e horas/R$/ha do espelho
++OK    · 5c demanda de insumos (CAL-01) igual à inicial: a divisão não muda dose × área
++escolher a01+a07 ok
++salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator T1 JD 6M 155 + Distribuidor 3 t: 6,72 ha/h · R$ 39,14/ha. Conjunto trocado: custos por hora do cadastro (máquina 180, implemento 45). Horas e capacidade não mudaram.')
++OK    · 6a mesmo distribuidor do cadastro nas duas configurações → "em sequência"; decorrido = horas-conjunto na ocorrência
++janela 3 h: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator T1 JD 6M 155 + Distribuidor 3 t: 6,72 ha/h · R$ 39,14/ha. Adubação a lanço: 55,7 → 45,9 h · Distribuidores nov/26: 23 % → 18 %.')
++janela 3 h: ('ok', 'Cálculo incompleto: Adubação a lanço com 498,76 ha sem conjunto (configurações com a mesma máquina do cadastro trabalham em sequência), 3 sequências que não cabem na janela. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Adubação a lanço: 45,9 → 15,3 h · Distribuidores nov/26: 18 % → 23 %.')
++OK    · 6b janela de 3 h por talhão: área que não cabe fica "sem conjunto"; sequência acima da janela aparece como conflito; nada vira 0 h
++OK    · 7 partes fixas 30 % + 80 % são recusadas com motivo; o formulário continua aberto com o que foi digitado
++remover (1º toque): ok
++confirmar: ok Cálculo incompleto: Adubação a lanço com 448 ha sem conjunto (as janelas não comportam toda a área). Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Configuração removida de Adubação de cobertura: Trator T1 JD 6M 155 + Distribuidor 3 t. A área volta para as outras; plano operacional e recursos recalculados.
++OK    · 8a remover pede confirmação e a atividade volta a uma configuração
++desfeito: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Adubação a lanço: 15,3 → 40,2 h.')
++OK    · 8b depois de desfazer, horas e custo voltam aos iniciais
++OK    · 8c sem erros de JS na página
++RESULTADO: 18/18 OK
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-telas.log b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-telas.log
+new file mode 100644
+index 0000000..69d7235
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_test-telas.log
+@@ -0,0 +1,6 @@
++OK    · 10 S27SF: Total de horas-conjunto e custo = espelho dados2.plano_op (uma configuração por atividade)
++OK    · 10 LG2627: Total de horas-conjunto e custo = espelho dados2.plano_op (uma configuração por atividade)
++OK    · 10b LG2627 Operadores nov/26: aria-label, Total da g_op e espelho capSaf com as mesmas horas
++OK    · 11 Safra 2025/26 (encerrada): formulário só em consulta, sem "+ Outra configuração" nem Salvar
++OK    · 9 celular 390 px: etapa 3 sem rolagem lateral da página (a tabela rola dentro da caixa) e sem erros
++RESULTADO: 5/5 OK
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_unit.log b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_unit.log
+new file mode 100644
+index 0000000..f376f90
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/rend_multiconjuntos_unit.log
+@@ -0,0 +1,425 @@
++OK    03 paralelo_proporcional_tempo_horas_conjunto · 108 ha, 3,6 e 7,2 ha/h, divide pelo rendimento → 36/72 ha, 10 h decorridas, 20 horas-conjunto
++        esperado={"q": ["36", "72"], "decorrido": "10", "hconj": "20", "saldo": "0"}
++        JS={"q": [36, 72], "decorrido": 10, "hconj": 20, "saldo": 0} · conserva=True
++        Py={"q": ["36", "72"], "decorrido": "10", "hconj": "20", "saldo": "0"} · conserva=True
++OK    04 particao_fixa_tempo_horas_conjunto · 54/54 ha fixos → 15 h decorridas, 22,5 horas-conjunto
++        esperado={"q": ["54", "54"], "decorrido": "15", "hconj": "45/2"}
++        JS={"q": [54, 54], "decorrido": 15, "hconj": 22.5} · conserva=True
++        Py={"q": ["54", "54"], "decorrido": "15", "hconj": "45/2"} · conserva=True
++OK    05a recurso_compartilhado_troca · 36/72 ha com o mesmo operador (sequência) e 1 h de troca → 21 h decorridas, 20 horas-conjunto
++        esperado={"decorrido": "21", "hconj": "20", "troca": "1", "conflito": false, "nec.decorrido": "21", "nec.hconj": "20", "falta.hconj": "0"}
++        JS={"decorrido": 21, "hconj": 20, "troca": 1, "conflito": false, "nec.decorrido": 21, "nec.hconj": 20, "falta.hconj": 0} · conserva=True
++        Py={"decorrido": "21", "hconj": "20", "troca": "1", "conflito": false, "nec.decorrido": "21", "nec.hconj": "20", "falta.hconj": "0"} · conserva=True
++OK    05b mesmo_trator_do_cadastro · mesmo trator a01 nas duas (sem marcar sequência) → em sequência: 20 h decorridas
++        esperado={"decorrido": "20", "hconj": "20"}
++        JS={"decorrido": 20, "hconj": 20} · conserva=True
++        Py={"decorrido": "20", "hconj": "20"} · conserva=True
++OK    05c sequencia_nao_cabe_na_janela · a mesma sequência precisaria de 21 h numa janela de 12 h → conflito (faltam 9 h) e a área que não cabe fica sem conjunto: 2 × 5,5 h + 1 h de troca = 12 h; 19,8 + 39,6 = 59,4 ha; 48,6 ha sem conjunto
++        esperado={"conflito": true, "deficit": "9", "decorrido": "12", "hconj": "11", "q": ["99/5", "198/5"], "alocado": "297/5", "saldo": "243/5", "nq": ["36", "72"], "motivo": "precisam de 21 h para 108 ha; a janela tem 12 h", "nec.hconj": "20", "nec.decorrido": "21", "falta.hconj": "9", "falta.decorrido": "9"}
++        JS={"conflito": true, "deficit": 9, "decorrido": 12, "hconj": 11, "q": [19.8, 39.6], "alocado": 59.400000000000006, "saldo": 48.6, "nq": [36, 72], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B 12 m: troca de 1 h reservada na janela de 12 h de A 6 m e B 12 m (sequência declarada); para liberar horas, reduza a troca ou tire B 12 m da sequência declarada", "A 6 m e B 12 m: em sequência precisam de 21 h para 108 ha; a janela tem 12 h (e mais 1 combinação que também não cabe)"], "nec.hconj": 20, "nec.decorrido": 21, "falta.hconj": 8.999999999999998, "falta.decorrido": 9} · conserva=True
++        Py={"conflito": true, "deficit": "9", "decorrido": "12", "hconj": "11", "q": ["99/5", "198/5"], "alocado": "297/5", "saldo": "243/5", "nq": ["36", "72"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B 12 m: troca de 1 h reservada na janela de 12 h de A 6 m e B 12 m (sequência declarada); para liberar horas, reduza a troca ou tire B 12 m da sequência declarada", "A 6 m e B 12 m: em sequência precisam de 21 h para 108 ha; a janela tem 12 h (e mais 1 combinação que também não cabe)"], "nec.hconj": "20", "nec.decorrido": "21", "falta.hconj": "9", "falta.decorrido": "9"} · conserva=True
++OK    S1 sequencia_janela_3h_B4.3 · 42 ha, 3,6 e 7,2 ha/h em sequência, janela de 3 h → 1,5 h cada: 5,4 + 10,8 = 16,2 ha (≤ 21,6 possíveis), 25,8 ha sem conjunto (≥ 20,4), decorrido 3 h; necessário 42 ÷ 10,8 × 2 = 70/9 h (não 6 h: o plano não corta na janela), déficit 43/9 h
++        esperado={"q": ["27/5", "54/5"], "alocado": "81/5", "saldo": "129/5", "decorrido": "3", "hconj": "3", "conflito": true, "deficit": "43/9", "motivo": ["mesma janela", "precisam de 7,78 h para 42 ha; a janela tem 3 h"], "nec.decorrido": "70/9", "falta.hconj": "43/9", "falta.decorrido": "43/9"}
++        JS={"q": [5.4, 10.8], "alocado": 16.200000000000003, "saldo": 25.8, "decorrido": 3, "hconj": 3, "conflito": true, "deficit": 4.777777777777778, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 7,78 h para 42 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": 7.777777777777778, "falta.hconj": 4.777777777777778, "falta.decorrido": 4.777777777777778} · conserva=True
++        Py={"q": ["27/5", "54/5"], "alocado": "81/5", "saldo": "129/5", "decorrido": "3", "hconj": "3", "conflito": true, "deficit": "43/9", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 7,78 h para 42 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": "70/9", "falta.hconj": "43/9", "falta.decorrido": "43/9"} · conserva=True
++OK    S2 sequencia_e_paralela · A e B em sequência (janela 3 h) e C 6 ha/h ao mesmo tempo, sem janela, 42 ha → A e B param em 1,5 h; C faz o resto: 5,4 + 10,8 + 25,8 ha, nada sem conjunto, decorrido 4,3 h
++        esperado={"q": ["27/5", "54/5", "129/5"], "saldo": "0", "decorrido": "43/10", "hconj": "73/10", "conflito": true, "deficit": "2", "motivo": "precisam de 5 h para 27 ha; a janela tem 3 h", "nec.hconj": "73/10", "falta.hconj": "0", "falta.decorrido": "0"}
++        JS={"q": [5.4, 10.8, 25.799999999999997], "saldo": 0, "decorrido": 4.3, "hconj": 7.3, "conflito": true, "deficit": 2, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m e B 12 m: em sequência precisam de 5 h para 27 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"], "nec.hconj": 7.3, "falta.hconj": 0, "falta.decorrido": 0} · conserva=True
++        Py={"q": ["27/5", "54/5", "129/5"], "saldo": "0", "decorrido": "43/10", "hconj": "73/10", "conflito": true, "deficit": "2", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m e B 12 m: em sequência precisam de 5 h para 27 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"], "nec.hconj": "73/10", "falta.hconj": "0", "falta.decorrido": "0"} · conserva=True
++OK    S3 troca_na_primeira_P10b · troca de 2 h só na 1ª configuração: começa a de menor troca (B, 0 h) e A entra com 2 h → 22 h decorridas, 20 horas-conjunto
++        esperado={"decorrido": "22", "hconj": "20", "troca": "2"}
++        JS={"decorrido": 22, "hconj": 20, "troca": 2} · conserva=True
++        Py={"decorrido": "22", "hconj": "20", "troca": "2"} · conserva=True
++OK    S4 grupo_da_fazenda_com_janela · 1 plantadeira na fazenda e janela de 12 h → em sequência, 6 h cada: 21,6 + 43,2 ha; 43,2 ha sem conjunto; precisaria de 20 h
++        esperado={"q": ["108/5", "216/5"], "saldo": "216/5", "decorrido": "12", "conflito": true, "deficit": "8", "motivo": "Plantadeiras", "nec.decorrido": "20", "falta.hconj": "8"}
++        JS={"q": [21.6, 43.2], "saldo": 43.2, "decorrido": 12, "conflito": true, "deficit": 8, "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 20 h para 108 ha; a janela tem 12 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": 19.999999999999996, "falta.hconj": 7.999999999999997} · conserva=True
++        Py={"q": ["108/5", "216/5"], "saldo": "216/5", "decorrido": "12", "conflito": true, "deficit": "8", "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A 6 m e B 12 m: em sequência precisam de 20 h para 108 ha; a janela tem 12 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": "20", "falta.hconj": "8"} · conserva=True
++OK    S5 partes_fixas_em_sequencia · PRD 22.1 · 50 % + 50 % em sequência, janela de 10 h. Necessário (demanda inteira, partilha do usuário): 54/3,6 + 54/7,2 = 22,5 h; janela 10 h; déficit 12,5 h (a saída antiga, 17,5 h / 7,5 h, cortava A em 36 ha antes de somar). Atendido (sem mudar a distribuição): A 36 ha na própria janela, a sequência reduz as duas a 4/7 → 144/7 + 216/7 ha em 10 h; saldo 396/7 ha = faltam 12,5 horas-conjunto; necessário 54 + 54 ha = atendido + saldo
++        esperado={"q": ["144/7", "216/7"], "alocado": "360/7", "saldo": "396/7", "hconj": "10", "decorrido": "10", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 %", "precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.area": "108", "nec.hconj": "45/2", "nec.decorrido": "45/2", "falta.area": "396/7", "falta.hconj": "25/2", "falta.decorrido": "25/2", "falta.semHoras": "0"}
++        JS={"q": [20.57142857142857, 30.857142857142854], "alocado": 51.42857142857142, "saldo": 56.57142857142858, "hconj": 10, "decorrido": 10, "conflito": true, "deficit": 12.5, "nq": [54, 54], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 % do que cabia na própria janela (A 6 m e B 12 m)", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"], "nec.area": 108, "nec.hconj": 22.5, "nec.decorrido": 22.5, "falta.area": 56.57142857142858, "falta.hconj": 12.5, "falta.decorrido": 12.5, "falta.semHoras": 0} · conserva=True
++        Py={"q": ["144/7", "216/7"], "alocado": "360/7", "saldo": "396/7", "hconj": "10", "decorrido": "10", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "A 6 m: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 57,14 % do que cabia na própria janela (A 6 m e B 12 m)", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"], "nec.area": "108", "nec.hconj": "45/2", "nec.decorrido": "45/2", "falta.area": "396/7", "falta.hconj": "25/2", "falta.decorrido": "25/2", "falta.semHoras": "0"} · conserva=True
++OK    S6 partes_fixas_ao_mesmo_tempo · 50 % + 50 % ao mesmo tempo (recursos próprios), janela de 10 h cada: A precisa de 15 h para 54 ha e faz 36 ha; B faz 54 ha em 7,5 h → atendido 90 ha, saldo 18 ha = faltam 5 h (de A); necessário 22,5 horas-conjunto e 15 h decorridas; sem sequência, sem conflito
++        esperado={"q": ["36", "54"], "alocado": "90", "saldo": "18", "hconj": "35/2", "decorrido": "10", "conflito": false, "deficit": "0", "nq": ["54", "54"], "motivo": "parte fixa não cabe na janela", "nec.hconj": "45/2", "nec.decorrido": "15", "falta.hconj": "5", "falta.decorrido": "5"}
++        JS={"q": [36, 54], "alocado": 90, "saldo": 18, "hconj": 17.5, "decorrido": 10, "conflito": false, "deficit": 0, "nq": [54, 54], "motivo": ["A 6 m: a parte fixa não cabe na janela de 10 h"], "nec.hconj": 22.5, "nec.decorrido": 15, "falta.hconj": 5, "falta.decorrido": 5} · conserva=True
++        Py={"q": ["36", "54"], "alocado": "90", "saldo": "18", "hconj": "35/2", "decorrido": "10", "conflito": false, "deficit": "0", "nq": ["54", "54"], "motivo": ["A 6 m: a parte fixa não cabe na janela de 10 h"], "nec.hconj": "45/2", "nec.decorrido": "15", "falta.hconj": "5", "falta.decorrido": "5"} · conserva=True
++OK    06 capacidade_janela_saldo · 36 ha, A 4 h e B 2 h disponíveis → 28,8 ha atendidos, 7,2 ha sem conjunto
++        esperado={"alocado": "144/5", "saldo": "36/5", "pendente": false, "nec.hconj": "22/3", "falta.hconj": "4/3", "falta.decorrido": "2/3"}
++        JS={"alocado": 28.8, "saldo": 7.200000000000001, "pendente": false, "nec.hconj": 7.333333333333332, "falta.hconj": 1.333333333333333, "falta.decorrido": 0.6666666666666661} · conserva=True
++        Py={"alocado": "144/5", "saldo": "36/5", "pendente": false, "nec.hconj": "22/3", "falta.hconj": "4/3", "falta.decorrido": "2/3"} · conserva=True
++OK    07a custos_proporcional · tarifas 180 e 300 R$/h, 36/72 ha → R$ 4.800
++        esperado={"custo": "4800", "custoOk": true}
++        JS={"custo": 4800, "custoOk": true} · conserva=True
++        Py={"custo": "4800", "custoOk": true} · conserva=True
++OK    07b custos_fixo · 54/54 ha → R$ 4.950
++        esperado={"custo": "4950"}
++        JS={"custo": 4950} · conserva=True
++        Py={"custo": "4950"} · conserva=True
++OK    08 custo_unitario_proporcional · custo por ha = custo total ÷ área atendida = 400/9 (R$ 44,44…/ha), não média de custos
++        esperado={"custoHa": "400/9"}
++        JS={"custoHa": 44.44444444444444} · conserva=True
++        Py={"custoHa": "400/9"} · conserva=True
++OK    10a diesel_recalculado_por_hora · 12 e 20 L/h, 36/72 ha → 320 L
++        esperado={"diesel": "320"}
++        JS={"diesel": 320} · conserva=True
++        Py={"diesel": "320"} · conserva=True
++OK    10b diesel_fixo · 54/54 ha → 330 L
++        esperado={"diesel": "330"}
++        JS={"diesel": 330} · conserva=True
++        Py={"diesel": "330"} · conserva=True
++OK    G1 gemini_tres_conjuntos · 150 ha; 4,5/6/7,5 ha/h; janelas 10/8/5 h; 200/250/320 R$/h → 45/48/37,5 ha; 130,5 atendidos; 19,5 sem conjunto; 23 horas-conjunto; 10 h; R$ 5.600
++        esperado={"q": ["45", "48", "75/2"], "alocado": "261/2", "saldo": "39/2", "hconj": "23", "decorrido": "10", "custo": "5600", "custoHa": "11200/261", "nec.hconj": "105/4", "nec.decorrido": "133/12", "falta.hconj": "13/4", "falta.decorrido": "13/12"}
++        JS={"q": [45, 48, 37.5], "alocado": 130.5, "saldo": 19.5, "hconj": 23, "decorrido": 10, "custo": 5600, "custoHa": 42.911877394636015, "nec.hconj": 26.25, "nec.decorrido": 11.083333333333334, "falta.hconj": 3.25, "falta.decorrido": 1.083333333333334} · conserva=True
++        Py={"q": ["45", "48", "75/2"], "alocado": "261/2", "saldo": "39/2", "hconj": "23", "decorrido": "10", "custo": "5600", "custoHa": "11200/261", "nec.hconj": "105/4", "nec.decorrido": "133/12", "falta.hconj": "13/4", "falta.decorrido": "13/12"} · conserva=True
++OK    E1 rendimento_ausente · rendimento vazio não divide 50 ha: pendente, sem horas (nunca 0 h), área sem conjunto, causa "sem rendimento"
++        esperado={"pendente": true, "hconj": null, "decorrido": null, "saldo": "50", "motivo": "sem rendimento", "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": "50"}
++        JS={"pendente": true, "hconj": null, "decorrido": null, "saldo": 50, "motivo": ["S: sem rendimento válido (ha/h); horas pendentes"], "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": 50} · conserva=True
++        Py={"pendente": true, "hconj": null, "decorrido": null, "saldo": "50", "motivo": ["S: sem rendimento válido (ha/h); horas pendentes"], "causa": "sem rendimento", "nec.hconj": null, "falta.hconj": null, "falta.semHoras": "50"} · conserva=True
++OK    E2 rendimento_zero · rendimento 0 não divide: pendente
++        esperado={"pendente": true, "hconj": null, "saldo": "50"}
++        JS={"pendente": true, "hconj": null, "saldo": 50} · conserva=True
++        Py={"pendente": true, "hconj": null, "saldo": "50"} · conserva=True
++OK    E3 area_zero · área 0 é válida: 0 horas-conjunto, nada pendente
++        esperado={"pendente": false, "hconj": "0", "decorrido": "0", "saldo": "0", "nec.hconj": "0", "falta.hconj": "0"}
++        JS={"pendente": false, "hconj": 0, "decorrido": 0, "saldo": 0, "nec.hconj": 0, "falta.hconj": 0} · conserva=True
++        Py={"pendente": false, "hconj": "0", "decorrido": "0", "saldo": "0", "nec.hconj": "0", "falta.hconj": "0"} · conserva=True
++OK    E4 janela_zero · janela 0 h com rendimento válido: sem capacidade, os 10 ha ficam sem conjunto; pendente com a causa "sem horas na janela" (não "sem rendimento")
++        esperado={"alocado": "0", "saldo": "10", "motivo": "janelas não comportam", "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": "2", "falta.hconj": "2", "falta.decorrido": "2"}
++        JS={"alocado": 0, "saldo": 10, "motivo": ["as janelas não comportam toda a área"], "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": 2, "falta.hconj": 2, "falta.decorrido": 2} · conserva=True
++        Py={"alocado": "0", "saldo": "10", "motivo": ["as janelas não comportam toda a área"], "pendente": true, "hconj": null, "causa": "sem horas na janela", "nec.hconj": "2", "falta.hconj": "2", "falta.decorrido": "2"} · conserva=True
++OK    E9 sem_configuracao · atividade sem configuração: pendente com a causa "sem conjunto"
++        esperado={"pendente": true, "hconj": null, "saldo": "10", "causa": "sem conjunto"}
++        JS={"pendente": true, "hconj": null, "saldo": 10, "causa": "sem conjunto"} · conserva=True
++        Py={"pendente": true, "hconj": null, "saldo": "10", "causa": "sem conjunto"} · conserva=True
++OK    E10 janela_zero_na_sequencia · a troca (3 h) passa a janela da sequência (2 h): nada cabe, pendente com a causa da troca (regra a, 5983640246)
++        esperado={"pendente": true, "hconj": null, "saldo": "20", "causa": "troca reservada ocupa a janela"}
++        JS={"pendente": true, "hconj": null, "saldo": 20, "causa": "troca reservada ocupa a janela"} · conserva=True
++        Py={"pendente": true, "hconj": null, "saldo": "20.0", "causa": "troca reservada ocupa a janela"} · conserva=True
++OK    E5 tarifa_desconhecida · tarifa vazia não vira R$ 0: custo não calculável, R$/ha vazio
++        esperado={"custoOk": false, "custoHa": null, "motivo": "tarifa desconhecida"}
++        JS={"custoOk": false, "custoHa": null, "motivo": ["B 12 m: tarifa desconhecida (R$/h), custo não calculado"]} · conserva=True
++        Py={"custoOk": false, "custoHa": null, "motivo": ["B 12 m: tarifa desconhecida (R$/h), custo não calculado"]} · conserva=True
++OK    E6 partes_acima_de_100 · 70 % + 50 % → aviso e conservação (Σ q + sem conjunto = Q)
++        esperado={"motivo": "partes fixas somam 120", "conserva": true}
++        JS={"motivo": ["partes fixas somam 120 %: reduzidas na proporção para fechar 100 %"], "conserva": "Σq+saldo=100.00000000000001"} · conserva=True
++        Py={"motivo": ["partes fixas somam 120 %: reduzidas na proporção para fechar 100 %"], "conserva": "Σq+saldo=100"} · conserva=True
++OK    E7 invalida_na_divisao_pelo_rendimento · uma configuração sem rendimento na divisão pelo rendimento: a divisão fica pendente (não joga tudo na outra)
++        esperado={"pendente": true, "saldo": "108", "motivo": "divisão pelo rendimento fica pendente"}
++        JS={"pendente": true, "saldo": 108, "motivo": ["B 12 m: sem rendimento válido (ha/h); a divisão pelo rendimento fica pendente"]} · conserva=True
++        Py={"pendente": true, "saldo": "108", "motivo": ["B 12 m: sem rendimento válido (ha/h); a divisão pelo rendimento fica pendente"]} · conserva=True
++OK    E8a grupo_da_fazenda_1_plantadeira · duas configurações com plantadeira e a fazenda tem 1 → em sequência: decorrido = horas-conjunto
++        esperado={"decorrido": "20", "hconj": "20", "motivo": "Plantadeiras"}
++        JS={"decorrido": 20, "hconj": 20, "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez"]} · conserva=True
++        Py={"decorrido": "20", "hconj": "20", "motivo": ["Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez"]} · conserva=True
++OK    E8b grupo_da_fazenda_2_plantadeiras · com 2 plantadeiras trabalham ao mesmo tempo: 10 h
++        esperado={"decorrido": "10"}
++        JS={"decorrido": 10} · conserva=True
++        Py={"decorrido": "10"} · conserva=True
++OK    R1 janela_zero_na_sequencia_declarada · PRE-REV R1 · o S5 com a janela de A = 0: A não recebe área, mas a sequência declarada continua precisando de 54/3,6 + 54/7,2 = 22,5 h numa janela de 10 h (déficit 12,5 h, como com 0,01 h); B faz 54 ha em 7,5 h
++        esperado={"q": ["0", "54"], "alocado": "54", "saldo": "54", "hconj": "15/2", "decorrido": "15/2", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["parte fixa não cabe na janela de 0 h", "precisam de 22,5 h para 108 ha; a janela tem 10 h"], "nec.decorrido": "45/2", "falta.decorrido": "15"}
++        JS={"q": [0, 54], "alocado": 54, "saldo": 54, "hconj": 7.5, "decorrido": 7.5, "conflito": true, "deficit": 12.5, "nq": [54, 54], "motivo": ["A 6 m: a parte fixa não cabe na janela de 0 h", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": 22.5, "falta.decorrido": 15} · conserva=True
++        Py={"q": ["0", "54"], "alocado": "54", "saldo": "54", "hconj": "15/2", "decorrido": "15/2", "conflito": true, "deficit": "25/2", "nq": ["54", "54"], "motivo": ["A 6 m: a parte fixa não cabe na janela de 0 h", "A 6 m e B 12 m: em sequência precisam de 22,5 h para 108 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"], "nec.decorrido": "45/2", "falta.decorrido": "15"} · conserva=True
++OK    R2a grupo_de_recursos_nao_relaxa_janela_1 · PRE-REV R2 · A e B em sequência declarada (janela 10 h), C sem janela; A e C usam plantadeira e a fazenda tem 1: a união por falta de plantadeira não tira a janela de A+B (5 h cada, 25 + 25 ha); C faz 150 ha; tudo em sequência: 40 h
++        esperado={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "40", "conflito": true, "deficit": "50/3", "motivo": ["Plantadeiras", "precisam de 26,67 h para 133,33 ha; a janela tem 10 h"]}
++        JS={"q": [25, 25, 150], "saldo": 0, "decorrido": 40, "conflito": true, "deficit": 16.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "40", "conflito": true, "deficit": "50/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    T1a ociosa_nao_liga_ativo · rodada 2 · Z (janela 0, sem %, fora do plano) no trator a01 e na sequência declarada com D (sem janela) não junta B+C a D: B e C dividem os 10 h do a01 (25 + 25 ha), conflito de 30 h; D faz 250 ha
++        esperado={"q": ["25", "25", "0", "250"], "conflito": true, "deficit": "30", "decorrido": "50", "motivo": "precisam de 40 h para 200 ha; a janela tem 10 h"}
++        JS={"q": [25, 25, 0, 250], "conflito": true, "deficit": 30, "decorrido": 50, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "B e C: em sequência precisam de 40 h para 200 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["25", "25", "0", "250"], "conflito": true, "deficit": "30", "decorrido": "50", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "B e C: em sequência precisam de 40 h para 200 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    T1b ociosa_nao_serializa · rodada 2 · A (janela 0, sem %) com os ativos a01 e a02 não põe B (a01) e C (a02) em sequência: 30 + 30 ha em 6 h, sem conflito
++        esperado={"q": ["0", "30", "30"], "conflito": false, "decorrido": "6", "saldo": "0"}
++        JS={"q": [0, 30, 30], "conflito": false, "decorrido": 6, "saldo": 0} · conserva=True
++        Py={"q": ["0", "30", "30"], "conflito": false, "decorrido": "6", "saldo": "0"} · conserva=True
++OK    T1c ociosa_nao_estica_sequencia · rodada 2 · A e B em sequência declarada (janela 3 h); Z (janela 0) na sequência e no a01 de C (janela 20 h) não estica a janela de A+B: 7,5 + 7,5 ha, déficit 71/3 h
++        esperado={"q": ["15/2", "15/2", "0", "100"], "conflito": true, "deficit": "71/3", "decorrido": "20"}
++        JS={"q": [7.5, 7.5, 0, 100], "conflito": true, "deficit": 23.666666666666668, "decorrido": 20} · conserva=True
++        Py={"q": ["15/2", "15/2", "0", "100"], "conflito": true, "deficit": "71/3", "decorrido": "20"} · conserva=True
++OK    T2a ponte_por_outro_grupo_2 · rodada 2 · A sem janela usa 2 tratores, B (janela 2 h) usa trator e operador, C (janela 2 h) usa operador; 2 tratores e 1 operador: B+C dividem os 2 h do operador (5 + 5 ha)
++        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "20"}
++        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "decorrido": 20} · conserva=True
++        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "20"} · conserva=True
++OK    T2b ponte_por_outro_grupo_3 · rodada 2 · o mesmo com 3 tratores (mais recurso): a mesma divisão, nunca mais otimista com menos; decorrido 18 h
++        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "18"}
++        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "decorrido": 18} · conserva=True
++        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "decorrido": "18"} · conserva=True
++OK    T2c ponte_por_sequencia · rodada 2 · B e C no a01 (janela 10 h) e Z (janela 0,01 h) no a01 e na sequência declarada com D (sem janela): B+C+Z dividem os 10 h do a01
++        esperado={"q": ["999/40", "999/40", "1/20", "250"], "conflito": true, "deficit": "35", "decorrido": "60"}
++        JS={"q": [24.975, 24.975, 0.05, 249.99999999999997], "conflito": true, "deficit": 35, "decorrido": 59.99999999999999} · conserva=True
++        Py={"q": ["999/40", "999/40", "1/20", "250"], "conflito": true, "deficit": "35", "decorrido": "60"} · conserva=True
++OK    N1 troca_reservada_e_cobrada · rodada 2 · A e B em sequência (janela 10 h, troca 2 h cada) e C com a plantadeira de A (1 na fazenda): C começa o fecho, A e B pagam a troca; A+B com as trocas cabem nos 10 h (3 + 2 + 3 + 2)
++        esperado={"q": ["15", "15", "170"], "decorrido": "44", "conflito": true, "deficit": "62/3", "motivo": "precisam de 30,67 h para 133,33 ha; a janela tem 10 h"}
++        JS={"q": [15, 15, 170], "decorrido": 44, "conflito": true, "deficit": 20.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 30,67 h para 133,33 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["15", "15", "170"], "decorrido": "44", "conflito": true, "deficit": "62/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 30,67 h para 133,33 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    M2 fracao_final_no_corte_aninhado · rodada 2 · A e B (30 % cada, sequência, janela 4 h) e C (40 %, janela 10 h) com a plantadeira de A: dois cortes (sequência e plantadeira); A+B ≤ 4 h e A+C ≤ 10 h; o motivo diz a fração final de cada uma
++        esperado={"q": ["5/3", "2", "25/3"], "motivo": ["janela de 4 h: fazem de 41,67 % a 50 %", "janela de 10 h: fazem de 41,67 % a 83,33 %"]}
++        JS={"q": [1.6666666666666667, 2, 8.333333333333334], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A: a parte fixa não cabe na janela de 4 h", "B: a parte fixa não cabe na janela de 4 h", "C: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela (A e B)", "as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela (A e C)", "A e C: em sequência precisam de 700 h para 700 ha; a janela tem 10 h (e mais 3 combinações que também não cabem)"]} · conserva=True
++        Py={"q": ["5/3", "2", "25/3"], "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A: a parte fixa não cabe na janela de 4 h", "B: a parte fixa não cabe na janela de 4 h", "C: a parte fixa não cabe na janela de 10 h", "as partes fixas em sequência não cabem na janela de 4 h: fazem de 41,67 % a 50 % do que cabia na própria janela (A e B)", "as partes fixas em sequência não cabem na janela de 10 h: fazem de 41,67 % a 83,33 % do que cabia na própria janela (A e C)", "A e C: em sequência precisam de 700 h para 700 ha; a janela tem 10 h (e mais 3 combinações que também não cabem)"]} · conserva=True
++OK    P1 grupo_ja_no_fecho_por_outro_grupo · rodada 3 · B e C usam trator e o único operador (janelas de 2 h); A sem janela usa 2 tratores: o fecho pelos tratores não apaga a restrição do operador (5 + 5 ha)
++        esperado={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "motivo": "Operadores"}
++        JS={"q": [90, 5, 5], "conflito": true, "deficit": 11.333333333333334, "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "Operadores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "B e C: em sequência precisam de 13,33 h para 66,67 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["90", "5", "5"], "conflito": true, "deficit": "34/3", "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "Operadores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "B e C: em sequência precisam de 13,33 h para 66,67 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    P2a uma_plantadeira_como_grupo · rodada 3 · A e B em sequência com a única plantadeira (janelas de 3 h) e C na sequência sem janela: A+B dividem os 3 h da plantadeira
++        esperado={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3", "motivo": "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela"}
++        JS={"q": [7.5, 7.5, 185], "conflito": true, "deficit": 23.666666666666668, "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "Plantadeiras: a fazenda tem 1; quem a usa divide a janela dela", "A e B: em sequência precisam de 26,67 h para 133,33 ha; a janela tem 3 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    P2b uma_plantadeira_como_ativo · rodada 3 · o mesmo com a plantadeira como ativo p01 do cadastro: a mesma divisão
++        esperado={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3"}
++        JS={"q": [7.5, 7.5, 185], "conflito": true, "deficit": 23.666666666666668} · conserva=True
++        Py={"q": ["15/2", "15/2", "185"], "conflito": true, "deficit": "71/3"} · conserva=True
++OK    P3 grupo_com_janela_0_no_plano · rodada 3 · o S5 com a plantadeira (1 na fazenda) no lugar da sequência e a janela de A = 0: o grupo do plano conta A; conflito, déficit 12,5 h, necessário 22,5 h
++        esperado={"q": ["0", "54"], "conflito": true, "deficit": "25/2", "nec.decorrido": "45/2"}
++        JS={"q": [0, 54], "conflito": true, "deficit": 12.5, "nec.decorrido": 22.5} · conserva=True
++        Py={"q": ["0", "54"], "conflito": true, "deficit": "25/2", "nec.decorrido": "45/2"} · conserva=True
++OK    P5a fecho_nao_e_restricao_1 · rodada 3 · A (a01), B (a01 e a02), C (a02 e plantadeira), D sem janela (plantadeira): cada ativo cabe nos 10 h dele; com 1 plantadeira
++        esperado={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"}
++        JS={"q": [25, 25, 25, 925], "conflito": true, "deficit": 90} · conserva=True
++        Py={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"} · conserva=True
++OK    P5b fecho_nao_e_restricao_2 · rodada 3 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso não dá plano mais otimista)
++        esperado={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"}
++        JS={"q": [25, 25, 25, 925], "conflito": true, "deficit": 90} · conserva=True
++        Py={"q": ["25", "25", "25", "925"], "conflito": true, "deficit": "90"} · conserva=True
++OK    Q1 cafe_colhedora_como_grupo · rodada 4 · colheita de café, 60 ha, janelas de 80 h: A e B com a única colhedora, trator e 2 operadores; C com equipe de 6; 8 operadores: A e B nunca juntas, então cabem 2 + 6 = 8; 20 + 20 + 20 ha, déficit 80/9 h só da colhedora
++        esperado={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9", "motivo": "Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1"}
++        JS={"q": [20, 20, 20], "saldo": 0, "conflito": true, "deficit": 8.888888888888886, "motivo": ["Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 88,89 h para 44,44 ha; a janela tem 80 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9", "motivo": ["Colhedoras: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez", "A e B: em sequência precisam de 88,89 h para 44,44 ha; a janela tem 80 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    Q2 cafe_colhedora_como_ativo · rodada 4 · o mesmo com a colhedora como ativo colh01 do cadastro: a mesma divisão
++        esperado={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9"}
++        JS={"q": [20, 20, 20], "saldo": 0, "conflito": true, "deficit": 8.888888888888886} · conserva=True
++        Py={"q": ["20", "20", "20"], "saldo": "0", "conflito": true, "deficit": "80/9"} · conserva=True
++OK    Q3 equipe_maior_que_o_quadro · rodada 4 · equipe de 10 com 8 operadores na fazenda: não trabalha, pendente com a causa "sem recurso na fazenda" e o motivo
++        esperado={"q": ["0"], "pendente": true, "causa": "sem recurso na fazenda", "saldo": "10", "motivo": "E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"}
++        JS={"q": [0], "pendente": true, "causa": "sem recurso na fazenda", "saldo": 10, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
++        Py={"q": ["0"], "pendente": true, "causa": "sem recurso na fazenda", "saldo": "10", "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
++OK    Q4 equipe_maior_com_parte_fixa · rodada 4 · E (equipe de 10, 50 %) e F (1 operador, 50 %): E fica sem conjunto com o motivo; F faz a parte dela
++        esperado={"q": ["0", "50"], "saldo": "50", "pendente": false, "motivo": "E: precisa de 10 em Operadores e equipe"}
++        JS={"q": [0, 50], "saldo": 50, "pendente": false, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
++        Py={"q": ["0", "50"], "saldo": "50", "pendente": false, "motivo": ["E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência"]} · conserva=True
++OK    V1 triangulo_sequencia_ativo_grupo · rodada 5 · A e B em sequência, A e C no a01, B e C na única plantadeira (janelas de 10 h, 1 ha/h, 15 ha): nunca juntas, dividem 10 h: 10/3 ha cada, 5 sem conjunto, déficit 5 h
++        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
++        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
++        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
++OK    V2 triangulo_de_grupos_de_1 · rodada 5 · pulverizador, plantadeira e distribuidor (1 de cada) em triângulo: 10/3 ha cada, déficit 5 h
++        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
++        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
++        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
++OK    V3 triangulo_puro · rodada 5 · A e B em sequência, B e C no a02, A e C no a01: 10/3 ha cada, déficit 5 h
++        esperado={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"}
++        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335], "saldo": 4.999999999999998, "conflito": true, "deficit": 5} · conserva=True
++        Py={"q": ["10/3", "10/3", "10/3"], "saldo": "5", "conflito": true, "deficit": "5"} · conserva=True
++OK    V4 ciclo_de_5_sem_corda · rodada 5 · 5 configurações em ciclo de ativos (cada uma divide um com a vizinha): não cordal, o componente divide os 10 h (conservador): 2 ha cada
++        esperado={"q": ["2", "2", "2", "2", "2"], "saldo": "15", "conflito": true, "deficit": "15"}
++        JS={"q": [2, 2, 2, 2, 2], "saldo": 15, "conflito": true, "deficit": 15} · conserva=True
++        Py={"q": ["2", "2", "2", "2", "2"], "saldo": "15", "conflito": true, "deficit": "15"} · conserva=True
++OK    V5 cadeia_so_por_pares · rodada 5 · A–B no a01 e B–C no a02 (cordal): só os pares dividem janela; B primeiro e A com C ao mesmo tempo: 5 + 5 + 5 ha em 10 h
++        esperado={"q": ["5", "5", "5"], "saldo": "15", "conflito": true, "deficit": "10"}
++        JS={"q": [5, 5, 5], "saldo": 15, "conflito": true, "deficit": 10} · conserva=True
++        Py={"q": ["5", "5", "5"], "saldo": "15", "conflito": true, "deficit": "10"} · conserva=True
++OK    V7 pico_real_no_motivo · rodada 5 · três equipes de 6 operadores com 8 na fazenda: o motivo diz o pico real (18), não o primeiro valor acima de 8
++        esperado={"motivo": "Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8"}
++        JS={"motivo": ["Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "E0, E1 e E2: em sequência precisam de 171,43 h para 60 ha; a janela tem 80 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"motivo": ["Operadores e equipe: ao mesmo tempo precisariam de 18, a fazenda tem 8; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "E0, E1 e E2: em sequência precisam de 171,43 h para 60 ha; a janela tem 80 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    V8 unidades_negativas · rodada 5 · grupo com unidades negativas (fora da tela) é ignorado: A, que nem usa o grupo, faz os 30 ha
++        esperado={"q": ["30"], "saldo": "0", "pendente": false}
++        JS={"q": [30], "saldo": 0, "pendente": false} · conserva=True
++        Py={"q": ["30"], "saldo": "0", "pendente": false} · conserva=True
++OK    V9 b5a_pico_do_grupo_de_1 · B5a · A e B ao mesmo tempo, cada uma com o único distribuidor: o motivo diz "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1" (o grupo não se separa por ele mesmo)
++        esperado={"motivo": "Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez"}
++        JS={"motivo": ["Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez"]} · conserva=True
++        Py={"motivo": ["Distribuidores: ao mesmo tempo precisariam de 2, a fazenda tem 1; trabalham uma de cada vez"]} · conserva=True
++OK    W1a dois_tratores_duas_plantadeiras · rodada 6 · T1+P1, T1+P2, T2+P1 e T2+P2 (2 ha/h, janelas de 10 h, 80 ha): ciclo de 4 é grafo perfeito; T1+P1 com T2+P2 e depois T1+P2 com T2+P1: 10 ha cada, 40 ha, déficit 10 h
++        esperado={"q": ["10", "10", "10", "10"], "alocado": "40", "saldo": "40", "conflito": true, "deficit": "10", "motivo": "em sequência precisam de 20 h para 40 ha; a janela tem 10 h"}
++        JS={"q": [10, 10, 10, 10], "alocado": 40, "saldo": 40, "conflito": true, "deficit": 10, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "T1+P1 e T1+P2: em sequência precisam de 20 h para 40 ha; a janela tem 10 h (e mais 7 combinações que também não cabem)"]} · conserva=True
++        Py={"q": ["10", "10", "10", "10"], "alocado": "40", "saldo": "40", "conflito": true, "deficit": "10", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "T1+P1 e T1+P2: em sequência precisam de 20 h para 40 ha; a janela tem 10 h (e mais 7 combinações que também não cabem)"]} · conserva=True
++OK    W1b dois_por_dois_janela_de_1h · rodada 6 · o mesmo com 200 ha, só T1+P1 com janela de 1 h e as outras sem janela: atende os 200 ha, sem conflito (T1+P1 faz 2 ha)
++        esperado={"q": ["2", "66", "66", "66"], "alocado": "200", "saldo": "0", "conflito": false}
++        JS={"q": [2, 66, 66, 66], "alocado": 200, "saldo": 0, "conflito": false} · conserva=True
++        Py={"q": ["2", "66", "66", "66"], "alocado": "200", "saldo": "0", "conflito": false} · conserva=True
++OK    W1c dois_por_dois_parte_fixa_janela_0 · rodada 6 · T1+P1 com 10 % fixos e janela 0, as outras sem janela, 200 ha: 180 ha atendidos, sem conflito falso de "janela 0 h"
++        esperado={"q": ["0", "60", "60", "60"], "alocado": "180", "saldo": "20", "conflito": false}
++        JS={"q": [0, 60, 60, 60], "alocado": 180, "saldo": 20, "conflito": false} · conserva=True
++        Py={"q": ["0", "60", "60", "60"], "alocado": "180", "saldo": "20", "conflito": false} · conserva=True
++OK    W1d tres_tratores_dez_implementos · rodada 6 · 3 tratores × 10 implementos (30 configurações, 1 ha/h, janelas de 10 h, 100 ha): cada trator trabalha 10 h, 30 ha (o conservador do componente daria 10)
++        esperado={"alocado": "30", "saldo": "70", "conflito": true}
++        JS={"alocado": 30, "saldo": 70, "conflito": true} · conserva=True
++        Py={"alocado": "30", "saldo": "70", "conflito": true} · conserva=True
++OK    W2 grupo_so_do_plano_nao_serializa_divisao · rodada 6 · 2 tratores; A e B (janela 10 h, 1 trator cada) e C (20 % fixos, janela 0, 1 trator), 30 ha: no plano 3 > 2, na divisão só A e B, que cabem juntas: 10 + 10 ha, 10 h decorridas
++        esperado={"q": ["10", "10", "0"], "alocado": "20", "saldo": "10", "decorrido": "10"}
++        JS={"q": [10, 10, 0], "alocado": 20, "saldo": 10, "decorrido": 10} · conserva=True
++        Py={"q": ["10", "10", "0"], "alocado": "20", "saldo": "10", "decorrido": "10"} · conserva=True
++OK    W3a cadeia_de_28_com_14_operadores · rodada 6 · 28 configurações em cadeia (cada uma divide um ativo com a seguinte), 1 operador cada, 14 na fazenda, janelas de 100 h, 2.000 ha: o pico real é 14 (cabe); cada par vizinho divide 100 h: 50 ha cada, 1.400 ha
++        esperado={"alocado": "1400", "saldo": "600"}
++        JS={"alocado": 1400, "saldo": 600} · conserva=True
++        Py={"alocado": "1400", "saldo": "600"} · conserva=True
++OK    W3b cadeia_de_30_com_10_operadores · rodada 6 · a mesma cadeia com 30 configurações e 10 operadores: o motivo diz o pico real (15), não a soma (30)
++        esperado={"motivo": "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa"}
++        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0 e K1: em sequência precisam de 133,33 h para 133,33 ha; a janela tem 100 h", "K0, K1, K2 e mais 27: consideradas em sequência nesta estimativa, precisam de 2000 h para 2000 ha; a janela tem 100 h (e mais 29 combinações que também não cabem)"]} · conserva=True
++        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 15, a fazenda tem 10; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0 e K1: em sequência precisam de 133,33 h para 133,33 ha; a janela tem 100 h", "K0, K1, K2 e mais 27: consideradas em sequência nesta estimativa, precisam de 2000 h para 2000 ha; a janela tem 100 h (e mais 29 combinações que também não cabem)"]} · conserva=True
++OK    D01a subgrupo_finito_com_vizinho_de_100h · D-01 (5983640246) · A, B e C (janelas de 10 h) e D (100 h) se excluem duas a duas, 25 % cada de 16 ha: A+B+C precisariam de 12 h em 10 h; cada uma faz 10/3 ha, D faz 4, 2 ha sem conjunto, déficit 2 h
++        esperado={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2", "motivo": "em sequência precisam de 12 h para 12 ha; a janela tem 10 h"}
++        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335, 4], "alocado": 14, "saldo": 1.9999999999999996, "conflito": true, "deficit": 2, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 83,33 % do que cabia na própria janela (A, B e C)", "A, B e C: em sequência precisam de 12 h para 12 ha; a janela tem 10 h"]} · conserva=True
++        Py={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2", "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 83,33 % do que cabia na própria janela (A, B e C)", "A, B e C: em sequência precisam de 12 h para 12 ha; a janela tem 10 h"]} · conserva=True
++OK    D01b subgrupo_finito_com_vizinho_sem_janela · D-01 · o mesmo com D sem janela: a mesma divisão (um vizinho sem prazo não amplia o dos outros)
++        esperado={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2"}
++        JS={"q": [3.3333333333333335, 3.3333333333333335, 3.3333333333333335, 4], "alocado": 14, "saldo": 1.9999999999999996, "conflito": true, "deficit": 2} · conserva=True
++        Py={"q": ["10/3", "10/3", "10/3", "4"], "alocado": "14", "saldo": "2", "conflito": true, "deficit": "2"} · conserva=True
++OK    D01c controle_positivo_sem_restricao_falsa · D-01 · controle: as mesmas quatro com 8 ha (2 h cada; A+B+C = 6 h em 10 h): tudo atendido, sem conflito
++        esperado={"q": ["2", "2", "2", "2"], "alocado": "8", "saldo": "0", "conflito": false, "deficit": "0"}
++        JS={"q": [2, 2, 2, 2], "alocado": 8, "saldo": 0, "conflito": false, "deficit": 0} · conserva=True
++        Py={"q": ["2", "2", "2", "2"], "alocado": "8", "saldo": "0", "conflito": false, "deficit": "0"} · conserva=True
++OK    D01d recurso_unico_com_vizinho_sem_janela · D-01 · A e B (janela de 10 h) e D (sem janela) no mesmo a01, 24 ha pelo rendimento: A e B param em 5 h cada (A+B = 10 h), D faz o resto; a partilha do plano (8 + 8) não cabe: déficit 6 h
++        esperado={"q": ["5", "5", "14"], "alocado": "24", "saldo": "0", "conflito": true, "deficit": "6"}
++        JS={"q": [5, 5, 14], "alocado": 24, "saldo": 0, "conflito": true, "deficit": 6} · conserva=True
++        Py={"q": ["5", "5", "14"], "alocado": "24", "saldo": "0", "conflito": true, "deficit": "6"} · conserva=True
++OK    D01e prazos_aninhados · D-01 · três no mesmo a01 com prazos 2, 5 e 10 h, 30 ha pelo rendimento (1 ha/h): cortes 2 · 5 · 10 (EDF): A 2, B 3, C 5 ha; déficit pela partilha do plano
++        esperado={"q": ["2", "3", "5"], "alocado": "10", "saldo": "20", "conflito": true}
++        JS={"q": [2, 3, 5], "alocado": 10, "saldo": 20, "conflito": true} · conserva=True
++        Py={"q": ["2", "3", "5"], "alocado": "10", "saldo": "20", "conflito": true} · conserva=True
++OK    Da troca_reservada_ocupa_a_janela · regra (a) · A (50 %, janela 10 h) e B (sem %, troca 10 h) em sequência, 10 ha: a troca reservada de B ocupa a janela; pendente com a causa e o motivo da troca
++        esperado={"q": ["0", "0"], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada)", "reduza a troca ou tire B da sequência declarada"]}
++        JS={"q": [0, 0], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 0 % do que cabia na própria janela (A)", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada", "A e B: em sequência precisam de 20 h para 10 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["0", "0"], "pendente": true, "causa": "troca reservada ocupa a janela", "motivo": ["sequência declarada: dividem trator, implemento ou operador", "as partes fixas em sequência não cabem na janela de 10 h: cada uma faz 0 % do que cabia na própria janela (A)", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (sequência declarada); para liberar horas, reduza a troca ou tire B da sequência declarada", "A e B: em sequência precisam de 20 h para 10 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    Db consideradas_em_sequencia · regra (b) · 3 configurações com 1 trator cada e 2 tratores: o motivo diz "consideradas em sequência nesta estimativa" (não afirma que trabalham em sequência)
++        esperado={"motivo": "Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa"}
++        JS={"motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "as partes fixas consideradas em sequência nesta estimativa não cabem na janela de 10 h: cada uma faz 50 % do que cabia na própria janela (A, B e C)", "A, B e C: consideradas em sequência nesta estimativa, precisam de 20 h para 20 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "as partes fixas consideradas em sequência nesta estimativa não cabem na janela de 10 h: cada uma faz 50 % do que cabia na própria janela (A, B e C)", "A, B e C: consideradas em sequência nesta estimativa, precisam de 20 h para 20 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R2-2a buraco_por_configuracao_sem_janela · rodada 2 do D-01 · anel de 5 (T1, P2, O3, T3, P1) em que só K0 e K2 têm janela (30 h) e não dividem nada: o buraco passa por configurações sem prazo, que vão por último; K0 e K2 juntas de 0 a 20 h, 20 ha cada, sem conflito
++        esperado={"q": ["20", "20", "20", "20", "20"], "saldo": "0", "conflito": false}
++        JS={"q": [20, 20, 20, 20, 20], "saldo": 0, "conflito": false} · conserva=True
++        Py={"q": ["20", "20", "20", "20", "20"], "saldo": "0", "conflito": false} · conserva=True
++OK    R2-2b buraco_entre_quem_tem_janela · rodada 2 do D-01 · controle positivo: o mesmo anel com as cinco em 30 h continua no conservador e diz isso no motivo (estimativa)
++        esperado={"q": ["6", "6", "6", "6", "6"], "conflito": true, "motivo": ["arranjo de recursos compartilhados que esta estimativa não confere exatamente", "consideradas em sequência nesta estimativa, precisam de"]}
++        JS={"q": [6, 6, 6, 6, 6], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "arranjo de recursos compartilhados que esta estimativa não confere exatamente: as configurações ligadas são consideradas juntas em cada janela (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0 e K1: em sequência precisam de 40 h para 40 ha; a janela tem 30 h", "K0, K1, K2 e mais 2: consideradas em sequência nesta estimativa, precisam de 100 h para 100 ha; a janela tem 30 h (e mais 9 combinações que também não cabem)"]} · conserva=True
++        Py={"q": ["6", "6", "6", "6", "6"], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "arranjo de recursos compartilhados que esta estimativa não confere exatamente: as configurações ligadas são consideradas juntas em cada janela (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "K0 e K1: em sequência precisam de 40 h para 40 ha; a janela tem 30 h", "K0, K1, K2 e mais 2: consideradas em sequência nesta estimativa, precisam de 100 h para 100 ha; a janela tem 30 h (e mais 9 combinações que também não cabem)"]} · conserva=True
++OK    R2-3 partes_fixas_grupo_inteiro_primeiro · rodada 2 do D-01 · A, B e C (3 ha/h, 12 %, 10 h) e D (4 ha/h, 64 %, 20 h), todas com máquina em comum duas a duas: o grupo inteiro (20 h) reduz as quatro na mesma fração (5/7); A+B+C = 8,57 h ≤ 10 h, então o subgrupo de 10 h não reduz de novo
++        esperado={"q": ["60/7", "60/7", "60/7", "320/7"], "motivo": "cada uma faz 71,43 %"}
++        JS={"q": [8.571428571428571, 8.571428571428571, 8.571428571428571, 45.714285714285715], "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 20 h: cada uma faz 71,43 % do que cabia na própria janela (A, B, C e D)", "A, B, C e D: em sequência precisam de 28 h para 100 ha; a janela tem 20 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["60/7", "60/7", "60/7", "320/7"], "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "as partes fixas em sequência não cabem na janela de 20 h: cada uma faz 71,43 % do que cabia na própria janela (A, B, C e D)", "A, B, C e D: em sequência precisam de 28 h para 100 ha; a janela tem 20 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R2-5b troca_na_mesma_maquina · rodada 2 do D-01 · A e B no mesmo a01 (10 h cada), B com troca de 10 h, sem sequência declarada: o motivo nomeia o grupo e a origem e propõe outro conjunto, não "tirar da sequência"
++        esperado={"motivo": ["B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro)", "reduza a troca ou use outro conjunto para B"]}
++        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B", "A e B: em sequência precisam de 30 h para 20 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B: troca de 10 h reservada na janela de 10 h de A e B (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B", "A e B: em sequência precisam de 30 h para 20 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R2-5c troca_nomeia_o_grupo · rodada 2 do D-01 · A–B na máquina x e B–C na máquina y, B troca 3 h e C troca 1 h, mesma janela de 10 h: um motivo de troca por grupo e janela, o da maior troca, dizendo de quais configurações é (antes, "B" com 3 h e "B, C" com 4 h na mesma janela, sem dizer o grupo)
++        esperado={"motivo": ["B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro)"]}
++        JS={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B, C", "B e C: em sequência precisam de 24 h para 20 ha; a janela tem 10 h (e mais 3 combinações que também não cabem)"]} · conserva=True
++        Py={"motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "B, C: troca de 4 h reservada na janela de 10 h de B e C (mesma máquina do cadastro); para liberar horas, reduza a troca ou use outro conjunto para B, C", "B e C: em sequência precisam de 24 h para 20 ha; a janela tem 10 h (e mais 3 combinações que também não cabem)"]} · conserva=True
++OK    R3-1a p4_trator_implemento_prazos_diferentes · rodada 3 do D-01 · S2 (anterior ao D-01): A=T1+I1 (1 h), B=T1+I2 (2 h), C=T2+I2 (2 h), D=T2+I3 (1 h), 4 ha: antes 4 ha sem conflito, mas A e D prendem T1 e T2 na 1ª hora e B+C precisam de 2 h em 1 h; agora conservador (cortes do componente), com conflito e motivo
++        esperado={"q": ["1/2", "1/2", "1/2", "1/2"], "alocado": "2", "conflito": true, "motivo": "prazos diferentes em recursos compartilhados"}
++        JS={"q": [0.5, 0.5, 0.5, 0.5], "alocado": 2, "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "prazos diferentes em recursos compartilhados: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 4 h para 4 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["1/2", "1/2", "1/2", "1/2"], "alocado": "2", "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "prazos diferentes em recursos compartilhados: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 4 h para 4 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R3-1b anel_com_membro_sem_janela · rodada 3 do D-01 · S2 (agravado pela R2-2): anel A–B–C–D–E (A e D 1 h, B e C 2 h, E sem janela, 6 ha/h), 10 ha: antes 10 ha sem conflito com 1 h fictícia; agora conservador e com conflito
++        esperado={"q": ["1/2", "1/2", "1/2", "1/2", "8"], "conflito": true, "motivo": "prazos diferentes em recursos compartilhados"}
++        JS={"q": [0.5, 0.5, 0.5, 0.5, 8], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "prazos diferentes em recursos compartilhados: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 4 h para 4 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"q": ["1/2", "1/2", "1/2", "1/2", "8"], "conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "prazos diferentes em recursos compartilhados: as configurações ligadas são consideradas juntas em cada janela nesta estimativa (conservador)", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 4 h para 4 ha; a janela tem 2 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R3-2c conflito_de_fato_e_de_estimativa · rodada 3 do D-01 · A e B na mesma máquina t1 (fato) e C, D só pelos Operadores (2 na fazenda, estimativa), 10 h cada, 50 ha: os dois motivos, o de fato primeiro
++        esperado={"conflito": true, "motivo": ["A e B: em sequência precisam de 25 h para 25 ha; a janela tem 10 h", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 50 h"]}
++        JS={"conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "A e B: em sequência precisam de 25 h para 25 ha; a janela tem 10 h", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 50 h para 50 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"conflito": true, "motivo": ["configurações com a mesma máquina do cadastro trabalham em sequência", "Operadores: ao mesmo tempo precisariam de 3, a fazenda tem 2; configurações consideradas em sequência nesta estimativa", "consideradas em sequência nesta estimativa, dividem a mesma janela: a área que não cabe fica sem conjunto", "A e B: em sequência precisam de 25 h para 25 ha; a janela tem 10 h", "A, B, C e D: consideradas em sequência nesta estimativa, precisam de 50 h para 50 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R3-4a par_que_passa_do_grupo_e_fato · rodada 3 do D-01 · A precisa de 2 tratores e B de 1, a fazenda tem 2: nunca trabalham juntas (fato, não estimativa)
++        esperado={"conflito": true, "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; trabalham uma de cada vez", "A e B: em sequência precisam de 30 h"]}
++        JS={"conflito": true, "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A e B: em sequência precisam de 30 h para 30 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++        Py={"conflito": true, "motivo": ["Tratores: ao mesmo tempo precisariam de 3, a fazenda tem 2; trabalham uma de cada vez", "em sequência dividem a mesma janela: a área que não cabe fica sem conjunto", "A e B: em sequência precisam de 30 h para 30 ha; a janela tem 10 h (e mais 1 combinação que também não cabe)"]} · conserva=True
++OK    R2b grupo_de_recursos_nao_relaxa_janela_2 · PRE-REV R2 · o mesmo com 2 plantadeiras: a mesma divisão (menos recurso nunca dá plano mais otimista); C ao mesmo tempo: 30 h
++        esperado={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "30", "conflito": true, "deficit": "50/3"}
++        JS={"q": [25, 25, 150], "saldo": 0, "decorrido": 30, "conflito": true, "deficit": 16.666666666666668} · conserva=True
++        Py={"q": ["25", "25", "150"], "saldo": "0", "decorrido": "30", "conflito": true, "deficit": "50/3"} · conserva=True
++OK    01 capacidades_ha_h · A 6 m × 8 km/h × 75 % e B 12 m × 8 km/h × 75 %
++        esperado=(18/5, 36/5)
++        JS=[3.6, 7.2]
++        Py=('18/5', '36/5')
++OK    02 reciproco_h_ha · horas por hectare = 1 ÷ rendimento
++        esperado=(5/18, 5/36)
++        JS=[0.2777777777777778, 0.1388888888888889]
++        Py=('5/18', '5/36')
++OK    09 insumos_conservados · dose 2 un/ha em 108 ha: 216 antes e depois da divisão (dose × área não muda com os conjuntos)
++        esperado=(216, 216)
++        JS=[216, 216]
++        Py=(216, '216')
++OK    11 gargalo_serie_limite_inferior · etapas em série: 6+4 ha/h em paralelo, 6 e 8 ha/h; 48 ha → gargalo 6 ha/h, limite inferior 8 h (paralelo soma, série não)
++        esperado=(6, 8)
++        JS=[6, 8, [4.8, 8, 6]]
++        Py=('6', '8', ['24/5', '8', '6'])
++OK    12 sem_arredondamento_intermediario · 1,1 m × 3,7 km/h × 63 %: h/ha = 100000/25641 (≈ 3,9000039); arredondar o rendimento para 0,26 daria 3,846
++        esperado=100000/25641
++        JS=[3.9000039000038997, 3.846153846153846]
++        Py=100000/25641
++OK    R3 resto_relativo_area_grande · PRE-REV R3 · 2.882,53 ha com partes 48,7 + 17,6 + 21,9 + 5,4 + 6,4 = 100 % e uma configuração sem % em sequência (troca 2 h): ela não recebe área nem soma troca, em ponto flutuante (JS e Python) e exato
++        esperado=[0, 0 avisos "não cobrem", decorrido 2882,53/5]
++        JS=[0, 0, 576.5059999999999]
++        Py=(0, '0', '288253/500')
++OK    Q4b sem_sequencia_falsa · rodada 4 · E não trabalha (equipe maior que o quadro): o grupo não diz "trabalham em sequência" por causa dela
++        esperado=sem "trabalham em sequência"
++        JS=['E: precisa de 10 em Operadores e equipe, a fazenda tem 8; não trabalha nesta ocorrência']
++        Py=
++OK    Q5 vinte_configuracoes_rapido · rodada 4 · 20 configurações com 3 grupos de recursos: a busca do uso simultâneo com poda responde em menos de 1 s (JS e Python) e conserva a área
++        esperado=< 1000 ms
++        JS=JS 4 ms · Σ = 800
++        Py=Py 10 ms
++OK    V6 pares_por_componente · rodada 5 · 24 configurações em pares no mesmo ativo, 12 operadores: o pico real é 12 (cabe), sem serializar todas; cada par divide os 100 h: 1.200 ha em menos de 1 s (JS e Python)
++        esperado=1200 ha, sem "ao mesmo tempo precisariam", < 1 s
++        JS=JS 1 ms · 1200 ha · sequência=False
++        Py=Py 7 ms · 1200.0 ha
++OK    W3c cadeia_sem_pico_inventado · rodada 6 · cadeia de 28 com 14 operadores: nenhum motivo "ao mesmo tempo precisariam" (o pico real cabe)
++        esperado=sem "precisariam"
++        JS=['configurações com a mesma máquina do cadastro trabalham em sequência', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h (e mais 53 combinações que também não cabem)']
++        Py=['configurações com a mesma máquina do cadastro trabalham em sequência', 'em sequência dividem a mesma janela: a área que não cabe fica sem conjunto', 'K0 e K1: em sequência precisam de 142,86 h para 142,86 ha; a janela tem 100 h (e mais 53 combinações que também não cabem)']
++OK    W1e quatro_tratores_cinco_implementos · rodada 6 · 4 tratores × 5 implementos (20 configurações, 2 ha/h), só T0+P0 com janela de 50 h, 4.000 ha: atende tudo, sem conflito, em menos de 1 s (JS e Python)
++        esperado=4000 ha, sem conflito, < 1 s
++        JS=JS 1 ms · 3999.9999999999986 ha · conflito=False
++        Py=Py 2 ms · 3999.9999999999986 ha · conflito=False
++OK    W4 trios_rapido · rodada 6 · 30 configurações em trios (juntas dentro do trio, nunca com outro trio: 3^10 cliques): passa do teto de cliques, o componente divide a janela (conservador), com o motivo, em menos de 1 s (JS e Python), conservando a área
++        esperado=< 1000 ms, motivo "combinações demais"
++        JS=JS 99 ms · Σ = 2999.9999999999955 · motivo=True
++        Py=Py 83 ms · motivo=True
++OK    D01f triangulo_mais_vizinho_sem_janela · D-01 · o S2 refutado na rodada 5 (triângulo A–B–C de 10 h + D sem janela ligado às três): A+B+C cabem nos 10 h e há conflito (Python com Fraction; JS no R1/R2)
++        esperado=h(A+B+C) ≤ 10, conflito
++        JS=JS [10, True]
++        Py=Py h=10 conflito=True
++OK    Dc ajuda_sem_promessa · regra (c) · a ajuda de "Parte da área" não promete término no mesmo horário nem capacidade máxima
++        esperado=sem "terminam juntas"
++        JS=
++        Py=
++OK    R2-5e ajudas_e_motivos_sem_regra_antiga · rodada 2 do D-01 · ajudas da janela, da parte e da sequência e motivos do conservador sem "dividem a maior janela" nem "as mesmas horas produtivas"; a ajuda da janela fala em prazo
++        esperado=ausentes; "Prazo" na ajuda
++        JS=
++        Py=
++OK    R2-1 teto_de_cortes_por_componente · rodada 2 do D-01 · 11 pares que passam de 8 192 cortes ficam no conservador (com motivo), mas o A–B–C independente continua com 5 ha cada (antes 3,33 ha cada, com conflito falso)
++        esperado=A, B, C = 5 · motivo "combinações demais" · < 1 s
++        JS=JS q=[5, 5, 5] motivo=True 330 ms
++        Py=Py q=[5.0, 5.0, 5.0] 283 ms
++OK    R2-4 motivos_por_grupo_e_janela · rodada 2 do D-01 · 26 configurações em 13 partes (máquina por par), partes fixas e trocas: no máximo 3 motivos por configuração (04bf6f2: 176; ee4f954: 1.672), JS = Python, < 1 s; A–B/B–C na mesma janela: um motivo de troca
++        esperado=≤ 78 motivos · JS = Py · < 1 s · 1 motivo de troca
++        JS=JS 35 motivos 429 ms · troca 1
++        Py=Py 35 motivos 518 ms · troca 1
++OK    R3-2 conflito_de_fato_nao_vira_estimativa · rodada 3 do D-01 · (a) A e B em sequência declarada (6 h) com C que precisa dos 2 tratores: conflito de fato, não "nesta estimativa"; (c) fato + estimativa no mesmo grupo: conflitoEst falso, só C e D como estimativa; par que passa do grupo é fato; e número em texto lido igual em JS e Python (espaço = vazio; 0x10, 1_000 e Infinity inválidos)
++        esperado=[[True, False, [False, False, False, False]], [True, False, [False, False, True, True]], [True, False, [False, False]]] · ['nulo', 'invalido', 'invalido', 1.5, 0.5, 5.0, 100.0, 'invalido', 'nulo', 'nulo']
++        JS=[[True, False, [False, False, False, False]], [True, False, [False, False, True, True]], [True, False, [False, False]], ['nulo', 'invalido', 'invalido', 1.5, 0.5, 5, 100, 'invalido', 'nulo', 'nulo']]
++        Py=[[[True, False, [False, False, False, False]], [True, False, [False, False, True, True]], [True, False, [False, False]]], ['nulo', 'invalido', 'invalido', 1.5, 0.5, 5.0, 100.0, 'invalido', 'nulo', 'nulo']]
++OK    R2-5a empate_sem_motivo_de_troca · rodada 2 do D-01 · tudo cabe (empate de ponto flutuante em A: 1,2 h para 1,2 h): sem o motivo "para liberar horas" da troca, em JS, Python float e Python Fraction
++        esperado=8 ha, nenhum motivo de troca
++        JS=[8, []]
++        Py=[8.0, [], '8', []]
++OK    R2-5d sequencia_de_estimativa_na_tela · rodada 2 do D-01 · regra (b) nos chips: 3 com 1 trator cada e 2 tratores → "em sequência nesta estimativa" e "não cabe na janela nesta estimativa"; sequência declarada e mesma máquina continuam como fato
++        esperado=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
++        JS=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
++        Py=[[True, True, [[True, True], [True, True], [True, True]]], [True, False, [[False, False], [False, False]]], [True, False, [[True, False], [True, False]]]]
++OK    P4 empate_de_troca_independe_da_ordem · rodada 3 · A e B em sequência (janela 3 h, troca 1 h), C no a01 de A sem janela (troca 1 h), nas ordens ABC, CAB e BCA: a mesma divisão (3,75 ha cada), sem conflito, decorrido 4,25 h
++        esperado=3 × [15/4, 15/4, 15/4, False, 0, 17/4]
++        JS=[[3.75, 3.75, 3.75, False, 0, 4.25], [3.75, 3.75, 3.75, False, 0, 4.25], [3.75, 3.75, 3.75, False, 0, 4.25]]
++        Py=[['15/4', '15/4', '15/4', 'False', '0', '17/4'], ['15/4', '15/4', '15/4', 'False', '0', '17/4'], ['15/4', '15/4', '15/4', 'False', '0', '17/4']]
++OK    M1 motivo_sem_sequencia_falsa · rodada 2 · A (janela 0) e B (janela 10 h) em sequência declarada, pelo rendimento: B faz 72 ha na janela dela; o motivo é só "as janelas não comportam", sem "sequência declarada" nem "dividem a mesma janela"
++        esperado=['as janelas não comportam toda a área']
++        JS=['as janelas não comportam toda a área']
++        Py=['as janelas não comportam toda a área']
++OK    R1 paridade_js_python_400 · 400 entradas aleatórias (rendimento vazio/0/vírgula, partes, janelas 0–20 h, sequência, troca, mesmo ativo, grupo da fazenda): JS = Python
++        esperado=400/400
++        JS=400/400 iguais
++        Py=com sequência 101 · conflito 56 · pendentes 45 · exemplos []
++OK    R2 invariantes_400 · Σ q + sem conjunto = Q, sem negativos, h ≤ janela própria, sequência declarada, cada ativo e o grupo de 1 plantadeira ≤ a janela deles, pendente com causa e sem horas, horas-conjunto = Σ h, necessário = atendido + saldo (ha e horas-conjunto)
++        esperado=400/400
++        JS=400/400 sem violação
++        Py=exemplos []
++OK    R4 ociosa_nao_muda_400 · rodada 2 · 352 entradas aleatórias com uma configuração ociosa a mais (janela 0, sem %, fora do plano; na sequência, nos ativos a01 e a02 e na plantadeira): atendido, saldo, decorrido, déficit, conflito e divisão iguais
++        esperado=352/352
++        JS=352/352 iguais
++        Py=exemplos []
++RESULTADO: 106/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test-render-62b0904.log b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test-render-62b0904.log
+new file mode 100644
+index 0000000..4fc50d6
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test-render-62b0904.log
+@@ -0,0 +1,50 @@
++OK    · 1440px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 1440px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 1440px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
++OK    · 1440px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
++OK    · 1440px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
++OK    · 1440px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
++OK    · 1440px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
++OK    · 1440px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
++OK    · 1440px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
++OK    · 1440px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
++OK    · 1440px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
++OK    · 1440px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
++OK    · 1440px sem rolagem lateral nas duas vistas, com o filtro ativo
++FALHA · 1440px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27 · (['set/26', 'out/26', 'nov/26', 'dez/26', 'jan/27', 'fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27'], ['fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27'])
++FALHA · 1440px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades") · (('ok', 'ok', 'ok', 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1, somando a Safra 2026/27 (122,0 h). Fora da conta: 2 ocorrências depois do fim da safra. | Mostrando Operadores e equipe · jul/27: 93,7 h de 1.620,0 h (6 %) · desta safra 68,4 h · Safra 2026/27 25,3 h · fora da conta: desta safra 157,2 h depois do fim · precisa de 2, tem 8\nVer todas | Tratores: 1 unidades, jornada de 10 h. Tratores fev/27: 27 % → 108 %.'), ('ok', 'ok', 'ok', 'Falta recurso: Operadores e equipe precisam de 6 em mai/27 e você tem 1 (4 meses); Tratores, 2 em fev/27 e você tem 1, somando a Safra 2026/27 (122,0 h). Inclui 6 ocorrências ainda sem alocação. Fora da conta: 2 ocorrências depois do fim da safra. | Mostrando Operadores e equipe · jul/27: 93,7 h de 202,5 h (46 %) · desta safra 68,4 h · Safra 2026/27 25,3 h · fora da conta: desta safra 157,2 h depois do fim · precisa de 2, tem 1\nVer todas | Operadores e equipe: 1 pessoas, jornada de 9 h. Operadores e equipe mai/27: 42 % → 337 %.'))
++FALHA · 1440px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário" · ('ok', 'ok', 'S27SF 3', 'Capacidade não calculada: as 14 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).')
++OK    · 1440px sem erro de JS
++OK    · 390px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 390px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 390px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
++OK    · 390px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
++OK    · 390px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
++OK    · 390px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
++OK    · 390px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
++OK    · 390px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
++OK    · 390px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
++OK    · 390px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
++OK    · 390px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
++OK    · 390px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
++OK    · 390px sem rolagem lateral nas duas vistas, com o filtro ativo
++FALHA · 390px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27 · (['set/26', 'out/26', 'nov/26', 'dez/26', 'jan/27', 'fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27'], ['fev/27', 'mar/27', 'abr/27', 'mai/27', 'jun/27', 'jul/27'])
++FALHA · 390px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades") · (('ok', 'ok', 'ok', 'Falta recurso: Tratores precisam de 2 em fev/27 e você tem 1, somando a Safra 2026/27 (122,0 h). Fora da conta: 2 ocorrências depois do fim da safra. | Mostrando Operadores e equipe · jul/27: 93,7 h de 1.620,0 h (6 %) · desta safra 68,4 h · Safra 2026/27 25,3 h · fora da conta: desta safra 157,2 h depois do fim · precisa de 2, tem 8\nVer todas | Tratores: 1 unidades, jornada de 10 h. Tratores fev/27: 27 % → 108 %.'), ('ok', 'ok', 'ok', 'Falta recurso: Operadores e equipe precisam de 6 em mai/27 e você tem 1 (4 meses); Tratores, 2 em fev/27 e você tem 1, somando a Safra 2026/27 (122,0 h). Inclui 6 ocorrências ainda sem alocação. Fora da conta: 2 ocorrências depois do fim da safra. | Mostrando Operadores e equipe · jul/27: 93,7 h de 202,5 h (46 %) · desta safra 68,4 h · Safra 2026/27 25,3 h · fora da conta: desta safra 157,2 h depois do fim · precisa de 2, tem 1\nVer todas | Operadores e equipe: 1 pessoas, jornada de 9 h. Operadores e equipe mai/27: 42 % → 337 %.'))
++FALHA · 390px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário" · ('ok', 'ok', 'S27SF 3', 'Capacidade não calculada: as 14 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).')
++OK    · 390px sem erro de JS
++FALHA · PL-05 pelo Meu dia (Reprogramar saldo → Ver capacidade): abre a etapa 3 da Safra 2026/27 com o veredito da capacidade, não o PL-03 de números fixos · ('ok', 'PL-05.dc.html', ('sem link', 'PL-05.dc.html', '', '', ''))
++FALHA · PL-02 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03) · ('ok PL-03.dc.html', 'PL-03.dc.html', '', '', '')
++FALHA · PL-04 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03) · ('sem link', 'PL-04.dc.html', '', '', '')
++FALHA · nenhuma página do _render leva ao PL-03 (capacidade com números fixos) · ['PL-02.dc.html', 'PL-04.dc.html', 'PL-05.dc.html']
++
++RESULTADO: 28 ok · 10 falhas
++  - 1440px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
++  - 1440px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
++  - 1440px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
++  - 390px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
++  - 390px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
++  - 390px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
++  - PL-05 pelo Meu dia (Reprogramar saldo → Ver capacidade): abre a etapa 3 da Safra 2026/27 com o veredito da capacidade, não o PL-03 de números fixos
++  - PL-02 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
++  - PL-04 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
++  - nenhuma página do _render leva ao PL-03 (capacidade com números fixos)
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test.log
+new file mode 100644
+index 0000000..fe064a4
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_capacidade_simetrica_test.log
+@@ -0,0 +1,40 @@
++OK    · 1440px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 1440px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 1440px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
++OK    · 1440px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
++OK    · 1440px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
++OK    · 1440px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
++OK    · 1440px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
++OK    · 1440px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
++OK    · 1440px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
++OK    · 1440px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
++OK    · 1440px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
++OK    · 1440px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
++OK    · 1440px sem rolagem lateral nas duas vistas, com o filtro ativo
++OK    · 1440px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
++OK    · 1440px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
++OK    · 1440px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
++OK    · 1440px sem erro de JS
++OK    · 390px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 390px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
++OK    · 390px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
++OK    · 390px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
++OK    · 390px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
++OK    · 390px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
++OK    · 390px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
++OK    · 390px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
++OK    · 390px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
++OK    · 390px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
++OK    · 390px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
++OK    · 390px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
++OK    · 390px sem rolagem lateral nas duas vistas, com o filtro ativo
++OK    · 390px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
++OK    · 390px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
++OK    · 390px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
++OK    · 390px sem erro de JS
++OK    · PL-05 pelo Meu dia (Reprogramar saldo → Ver capacidade): abre a etapa 3 da Safra 2026/27 com o veredito da capacidade, não o PL-03 de números fixos
++OK    · PL-02 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
++OK    · PL-04 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
++OK    · nenhuma página do _render leva ao PL-03 (capacidade com números fixos)
++
++RESULTADO: 38 ok · 0 falhas
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/saf_cmp_continuidade_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_cmp_continuidade_test.log
+new file mode 100644
+index 0000000..f715f6a
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_cmp_continuidade_test.log
+@@ -0,0 +1,33 @@
++OK    · 1 SAF: Safrinha 2027 abre direto na etapa 4, demanda de insumos ("Continuar: enviar demanda para cotação")
++OK    · 2 SAF demanda de insumos (CAL-01): R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada
++OK    · 3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes
++OK    · 4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data
++OK    · 5 SAF envia SOL-2027-02: 8 insumos, R$ 1.098.502,50, origem Safrinha 2027 · demanda de insumos
++OK    · 6 registro único talhao-os-compras-v1: ID, fazenda, safra, 8 itens, estado e origem
++OK    · 7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)
++OK    · 8 CMP abre a mesma solicitação: #sol=SOL-2027-02&saf=S27SF, etapa 2, contexto "Safrinha 2027 · SOL-2027-02"
++OK    · 9 CMP etapa 2: mesmos 8 insumos e R$ 1.098.502,50 (resumo e total da tabela)
++OK    · 10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000
++OK    · 11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)
++OK    · 12 origem do insumo volta ao Planejar safra na demanda de insumos da Safrinha (passo=demanda)
++OK    · 13 recarregar a Compra mantém SOL-2027-02 na etapa 2
++OK    · 14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.098.502,50 · A cotar; 2026/27 continua SOL-2026-07 · R$ 379.580,00
++OK    · 15 Safrinha não herda os convites da 2026/27 (convites prontos, nada enviado) e o endereço acompanha a safra
++OK    · 16 cotação da SOL-2027-02 segue: convites enviados e propostas comparadas na etapa 4
++OK    · 17 de volta à 2026/27: os convites dela continuam enviados
++OK    · 18 trilha da compra oferece "Ver origem · demanda de insumos ›" para a Safrinha
++OK    · 19 SAF volta na demanda de insumos (etapa 4) da Safrinha e mostra o andamento da compra (registro proc): SOL-2027-02 · Em cotação · N de 13 respostas
++OK    · 26 Compra → origem → Compra: convites e propostas da SOL-2027-02 continuam (trilha igual) e o registro guarda o estado
++OK    · 20 SAF recarregada sem endereço: a Safrinha não volta a "enviar demanda" (registro mantido)
++OK    · 23 SAF demanda de insumos, etapa 4 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela
++OK    · 24 memória como extrato por data, com a origem de sempre: "25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto
++OK    · 21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L como antes; memória igual nas duas telas
++OK    · 25 solicitação de safra nova (só no Planejar safra) aparece na Compra e abre com o próprio contexto
++OK    · 27 paridade na tela: demanda de insumos (endereço antigo etapa=6) de S2627, S27SF e LG2627 = dados2.demanda (valor e nº de insumos)
++OK    · 28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com 1.185.680 realizados, ruptura 25/09–30/09 coberta pelo recebimento, 0 a comprar (= dados2.demanda)
++OK    · 29 memória do calcário: realizado antes de hoje, ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova
++OK    · 30 Compra da SOL-2026-09: Fazenda Lagoa Grande; Corretivos e Mudas "Sem fornecedor homologado" com link de cadastro; convites dos outros grupos saem e as propostas chegam
++OK    · 31 endereço com SOL de outra safra abre a SOL da safra e corrige o endereço; safra encerrada por endereço abre a consulta (etapa 6)
++OK    · 22 sem erro JS (ouvinte de error e unhandledrejection em cada página aberta)
++
++RESULTADO: 31 ok · 0 falhas
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/saf_operacoes_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_operacoes_test.log
+new file mode 100644
+index 0000000..53f79da
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_operacoes_test.log
+@@ -0,0 +1,89 @@
++OK    · N1 etapa=6 abre a 4 "Confira a demanda de insumos"
++OK    · N2 etapa=3 abre a 3
++OK    · N2 etapa=4 abre a 3
++OK    · N2 etapa=5 abre a 3
++OK    · N3 passo=operacoes abre a 3
++OK    · N3 passo=demanda abre a 4
++OK    · N3 só saf= abre a 4
++OK    · N4a hashchange: etapa=6 → 4 e etapa=4 → 3 (etapa=4 nunca abre a demanda)
++OK    · matriz 1: 4 etapas; sem "Definir rendimentos", "Conferir plano operacional" nem "Dimensionar recursos"
++OK    · N6 retomada (§5.4): S2627 aplicar plano em 4; S27SF enviar demanda; S2526 consultar
++OK    · N6 aviso do Continuar da S27SF sem número de etapa
++OK    · N7 guardas estáticos (§5.3) = 0
++OK    · V1 veredito S2627 (R4, âmbar)
++OK    · V1 atalho "Maior uso: Colhedoras 81 % · fev/27"
++OK    · V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"
++OK    · O1 g_op: 8 colunas na ordem do §3.4
++OK    · O1 operações na ordem da 1ª data (§2.1)
++OK    · O2 Pulverização = espelho (data, conjunto, 21,60 ha/h, ha-op, horas, R$/ha-op)
++OK    · O2 negativo: nenhuma operação com "ha" puro na área
++OK    · O2 "6 atividades" na Pulverização
++OK    · O4 S2627: 8 operações "Janela não informada", nenhum "Cabe na janela"; sem chips do filtro rápido
++OK    · Total da g_op só em horas-conjunto = espelho (561,8 h)
++OK    · O18 negativo: "/ha da safra" não aparece
++OK    · §5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, Conferir demanda de insumos ›
++OK    · L1 1440 × 1040: 8 operações e Total acima da área de ações
++OK    · O3 Plantio T2: 2 configurações com a área atendida e o R$/ha de cada (espelho)
++OK    · O3 T2 horas = espelho (61,3 h) e Situação sem número
++OK    · O3 toque no talhão abre a configuração com "Neste talhão" (trio e decorrido)
++OK    · O8 Pulverização: "Aplicar em" = Todas; sem Janela editável; janela por atividade "nenhuma das 6 com janela"
++OK    · O13 Origem "Padrão do cadastro (CD-02)" e Custo R$/ha ao vivo
++OK    · O13 ao vivo: velocidade 12 "Ajustado nesta safra", voltar a 8 "Padrão"
++OK    · O14 "2,5" pessoas recusado e o digitado fica
++OK    · repetição: salvar sem mudar mantém horas e capacidade
++OK    · O9 "Todas": aviso "(6 atividades)" e totais = espelho (horas-conjunto e custo)
++OK    · O9 negativo: as 6 em uso com 32,4 ha/h; as fora de uso seguem 21,6
++OK    · O12 atividade abre com "Só esta atividade"
++OK    · P7 aviso antes → depois (§4.4): Adubação a lanço 40,2 → 74,1 h · Distribuidores nov/26: 16 % → 31 %
++OK    · O12 a atividade mostra 9,00 ha/h e R$ 25,89/ha; a operação "varia" no rendimento (o conjunto continua o mesmo, §3.4 coluna a coluna)
++OK    · O12 as demais atividades da operação ficam com 18,00 ha/h
++OK    · O11 Colheita de grãos (1 atividade): "Todas" sem campo de janela
++OK    · O11 janela com "Todas" é recusada no "Aplicar em"; nada gravado
++OK    · O5 janela 60 h só na Colheita: "Cabe na janela" e veredito com "16 de 17"
++OK    · O5 filtro rápido passa a mostrar 2 categorias
++OK    · O15 Colheita de grãos S2627: Custo R$/kg da soja
++OK    · V3 g_cap recolhida por padrão
++OK    · V3 g_cap aberta: 6 recursos e 15 colunas (Recurso, Maior uso, Mês e 12 meses)
++OK    · V3 Colhedoras: Maior uso 81 %, Mês fev/27; Tratores mar/27 só da Safrinha entre parênteses
++OK    · V3 atalhos somem com a g_cap aberta
++OK    · V14 "—" inerte (sem botão)
++OK    · V4 célula Colhedoras · fev/27: linha de filtro "122,0 h de 150,5 h (81 %) · precisa de 1, tem 1"
++OK    · V4 cabeçalho "Horas de Colhedoras" e Total 122,0 h
++OK    · V4 T1-A 32,0, T1-B 30,4, T2 59,6 h
++OK    · V4 "Ver todas" volta a Horas-conjunto e 561,8 h
++OK    · V6 Tratores · fev/27: desta safra 122,0 h · Safrinha 2027 67,3 h · precisa de 2, tem 4; só Colheita de grãos
++OK    · V7 Operadores out/26: 171,2 h de 1.425,6 h (12 %) · precisa de 2, tem 8; Total fecha
++OK    · P1 Tratores: 174,8 h em fev/27; 366,9 h na safra
++OK    · P1 prévia "Maior uso: 27 % → 22 % (fev/27)"
++OK    · P1 depois de salvar: Tratores fev/27 22 % (C10)
++OK    · P2 prévia Operadores 8 → 5 (§9.2 P2)
++OK    · P2 veredito R2 "Operadores e equipe precisam de 6 em mai/27 e você tem 5"
++OK    · V13 Colhedoras 0: veredito com "precisam de 1 em fev/27 e você tem 0. Inclui 3 ocorrências ainda sem alocação."
++OK    · V13 fev/27 "precisa 1"; Maior uso "não calculável"
++OK    · P8 +1 pessoa no Plantio: horas de Operadores no formulário do recurso = espelho (sobe 62,70 h)
++OK    · P8 horas-homem do Resumo = espelho (C22)
++OK    · P4 Resumo S2627: custo por cultura = espelho e Total
++OK    · P4 nota "Todos de hoje em diante" e trabalho da safra
++OK    · P4 Esc fecha o Resumo e o foco volta ao link
++OK    · V12 S27SF veredito R5 (verde) e atalho Colhedoras 56 % · jul/27
++OK    · V11 S2526: veredito R1; sem atalho; primária "Ver demanda de insumos ›"
++OK    · V11 S2526: g_cap toda "—" e recurso só em consulta ("Para ajustar, abra uma safra aberta.")
++OK    · V11 S2526: rendimento só em consulta
++OK    · V8 LG2627 veredito R2
++OK    · V8 atalhos "Operadores e equipe 1.584 % · nov/26" e "Tratores 234 % · out/26"
++OK    · V8 qualificador do custo (antes do início e pendentes)
++OK    · V8 Colheita de frutas: "sem recurso na fazenda · precisa de 10, tem 8"
++OK    · V8 g_cap: Operadores nov/26 "precisa 127", Maior uso 1.584 %
++OK    · L4 sem erro de JS · S2627
++OK    · L4 sem erro de JS · S27SF
++OK    · L4 sem erro de JS · LG2627
++OK    · L4 sem erro de JS · S2526
++OK    · L2 S2627 390×844: sem rolagem lateral; veredito e primária sem rolar
++OK    · N5 faixa a 390: "Etapa 3 de 4 · Dimensione operações e recursos"
++OK    · L2 LG2627 390×844: sem rolagem lateral; veredito e primária sem rolar
++OK    · L2 S2627 360×800: sem rolagem lateral; veredito e primária sem rolar
++OK    · L2 LG2627 360×800: sem rolagem lateral; veredito e primária sem rolar
++OK    · 390: célula Colhedoras · fev/27 filtra a g_op
++OK    · 390: sem erro de JS
++
++RESULTADO: 87 ok · 0 falhas (tudo)
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/saf_revisao_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_revisao_test.log
+new file mode 100644
+index 0000000..d8bf4c2
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/saf_revisao_test.log
+@@ -0,0 +1,44 @@
++OK    · S2.1 N1 (Safra 2027/28): soja no T1 inteiro
++OK    · S2.1 N2 (Safrinha 2028) no mesmo estado: T1 Livre 312 ha depois da soja da N1
++OK    · S2.1 N2: Planejar T1 com os padrões grava (nunca "Já existe T1 nesta safra", que vinha do T1 da N1)
++OK    · S2.1/R-22 g_cult_NOVA com um T1 de 312 ha em cada safra nova
++OK    · E5 meta gravada na unidade de mercado do Milho: "170 sc/ha"
++OK    · S1 preparo: N1 com T1-A (150 ha) e N2 com T1 inteiro, no mesmo estado
++OK    · S1 Dividir T1 na N2 abre só o cultivo da N2 (o T1-A da N1 não entra no painel)
++OK    · S1 depois de dividir: o T1-A da N1 continua na N1 (150 ha) e a N2 tem T1-A e T1-B
++OK    · S1 estado da g_cult_NOVA sem id de grupo repetido (um grupo por safra e talhão)
++OK    · S1 N1 intacta: "Nesta safra 150" e o T1-A dela na tabela
++OK    · E4/OC-21 painel mostra o plantio mínimo: "Plantio a partir de 21/02/2027 com este plano"
++OK    · S2.2 Parcela "T1" com área parcial não contorna a trava: recusa M2 com o nome que seria gravado (T1-B), nada gravado
++OK    · S2.2 Parcela vazia em 21/02/2027 (o PlantioMin): grava como T1-B, sem recusa falsa citando o Milho de T1-A
++OK    · S4 nota da sobreposição sem o rótulo repetido ("Sobreposição em T1: Soja (T1-B, Safra 2026/27) × Soja (T1-B, Safrinha 2027) em 10/02/2027")
++OK    · S3.4 "Corrigir T1" abre o cultivo da trava (x9, T1-B), não o d1 (T1-A, fora do conflito)
++OK    · S3.3 c1 tem plano: o atalho é "Ver T1-A na Safra 2026/27 ›" (nunca "Informar colheita", sem campo no painel)
++OK    · S3.3 sem plano continua "Informar colheita" (T3 da Safra 2026/27)
++OK    · S3.3 o atalho abre o c1 na Safra 2026/27
++OK    · S3.5 2º toque no mesmo atalho (endereço igual) abre de novo a S2627 com o painel do T3
++OK    · S3.6 1º Planejar de safra sem cultivo: Cultura mostra "Escolha a cultura", como o rascunho (vazio)
++OK    · S3.6 Ocupação prevista "—" enquanto não há cultura
++OK    · S3.6 Salvar sem cultura pede a cultura, e o que se vê bate com o motivo
++OK    · E5 meta do Mamão gravada na unidade de mercado: "45 t/ha/ano"
++OK    · S3.2 C1 vinculado sem "Dividir" na linha
++OK    · S3.2 ao editar o vinculado, cultura, variedade, plantio, área e parcela ficam só leitura; meta e plano seguem editáveis
++OK    · S3.2 salvar não muda área, plantio nem cultura do ciclo (só a meta)
++OK    · S3.7 Dividir sem seletor de unidade da meta
++OK    · S3.7 a unidade segue a cultura da linha: sc/ha (Milho) e t/ha/ano (Mamão Formosa)
++OK    · S3.7 gravado com a unidade de mercado de cada cultura
++OK    · S3.8 "Selecionar as 3 linhas visíveis" marca só os cultivos desta safra (d1, d2, d3)
++OK    · S3.1 veredito: "Fora da conta: 2 ocorrências depois do fim da safra", sem falta em ago/27
++OK    · S3.1 nenhuma hora desta safra em ago/27 (Colhedoras e Operadores somavam 19 h e 42,4 h)
++OK    · S3.1 g_cap da S27SF com os meses do período (fev/27 a jul/27), sem ago/27
++OK    · B10 g_op: etiqueta "depois do fim da safra" na colheita do P1
++OK    · S3.1 g_cap de safra nova (mar/27 a ago/27) com os meses do período, pelos dados
++OK    · E3 preparo: milho sem plano no T3 em 05/02/2027 grava (previsão não trava)
++OK    · E3 prévia do lote: com o plano, o T3 trava (núcleo da soja até 10/02/2027) e "não recebe"; botão conta 0
++OK    · E3 aplicar recusa ("Nenhum cultivo pode receber") e o cultivo continua sem plano
++OK    · B1 janela 50 h na Colheita: 48 ha sem conjunto e Custo R$/ha = custo ÷ área atendida (R$ 229,20/ha-op, nunca ÷ 610 ha)
++OK    · B11 g_op LG2627: chip de falta de recurso na operação ("Operadores e equipe … %")
++OK    · B15 ocorrência pendente (sem alocação) não mostra horas
++OK    · sem erro de JS
++
++RESULTADO: 42 ok · 0 falhas
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/semh-62b0904.json b/docs/planejar-safra/verificacao-saf-c02/saidas/semh-62b0904.json
+new file mode 100644
+index 0000000..e9d6ac1
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/semh-62b0904.json
+@@ -0,0 +1,18 @@
++[
++ {
++  "view": "A",
++  "d": 140,
++  "ocup": 87.5,
++  "ge": false,
++  "R": "R5",
++  "txt": "Na estimativa mensal, cabe com o que você tem."
++ },
++ {
++  "view": "B",
++  "d": 140,
++  "ocup": 87.5,
++  "ge": true,
++  "R": "R5",
++  "txt": "Na estimativa mensal, cabe com o que você tem."
++ }
++]
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/semh-correcao.json b/docs/planejar-safra/verificacao-saf-c02/saidas/semh-correcao.json
+new file mode 100644
+index 0000000..c8d917a
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/semh-correcao.json
+@@ -0,0 +1,18 @@
++[
++ {
++  "view": "A",
++  "d": 140,
++  "ocup": 87.5,
++  "ge": true,
++  "R": "R5",
++  "txt": "Na estimativa mensal, cabe com o que você tem."
++ },
++ {
++  "view": "B",
++  "d": 140,
++  "ocup": 87.5,
++  "ge": true,
++  "R": "R5",
++  "txt": "Na estimativa mensal, cabe com o que você tem."
++ }
++]
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-10000-sem777.json b/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-10000-sem777.json
+new file mode 100644
+index 0000000..1e7f546
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-10000-sem777.json
+@@ -0,0 +1,36 @@
++{
++ "arquivo": "tools/prototipo/v37/gen37/safra.js",
++ "N": 10000,
++ "semente": 777,
++ "python": true,
++ "estatistica": {
++  "vistas": 29996,
++  "pares": 0,
++  "celulas": 299009,
++  "fora_outras": 3196,
++  "oc_fora": 23065,
++  "cen_mesmo_periodo": 4721,
++  "cen_fechada": 4357,
++  "cen_outra_faz": 2947,
++  "Rs": {
++   "R2": 13095,
++   "R4": 4697,
++   "R5": 1454,
++   "R1": 8501,
++   "R3": 716,
++   "R0": 1533
++  }
++ },
++ "cobertura": {
++  "a_oraculo": 299009,
++  "a_pares_celulas": 167082,
++  "a_pares_mesmo_periodo_celulas_com_fora": 3345,
++  "b_fontes": 158452,
++  "c_grupos": 2018,
++  "c_vistas_com_grupo": 1861,
++  "d_vistas_fechadas": 5396,
++  "d_vistas_com_outra_faz": 10679,
++  "e_celulas": 299009
++ },
++ "falhas": {}
++}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-2000-sem20261009.txt b/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-2000-sem20261009.txt
+new file mode 100644
+index 0000000..9379a26
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/simetria-2000-sem20261009.txt
+@@ -0,0 +1,40 @@
++{
++ "arquivo": "tools/prototipo/v37/gen37/safra.js",
++ "N": 2000,
++ "semente": 20261009,
++ "python": true,
++ "estatistica": {
++  "vistas": 6081,
++  "pares": 0,
++  "celulas": 62269,
++  "fora_outras": 624,
++  "oc_fora": 4678,
++  "cen_mesmo_periodo": 942,
++  "cen_fechada": 913,
++  "cen_outra_faz": 615,
++  "Rs": {
++   "R1": 1685,
++   "R4": 910,
++   "R5": 343,
++   "R2": 2728,
++   "R3": 122,
++   "R0": 293
++  }
++ },
++ "cobertura": {
++  "a_oraculo": 62269,
++  "a_pares_celulas": 35735,
++  "a_pares_mesmo_periodo_celulas_com_fora": 673,
++  "b_fontes": 32661,
++  "c_grupos": 402,
++  "c_vistas_com_grupo": 373,
++  "d_vistas_fechadas": 1120,
++  "d_vistas_com_outra_faz": 2243,
++  "e_celulas": 62269
++ },
++ "falhas": {}
++}
++
++real	0m14.010s
++user	0m7.903s
++sys	0m0.484s
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/tabelas_saf_test.log b/docs/planejar-safra/verificacao-saf-c02/saidas/tabelas_saf_test.log
+new file mode 100644
+index 0000000..f274e28
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/tabelas_saf_test.log
+@@ -0,0 +1,26 @@
++  ok  §3.4 cabeçalhos: 8 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula) · ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA']
++  ok  nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/kg", "Parte: …") · []
++  ok  Situação só com os valores de s.sit (S2627: "Janela não informada" nas 8 operações, sem números) · ['Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada']
++  ok  unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia" · [('Pulverização 6 atividades', '21,60 ha/h', '2.520 ha-op', '116,7 h', 'R$ 14,49/ha-op'), ('Fertirrigação 2 atividades', '10,00 ha/h', '84 ha-op', '8,4 h', 'R$ 5,70/ha-op'), ('Tratamento de sementes 1 atividade', '40,00 ha/h', '610 ha-op', '15,3 h', 'R$ 3,40/ha-op'), ('Plantio 1 atividade', '', '610
++  ok  atividades em "ha" (uma passada por cultivo) e talhões em "ha" · [('Dessecação pré-plantio', '610 ha'), ('Controle de ácaro', '42 ha'), ('Herbicida pós-emergente', '610 ha'), ('Fungicida 1ª aplicação', '610 ha')]
++  ok  ordenar Custo R$/ha crescente (número, não texto): R$ 3,40/ha-op primeiro, R$ 662,86/ha-op por último · ['R$ 3,40/ha-op', 'R$ 5,70/ha-op', 'R$ 12,94/ha-op', 'R$ 14,49/ha-op', 'R$ 73,59/ha-op', 'R$ 165,33/ha-op', 'R$ 229,20/ha-op', 'R$ 662,86/ha-op']
++  ok  filtro Conjunto (valor exato da célula): só a Pulverização · ['Pulverização 6 atividades']
++  ok  filtro Situação = "Janela não informada": as 8 operações · 8
++  ok  busca "T2": só ocorrências do T2 (com operação e atividade que as agrupam) · ['T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W']
++  ok  Data: Pulverização "set/26 – jan/27" (faixa real de meses da operação) · ['Pulverização 6 atividades', 'Janela não informada', 'set/26 – jan/27', 'Trator 02 MF 7719 + Pulverizador PJ-3030 36 m', '21,60 ha/h', '2.520 ha-op', '116,7 h', 'R$ 14,49/ha-op']
++  ok  TF03 Adubação de cobertura 24 → 12 m (só esta): 9,00 ha/h e R$ 25,89/ha na mesma linha; a operação "varia" no rendimento · (['Adubação de cobertura', '', 'nov/26', '', '9,00 ha/h', '610 ha', '67,8 h', 'R$ 25,89/ha'], ['Adubação a lanço 4 atividades', 'Janela não informada', 'out/26 – jun/27', 'Trator 03 + Distribuidor 3 t', 'varia', '724 ha-op', '74,1 h', 'R$ 23,85/ha-op'])
++  ok  sem erro de script (1440) · None
++  ok  2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade) · ['', 'TALHÃO OU PARCELA', 'SITUAÇÃO', 'ÁREA LIVRE', 'LIVRE A PARTIR DE', 'ÁREA', 'CULTURA', 'OCUPA ATÉ', 'FIM POR', 'SAFRA', 'VARIEDADE', 'PLANO AGRONÔMICO', 'VERSÃO', 'PLANTIO', 'META', 'AJUSTES LOCAIS', 'TIPO', '']
++  ok  2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão) · {'': '', 'TALHÃO OU PARCELA': 'T7 Dividir', 'SITUAÇÃO': 'Planejado', 'ÁREA LIVRE': '—', 'LIVRE A PARTIR DE': '—', 'ÁREA': '42 ha', 'CULTURA': 'Mamão Formosa', 'OCUPA ATÉ': 'sem fim', 'FIM POR': 'Perene', 'SAFRA': '—', 'VARIEDADE': 'Formosa', 'PLANO AGRONÔMICO': 'Mamão Formosa produção Ajustar insumo
++  ok  2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7 · [('T7 Dividir', '45 t/ha/ano')]
++  ok  2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro · [('T1 Dividir', '2 parcelas'), ('T1-A', 'Parcela'), ('T1-B', 'Parcela')]
++  ok  2b meta 62,5 salva no T2: célula e filtro mostram "62,5 sc/ha" (sem arredondar para 63) · ('62,5 sc/ha', ['38 sc/ha', '45 t/ha/ano', '60 sc/ha', '62 sc/ha', '62,5 sc/ha', '64 sc/ha', '66 sc/ha'])
++  ok  2b etapa 4 (demanda): MAP 11-52 com necessidade "62.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias · {'GRUPO': 'Fertilizantes', 'INSUMO': 'MAP 11-52', '1º USO': '15/10/2026', 'NECESSIDADE LÍQUIDA': '62.500 kg', 'FALTA EM': '18/10/2026', 'VALOR': 'R$ 243.750,00', 'SITUAÇÃO': 'Em cotação', 'SOLICITAÇÃO': 'SOL-2026-07', 'A COMPLEMENTAR': '—', 'DEMANDA BRUTA': '152.500 kg', 'JÁ REALIZADO': '—', 'ESTOQU
++  ok  2b etapa 4 (demanda): cada quantidade com a unidade junto ("152.500 kg", "610,0 L"), sem coluna Unidade e sem "falta em" no texto · []
++  ok  2b filtro Necessidade líquida = "62.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52 · ['MAP 11-52']
++  ok  2b filtro Grupo = Herbicidas: só os herbicidas · ['2,4-D 806', 'Cletodim 240', 'Glifosato 480']
++  ok  2b ordenar Necessidade líquida decrescente nos fertilizantes: "62.500 kg" primeiro, "0 kg" por último (ordem pelo número) · ['62.500 kg', '14.800 kg', '870 kg', '680 kg', '0 kg']
++  ok  sem erro de script (etapas 2 e 4) · None
++   cabeçalhos 390: ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA']
++  ok  390 px: a página não rola na horizontal (a tabela rola dentro da caixa) e o cabeçalho Operação › atividade › talhão está à vista · [390, 390]
++RESULTADO: 24/24 ok
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-62b0904.json b/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-62b0904.json
+new file mode 100644
+index 0000000..c6e74c9
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-62b0904.json
+@@ -0,0 +1 @@
++{"arquivo": "fix_safra.js", "N": 3000, "celulas_comparadas": 117762, "divergencias": 9, "exemplos": [[1586, "S1", "S2", "pulv", 2, ["1 %", 3, true, 2.9999999999999996], ["2 %", 3, true, 3]], [1586, "S2", "S3", "pulv", 2, ["2 %", 3, true, 3], ["1 %", 3, true, 2.9999999999999996]], [2089, "S1", "S3", "oper", 2, ["18 %", 2, true, 35], ["17 %", 2, true, 34.99999999999999]], [2089, "S2", "S3", "oper", 2, ["18 %", 2, true, 35], ["17 %", 2, true, 34.99999999999999]], [2110, "S1", "S2", "trator", 1, ["1 %", 3, false, 7.5], ["<1 %", 3, false, 7.499999999999999]], [2110, "S1", "S3", "trator", 1, ["1 %", 3, false, 7.5], ["<1 %", 3, false, 7.499999999999999]], [2110, "S1", "S4", "trator", 1, ["1 %", 3, false, 7.5], ["<1 %", 3, false, 7.499999999999999]], [2229, "S1", "S2", "trator", 2, ["30 %", 2, true, 73.75], ["29 %", 2, true, 73.74999999999999]], [2229, "S2", "S3", "trator", 2, ["29 %", 2, true, 73.74999999999999], ["30 %", 2, true, 73.75]]]}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-correcao.json b/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-correcao.json
+new file mode 100644
+index 0000000..1199007
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/txt-3000-correcao.json
+@@ -0,0 +1 @@
++{"arquivo": "tools/prototipo/v37/gen37/safra.js", "N": 3000, "celulas_comparadas": 117762, "divergencias": 0, "exemplos": []}
+diff --git a/docs/planejar-safra/verificacao-saf-c02/saidas/varredura.log b/docs/planejar-safra/verificacao-saf-c02/saidas/varredura.log
+new file mode 100644
+index 0000000..8b67c64
+--- /dev/null
++++ b/docs/planejar-safra/verificacao-saf-c02/saidas/varredura.log
+@@ -0,0 +1 @@
++RESULTADO: 140/140 páginas sem erro
+-- 
+2.43.0
+

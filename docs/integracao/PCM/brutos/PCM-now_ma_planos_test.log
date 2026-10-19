@@ -1,0 +1,18 @@
+  ok  PM: sem erro de JS 
+  FALHA menu: Planos de manutenção primeiro na Manutenção; MA-03 = Vencimentos e paradas
+  FALHA biblioteca: 10 planos, 4 sem plano, PM-02 com 1 vencida (0, 4)
+  ok  vencimento: manVenc (JS) = vencimento() (Python) nos 14 ativo × serviço
+  ok  MA-03: sem erro de JS 
+  FALHA MA-03: 2 vencidas · 3 sem ordem · primária Gerar 3 ordens preventivas [] ['Gerar 3 ordens preventivas']
+  FALHA gerar: 3 ordens, sem duplicar no 2º clique · 
+  FALHA MA-03: sem nada a gerar, a primária vira Ver ordens de manutenção
+  ok  MA-04: sem erro de JS 
+  FALHA OM-0235: 5 tarefas do plano, Falta peça e liberar bloqueado
+Traceback (most recent call last):
+  File "<sp-pcm>/tools/prototipo/v37/gen37/ma_planos_test.py", line 59, in <module>
+    J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sp-pcm>/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

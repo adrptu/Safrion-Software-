@@ -1,0 +1,26 @@
+ docs/comercial/DECISOES.md                         |  88 ++++
+ docs/comercial/ESPECIFICACAO.md                    | 227 +++++++++
+ docs/comercial/verificacao/contas.py               |  91 ++++
+ docs/comercial/verificacao/sonda_base.py           |  56 +++
+ .../prototipo/v37/ferramentas/acoes_duplicadas.py  |   2 +-
+ .../prototipo/v37/gen37/aprova_quem_decide_unit.js |   8 +-
+ tools/prototipo/v37/gen37/areas/indice.py          |   4 +-
+ tools/prototipo/v37/gen37/areas/producao.py        | 133 +++---
+ tools/prototipo/v37/gen37/areas/vendas.py          | 523 +++++++++++++++++++++
+ tools/prototipo/v37/gen37/cenario.py               |   8 +-
+ tools/prototipo/v37/gen37/comercial.js             | 433 +++++++++++++++++
+ tools/prototipo/v37/gen37/comercial_fluxo_test.py  | 229 +++++++++
+ .../prototipo/v37/gen37/comercial_revisao_test.py  | 175 +++++++
+ tools/prototipo/v37/gen37/comercial_unit.js        | 386 +++++++++++++++
+ tools/prototipo/v37/gen37/comercial_unit_test.py   |  56 +++
+ tools/prototipo/v37/gen37/dados_comercial.py       | 104 ++++
+ tools/prototipo/v37/gen37/dados_producao.py        |  10 +-
+ tools/prototipo/v37/gen37/g2lib.js                 |   3 +-
+ tools/prototipo/v37/gen37/os_aprov_lib_unit.js     |   6 +-
+ tools/prototipo/v37/gen37/producao.js              |  77 ++-
+ tools/prototipo/v37/gen37/producao_fluxo_test.py   |  19 +-
+ tools/prototipo/v37/gen37/producao_unit.js         |  69 ++-
+ tools/prototipo/v37/gen37/producao_unit_test.py    |   3 +-
+ .../v37/gen37/reserva_duplo_clique_test.py         |  41 ++
+ tools/prototipo/v37/gen37/ui37.py                  |   2 +
+ 25 files changed, 2617 insertions(+), 136 deletions(-)

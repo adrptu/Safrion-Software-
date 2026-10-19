@@ -1,0 +1,10 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock timeout 900 python3 componentes_test.py ajustes
+FALHA 26 tabela no celular (SAF, CMP, CD-06, SU-01, MA-01 em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o foco, nada vaza da coluna presa; 1440 px sem limite [{'SAF': {'caixa': 236, 'c0': 106, 'lim': True, 'total': 6, 'vistas': [0, 1, 2, 3, 4, 5], 'ruins': [], 'vaza': []}, 'CMP': {'caixa': 236, 'c0': 106, 'lim': True, 'total': 5, 'vistas': [0, 1, 2, 3, 4], 'ruins': [], 'vaza': []}, 'CD-06': {'caixa': 262, 'c0': 152, 'lim': True, 'total': 5, 'vistas': [0, 1, 2, 3, 4], 'ruins': [], 'vaza': []}, 'SU-01': {'caixa': 236, 'c0': 115, 'lim': True, 'total': 7, 'vistas': [0, 1, 2, 3, 4, 5, 6], 'ruins': ['PEDIR ATÉ · NECESSÁRIA ▲'], 'vaza': []}, 'MA-01': {'caixa': 224, 'c0': 111, 'lim': True, 'total': 6, 'vistas': [0, 1, 2, 3, 4, 5], 'ruins': ['OM-0233 · corretiva em e'], 'vaza': []}}, [False, 6]]
+OK    27 menu · com "aberto" guardado, CMP e O.S. começam recolhidos (68 px, sem fundo, título livre) em 360, 768 e zoom 200 %, e abertos ao lado em 1440; no estreito, Tab depois do último item fecha o menu e o foco segue no conteúdo; a escolha guardada não muda 
+OK    28 áreas seguras emuladas (800×360 com 47 px nas laterais; 360×800 com 47 px no alto) · botão do menu e menu aberto dentro da área segura; o botão não cobre itens do menu 
+OK    29 toque (360×800, sem hover) · expandir da grade e filtro de coluna sem fundo de hover depois do toque 
+     erros JS (ajustes): []
+
+RESULTADO: 3 ok · 1 falhas (ajustes)
+  - 26 tabela no celular (SAF, CMP, CD-06, SU-01, MA-01 em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o foco, nada vaza da coluna presa; 1440 px sem limite
+[exit 1]

@@ -1,0 +1,69 @@
+{
+  "candidate": "rev02",
+  "executor": "Claude Node local (harness do Codex 6091943041, sem mudança)",
+  "synthetic": true,
+  "checks": [
+    {
+      "id": "duplicate-atomic",
+      "pass": true,
+      "raw": {
+        "erro": "Lote repetido na carga (L39-133): informe o previsto de cada lote uma vez. Nada foi gravado."
+      }
+    },
+    {
+      "id": "saida-replay",
+      "pass": true,
+      "raw": {
+        "repetido": true,
+        "entrega": null
+      }
+    },
+    {
+      "id": "saida-not-delivery",
+      "pass": true,
+      "raw": "Em trânsito"
+    },
+    {
+      "id": "delivery-replay",
+      "pass": true,
+      "raw": true
+    },
+    {
+      "id": "delivery-different-lot-conflict",
+      "pass": true,
+      "raw": {
+        "error": "Este registro (QA-ENT) já foi gravado como RM-0002 com a devolução do L39-133 com outro conteúdo: conflito, nada gravado.",
+        "actualOrigin": "L39-133",
+        "requestedOrigin": "L10-031"
+      }
+    },
+    {
+      "id": "unauthorized-no-write",
+      "pass": true,
+      "raw": {
+        "erro": "Liberar o lote L39-134: decisão de Ana (agrônoma) ou Marta (qualidade). Nada foi alterado."
+      }
+    },
+    {
+      "id": "actor-recorded",
+      "pass": true,
+      "raw": {
+        "quem": "Marta (qualidade)",
+        "d": "2026-09-26",
+        "at": "01:09"
+      }
+    },
+    {
+      "id": "missing-receipt-omitted-lot-conflict",
+      "pass": false,
+      "raw": {
+        "repetido": true
+      }
+    },
+    {
+      "id": "valid-omitted-lot-replay",
+      "pass": true,
+      "raw": true
+    }
+  ]
+}

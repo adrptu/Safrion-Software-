@@ -1,0 +1,6 @@
+P0 js: 6000 chamadas em série · mediana 0.077 ms · p99 4.367 ms · máx 52.481 ms (caso 509)
+P0 py: 6000 chamadas em série · mediana 0.720 ms · p99 1.797 ms · máx 23.512 ms (caso 181)
+P1 js: 6000 chamadas em série · mediana 0.080 ms · p99 3.727 ms · máx 24.595 ms (caso 1620)
+P1 py: 6000 chamadas em série · mediana 0.768 ms · p99 1.915 ms · máx 29.465 ms (caso 1881)
+P2 js: 6000 chamadas em série · mediana 0.080 ms · p99 3.599 ms · máx 45.144 ms (caso 3737)
+P2 py: 6000 chamadas em série · mediana 0.756 ms · p99 2.305 ms · máx 30.785 ms (caso 3849)

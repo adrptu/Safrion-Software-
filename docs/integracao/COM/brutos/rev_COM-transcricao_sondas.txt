@@ -1,0 +1,252 @@
+# Revisão adversarial do Comercial (agente COM:revisar, HEAD bdc5ca8): sondas no node (p1-p11), duplo clique e tela via CDP (dbl_test, ui_test) e mutantes
+# Saidas registradas no transcript do agente (nao havia arquivo de log). Extraidas sem reexecutar nada.
+# Horario UTC de cada comando; corpo de heredoc omitido; caminhos da maquina trocados por marcadores.
+
+### 2026-10-09T17:45:02.481Z
+$ cd <scratchpad>/com && cat > helpers.js <<'EOF'
+  [corpo do heredoc omitido]
+perfis [{"k":"Ana","t":"Ana · Gestora e RT","papeis":{"gestor":"gestora","agronomo":"agrônoma"}},{"k":"Caio","t":"Caio · PCP","papeis":{"pcp":"PCP"}},{"k":"Rui","t":"Rui · Almoxarife e expedição","papeis":{"almoxarife":"almoxarife","expedicao":"expedição"}},{"k":"Paula","t":"Paula · Conferência","papeis":{"almoxarife":"almoxarife","conferente":"conferência"}},{"k":"Zé","t":"Zé · Mecânico","papeis":{"mecanico":"mecânico"}},{"k":"Dora","t":"Dora · Comercial","papeis":{"comercial":"comercial"}}]
+pedidos [
+  'PV-030', 'PV-036',
+  'PV-037', 'PV-038',
+  'CT-203', 'CRE-0095',
+  'BT-090'
+]
+reservas {"RS-0001":{"id":"RS-0001","pedido":"PV-030","lote":"L10-031","kg":232500,"st":"Ativa","d":"2026-09-20","at":"10:12","quem":"Comercial","chave":"SEM-RS-0001","kg0":232500,"exp":0}}
+lotes L38-131,L38-132,L39-131,L39-132,L10-031
+PV-030 Coop Grão Sul pronta null 4000 null ["50","60"] Saca a conferir
+PV-036 Frutas Real pronta 10000 10000 1 undefined Sem reserva
+PV-037 Frutas Real pronta 30490 30490 1 undefined Entregue
+PV-038 Frutas Real futura 30000 30000 1 undefined Futura: compromete a previsão
+CT-203 Coop Grão Sul futura null 12000 null ["50","60"] Saca a conferir
+CRE-0095 Agroquímica Delta futura null 6900 null ["50","60"] Saca a conferir
+BT-090 Fertisul futura null 1000 null ["50","60"] Saca a conferir
+
+### 2026-10-09T17:49:02.665Z
+$ cd <scratchpad>/com && cat > p2.js <<'EOF'
+  [corpo do heredoc omitido]
+cred Crédito do PV-036 aprovado por Ana (gestora) até R$ 121.970,00 (a receber de Frutas Real + reservado não expedido).
+prog RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 10.000 kg = 10.000 kg · Baú refrigerado 12 t ABC1D23 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+sai RM-0002: saída de 10.000 kg (22.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 30.500,00 a receber (28 d após a entrega comprovada). L39-133 disponível 2.050 kg.
+RM st Em trânsito | sit venda Entregue | prSitPed Entregue
+titulos [{"rm":"RM-0002","venda":"PV-036","cliente":"Frutas Real","prod":"Mamão Formosa · fruta de campo","cultura":"Mamão Formosa","kg":10000,"valor":30500,"ev":"","venc":"","transito":true,"dias":28}]
+indicadores {"aRec":121970,"venc":0,"ent30":121970,"nTit":2}
+precos mamao [{"ent":40490,"medR":3.012349,"aRec":121970}]
+
+### 2026-10-09T17:49:16.275Z
+$ cd <scratchpad>/com && cat > p3.js <<'EOF'
+  [corpo do heredoc omitido]
+rs36 RS-0002: 5.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponível 7.050 kg · PV-036 parcial.
+rs38 RS-0003: 7.050 kg do L39-133 reservados para o PV-038 (Frutas Real). L39-133 disponível 0 kg · PV-038 futura: parcial. Aviso: o L39-133 vence 29/09, antes do início da janela do PV-038 (05/10).
+saldo antes {"fis":12050,"res":12050,"q":"Liberado","mot":"Íntegro no recebimento","dono":"","blq":0,"apto":12050,"proc":0,"disp":0,"esgotado":false,"vencido":false}
+prog dup RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 5.000 kg + L39-133 5.000 kg = 10.000 kg · Baú refrigerado 12 t ABC1D23 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+sai Saída da RM-0002 recusada no crédito: a receber de Frutas Real + esta saída = R$ 121.970,00, acima do limite de R$ 120.000,00. Aprovar crédito do PV-036: decisão de Ana (gestora). Nada foi alterado.
+saldo depois {"fis":12050,"res":12050,"q":"Liberado","mot":"Íntegro no recebimento","dono":"","blq":0,"apto":12050,"proc":0,"disp":0,"esgotado":false,"vencido":false}
+expedido PV-036 0 res PV-038 [7050]
+
+### 2026-10-09T17:49:21.298Z
+$ cd <scratchpad>/com && sed -i "s#if (!r.erro) { const rmid = r.rm.id;#if (!r.erro) { const rmid = r.rm.id; P('cr', J(MUD(c, x => comAprovarCredito(x, { venda: 'PV-036', kg: 10000, ator: 'Ana', chave: 'A5' }))));#" p3.js && cat base.js helpers.js p3.js > run3.js && node run3.js 2>&1 | tail -5
+prog dup RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 5.000 kg + L39-133 5.000 kg = 10.000 kg · Baú refrigerado 12 t ABC1D23 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+cr {"msg":"Crédito do PV-036 aprovado por Ana (gestora) até R$ 121.970,00 (a receber de Frutas Real + reservado não expedido)."}
+sai RM-0002: saída de 10.000 kg (22.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 30.500,00 a receber (28 d após a entrega comprovada). L39-133 disponível 0 kg · L39-133 disponível 0 kg.
+saldo depois {"fis":2050,"res":7050,"q":"Liberado","mot":"Íntegro no recebimento","dono":"","blq":0,"apto":2050,"proc":0,"disp":0,"esgotado":false,"vencido":false}
+expedido PV-036 10000 res PV-038 [7050]
+
+### 2026-10-09T17:49:35.398Z
+$ cd <scratchpad>/com && cat > p4.js <<'EOF'
+  [corpo do heredoc omitido]
+rs36 RS-0002: 10.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponível 2.050 kg · PV-036 coberto.
+cred Crédito do PV-036 aprovado por Ana (gestora) até R$ 121.970,00 (a receber de Frutas Real + reservado não expedido).
+prog RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 10.000 kg = 10.000 kg · Baú refrigerado 12 t ABC1D23 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+cancel RS-0002 cancelada (cliente adiou): 10.000 kg voltam ao disponível do L39-133.
+RM st Programada imp [] sit venda Sem reserva
+rs38 RS-0003: 12.050 kg do L39-133 reservados para o PV-038 (Frutas Real). L39-133 disponível 0 kg · PV-038 futura: parcial. Aviso: o L39-133 vence 29/09, antes do início da janela do PV-038 (05/10).
+sai Rui Saída recusada: 10.000 kg do L39-133 passam a reserva do PV-036 (0 kg) em 10.000 kg e o disponível do lote é 0 kg: o excesso nunca sai da reserva de outra venda. Nada foi alterado.
+sai Ana Saída recusada: 10.000 kg do L39-133 passam a reserva do PV-036 (0 kg) em 10.000 kg e o disponível do lote é 0 kg: o excesso nunca sai da reserva de outra venda. Nada foi alterado.
+encerrar Encerrar recusado: RM-0002 programada para o PV-036. Cancele a carga antes.
+
+### 2026-10-09T17:49:49.633Z
+$ cd <scratchpad>/com && cat > p5.js <<'EOF'
+  [corpo do heredoc omitido]
+cred Crédito do PV-036 aprovado por Ana (gestora) até R$ 128.222,50 (a receber de Frutas Real + reservado não expedido).
+progA RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 6.000 kg = 6.000 kg · Baú refrigerado 12 t AAA1A11 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+progB RM-0003 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 4.000 kg = 4.000 kg · Baú refrigerado 12 t BBB2B22 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+saiA 10.000 (previsto 6.000) RM-0002: saída de 10.000 kg (22.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 30.500,00 a receber (28 d após a entrega comprovada). L39-133 disponível 2.050 kg.
+RM-0003 imp [] naoProg 0 sit venda Entregue
+saiB Rui Saída recusada: 4.000 kg do L39-133 passam a reserva do PV-036 (0 kg) em 4.000 kg e o disponível do lote é 2.050 kg: o excesso nunca sai da reserva de outra venda. Nada foi alterado.
+
+### 2026-10-09T17:49:57.396Z
+$ cd <scratchpad>/com && cat > p6.js <<'EOF'
+  [corpo do heredoc omitido]
+"1.5" true 1.5
+"1,5" true 1.5
+"1.000" true 1000
+"1.000,5" true 1000.5
+"51.200" true 51200
+"51200" true 51200
+"12.5" true 12.5
+"0,5" true 0.5
+"1e3" false X
+"-5" true -5
+"  10 " true 10
+"10kg" false X
+"1.2.3" true 123
+"0x10" false X
+"Infinity" false X
+<sp-com>/tools/prototipo/v37/gen37/producao.js:257:function prNum(x) { if (typeof x === 'number') return x; let t = String(x === null || x === undefined ? '' : x).replace(/\s/g, ''); if (!/^-?[\d.,]+$/.test(t)) return NaN;
+<sp-com>/tools/prototipo/v37/gen37/producao.js:259:function prNumOk(x) { return x !== '' && x !== null && x !== undefined && isFinite(prNum(x)); }
+
+### 2026-10-09T17:50:11.582Z
+$ cd <scratchpad>/com && cat > p7.js <<'EOF'
+  [corpo do heredoc omitido]
+prog RM-0002 programada por Dora (comercial): PV-036 (Frutas Real) · L39-133 6.000 kg = 6.000 kg · Baú refrigerado 12 t AAA1A11 · Rota Sul Transportes · 26/09. Próximo passo: confirmar a saída com a pesagem.
+sai RM-0002: saída de 6.000 kg (18.000 − 12.000) para o PV-036 (Frutas Real). Em trânsito: confirmar a entrega · R$ 18.300,00 a receber (28 d após a entrega comprovada). L39-133 disponível 2.050 kg.
+enc PV-036 encerrada (cliente reduziu) por Dora (comercial): quantidade vigente 6.000 kg (era 10.000 kg); reservas canceladas: RS-0002.
+v {"qtd":6000,"qc":6000,"valorQc":18300,"sit":"Encerrada"}
+ent+dev RM-0002 entregue em 26/09 (Rui (expedição)): 5.000 kg aceitos, 1.000 kg devolvidos (Avaria no transporte) no L39-134 Em inspeção: a Qualidade decide · R$ 15.250,00 a receber até 24/10.
+v depois {"qtd":6000,"qc":6000,"valorQc":18300,"sit":"Encerrada","exp":5000,"aRec":15250}
+reservas [["RS-0001","PV-030",232500,"Ativa"],["RS-0002","PV-036",4000,"Cancelada"]]
+lote dev L39-134 {"fis":1000,"res":0,"q":"Em inspeção","mot":"Recebido devolvido: a Qualidade confere e libera","dono":"Qualidade (Marta)","blq":1000,"apto":0,"proc":0,"disp":0,"esgotado":false,"vencido":false} [{"os":"OS-0505","cult":"lg19","tal":"Pivô 19","dcol":"2026-09-22","dev":{"lote":"L39-133","rm":"RM-0002"}}]
+lib L39-134 liberado por Marta (Qualidade): 1.000 kg aptos para reserva e venda.
+pedidos p/ lote dev ["PV-038"]
+
+### 2026-10-09T17:50:18.435Z
+$ cd <scratchpad>/com && sed -i "s#P('v depois', J({ qtd: v.qtd,#const v2 = c.producao.pedidos['PV-036']; P('v depois', J({ qtd: v2.qtd, txt: comQtdTxt(v2),#" p7.js && cat base.js helpers.js p7.js > run7.js && node run7.js 2>&1 | sed -n 6p
+v depois {"qtd":5000,"txt":"5.000 kg","qc":6000,"valorQc":18300,"sit":"Encerrada","exp":5000,"aRec":15250}
+
+### 2026-10-09T17:52:03.590Z
+$ cd <scratchpad>/proto/v37/gen37 && cat > ../../dbl_test.py <<'EOF'
+  [corpo do heredoc omitido]
+<chrome>
+ok
+
+### 2026-10-09T17:52:07.947Z
+$ cd <scratchpad>/proto && env SAFRION_DADOS=sintetico PYTHONDONTWRITEBYTECODE=1 CHROME_BIN=<chrome> flock /tmp/cdpC.lock env CDP_GL=1 timeout 300 python3 dbl_test.py saida 2>&1 | tail -20
+mut ok
+mut2 ok
+PRIM header ['Confirmar saída da RM-0002'] | botões do painel ['×', 'Abrir lote ›', 'Cancelar carga', 'Cancelar', 'Confirmar saída da RM-0002']
+xy [1314.03125, 971.875]
+toast RM-0002 entregue em 26/09 (Rui (expedição)): 10.000 kg aceitos · R$ 30.500,00 a receber até 24/10.
+RM-0002 {'st': 'Entregue', 'saida': True, 'entrega': {'d': '2026-09-26', 'at': '17:55', 'quem': 'Rui (expedição)', 'comp': '', 'chave': 'W-RM-mv19njou-1bowg5', 'imp': '["RM-0002","2026-09-26",null]'}, 'movs': 1}
+títulos [["RM-0001","Entregue","2026-09-17"],["RM-0002","Entregue","2026-09-26"]]
+erros JS 
+RESULTADO: OK 0/0
+
+### 2026-10-09T17:55:56.822Z
+$ cd <scratchpad>/proto && for m in header saca venda; do echo "=== $m"; env SAFRION_DADOS=sintetico PYTHONDONTWRITEBYTECODE=1 CHROME_BIN=<chrome> flock /tmp/cdpC.lock env CDP_GL=1 timeout 300 python3 dbl_test.py $m 2>&1 | tail -12; done
+Command did not complete within its 600s timeout and was moved to the background (ID: b9okovvt5). Output is being written to: <sessao-tmp>/tasks/b9okovvt5.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T18:06:57.441Z
+$ cd <scratchpad>/com && cat > mut.py <<'EOF'
+  [corpo do heredoc omitido]
+1
+
+### 2026-10-09T18:07:27.425Z
+$ cd <scratchpad>/com && cat > mutantes.txt <<'EOF'
+  [corpo do heredoc omitido]
+base falhas [] 70
+MORTO M01 saída: sem a checagem do disponível no excesso · ['C05g sem disponível no lote (o resto é reserva do PV-038), o excesso é recusado até para a gestora: nunca sai da reserva de outra venda']
+VIVO  M02 saída: carga cancelada também sai · 70
+VIVO  M03 entrega: data futura aceita · 70
+MORTO M04 entrega: antes da saída aceita · ['C08 AC-09 KC10 entrega com devolução de 400 kg: lote novo Em inspeção (origem sem carga e sem kg), entregue 9.600 kg, a receber R$ 29.280,00 vence 24/10, falta 400 kg', 'C08b o lote de retorno não é reservável até a Qualidade liberar; depois de liberado, reserva', 'C08c devolver mais que o entregue, sem motivo ou por quem vende é recusado']
+VIVO  M05 crédito: limite com >= (borda) · 70
+VIVO  M06 aprovar crédito: comercial também aprova · 70
+VIVO  M07 entrega: comercial também confirma · 70
+MORTO M08 devolução: comercial também registra · ['C08c devolver mais que o entregue, sem motivo ou por quem vende é recusado']
+MORTO M09 cancelar carga: PCP também cancela · ['C11 AC-12 R-C14: Rui não reserva; Dora reserva e programa carga mas não confirma a saída; Caio não age; Rui confirma a saída; cada registro grava quem agiu']
+VIVO  M10 cancelar carga: sem motivo aceito · 70
+MORTO M11 devolução: lote nasce Liberado · ['C08 AC-09 KC10 entrega com devolução de 400 kg: lote novo Em inspeção (origem sem carga e sem kg), entregue 9.600 kg, a receber R$ 29.280,00 vence 24/10, falta 400 kg', 'C08b o lote de retorno não é reservável até a Qualidade liberar; depois de liberado, reserva']
+MORTO M12 devolução: origem leva a carga (produção conta de novo) · ['C08 AC-09 KC10 entrega com devolução de 400 kg: lote novo Em inspeção (origem sem carga e sem kg), entregue 9.600 kg, a receber R$ 29.280,00 vence 24/10, falta 400 kg']
+VIVO  M13 lotes para reservar: sem o filtro de validade antes da janela · 70
+VIVO  M14 vender: janela passada aceita · 70
+VIVO  M15 programar: data prevista no passado aceita · 70
+MORTO M16 programar: sem placa aceito · ['C04c recusas: acima da reserva não programada, acima da capacidade, veículo incompatível (soja em baú refrigerado), sem placa', 'C04d Dora programa a RM-0002 (cliente retira: transportador é o cliente); mesma chave = mesma carga; não programado cai para 203.000 kg']
+VIVO  M17 programar: entrega sem transportador aceita · 70
+MORTO M18 saída: reserva consumida não vira Expedida · ['C12 AC-13 KC15 três saídas de 3.333,3 + 3.333,3 + 3.333,4 kg: reserva Expedida com 0 exato, físico 2.050 kg exato, a receber 10.166,57 + 10.166,57 + 10.166,87 = R$ 30.500,01 (centavo do arredondamento por evento); o crédito aprovado (R$ 121.970) cobre as três']
+MORTO M19 encerrar: aceita com carga programada · ['C09 AC-10 encerrar sem motivo recusa; com carga programada recusa (cancele a carga antes)', 'C09b cancelada a carga (reservas intactas), encerrar cancela RS-0001 e RS-0002 na mesma transação; quantidade vigente 0 sc; disponível do L10-031 volta a 38.420 sc; falta 0']
+VIVO  M20 converter saca: mesma chave com outro conteúdo não é conflito · 70
+MORTO M21 converter saca: sem fonte aceita · ['C13e registrar a saca: Rui (expedição) recusado; massa fora do conflito (55 kg) recusada; sem fonte recusada; nada gravado', 'C13f com 60 kg e a fonte: 4.000 sc = 240.000 kg, falta 7.500 kg (125 sc), quem e quando gravados; mesma chave repete sem gravar; outra massa depois é recusada; estoque livre 34.420 sc']
+MORTO M22 converter saca: Rui (expedição) registra · ['C13e registrar a saca: Rui (expedição) recusado; massa fora do conflito (55 kg) recusada; sem fonte recusada; nada gravado', 'C13f com 60 kg e a fonte: 4.000 sc = 240.000 kg, falta 7.500 kg (125 sc), quem e quando gravados; mesma chave repete sem gravar; outra massa depois é recusada; estoque livre 34.420 sc']
+MORTO M23 títulos: antecipado entra no a receber · ['C07f CE-04 Antecipado não dispensa: sem conferir o pagamento a saída é recusada; Ana confere, a saída passa e a venda fica fora do a receber']
+VIVO  M24 exposição: antecipado entra na exposição · 70
+MORTO M25 vencido: hoje conta como vencido · ['C10d depois da tarefa (§6.5): soja realizado R$ 128,00/sc, entregue 616 sc; a receber R$ 170.318,00; estoque livre 34.420 sc (igual)']
+MORTO M26 painel: livre sem descontar o disponível vencido · ['C10f KC17 comPainel(c, 05/10): PV-038 entra no estoque, vencido 12.050 kg à parte, 12.050 − 40.000 − 2.050 = déficit 30.000 kg; S41 sai da grade de semanas']
+MORTO M27 painel: preço médio inclui CPR/barter · ['C10c preço médio contratado soja R$ 131,00/sc e mamão R$ 3,05/kg; realizado mamão R$ 3,00/kg; a receber R$ 91.470,00 (vence 15/10); vencido 0; CPR e barter fora', 'C13d preço médio da soja não soma venda sem a massa: fora da média PV-030 e CT-203 (CPR e barter à parte)']
+VIVO  M28 indicador: 30 dias vira 60 · 70
+MORTO M29 entrega: devolução não muda o status · ['C08 AC-09 KC10 entrega com devolução de 400 kg: lote novo Em inspeção (origem sem carga e sem kg), entregue 9.600 kg, a receber R$ 29.280,00 vence 24/10, falta 400 kg']
+VIVO  M30 devolução de carga em trânsito aceita · 70
+MORTO M31 crédito: aprovação vale sem teto · ['C05e KC18 excesso de 40 kg: Rui recusado (ajuste autorizado é da gestora), Dora recusada (não confirma saída); com Ana a aprovação de crédito (R$ 121.970) não cobre R$ 122.092', 'C05f Ana aprova de novo e a saída passa: 40 kg saem do disponível do L39-133 (2.050 → 2.010), físico 2.010 kg, falta 0, R$ 30.622,00; a reserva de outra venda não é tocada']
+MORTO M32 impede: reservado acima da venda não impede · ['C13h PV-030 com 50 kg: 200.000 kg e a RS-0001 (232.500 kg) fica acima da venda em 650 sc 50 kg: a mensagem e a situação "Em risco" pedem cancelar e reservar de novo; a saída fica impedida']
+MORTO M33 vender: CPR com cliente (sem papel fornecedor) aceito · ['C02h condição corrigível por toque (Antecipado aceito); condição sem evento recusada; CPR só com fornecedor']
+MORTO M34 programar: previsto acima da reserva não programada aceito · ['C04c recusas: acima da reserva não programada, acima da capacidade, veículo incompatível (soja em baú refrigerado), sem placa']
+VIVO  M35 devolução: motivo livre aceito · 70
+VIVO  M36 entrega: segunda entrega com outra chave aceita (sobrescreve) · 70
+MORTO M37 situação: Em risco ignorado · ['C06c bula corrigida põe o lote na carência: saída recusada (bloqueado), venda "Em risco" pela mesma comImpede', 'C06g a mesma recusa aparece "Em risco" na venda e impede a carga (mesma função)', 'C13h PV-030 com 50 kg: 200.000 kg e a RS-0001 (232.500 kg) fica acima da venda em 650 sc 50 kg: a mensagem e a situação "Em risco" pedem cancelar e reservar de novo; a saída fica impedida']
+MORTO M38 saída: crédito usa só o previsto (não o pesado) · ['C05e KC18 excesso de 40 kg: Rui recusado (ajuste autorizado é da gestora), Dora recusada (não confirma saída); com Ana a aprovação de crédito (R$ 121.970) não cobre R$ 122.092', 'C05f Ana aprova de novo e a saída passa: 40 kg saem do disponível do L39-133 (2.050 → 2.010), físico 2.010 kg, falta 0, R$ 30.622,00; a reserva de outra venda não é tocada']
+
+### 2026-10-09T18:08:02.945Z
+$ cd <scratchpad>/com && python3 -c "
+import sys,os; sys.dont_write_bytecode=True; os.environ['SAFRION_DADOS']='sintetico'; G='<sp-com>/tools/prototipo/v37/gen37'; sys.path.insert(0,G); os.chdir(G); import cenario
+P=cenario.js_prefixo(); S=open('producao.js').read(); print(S in P, len(P))"; cat > mutantes2.txt <<'EOF'
+  [corpo do heredoc omitido]
+True 150555
+base falhas [] 70
+MORTO P: prReservar sem a checagem de ator · ['R01b reservar com perfil sem o papel (Caio · PCP) é recusado: decisão do comercial ou da gestora', 'C11 AC-12 R-C14: Rui não reserva; Dora reserva e programa carga mas não confirma a saída; Caio não age; Rui confirma a saída; cada registro grava quem agiu']
+VIVO  P: prCancelarReserva aceita qualquer perfil · 70
+MORTO P: prSaldoFut sem o máximo zero · ['R02 CE-03 venda futura expedida acima da quantidade (30.040 de 30.000 kg): vendas futuras 0 kg, nunca −40, e a oferta livre não ganha 40 kg', 'C05h excesso de 40 kg na venda futura (1.040 de 1.000 kg): vendas futuras da S42 vão a 0 kg e a oferta livre não aumenta']
+VIVO  P: prReservar aceita venda encerrada? (sem falta de qualquer jeito) · 70
+MORTO P: prSitPed sem Encerrada · ['R04 R-C11 venda com saldo encerrado aparece "Encerrada" (não "Entregue" nem "Sem reserva")', 'C09b cancelada a carga (reservas intactas), encerrar cancela RS-0001 e RS-0002 na mesma transação; quantidade vigente 0 sc; disponível do L10-031 volta a 38.420 sc; falta 0', 'C13j CT-203 encerrado sem a saca: "Encerrada", 0 kg vigentes; a oferta 26/27 segue suspensa só por CRE-0095 e BT-090; registrar a saca depois é recusado; com as outras duas em 60 kg, livre 60.280 sc (68.180 − 7.900)']
+
+### 2026-10-09T18:09:07.580Z
+$ cd <scratchpad>/com && cat > p8.js <<'EOF'
+  [corpo do heredoc omitido]
+saca PV-030: saca de 50 kg registrada por Ana (gestora) (Contrato CT-201 cl. 2): 4.000 sc = 200.000 kg; falta 0 sc 50 kg. Reservado acima da venda em 650 sc 50 kg: cancele a reserva e reserve de novo.
+cancel RS-0001 cancelada (refazer com 50 kg): 3.875 sc voltam ao disponível do L10-031.
+res RS-0002: 500 sc do L10-031 reservados para o PV-030 (Coop Grão Sul). L10-031 disponível 37.920 sc · PV-030 parcial.
+prog RM-0002 programada por Ana (gestora): PV-030 (Coop Grão Sul) · L10-031 30.000 kg = 500 sc · Bitrem graneleiro 37 t AAA1A11 · cliente retira · 26/09. Próximo passo: confirmar a saída com a pesagem.
+sai RM-0002: saída de 30.000 kg (44.000 − 14.000) = 600 sc 50 kg para o PV-030 (Coop Grão Sul). Entregue na retirada · R$ 76.800,00 a receber até 26/09. L10-031 disponível 37.920 sc.
+EXPED (comTxt cultura): 500 sc | VEN (comTxtV venda): 600 sc 50 kg
+dev 100 "sc" → 6000 kg · 120 sc 50 kg devolvidos da RM-0002 (Fora do padrão contratado): lote L39-133 Em inspeção, só a Qualidade libera. PV-030: entregue 480 sc 50 kg, a receber da carga R$ 61.440,00.
+
+### 2026-10-09T18:10:53.076Z
+$ cd <scratchpad>/proto && cat > ui_test.py <<'EOF'
+  [corpo do heredoc omitido]
+Command running in background with ID: brlexclmh. Output is being written to: <sessao-tmp>/tasks/brlexclmh.output. If it exits while you are still working you will be notified, but it is terminated when you give your final response and no notification can follow that — so do not end your turn to wait for it; if you need its result, wait for it before giving your final response. To check interim output, use Read on that file path.
+Session cwd remains <repo>; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+### 2026-10-09T18:11:11.923Z
+$ cd <scratchpad>/com && cat > p9.js <<'EOF'
+  [corpo do heredoc omitido]
+Fertisul | Fornecedor |  | null  |  | 
+Casa do Adubo | Fornecedor |  | null  |  | 
+Agro Norte | Fornecedor |  | null  |  | 
+Santa Rita Insumos | Fornecedor |  | null  |  | 
+Sementes Vale | Fornecedor |  | null  |  | 
+Coop. Vale | Fornecedor,Cliente | À vista na entrega | 1500000 2027-06-30 | Armazém Coop. Vale · Rio Verde/GO · 24 h na safra | 
+Química Centro-Oeste | Fornecedor |  | null  |  | 
+Coop Grão Sul | Cliente | À vista na entrega | 2000000 2027-06-30 | Retira no Armazém Sede (FOB) · seg–sáb 06–22h | 
+TransVale Transportes | Transportador |  | null  |  | Bitrem graneleiro 37 t;Truck graneleiro 14 t
+Frutas Real | Cliente | 28 dias após a entrega comprovada | 120000 2026-12-31 | CD Frutas Real · Vitória/ES · seg–sáb 06–12h | 
+Torrefação Serra | Cliente | 30 dias após a entrega comprovada | 900000 2026-11-30 | Retira no Armazém Sede (FOB) · seg–sex 07–16h | 
+Rede Hortifrúti BA | Cliente | À vista na entrega | 40000 2026-08-31 | CD Salvador/BA · seg–sáb 04–10h | 
+Rota Sul Transportes | Transportador |  | null  |  | Baú refrigerado 12 t
+Atacado Bom Preço | Cliente | 14 dias após a entrega comprovada | 300000 2027-03-31 | CD Atacado Bom Preço · Goiânia/GO · seg–sex 06–14h | 
+CD Horti | Cliente | 28 dias após a entrega comprovada | 100000 2027-01-31 | CD Horti · Vitória/ES · seg–sáb 06–12h | 
+Agroquímica Delta | Fornecedor |  | null  |  | 
+{"modal":"entrega","local":"Retira no Armazém Sede (FOB) · seg–sáb 06–22h"}
+
+### 2026-10-09T18:11:26.479Z
+$ cd <scratchpad>/com && cat > p10.js <<'EOF'
+  [corpo do heredoc omitido]
+antes: [["Estoque (2025/26)","38.420 sc","4.000 sc","34.420 sc","Livre"],["Safra 2026/27","68.180 sc","19.900 sc","48.280 sc","Livre"]]
+comSafColhida 26/27 = true · safras futuras []
+depois de 1 caminhão: [["Estoque (2025/26)","38.420 sc","4.000 sc","34.420 sc","Livre"],["Estoque (2026/27)","0 sc","19.900 sc","−19.900 sc","Déficit"]]
+venda futura 26/27 depois do 1º caminhão: Venda futura só para safra ainda não colhida: a 2026/27 já começou a ser colhida (CE-02).
+
+### 2026-10-09T18:12:00.209Z
+$ cd <scratchpad>/com && cat > p11.js <<'EOF'
+  [corpo do heredoc omitido]
+aprova 10.000 Crédito do PV-036 aprovado por Ana (gestora) até R$ 121.970,00 (a receber de Frutas Real + reservado não expedido).
+aprova 10.040 mesma chave Aprovar crédito do PV-036: já registrado por Ana (gestora); nada foi gravado de novo. | ate 121970
+saída 10.040 Saída da RM-0002 recusada no crédito: a receber de Frutas Real + esta saída = R$ 122.092,00, acima do limite de R$ 120.000,00 (a aprovação de Ana (gestora) cobre até R$ 121.970,00). Aprovar crédito do PV-036: decisão de Ana (gestora). Nada foi alterado.

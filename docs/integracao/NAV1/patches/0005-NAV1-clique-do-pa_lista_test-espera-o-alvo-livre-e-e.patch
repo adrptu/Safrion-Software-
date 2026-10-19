@@ -1,0 +1,105 @@
+From a7023caf529f9c06ad9cad4f3c6a18ba7c6470be Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 9 Oct 2026 21:42:42 +0000
+Subject: [PATCH 5/5] =?UTF-8?q?NAV1:=20clique=20do=20pa=5Flista=5Ftest=20e?=
+ =?UTF-8?q?spera=20o=20alvo=20livre=20e=20evid=C3=AAncia=20das=20corre?=
+ =?UTF-8?q?=C3=A7=C3=B5es=20(=C2=A77.1)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- pa_lista_test.py (revisão T1): o clique de verdade espera, até 2 s, nada
+  estar por cima do alvo no ponto do clique (uma lista de busca ainda
+  fechando), para o clique não cair em outra camada. Só o teste muda; o
+  código da PA é o do 7b7d260.
+- docs/navegacao/ESPECIFICACAO.md §7.1: bateria das correções da revisão,
+  com o resultado de cada comando no 7b7d260 e no 0e1c368.
+
+Executado (Chrome headless, um teste por vez com flock):
+- pa_lista_test.py → 24 ok · 0 falhas em 3 rodadas com esta mudança (e 2 no
+  7b7d260); com ANTES=_render de cdc185f, L12: 4 cliques + 4 teclas contra
+  5 + 4 na base
+- acoes_duplicadas.py → 140 páginas · 0 com ação repetida · erros 0
+- verif_pa.py → limites do gatilho iguais; sem erro de JS
+- sondas do revisor (adv.py A, B, D, E, F, G2, H, I, J, L) → nenhum achado
+  se reproduz; a sonda I mede o bloco completo, que segue no fim da página:
+  o resumo está na nota ao lado de Publicar (L5/L11)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Div8EjesSwVnpSUvYjZ7kh
+---
+ docs/navegacao/ESPECIFICACAO.md            | 29 ++++++++++++++++++++--
+ tools/prototipo/v37/gen37/pa_lista_test.py | 10 ++++++--
+ 2 files changed, 35 insertions(+), 4 deletions(-)
+
+diff --git a/docs/navegacao/ESPECIFICACAO.md b/docs/navegacao/ESPECIFICACAO.md
+index 9ea36ab..f37f930 100644
+--- a/docs/navegacao/ESPECIFICACAO.md
++++ b/docs/navegacao/ESPECIFICACAO.md
+@@ -75,7 +75,7 @@ Conferidos contra os padrões BOT-01 a BOT-09 do design system de 09/10 (`docs/d
+ - **CTL5:** AG-07 "PL-xx ›" → `PA.dc.html#plano=<id>` (o endereço já existe).
+ - **Planejar safra (adoção, PRD 40.3; revisão R5):** a troca de versão por cultivo não existe no protótipo, e a PA não grava no `cenario.js` (o seletor do Planejar safra continua mostrando a v6). Aceite proposto para a frente dona: publicar a v7 da Soja alta tecnologia na PA; o link "Abrir cultivo no Planejar safra ›" do c1 abre o painel do cultivo com "Na v6 · v7 publicada" e um comando para adotar a v7, que grava a troca no cenário; de volta à PA, o c1 aparece "Na versão em vigor" e os demais continuam na v6. Depende de a PA gravar os planos no estado único (item abaixo).
+ - **Quem publica (AG-05, já na base, fora desta frente):** publicar não grava quem publicou nem confere o perfil (`g2perfil`); qualquer perfil do "Ver como" publica uma dose. O PRD prevê o aprovador técnico. Vai para a frente de perfis (CTL-3/CONF), com aceite: só o perfil agrônomo publica, e a versão guarda quem e quando.
+-- **Integrador (`etapas_celular_test.py`, linha 143):** a correção preferida (revisão T2) mantém a PA no zoom de 200 %, que continua conferindo cabeçalho, título e comando: no item 7, ler `z[g].get('sobrepoe',0)` e `z[g].get('vazam')` no lugar de `z[g]['sobrepoe']` e `z[g]['vazam']`, como no `etapas_celular_alt_codex.py` do revisor. Hoje o teste aborta no item 7 com `KeyError: 'sobrepoe'`, e os itens 7 a 14 não rodam. Esta frente não edita o arquivo (§3.1); a troca, rodada numa cópia contra o build corrigido, deu o resultado da §7.
++- **Integrador (`etapas_celular_test.py`, linha 143):** a correção preferida (revisão T2) mantém a PA no zoom de 200 %, que continua conferindo cabeçalho, título e comando: no item 7, ler `z[g].get('sobrepoe',0)` e `z[g].get('vazam')` no lugar de `z[g]['sobrepoe']` e `z[g]['vazam']`, como no `etapas_celular_alt_codex.py` do revisor. Hoje o teste aborta no item 7 com `KeyError: 'sobrepoe'`, e os itens 7 a 14 não rodam. Esta frente não edita o arquivo (§3.1); a troca, rodada numa cópia contra o build corrigido, deu o resultado da §7.1.
+ - **Estado único:** a PA guarda os planos no estado da tela (como na base), não no `cenario.js`. Um plano criado some no F5; o endereço dele então abre a lista com aviso.
+ 
+ ## 5. Testes antigos com expectativa mudada (motivo: a PA deixou de ter etapas)
+@@ -129,7 +129,32 @@ Parecer do Codex (papel revisor) sobre `cdc185f..0e1c368`: não integrar antes d
+ | R6 · Esc com o filtro de coluna ou o menu sobreposto voltava à lista | S4 | O Esc da PA passa à fase de bolha e respeita quem já tratou o Esc; isenta qualquer `[role=dialog]`, lista, menu e o menu sobreposto | L17 |
+ | R7 · aviso com o id interno depois do F5 | S4 | "Plano do endereço não encontrado (no protótipo, um plano criado aqui não fica guardado ao recarregar): escolha um plano da biblioteca." | L18 |
+ | R8 · voltar descartava sem aviso a inclusão de insumo digitada | S4 | Voltar, ou trocar o endereço, com a dose ou a inclusão digitadas não sai: a nota avisa, com "Descartar e voltar à biblioteca" (ou "Descartar e abrir <plano>") e "Continuar editando" | U15; L19 |
+-| T1 · `pa_lista_test.py` instável (L7, L8) | S3 | Esperas pela condição (até 6 a 8 s) no lugar das esperas fixas, também nos casos novos | rodadas da §7.1 |
++| T1 · `pa_lista_test.py` instável (L7, L8) | S3 | Esperas pela condição (até 6 a 8 s) no lugar das esperas fixas, também nos casos novos; o clique espera (até 2 s) nada estar por cima do alvo, como uma lista de busca que ainda está fechando | 5 rodadas seguidas sem falha (§7.1) |
+ | T2 · `etapas_celular_test.py` vermelho | S3 | Arquivo fora desta frente (§3.1 do CONSOLIDADO): a correção do revisor está na §4 para o integrador e foi rodada numa cópia (§7.1) | — |
+ | T3 · lacunas dos testes | S4 | U4 com "retira"; U8b com d1 (S27SF) e lg01 (LG2627); U10 com a base em rascunho; U13 com 0, vazio, "−2" e "-2"; mutação: 18 de 18 mutantes mortos (§7.1) | — |
+ | Fora do escopo · quem publica (AG-05) | S3, já na base | Registrado na §4 para a frente de perfis | — |
++
++### 7.1 Evidência das correções (executada em 09/10, 18:39–21:50 UTC)
++
++Build do `7b7d260` (o código da PA não muda depois dele): `build.py` → 0 FALHA, 140 artboards; `montar_render.py` → 140 páginas. Navegador: Chrome headless, um teste por vez (`flock /tmp/cdpE.lock`), emulação, não aparelho físico. Logs em `scratchpad/nav1fix/` (`bateria.idx`, `bateria2.idx`, `log_*.txt`).
++
++| Comando (de `gen37/`) | Depois das correções | No `0e1c368` (antes) |
++|---|---|---|
++| `python3 pa_regras_test.py` | 18/18 | 10/18 (os casos novos de R1, R2, R3, R4, R8 e o U5) |
++| mutação do `pa_regras_test.py` (cópia, `mut/run.py` → `mut/resultado.txt`) | 18 de 18 mutantes mortos, inclusive os 3 vivos do revisor (safra fixa, cópia do rascunho, sem "retira") | 3 vivos de 11 (revisor) |
++| `python3 pa_lista_test.py` | 24 ok · 0 falhas em 5 rodadas: 2 com o `7b7d260` e 3 com o clique que espera nada por cima (commit seguinte) | 13 ok · 11 falhas (L5, L6, L7a, L11, L14a, L14c, L15 a L19) |
++| `ANTES=<_render de cdc185f> python3 pa_lista_test.py` (L12) | mudar uma dose e publicar: 4 cliques + 4 teclas; base 5 cliques + 4 teclas | — |
++| `python3 patest.py` | 46 ok | — |
++| `python3 acao_unica_test.py familias` / `v3` | 8 ok · 0 falhas / 10 ok · 0 falhas | — |
++| `python3 componentes_test.py matriz` / `ajustes2` | 3 ok · 0 falhas / 2 ok · 0 falhas | — |
++| `python3 componentes_test.py interacao` | 8 ok · 2 falhas (10 e 14, hover no headless; vermelho conhecido da base) | — |
++| `python3 etapas_celular_test.py` | **vermelho**: `KeyError: 'sobrepoe'` no item 7 (arquivo fora desta frente, §4) | — |
++| o mesmo com a troca do revisor na linha 143 (cópia em `etc_alt/`) | 14 ok · 0 falhas | — |
++| `python3 agrofit_test.py` | 17/17 | — |
++| `python3 varredura.py` | 140/140 páginas sem erro | — |
++| `python3 links_ocultos_test.py` | 8 · 0 falhas | — |
++| `python3 ../ferramentas/acoes_duplicadas.py . /tmp/NAV1-dup.json` | 140 páginas · 0 com ação repetida · erros 0 | — |
++| `python3 verif_pa.py` (diagnóstico) | limites do gatilho iguais aos da §6; sem erro de JS | — |
++| sondas do revisor (`probes/adv.py` A, B, D, E, F, G2, H, I, J, L) | A: o clique não publica, a dose do Glifosato entra no rascunho e no resumo ao lado do botão ("2 alterações na v7…"); B: não publica, erro no campo, botão desabilitado com o motivo; D: desabilitado ("O rascunho v7 está igual à v6…"), 0 links; E e F: o Esc fecha só o filtro ou o menu, o plano continua aberto; G2: o painel continua na Soja e "Salvar" sem mudança não grava ("Nada mudou…"); H: aviso sem id; J: não volta à biblioteca com a inclusão digitada; L: "Cancelar" fecha na 1ª vez, 5 de 5 | A, B, D, E, F, G2, H e J reproduziam os achados |
++
++**Sonda I:** o bloco completo de alterações continua no fim da página (0 px visível a 1440 × 900 e a 390 × 844 logo depois de mudar a dose). O que fica à vista é o resumo na nota ao lado de "Publicar" (L5 a 1440 × 900 e L11 a 390 × 844 medem a nota dentro da tela), com "Ver alterações" para o bloco. Foi a opção do próprio parecer ("um resumo na nota do Próximo passo").
+diff --git a/tools/prototipo/v37/gen37/pa_lista_test.py b/tools/prototipo/v37/gen37/pa_lista_test.py
+index 7c3ae8e..1717f52 100644
+--- a/tools/prototipo/v37/gen37/pa_lista_test.py
++++ b/tools/prototipo/v37/gen37/pa_lista_test.py
+@@ -91,8 +91,14 @@ NOTA = """(()=>{const n=document.querySelector('[data-acoes] .acoes-nota'); cons
+   const r=n.getBoundingClientRect(), rb=b?b.getBoundingClientRect():null; return {txt:n.innerText.replace(/\\s+/g,' ').trim(), naTela:r.height>0&&r.top>=0&&r.bottom<=innerHeight,
+   pubNaTela:!!rb&&rb.top>=0&&rb.bottom<=innerHeight, desc:b?(b.getAttribute('aria-describedby')||''):'', dis:!!(b&&b.disabled)};})()"""
+ CLIQUES = [0]
+-def centro(sel):
+-    return J(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
++def centro(sel, limite=2.0):
++    """centro do elemento depois de trazê-lo à tela; espera (até o limite) nada estar por cima dele no ponto do clique, como uma
++    lista de busca que ainda está fechando (revisão T1: o clique não cai em outra camada)"""
++    fim = time.time() + limite
++    while True:
++        r = J(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); const x=r.left+r.width/2, y=r.top+r.height/2; const t=document.elementFromPoint(x,y); return [x,y,!!t&&(e===t||e.contains(t))];}})()")
++        if not r or r[2] or time.time() >= fim: return r[:2] if r else None
++        time.sleep(.15)
+ def clique(sel, toque=False, w=.45):
+     """clique (ou toque) de verdade no centro do elemento, contado; sel é uma expressão JS que devolve o elemento"""
+     xy = centro(sel)
+-- 
+2.43.0
+

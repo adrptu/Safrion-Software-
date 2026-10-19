@@ -1,0 +1,14 @@
+inicio 2026-10-10T02:42:28Z gen=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/COMP-SAF-DOM-PCM/base7d38e5d/tools/prototipo/v37/gen37 HEAD=copia lista=/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/COMP-SAF-DOM-PCM/listaD.txt
+ostest rc=0 569s · 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+osacoes rc=0 211s · RESULTADO: 40 ok · 5 falhas
+acao_unica_familias rc=0 213s · RESULTADO: 8 ok · 0 falhas (familias)
+acao_unica_responsivo rc=1 93s · RESULTADO: 1 ok · 2 falhas (responsivo)
+componentes_matriz rc=0 180s · RESULTADO: 3 ok · 0 falhas (matriz)
+componentes_rotacao rc=0 282s · RESULTADO: 6 ok · 0 falhas (rotacao)
+componentes_interacao rc=1 70s · RESULTADO: 8 ok · 2 falhas (interacao)
+componentes_ajustes rc=1 63s · RESULTADO: 2 ok · 2 falhas (ajustes)
+componentes_ajustes2 rc=0 62s · RESULTADO: 2 ok · 0 falhas (ajustes2)
+etapas_celular_complemento rc=1 62s · RESULTADO: 7 ok · 2 falhas (complemento)
+etapas_celular_desktop rc=1 23s · RESULTADO: 0 ok · 1 falhas (desktop)
+carencia_fluxo rc=0 150s · RESULTADO: 41/41 verificações
+fim 2026-10-10T03:15:27Z

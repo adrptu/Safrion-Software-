@@ -1,0 +1,8 @@
+PASS 5 paridades JS/Python: previsões canônicas da semente (2 fazendas), parcial deduplicado, multi-item, legado ambíguo excluído com aviso. Não é execução integral do build.
+PASS 6ª paridade: dois lotes em unidades distintas e recebimento parcial, previsão ambígua excluída.
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/q5cp/c34_paridade_test.py", line 51, in <module>
+    assert not out['recebDt'] and len(out['recebNaoApuravel'])==2 and all('7001' in x['motivo'] for x in out['recebNaoApuravel']),out
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'fisico': {}, 'quar': {}, 'quarRep': {}, 'quarRef': [], 'reservas': [], 'recebDt': [{'ref': 'PC-X', 'item': 'A', 'un': 'kg', 'linha': 1, 'q': 80.0, 'faz': 'F'}, {'ref': 'PC-X', 'item': 'A', 'un': 'L', 'linha': 2, 'q': 30.0, 'faz': 'F'}], 'recebNaoApuravel': [], 'sobra': []}
+rc=1

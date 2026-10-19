@@ -1,0 +1,106 @@
+U · regras (node)
+  ok  U · motor JS executou sem erro
+  ok  U · V1 · "Sem plano" no seed = Distribuidor 3 t, Máquina TSI, Esqueletadeira e Gotejo T7 (ativos em uso sem vínculo em plano ativo e publicado)
+  ok  U · V1 · sugestão: Gotejo T7 → PM-07 (mesma classe, Irrigação); Máquina TSI → PM-08 (mesmo grupo, Beneficiamento); Distribuidor e Esqueletadeira sem plano compatível
+  ok  U · V1 · sugestão é opção, não vínculo: nada mudou no estado
+  ok  U · V2 · plano de pulverizador num trator é recusado com o motivo (gera ordem e peças erradas)
+  ok  U · V2 · modelo diferente no mesmo grupo é aviso e permite
+  ok  U · V2 · o mesmo serviço por dois planos é recusado (Revisão 250 h pelo PM-02)
+  ok  U · V2 · gatilho só por km num ativo com horímetro: recusado com o motivo (nunca "Sem gatilho" calado)
+  ok  U · V2 · km + dias num ativo com horímetro: aviso dizendo que só os dias contam
+  ok  U · V2 · ativo inativo não é candidato nem "Sem plano"
+  ok  U · V3 · referência 1.000 h, leitura 1.450 h, intervalo 250 h → Vencida (vence em 1.250 h)
+  ok  U · V3 · vincular de novo (já vinculado) não muda nada: segue Vencida, marco e última execução intactos
+  ok  U · V3 · desvincular guarda o vínculo com fim (marco e última execução intactos) e tira o ativo dos vencimentos
+  ok  U · V3 · revínculo mostra a base de antes ("hist"), não a leitura atual
+  ok  U · V3 · revincular retoma a contagem: continua Vencida em 1.250 h; marco e última execução iguais aos de antes; histórico do período guardado
+  ok  U · V3 · contraprova: com a leitura atual (1.450 h) como referência a mesma conta daria Em dia (vence em 1.700 h)
+  ok  U · V4 · sem execução registrada: a pessoa escolhe (sem escolha, não vincula)
+  ok  U · V4 · contar de agora: hoje e a leitura atual do próprio ativo (5.210 h), marcado como estimado
+  ok  U · V4 · prévia igual ao vencimento gravado (mesma conta: manRef + manVenc + manProxTxt)
+  ok  U · V4 · vincular inclui o ativo em "Aplica a" (ativos escolhidos) e tira de "Sem plano"
+  ok  U · V4 · última execução: data futura, leitura negativa e maior que a atual recusadas; 5.100 h em 01/09 aceita
+  ok  U · V4 · ativo sem contador: a base fica sem leitura (nunca 0); ativo com horímetro sem leitura não "conta de agora"
+  ok  U · V4 · com OM encerrada do mesmo serviço a base é a dela (OM-0205 · 02/06 · 3.300 h); corrigir pede motivo
+  ok  U · V5 · lote com um inválido não grava metade (tudo ou nada) e diz o motivo
+  ok  U · V5 · 3 ativos num lote (o repetido na lista conta uma vez); a mesma chave (duplo clique) não grava de novo; outra chave acha "já vinculados" e nada muda
+  ok  U · V5 · o ativo pode ter mais de um plano: Trator 02 no PM-01 e no PM-11 (nada é colapsado)
+  ok  U · V5 · permissão pela mesma regra do plano (manExige "plano"): Zé e Ana recusados com o motivo
+  ok  U · V6 · desvincular pede motivo; com motivo, avisa que a OM-0234 continua aberta e não a apaga
+  ok  U · V6 · histórico preservado: marco e últimas execuções intactos, fim com quem, quando e motivo
+  ok  U · V6 · vínculo encerrado não gera ordem nem vencimento; o ativo fica "Sem plano"
+  ok  U · V6 · revincular retoma o mesmo ciclo: a OM-0234 volta a ser a ordem do ciclo (nenhuma duplicada)
+  ok  U · V6 · desvincular de novo não muda nada
+  ok  U · V7 · ativo de outro modelo num plano por modelo entra como exceção (aplica.x) e o texto diz isso
+  ok  U · V7 · trocar para "Ativos escolhidos" sem marcar nada mantém o vinculado e diz o efeito
+  ok  U · V7 · trocar para um modelo de outro grupo é recusado (um plano, um grupo de máquina)
+  ok  U · V7 · situação na coluna Plano: Atrasado · Vence em 55 h · Vence em 8 dias · Em dia
+  ok  U · V7 · vínculo só em rascunho continua "Sem plano" (distinto: a coluna diz Rascunho)
+  ok  U · V8.1 · publicado só por km e rascunho por dias, ativo por horímetro: recusado com o motivo (a v1 em vigor não tem gatilho que o ativo conte)
+  ok  U · V8.1 · com a versão compatível publicada (dias), o mesmo vínculo passa e tem vencimento
+  ok  U · V8.2 · publicado por dias e rascunho só por km: aceita pelo publicado (com vencimento) e avisa do rascunho
+  ok  U · V8.2 · com o ativo vinculado, o rascunho só por km não pode ser publicado (o motivo diz quem ficaria sem gatilho)
+  ok  U · V8.3 · sem versão publicada: km recusado com o motivo (rascunho v1 é o que vale ao publicar); dias aceita, a prévia diz que vence só depois de publicar e o ativo segue "Sem plano"
+A · 1440 px
+  ok  A1 · entrada do módulo: "4 ativos sem plano de manutenção · Vincular ›" leva a Ativos › Sem plano
+  ok  A1 · um toque: Ativos com o filtro rápido "Sem plano" ligado (4 linhas) e a primária "Vincular a plano" no cabeçalho
+  ok  A1 · coluna Plano: sugestão explícita por linha (Gotejo T7 → PM-07; Máquina TSI → PM-08) ou Criar plano
+  ok  A1 · sem o filtro: 16 ativos; a coluna Plano diz o plano e a situação (Trator 03 PM-02 Atrasado; Trator 02 PM-01 Vence em 55 h)
+  ok  A1 · "Plano" é a 2ª coluna, logo depois do ativo
+  ok  A1: sem erro de JS
+  ok  A1b · "Vincular a plano" com os 4 sem plano: opções PM-07 e PM-08; no PM-07 só o Gotejo T7 entra, os outros com o motivo
+  ok  A1b · trocar para o PM-08 marca a Máquina TSI e tira o Gotejo T7
+  ok  A1b · "Criar plano ›" abre o Novo plano já com o Distribuidor; a lista filtrada continua
+  ok  A2 · o link abre o painel com o PM-07 já escolhido, Gotejo T7 marcado e o aviso de modelo diferente (permitido)
+  ok  A2 · sem execução registrada a primária fica desligada até a pessoa escolher (nada é inferido)
+  ok  A2 · contar de agora mostra a origem (23/09 · 5.210 h, estimado) e a prévia; primária "Vincular ao PM-07"
+  ok  A2 · Vincular grava uma vez (recibo depois da gravação): marco 23/09 · 5.210 h estimado
+  ok  A2 · volta à mesma lista filtrada (3 sem plano) com o foco numa linha dela
+  ok  A2 · prévia igual ao vencimento gravado (Ativos deste plano mostra a mesma data)
+  ok  A2: sem erro de JS
+  ok  A3 · detalhe do plano: seção "Ativos deste plano · 0" com "Vincular ativos" nela
+  ok  A3 · lista já marcada com os do "Aplica a" (Trator 02, 03 e 04); Trator T1 (mesma classe) aparece desmarcado
+  ok  A3 · cada ativo conta da própria leitura (2.988 · 5.120 · 3.410 h), com prévia por ativo; "Vincular 3 ativos ao PM-11"
+  ok  A3 · duplo clique grava uma vez só (2 recibos de vínculo na sessão: A2 e A3)
+  ok  A3 · a seção mostra os 3 com a base e o próximo vencimento
+  ok  A3: sem erro de JS
+  ok  A4 · no plano, a busca acha o trator e diz por que não serve (sem caixa para marcar); Máquina TSI é candidata (mesmo grupo)
+  ok  A4 · painel de um ativo sem busca (lista curta: sem ruído)
+  ok  A4 · informar a última execução: data e leitura pedidas no campo
+  ok  A4 · atalhos "Hoje" e "Atual · 720 h" (a leitura do próprio ativo); leitura negativa recusada
+  ok  A4 · fechar com alteração pede confirmação e descarta
+  ok  A5 · Zé: "Vincular a plano" e "Vincular ao PM-08" desligados com o motivo (Ação do Otávio)
+  ok  A5 · Zé no plano: "Vincular ativos" desligado (ou ausente sem candidato)
+  ok  A6 · gravação recusada: nada vinculado, painel aberto com o plano, a escolha e a caixa marcada
+  ok  A6 · gravação de volta: o mesmo toque vincula
+  ok  A7 · recarregar: Gotejo T7 no PM-07 e Máquina TSI no PM-08
+  ok  A8 · Desvincular (⋯ da linha) avisa da OM-0234 aberta e pede o motivo antes
+  ok  A8 · desvinculado com motivo; OM-0234 continua em A liberar; marco e últimas execuções guardados
+  ok  A8 · Trator 02 segue no PM-11 (o outro plano dele): não fica "Sem plano" por desvincular um
+  ok  A8 · revínculo: retoma a contagem de antes (sem escolher base de novo)
+  ok  A8 · revinculado: marco, últimas execuções e o ciclo da OM-0234 iguais (nenhuma ordem duplicada)
+  ok  A9 · revincular não esconde atraso: Trator 03 segue Vencida em 5.090 h (Atrasado na coluna Plano)
+  ok  A10 · Editar plano: o efeito de trocar "Aplica a" aparece antes de salvar
+  ok  A10 · salvo: modelo + 2 de outro modelo; os 3 vínculos continuam
+  ok  A10: sem erro de JS
+  ok  A11 · teclado: Tab preso no painel, Esc fecha, foco volta a "Vincular ativos"
+  ok  A12 · Esqueletadeira inativa: fora do "Sem plano" (só o Distribuidor sobra) e sem sugestão
+  ok  A13 · CD-03: "Plano: PM-01 ›" e "Plano: PM-11 ›" no Trator 02; Distribuidor: "Sem plano · Vincular na Manutenção ›"
+  ok  A13: sem erro de JS
+  ok  A14 · publicado só por km (rascunho por dias) num ativo por horímetro: recusado no painel com o motivo da versão em vigor
+  ok  A14 · publicado por dias e rascunho só por km: o vínculo vale pelo publicado (Em dia) e "Publicar v2" fica desligado com o motivo
+  ok  A14: sem erro de JS
+  ok  A15 · 2 marcados e um fica Inativo antes de gravar: nada gravado (sem vínculo nem recibo), painel aberto com a seleção e o motivo; primária desligada
+  ok  A15 · desmarcado o inválido, grava só o que continua marcado (decisão explícita)
+  ok  A15 · busca sem resultado: os 3 marcados continuam na lista e no rótulo ("Vincular 3 ativos ao PM-11")
+  ok  A15 · busca que esconde 2 marcados não os tira do lote: grava os 3
+  ok  A15: sem erro de JS
+B · 390 px (toque)
+  ok  B1 · entrada do módulo: aviso com 44 px de alvo, sem rolagem lateral
+  ok  B1 · Ativos › Sem plano no celular: 4 ativos, "Vincular ao PM-07 ›" à vista na linha (44 px), sem rolagem lateral da página
+  ok  B2 · painel a 390 px: largura da tela, primária alcançável (sem rolar) e alvos de 44 px (caixa, plano, contar de agora, Vincular)
+  ok  B2 · 3 toques: link, Contar de agora, Vincular ao PM-07
+  ok  B3 · lote no celular: data e leitura com 44 px, teclado numérico, dentro da tela
+  ok  B: sem erro de JS
+RESULTADO: 101/101 ok
+rc=0

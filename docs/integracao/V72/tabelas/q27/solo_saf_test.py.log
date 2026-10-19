@@ -1,0 +1,39 @@
+== desktop · Planejar safra com a análise de solo
+OK  base: demanda bruta de KCl 60% da Safra 2026/27 lida do mesmo cálculo da etapa 4 (sem aceite) · [78900, 0]
+OK  link "Sugestões pelas análises · 4" na etapa 2 da Safra 2026/27 · Sugestões pelas análises · 4
+OK  AC-SOLO-05 T7 (sem laudo validado): painel sem "sem análise"/"sem laudo" e sem sugestão · Insumos e doses de T7 · Mamão Formosa Formosa, 42 ha × Plano padrão: Mamão Formosa produção v3 · plantio 10/03/2025. Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam. DATA DO CALENDÁRIO ▾ 01/10/2026 · 01/10/2026 ▾ Fertirrigação de nitrogênio · Ferti
+OK  AC-SOLO-05 o T7 salva dose manual sem nada pedir · 1 dose alterada em T7. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.
+OK  AC-SOLO-05 etapas 2 a 4 sem "sem análise" ou "sem laudo"
+OK  AC-SOLO-05 Safrinha 2027 (0 sugestões: a calagem do T2 ficou na Safra 2026/27): o link não aparece
+OK  AC-SOLO-08 T1-A: "Análise sugere 150 kg/ha · +4.800 kg no talhão · Por quê · Usar 150 kg/ha" sob o KCl · KCl 60% 120,00 kg/ha kg/ha R$ 2,40/kg R$ 288,00/ha Retirar Análise sugere 150 kg/ha · +4.800 kg no talhão · Por quê · Usar 150 kg/ha + Incluir insumo nesta atividade ▾ DAP +25 · 09/11/2026 ▾ Herbicida
+OK  uma só primária no painel de insumos (Salvar)
+OK  AC-SOLO-08 Por quê: laudo, profundidade, método, regra rotulada e conta · Por quê · Adubação de cobertura · KCl 60% T1-A · análise sugere 150 kg/ha × LAUDO LAU-2061 · T1 · 0–20 cm · coleta 18/09/2026 Lab Solo Vale · extrator Mehlich-1 Validado por Ana (agrônoma) em 20/09/2026 Ver laudo › ENTRADAS USADAS K 58,65 mg/dm³ (Mehlich-1) → médio meta 64 sc/ha = 3.840 kg/ha (Plane
+OK  "Usar" no Por quê preenche o rascunho (150) e fecha o Por quê; chip "pela análise · LAU-2061" · ['150', 'KCl 60% pela análise · LAU-2061 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha Restaurar dose Retirar + Incluir insumo nesta atividade ▾ DAP +25 · 09/11/2026 ▾ Herb']
+OK  AC-SOLO-08 Cancelar antes de salvar → nada gravado
+OK  AC-SOLO-08 Salvar grava o aceite (pela análise, LAU-2061, quem e quando) e a demanda bruta de KCl sobe 4.800 kg exatos · [(150, 'Ana (gestora)', '2026-09-23 20:19'), 4800, '1 sugestão da análise usada em T1-A. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.']
+OK  reabrir: chip "pela análise · LAU-2061", padrão 120,00 kg/ha visível e sem linha de sugestão · KCl 60% pela análise · LAU-2061 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha Restaurar dose Retirar + Incluir insumo nesta atividade ▾ DAP +25 · 09/11/2026 ▾ Herbicida pós-emergente · Pulverização Herbi
+OK  R21 memória da demanda diz a origem da dose (pela análise · LAU-2061) · ['Estoque apto hoje: 50.000 kg + 10.000 kg em quarentena, cobertura condicionada à qualidade (lote K26-11: laudo pendente) = 60.000 kg', '02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg', '04/11/2026 · T1-A · Adubação de cobertura · 150,00 kg/ha (pela análise · LAU-2061)
+OK  AC-SOLO-12 mudar à mão para 140 e salvar → "ajustado pelo usuário"; "Análise sugere 150 · Usar" volta; aceite "substituído por ajuste manual"; demanda com 140 · ['substituído por ajuste manual', 3200, 'KCl 60% ajustado pelo usuário 120,00 kg/ha kg/ha R$ 2,40/kg R$ 336,00/ha Restaurar dose Retirar Análise sugere 150 kg/ha · +1.600 kg no talhão · Por quê · Usar 150 kg/ha + Incluir insumo nesta ativida']
+OK  AC-SOLO-12 Restaurar → 120 (demanda de volta à base)
+OK  AC-SOLO-12 Usar 150 e salvar; reabrir e salvar sem mudar → continua "pela análise" (nada vira ajuste da sessão) · ['ativo', 'KCl 60% pela análise · LAU-2061 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha Restaurar dose Retirar + Incluir insumo nesta']
+OK  AC-SOLO-12 desfazer como de outra aba → demanda volta a 120 (nenhuma cópia na sessão) · [{'msg': 'Uso da análise desfeito: vale a dose do plano.'}, 0]
+OK  AC-SOLO-11 meta do T1-B 62 → 60 sc/ha (3.600 kg/ha): a sugestão some (120 = padrão) · KCl 60% 120,00 kg/ha kg/ha R$ 2,40/kg R$ 288,00/ha Retirar + Incluir insumo nesta atividade ▾ DAP +25 · 19/11/2026 ▾ Herbicida pós-emergente · Pulverização Herb
+OK  AC-SOLO-11 com o aceite de 150 feito, "Análise sugere 120 kg/ha · −4.560 kg" reaparece · KCl 60% pela análise · LAU-2061 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha Restaurar dose Retirar Análise sugere 120 kg/ha · −4.560 kg no talhão · Por quê · Usar 120 kg/ha + Incluir insumo nesta ativi
+OK  AC-SOLO-09 base do lote: 4 sugestões gravadas com uma chave · [4, '4 sugestões usadas · KCl 60% −26.400 kg · Calcário dolomítico +357,6 t.']
+OK  depois do lote o link some (0 sugestões)
+OK  AC-SOLO-10 lote: nenhuma linha vem marcada e "Usar 0 sugestões" fica desabilitado · [0, ['Usar 0 sugestões', 'true']]
+OK  AC-SOLO-18 lote com busca, filtro rápido por tipo e controles de coluna acessíveis
+OK  rodapé "Os demais talhões seguem a dose do plano."
+OK  AC-SOLO-10 aviso com o efeito e demanda bruta: KCl 60% −26.400 kg e Calcário dolomítico +357,6 t · ['4 sugestões usadas · KCl 60% −26.400 kg · Calcário dolomítico +357,6 t.', -26400, 357.6]
+OK  AC-SOLO-10 custo de insumos +R$ 1.008,00 (−26.400 × 2,40 + 357,6 × 180,00) · 1008.0
+OK  AC-SOLO-10 etapa 3: o T2 perde a Adubação de cobertura de 07/11 e ganha a Calagem de 30/09 (com horas de máquina) · [['a1', 'Dessecação pré-plantio', '2026-09-28', 'Pulverização', True], ['a2', 'Tratamento de sementes', '2026-10-17', 'Tratamento de sementes', True], ['a3', 'Plantio e adubação de base', '2026-10-18', 'Plantio', True], ['a5', 'Herbicida pós-emergente', '2026-11-12', 'Pulverização', True], ['a6', 'F
+OK  painel do T2: Calagem "incluída pela análise · LAU-2063" no topo e o KCl "retirado pela análise" · Insumos e doses de T2 · Soja 58 W, 298 ha × Plano padrão: Soja alta tecnologia v6 · plantio 18/10/2026. Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam. INCLUÍDA PELA ANÁLISE Calagem · Calcário dolomítico 1,20 t/ha · 30/09/2026 · 357,6 t incluída p
+OK  AC-SOLO-09 mesma chave duas vezes → "Já registrado" e a demanda não muda; mesma chave e outra dose → conflito, nada gravado · [['4 sugestões usadas · KCl 60% 0 kg · Calcário dolomítico 0 t.', 'Já registrado: 4 sugestões usadas · KCl 60% 0 kg · Calcário dolomítico 0 t. Nada mudou.', 'Conflito: a chave K-REP-1 já gravou outro conteúdo. Nada foi gravado.'], -26400]
+OK  AC-SOLO-09 lote com uma linha negada pela R11: a gessagem grava; a calagem mostra "não gravada: OS-0502 já liberada" na própria linha · ['1 sugestão usada · Gesso agrícola +24.235 kg. Não gravadas (1): OS-0502 já liberada.', 'Sugestões pelas análises · Safra Mamão 2026/27 Padrão ao lado da sugestão, por talhão. Marque as que quer usar; as outras seguem como estão. × 1 de 1 Agrupar por ▾ Colunas TALHÃO ⇅ ATIVIDADE · PRODUTO ⇅ PADRÃO 
+OK  "Ver no plano" do AG-02 abre o Planejar safra na etapa 2 com as Sugestões pelas análises · Sugestões pelas análises · Safra 2026/27 Padrão ao lado da sugestão, por talhão. Marque as que quer usar; as outras seguem como estão. × Todas 4 Outra dose 2 Incluir 1 Retirar 1 Agrupar por ▾ Colunas 
+OK  nenhum erro de JS (desktop)
+== celular · 390 × 844
+OK  painel de insumos em tela cheia; a linha da sugestão cabe em até 3 linhas e os botões têm 44 px · [390, 73, [44, 44]]
+OK  lote em tela cheia, com a primária presa no rodapé, e sem rolagem lateral da página · [390, [['Fechar', True], ['Usar 0 sugestões', True]], True]
+OK  nenhum erro de JS (celular)
+RESULTADO: OK 36/36

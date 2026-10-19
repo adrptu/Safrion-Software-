@@ -6,9 +6,11 @@ import time, sys, os, time, subprocess, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import cv_todas_js   # VISOES-2 §3.6
 HERE = os.path.dirname(os.path.abspath(__file__)); R = os.path.join(HERE, '_render')
 
 
+# VISOES-2 (C2): a linha da O.S. é achada pelo código visível (OS-/OB-), não pelo começo do texto (o estado curto vem antes)
 class Os:
     def __init__(self, copiar=True):
         if copiar:
@@ -20,21 +22,30 @@ class Os:
 
     def abrir(self, wait=1.0):
         self.c.goto(f'http://127.0.0.1:{self.p}/OS.dc.html', wait=wait)
+        # VISOES-2 §3.6: estes testes leem colunas fora do padrão (Situação, Realizado, Local...): a pessoa escolhe "todas as colunas"
+        if not self.J("!!(window.__g2cvEscolha&&window.__g2cvEscolha('g_os'))"):
+            self.J(cv_todas_js('g_os')); self.c.goto(f'http://127.0.0.1:{self.p}/OS.dc.html', wait=wait)
         self.J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }")
 
     # ---- tela ----
     def linha(self, id_):
-        return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+        return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)}); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+    def cel(self, id_, col):   # TABELAS-FOCO: valor de uma coluna (uma variável por coluna) na linha da O.S.
+        return self.J(f"""(()=>{{const hs=[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
+          const i=hs.indexOf({json.dumps(col)}.toUpperCase()); const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)});
+          const c=r&&[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'';}})()""") or ''
     def ordem(self, id_):
-        self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.4)
+        self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)}); r&&r.click();}})()"); time.sleep(.4)
     def pan(self):   # 01/10: abre as seções recolhidas do painel antes de ler
         if self.J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
         return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     def ins(self): return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const t=a.innerText; return t.slice(t.indexOf('INSUMOS'),t.indexOf('APONTAMENTOS')).replace(/\\s+/g,' ');})()") or ''
     def aps(self): return self.J("[...document.querySelectorAll('aside[role=dialog] [style*=\"grid-template-columns: 64px\"]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' '))") or []
-    def temb(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
+    # botão acionável (14/10: sem o papel, a ação fica visível mas indisponível, aria-disabled, com o motivo ao lado; temb_off a encontra)
+    def temb(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')!=='true')"))
+    def temb_off(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')==='true'&&b.offsetParent!==null)"))
     def btn(self, t, root='aside[role=dialog]'):
-        r = self.J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root + ' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
+        r = self.J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root + ' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')!=='true'); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
     def link(self, t): return self.J(f"(()=>{{const a=[...document.querySelectorAll('aside[role=dialog] a')].find(a=>a.innerText.trim().startsWith({json.dumps(t)})); return a?a.getAttribute('href'):'';}})()") or ''
     def toast(self): return self.J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     def fechar(self): self.J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)

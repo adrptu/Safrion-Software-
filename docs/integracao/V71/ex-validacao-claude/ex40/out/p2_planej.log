@@ -1,0 +1,13 @@
+# EX-40.2 · PL-05 Notificar responsáveis (render b87f79b)
+[Ana] h1 'Impedimentos e reprogramação' · clique ok · aviso: 'Notificados 5 donos · alertas do mesmo impedimento agrupados num caso único (simulado · nenhuma mensagem real enviada). | Tela: Impedimentos e reprogramação · 1 vence hoje'
+   chaves do localStorage antes ["safrion.perfilDemo"] · depois ["safrion.perfilDemo"]
+[Caio] h1 'Impedimentos e reprogramação' · clique ok · aviso: 'Notificados 5 donos · alertas do mesmo impedimento agrupados num caso único (simulado · nenhuma mensagem real enviada). | Tela: Impedimentos e reprogramação · 1 vence hoje'
+   chaves do localStorage antes ["safrion.perfilDemo"] · depois ["safrion.perfilDemo"]
+   fila (texto): 
+
+# EX-40.5 · Manutenções e impacto na produção em PL-03 e PL-04
+PL-03.dc.html: {"h1": "Capacidade e recursos", "y": 1417, "txt": "Manutenções e impacto na produção Simular janela ⋯ MANUTENÇÃO ⇅ JANELA ⇅ PRODUÇÃO AFETADA ⇅ SITUAÇÃO ⇅ ABRIR ⇅ Corretiva OM-0233 Trator T1 · retorno previsto 14h · não confirmado até teste aprovado OS-0420 saldo 70 ha OS-0431 · plantio T2 · 102 ha Proposto · OS-0420 saldo 70 ha · aguarda PCP OS-0431: sem substituto confirmado Ver ordem Preventiva 250 h · OM-0234 Trator 02 · MF 7719 28/09 OS-0420 saldo · substituto até 27/09 Conflito · OS-0420 Ver conflito Revisão pré-plantio Plantadeira 24 linhas 25/09 nenhuma ordem na janela Sem conflito Ver agenda", "acoes": ["Simular janela", "⋯", "Propor substituição", "Abrir impedimentos", "MANUTENÇÃO ⇅", "Filtrar Manutenção", "JANELA ⇅", "Filtrar Janela", "PRODUÇÃO AFETADA ⇅", "Filtrar Produção afetada", "SITUAÇÃO ⇅", "Filtrar Situação", "ABRIR ⇅", "Filtrar Abrir", "Ver ordem", "Ver conflito", "Ver agenda"]}
+PL-04.dc.html: {"h1": "Programação integrada", "y": 1687, "txt": "Manutenções e impacto na produção Simular janela ⋯ MANUTENÇÃO ⇅ JANELA ⇅ PRODUÇÃO AFETADA ⇅ SITUAÇÃO ⇅ ABRIR ⇅ Corretiva OM-0233 Trator T1 · retorno previsto 14h · não confirmado até teste aprovado OS-0420 saldo 70 ha OS-0431 · plantio T2 · 102 ha Proposto · OS-0420 saldo 70 ha · aguarda PCP OS-0431: sem substituto confirmado Ver ordem Preventiva 250 h · OM-0234 Trator 02 · MF 7719 28/09 OS-0420 saldo · substituto até 27/09 Conflito · OS-0420 Ver conflito Revisão pré-plantio Plantadeira 24 linhas 25/09 nenhuma ordem na janela Sem conflito Ver agenda", "acoes": ["Simular janela", "⋯", "Propor substituição", "Abrir impedimentos", "MANUTENÇÃO ⇅", "Filtrar Manutenção", "JANELA ⇅", "Filtrar Janela", "PRODUÇÃO AFETADA ⇅", "Filtrar Produção afetada", "SITUAÇÃO ⇅", "Filtrar Situação", "ABRIR ⇅", "Filtrar Abrir", "Ver ordem", "Ver conflito", "Ver agenda"]}
+
+mesmo texto do bloco nas duas telas: True · tamanho 555 × 555
+erros JS: []

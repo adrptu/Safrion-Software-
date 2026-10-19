@@ -1,0 +1,9 @@
+R1 entradas: 2 referências: ['ligado']
+R1 obs = mundo ligado: True
+R1 mundo divergente recusado: Mundo factual conflitante
+R2: {'estado': 'sem_comparacao_valida', 'pares': [], 'exclusoes': [{'id': 'C', 'motivo': 'datas_nao_pareadas'}]}
+R2 datas iguais: comparacoes_calculadas
+R4 recusado: Versão e publicação fora de ordem
+R4 corte 2 (versão 1 ainda indisponível): [2]
+R3: nao_pareado
+rc=0

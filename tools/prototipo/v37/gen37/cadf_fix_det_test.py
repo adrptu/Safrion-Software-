@@ -29,19 +29,20 @@ def aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find
 def erro_js(): return J("[...document.querySelectorAll('.sc-logic-error')].map(e=>e.innerText).join(' | ')")
 def save(): J(f"({BTN})('Salvar')"); time.sleep(.4)
 def fechar(): J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-def tal(t): J(f"({SETV})('header select',{json.dumps(t)})"); time.sleep(.4)
+def tal(t): J(f"({SETV})('select[aria-label=Talhão]',{json.dumps(t)})"); time.sleep(.4)
 ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''), flush=True)
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html#talhao=T3',wait=1.2)
-    chk('1 sem erro JS; T3 aberto', erro_js()=='' and J("document.querySelector('header select').value")=='T3', erro_js())
+    chk('1 sem erro JS; T3 aberto', erro_js()=='' and J("document.querySelector('select[aria-label=Talhão]').value")=='T3', erro_js())
     # ---------- safra encerrada mantém o resumo da época ----------
     openrow(0,'Santa Rita'); fset('decl','100'); fset('motivo','Documento desatualizado'); save()
     J(f"({CLK})('Expandir tudo')"); time.sleep(.3)
     a=rowtxt(1,'Safra 2026/27'); e=rowtxt(1,'Safra 2025/26')
-    chk('2 safra aberta recalcula (96 de 100 ha · 4 ha livres); encerrada fica 96 de 96 ha · Área conferida', '96 de 100 ha' in (a or '') and '4 ha livres' in (a or '')
-        and '96 de 96 ha' in (e or '') and 'Área conferida' in (e or '') and 'livres' not in (e or ''), [a,e])
+    # TABELAS-FOCO (06/10/2026): Área (alocada) e Livre em colunas próprias: aberta "96 ha | 4 ha"; encerrada "96 ha | 0 ha" (o resumo da época)
+    chk('2 safra aberta recalcula (96 de 100 ha · 4 ha livres); encerrada fica 96 de 96 ha · Área conferida', '96 ha 4 ha' in (a or '') and 'Em planejamento' in (a or '')
+        and '96 ha 0 ha' in (e or '') and 'Encerrada' in (e or ''), [a,e])
     # ---------- T3 não muda de fazenda com parcelas em safra aberta ----------
     openrow(0,'Santa Rita'); fset('faz','Boa Vista'); save(); al=alerts()
     chk('3 no detalhe o T3 também não muda de fazenda', aberto() and 'T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.' in al, al)
@@ -53,11 +54,12 @@ try:
     J(f"({CLK})('Reativar B1','main button')"); time.sleep(.45)
     foco=J("(document.activeElement||{}).id||''")
     chk('6 "Reativar B1" abre o formulário do B1 com Situação em Ativo e o foco nela', aberto() and fv('sit')=='Ativo' and foco.endswith('_sit'), [fv('sit'),foco])
-    save(); aba('Geometria'); hb=mbtns(); aba('Parcelas')
-    chk('7 salvar reativa: toast, estado e a aba Geometria voltam a nomear o próximo passo', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast() and 'Inativo' not in head()
-        and 'Definir polígono do B1' in hb and 'Reativar B1' not in hb, [toast(),hb])
+    # 16/10/2026 (BOT-01): o próximo passo do talhão ("Definir polígono do B1") é a primária do cabeçalho do detalhe
+    save(); aba('Geometria'); hb=mbtns(); hh=hbtns(); aba('Parcelas')
+    chk('7 salvar reativa: toast, estado e o cabeçalho voltam a nomear o próximo passo', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast() and 'Inativo' not in head()
+        and 'Definir polígono do B1' in hh and 'Reativar B1' not in hb, [toast(),hb,hh])
     # ---------- versões do polígono não ficam cortadas ----------
-    tal('T1'); aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','main button')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
+    tal('T1'); aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','header button')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     for _ in range(2):
         J(f"({CLK})('Nova versão do polígono')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     J(f"({CLK})('Expandir tudo')"); time.sleep(.3)

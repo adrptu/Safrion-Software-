@@ -1,0 +1,29 @@
+OK    · 1 Total de horas-conjunto da g_op = espelho dados2.plano_op
+OK    · 1b custo de operação da etapa = espelho
+OK    · 1c horas-homem e diesel (Resumo da safra) = espelho
+OK    · 2 T2 (298 ha): duas configurações com área, horas-conjunto e R$/ha do espelho; Σ área = 298 ha
+OK    · 2b "Neste talhão": decorrido do espelho, menor que as horas-conjunto
+OK    · 3 um conjunto só (Dessecação pré-plantio em T2): sem linhas de configuração, horas = 298 ÷ 21,6
+incluir: ok
+OK    · 4a "+ Outra configuração" abre "Nova configuração" com a atividade à vista e "Por classe" sem patrimônio
+salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Configuração incluída em Adubação de cobertura · Trator 75 cv + distribuidor 12 m: 6,72 ha/h. A área de Adubação de cobertura agora se divide entre 2 configurações. Adubação a lanço: 40,2 → 55,7 h · Distribuidores nov/26: 16 % → 23 %.')
+OK    · 4b a atividade passa a 2 conjuntos; a anterior (Trator 03 + Distribuidor 3 t, 18 ha/h) continua; a nova com 6,72 ha/h
+OK    · 4c horas e custo recalculados no lugar (mudam)
+OK    · 5a "Nesta configuração" no formulário aberto pela configuração
+salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Plantio e adubação de base · Prestador · plantadeira 12 linhas (6 m): 2,93 ha/h · R$ 109,40/ha. Plantio: 125,4 → 125,3 h.')
+OK    · 5b T2 com 30 % fixo no prestador: área 89,4 + 208,6 = 298 ha e horas/R$/ha do espelho
+OK    · 5c demanda de insumos (CAL-01) igual à inicial: a divisão não muda dose × área
+escolher a01+a07 ok
+salvar: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator T1 JD 6M 155 + Distribuidor 3 t: 6,72 ha/h · R$ 39,14/ha. Conjunto trocado: custos por hora do cadastro (máquina 180, implemento 45). Horas e capacidade não mudaram.')
+OK    · 6a mesmo distribuidor do cadastro nas duas configurações → "em sequência"; decorrido = horas-conjunto na ocorrência
+janela 3 h: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator T1 JD 6M 155 + Distribuidor 3 t: 6,72 ha/h · R$ 39,14/ha. Adubação a lanço: 55,7 → 45,9 h · Distribuidores nov/26: 23 % → 18 %.')
+janela 3 h: ('ok', 'Cálculo incompleto: Adubação a lanço com 498,76 ha sem conjunto (configurações com a mesma máquina do cadastro trabalham em sequência), 3 sequências que não cabem na janela. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Adubação a lanço: 45,9 → 15,3 h · Distribuidores nov/26: 18 % → 23 %.')
+OK    · 6b janela de 3 h por talhão: área que não cabe fica "sem conjunto"; sequência acima da janela aparece como conflito; nada vira 0 h
+OK    · 7 partes fixas 30 % + 80 % são recusadas com motivo; o formulário continua aberto com o que foi digitado
+remover (1º toque): ok
+confirmar: ok Cálculo incompleto: Adubação a lanço com 448 ha sem conjunto (as janelas não comportam toda a área). Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. | Configuração removida de Adubação de cobertura: Trator T1 JD 6M 155 + Distribuidor 3 t. A área volta para as outras; plano operacional e recursos recalculados.
+OK    · 8a remover pede confirmação e a atividade volta a uma configuração
+desfeito: ('ok', 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela. | Rendimento de Adubação de cobertura · Trator 03 + Distribuidor 3 t: 18,00 ha/h · R$ 12,94/ha. Adubação a lanço: 15,3 → 40,2 h.')
+OK    · 8b depois de desfazer, horas e custo voltam aos iniciais
+OK    · 8c sem erros de JS na página
+RESULTADO: 18/18 OK

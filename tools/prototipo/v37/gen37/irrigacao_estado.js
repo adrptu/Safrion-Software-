@@ -11,12 +11,16 @@ function irrInicial() { const s = irrClone(IRR0); irrGerar(s); return s; }
 function irrGet() {
   let t = null; try { t = localStorage.getItem(IRR_KEY); } catch (e) { t = null; }
   if (t) { let o = (t === IRR_RAW && IRR_OBJ) ? IRR_OBJ : null;
-    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) o = p; } catch (e) {} }
+    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) { o = p; o.capt = irrClone(IRR0.capt); } } catch (e) {} }   // outorga: vale sempre a do cadastro (CTL-5)
     if (o && irrOrfa(o)) { irrReset(); o = null; }
-    if (o) { IRR_RAW = t; IRR_OBJ = o; return o; } }
+    if (o) { IRR_RAW = t; IRR_OBJ = o; return irrEqVaz(o); } }
   if (IRR_MEM && irrOrfa(IRR_MEM)) IRR_MEM = null;
-  if (!IRR_MEM) IRR_MEM = irrInicial(); return IRR_MEM;
+  if (!IRR_MEM) IRR_MEM = irrInicial(); return irrEqVaz(IRR_MEM);
 }
+// vazão do setor = a do equipamento (x.eq, cadastro CD-03): com ficha do pivô registrada, vale a vazão da ficha (fpvFicha, ficha_pivo.py),
+// a mesma do cadastro; a duração e a trava de outorga usam este valor (revisão de 10/10, A2: uma fonte também durante o uso)
+function irrEqVaz(o) { if (typeof fpvFicha !== 'function' || !o || !o.setores) return o;
+  Object.keys(o.setores).forEach(k => { const x = o.setores[k]; const f = x.eq ? fpvFicha(x.eq) : null; if (f && f.vazao_ls > 0) x.vazao = f.vazao_ls; }); return o; }
 function irrSave(s) { s.cenVisto = Math.max(s.cenVisto || 0, irrCenRev()); IRR_MEM = s; try { const t = JSON.stringify(s); localStorage.setItem(IRR_KEY, t); IRR_RAW = t; IRR_OBJ = s; } catch (e) {} }
 function irrReset() { IRR_MEM = null; IRR_RAW = null; IRR_OBJ = null; try { localStorage.removeItem(IRR_KEY); } catch (e) {} }
 // mudança atômica: aplica fn numa cópia, grava e devolve a mensagem; com erro nada é gravado
@@ -28,7 +32,7 @@ function irrMudar(self, fn) {
 }
 function irrOuvir(self) {
   if (self.__irrOuvindo) return; self.__irrOuvindo = true;
-  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
+  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1' || e.key === 'talhao-os-ficha-pivo-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
 }
 // cenário da O.S. (cenario.js): lido uma vez por versão gravada (o texto do localStorage serve de chave do cache)
 let IRR_CRAW = null, IRR_COBJ = null;
@@ -46,6 +50,14 @@ function irrOrfa(o) { if (!o) return false; const c = irrCen(); if (!c) return f
 
 // ---------- formatos ----------
 const IRR_D0 = Date.UTC(2026, 8, 23);
+// área da v2 (Adicionar produtos): com passada em curso, o que falta dela (2 casas); a área já coberta fica na v1. Mesma conta na prévia.
+// área digitada com 2 casas, meio para cima no decimal (20,275 → 20,28; o binário de 20,275 × 100 daria 20,27)
+function irr2(n) { const t = String(n); return /e/i.test(t) ? Math.round(n * 100) / 100 : Number(Math.round(Number(t + 'e2')) + 'e-2'); }
+function irrAreaV2(x, p) { return p ? Math.round((x.ha - Math.min(x.ha, p.cob || 0)) * 100) / 100 : x.ha; }
+// v2 que daria total 0 pela regra única: a liberação recusaria e a ordem ficaria sem saída; diz a causa (mesmo texto na prévia)
+function irrV2Zero(o, x, p, dose) { const a = irrAreaV2(x, p); if (!(a > 0)) return irrPassProx(o) ? 'A passada ' + p.n + ' já cobriu o setor: confirme o término dela e adicione os produtos para as próximas passadas.' : 'A passada já cobriu o setor: confirme o término e programe uma nova fertirrigação na O.S.';
+  if (p && irrPassProx(o)) return 'A passada ' + p.n + ' está em curso e há outra programada: confirme o término dela e adicione os produtos para as próximas passadas.';   // a v2 cobriria só o saldo desta passada com a água das seguintes (PRE-REV U2)
+  return (dose > 0 && !(cenQtd(dose, a) > 0)) ? 'Dose × área dá 0 kg: aumente a dose.' : ''; }
 function irrN(n, d, dmin) { return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: (dmin === undefined ? (d || 0) : dmin), maximumFractionDigits: d || 0 }); }
 function irrHa(n) { return irrN(n, Math.abs(n % 1) > 1e-9 ? 1 : 0); }
 function irrMm(n) { return irrN(n, 2, 1); }      // 10,81 · 4,0 · 13,5 · 6,75 (o mesmo formato em todas as telas)
@@ -86,39 +98,126 @@ function irrApsSetor(s, sid) {
 // crédito no déficit do pivô: volta/turno completo credita o pivô inteiro; passagem parcial fica na faixa coberta e não baixa o déficit
 // do pivô, salvo quando as parciais da MESMA ordem completam a área (v1 + saldo da v2) — aí vale a menor lâmina líquida entre elas.
 function irrCreditos(s, sid, ate) {
-  const x = s.setores[sid]; const aps = irrApsSetor(s, sid).filter(a => (ate === undefined || a.q < ate) && irrApCob(a) > 0 && a.vol > 0);
-  let gov = 0, ultCheia = -1e9; const grp = {}; let faixa = null;
-  aps.forEach(a => { if (!irrApParc(a, x.ha)) { gov += irrApNet(a); ultCheia = Math.max(ultCheia, a.q); return; }
-    const g = grp[a.os] || (grp[a.os] = { cob: 0, net: 1e9, q: a.q }); g.cob += irrApCob(a); g.net = Math.min(g.net, irrApNet(a)); g.q = Math.max(g.q, a.q); });
-  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.cob >= x.ha - 1e-6) { gov += g.net; ultCheia = Math.max(ultCheia, g.q); } });
+  // parcial com 0 m³ (avanço pequeno que a telemetria arredonda a 0) ainda conta a área coberta da ordem; a lâmina vem só de quem tem volume (PRE-REV U1)
+  const x = s.setores[sid]; const aps = irrApsSetor(s, sid).filter(a => (ate === undefined || a.q < ate) && irrApCob(a) > 0 && (a.vol > 0 || irrApParc(a, x.ha)));
+  let gov = 0, ultCheia = -1e9; const grp = {}; let faixa = null; const ev = [];
+  aps.forEach(a => { if (!irrApParc(a, x.ha)) { gov += irrApNet(a); ev.push({ q: a.q, net: irrApNet(a) }); ultCheia = Math.max(ultCheia, a.q); return; }
+    const g = grp[a.os] || (grp[a.os] = { cob: 0, net: 1e9, q: a.q }); g.cob += irrApCob(a); if (a.vol > 0) g.net = Math.min(g.net, irrApNet(a)); g.q = Math.max(g.q, a.q); });
+  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob >= x.ha - 1e-6) { gov += g.net; ev.push({ q: g.q, net: g.net }); ultCheia = Math.max(ultCheia, g.q); } });
   // faixa pendente: a parcial mais recente que nenhuma volta completa cobriu depois
-  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.cob < x.ha - 1e-6 && g.q > ultCheia && (!faixa || g.q > faixa.q)) faixa = { os: k, q: g.q, cob: g.cob, net: g.net }; });
-  return { gov, faixa, aps };
+  Object.keys(grp).forEach(k => { const g = grp[k]; if (g.net < 1e9 && g.cob < x.ha - 1e-6 && g.q > ultCheia && (!faixa || g.q > faixa.q)) faixa = { os: k, q: g.q, cob: g.cob, net: g.net }; });
+  return { gov, faixa, aps, ev };
 }
 function irrBase(b) { return b.d0 + b.etc - b.pef; }
-function irrDef(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; return Math.max(0, irrBase(x.bal) - irrCreditos(s, sid).gov); }
+// ---------- água no solo (AGUA-SOLO-IRR, proprietário 18/10/2026: "agua no solo é no submenu irrigação, onde se define a capacidade de campo do
+// solo para os calculos, deficit e recomendações de irrigação") ----------
+// FAO-56 (Allen et al., 1998), cap. 8: CAD = (CC − PMP) × z (soloCAD, solo.js, fórmula única); AFD = f × CAD, com f = fração da CAD que a cultura
+// usa sem estresse (Tabela 22; o setor pode ter a sua, decisão do responsável técnico). O déficit não passa da CAD (ponto de murcha na zona das
+// raízes); o gatilho de irrigação é o limiar do setor, nunca acima da AFD; a lâmina líquida recomendada é o déficit, que repõe até a capacidade
+// de campo. Sem CAD calculável vale o limiar do setor, como antes, e a tela diz por quê. A medição é a mais recente do talhão (soloAguaDo): as
+// semeadas (IRR_SOLO0.agua, de dados_solo.AGUA) e as gravadas no cenário (c.solo.agua) pelo IR-01, uma fonte só.
+let IRR_SOLO_C = null;
+function irrSoloInval() { IRR_SOLO_C = null; }
+try { window.addEventListener('storage', irrSoloInval); } catch (e) {}
+function irrSoloCen() { if (IRR_SOLO_C) return IRR_SOLO_C; let c = null; try { c = typeof cenGet === 'function' ? cenGet() : null; } catch (e) { c = null; }
+  IRR_SOLO_C = { agua: ((c && c.solo) || {}).agua || {} }; return IRR_SOLO_C; }
+function irrTal(x, sid) { return x.faz === 'SR' ? sid : x.nome; }
+function irrCult(x) { return String(x.cult || '').split(/ |·/)[0]; }
+function irrFdep(x) { const cu = irrCult(x); const t = (typeof IRR_SOLO0 !== 'undefined' && IRR_SOLO0.fdep[cu]) || null;
+  if (x.f !== undefined && x.f !== null && x.f !== '') return { f: Number(x.f), fonte: 'definido no setor', cu, ref: t };
+  return t ? { f: t.f, fonte: t.fonte, cu, ref: t } : { f: 0.5, fonte: 'padrão sem referência para ' + (cu ? cu.toLowerCase() : 'a cultura') + ': confirme com o responsável técnico', cu, ref: null, conf: true }; }
+function irrAgua(s, sid) {
+  const x = s.setores[sid]; if (!x || typeof soloAguaDo !== 'function' || typeof soloCAD !== 'function') return null;
+  const S0 = { agua: (typeof IRR_SOLO0 !== 'undefined' && IRR_SOLO0.agua) || [] };
+  const m = soloAguaDo(S0, { solo: irrSoloCen() }, (s.faz[x.faz] || {}).nome, irrTal(x, sid)); const fd = irrFdep(x);
+  if (!m) return { m: null, cad: null, nc: 'sem medição de água no solo neste talhão', fd };
+  const cad = soloCAD(m); if (cad.v === null) return { m, cad: null, nc: cad.nc, fd };
+  const v = Number(cad.v); return { m, cad: v, e: cad.e, fd, afd: fd.f * v };
+}
+// gatilho: o limiar do setor, ou a AFD quando ela é menor (a cultura entraria em estresse antes do limiar)
+function irrGatilho(s, sid) { const x = s.setores[sid]; if (!x || x.limiar === null || x.limiar === undefined) return null; const a = irrAgua(s, sid);
+  if (a && a.afd !== undefined && a.afd < x.limiar - 1e-9) return { v: a.afd, por: 'afd', a }; return { v: x.limiar, por: 'limiar', a }; }
+// balanço com CAD, dia a dia na ordem do tempo (FAO-56, eq. 85–86: Dr,i = Dr,i−1 − P − I + ETc, com 0 ≤ Dr ≤ CAD em cada dia). O teto aplicado só
+// no fim, depois dos créditos, escondia o déficit acima da CAD e pedia água depois de repor o déficit mostrado (Codex 6252809331, S2). Dias de
+// ETc: os b.dias antes de hoje; chuva efetiva no dia dela; irrigação no dia em que foi aplicada (antes do início do balanço, no primeiro dia).
+// Sem CAD calculável: null, e vale o balanço de antes (sem passo diário).
+function irrBalDias(s, sid, cr, extra) {
+  const x = s.setores[sid], b = x && x.bal; if (!b) return null; const a = irrAgua(s, sid); if (!a || a.cad === null || a.cad === undefined) return null;
+  const cad = a.cad, k1 = -(b.dias || 0), etcd = b.dias ? b.etc / b.dias : 0, ev = cr.ev.concat(extra || []), kEv = q => Math.max(k1, irrDiaN(q));
+  let kEnd = -1; ev.forEach(e => { kEnd = Math.max(kEnd, kEv(e.q)); });
+  let D = Math.min(cad, Math.max(0, b.d0)); const fim = {}; const teto = []; if (b.d0 > cad + 1e-9) teto.push(k1);
+  for (let k = k1; k <= kEnd; k++) {
+    let v = D + (k <= -1 ? etcd : 0) - (b.pef && k <= -1 && irrDdmm(k) === '20/09' ? b.pef : 0);
+    ev.forEach(e => { if (kEv(e.q) === k) v -= e.net; });
+    if (v > cad + 1e-9) teto.push(k); D = Math.min(cad, Math.max(0, v)); fim[k] = D;
+  }
+  return { d: D, fim, cad, teto };
+}
+function irrDef(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; const cr = irrCreditos(s, sid); const bd = irrBalDias(s, sid, cr);
+  return bd ? bd.d : Math.max(0, irrBase(x.bal) - cr.gov); }
+// texto do painel do setor: a medição usada, CAD, AFD, déficit em % da CAD e o gatilho (AGUA-SOLO-IRR)
+function irrAguaTxt(s,k,d){ if(d===undefined) d=irrDef(s,k); const x=s.setores[k]; const a=irrAgua(s,k); const G=irrGatilho(s,k); const lim=x.limiar;
+  const gat=G?' · gatilho '+irrN(G.v,1)+' mm ('+(G.por==='afd'?'AFD do solo, menor que o limiar de '+irrN(lim,1)+' mm':'limiar do setor')+')':'';
+  if(!a||!a.m) return 'Sem medição de água no solo neste talhão'+(G?': vale o limiar do setor ('+irrN(lim,1)+' mm)':'')+'. Registre a medição em Água no solo.';
+  const m=a.m; const org=m.id+(m.zona?' · zona '+m.zona:'')+' · '+m.prof+' cm · raízes até '+prFmtT(m.z,1)+' cm · '+soloBr(m.data);
+  if(a.cad===null) return 'CAD não calculável ('+a.nc+')'+(G?': vale o limiar do setor ('+irrN(lim,1)+' mm)':'')+' · '+org;
+  const fd=a.fd; const pc=(d!==null&&d!==undefined)?' · déficit '+irrN(d,1)+' mm = '+irrN(100*d/a.cad,0)+' % da CAD'+(d>=a.cad-1e-9?' (sem água disponível às raízes)':''):'';
+  return 'CAD '+prFmtT(a.cad,1)+' mm · AFD '+prFmtT(a.afd,1)+' mm (f '+irrN(fd.f,2)+' · '+fd.fonte+')'+pc+gat+' · '+org; }
+// ponto de leitura da ficha do pivô (fpvCad, ficha_pivo.py): o mesmo texto do painel do setor
+function irrCadTxt(F,k,x){ const s=irrGet(); return s.setores[k]?irrAguaTxt(s,k):''; }
 // faixa coberta por passagem parcial (ainda sem o resto da volta): área e déficit dela
 function irrFaixaCob(s, sid) { const x = s.setores[sid]; if (!x || !x.bal) return null; const cr = irrCreditos(s, sid); if (!cr.faixa) return null;
-  return { os: cr.faixa.os, cob: cr.faixa.cob, d: Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net) }; }
-function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 1) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
+  const bd = irrBalDias(s, sid, cr, [{ q: cr.faixa.q, net: cr.faixa.net }]);
+  return { os: cr.faixa.os, cob: cr.faixa.cob, d: bd ? bd.d : Math.max(0, irrBase(x.bal) - cr.gov - cr.faixa.net) }; }
+function irrLamTxt(vol, cob, ha) { return cob < ha - 1e-9 ? irrMm(vol / (10 * cob)) + ' mm na faixa de ' + irrN(cob, 2, 0) + ' ha' : irrMm(vol / (10 * ha)) + ' mm no setor'; }
 function irrCobO(o) { return o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial').reduce((q, p) => Math.max(q, p.cob || 0), 0); }
-function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
+function irrDefTxt(s, sid, pre) { const x = s.setores[sid]; const fx = irrFaixaCob(s, sid); return 'déficit do ' + x.nome + ' ' + (pre || '') + irrN(irrDef(s, sid), 1) + ' mm' + (fx ? ' (faixa de ' + irrN(fx.cob, 2, 1) + ' ha: ' + irrN(fx.d, 1) + ' mm)' : ''); }
 function irrDur(x, lam) { return Math.round(lam * x.ha * 10 / (x.vazao * 3.6) * 60); }
-function irrNec(s, sid) {
+function irrDemanda(s, sid) {
   const x = s.setores[sid]; const d = irrDef(s, sid); if (d === null) return null;
   const br = d / (x.efic / 100); const np = Math.max(1, Math.ceil(br / x.lmax - 1e-9)); const por = br / np;
   return { liq: d, br, np, por, vol: br * x.ha * 10, dur: irrDur(x, por) };
+}
+// percentímetro (15/10/2026, proprietário: "lâmina recomendada e % velocidade do pivô, baseado na ficha do pivô e da necessidade da cultura"):
+// a lâmina é a de irrNec (déficit pela ETc da cultura, chuva e irrigação; bruta = líquida ÷ eficiência; passadas até o limite do setor); a ficha
+// do pivô dá a velocidade: lâmina = lâmina a 100 % × 100 ÷ percentímetro → percentímetro = ⌊lâmina a 100 % × 100 ÷ lâmina da passada⌋ (para
+// baixo: aplica pelo menos a lâmina; para cima se passaria do limite por passada), entre o menor da tabela da ficha e 100 %; se nem o menor
+// percentímetro dá a lâmina da passada, mais uma passada. Ficha: a registrada (fpvFicha do equipamento) ou a demonstrativa da semente (Lagoa
+// Grande, sintética). Sem ficha: lâmina e passadas, sem percentímetro. Gotejo: sem percentímetro (duração do turno pela vazão).
+function irrPerc(s, sid) {
+  const x = s.setores[sid]; const n = x ? irrDemanda(s, sid) : null; if (!n) return null;
+  const out = { liq: n.liq, br: n.br, np: n.np, por: n.por, dur: n.dur, pct: null, lamP: null, volta: null, ficha: null, demo: false, l100: null, v100: null };
+  if (!(n.br > 0.05) || x.tipo !== 'pivô') return out;
+  const fr = (x.eq && typeof fpvFicha === 'function') ? fpvFicha(x.eq) : null; const sd = (typeof IRR0 !== 'undefined' && IRR0.setores[sid]) ? IRR0.setores[sid].ficha : null;
+  const f = fr || sd; if (!f || !(Number(f.lamina_100_mm) > 0)) return out;
+  const l100 = Number(f.lamina_100_mm), v100 = Number(f.volta_100_h); const ps = (f.tabela || []).map(r => Number(r[0])).filter(v => v > 0);
+  const pmin = ps.length ? Math.min.apply(null, ps) : (f.pct_min || 10);
+  if (!(v100 > 0) || l100 > x.lmax + 1e-9) return Object.assign(out, { erro: 'Ficha do pivô incompatível com o limite por passada: confira a lâmina e a duração a 100 %.' });
+  let np = n.np, por = n.por; const calc = () => { let p = Math.floor(l100 * 100 / por + 1e-9); if (p > 0 && l100 * 100 / p > x.lmax + 1e-9) p = Math.ceil(l100 * 100 / por - 1e-9); return p; };
+  let pct = calc(); while (pct < pmin && np < 24) { np++; por = n.br / np; pct = calc(); }
+  pct = Math.min(100, Math.max(pmin, pct));
+  if (l100 * 100 / pct > x.lmax + 1e-9 || l100 * 100 / pct + 1e-9 < por) return Object.assign(out, { erro: 'Não há percentímetro possível na ficha para esta lâmina e limite. Confira a programação.' });
+  return Object.assign(out, { np, por, pct, lamP: l100 * 100 / pct, volta: v100 * 100 / pct, ficha: f, demo: !fr, l100, v100 });
+}
+// IRR-ONDA0 R2: programação e recomendação usam o mesmo preparo físico da ficha.
+// O déficit permanece a necessidade líquida; o mínimo do equipamento pode aplicar mais água.
+function irrNec(s, sid) {
+  const n = irrPerc(s, sid); if (!n) return null;
+  const x = s.setores[sid]; const por = n.lamP === null ? n.por : n.lamP;
+  return Object.assign({}, n, { demandaBr: n.br, por, br: por * n.np, vol: por * n.np * x.ha * 10,
+    dur: n.volta === null ? n.dur : Math.ceil(n.volta * 60 - 1e-9) });
 }
 // déficit no fim de cada dia (7 dias fechados) com ≈ nos dias estimados
 function irrSerie(s, sid) {
   const x = s.setores[sid]; const b = x && x.bal; if (!b) return [];
   const so = irrSonda(s, x); const estDesde = (so && so.st !== 'Ativa' && so.desde !== undefined) ? irrDiaN(so.desde) : 99;
-  const out = []; const etcd = b.etc / b.dias; const k0 = irrDiaN(b.ini); let nd = 0, chuva = 0;
+  const out = []; const etcd = b.etc / b.dias; const k0 = irrDiaN(b.ini); let nd = 0, chuva = 0; const bd = irrBalDias(s, sid, irrCreditos(s, sid));
   for (let k = -7; k <= -1; k++) {
     if (k < k0) { out.push({ k, t: irrDdmm(k), v: null, est: false }); continue; }
     nd++; if (b.pef && irrDdmm(k) === '20/09') chuva = b.pef;
-    const d = b.d0 + etcd * nd - chuva - irrCreditos(s, sid, (k + 1) * 1440).gov;
-    out.push({ k, t: irrDdmm(k), v: Math.max(0, d), est: k > estDesde });
+    // com CAD, o mesmo balanço dia a dia do déficit de hoje (série e necessidade coerentes); sem CAD, a conta de antes
+    const v = bd ? (bd.fim[k] !== undefined ? bd.fim[k] : Math.min(bd.cad, Math.max(0, b.d0))) : Math.max(0, b.d0 + etcd * nd - chuva - irrCreditos(s, sid, (k + 1) * 1440).gov);
+    out.push({ k, t: irrDdmm(k), v, est: k > estDesde });
   }
   return out;
 }
@@ -164,29 +263,66 @@ function irrOv(a1, b1, a2, b2) { return a1 < b2 && a2 < b1; }
 function irrPonta(s, a, b) { const P = s.ponta; let ini = null, fim = null;
   for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const pa = k * 1440 + P[0], pb = k * 1440 + P[1]; if (irrOv(a, b, pa, pb)) { const x = Math.max(a, pa), y = Math.min(b, pb); if (ini === null) { ini = x; fim = y; } } }
   if (ini === null) return ''; const tot = (fim - ini) >= (P[1] - P[0]); return (tot ? 'Ponta' : 'Ponta parcial') + ' (' + irrN(ini % 1440 / 60, 0) + '–' + irrN((fim % 1440 || 1440) / 60, 0) + ' h)'; }
-// bloqueios de uma janela: bomba ocupada, parada do PCM, outorga vencida, vazão outorgada (instantânea e do dia)
+// ---------- outorga da captação (fonte única: o cadastro, via dados_lagoa_fonte.captacao; CTL-5 · RL-E4) ----------
+// volume do dia autorizado (m³) = vazão (L/s) × horas por dia × 3,6: uma conta só para a trava e para as telas
+function irrVolOut(o) { return o ? o.ls * o.h * 3.6 : 0; }
+function irrCapDia(cp) { return irrVolOut(cp); }
+function irrOutC(st) { return { 'Vigente': 'green', 'Vence em 90 dias': 'yellow', 'Em renovação': 'yellow', 'Vencida': 'red', 'Sem outorga': 'red' }[st] || 'gray'; }
+function irrBrIso(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] + '/' + a[0] : ''; }
+// outorgas da captação (cadastro); captação sem a lista (Santa Rita, demonstrativa) vale como uma outorga só
+function irrOuts(cp) { return !cp ? [] : (cp.outs || [{ num: cp.outorga, ls: cp.ls, h: cp.h, venc: cp.venc || '', renov: cp.st === 'Em renovação' }]); }
+// vigência na DATA DO DIA k (revisão do CTL-5, S3-2): vale a outorga com vencimento ≥ o dia, ou em renovação; dela saem a vazão e o volume do dia
+function irrOutDia(cp, k) { const d = irrIso(k); const vig = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && (o.renov || !o.venc || o.venc >= d));
+  return { ls: vig.reduce((q, o) => q + o.ls, 0), vol: vig.reduce((q, o) => q + irrVolOut(o), 0), vig }; }
+// sem outorga vigente no dia k: o texto do bloqueio (com o gestor)
+function irrOutSemT(cp, k) { const os = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0); if (!os.length || !cp.outorga || cp.outorga === '—') return 'Sem outorga de irrigação no cadastro';
+  const d = irrIso(k); const vs = os.map(o => o.venc).filter(v => v && v < d).sort(); return 'Outorga vencida' + (vs.length ? ' em ' + irrBrIso(vs[vs.length - 1]) : '') + ' · ' + cp.nome; }
+// vencimento na tela (IR-02, IR-04): com várias outorgas na soma, diz qual vence e quanto sai (não sugere que a captação inteira acaba)
+function irrOutVenc(s, cp) { if (!cp || !String(cp.venc || '').split('-')[2]) return 'sem vencimento no cadastro';
+  if (cp.venc < s.hoje) return 'venceu em ' + irrBrIso(cp.venc);
+  const vig = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && (o.renov || !o.venc || o.venc >= s.hoje));
+  if (vig.length < 2) return 'até ' + irrBrIso(cp.venc);
+  const pri = vig.filter(o => o.venc === cp.venc); return pri.map(o => o.num).join(' + ') + ' vence em ' + irrBrIso(cp.venc) + ' (' + irrN(pri.reduce((q, o) => q + o.ls, 0)) + ' de ' + irrN(cp.ls) + ' L/s)'; }
+// dias com sobreposição positiva com a janela [a, b) (a que termina à meia-noite não entra no dia seguinte)
+function irrDiasJan(a, b) { const out = []; for (let k = irrDiaN(a); k <= irrDiaN(b); k++) if (Math.min(b, k * 1440 + 1440) > Math.max(a, k * 1440)) out.push(k); return out; }
+// uso da captação no dia k (IR-02 e IR-04): volume comprometido, pico de vazão e % do volume outorgado do dia (0 % sem outorga, nunca ÷ 0)
+function irrUsoDia(s, cid, k) { const cp = s.capt[cid]; const ws = irrComprometidas(s, null).filter(w => w.capt === cid); const d0 = k * 1440, d1 = d0 + 1440; let vol = 0, pico = 0;
+  ws.forEach(w => { const a = Math.max(d0, w.ini), b = Math.min(d1, w.fim); if (b > a) vol += w.ls * (b - a) * 0.06; });
+  ws.filter(w => w.fim > d0 && w.ini < d1).forEach(w => { const t = Math.max(w.ini, d0); const q = ws.filter(z => z.ini <= t && z.fim > t).reduce((a, z) => a + z.ls, 0); if (q > pico) pico = q; });
+  const cap = irrOutDia(cp, k).vol; return { vol, pico, cap, pct: cap > 0 ? vol / cap * 100 : 0 }; }
+// bloqueios de uma janela: bomba ocupada, parada do PCM, outorga vencida, vazão outorgada (instantânea e do dia), na data de cada dia da janela
 function irrBloqJanela(s, x, a, b, excl, proprias) {
   const F = s.faz[x.faz]; const out = []; const occ = irrComprometidas(s, excl).concat(proprias || []);
   occ.filter(w => w.bomba === x.bomba && irrOv(a, b, w.ini, w.fim)).forEach(w => out.push({ k: 'bomba', c: 'red', t: 'Conflito · ' + (w.os === excl ? 'passadas sobrepostas' : w.os + ' na ' + x.bnome), h: irrJan(w.ini, w.fim), dono: F.pcp, os: w.os }));
   s.paradas.filter(z => z.bomba === x.bomba && irrOv(a, b, z.ini, z.fim)).forEach(z => out.push({ k: 'parada', c: 'red', t: 'Conflito · ' + z.txt, h: irrHm(z.ini) + '–' + irrHm(z.fim) + (irrDiaN(z.ini) !== irrDiaN(z.fim) ? ' (' + irrDdmm(irrDiaN(z.fim)) + ')' : ''), dono: z.dono || F.pcm, ref: z.ref }));
   const cp = s.capt[x.capt];
-  if (cp) {
-    if (cp.st === 'Vencida') out.push({ k: 'outorga', c: 'red', t: 'Outorga vencida · ' + cp.nome, dono: F.gestor });
+  if (cp) { const dias = irrDiasJan(a, b);
+    const sem = dias.find(k => !(irrOutDia(cp, k).ls > 0));
+    if (sem !== undefined) { out.push({ k: 'outorga', c: 'red', t: irrOutSemT(cp, sem), dono: F.gestor }); return out; }   // sem outorga vigente no dia nada se capta: a vazão não entra
     const ws = occ.filter(w => w.capt === x.capt && w.bomba !== x.bomba);
-    const pts = [a].concat(ws.filter(w => w.ini > a && w.ini < b).map(w => w.ini)); let mx = 0;
-    pts.forEach(t => { const q = x.vazao + ws.filter(w => w.ini <= t && w.fim > t).reduce((q2, w) => q2 + w.ls, 0); if (q > mx) mx = q; });
-    if (mx > cp.ls + 1e-9) out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(mx) + ' de ' + irrN(cp.ls) + ' L/s', dono: F.gestor });
-    else { const lim = cp.ls * cp.h * 3.6; for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0;
+    const pts = [a].concat(ws.filter(w => w.ini > a && w.ini < b).map(w => w.ini)).concat(dias.slice(1).map(k => k * 1440)); let ex = null;   // a vazão do dia muda à meia-noite
+    pts.forEach(t => { const q = x.vazao + ws.filter(w => w.ini <= t && w.fim > t).reduce((q2, w) => q2 + w.ls, 0); const L = irrOutDia(cp, irrDiaN(t)).ls; if (q > L + 1e-9 && (!ex || q > ex.q)) ex = { q, L }; });
+    if (ex) out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(ex.q) + ' de ' + irrN(ex.L) + ' L/s', dono: F.gestor });
+    else { for (const k of dias) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0; const lim = irrOutDia(cp, k).vol;
         ws.concat([{ ini: a, fim: b, ls: x.vazao }]).forEach(w => { const o0 = Math.max(d0, w.ini), o1 = Math.min(d1, w.fim); if (o1 > o0) v += w.ls * (o1 - o0) * 0.06; });
         if (v > lim + 1e-6) { out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(v) + ' de ' + irrN(lim) + ' m³ em ' + irrDdmm(k), dono: F.gestor }); break; } } }
   }
   return out;
 }
+// aviso da outorga: só quando a janela passa do vencimento de uma outorga da soma de hoje (sai da soma) ou usa outorga em renovação
+function irrOutAviso(s, cp, wins) { if (!cp || !wins.length) return [];
+  const kf = Math.max.apply(null, wins.map(w => { const d = irrDiasJan(w[0], w[1]); return d.length ? d[d.length - 1] : irrDiaN(w[0]); })); const df = irrIso(kf); const out = [];
+  irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && o.venc && o.venc < df && (o.renov || o.venc >= s.hoje)).forEach(o => {
+    if (o.renov) out.push('Outorga ' + o.num + ' em renovação (venceu em ' + irrBrIso(o.venc) + ')');
+    else { const L = irrOutDia(cp, kf).ls; if (L > 0) out.push('Outorga ' + o.num + ' vence em ' + irrBrIso(o.venc) + ' · depois, ' + irrN(L) + ' L/s'); } });
+  return out; }
 // prontidão da ordem: bloqueios (impedem a liberação) e avisos (não impedem)
 function irrChecar(s, o, ps) {
   ps = ps || o.passadas; const x = s.setores[o.setor]; const F = s.faz[x.faz]; const bloq = [], av = [];
   const pend = ps.filter(p => p.st === 'Programada' || p.st === 'Em execução');
   if (pend.some(p => p.ini === null || p.ini === undefined)) bloq.push({ k: 'jan', c: 'yellow', t: 'Janela a definir', dono: F.irrig });
+  // sem outorga vigente hoje e sem janela: quem resolve é o gestor (com janela, irrBloqJanela já trava por passada, na data de cada dia)
+  { const cp0 = s.capt[x.capt]; if (cp0 && !(irrOutDia(cp0, 0).ls > 0) && pend.some(p => p.ini === null || p.ini === undefined)) bloq.unshift({ k: 'outorga', c: 'red', t: irrOutSemT(cp0, 0), dono: F.gestor }); }
   const prop = [];
   pend.forEach(p => { if (p.ini === null || p.ini === undefined) return; const a = p.ini, b = irrFimP(o, p);
     irrBloqJanela(s, x, a, b, o.id, prop).forEach(z => bloq.push(z)); prop.push({ os: o.id, n: p.n, bomba: x.bomba, capt: x.capt, ls: x.vazao, ini: a, fim: b });
@@ -197,13 +333,13 @@ function irrChecar(s, o, ps) {
   const todos = ant.slice(-1).concat(ini).sort((p, q) => p - q);
   for (let i = 1; i < todos.length; i++) { const dh = (todos[i] - todos[i - 1]) / 60; if (dh < x.imin - 1e-9) { av.push({ k: 'int', t: 'Intervalo curto · ' + irrN(dh, 1) + ' h (mín. ' + irrN(x.imin) + ' h)' }); break; } }
   if (irrEst(s, x)) av.push({ k: 'est', t: 'Estimativa por ET' });
-  const cp = s.capt[x.capt]; if (cp && cp.st === 'Em renovação') av.push({ k: 'renov', t: 'Outorga em renovação' });
+  irrOutAviso(s, s.capt[x.capt], pend.filter(p => p.ini !== null && p.ini !== undefined).map(p => [p.ini, irrFimP(o, p)])).forEach(t => av.push({ k: 'renov', t }));   // aviso da outorga: só se a janela passa do vencimento
   // lâmina × necessidade (só aviso): acima do que o setor vai precisar até a última passada, ou setor abaixo do limiar de irrigação
   if (x.bal && !ps.some(p => p.st === 'Feita' || p.st === 'Parcial' || p.st === 'Em execução')) {
     const liq = ps.filter(p => p.st === 'Programada').reduce((q, p) => q + p.lam, 0) * (o.ef || x.efic) / 100; const d = irrDef(s, o.setor);
     const iU = ini.length ? Math.max.apply(null, ini) : null; const need = iU === null ? null : irrNecAte(s, o, iU);
     if (need !== null && liq > need + Math.max(1, 0.1 * liq)) av.push({ k: 'acima', t: 'Lâmina acima da necessidade · ' + irrMm(liq) + ' mm líquidos para ' + irrN(need, 1) + ' mm' });
-    else if (x.limiar !== null && x.limiar !== undefined && d < x.limiar - 1e-9) av.push({ k: 'limiar', t: 'Abaixo do limiar · déficit ' + irrN(d, 1) + ' de ' + irrN(x.limiar, 1) + ' mm' });
+    const G = irrGatilho(s, o.setor); if (G && d < G.v - 1e-9) av.push({ k: 'limiar', t: 'Abaixo do limiar · déficit ' + irrN(d, 1) + ' de ' + irrN(G.v, 1) + ' mm' + (G.por === 'afd' ? ' (AFD do solo)' : '') });
   }
   const uniq = (l) => l.filter((z, i) => l.findIndex(y => y.t === z.t) === i);
   return { bloq: uniq(bloq), av: uniq(av) };
@@ -269,6 +405,7 @@ function irrOpcoes(s, id) {
 function irrFertAbertaSetor(s, sid) { return Object.keys(s.fert).filter(k => { if (s.fert[k].setor !== sid) return false; const et = irrFertEtapa(k); return !et || ['Encerradas', 'Canceladas'].indexOf(et) < 0; }); }
 function irrNova(s, sid, quem) {
   const x = s.setores[sid]; const n = irrNec(s, sid); const F = s.faz[x.faz];
+  if (n.erro) throw new Error(n.erro);
   const id = irrNovoId(s, 'OS'); const au = irrNovoId(s, 'au'); const est = irrEst(s, x);
   const durs = Array.from({ length: n.np }, () => n.dur); const inis = irrSugerir(s, sid, durs, s.agora, id);
   const o = { id, faz: x.faz, setor: sid, tipo: 'água', versao: 'v1', etapa: 'A liberar', lam: Math.round(n.br * 100) / 100, au, ef: x.efic, ex: null,
@@ -281,9 +418,10 @@ function irrNova(s, sid, quem) {
 }
 function irrGerar(s) {
   if (s.ger) return 0; let n = 0;
-  Object.keys(s.setores).forEach(sid => { const x = s.setores[sid]; if (!x.bal || x.limiar === null || x.limiar === undefined) return;
-    const d = irrDef(s, sid); if (d < x.limiar) return;
+  Object.keys(s.setores).forEach(sid => { const x = s.setores[sid]; const G = irrGatilho(s, sid); if (!x.bal || !G) return;
+    const d = irrDef(s, sid); if (d < G.v) return;
     if (irrOrdensSetor(s, sid).some(irrAberta) || irrFertAbertaSetor(s, sid).length) return;
+    if ((irrNec(s, sid) || {}).erro) return;
     irrNova(s, sid, 'sistema'); n++; });
   s.ger = true; return n;
 }
@@ -321,61 +459,87 @@ function irrIniciar(s, id) {
   if (irrPausada(o)) throw new Error('Retome a irrigação antes.');
   const p = irrPassProx(o); if (!p || ['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' está ' + o.etapa + '.');
   if (p.ini === null) throw new Error('Defina a janela da passada ' + p.n + '.');
-  p.st = 'Em execução'; p.iniReal = p.ini + 2; p.cob = 0; o.etapa = 'Em execução'; if (!o.ex) o.ex = irrNovoId(s, 'ex'); if (o.exec.ini === undefined) o.exec.ini = p.iniReal;
+  p.st = 'Em execução'; p.iniReal = Math.max(irrAgora(s, o), p.ini) + 2; p.cob = 0; o.etapa = 'Em execução'; if (!o.ex) o.ex = irrNovoId(s, 'ex'); if (o.exec.ini === undefined) o.exec.ini = p.iniReal;
   irrTr(o, p.iniReal, o.ex, 'Início' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · telemetria da ' + s.setores[o.setor].bnome + ' ativa', s.faz[o.faz].irrig);
   return { msg: id + ' Em execução · início ' + irrQuando(p.iniReal) + ' (' + o.ex + ') · término previsto ' + irrQuando(irrFimP(o, p)) + '.' };
 }
 function irrUlt(o) { return o.trilha.reduce((q, t) => Math.max(q, t.q), -1e9); }
+// O relógio demonstrativo de uma ordem não desloca as janelas das outras.
+function irrAgora(s, o) { return Math.max(s.agora, irrUlt(o), o.exec.ini === undefined ? -1e9 : o.exec.ini); }
+function irrTerminoInfo(s, o, cob) {
+  const p = irrPassAtual(o); if (!p) return { cedo: false, pendente: false, minutos: 0 };
+  const x = s.setores[o.setor], q = irrAgora(s, o);
+  const minutos = Math.max(0, q - p.iniReal - irrPausaMin(o, p.n));
+  const cedo = q < irrFimP(o, p);
+  // A área informada não é prova do giro. Não atribuir área proporcional ao gotejo.
+  const pendente = minutos <= 0 || (cedo && (cob >= x.ha - 1e-9 || (x.tipo !== 'gotejo' && cob > x.ha * minutos / p.dur + 0.01)));
+  return { cedo, pendente, minutos };
+}
+// Estimativa e tolerância compartilham a mesma precisão em comando e tela.
+function irrMedicao(s, o, med) {
+  const ps = o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial');
+  const est = ps.reduce((q, p) => q + p.lam * p.cob * 10, 0);
+  const dv = est ? (med - est) / est * 100 : 0;
+  const temporal = ps.some(p => p.temporalPendente);
+  return { est, dv, temporal, exigeMotivo: temporal || Math.abs(dv) > s.tol + 1e-9 };
+}
 function irrPausar(s, id) {
   const o = irrO(s, id); const p = irrPassAtual(o); if (o.etapa !== 'Em execução' || !p) throw new Error('Só pausa uma passada em execução.');
   if (irrPausada(o)) throw new Error('A irrigação já está pausada.');
-  const q = irrUlt(o) + 60; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
+  const q = irrAgora(s, o) + 60; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
   return { msg: 'Pausada às ' + irrHm(q) + ' · a etapa continua Em execução.' };
 }
 function irrRetomar(s, id) {
   const o = irrO(s, id); const pz = (o.exec.pausas || []).find(z => z.fim === null || z.fim === undefined); if (!pz) throw new Error('A irrigação não está pausada.');
-  pz.fim = pz.ini + 8; irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
+  pz.fim = Math.max(irrAgora(s, o), pz.ini + 8); irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
   return { msg: 'Retomada às ' + irrHm(pz.fim) + ' · término previsto ' + irrQuando(irrFimP(o, p)) + '.' };
 }
 function irrAvanco(s, id, cob) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor]; if (!p) throw new Error('Nenhuma passada em execução.');
-  if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 1) + ' ha.');
-  p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);
-  const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 1) + ' de ' + irrN(x.ha, 1) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
+  cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
+  if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
+  p.cob = cob; const q = irrAgora(s, o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
+  const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
   if (tr) { tr.ev = ev; tr.q = q; } else { o.trilha.push({ q, rec: o.ex, ev, quem: s.faz[o.faz].irrig, av: p.n }); }   // telemetria e manual do mesmo evento: um registro
   return { msg: ev + ' · mesmo registro da telemetria, sem duplicar.' };
 }
 function irrTele(s, o, p, cob) { if (o.tele && cob >= s.setores[o.setor].ha - 1e-9 && o.passadas.length === 1) return o.tele; return Math.round(p.lam * cob * 10 * 0.985 / 10) * 10; }
 function irrCredito(s, o, p) {
   const x = s.setores[o.setor]; const ap = x.bal.ap; const i = ap.findIndex(a => a.os === o.id && a.n === p.n);
-  if (p.vol === null || p.vol === undefined || !(p.cob > 0)) { if (i >= 0) ap.splice(i, 1); return; }
+  if (p.temporalPendente || p.vol === null || p.vol === undefined || !(p.cob > 0)) { if (i >= 0) ap.splice(i, 1); return; }
   const e = { q: irrFimP(o, p), os: o.id, n: p.n, vol: p.vol, ha: x.ha, ef: o.ef || x.efic, cob: p.cob, txt: p.st === 'Parcial' ? 'passagem parcial' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa'), prov: true };
   if (i >= 0) ap[i] = e; else ap.push(e);   // um crédito por passada: telemetria e registro manual não duplicam
 }
-function irrTerminar(s, id, cob, vol) {
+function irrTerminar(s, id, cob, vol, antecipado, motivo) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor];
   if (!p) throw new Error(o.etapa === 'Liberadas' ? 'Nada foi executado ainda: inicie a irrigação.' : 'Nenhuma passada em execução.');
   if (irrPausada(o)) throw new Error('Retome a irrigação antes de confirmar o término.');
   if (o.fert && o.fert.exec) throw new Error('Saldo parado pela v2: aguarde o agrônomo liberar na O.S.');
-  if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 1) + ' ha.');
-  if (vol !== null && vol !== undefined && !(vol >= 0)) throw new Error('Leitura do hidrômetro inválida.');
-  const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';
-  p.fimReal = p.iniReal + Math.round(p.dur * cob / x.ha) + irrPausaMin(o, p.n); p.vol = (vol === null || vol === undefined || vol === '') ? null : vol;
+  const tempo = irrTerminoInfo(s, o, cob);
+  if (tempo.cedo && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
+  cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
+  if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
+  if (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0) throw new Error('Informe o volume medido no hidrômetro; a estimativa não é leitura.');
+  const mot = String(motivo || '').trim();
+  if (tempo.pendente && !mot) throw new Error('Área e tempo de bombeamento precisam de conferência: informe o motivo. O balanço só será creditado após conferir.');
+  const parc = cob < x.ha - 1e-9; p.temporalPendente = tempo.pendente; p.motivoTempo = tempo.pendente ? mot : ''; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
+  p.fimReal = irrAgora(s, o); p.vol = vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, 'Término' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 1) + ' de ' + irrN(x.ha, 1) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (tempo.pendente ? 'área informada de ' + irrN(cob, 2, 0) + ' ha · tempo incompatível a conferir · motivo: ' + mot : parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
-  if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
+  if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução'+(tempo.pendente?' · área e tempo desta passada a conferir, crédito pendente':'')+' · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
   return { msg: irrConfAuto(s, o) };
 }
 function irrConfAuto(s, o) {
   const ps = o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial'); const x = s.setores[o.setor];
   const med = ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q, p) => q + p.vol, 0);
-  const est = ps.reduce((q, p) => q + p.lam * p.cob * 10, 0); const q0 = o.exec.fim + 1;
-  if (med === null) { o.conf = { med: null, est: Math.round(est), st: 'Sem leitura' };
+  const m = irrMedicao(s, o, med); const est = m.est; const q0 = o.exec.fim + 1;
+  if (med === null) { o.conf = { med: null, est, st: 'Sem leitura' };
     irrTr(o, q0, o.ex, 'Em conferência · sem leitura do hidrômetro: nada é creditado no balanço até a leitura', 'sistema');
     return o.id + ' Em conferência · sem leitura do hidrômetro: informe a leitura (o balanço não assume zero nem o previsto).'; }
-  const dv = est ? (med - est) / est * 100 : 0; o.conf = { med, est: Math.round(est), dv, st: Math.abs(dv) <= s.tol + 1e-9 ? 'Automática' : 'Divergência' };
+  const dv = m.dv; o.conf = { med, est, dv, st: m.temporal ? 'Área e tempo a conferir' : (m.exigeMotivo ? 'Divergência' : 'Automática') };
+  if (m.temporal) { irrTr(o, q0, o.ex, 'Área e tempo a conferir · crédito pendente até validação do irrigante/gestor', 'sistema'); return o.id + ' Em conferência · confira área, tempo e medição; sem crédito da passada incompatível no balanço.'; }
   if (o.conf.st === 'Automática') { o.etapa = 'Encerradas'; o.conf.q = q0; x.bal.ap.filter(a => a.os === o.id).forEach(a => { a.prov = false; });
     irrTr(o, q0, o.ex, 'Conferência automática · ' + irrN(med) + ' m³ medidos × ' + irrN(est) + ' m³ estimados (' + irrPct(dv) + ') · encerrada · balanço creditado uma vez', 'sistema');
     return o.id + ' conferida e encerrada · ' + irrN(med) + ' m³ = ' + irrLamTxt(med, irrCobO(o), x.ha) + ' (' + irrPct(dv) + ', tolerância ' + s.tol + ' %) · ' + irrDefTxt(s, o.setor, 'agora ') + '.'; }
@@ -383,23 +547,48 @@ function irrConfAuto(s, o) {
   return o.id + ' Em conferência · divergência de ' + irrPct(dv) + ' entre hidrômetro e estimativa: confira a medição.';
 }
 // conferir medição / informar leitura: o hidrômetro validado prevalece
-function irrConferir(s, id, vol) {
+function irrConferente() {
+  const p = typeof g2perfil === 'function' ? g2perfil() : null;
+  if (!p || !p.papeis || !(p.papeis.gestor || p.papeis.eletricista)) throw new Error('Só irrigante ou gestor pode conferir esta medição.');
+  return p.k;
+}
+function irrConferir(s, id, vol, motivo) {
+  const quem = irrConferente();
   const o = irrO(s, id); if (o.etapa !== 'Em conferência') throw new Error(id + ' não está Em conferência.'); const x = s.setores[o.setor];
   const ps = o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial');
-  if (vol !== null && vol !== undefined) { if (!(vol > 0)) throw new Error('Informe a leitura do hidrômetro em m³ (ex.: 8.480).');
-    const est = ps.map(p => p.lam * p.cob * 10); const te = est.reduce((a, b) => a + b, 0) || 1; ps.forEach((p, i) => { p.vol = Math.round(vol * est[i] / te); irrCredito(s, o, p); }); }
-  const med = ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q, p) => q + p.vol, 0);
+  if (!ps.length) throw new Error('Nenhuma passada realizada para conferir.');
+  const vals = ps.map(p => p.lam * p.cob * 10); const est = vals.reduce((a,b) => a+b,0);
+  const informado = vol !== null && vol !== undefined;
+  if (informado && (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0)) throw new Error('Informe o volume medido em m³.');
+  const med = informado ? vol : (ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q,p) => q+p.vol,0));
   if (med === null) throw new Error('Sem leitura do hidrômetro: informe o volume medido.');
-  const est = ps.reduce((q, p) => q + p.lam * p.cob * 10, 0); const dv = est ? (med - est) / est * 100 : 0;
-  o.etapa = 'Encerradas'; o.conf = { med, est: Math.round(est), dv, st: 'Hidrômetro prevaleceu', q: s.agora }; x.bal.ap.filter(a => a.os === o.id).forEach(a => { a.prov = false; });
-  irrTr(o, s.agora, o.ex, 'Conferida · hidrômetro validado prevalece: ' + irrN(med) + ' m³ = ' + irrLamTxt(med, irrCobO(o), x.ha) + ' (' + irrPct(dv) + ' da estimativa) · encerrada', s.faz[o.faz].irrig);
+  const m = irrMedicao(s, o, med); const dv = m.dv; const mot = String(motivo || '').trim();
+  if (m.exigeMotivo && !mot) throw new Error(m.temporal ? 'Confira área e tempo e informe o motivo da validação.' : 'Divergência acima da tolerância: informe o motivo para aceitar.');
+  // Validar tudo antes de alterar leituras/créditos; a última parcela conserva o total medido.
+  ps.forEach(p => { if (p.temporalPendente) { p.temporalPendente = false; p.tempoConferido = { quem, motivo: mot, q: irrAgora(s, o) }; } });
+  if (informado) { let saldo = med; ps.forEach((p,i) => { p.vol = i === ps.length-1 ? saldo : Math.min(saldo, Math.round(med*vals[i]/(est || 1))); saldo -= p.vol; }); }
+  ps.forEach(p => irrCredito(s,o,p));
+  o.etapa = 'Encerradas'; o.conf = { med, est, dv, st: 'Hidrômetro prevaleceu', q: irrAgora(s, o), motivo: mot, quem };
+  x.bal.ap.filter(a => a.os === o.id).forEach(a => { a.prov = false; });
+  irrTr(o,irrAgora(s, o),o.ex,'Conferida (simulado) · hidrômetro '+irrN(med)+' m³ · '+irrPct(dv)+' da estimativa'+(mot?' · motivo: '+mot:'')+' · encerrada',quem);
   return { msg: id + ' encerrada · hidrômetro prevalece: ' + irrN(med) + ' m³ · balanço usa o medido, sem duplicar · ' + irrDefTxt(s, o.setor) + '.' };
+}
+function irrDevolver(s,id) {
+  const quem = irrConferente(); const o = irrO(s,id);
+  if (o.etapa !== 'Em conferência') throw new Error(id+' não está Em conferência.');
+  o.conf = Object.assign({},o.conf,{st:'Devolvida',quem,q:irrAgora(s, o)});
+  irrTr(o,irrAgora(s, o),o.ex,'Devolvida para conferir o hidrômetro · medição e crédito provisório preservados',quem);
+  return {msg:id+' devolvida para conferir o hidrômetro · permanece Em conferência.'};
 }
 function irrLimites(s, sid, v) {
   const x = s.setores[sid]; if (!x) throw new Error('Setor não encontrado.');
   if (!(v.lmax >= 1 && v.lmax <= 40)) throw new Error('Lâmina máxima por passada entre 1 e 40 mm.');
   if (!(v.imin >= 6 && v.imin <= 96)) throw new Error('Intervalo mínimo entre 6 e 96 h.');
   if (!(v.efic >= 50 && v.efic <= 100)) throw new Error('Eficiência entre 50 e 100 %.');
+  // fração de depleção f (AGUA-SOLO-IRR): vazio ou igual à referência da cultura = segue a cultura; sem referência, o valor digitado confirma o padrão
+  if (v.f !== undefined) { const f = v.f === '' || v.f === null ? null : Number(v.f);
+    if (f !== null && !(f >= 0.1 && f <= 0.9)) throw new Error('Fração de depleção f entre 0,10 e 0,90.');
+    const ref = irrFdep(Object.assign({}, x, { f: undefined })); x.f = (f === null || (!ref.conf && Math.abs(f - ref.f) < 1e-9)) ? undefined : f; }
   x.lmax = v.lmax; x.imin = v.imin; x.efic = v.efic; const n = irrNec(s, sid);
   const lib = irrOrdensSetor(s, sid).filter(o => ['Liberadas', 'Em execução'].indexOf(o.etapa) >= 0).map(o => o.id);
   return { msg: 'Limites do ' + x.nome + ' salvos · a próxima programação usa até ' + irrMm(v.lmax) + ' mm por passada' + (n && n.liq > 0.05 ? ' (necessidade de hoje = ' + n.np + (n.np > 1 ? ' passadas' : ' passada') + ')' : '') + (lib.length ? ' · ' + lib.join(', ') + ' não ' + (lib.length > 1 ? 'mudam' : 'muda') : '') + '.' };
@@ -426,15 +615,16 @@ function irrReclassificar(s, id, d) {
   if (irrPausada(o)) { const pz = o.exec.pausas.find(z => z.fim === null || z.fim === undefined); pz.fim = pz.ini + 8; }
   const q = iniciou ? irrUlt(o) + 30 : s.agora; let v1 = 0, area = x.ha, vol = 0, sw = null;
   if (p) {   // a passada em curso para na área já coberta: essa água fica na v1 (crédito só na faixa); o saldo vai para a v2
-    v1 = Math.min(x.ha, p.cob || 0); area = Math.round((x.ha - v1) * 10) / 10; const fim0 = irrFimP(o, p);
+    v1 = Math.min(x.ha, p.cob || 0); area = irrAreaV2(x, p); const fim0 = irrFimP(o, p);
     p.st = 'Parcial'; p.cob = v1; p.fimReal = q; p.vol = v1 > 0 ? irrTele(s, o, p, v1) : 0; irrCredito(s, o, p);
     vol += area * p.lam * 10; sw = { ini: q, fim: Math.max(q + 15, fim0) }; }
   o.passadas.filter(z => z.st === 'Programada').forEach(z => { vol += x.ha * z.lam * 10; });
-  o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: Math.round(d.dose * area), sw };
+  { const m = irrV2Zero(o, x, p, d.dose); if (m) throw new Error(m); }   // nunca seria liberada nem entregue (PRE-REV Y1)
+  o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
-  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 1) + ' de ' + irrN(x.ha, 1) + ' ha (fica na v1); saldo de ' + irrN(area, 1) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot) + ' kg na liberação', s.faz[o.faz].gestor);
-  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 1) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot) + ' kg na liberação.' };
+  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
+  return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 2, 0) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
 }
 // Adicionar produtos de uma vez: v2 na irrigação e no cenário da O.S.; se um lado falhar, nada é gravado
 function irrReclassTudo(self, id, d) {
@@ -449,13 +639,13 @@ function irrReclassTudo(self, id, d) {
 function irrReclassCen(c, s, id) {
   const o = s.ordens[id]; const x = s.setores[o.setor]; const f = o.fert; if (!f) throw new Error('Sem v2.');
   if (c.ordens[id]) throw new Error(id + ' já está no cenário da O.S.');
-  const ins = [{ g: 'Fertilizantes', p: f.prod, dose: f.dose, un: 'kg', tot: f.tot, sit: 'Reserva ao liberar' }];
+  const ins = [{ g: 'Fertilizantes', p: f.prod, dose: f.dose, un: 'kg', tot: cenQtd(f.dose, f.area), sit: 'Reserva ao liberar' }];
   const no = { id, novo: false, keys: [], tipo: 'Fertirrigação · ' + f.prod + ' (v2 da irrigação)', talhao: o.setor, area: f.area, etapa: 'A liberar', selos: f.exec ? [{ t: 'Revisão de saldo pendente', c: 'yellow' }] : [],
     faz: x.faz === 'LG' ? 'Lagoa Grande' : 'Santa Rita', saf: '2026/27', lam: irrMm(o.lam) + ' mm', obs: f.mot, agua: false, ins, semins: '', bloq: null, aviso: '', dono: 'Ana (agrônoma)', prazo: 'liberar',
     atv: { op: 'Fertirrigação', nome: 'Fertirrigação · ' + f.prod, gat: '', orig: 'Irrigação ' + id + ' v1 → v2', conj: x.bnome, rend: 0 },
     realizado: 0, saldo: f.area, resp: s.faz[x.faz].irrig, versao: 'v2', janela: irrJanO(o), ap: [], nota: '',
     cond: 'Produto na água: o agrônomo confere, ajusta se precisar e libera; a liberação reserva o estoque. Próximo passo: liberar para execução.',
-    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos · ' + f.mot, f.exec ? irrN(f.v1, 1) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
+    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos · ' + f.mot, f.exec ? irrN(f.v1, 2, 0) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
   c.ordens[id] = { id, tipo: no.tipo, talhao: no.talhao, area: f.area, etapa: 'A liberar', versao: 'v2', realizado: 0, saldo: f.area, resp: no.resp,
     ins: ins.map(z => ({ p: z.p, dose: z.dose, un: z.un, tot: z.tot, emb: '' })), req: null, selos: no.selos, ap: [], reservado: false, osc: { novo: no } };
   return { msg: '' };
@@ -473,7 +663,7 @@ function irrSelos(s, o) {
     return out; }
   if (et === 'A liberar') irrChecar(s, o).bloq.forEach(b => out.push({ t: b.t, c: b.c, h: b.h, dono: b.dono }));
   if (et === 'Em execução') { if (irrPausada(o)) out.push({ t: 'Pausada', c: 'yellow' }); else if (!irrPassAtual(o) && irrPassProx(o)) out.push({ t: 'Entre passadas', c: 'gray' }); }
-  if (et === 'Em conferência' && o.conf) { if (o.conf.st === 'Sem leitura') out.push({ t: 'Sem leitura do hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Divergência') out.push({ t: 'Divergência · ' + irrPct(o.conf.dv !== undefined ? o.conf.dv : (o.conf.med - o.conf.est) / o.conf.est * 100), c: 'yellow' }); }
+  if (et === 'Em conferência' && o.conf) { if (o.conf.st === 'Área e tempo a conferir') out.push({ t: 'Área e tempo a conferir · crédito pendente', c: 'yellow' }); else if (o.conf.st === 'Devolvida') out.push({ t: 'Devolvida · conferir hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Sem leitura') out.push({ t: 'Sem leitura do hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Divergência') out.push({ t: 'Divergência · ' + irrPct(o.conf.dv !== undefined ? o.conf.dv : (o.conf.med - o.conf.est) / o.conf.est * 100), c: 'yellow' }); }
   if (et === 'Encerradas' && o.conf) out.push({ t: o.conf.st === 'Automática' ? 'Encerrada automaticamente' : 'Hidrômetro prevaleceu', c: 'gray', mut: true });
   return out;
 }
@@ -490,7 +680,7 @@ function irrProx(s, o) {
     if (red) { if (red.k === 'outorga' || red.k === 'vazao') return { t: 'Ajustar à outorga', h: det + ':conflito', dono: red.dono, r: 1 }; return { t: 'Resolver conflito', h: det + ':conflito', dono: red.dono, r: 1 }; }
     return { t: 'Definir janela', h: det + ':janela', dono: F.irrig, r: 3 }; }
   if (et === 'Liberadas') return { t: 'Iniciar irrigação', h: det, dono: F.irrig, r: 5 };
-  if (et === 'Em execução') { if (irrPausada(o)) return { t: 'Retomar irrigação', h: det, dono: F.irrig, r: 4 }; if (irrPassAtual(o)) return { t: 'Confirmar término', h: det + ':termino', dono: F.irrig, r: 4 };
+  if (et === 'Em execução') { if (irrPausada(o)) return { t: 'Retomar irrigação', h: det, dono: F.irrig, r: 4 }; if (irrPassAtual(o)) return { t: irrTerminoInfo(s, o, 0).cedo ? 'Registrar término antecipado' : 'Confirmar término', h: det + ':termino', dono: F.irrig, r: 4 };
     return { t: 'Iniciar passada ' + irrPassProx(o).n, h: det, dono: F.irrig, r: 5 }; }
   if (et === 'Em conferência') { if (o.conf && o.conf.st === 'Sem leitura') return { t: 'Informar leitura', h: det + ':conferir', dono: F.irrig, r: 2 }; return { t: 'Conferir medição', h: det + ':conferir', dono: F.irrig, r: 2 }; }
   return null;
@@ -527,6 +717,15 @@ function irrSitOrdem(s, o, p, et) {
   if (et === 'Em execução') return { c: irrPausada(o) ? 'yellow' : 'blue', sit: 'Irrigando', l: (irrPausada(o) ? 'pausada · ' : 'irrigando · ') + o.id };
   const q = irrIni(o); return { c: 'lime', sit: 'Programada', l: 'programada · ' + (q === null ? o.id : irrQuando((irrPassProx(o) || {}).ini || q)) };
 }
+// EX-55 F1 · entrada do talhão na camada Irrigação do Mapa (mapa_camadas.js · mcIrr): fonte única do Mapa da fazenda (IN-04, irrMapa) e da
+// visão Mapa da Irrigação (IR-01). Talhão sem setor: cinza, com o rótulo que a tela dá (sequeiro, ou preparo sem rega na Lagoa Grande).
+function irrMapaEntrada(s, t, semSetor) {
+  const x = s && s.setores[t]; if (!x) return { c: 'gray', l: semSetor, d: null, est: false, hoje: '', ac: null, ords: [] };
+  const si = irrSituacao(s, t); const rp = si.d !== null ? irrPerc(s, t) : null;
+  return { rec: rp, kc: x.kc || null, etcd: x.bal ? x.bal.etc / x.bal.dias : null, tipo: x.tipo, ef: x.efic, lmax: x.lmax, c: si.c, l: si.l, d: si.d, est: si.est, hoje: si.hoje,
+    ac: si.acao, fon: si.fon, limt: si.limt, lam: si.lam, eq: si.eq, ult: si.ult, faixa: si.faixa || '', ords: si.ords || [],
+    top: si.top ? { sit: si.top.sit, agua: !!(si.top.o && !si.top.o.fert) } : null };
+}
 // situação do setor (mapa, IR-01 e faixa): c = cor da camada do mapa · l = rótulo · acao = [verbo, destino] · dono = de quem é o passo
 function irrSituacao(s, sid) {
   const x = s.setores[sid]; const F = s.faz[x.faz];
@@ -534,7 +733,8 @@ function irrSituacao(s, sid) {
   const d = irrDef(s, sid); const est = irrEst(s, x); const n = irrNec(s, sid); const cp = s.capt[x.capt];
   const ords = irrOrdensSetor(s, sid); const ab = ords.filter(irrAberta);
   const fe = Object.keys(s.fert).filter(k => s.fert[k].setor === sid && !s.ordens[k]).map(k => ({ id: k, f: s.fert[k], et: irrFertEtapa(k) })).filter(z => z.et && ['Encerradas', 'Canceladas'].indexOf(z.et) < 0);
-  const lim = x.limiar; const precisa = lim !== null && lim !== undefined && d >= lim;
+  const G = irrGatilho(s, sid); const lim = G ? G.v : null; const precisa = lim !== null && d >= lim;
+  const ag = G ? G.a : irrAgua(s, sid); const limS = G && G.por === 'afd' ? ' (AFD do solo)' : ''; const seca = !!(ag && ag.cad !== null && d >= ag.cad - 1e-9);
   const aguaAb = ab.some(o => !o.fert);
   const it = [];
   ab.forEach(o => { const p = irrProx(s, o); const et = irrEtapa(s, o); const sel = irrSelos(s, o); const so = irrSitOrdem(s, o, p, et);
@@ -549,18 +749,18 @@ function irrSituacao(s, sid) {
   it.sort((a, b) => a.r - b.r);
   const fon = est ? ((irrSonda(s, x) || {}).st === 'Suspeita' ? 'sonda suspeita (' + (irrSonda(s, x).motivo || '') + ') · estimativa por ET' : 'sonda sem dado desde ' + irrQuando(irrSonda(s, x).desde) + ' · estimativa por ET') : (F.demo ? 'balanço demonstrativo · hoje 06:00' : 'estação Santa Rita + sonda · hoje 06:00');
   const aps = irrApsSetor(s, sid); const ultA = aps.slice().sort((a, b) => b.q - a.q)[0]; const fx = irrFaixaCob(s, sid);
-  const ult = ultA ? irrDdmm(irrDiaN(ultA.q)) + ' · ' + ultA.os + ' · ' + irrMm(irrApBr(ultA)) + ' mm em ' + (irrApParc(ultA, x.ha) ? irrN(irrApCob(ultA), 1) + ' de ' + irrN(x.ha) + ' ha' : irrN(x.ha) + ' ha') + (ultA.prov ? ' · provisório' : '')
+  const ult = ultA ? irrDdmm(irrDiaN(ultA.q)) + ' · ' + ultA.os + ' · ' + irrMm(irrApBr(ultA)) + ' mm em ' + (irrApParc(ultA, x.ha) ? irrN(irrApCob(ultA), 2, 1) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : irrN(x.ha, 2, 0) + ' ha') + (ultA.prov ? ' · provisório' : '')
     : (x.bal.repos !== undefined ? irrDdmm(irrDiaN(x.bal.repos)) + ' · reposição completa (há ' + (-irrDiaN(x.bal.repos)) + (irrDiaN(x.bal.repos) === -1 ? ' dia' : ' dias') + ')' : '—');
-  const base = { d, est, n, fon, eq: (x.tipo === 'gotejo' ? 'Gotejo' : 'Pivô central') + ' · ' + irrN(x.ha) + ' ha · ' + irrN(x.vazao) + ' L/s · ' + x.bnome + (cp ? ' · ' + cp.nome : ''), ult, ords: ab,
-    faixa: fx ? 'faixa de ' + irrN(fx.cob, 1) + ' ha (' + fx.os + '): ' + irrN(fx.d, 1) + ' mm · resto do ' + (x.tipo === 'gotejo' ? 'setor' : 'pivô') + ': ' + irrN(d, 1) + ' mm' : '' };
+  const base = { d, est, n, fon, eq: (x.tipo === 'gotejo' ? 'Gotejo' : 'Pivô central') + ' · ' + irrN(x.ha, 2, 0) + ' ha · ' + irrN(x.vazao) + ' L/s · ' + x.bnome + (cp ? ' · ' + cp.nome : ''), ult, ords: ab,
+    faixa: fx ? 'faixa de ' + irrN(fx.cob, 2, 1) + ' ha (' + fx.os + '): ' + irrN(fx.d, 1) + ' mm · resto do ' + (x.tipo === 'gotejo' ? 'setor' : 'pivô') + ': ' + irrN(d, 1) + ' mm' : '' };
   if (it.length) { const t = it[0]; const o = (t.o && irrEt(t.o) === 'Em conferência') ? (ab.find(z => irrEt(z) !== 'Em conferência') || null) : t.o; let limt = 'Lâmina programada', lam = '';
     if (o) { lam = irrMm(o.lam) + ' mm' + (o.passadas.length > 1 ? ' em ' + o.passadas.length + ' passadas' : '') + ' · ' + irrJanO(o); const cb = irrCobre(s, o); if (cb && cb.cob !== null) lam += ' · cobre ' + irrN(cb.cob, 0) + ' %' + (cb.resta > 0.05 ? ' · resta ' + irrN(cb.resta, 1) + ' mm' : ''); }
     else if (t.fert) { const f = s.fert[t.fert]; lam = f.lam ? irrMm(f.lam) + ' mm · ' + irrJan(f.ini, f.fim) : (f.ini ? irrJan(f.ini, f.fim) : 'parada'); limt = 'Fertirrigação'; }
     else { limt = 'Necessidade'; lam = n && n.liq > 0.05 ? irrMm(n.br) + ' mm brutos em ' + n.np + (n.np > 1 ? ' passadas' : ' passada') + ' · sem ordem programada' : 'sem lâmina'; }
     return Object.assign(base, { c: t.c, l: t.l, sit: t.sit, hoje: t.hoje, acao: t.acao, dono: t.dono || '', limt, lam, top: t }); }
   const lamN = n && n.liq > 0.05 ? irrMm(n.br) + ' mm brutos em ' + n.np + (n.np > 1 ? ' passadas' : ' passada') : 'sem lâmina';
-  if (precisa) return Object.assign(base, { c: 'yellow', l: 'a programar · ' + irrN(d, 1) + ' mm', sit: 'A programar', hoje: 'Déficit de ' + irrN(d, 1) + ' mm passou do limite de ' + irrN(lim, 1) + ' mm: programe a irrigação', acao: ['Programar irrigação', 'IR-02.dc.html#programar=' + sid], dono: F.irrig, limt: 'Necessidade', lam: lamN });
-  return Object.assign(base, { c: est ? 'cloud' : 'ok', l: est ? 'sem necessidade · ≈ estimado' : 'sem necessidade hoje', sit: 'Sem necessidade', hoje: 'Déficit de ' + (est ? '≈' : '') + irrN(d, 1) + ' mm abaixo do limite de ' + irrN(lim || 0, 1) + ' mm: sem rega hoje', acao: null, dono: '', limt: 'Irrigar a partir de', lam: irrN(lim || 0, 1) + ' mm de déficit' + (x.fase ? ' (' + x.cult.toLowerCase() + ')' : '') });
+  if (precisa) return Object.assign(base, { c: 'yellow', l: 'a programar · ' + irrN(d, 1) + ' mm', sit: 'A programar', hoje: 'Déficit de ' + irrN(d, 1) + ' mm passou do limite de ' + irrN(lim, 1) + ' mm' + limS + (seca ? ' e chegou à CAD: sem água disponível às raízes' : '') + ': programe a irrigação', acao: ['Programar irrigação', 'IR-02.dc.html#programar=' + sid], dono: F.irrig, limt: 'Necessidade', lam: lamN });
+  return Object.assign(base, { c: est ? 'cloud' : 'ok', l: est ? 'sem necessidade · ≈ estimado' : 'sem necessidade hoje', sit: 'Sem necessidade', hoje: 'Déficit de ' + (est ? '≈' : '') + irrN(d, 1) + ' mm abaixo do limite de ' + irrN(lim || 0, 1) + ' mm' + limS + ': sem rega hoje', acao: null, dono: '', limt: 'Irrigar a partir de', lam: irrN(lim || 0, 1) + ' mm de déficit' + (x.fase ? ' (' + x.cult.toLowerCase() + ')' : '') });
 }
 // contadores da faixa de etapas
 function irrContagem(s, fz) {

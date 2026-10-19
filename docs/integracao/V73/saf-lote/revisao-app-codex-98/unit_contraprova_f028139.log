@@ -1,0 +1,72 @@
+— slTsv: bloco copiado do Excel/Planilhas
+OK    linhas por \r\n, células por tabulação, quebra final ignorada
+OK    \n e \r sozinhos também quebram linha
+OK    célula entre aspas com tabulação, quebra e aspas duplicadas
+OK    célula vazia no meio continua na posição
+OK    linhas vazias do fim saem
+OK    espaços nas pontas da célula saem
+— slNumTxt: número pt-BR
+OK    "1.234,5" → "1234,5"
+OK    "12,5" e "12.5" → "12,5"
+OK    "64 sc/ha" → "64" (a unidade colada junto sai)
+OK    negativo, texto e vazio → null
+— slData: datas com atalho
+OK    aaaa-mm-dd fica
+OK    dd/mm/aaaa → ISO
+OK    dd/mm/aa → 20aa
+OK    dd/mm sem ano: o ano que cai dentro da safra (out → 2026; fev → 2027)
+OK    ddmmaaaa e ddmm (só dígitos)
+OK    31/02 e 13/13 → null (data que não existe)
+OK    texto → null; vazio → ""
+— slPode: o que cada célula aceita (mesmas regras do painel do cultivo e do Dividir)
+OK    O.S. liberada ou em execução prende cultura, variedade e plano, com o motivo
+OK    na linha com O.S., plantio e meta seguem editáveis
+OK    área do talhão inteiro vem do cadastro (recusa com motivo)
+OK    área da parcela: número, mínimo 0,01 ha e no máximo a área do talhão
+OK    perene só leitura recusa tudo com o motivo
+OK    cultura pelo nome sem acento nem maiúscula ("feijao" → Feijão); cultura fora do cadastro recusa
+OK    plano pelo nome, pelo código e pelo nome com versão
+OK    plano de outra cultura recusa (a cultura do rascunho conta)
+OK    "sem plano" limpa o plano
+OK    meta inválida recusa; data inválida recusa com o formato
+— slTrocaCult: trocar a cultura arrasta plano e variedade
+OK    plano e variedade da cultura anterior saem; vazios recebem a sugestão da safra; plantio e meta ficam
+OK    linha livre ganha variedade, plano e o primeiro plantio possível; a meta nunca vem de sugestão
+OK    variedade digitada fora do cadastro fica (não se apaga o que não se sabe de quem é)
+— slColarBloco: colar a partir da célula focada
+OK    dimensão 4 × 5
+OK    T2 (O.S. em execução): cultura, variedade e plano recusados; plantio e meta colados
+OK    T3 recebe a linha inteira (cultura antes do plano)
+OK    T1-A recebe a 3ª linha
+OK    T7 (perene) recusa a 4ª linha inteira
+OK    contagem: 4 + 2 + 5 + 5 colados = 12 e 3 + 5 recusados = 8
+OK    o rascunho de partida não muda (nada é salvo antes do Salvar)
+OK    além da última coluna e da última linha: recusas com o motivo
+OK    célula vazia do bloco não apaga o que estava
+OK    texto das recusas cita linha, coluna e motivo
+— slAplicarSel: aplicar aos marcados
+OK    só os campos preenchidos da faixa
+OK    T3 e P2 recebem Milho e o plano do milho; T2 (O.S.) e T7 (perene) recusam com o motivo
+OK    linha livre que recebe a cultura ganha o plantio sugerido (primeiro possível)
+OK    plano de outra cultura sem trocar a cultura: recusado
+— slPlano exato (revisão do Codex 6229216931, PR #47): sem prefixo, nome repetido é ambíguo, a ordem do catálogo não decide
+OK    "Soja precoce v9" e "Soja v99" recusados (não encontrados; nada por prefixo)
+OK    "Soja" com Soja v1 e Soja v2 no catálogo: recusado como ambíguo, com as versões no motivo
+OK    código exato (P2) e nome com versão exatos (Soja precoce v1, Soja v2, soja v1) aceitos
+OK    nome único sem versão (Soja precoce) aceito; o rótulo da lista ("Soja v2 · 8 atividades") também
+OK    plano de outra cultura continua recusado pela cultura; "sem plano" limpa
+OK    as 24 ordens do catálogo dão a mesma resolução
+OK    colar e "Aplicar aos marcados" recusam com o motivo e o rascunho fica (P1)
+— revisão do app do Codex (#98, P2): cultivar de outra cultura e erro já corrigido
+FALHA cultivar cadastrada de outra cultura é recusada pela regra (vale para célula, colagem e faixa); a da própria cultura e o texto livre passam · {"ok":true,"v":"58 W"}
+FALHA faixa com Milho e a cultivar de soja (58 W) que sobrou: a linha fica Milho sem a 58 W, e a recusa diz por quê · {"vals":{"c5":{"area":"96","cult":"Milho","var":"58 W","plantio":"2026-10-22","meta":"62","plano":"MILHO-SF"}},"n":2,"recusas":[],"cols":["cult","var"]}
+FALHA colar a cultivar de soja (62 X) numa linha de milho: recusado, o rascunho fica · {"vals":{"c5":{"area":"96","cult":"Milho","var":"62 X","plantio":"2026-10-22","meta":"62","plano":""}},"n":1,"recusas":[],"dim":[1,1]}
+FALHA slSemErro: a célula corrigida sai do erro, o resto fica; a cultura leva junto o erro do plano · null
+FALHA aplicar e colar devolvem as células feitas (para limpar o erro)
+— slContar: células alteradas (contador do Salvar)
+OK    sem mudança → 0
+OK    mudança de espaço nas pontas não conta
+OK    colagem acima: 12 células coladas, 7 mudaram de valor (colar o mesmo valor não conta)
+
+5 FALHA(S)
+RESULTADO 54/59

@@ -1,0 +1,9 @@
+$ CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdp9333.lock env CDP_GL=1 timeout 900 python3 app_mb04_test.py
+  OK  pré-carga: 3 ordens na fila de Marcos
+  OK  formulário aberto com erro junto ao campo e foto anexada
+  OK  3 ordens + formulário com erro + lista de ocorrências longas cabem (excesso 0 px)
+  OK  lista: as 2 mais recentes (OC-503, OC-502) e "+ 1 anterior"
+  OK  registrada: cartão OC-504, rodapé Voltar à fila e cabe (excesso 0 px)
+  OK  sem erros JS []
+6/6 ok · FALHAS: 0
+[exit 0]

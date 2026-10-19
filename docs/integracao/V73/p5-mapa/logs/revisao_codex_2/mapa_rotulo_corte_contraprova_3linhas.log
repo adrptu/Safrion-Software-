@@ -1,0 +1,6 @@
+OK    R1 1440 px: em 9 camadas, nenhum valor de rótulo cortado nem "·" no começo de linha
+OK    R2 390 px com toque: em 9 camadas, nenhum valor de rótulo cortado nem "·" no começo de linha
+OK    R3 Colheita e produtividade (Mamão em kg/ha): o Pivô 19 mostra a situação e a produtividade com a unidade inteira
+FALHA R5 os textos compostos mais longos (café a apurar com a medida do campo; estimativa; "+1" de outro cultivo) cabem no rótulo sem corte · [['em colheita · kg/ha a apurar · 1.200,00 kg/ha de Café da roça · +1', True, 38], ['em colheita · 1.484,89 kg/ha · estimativa · +1', False, 38]]
+OK    R4 nenhum erro de JavaScript
+RESULTADO: 4/5 ok

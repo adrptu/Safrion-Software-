@@ -1,0 +1,18 @@
+$ env CHROME_BIN=<chrome> flock /tmp/cdp9333.lock env CDP_GL=1 timeout 1200 python3 componentes_test.py interacao
+FALHA 10 PA · repouso branco com "Abrir plano →" visível; hover muda fundo e borda; ao sair volta; nada selecionado; mesmo tamanho e posição [['Abrir plano →', True], ['rgb(255, 255, 255)', 'rgb(228, 233, 229)', 'pointer'], ['rgb(255, 255, 255)', 'rgb(228, 233, 229)'], ['rgb(255, 255, 255)', 'rgb(228, 233, 229)'], 'false', [281, 335, 336, 182], [281, 335, 336, 182]]
+OK    11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (etapa 2); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto") 
+OK    12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; "‹ Biblioteca de planos" volta à mesma posição de rolagem com o foco no cartão aberto 
+OK    13 linha com controle interno (CD-06) · Enter e Espaço no expandir alternam aria-expanded sem abrir o formulário; Enter na linha abre 1 formulário 
+     (informativo) famílias: {'botão primário hover': 'none', 'menu hover': 'none', 'chip hover': ['none', 'none'], 'etapa inerte': ['none', 'default', 'none'], 'texto inerte': ['auto', 'none', 'none'], 'busca hover': 'none', 'busca foco': ['solid', 'rgb(30, 122, 76)'], 'talhão foco': ['7px, 4px', 'rgb(21, 32, 26)'], 'trilha hover': 'none'}
+FALHA 14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover {'botão primário hover': 'none', 'menu hover': 'none', 'chip hover': ['none', 'none'], 'etapa inerte': ['none', 'default', 'none'], 'texto inerte': ['auto', 'none', 'none'], 'busca hover': 'none', 'busca foco': ['solid', 'rgb(30, 122, 76)'], 'talhão foco': ['7px, 4px', 'rgb(21, 32, 26)'], 'trilha hover': 'none'}
+OK    15 indisponível · OK do filtro sem valor marcado: desabilitado, opacidade menor, cursor de proibido e motivo "Marque pelo menos um valor." em texto 
+OK    16 menos movimento · com redução pedida a transição do menu cai a ~0 s; sem pedido continua 0,18 s 
+OK    17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; a lista só informa: o Tab não entra nela, nenhum item é botão/link e a etapa continua a 2 (UX-ACAO-UNICA) 
+OK    18 menu sobreposto · Esc fecha (232 → 68 px) e o foco volta ao botão do menu 
+OK    19 tabela larga (SAF 390 px) · rola dentro da caixa com a borda direita esmaecida; no fim da rolagem o esmaecimento some 
+     erros JS (interação): []
+
+RESULTADO: 8 ok · 2 falhas (interacao)
+  - 10 PA · repouso branco com "Abrir plano →" visível; hover muda fundo e borda; ao sair volta; nada selecionado; mesmo tamanho e posição
+  - 14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover
+[exit 1]

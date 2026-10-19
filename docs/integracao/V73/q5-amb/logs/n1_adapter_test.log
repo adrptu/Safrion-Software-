@@ -1,0 +1,2 @@
+6 PASS: migration/adapter; emission and B-3 covered in separate tests.
+rc=0

@@ -1,0 +1,107 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Agronomia › Eficácia e histórico
+Eficácia e histórico
+i
+1 pós vence em 27/09
+Intervenção × observação posterior
+Abrir aplicações
+Propor melhoria
+5 de 5
+AVALIAÇÃO
+⇅
+RECOMENDAÇÃO → EXECUÇÃO
+⇅
+MÉTODO PRÉ/PÓS
+⇅
+DATAS
+⇅
+RESULTADO
+⇅
+CONFIANÇA
+⇅
+CUSTO
+⇅
+AÇÃO
+⇅
+EF-021
+REC-016
+→
+OS-0421
+fungicida T1+T2
+% folíolos com ferrugem
+pré 19/09 · pós 27/09 (7 DAA)
+Pós em 27/09
+—
+R$ 96/ha
+Programar pós
+EF-020
+REC-014
+→
+OS-0420
+plantio T4
+cistos/200 cm³ (pré = VIS-011)
+pré 15/09 · pós em V4
+Sem leitura pós
+O.S. impedida
+—
+R$ 328/ha
+Ver O.S.
+EF-019
+REC-012 →
+OS-0415
+dessecação T3
+% cobertura verde
+pré 08/09 · pós 22/09
+Controle 96 %
+Alta
+R$ 82/ha
+Abrir aplicação
+EF-018
+REC-011 → inseticida P2
+lagartas/m
+pré 02/09 · pós 16/09
+Redução 62 %
+observada · chuva de 48 mm
+Baixa
+R$ 54/ha
+Registrar parecer
+EF-017
+REC-009 → herbicida T2
+plantas/m²
+pré 10/08 · pós 24/08 · recorrência 05/09
+Recorreu
+alvo voltou em 12 dias
+Alta
+R$ 61/ha
+Propor revisão
+Economia adiada × efetivamente evitada
+ECONOMIA
+⇅
+VALOR
+⇅
+O QUE ENTRA
+⇅
+SITUAÇÃO
+⇅
+Efetivamente evitada
+R$ 41 mil
+2 aplicações dispensadas por contagem abaixo do NC confirmada no ciclo (P2 e T3)
+Janela do alvo encerrada
+Adiada
+R$ 18 mil
+1 aplicação no C1 aguardando nova contagem de bicho-mineiro em 02/10
+Pode voltar como custo
+Tela: Eficácia e histórico · 1 pós vence em 27/09

@@ -1,0 +1,295 @@
+[
+ {
+  "tela": "GE-03",
+  "rotulo": "Fechar competência",
+  "antes": [
+   {
+    "t": "Fechar competência 09/2026",
+    "dis": false,
+    "verde": true,
+    "title": "Fechar a competência (exige as pendências tratadas)",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Fechar está bloqueado: frete sem versão de rateio e diesel sem conciliação de tanque. | Tela: Custos e fechamento · 2 pendências bloqueiam o fechamento",
+  "clique": {
+   "txt": "Fechar competência 09/2026",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Fechar está bloqueado: frete sem versão de rateio e diesel sem conciliação de tanque. | Bloqueado · 2 pendência(s) obrigatória(s): frete sem versão de rateio e diesel sem conciliação de tanque — trate e o fechamento libera. | Bloqueado · 2 pendência(s) obrigatória(s): frete sem versão de rateio e diesel sem conciliação de tanque — trate e o fechamento libera.",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_GE_03_Fechar_competência.png"
+ },
+ {
+  "tela": "CA-02",
+  "rotulo": "Encerrar",
+  "antes": [
+   {
+    "t": "Encerrar OS-0417",
+    "dis": false,
+    "verde": false,
+    "title": "Encerrar a ordem (exige custódia zero e conferência concluída)",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Apontamentos e conferência · 2 a conferir · 1 divergência",
+  "clique": {
+   "txt": "Encerrar OS-0417",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Indisponível: 10 sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Rui recebe a devolução no almoxarifado; ou documente a destinação competente para encerrar. | Tela: Apontamentos e conferência · 2 a conferir · 1 divergência",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_CA_02_Encerrar.png"
+ },
+ {
+  "tela": "CA-04",
+  "rotulo": "Confirmar recebimento",
+  "antes": [
+   {
+    "t": "Confirmar recebimento",
+    "dis": false,
+    "verde": false,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Minhas requisições · 10 sc e 65 L em custódia",
+  "clique": {
+   "txt": "Confirmar recebimento",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Indisponível: nada foi entregue — a OS-0418 aguarda a liberação pelo agrônomo; a REQ-038 só é separada depois dela. Confirme quando os 1.140 kg chegarem à equipe; só então a custódia passa para vocês. | Tela: Minhas requisições · 10 sc e 65 L em custódia",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_CA_04_Confirmar_recebimento.png"
+ },
+ {
+  "tela": "SU-07",
+  "rotulo": "Confirmar entrega",
+  "antes": [
+   {
+    "t": "Confirmar entrega",
+    "dis": false,
+    "verde": false,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Requisições e entregas · 2 impedidas · 10 sc de sobras a receber",
+  "clique": {
+   "txt": "Confirmar entrega",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Bloqueado · a OS-0420 está impedida pela OM-0233 (Trator T1). Nada entregue: os 3.640 kg do saldo de 70 ha seguem reservados no S58-0801 até a O.S. voltar a executar. Responsável: Carlos. | Bloqueado · a OS-0420 está impedida pela OM-0233 (Trator T1). Nada entregue: os 3.640 kg do saldo de 70 ha seguem reservados no S58-0801 até a O.S. voltar a executar. Responsável: Carlos.",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_SU_07_Confirmar_entrega.png"
+ },
+ {
+  "tela": "SU-07",
+  "rotulo": "Separar FEFO",
+  "antes": [
+   {
+    "t": "Separar FEFO",
+    "dis": false,
+    "verde": false,
+    "title": "",
+    "desc": ""
+   },
+   {
+    "t": "Separar FEFO",
+    "dis": false,
+    "verde": false,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Requisições e entregas · 2 impedidas · 10 sc de sobras a receber",
+  "clique": {
+   "txt": "Separar FEFO",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Bloqueado · a OS-0418 aguarda o agrônomo aprovar a v2. Nada separado: a entrega só vale na versão aprovada. Responsável: João. | Bloqueado · a OS-0418 aguarda o agrônomo aprovar a v2. Nada separado: a entrega só vale na versão aprovada. Responsável: João.",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_SU_07_Separar_FEFO.png"
+ },
+ {
+  "tela": "SU-02",
+  "rotulo": "Publicar vigência",
+  "antes": [
+   {
+    "t": "Publicar vigência",
+    "dis": false,
+    "verde": false,
+    "title": "Publica a versão aprovada",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Políticas de estoque · 1 proposta aguardando gestor",
+  "clique": {
+   "txt": "Publicar vigência",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita. | Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita.",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_SU_02_Publicar_vigência.png"
+ },
+ {
+  "tela": "SU-09",
+  "rotulo": "Submeter ajuste",
+  "antes": [
+   {
+    "t": "Submeter ajuste",
+    "dis": false,
+    "verde": false,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Inventários e ajustes · 1 ajuste aguardando gestor · 1 diferença a submeter",
+  "clique": {
+   "txt": "Submeter ajuste",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Informe causa e evidência: clique na linha do INV-2612 e preencha antes de submeter | Informe causa e evidência: clique na linha do INV-2612 e preencha antes de submeter",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_SU_09_Submeter_ajuste.png"
+ },
+ {
+  "tela": "PL-01",
+  "rotulo": "Autorizar execução",
+  "antes": [
+   {
+    "t": "Autorizar execução 2026/27",
+    "dis": false,
+    "verde": true,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Safras, ciclos e metas · 2026/27 em planejamento",
+  "clique": {
+   "txt": "Autorizar execução 2026/27",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Não autorizado: o orçamento revisado da Safra 2026/27 aguarda a Direção. Plano operacional v3 aprovado ✓ · orçamento pendente ✗. Como resolver: cobrar a aprovação em Aprovações; a data de início nunca supre a aprovação. | Tela: Safras, ciclos e metas · 2026/27 em planejamento",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_PL_01_Autorizar_execução.png"
+ },
+ {
+  "tela": "PL-01",
+  "rotulo": "Encerrar período",
+  "antes": [
+   {
+    "t": "Encerrar período",
+    "dis": false,
+    "verde": false,
+    "title": "Encerrar o período com as pendências destinadas",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Safras, ciclos e metas · 2026/27 em planejamento",
+  "clique": {
+   "txt": "Encerrar período",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Nenhum período apto a encerrar agora: 2026/27 está em planejamento e 2025/26 já foi encerrada em 30/08 com as pendências destinadas. | Tela: Safras, ciclos e metas · 2026/27 em planejamento",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_PL_01_Encerrar_período.png"
+ },
+ {
+  "tela": "AG-05",
+  "rotulo": "Publicar",
+  "antes": [
+   {
+    "t": "Publicar",
+    "dis": false,
+    "verde": false,
+    "title": "Publicar a versão validada para as adoções",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo",
+  "clique": {
+   "txt": "Publicar",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "Nada a publicar ainda: o Feijão pivô v3 está em validação. Depois de validado, publicar envia as diferenças às 4 adoções ativas, preserva ajustes locais e não muda planos em execução. | Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_AG_05_Publicar.png"
+ },
+ {
+  "tela": "OS-0424-app",
+  "rotulo": "Retirar",
+  "antes": [
+   {
+    "t": "Retirar no almoxarifado",
+    "dis": false,
+    "verde": true,
+    "title": "",
+    "desc": ""
+   }
+  ],
+  "aviso_antes": "● Disponível sem internet · v1 liberada por Ana (agrônoma) | Tela: OS-0424 · Fungicida",
+  "clique": {
+   "txt": "Retirar no almoxarifado",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso_depois": "● Disponível sem internet · v1 liberada por Ana (agrônoma) | Nada entregue ainda: retire com Rui no almoxarifado (REQ-039 · Fungicida A 65 L · lote F26-02 · 13 × galão 5 L). Quando ele entregar, confirme o recebimento aqui. | Nada entregue ainda: retire com Rui no almoxarifado (REQ-039 · Fungicida A 65 L · lote F26-02 · 13 × galão 5 L). Quando ele entregar, confirme o recebimento aqui.",
+  "dialogo": [],
+  "primaria_dialogo": null,
+  "aviso_primaria": null,
+  "dialogo_apos_primaria": null,
+  "cap": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ex37/cap/ex05_OS_0424_app_Retirar.png"
+ }
+]

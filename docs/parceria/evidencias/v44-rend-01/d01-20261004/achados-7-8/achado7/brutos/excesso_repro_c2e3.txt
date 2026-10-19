@@ -1,0 +1,9 @@
+{"nome": "5x6 partes fixas, todas 10 h", "ha_com_prazo": 20.00000000000001, "ha_executavel_max": 20.00000000000001, "excesso_ha": 0.0}
+{"nome": "6x5 partes fixas, todas 10 h", "ha_com_prazo": 20.000000000000018, "ha_executavel_max": 20.000000000000018, "excesso_ha": 0.0}
+{"nome": "5x6 T4+P5 sem janela (prestador)", "ha_com_prazo": 76.72727272727272, "ha_executavel_max": 76.72727272727272, "excesso_ha": 0.0}
+{"nome": "caso 9: 5x6 janelas variadas (perf_casos #9)", "ha_com_prazo": 379.0, "ha_executavel_max": 368.9999999999999, "excesso_ha": 10.000000000000114}
+{"nome": "controle 4x5 partes fixas, todas 10 h", "ha_com_prazo": 66.25, "ha_executavel_max": 66.25, "excesso_ha": 0.0}
+{"nome": "controle 4x6 partes fixas, todas 10 h", "ha_com_prazo": 66.31578947368422, "ha_executavel_max": 66.31578947368422, "excesso_ha": 0.0}
+{"nome": "controle 5x5 partes fixas, todas 10 h", "ha_com_prazo": 84.76190476190476, "ha_executavel_max": 84.76190476190476, "excesso_ha": 0.0}
+{"nome": "contraexemplo 7 configurações, prazos 2/3/10, partes fixas (rend 1)", "ha_com_prazo": 15.5, "ha_executavel_max": 15.0, "excesso_ha": 0.5}
+{"nome": "contraexemplo 7 configurações, sem %, Q=15,5", "ha_com_prazo": 15.499999999999998, "ha_executavel_max": 15.0, "excesso_ha": 0.4999999999999982}

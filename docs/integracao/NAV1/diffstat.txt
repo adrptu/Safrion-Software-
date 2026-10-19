@@ -1,0 +1,9 @@
+ docs/navegacao/CONSOLIDADO.md                      | 345 +++++++++++++++++++++
+ docs/navegacao/ESPECIFICACAO.md                    | 160 ++++++++++
+ tools/prototipo/v37/gen37/acao_unica_test.py       |  32 +-
+ tools/prototipo/v37/gen37/areas/processo_planos.py | 315 +++++++++++++------
+ tools/prototipo/v37/gen37/componentes_test.py      |  16 +-
+ tools/prototipo/v37/gen37/pa_lista_test.py         | 338 ++++++++++++++++++++
+ tools/prototipo/v37/gen37/pa_regras_test.py        | 159 ++++++++++
+ tools/prototipo/v37/gen37/patest.py                | 235 +++++++-------
+ 8 files changed, 1353 insertions(+), 247 deletions(-)

@@ -1,0 +1,131 @@
+# folga 0
+
+######## COM e4/e5
+# Dados atuais: travas e pendências (Santa Rita e Lagoa)
+   nenhuma
+# R-17 sucessão (S27SF)
+Milho T1-B 152 ha 21/02/2027                         início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | salva
+Milho T1-B 152 ha 20/02/2027                         início 20/02/2027 → Ocupa até 10/07/2027 (Pelo plano) | salva
+Milho T1-B 152 ha 15/02/2027                         início 15/02/2027 → Ocupa até 05/07/2027 (Pelo plano) | salva | pendência {'nv': [('prevista', 'c2', '15/02/2027..19/02/2027', '5 dia(s)')]}
+Milho T1-C 152 ha 15/02/2027                         início 15/02/2027 → Ocupa até 05/07/2027 (Pelo plano) | salva
+# M1 (OC-07) e OC-R10
+Milho T1 312 ha 21/02/2027                           início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | TRAVA [('safra', 'S27SF', 'nv', '21/02/2027', 472.0), ('faixa', 'd1', 'nv', '21/02/2027')]
+   M1: De 21/02/2027 a 10/07/2027, 160 ha de T1 estão com d1. Máximo 152 ha nesse período.
+Milho T1 312 ha 11/07/2027                           início 11/07/2027 → Ocupa até 28/11/2027 (Pelo plano) | TRAVA [('safra', 'S27SF', 'nv', '11/07/2027', 472.0)]
+# OC-R5 (núcleo pelo ciclo mínimo) · T3 sobre o c5 (soja 22/10/2026, sem plano, núcleo até 10/02/2027)
+Milho MILHO-SF T3 23/10/2026                         início 23/10/2026 → Ocupa até 12/03/2027 (Pelo plano) | TRAVA [('faixa', 'c5', 'm3', '23/10/2026')]
+Milho MILHO-SF T3 10/01/2027                         início 10/01/2027 → Ocupa até 30/05/2027 (Pelo plano) | TRAVA [('faixa', 'c5', 'm3', '10/01/2027')]
+Milho MILHO-SF T3 10/02/2027                         início 10/02/2027 → Ocupa até 30/06/2027 (Pelo plano) | salva | pendência {'m3': [('provavel', 'c5', '10/02/2027..16/02/2027', '7 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 11/02/2027                         início 11/02/2027 → Ocupa até 01/07/2027 (Pelo plano) | salva | pendência {'m3': [('provavel', 'c5', '11/02/2027..16/02/2027', '6 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 17/02/2027                         início 17/02/2027 → Ocupa até 07/07/2027 (Pelo plano) | salva | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 18/02/2027                         início 18/02/2027 → Ocupa até 08/07/2027 (Pelo plano) | salva | aviso saída estimada [('c5', '17/02/2027')]
+Milho SEM plano T3 23/10/2026                        início 23/10/2026 → Ocupa até 12/03/2027 (Estimado (ciclo)) | salva | pendência {'m3': [('provavel', 'c5', '23/10/2026..16/02/2027', '117 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+c5 colheita 20/01/2027 → milho 21/01/2027            início 21/01/2027 → Ocupa até 10/06/2027 (Pelo plano) | salva
+c5 colheita 20/01/2027 → milho 20/01/2027            início 20/01/2027 → Ocupa até 09/06/2027 (Pelo plano) | salva
+# M3/OC-09 · lote SOJA-AT e SOJA-PD em c4, c5, c6, c7 (S2627)
+c4 SOJA-AT                                           início 30/09/2026 → Ocupa até 15/02/2027 (Pelo plano) | salva
+c5 SOJA-AT                                           início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva
+c6 SOJA-AT                                           início 21/10/2026 → Ocupa até 08/03/2027 (Pelo plano) | salva
+c7 SOJA-AT                                           início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | salva | pendência {'c7': [('prevista', 'e5', '05/11/2026..14/11/2026', '10 dia(s)')]}
+c4 SOJA-PD                                           início 05/10/2026 → Ocupa até 12/02/2027 (Pelo plano) | salva
+c5 SOJA-PD                                           início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva
+c6 SOJA-PD                                           início 26/10/2026 → Ocupa até 05/03/2027 (Pelo plano) | salva
+c7 SOJA-PD                                           início 10/11/2026 → Ocupa até 20/03/2027 (Pelo plano) | salva | pendência {'c7': [('prevista', 'e5', '10/11/2026..14/11/2026', '5 dia(s)')]}
+     PlantioMin do c7 com SOJA-AT (desde a liberação do e5 16/11/2026): 06/12/2026
+     PlantioMin do c7 com SOJA-PD (desde a liberação do e5 16/11/2026): 01/12/2026
+   demanda do P2 (80 ha): SOJA-AT R$ 167992.00 · SOJA-PD R$ 110680.00
+# REG-02 negativo: colheita REAL do e5 em 20/11/2026
+c7 SOJA-AT (e5 colhido de fato em 20/11)             início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | TRAVA [('observado', 'e5', 'c7', '05/11/2026')] | pendência {'c7': [('prevista', 'e5', '05/11/2026..19/11/2026', '15 dia(s)')]}
+     PlantioMin do c7 SOJA-AT depois da colheita real: 10/12/2026
+# M4 · plantio do c1 em 30/10/2026
+c1 plantio 30/10/2026                                início 10/10/2026 → Ocupa até 25/02/2027 (Pelo plano) | salva | pendência {'d1': [('prevista', 'c1', '20/02/2027..24/02/2027', '5 dia(s)')]}
+# OC-11 · T3 na S27SF com milho em 11/02/2027, depois SOJA-AT/PD no c5
+depois: c5 SOJA-AT                                   início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva | pendência {'m3': [('prevista', 'c5', '11/02/2027..16/02/2027', '6 dia(s)')]}
+depois: c5 SOJA-PD                                   início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva | pendência {'m3': [('prevista', 'c5', '11/02/2027..13/02/2027', '3 dia(s)')]}
+# OC-R2 (a) · Planejar T3 com o padrão do painel e depois o lote SOJA-AT/PD
+   PlantioMin MILHO-SF no T3 (Livre a partir de 18/02/2027): 18/02/2027
+T3 18/02/2027 · c5 SOJA-AT                           início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva
+T3 18/02/2027 · c5 SOJA-PD                           início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva
+# OC-R2 (b) · Planejar P2 com o padrão e depois SOJA-AT no c7; janela do M3
+   PlantioMin MILHO-SF no P2 (Livre a partir de 24/03/2027): 24/03/2027
+P2 24/03/2027 · c7 SOJA-AT 25/11/2026                início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | salva | pendência {'c7': [('prevista', 'e5', '05/11/2026..14/11/2026', '10 dia(s)')]}
+P2 24/03/2027 · c7 SOJA-AT 06/12/2026                início 16/11/2026 → Ocupa até 03/04/2027 (Pelo plano) | TRAVA [('faixa', 'c7', 'm2', '24/03/2027')]
+P2 24/03/2027 · c7 SOJA-PD 01/12/2026                início 16/11/2026 → Ocupa até 26/03/2027 (Pelo plano) | salva | pendência {'m2': [('prevista', 'c7', '24/03/2027..25/03/2027', '2 dia(s)')]}
+   janela do c7 SOJA-AT com P2 em 24/03/2027: sem data
+   saída dupla: c7 SOJA-AT em 06/12/2026 termina em 03/04/2027 → milho do P2 a partir de 03/04/2027
+# DONO-05 · PlantioMin por plano (S27SF T1-B, Livre a partir de 21/02/2027)
+   SOJA-AT   PlantioMin 13/03/2027
+   SOJA-PD   PlantioMin 08/03/2027
+   MILHO-SF  PlantioMin 21/02/2027
+   FEIJ-PV   PlantioMin 21/02/2027
+SOJA-AT T1-B 12/03/2027                              início 20/02/2027 → Ocupa até 08/07/2027 (Pelo plano) | salva
+SOJA-AT T1-B 13/03/2027                              início 21/02/2027 → Ocupa até 09/07/2027 (Pelo plano) | salva
+# OC-R8 · DATA fora da safra (2027/28)
+Café CAFE-AR T3 01/11/2027                           início 01/11/2027 → Ocupa até sem fim (Perene) | salva | aviso [('datas_fixas', 'CAFE-AR', datetime.date(2026, 10, 15))]
+Mamão MAMAO-F P2 01/11/2027                          início 01/11/2027 → Ocupa até sem fim (Perene) | salva | aviso [('datas_fixas', 'MAMAO-F', datetime.date(2026, 10, 1))]
+# Perene bloqueia: milho no T7 na 2027/28; R-07 vincular C1 não conflita
+Milho T7 01/10/2027                                  início 01/10/2027 → Ocupa até 18/02/2028 (Pelo plano) | TRAVA [('faixa', 'c8', 'mt7', '01/10/2027')]
+   vincular c9 na 2027/28: ocupações do ciclo 1 · travas [] · pendências {}
+   CAFE-AR no ciclo vinculado: atividades de data fixa fora da 2027/28 = [('Adubação 1ª parcela', datetime.date(2026, 10, 15)), ('Adubação 2ª parcela', datetime.date(2026, 12, 15)), ('Fungicida para ferrugem', datetime.date(2027, 1, 20)), ('Colheita', datetime.date(2027, 5, 20))]
+
+######## SEM e4/e5
+# Dados atuais: travas e pendências (Santa Rita e Lagoa)
+   nenhuma
+# R-17 sucessão (S27SF)
+Milho T1-B 152 ha 21/02/2027                         início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | salva
+Milho T1-B 152 ha 20/02/2027                         início 20/02/2027 → Ocupa até 10/07/2027 (Pelo plano) | salva
+Milho T1-B 152 ha 15/02/2027                         início 15/02/2027 → Ocupa até 05/07/2027 (Pelo plano) | salva | pendência {'nv': [('prevista', 'c2', '15/02/2027..19/02/2027', '5 dia(s)')]}
+Milho T1-C 152 ha 15/02/2027                         início 15/02/2027 → Ocupa até 05/07/2027 (Pelo plano) | salva
+# M1 (OC-07) e OC-R10
+Milho T1 312 ha 21/02/2027                           início 21/02/2027 → Ocupa até 11/07/2027 (Pelo plano) | TRAVA [('safra', 'S27SF', 'nv', '21/02/2027', 472.0), ('faixa', 'd1', 'nv', '21/02/2027')]
+   M1: De 21/02/2027 a 10/07/2027, 160 ha de T1 estão com d1. Máximo 152 ha nesse período.
+Milho T1 312 ha 11/07/2027                           início 11/07/2027 → Ocupa até 28/11/2027 (Pelo plano) | TRAVA [('safra', 'S27SF', 'nv', '11/07/2027', 472.0)]
+# OC-R5 (núcleo pelo ciclo mínimo) · T3 sobre o c5 (soja 22/10/2026, sem plano, núcleo até 10/02/2027)
+Milho MILHO-SF T3 23/10/2026                         início 23/10/2026 → Ocupa até 12/03/2027 (Pelo plano) | TRAVA [('faixa', 'c5', 'm3', '23/10/2026')]
+Milho MILHO-SF T3 10/01/2027                         início 10/01/2027 → Ocupa até 30/05/2027 (Pelo plano) | TRAVA [('faixa', 'c5', 'm3', '10/01/2027')]
+Milho MILHO-SF T3 10/02/2027                         início 10/02/2027 → Ocupa até 30/06/2027 (Pelo plano) | salva | pendência {'m3': [('provavel', 'c5', '10/02/2027..16/02/2027', '7 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 11/02/2027                         início 11/02/2027 → Ocupa até 01/07/2027 (Pelo plano) | salva | pendência {'m3': [('provavel', 'c5', '11/02/2027..16/02/2027', '6 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 17/02/2027                         início 17/02/2027 → Ocupa até 07/07/2027 (Pelo plano) | salva | aviso saída estimada [('c5', '17/02/2027')]
+Milho MILHO-SF T3 18/02/2027                         início 18/02/2027 → Ocupa até 08/07/2027 (Pelo plano) | salva | aviso saída estimada [('c5', '17/02/2027')]
+Milho SEM plano T3 23/10/2026                        início 23/10/2026 → Ocupa até 12/03/2027 (Estimado (ciclo)) | salva | pendência {'m3': [('provavel', 'c5', '23/10/2026..16/02/2027', '117 dia(s)')]} | aviso saída estimada [('c5', '17/02/2027')]
+c5 colheita 20/01/2027 → milho 21/01/2027            início 21/01/2027 → Ocupa até 10/06/2027 (Pelo plano) | salva
+c5 colheita 20/01/2027 → milho 20/01/2027            início 20/01/2027 → Ocupa até 09/06/2027 (Pelo plano) | salva
+# M3/OC-09 · lote SOJA-AT e SOJA-PD em c4, c5, c6, c7 (S2627)
+c4 SOJA-AT                                           início 30/09/2026 → Ocupa até 15/02/2027 (Pelo plano) | salva
+c5 SOJA-AT                                           início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva
+c6 SOJA-AT                                           início 21/10/2026 → Ocupa até 08/03/2027 (Pelo plano) | salva
+c7 SOJA-AT                                           início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | salva
+c4 SOJA-PD                                           início 05/10/2026 → Ocupa até 12/02/2027 (Pelo plano) | salva
+c5 SOJA-PD                                           início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva
+c6 SOJA-PD                                           início 26/10/2026 → Ocupa até 05/03/2027 (Pelo plano) | salva
+c7 SOJA-PD                                           início 10/11/2026 → Ocupa até 20/03/2027 (Pelo plano) | salva
+   demanda do P2 (80 ha): SOJA-AT R$ 167992.00 · SOJA-PD R$ 110680.00
+# REG-02 negativo: colheita REAL do e5 em 20/11/2026
+# M4 · plantio do c1 em 30/10/2026
+c1 plantio 30/10/2026                                início 10/10/2026 → Ocupa até 25/02/2027 (Pelo plano) | salva | pendência {'d1': [('prevista', 'c1', '20/02/2027..24/02/2027', '5 dia(s)')]}
+# OC-11 · T3 na S27SF com milho em 11/02/2027, depois SOJA-AT/PD no c5
+depois: c5 SOJA-AT                                   início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva | pendência {'m3': [('prevista', 'c5', '11/02/2027..16/02/2027', '6 dia(s)')]}
+depois: c5 SOJA-PD                                   início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva | pendência {'m3': [('prevista', 'c5', '11/02/2027..13/02/2027', '3 dia(s)')]}
+# OC-R2 (a) · Planejar T3 com o padrão do painel e depois o lote SOJA-AT/PD
+   PlantioMin MILHO-SF no T3 (Livre a partir de 18/02/2027): 18/02/2027
+T3 18/02/2027 · c5 SOJA-AT                           início 02/10/2026 → Ocupa até 17/02/2027 (Pelo plano) | salva
+T3 18/02/2027 · c5 SOJA-PD                           início 07/10/2026 → Ocupa até 14/02/2027 (Pelo plano) | salva
+# OC-R2 (b) · Planejar P2 com o padrão e depois SOJA-AT no c7; janela do M3
+   PlantioMin MILHO-SF no P2 (Livre a partir de 24/03/2027): 24/03/2027
+P2 24/03/2027 · c7 SOJA-AT 25/11/2026                início 05/11/2026 → Ocupa até 23/03/2027 (Pelo plano) | salva
+P2 24/03/2027 · c7 SOJA-AT 06/12/2026                início 16/11/2026 → Ocupa até 03/04/2027 (Pelo plano) | TRAVA [('faixa', 'c7', 'm2', '24/03/2027')]
+P2 24/03/2027 · c7 SOJA-PD 01/12/2026                início 16/11/2026 → Ocupa até 26/03/2027 (Pelo plano) | salva | pendência {'m2': [('prevista', 'c7', '24/03/2027..25/03/2027', '2 dia(s)')]}
+# DONO-05 · PlantioMin por plano (S27SF T1-B, Livre a partir de 21/02/2027)
+   SOJA-AT   PlantioMin 13/03/2027
+   SOJA-PD   PlantioMin 08/03/2027
+   MILHO-SF  PlantioMin 21/02/2027
+   FEIJ-PV   PlantioMin 21/02/2027
+SOJA-AT T1-B 12/03/2027                              início 20/02/2027 → Ocupa até 08/07/2027 (Pelo plano) | salva
+SOJA-AT T1-B 13/03/2027                              início 21/02/2027 → Ocupa até 09/07/2027 (Pelo plano) | salva
+# OC-R8 · DATA fora da safra (2027/28)
+Café CAFE-AR T3 01/11/2027                           início 01/11/2027 → Ocupa até sem fim (Perene) | salva | aviso [('datas_fixas', 'CAFE-AR', datetime.date(2026, 10, 15))]
+Mamão MAMAO-F P2 01/11/2027                          início 01/11/2027 → Ocupa até sem fim (Perene) | salva | aviso [('datas_fixas', 'MAMAO-F', datetime.date(2026, 10, 1))]
+# Perene bloqueia: milho no T7 na 2027/28; R-07 vincular C1 não conflita
+Milho T7 01/10/2027                                  início 01/10/2027 → Ocupa até 18/02/2028 (Pelo plano) | TRAVA [('faixa', 'c8', 'mt7', '01/10/2027')]
+   vincular c9 na 2027/28: ocupações do ciclo 1 · travas [] · pendências {}
+   CAFE-AR no ciclo vinculado: atividades de data fixa fora da 2027/28 = [('Adubação 1ª parcela', datetime.date(2026, 10, 15)), ('Adubação 2ª parcela', datetime.date(2026, 12, 15)), ('Fungicida para ferrugem', datetime.date(2027, 1, 20)), ('Colheita', datetime.date(2027, 5, 20))]

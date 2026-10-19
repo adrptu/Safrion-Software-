@@ -1,0 +1,13 @@
+original e7872cb02fc6 [('acaro', 53, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 14, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 2, 'pivHi', 12, [])]), ('mosca', 40, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 76, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 1, 'pivHi', 16, [])])]
+clima e7872cb02fc6 [('acaro', 53, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 14, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 2, 'pivHi', 12, [])]), ('mosca', 40, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 76, [('placebo', 'forte', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 1, 'pivHi', 16, [])])]
+clima_wk5 5b21fc39c8d0 [('acaro', 53, [('placebo', 'moderada', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 14, [('placebo', 'moderada', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 2, 'pivHi', 12, [])]), ('mosca', 40, [('placebo', 'moderada', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, 'pivHi', 16, [])]), ('mosca', 76, [('placebo', 'moderada', 'wkHi', 3, 'pivHi', 16, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 1, 'pivHi', 16, [])])]
+perfil_hash "perfil_hash": "8dbf86ceeac20b57a9c3e106915743edf755101cef4b86076ca4031bf02adb80"
+rc=0
+v31 cb481aab9dc7 [('acaro', 53, [('placebo', 'moderada', 'wkHi', 3, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, [])]), ('mosca', 14, [('placebo', 'moderada', 'wkHi', 3, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 2, [])]), ('mosca', 40, [('placebo', 'moderada', 'wkHi', 3, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 3, [])]), ('mosca', 76, [('placebo', 'moderada', 'wkHi', 3, ['qs', 'molh']), ('ur', 'nulo', 'wkHi', 1, [])])]
+OK  clima candidato nas duas, mesmo sinal -> forte
+OK  clima candidato com sinais opostos -> moderada
+OK  clima candidato numa safra só -> nulo
+OK  grupo em uma safra -> grupo
+OK  não clima forte nas duas -> forte
+OK  não clima forte numa, fraca na outra -> fraca
+OK  uma safra sem resultado -> nao_avaliavel

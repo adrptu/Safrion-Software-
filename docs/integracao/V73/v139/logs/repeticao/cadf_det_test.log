@@ -1,0 +1,13 @@
+OK  1 CD-01det sem erro JS e T1 escolhido às claras no seletor · ['', 'Cadastros › Cadastros › T1 · 312 ha Talhão T1-B sem polígono Definir polígono da T1-B']
+OK  2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha) · ['Safra 2026/27 Em planejamento 312 ha 0 ha', 'Safrinha 2027 Rascunho 160 ha 152 ha']
+Traceback (most recent call last):
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_det_test.py", line 36, in <module>
+    openrow(1,'T1-B'); d=dlg()
+    ^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_det_test.py", line 17, in openrow
+    def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
