@@ -357,11 +357,10 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   v.om_lista=['lista','cartoes'].indexOf(st.omodo||'lista')>=0; v.om_kanban=st.omodo==='kanban'; self.g2modoExterno=(gid)=>(gid==='g_om'&&self.state.omodo==='cartoes')?'cartoes':'tabela';
   ['lista','cartoes','kanban'].forEach(k=>{ v['om_lv_'+k+'_p']=String((st.omodo||'lista')===k); v['om_lv_'+k+'_go']=()=>self.setState({omodo:k}); });
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
-  v.sem_dias=Object.keys(dias).sort().map(d=>{ const esp={}; dias[d].forEach(o=>{ esp[o.esp]=(esp[o.esp]||0)+(Number(o.tempo)||0); });
-    return {t:d==='vencidas'?'Atrasadas':(manSem(d)+' '+manBr(d)),oms:dias[d].map(o=>o.id).join(', '),hh:Object.keys(esp).map(k=>k+' '+manN(esp[k],1)+' HH').join(' · ')}; });
+  v.sem_dias=Object.keys(dias).sort().map(d=>({t:d==='vencidas'?'Atrasadas':(manSem(d)+' '+manBr(d)),oms:dias[d].map(o=>o.id).join(', '),hh:manHHTxt(manHH(dias[d]),true)}));   // soma única de HH (manHH, EX-53 M7a)
   /* Kanban: 5 colunas fixas, o mesmo filtro da lista */
   const spO=ma_G('g_om'), stO=g2st(self,'g_om'); const okIds=new Set((self.__om||[]).filter(r=>g2match(r,spO,stO)).map(r=>r.id));
-  v.kb=MAN_FASES.map(f=>{ const cs=os.filter(o=>o.etapa===f&&okIds.has(o.id)); return {t:f,n:String(cs.length),nst:'background:#EEF1EE;color:#15201A;border-radius:999px;font-weight:800;',carga:cs.length?manN(cs.reduce((s,o)=>s+(Number(o.tempo)||0),0),1)+' HH':'',vazio:!cs.length,
+  v.kb=MAN_FASES.map(f=>{ const cs=os.filter(o=>o.etapa===f&&okIds.has(o.id)); return {t:f,n:String(cs.length),nst:'background:#EEF1EE;color:#15201A;border-radius:999px;font-weight:800;',carga:cs.length?manHHTxt(manHH(cs)):'',vazio:!cs.length,
     cards:cs.map(o=>{ const a=c.ativos[o.aid]; const sl=manSelos(c,o); return {id:o.id,lab:'Abrir '+o.id+' · '+(a?a.nome:''),open:()=>ma_abrir(self,'om',o.id),key:(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); ma_abrir(self,'om',o.id); } },
       st:'display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:10px;background:#fff;border:1px solid #E4E9E5;cursor:pointer;text-align:left;',tipo:o.serv,local:(a?a.nome:'')+' · '+(o.jan||'—'),hasBar:false,bar:'',hasReal:false,real:'',
       selos:sl.slice(0,2).map(z=>({t:z.t,st:ma_chipSt(z.c),dot:ma_dotSt(z.c)})),hasObs:false,obs:'',hasDp:!!o.executante,dp:o.executante?('Executante: '+o.executante):'',meta:o.tipo+' · '+o.crit}; })}; });

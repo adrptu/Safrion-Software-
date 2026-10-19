@@ -1,0 +1,13 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    B0 · semente: total, ordens e horas por especialidade batem com o oráculo independente
+OK    B1 · as situações repartem o backlog sem perder nem repetir ordem
+OK    B2 · sem capacidade configurada não há semanas equivalentes
+OK    B3 · sem ordem pendente: n = 0 e 0 HH
+OK    B4 · em conferência, encerrada e cancelada ficam fora: 6,5 HH (Mecânico 4, Eletricista 2,5)
+OK    B5 · Liberadas = pronto; Em execução = em execução
+OK    B6 · ordem aberta sem tempo previsto não vira 0: conta em sem estimativa e não muda o total
+OK    B7 · contraprova: a soma antiga da carga (tempo ausente = 0) dá o mesmo total sem avisar que falta estimativa
+OK    B8 · A liberar com peça em falta fica em falta de peça, não em pronto; sem falta fica em a liberar
+OK    B9 · todas sem tempo: o texto é "N sem estimativa", nunca "0 HH"
+OK    B10 · filtro por ativo: só as ordens daquele ativo (a X2 movida para outro ativo sai)
+RESULTADO: 12/12 ok
