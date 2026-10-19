@@ -60,13 +60,14 @@ test('zero, negativos, NaN e infinito',()=>{
  for(const n of [-1,NaN,Infinity]){x.saldo=n;assert.equal(cenPreparoOrdem(d,x).ok,false)}
  x.saldo=10;for(const n of [0,-1,NaN,Infinity]){x.instrucao.vazao=n;assert.equal(cenPreparoOrdem(d,x).ok,false)}
 });
-test('P3: 400 combinações, cada carga cheia/parcial mantém dose e fecha área/volume',()=>{
+test('P3: 400 combinações, centésimos por carga conservam total e fecham área/volume',()=>{
  let seed=38;const rnd=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};const old=CEN_PREP_ATIVOS.a05.tanque;
  try {for(let j=0;j<400;j++){
   const d=clone(c),x=d.ordens[o.id];CEN_PREP_ATIVOS.a05.tanque=100+Math.floor(rnd()*5000);x.instrucao.vazao=20+rnd()*300;x.saldo=0.01+rnd()*500;
   x.ins=[{p:'A',dose:rnd()*4,un:'L'},{p:'B',dose:rnd()*2,un:'kg'}];const p=cenPreparoOrdem(d,x);assert.equal(p.ok,true);
-  let ha=0;for(const cg of p.cargas){ha+=cg.area;assert.ok(cg.area>0);assert.ok(cg.vol<=p.tanque+1e-7);for(let k=0;k<x.ins.length;k++)assert.ok(Math.abs(cg.prods[k].q/cg.area-x.ins[k].dose)<1e-12)}
+  let ha=0;for(const cg of p.cargas){ha+=cg.area;assert.ok(cg.area>0);assert.ok(cg.vol<=p.tanque+1e-7);for(let k=0;k<x.ins.length;k++)assert.ok(Math.abs(cg.prods[k].q-cg.area*x.ins[k].dose)<0.01+1e-9)}
   assert.ok(Math.abs(ha-x.saldo)<1e-7);
+  for(let k=0;k<x.ins.length;k++) assert.equal(p.cargas.reduce((s,cg)=>s+Math.round(cg.prods[k].q*100),0),Math.round(cenQtd(x.ins[k].dose,x.saldo)*100));
  }}finally{CEN_PREP_ATIVOS.a05.tanque=old}
 });
 test('app real: carga preparada mantém consumo, troca de versão bloqueia e aviso recupera',()=>{
