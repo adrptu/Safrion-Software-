@@ -1,0 +1,100 @@
+  ok  R1 referência O.S.: trilha "Agrícola › Ordem de Serviço", título ≠ módulo, sem texto solto, uma primária
+  ok  R2 referência O.S.: células com até 2 linhas e cabeçalho numa linha a 1440 px
+  ok  C1 semordem: título da visão ('Pendências sem ordem') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 semordem: trilha "Manutenção › Pendências sem ordem"
+  ok  C3 semordem: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 semordem: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 semordem: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  A1 semordem: uma fileira de escolha fora do bloco (as abas das visões)
+  ok  B1 semordem: a lista dentro de um bloco com título ('Pendências por prazo')
+  ok  B2 semordem: filtros rápidos dentro do bloco
+  ok  L1 semordem: células com no máximo 2 linhas a 1440 px
+  ok  L2 semordem: cabeçalhos de coluna numa linha
+  ok  C1 ordens: título da visão ('Ordens de manutenção') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 ordens: trilha "Manutenção › Ordens de manutenção"
+  ok  C3 ordens: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 ordens: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 ordens: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  A1 ordens: uma fileira de escolha fora do bloco (as abas das visões)
+  ok  B1 ordens: a lista dentro de um bloco com título ('Ordens por fase')
+  ok  B2 ordens: filtros rápidos dentro do bloco
+  ok  B3 ordens: fases + no máximo 2 recortes de ação no bloco
+  ok  L1 ordens: células com no máximo 2 linhas a 1440 px
+  ok  L2 ordens: cabeçalhos de coluna numa linha
+  ok  C1 ativos: título da visão ('Ativos e disponibilidade') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 ativos: trilha "Manutenção › Ativos e disponibilidade"
+  ok  C3 ativos: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 ativos: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 ativos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  A1 ativos: uma fileira de escolha fora do bloco (as abas das visões)
+  ok  B1 ativos: a lista dentro de um bloco com título ('Ativos por condição')
+  ok  B2 ativos: filtros rápidos dentro do bloco
+  ok  L1 ativos: células com no máximo 2 linhas a 1440 px
+  ok  L2 ativos: cabeçalhos de coluna numa linha
+  ok  C1 abast: título da visão ('Ativos e disponibilidade') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 abast: trilha "Manutenção › Ativos e disponibilidade"
+  ok  C3 abast: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 abast: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 abast: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  A1 abast: uma fileira de escolha fora do bloco (as abas das visões)
+  ok  B1 abast: a lista dentro de um bloco com título ('Abastecimentos por qualidade')
+  ok  B2 abast: filtros rápidos dentro do bloco
+  ok  L1 abast: células com no máximo 2 linhas a 1440 px
+  ok  L2 abast: cabeçalhos de coluna numa linha
+  ok  C1 planos: título da visão ('Planos preventivos') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 planos: trilha "Manutenção › Planos preventivos"
+  ok  C3 planos: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 planos: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 planos: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  A1 planos: uma fileira de escolha fora do bloco (as abas das visões)
+  ok  B1 planos: a lista dentro de um bloco com título ('Planos e cobertura')
+  ok  B2 planos: filtros rápidos dentro do bloco
+  ok  L1 planos: células com no máximo 2 linhas a 1440 px
+  ok  L2 planos: cabeçalhos de coluna numa linha
+  ok  C1 ativo: título da visão ('Ativos e disponibilidade') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 ativo: trilha "Manutenção › Ativos e disponibilidade" › registro
+  ok  C3 ativo: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 ativo: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 ativo: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  C1 plano: título da visão ('Planos preventivos') ≠ nome do módulo do "‹ Manutenção"
+  ok  C2 plano: trilha "Manutenção › Planos preventivos" › registro
+  ok  C3 plano: nenhum texto solto no cabeçalho além de título, selo e ações
+  ok  C4 plano: no máximo uma primária verde à vista e selo de estado ao lado do título
+  ok  C5 plano: ação indisponível com o motivo na dica e junto do botão (peça comum acao_motivo)
+  ok  C6 títulos diferentes por visão (o título diz a tela)
+  ok  C7 Ana · "Criar plano" indisponível: o toque não abre o painel e a dica diz o motivo
+  ok  C7 Ana · "Vincular a plano" indisponível: o toque não abre o painel e a dica diz o motivo
+  ok  L3 semordem (todas as colunas, 1440 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 semordem (todas as colunas, 1440 px): cabeçalhos de coluna numa linha
+  ok  L3 ordens (todas as colunas, 1440 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 ordens (todas as colunas, 1440 px): cabeçalhos de coluna numa linha
+  ok  L3 ativos (todas as colunas, 1440 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 ativos (todas as colunas, 1440 px): cabeçalhos de coluna numa linha
+  ok  L3 abast (todas as colunas, 1440 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 abast (todas as colunas, 1440 px): cabeçalhos de coluna numa linha
+  ok  L3 planos (todas as colunas, 1440 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 planos (todas as colunas, 1440 px): cabeçalhos de coluna numa linha
+  ok  L3 semordem (todas as colunas, 1280 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 semordem (todas as colunas, 1280 px): cabeçalhos de coluna numa linha
+  ok  L3 ordens (todas as colunas, 1280 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 ordens (todas as colunas, 1280 px): cabeçalhos de coluna numa linha
+  ok  L3 ativos (todas as colunas, 1280 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 ativos (todas as colunas, 1280 px): cabeçalhos de coluna numa linha
+  ok  L3 abast (todas as colunas, 1280 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 abast (todas as colunas, 1280 px): cabeçalhos de coluna numa linha
+  ok  L3 planos (todas as colunas, 1280 px): células com no máximo 2 linhas e sem rolagem lateral
+  ok  L4 planos (todas as colunas, 1280 px): cabeçalhos de coluna numa linha
+  ok  A2 Ana · Sem ordem 6: número > 0, com dica, igual à lista aberta (6) ou ao filtro rápido "Até 10 d" [6]
+  ok  A2 Ana · Ativos 1: número > 0, com dica, igual à lista aberta (16) ou ao filtro rápido "Bloqueado" [1]
+  ok  A2 Otávio · Sem ordem 6: número > 0, com dica, igual à lista aberta (6) ou ao filtro rápido "Até 10 d" [6]
+  ok  A2 Otávio · Ordens 2: número > 0, com dica, igual à lista aberta (16) ou ao filtro rápido "Aguardam você" [2]
+  ok  A2 Otávio · Ativos 1: número > 0, com dica, igual à lista aberta (16) ou ao filtro rápido "Bloqueado" [1]
+  ok  A2 Zé · Sem ordem 6: número > 0, com dica, igual à lista aberta (6) ou ao filtro rápido "Até 10 d" [6]
+  ok  A2 Zé · Ordens 1: número > 0, com dica, igual à lista aberta (16) ou ao filtro rápido "Aguardam você" [1]
+  ok  A2 Zé · Ativos 1: número > 0, com dica, igual à lista aberta (16) ou ao filtro rápido "Bloqueado" [1]
+  ok  E1 MOD-MAN: cartões em blocos com título (como o MOD-AGR)
+  ok  E2 MOD-MAN: acima dos cartões, só a linha de pendência "N ativos sem plano · Vincular ›" (um toque) e nada mais
+  ok  E3 MOD-MAN: os mesmos 5 destinos (Painel e as 4 visões)
+  ok  E4 referência MOD-AGR: blocos com título e sem aviso solto (a régua é a da tela aprovada)
+  ok  Z sem erro de JS
+RESULTADO: 99 ok · 0 falhas

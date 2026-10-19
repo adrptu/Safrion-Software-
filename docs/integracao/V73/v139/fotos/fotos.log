@@ -1,0 +1,10 @@
+saf_mapa 1440 ['Ver em tabela:false', 'Ver em mapa:true']
+cd01_lista 1440 ['Ver em tabela:true', 'Ver em cartões:false', 'Ver em mapa:false']
+cd01_mapa 1440 ok
+ben_kanban 1440 ok
+ma_ordens 1440 ['Ver em tabela:true', 'Ver em cartões:false', 'Ver em kanban:false']
+saf_mapa 390 ['Ver em tabela:false', 'Ver em mapa:true']
+cd01_lista 390 ['Ver em tabela:false', 'Ver em cartões:false', 'Ver em mapa:true']
+cd01_mapa 390 ok
+ben_kanban 390 ok
+ma_ordens 390 ['Ver em tabela:true', 'Ver em cartões:false', 'Ver em kanban:false']

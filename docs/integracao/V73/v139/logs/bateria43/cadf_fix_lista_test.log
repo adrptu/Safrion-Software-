@@ -1,0 +1,14 @@
+OK  1 sem erro JS e "Importar geometrias" retirado da tela · ['']
+OK  2 fazenda nova: texto de cadastro, sem instrução de inativar e sem campo Situação · ['Cadastrar fazenda × Cadastre a fazenda com empresa, município, área total e posse. Nome da fazenda Empresa Santa Rita Agro Boa Vista Ltda Responde pelos custos ', ['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse']]
+OK  3 talhão novo: texto de cadastro, sem "Área do polígono" vazio e sem Situação · ['Cadastrar talhão × Cadastre o talhão com fazenda, sistema e área cultivável; o polígono é definido depois, no detalhe do talhão. Identificação do talhão Ex.: T8. Não pode repetir na mesma fazenda. Faz', ['Identificação do talhão', 'Fazenda', 'Sistema', 'Área cultivável']]
+Traceback (most recent call last):
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_fix_lista_test.py", line 63, in <module>
+    openrow1(0,'T3'); d=dlg(); L=labels()
+    ^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cadf_fix_lista_test.py", line 21, in openrow1
+    def openrow1(ti,cod): J(f"""(()=>{{const acha=()=>[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); let r=acha(); if(!r){{ [...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click()); r=acha(); }} (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

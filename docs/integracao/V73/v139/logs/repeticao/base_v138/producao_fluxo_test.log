@@ -1,0 +1,34 @@
+== os · A-05 / AC-22: ordem nova de colheita na fazenda e safra do cultivo; uma por semana; carência no liberar
+OK  A-05 ordem nova do Pivô 19 (Safra Mamão 2026/27) nasce na Lagoa Grande e na safra 2026/27, A liberar · [['ok', 'ok', 'ok', 'ok'], ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']]
+OK  A-05 com o filtro Lagoa Grande · 2026/27 a ordem nova aparece na lista · OS-0440
+OK  AC-22 perene: a ordem se chama "Colheita · semana 40" · ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']
+OK  AC-22 segunda ordem de colheita da mesma semana (S40) no Pivô 19 é recusada e aponta a existente · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  AC-22 colheita na semana 39 do Pivô 19 é recusada: a OS-0505 (Colheita · semana 39) já existe · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  #nova:lg06:q3:2026-09-28 abre a ordem nova já preenchida (safra, cultivo, atividade, janela) · ['LG2627', 'lg06', 'q3', '2026-09-28']
+OK  a ordem da S40 do Pivô 6 é emitida (A liberar) · OS-0441
+OK  AC-22 liberar (Aprovar e liberar) a S40 do Pivô 6 fica impedido no comando por carência sem dados, com dono Wesley; a ordem continua A liberar · ['NÃO ACHEI: Liberar para execução', 'A liberar', 'OS-0441 · Colheita · semana 40 × A liberar Carência sem dados Pivô 6 · 62,79 ha · janela a partir de 28/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade e área abaixo e libera; se preci
+== fluxo · AC-01 menu e AC-17 tarefa do proprietário (§8.1), cliques e campos medidos
+OK  AC-01 sem o ícone Produção na barra; no Estoque de produto o ícone Agrícola marcado e "‹ Agrícola" · {'mods': ['Mapa', 'Painel', 'Cadastros', 'Agrícola', 'Manutenção', 'Suprimentos', 'Comercial', 'Crédito', 'Configurações', 'Outros acessos'], 'cur': ['Agrícola'], 'volta': ['MOD-AGR.dc.html', '‹ Agrícola']}
+OK  AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Beneficiamento · Estoque de produto em sequência (4 cartões), sem erro de JS · [True, [['AG-07.dc.html', 'Agrofit'], ['AG-02.dc.html', 'Análises de solo'], ['PA.dc.html', 'Planos agronômicos'], ['SAF.dc.html', 'Planejar safra'], ['GE-02.dc.html', 'Orçamento'], ['AG-01.dc.html', 'Pragas e doenças'], ['OS.dc.html', 'Ordens de serviço'], ['IR-01.dc.html', 'Irrigação'], ['COLH.dc.
+OK  AC-01 cartão "Colheita" abre COLH com "‹ Agrícola", sem erro de JS · ['ok', True, '/COLH.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Recebimento" abre CARGA com "‹ Agrícola", sem erro de JS · ['ok', True, '/CARGA.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Beneficiamento" abre BEN com "‹ Agrícola", sem erro de JS · ['ok', True, '/BEN.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Estoque de produto" abre PROD com "‹ Agrícola", sem erro de JS · ['ok', True, '/PROD.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  §8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19 · ['Publicar previsão do Pivô 19']
+FALHOU painel do Pivô 19: passe S39 parcial 0,73 t/ha, ciclo 0,48 t/ha, 1 carga a receber, rascunho S40 e S41
+FALHOU (1) Publicar previsão: v2 do Pivô 19 com S40 72,78 t e S41 87,34 t
+FALHOU (1) a ação primária passa a "Programar colheita S40" · ['Publicar previsão do Pivô 19']
+FALHOU (1) "Programar colheita S40" abre a ordem nova pré-preenchida (Pivô 19, janela 28/09) · [None, None]
+FALHOU (1) Emitir: ordem "Colheita · semana 40" do Pivô 19 em A liberar
+RESULTADO: FALHOU 15/20
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/v37x/g37/producao_fluxo_test.py", line 154, in <module>
+    ir('OS.dc.html#' + nid); clk('Liberar para execução', 'aside'); clk('Confirmar liberação', 'aside'); et = cen(f"c.ordens[{json.dumps(nid)}].etapa")
+                                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/v37x/g37/producao_fluxo_test.py", line 81, in cen
+    def cen(expr): return J(f"(()=>{{ const c=CEN(); return ({expr}); }})()")
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/v37x/g37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

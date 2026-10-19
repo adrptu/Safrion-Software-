@@ -1,0 +1,17 @@
+OK    S1 TAB-08 toda tabela do motor (251) tem o cabeçalho com ordenar e filtrar
+OK    S2 TAB-08 a moldura da tabela vale em toda página com tabela do motor
+OK    S3 AGR-02 nenhuma página com a trilha do agrupamento (153 páginas)
+OK    S4 TAB-08 Atividades do plano em Tabela usa a peça do motor (cabeçalho e filtro pa_tb)
+OK    B1 TAB-08 toda tabela à vista tem moldura de 12 px (201 tabelas)
+OK    B1b TAB-08 toda coluna com ordenar tem ⇅ e funil
+OK    B2 TAB-13 linha que abre o detalhe sem a seta de ir (a seta só na linha com filhos)
+OK    B3 TAB-08 sem linha vertical na 1ª coluna
+OK    C1 VIS-07 OS.dc.html?view=cartoes: grade de cartões compactos (15), sem cabeçalho de colunas, até 4 campos rotulados e o selo de fase no título
+OK    C1 VIS-07 OS.dc.html?view=cartoes&ag=onde: grade de cartões compactos (16), sem cabeçalho de colunas, até 4 campos rotulados e o selo de fase no título
+OK    C1 VIS-07 SAF.dc.html?view=cartoes: grade de cartões compactos (4), sem cabeçalho de colunas, até 4 campos rotulados
+OK    C1 VIS-07 CD-05.dc.html?view=cartoes: grade de cartões compactos (20), sem cabeçalho de colunas, até 4 campos rotulados
+OK    C1 VIS-07 CD-06.dc.html?view=cartoes: grade de cartões compactos (12), sem cabeçalho de colunas, até 4 campos rotulados
+OK    C2 TAB-08 Atividades em Tabela: ⇅ do Custo/ha ordena do menor para o maior; o funil de Insumos tira "2 insumos"
+OK    C3 VIS-07 O.S. agrupada por talhão: cartão sem itens dentro sem a coluna vazia da seta (1440 e 390) e com o selo da Fase também a 390 px
+OK    D sem erro de JavaScript
+RESULTADO: 16 ok · 0 falhas

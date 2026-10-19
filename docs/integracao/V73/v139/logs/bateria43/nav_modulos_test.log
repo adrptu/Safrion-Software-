@@ -1,0 +1,14 @@
+OK    N1 barra: um ícone por módulo (o Mapa primeiro, sem o logotipo repetido) + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica
+OK    N1 O.S. aberta: o ícone Agrícola marcado (aria-current) e só ele
+OK    N1 hover no ícone Suprimentos: a dica mostra "Suprimentos"
+OK    N2 6 telas de entrada (Agrícola, Comercial, Suprimentos, Configurações, Manutenção, Crédito): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título
+OK    N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada
+Traceback (most recent call last):
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/nav_modulos_test.py", line 83, in <module>
+    p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()")
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/osg/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'click')
+    at <anonymous>:1:36
