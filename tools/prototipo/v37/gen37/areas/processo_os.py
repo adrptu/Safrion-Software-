@@ -198,8 +198,18 @@ def _nova_ordem_dados():
     safs=[s for s in D2.SAFRAS if not s['ro']]
     import cenario
     from areas.processo_planos import VER_APLICADA as _VA   # PA-OPER F1: o cultivo fica na versão dele (40.3); a O.S. lê a instrução dessa versão
+    # LEVE-1 (proprietário 19/10): a data do gatilho de cada atividade do plano no cultivo (núcleo único datas_atividade.js, variante canônica;
+    # sem âncora, nada) vira o início da janela sugerido na ordem nova
+    def _datas(c):
+        pl=D2.PLANO.get(c['plano']) if c.get('plano') else None
+        if not pl: return {}
+        out={}
+        for a in pl['atividades']:
+            d=D2.data_atividade(c,a)
+            if d: out[str(a['id'])]=d.isoformat()
+        return out
     cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'],cultura=c['cultura'],
-                        ver=_VA.get(c['id'],(D2.PLANO.get(c['plano']) or {}).get('versao')))
+                        ver=_VA.get(c['id'],(D2.PLANO.get(c['plano']) or {}).get('versao')),datas=_datas(c))
                    for c in D2.CULTIVOS.get(s['id'],[])] for s in safs}
     # atividade do plano com seus insumos (grupo, produto, dose/ha): a ordem nova leva dose × área, como as ordens do registro
     planos={p['id']:dict(nome=p['nome'],versao=p['versao'],params=p.get('params') or {},atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
@@ -1598,10 +1608,19 @@ function EXTRAVALS(self,v){
     v.nv_safs=[{v:'',t:'Selecione a safra'}].concat(OSD.nova.safs.map(s=>({v:s.id,t:s.t}))); v.nv_saf=nv.saf;
     v.nv_cults=[{v:'',t:nv.saf?'Selecione o cultivo':'Escolha a safra primeiro'}].concat(cults.map(x=>({v:x.id,t:x.t}))); v.nv_cult=nv.cult; v.nv_cultdis=!nv.saf;
     v.nv_atvs=[{v:'',t:(!c?'Escolha o cultivo primeiro':(pl?'Selecione a atividade':'Cultivo sem plano aplicado'))}].concat(atvs.map(a=>({v:a.id,t:a.nome+' · '+a.op+(a.incl?' (incluída pela análise · '+a.laudo+')':'')}))); v.nv_atv=nv.atv; v.nv_atvdis=!pl;
-    v.nv_noplan=!!c&&!pl; v.nv_jan=nv.jan;
+    v.nv_noplan=!!c&&!pl;
+    /* LEVE-1 (proprietário 19/10): o início da janela vem preenchido com a data do gatilho do plano (datas do cultivo) ou hoje (dia operacional),
+       editável; gatilho que já passou vira hoje. Escolhido à mão ou vindo do atalho (#nova:…), vale o escolhido; campo apagado volta a pedir. */
+    const hojeOp=(typeof CEN_DIA_OP!=='undefined'?CEN_DIA_OP:'');
+    const janDe=(cur)=>{ const cc=cur.saf?(OSD.nova.cult[cur.saf]||[]).find(x=>x.id===cur.cult):null; const a=(cc&&pl&&cur.atv)?atvs.find(x=>x.id===cur.atv):null;
+      const g=a?(((cc.datas||{})[a.id])||((/^data (\d\d)\/(\d\d)\/(\d{4})$/.exec(a.gat||'')||[]).slice(1).reverse().join('-'))):'';
+      return {iso:g&&g>=hojeOp?g:hojeOp,g,gat:a?a.gat:''}; };
+    const janAuto=(cur)=>cur.janAuto!==false&&!cur.pre;
+    const janEf=(cur)=>janAuto(cur)?janDe(cur).iso:cur.jan;
+    v.nv_jan=janEf(nv); { const J=janDe(nv); v.nv_janh=!janAuto(nv)?'':(J.g?(J.g>=hojeOp?'Do gatilho do plano ('+J.gat+'). Edite se precisar.':'O gatilho do plano ('+J.gat+', '+brd(J.g)+') já passou: hoje. Edite se precisar.'):'Hoje. Edite se precisar.'); }
     v.nv_area=c?('Área da ordem: '+nf(c.area)+' ha · '+c.local+(pl?' · plano '+pl.nome+' v'+pl.versao:'')):''; v.nv_hasArea=!!c;
     v.nv_setsaf=(e)=>upd({saf:e.target.value,cult:'',atv:''}); v.nv_setcult=(e)=>upd({cult:e.target.value,atv:''});
-    v.nv_setatv=(e)=>upd({atv:e.target.value}); v.nv_setjan=(e)=>upd({jan:e.target.value});
+    v.nv_setatv=(e)=>upd({atv:e.target.value}); v.nv_setjan=(e)=>upd({jan:e.target.value,janAuto:false});
     const E=nv.errs||{}; ['saf','cult','atv','jan'].forEach(k=>{ v['nv_e_'+k]=E[k]||''; v['nv_he_'+k]=!!E[k];
       v['nv_st_'+k]='font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;background:#FFFFFF;color:#15201A;border:1px solid '+(E[k]?'#B42318':'#E4E9E5')+';'; });
     v.nv_hasErr=Object.keys(E).length>0; v.nv_warn=!!nv.warn;
@@ -1609,7 +1628,7 @@ function EXTRAVALS(self,v){
     v.nv_cancel=()=>{ if(dirty && !self.state.nv.warn){ self.setState({nv:Object.assign({},self.state.nv,{warn:true})}); return; } self.setState({nv:null}); };
     v.nv_discard=()=>self.setState({nv:null}); v.nv_keep=()=>self.setState({nv:Object.assign({},self.state.nv,{warn:false})});
     v.nv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.nv_cancel(); } };
-    v.nv_save=()=>{ const cur=self.state.nv; const errs={};
+    v.nv_save=()=>{ const cur0=self.state.nv; const cur=Object.assign({},cur0,{jan:janEf(cur0)}); const errs={};
       if(!cur.saf) errs.saf='Escolha a safra.';
       if(!cur.cult) errs.cult='Escolha o cultivo.';
       if(cur.cult && !pl) errs.atv='Sem atividade disponível para este cultivo.';
@@ -1625,7 +1644,7 @@ function EXTRAVALS(self,v){
         const tc=(/^solo:[^:]+:(cal|ges)$/.exec(cur.atv)||[])[1]||'';
         const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(tc&&(x.keys||[]).some(q=>soloKCorr(q,cur.cult,tc)))||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
         if(dup){ const dk=tc&&(dup.keys||[]).indexOf(k)<0; errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':(dk?' para a '+(tc==='ges'?'gessagem':'calagem')+' deste cultivo (incluída pelo '+String((dup.keys||[]).find(q=>soloKCorr(q,cur.cult,tc))).split(':')[1]+'): ajuste a dose nela.':' para esta atividade neste cultivo.')); dupId=dup.id; } }
-      if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
+      if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur0,{errs,warn:false,dup:dupId})}); return; }
       const a=atvs.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo&&!x.demoLote).length;   /* OS-LOTE: a semente de demonstração não desloca a numeração */ const id='OS-0'+num;
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
@@ -1916,7 +1935,7 @@ def _form():
       + f'<sc-if value="{H("nv_hasDup")}" hint-placeholder-val="{F()}"><div style="margin-top: -4px;"><button type="button" onClick="{H("nv_opendup")}" title="Abrir a ordem que já existe para esta atividade (nada é emitido)" style="{_MINI}">{H("nv_dupt")}</button></div></sc-if>'
       + f'<sc-if value="{H("nv_noplan")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; color: {YEL}; background: {YELS}; padding: 8px 12px; border-radius: 10px; font-weight: 700;">Este cultivo não tem plano aplicado. <a href="SAF.dc.html" style="color: {ACC};">Aplicar plano em Planejar safra ›</a></div></sc-if>'
       + f'<sc-if value="{H("nv_hasArea")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; padding: 8px 12px; border-radius: 10px; background: {BG};">{H("nv_area")}</div></sc-if>'
-      + campo('jan','Início da janela',f'<input id="nv_jan" type="date" value="{H("nv_jan")}" onChange="{H("nv_setjan")}" style="{H("nv_st_jan")}">')
+      + campo('jan','Início da janela',f'<input id="nv_jan" type="date" value="{H("nv_jan")}" onChange="{H("nv_setjan")}" style="{H("nv_st_jan")}">',H('nv_janh'))
       + f'<div style="flex-grow: 1;"></div>'
       f'<sc-if value="{H("nv_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("nv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("nv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
       f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("nv_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
