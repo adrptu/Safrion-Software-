@@ -1,0 +1,8 @@
+mapa_frota rc=0 RESULTADO: 20/20 ok
+mapa9 rc=0 RESULTADO: 13 ok · 0 falhas
+mapa_filtros rc=0 RESULTADO: 7/7
+mapa_faixa rc=0 RESULTADO: 25/25
+mapa_cancel rc=0 RESULTADO: 6/6
+map_trilha_icones rc=0 RESULTADO: 9 ok · 0 falhas
+talmapa rc=0 RESULTADO: 8/8
+colheita_mapa rc=0 RESULTADO: 7 ok · 0 falhas

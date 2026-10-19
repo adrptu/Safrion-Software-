@@ -1,0 +1,6 @@
+OK    R1 GE-02 390 px: toque curto no ⓘ "Regras desta tela" abre a dica com as regras; tocar de novo fecha
+FALHA R2 Mapa 390 px: toque curto no ⓘ da camada abre a dica com a fonte · [{'x': 195.1875, 'y': 401, 'w': 44, 'h': 44}, 'Demonstração sintética · pivôs, imagem e índices fictícios · O.S. e safra do cen', '']
+OK    R3 alvo do ⓘ ≥ 44 × 44 px no celular (regras e camada)
+OK    R4 1440 px: foco pelo teclado abre e Escape fecha; mouse sobre o ⓘ abre
+OK    R5 sem erro de JS
+RESULTADO: 4 ok · 1 falhas

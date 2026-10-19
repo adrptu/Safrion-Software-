@@ -1,0 +1,6 @@
+mapa_mux_f1 rc=0 RESULTADO: 43 ok · 0 falha(s)
+mapa_mux_f2 rc=0 RESULTADO: 29 ok · 0 falha(s)
+componentes rc=0 RESULTADO: 3 ok · 0 falhas (matriz)
+ds_1610 rc=0 RESULTADO: 16 ok · 0 falhas
+regras_toque rc=1 RESULTADO: 4 ok · 1 falhas
+acao_unica rc=0 RESULTADO: 10 ok · 0 falhas (saf)

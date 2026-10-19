@@ -88,6 +88,13 @@ ICONS.update({
  'v_mais':'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0',   # lucide ellipsis
  'v_cartoes':'M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM15 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM4 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1z',   # lucide layout-grid (modo Cartões, 15/10/2026)
 })
+# MAPA-FROTA F1 (decisão 5): família do ícone das máquinas no Mapa, pela operação do catálogo. Desenho próprio, traço único como os demais
+ICONS.update({
+ 'f_gotas':'M3 5h18M12 5v3M6 5v3M18 5v3M6 11c0 0-2 2.2-2 3.6a2 2 0 0 0 4 0C8 13.2 6 11 6 11zM18 11c0 0-2 2.2-2 3.6a2 2 0 0 0 4 0c0-1.4-2-3.6-2-3.6zM12 14c0 0-2 2.2-2 3.6a2 2 0 0 0 4 0c0-1.4-2-3.6-2-3.6z',   # pulverização: barra com gotas
+ 'f_broto':'M12 21v-9M12 12c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6zM12 12c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6zM7 21h10',   # plantio: broto
+ 'f_graos':'M12 21l-6-9M12 21l6-9M12 21v-11M5 8a1 1 0 1 0 2 0a1 1 0 1 0-2 0M11 6a1 1 0 1 0 2 0a1 1 0 1 0-2 0M17 8a1 1 0 1 0 2 0a1 1 0 1 0-2 0',   # adubação: leque de grânulos
+ 'f_grade':'M2 12h20M6 6c1.1 0 2 2.7 2 6s-.9 6-2 6-2-2.7-2-6 .9-6 2-6zM12 6c1.1 0 2 2.7 2 6s-.9 6-2 6-2-2.7-2-6 .9-6 2-6zM18 6c1.1 0 2 2.7 2 6s-.9 6-2 6-2-2.7-2-6 .9-6 2-6z',   # preparo: discos de grade
+})
 def icon(name,size=16,color='currentColor'):
     if name=='Mapa': name='map' if 'map' in ICONS else 'Início'
     d=ICONS.get(name,'M4 4h16v16H4z')

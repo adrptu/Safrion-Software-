@@ -1,0 +1,6 @@
+os_recurso rc=0 RESULTADO: 16/16
+os_cenario rc=0 RESULTADO: 22/22 ok
+solo_ag02 rc=0 RESULTADO: OK 30/30
+solo_saf rc=0 RESULTADO: OK 36/36
+ds rc=0 RESULTADO: OK 72/72
+paginas_scan rc=0 RESULTADO: 5 ok · 0 falhas (147 páginas)
