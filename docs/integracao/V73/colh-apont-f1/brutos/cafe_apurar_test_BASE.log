@@ -1,0 +1,30 @@
+REPRO COLH-C01 {"comArea":{"colh":"12.000 L · sc a apurar","prtv":"sc/ha a apurar · 2.400 L/ha de Café da roça","ref":"meta 38 sc/ha a apurar"},"semArea":{"colh":"12.000 L · sc a apurar","prtv":"sc/ha a apurar · sem área colhida apontada","ref":"meta 38 sc/ha a apurar"}}
+OK    C01a com 5 ha apontados: colhido "12.000 L · sc a apurar"; produtividade "sc/ha a apurar · 2.400 L/ha de Café da roça" e desvio a apurar (nada de 0 sc, 0,00 sc/ha ou −100,0 %)
+OK    C01b sem área apontada: colhido e desvio iguais (o apontamento não muda o estado de apuração); produtividade "sc/ha a apurar · sem área colhida apontada", sem divisão
+OK    C01c a linha não ordena o café a apurar como zero colhido (valor vazio, não 0)
+OK    C01d estado único (prResultado): a apurar, 12.000 L pendentes, 0 kg medidos, produtividade e desvio nulos
+OK    C01e total da cultura: a produtividade ponderada não soma o café a apurar como zero
+OK    C01f painel do talhão: colhido "12.000 L · sc a apurar", produtividade "sc/ha a apurar · 2.400 L/ha de Café da roça" e meta a apurar; passe e resultado sem 0 sc
+OK    C01g mensagem do recebimento com área apontada: passe "sc/ha a apurar", não "0,00 sc/ha"
+OK    C01h estoque de produto: lote Café da roça 12.000 L (físico e em processo), nunca "200 sc"; painel do lote e da carga também
+OK    C01i rendimento medido 3.000 kg beneficiado: 50 sc, 10,00 sc/ha em 5 ha e desvio contra a meta de 38 sc/ha (−73,7 %)
+OK    C01n carga de café: "12.000 L · sc a apurar" e, medido o rendimento, "12.000 L · 50 sc"
+OK    C01j zero medido: 0 sc, 0,00 sc/ha e −100,0 % aparecem porque foram medidos (não a apurar)
+OK    C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar com o fruto de todas as cargas (20.000 L em 5 ha = 4.000 L/ha de Café da roça)
+OK    C01o cartão do grupo: café todo a apurar "sc/ha a apurar · 1 talhão" (nunca "1 talhões" sem estado); medido, a ponderada; misto, a ponderada e "1 talhão a apurar fora da conta"
+OK    C01p talhão misto ordena pelo medido (3.000 kg), não como vazio; só a apurar continua vazio (C01c)
+OK    C01l oferta de Café beneficiado igual antes e depois dos 12.000 L (o físico em litros não vira oferta nem zero)
+OK    C01m mamão (Pivô 19) segue medido: não fica a apurar
+OK    C01q UNID-PROD: com kg/ha escolhido (Ana), linha, painel, grupo e meta em kg/ha ("kg/ha a apurar · 1.200,00 kg/ha de Café da roça"; medido "600,00 kg/ha"); Caio continua no Padrão; o cenário não muda
+RESULTADO unit: 17/17
+OK  erro: pesagem de café sem litros é recusada ("Informe os litros de café da roça"), nada gravado · Informe os litros de café da roça. 
+OK  pesagem de 12.000 L recebida pela tela; o aviso diz "sc/ha a apurar" no passe, sem zero falso · [['CG-2109 12000 L39-133'], 'CG-2109 recebida: 6.000 kg líquidos (9.200 − 3.200) no L39-133 (novo) · Armazém Sede · Em processo. C1: passe S39 sc/ha a apurar.']
+OK  repetição: o mesmo ticket com o mesmo conteúdo é a mesma carga, nada somado · Ticket TK-CF1 já recebido na CG-2109 com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.
+FALHOU COLH: linha do C1 "12.000 L · sc a apurar", "sc/ha a apurar", meta a apurar; nenhum 0 sc, 0,00 sc/ha ou −100,0 %
+OK  COLH: total da cultura Café não soma o café a apurar como zero (12.000 L · sc a apurar; produtividade a apurar) · Café 1 talhão 38,00 ha 12.000 L · sc a apurar sc/ha a apurar 1 em colheita
+FALHOU COLH: painel do C1 com colhido e produtividade a apurar e o passe da OS-0930 sem zero falso
+OK  PROD: lote Café da roça 12.000 L (Em processo), nunca "200 sc" · Café da roça 1 lote 12.000 L 0 L 12.000 L 0 L 0 L 0 L
+FALHOU 390 px: cartão do C1 "12.000 L · sc a apurar", sem zero falso e sem rolagem horizontal
+FALHOU transição: rendimento medido 3.000 kg → "50 sc", "10,00 sc/ha · safra parcial" e desvio contra a meta (−73,7 %)
+OK  nenhuma página com erro de JS
+RESULTADO: FALHOU 6/10

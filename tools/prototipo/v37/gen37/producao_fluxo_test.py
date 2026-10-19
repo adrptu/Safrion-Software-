@@ -150,12 +150,17 @@ try:
             vv = (json.loads(J(NAV) or '{}') or {}).get('volta')
             t.chk(f'AC-01 cartão "{nome}" abre {pg} com "‹ Agrícola", sem erro de JS', r == 'ok' and ok and vv == ['MOD-AGR.dc.html', '‹ Agrícola'] and not t.errs(), [r, ok, J("location.pathname"), vv, t.errs()])
         ir('COLH.dc.html', limpa=True)
-        t.chk('§8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19', J("PRIM()") == ['Publicar previsão do Pivô 19'], J("PRIM()"))
+        # COLH-APONT F1 (docs/gestao/GESTAO-1810.md §2 e aceite C1, 19/10/2026): com a OS-0505 em execução, a primária do Pivô 19 passou a ser
+        # "Apontar colheita" (o painel abre no apontamento do dia); o passo da previsão segue no painel como secundária: "Publicar previsão"
+        # abre o formulário (plantas/ha e perda editáveis) e a primária dele publica; depois, "Programar colheita S40" fica como secundária.
+        # Oráculo trocado pela especificação (não para passar): mais 1 clique na tarefa §8.1 (a troca de modo do painel).
+        t.chk('§8.1 sem seleção, a ação primária é "Apontar colheita" do Pivô 19 (OS-0505 em execução; GESTAO-1810 C1)', J("PRIM()") == ['Apontar colheita do Pivô 19'], J("PRIM()"))
         r = row('Pivô 19'); p = pan()
         t.chk('painel do Pivô 19: passe S39 parcial 0,73 t/ha, ciclo 0,48 t/ha, 1 carga a receber, rascunho S40 e S41', '0,73 t/ha' in p and '0,48 t/ha' in p and 'CG-2108' in p and 'S40' in p and 'S41' in p, p[:900])
-        clk('Publicar previsão', 'aside'); p = toast()
+        clk('Publicar previsão', 'aside'); clk('Publicar previsão', 'aside'); p = toast()   # secundária abre o formulário; a primária publica
         t.chk('(1) Publicar previsão: v2 do Pivô 19 com S40 72,78 t e S41 87,34 t', 'v2 publicada' in p and 'S40 72,78 t' in p and 'S41 87,34 t' in p, p)
-        t.chk('(1) a ação primária passa a "Programar colheita S40"', J("PRIM()") == ['Programar colheita S40'], J("PRIM()"))
+        sc = J("[...document.querySelectorAll('aside[role=dialog] button')].filter(VIS).map(b=>N(b.innerText))") or []
+        t.chk('(1) depois de publicar, a primária continua "Apontar colheita" e "Programar colheita S40" fica como secundária no painel', J("PRIM()") == ['Apontar colheita'] and 'Programar colheita S40' in sc, [J("PRIM()"), sc])
         clk('Programar colheita S40'); time.sleep(.8); lib()
         v = J("[document.querySelector('#nv_cult')&&document.querySelector('#nv_cult').value, document.querySelector('#nv_jan')&&document.querySelector('#nv_jan').value]")
         t.chk('(1) "Programar colheita S40" abre a ordem nova pré-preenchida (Pivô 19, janela 28/09)', v == ['lg19', '2026-09-28'], v)
@@ -165,8 +170,9 @@ try:
         ir('OS.dc.html#' + nid); clk('Liberar para execução', 'aside'); clk('Confirmar liberação', 'aside'); et = cen(f"c.ordens[{json.dumps(nid)}].etapa")
         t.chk('(2) Aprovar e liberar a ordem nova (carência do Pivô 19 em dia): Liberadas', et == 'Liberadas', [et, pan()[:300], toast()])
         ir('MB-10.dc.html'); lib()
-        clk('Apontar área · OS-0505'); setv('#mb_ha', '25'); setv('#mb_h', '8'); clk('Gravar área'); p = toast()
-        t.chk('(3) MB-10 › Colheita › OS-0505: Apontar área 25 ha em 8 h (regra única do apontamento, origem app)', '25 ha' in p, p)
+        # COLH-APONT F1: o app usa o mesmo nome da web ("Apontar colheita" e o botão "Apontar"); antes "Apontar área" e "Gravar área"
+        clk('Apontar colheita · OS-0505'); setv('#mb_ha', '25'); setv('#mb_h', '8'); clk('Apontar'); p = toast()
+        t.chk('(3) MB-10 › Colheita › OS-0505: Apontar colheita 25 ha em 8 h (regra única do apontamento, origem app)', '25 ha' in p, p)
         ap = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').map(a=>[a.ha,a.st,a.d])")
         t.chk('(3) o apontamento do app entrou uma vez na OS-0505 (26/09, Provisório)', ap == [[25, 'Provisório', '26/09']], ap)
         ir('COLH.dc.html'); row('Pivô 19'); p = pan()
@@ -270,7 +276,7 @@ try:
         ir('COLH.dc.html', limpa=True); mt = J("ROWTXT('Mamão Formosa')") or ''
         t.chk('A-15 linha do Mamão Formosa: 0,70 t/ha ponderada sobre 137,9 ha colhidos (96,74 t ÷ 137,9 ha)', '0,70 t/ha ponderada' in mt and 'sobre 137,9 ha colhidos' in mt, mt[:300])
         # A-16 · perda inválida ao publicar: o painel diz o que corrigir
-        row('Pivô 19'); setv('#pf_pe', 'abc'); clk('Publicar previsão', 'aside'); al = alerta(); n = cen("c.producao.previsoes.lg19.length")
+        row('Pivô 19'); clk('Publicar previsão', 'aside'); setv('#pf_pe', 'abc'); clk('Publicar previsão', 'aside'); al = alerta(); n = cen("c.producao.previsoes.lg19.length")   # COLH-APONT F1: a secundária abre o formulário
         t.chk('A-16 perda "abc": erro junto do campo e nada publicado (sem erro de JS)', 'Número de 0 a 99' in al and n == 1 and not t.errs(), [al, n, t.errs()])
         # A-09 · toque duplo em Concluir talhão (MB-07) grava uma contagem
         ir('MB-07.dc.html#lg06'); clk('Mais um fruto Pintado'); clk('Registrar e ir à planta 2'); setv('#mb_peso', '1,10')
@@ -319,11 +325,11 @@ try:
         ir('OS.dc.html', limpa=True)
         J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0999']={id:'OS-0999',tipo:'Pulverização · antracnose',talhao:'Pivô 19',area:75.11,etapa:'Encerradas',versao:'v1',realizado:75.11,saldo:0,resp:'Wesley',ins:[{p:'Tebuconazol 200 EC',dose:1,un:'L',tot:75.11}],req:null,selos:[],ap:[{d:'22/09',dia:1,ha:75.11,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
         ir('MB-10.dc.html'); lib(); cd = J("N(document.querySelector('main').innerText)") or ''
-        clk('Apontar área · OS-0505'); setv('#mb_ha', '5'); setv('#mb_h', '2'); clk('Gravar área'); e = J("[...document.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ')") or ''
-        n0 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length"); clk('Colheita já feita'); clk('Gravar área'); n1 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length")
+        clk('Apontar colheita · OS-0505'); setv('#mb_ha', '5'); setv('#mb_h', '2'); clk('Apontar'); e = J("[...document.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ')") or ''   # COLH-APONT F1: nome alinhado à web
+        n0 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length"); clk('Colheita já feita'); clk('Apontar'); n1 = cen("c.ordens['OS-0505'].ap.filter(a=>a.origem==='app').length")
         t.chk('A-14 MB-10 na carência: "não colha agora" (sem "turnos suspensos"); gravar pede "Colheita já feita" e só então registra', 'não colha agora' in cd and 'turnos suspensos' not in cd and 'Colheita já feita' in e and n0 == 0 and n1 == 1, [cd[cd.find('Carência'):][:200], e, n0, n1])
         # A-04 · O.S. de colheita liberada com carga recebida não oferece "Cancelar sem execução"
-        ir('COLH.dc.html', limpa=True); row('Pivô 19'); clk('Publicar previsão', 'aside'); ir('COLH.dc.html'); clk('Programar colheita S40'); time.sleep(.8); lib(); clk('Emitir ordem', 'aside')
+        ir('COLH.dc.html', limpa=True); row('Pivô 19'); clk('Publicar previsão', 'aside'); clk('Publicar previsão', 'aside'); clk('Programar colheita S40'); time.sleep(.8); lib(); clk('Emitir ordem', 'aside')   # COLH-APONT F1: previsão pela secundária do painel
         nid = cen("(()=>{ const o=Object.values(c.ordens).find(o=>o.talhao==='Pivô 19'&&/semana 40/.test(o.tipo)); return o?o.id:''; })()") or ''
         ir('OS.dc.html#' + nid); clk('Liberar para execução', 'aside'); clk('Confirmar liberação', 'aside')
         ir('OS.dc.html#' + nid); a0 = J("[...document.querySelectorAll('aside[role=dialog] button, aside[role=dialog] a')].filter(VIS).map(b=>N(b.innerText))") or []
@@ -390,7 +396,7 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         ir('CARGA.dc.html', limpa=True); row('CG-2108'); setv('#pf_tk', 'TK-4520'); setv('#pf_bruto', '19250'); setv('#pf_tara', '7200'); clk('Íntegra', 'aside'); clk('Pesar a CG-2108', 'aside')
         g = cen("c.producao.cargas['CG-2108'].st")
         ir('COLH.dc.html'); ul(); S0 = J("LS()")
-        row('Pivô 19'); setv('#pf_pe', '7', False)   # rascunho do "Publicar previsão" (não publica)
+        row('Pivô 19'); clk('Publicar previsão', 'aside'); setv('#pf_pe', '7', False)   # rascunho do "Publicar previsão" (não publica); COLH-APONT F1: a secundária abre o formulário
         clk('Em colheita'); time.sleep(.3)
         v19 = cel('Pivô 19')
         J("(()=>{ const h=TBL().querySelectorAll('[role=columnheader]')[HIDX('Produtividade')]; h.querySelector('.g2fb').click(); })()"); time.sleep(.5)
