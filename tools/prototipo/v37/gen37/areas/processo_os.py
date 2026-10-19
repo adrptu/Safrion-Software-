@@ -846,7 +846,7 @@ function osPeriodo(cs){ const ds=[]; const add=(d,m)=>ds.push([Number(m),Number(
   return 'período '+z(a[1])+(a[0]===b[0]?'':'/'+z(a[0]))+'–'+z(b[1])+'/'+z(b[0]); }
 // painel por fase: aberto só o que faz a ordem andar nesta fase; o resto fica recolhido com uma linha de resumo
 function panSecs(self,v,o){ const f=o.etapa; const sx=((self.state.psx||{})[o.id])||{}; const a=o.atv||{};
-  const DEF={'A liberar':['ins','rec'],'Liberadas':['ins','rec'],'Em execução':['ap','ins'],'Em conferência':['ap','ins'],'Encerradas':['ap'],'Canceladas':['sit','ins']}[f]||['ins'];
+  const DEF={'A liberar':['ins','rec'],'Liberadas':['ins','rec'],'Em execução':['ap','ins','rec'],'Em conferência':['ap','ins'],'Encerradas':['ap'],'Canceladas':['sit','ins']}[f]||['ins'];
   const ins=v.pan_ins||[], rec=v.pan_rec||[], nal=rec.reduce((t,r)=>t+(r.al||[]).length,0), nap=(o.ap||[]).length, cond=String(o.cond||'');
   const sum={atv:[a.op,a.nome||o.tipo,a.conj].filter(Boolean).join(' · '),
     ins:ins.length?(ins.length+(ins.length>1?' insumos':' insumo')+' · '+ins.map(x=>x.p).slice(0,2).join(', ')+(ins.length>2?'…':'')):'sem insumos',
@@ -892,6 +892,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
       ok:()=>{ const R=cenMudar(self,c=>alTrocar(c,o.id,r.r,rt.para,PF)); if(R&&!R.erro) self.setState({rt:null,g2toast:R.msg||'Recurso trocado.'}); },
       cancel:()=>self.setState({rt:null})}; });
   v.pan_hasRec=v.pan_rec.length>0;
+  v.pan_vermapa=o.etapa==='Em execução'; v.pan_vermapa_h='IN-04.dc.html#frota='+o.id;   // MAPA-FROTA F1: as máquinas desta O.S. no Mapa, com 1 clique
   const EQ={'Adubação a lanço':{cap:3000,un:'kg',nome:'distribuidor 3.000 kg'}}[a.op];
   const areaP=(o.etapa==='Em execução')?(o.saldo||0):(o.area||0);
   let prep=''; if(EQ&&areaP>0&&(o.ins||[]).length){ const ac=EQ.vaz?EQ.cap/EQ.vaz:EQ.cap/(o.ins.reduce((t,x)=>t+x.dose,0)||1); const n=Math.ceil(areaP/ac-1e-9); const ult=areaP-ac*(n-1);
@@ -1842,7 +1843,8 @@ def _painel():
       f'<sc-if value="{H("pan_hasAcum")}" hint-placeholder-val="{T()}"><div style="padding: 8px 0 0; border-top: 2px solid {INK}; font-size: 13px; font-weight: 800;">{H("pan_acum")}</div></sc-if>'
       f'<sc-if value="{H("pan_hasNota")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED};">{H("pan_nota")}</div></sc-if></sc-if>'
       f'<sc-if value="{H("pan_noAp")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; color: {MUTED}; padding: 6px 0;">{H("pan_noApT")}</div></sc-if>')
-      + sec('rec','Recursos alocados',f'<sc-for list="{H("pan_rec")}" as="rc" hint-placeholder-count="3"><div style="display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.3fr); gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
+      + sec('rec','Recursos alocados',f'<sc-if value="{H("pan_vermapa")}" hint-placeholder-val="{F()}"><a href="{H("pan_vermapa_h")}" data-frota-link="1" title="Ver as máquinas desta O.S. no Mapa" style="{_MINI} text-decoration: none; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;">{E.icon("map",14,INK)}Ver no mapa</a></sc-if>'
+      f'<sc-for list="{H("pan_rec")}" as="rc" hint-placeholder-count="3"><div style="display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.3fr); gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
       f'<span style="display: flex; flex-direction: column; gap: 3px; align-items: flex-start; min-width: 0;"><b>{H("rc.t")}</b>'
       f'<sc-if value="{H("rc.hasDe")}" hint-placeholder-val="{F()}"><span style="font-size: 11.8px; color: {MUTED};">{H("rc.de")}</span></sc-if>'
       f'<sc-if value="{H("rc.podeT")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("rc.go")}" title="Trocar por outro da mesma função, livre na janela" style="{_MINI}">Trocar</button></sc-if>'
