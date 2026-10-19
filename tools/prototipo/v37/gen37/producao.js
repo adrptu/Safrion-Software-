@@ -666,7 +666,7 @@ function prApontarColheita(c, k) { const o = (c.ordens || {})[k.os]; if (!o || !
   P.apont[k.chave] = { os: k.os, dia: R.ap.dia, d: k.d, umid: reg.umid, perda: reg.perda, por: k.por || '', at: R.ap.at };
   let conf = ''; try { conf = CEN_CONF_AP(); } catch (x) { conf = ''; }
   if (R.ap.st === CEN_AP_DUP) return { msg: 'Retido como duplicidade a conferir: a ' + k.os + ' já tem apontamento em ' + k.d + ' (' + cenApDupTxt(cenApDupVivos(o, R.ap)) + '). Nada somado' + (conf ? ' até a decisão de ' + conf : '') + '.', ap: R.ap };
-  return { msg: 'Colheita apontada: ' + prFmtT(R.ap.ha, 2) + ' ha em ' + k.d + ' na ' + k.os + ', provisório' + (conf ? ' até a conferência de ' + conf : '') + '. Saldo a colher: ' + prFmtT(prApSaldo(o), 2) + ' ha. A produção só muda com a carga pesada.', ap: R.ap }; }
+  return { msg: 'Colheita apontada: ' + prFmtT(R.ap.ha, 2) + ' ha em ' + k.d + ' na ' + k.os + ', provisório' + (conf ? ' até ' + conf + ' conferir' : '') + '. Saldo a colher: ' + prFmtT(prApSaldo(o), 2) + ' ha. A produção só muda com a carga pesada.', ap: R.ap }; }
 /* apontamentos do cultivo, do dia mais recente ao mais antigo: todo relato das O.S. de colheita menos o previsto (plano, não fato), com o
    registro da colheita (umidade, perdas, quem registrou na web) pela chave */
 function prApLista(c, cid) { const A = prP(c).apont || {}; const out = [];

@@ -1,0 +1,9 @@
+RESULTADO: OK 0/0
+Traceback (most recent call last):
+  File "/tmp/claude-0/colhap-base/tools/prototipo/v37/gen37/reserva_duplo_clique_test.py", line 32, in <module>
+    b = 'ok' if J("!![...document.querySelectorAll('aside[role=dialog] input')].find(i=>i.id.indexOf('pf_q_L39-133_PV-036')===0)") else J("CLK('Reservar L39-133 para pedido','aside[role=dialog]')"); time.sleep(.45)   # o formulário pode abrir já no clique da linha
+                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/colhap-base/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

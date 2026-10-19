@@ -1,0 +1,30 @@
+OK    U motor JS (node) executou sem erro
+OK    UA1 20 ha em 26/09 na OS-0505: um apontamento novo, Provisório, origem web, chave do formulário; saldo 25,11 → 5,11 ha; realizado 70 ha
+OK    UA1b umidade e perdas ficam no registro da colheita pela chave (nunca no ap); a observação vai no ap; quem registrou fica guardado
+OK    UA1c o previsto do dia 3 (24/09) sai quando o apontamento soma, como na web da O.S.
+OK    UA2 C2 repetir (mesma chave e conteúdo) não duplica: "já registrado", 1 apontamento, saldo 5,11 ha
+OK    UA3 mesma chave com outra área ou outra perda = conflito; o estado não muda
+OK    UA4 R-02 passe S39 do Pivô 19: 70 ha apontados; produção 36.420 kg (sem carga nova); produtividade 36,42 t ÷ 70 ha = 0,52 t/ha
+OK    UA5 lista do Pivô 19 do mais recente ao mais antigo: 26/09 (web, provisório, perdas 1,5) · 22/09 · 21/09; sem o previsto
+OK    UA6 recusas sem gravar: data futura, data inexistente, sem data, sem área, área não numérica, acima do saldo (máximo 25,11 ha), horas 0, umidade 120 %, perdas negativas
+OK    UA6b o mesmo formulário válido (vírgula decimal, perdas 0) não tem erro; ontem também vale
+OK    UA7 O.S. Liberada: recusado pelo cenApontar ("não está em execução"), nada gravado
+OK    UA8 web na mesma data de um apontamento do app: retido como "Duplicidade a conferir", saldo não muda, a mensagem diz quem decide
+OK    UA9 Pivô 19 (OS-0505 em execução): primária "Apontar colheita" na OS-0505; o passo da previsão (Publicar previsão) fica em ac0
+OK    UA9b C3 T1-A soja (sem O.S.) e Pivô 6 (só O.S. encerrada): sem apontar; motivo e "Programar colheita" com cultivo, atividade e janela
+OK    UA9c O.S. só Liberada: a primária continua "Apontar colheita" e o próximo passo é iniciar a ordem
+FALHA C1 sem seleção, uma primária verde no cabeçalho: "Apontar colheita do Pivô 19" (OS-0505 em execução) · ['Publicar previsão do Pivô 19']
+FALHA C1 o painel do Pivô 19 abre no apontamento: data já com hoje (26/09), área vazia (nunca o último valor), saldo à vista 25,11 ha, "Apontar" · [None, None, '']
+FALHA C1 o passo da previsão fica como secundária do painel ("Publicar previsão"), sem segunda primária verde · 
+FALHA C1 um apontamento novo: 26/09, 20 ha, Provisório, origem web, chave do formulário (W-COLH-…); saldo 25,11 → 5,11 ha; realizado 70 ha · [[], 25.11, 50]
+FALHA C1 a lista de apontamentos mostra 26/09 no topo, provisório, pela web com quem registrou · 
+FALHA C1 na hora: saldo 5,11 ha no formulário, área limpa para o próximo, passe S39 com 70 ha e 0,52 t/ha (36,42 t ÷ 70 ha, R-02) · 
+FALHA C1 o app (MB-10 › Colheita) vê o mesmo: OS-0505 "Feito 70 de 75,11 ha · saldo 5,11 ha"; a ação do app tem o mesmo nome ("Apontar colheita · OS-0505") · Cargas e entregas 1 colheita em execução · 1 a pesar i Colheita Motorista Com sinal Sem sinal Nada aguardando sinal Ver envios Colheita em execução OS-0505 · Pivô 19 Feito 50 de 75,11 ha · saldo 25,11 ha 1 carga a pesar: CG-2108 (~590 cx) Apontar área · OS-0505 Descartar carga a pesar Registrar carga · OS-0505 Tela: Cargas e entregas · 1 colheita em execução · 1 a pesar
+FALHA C2 duplo clique em "Apontar" grava uma vez (mesma chave); outro clique com a área já limpa não grava e diz o campo · [2, 2, 2, '']
+FALHA C3 T1-A Soja sem O.S. de colheita: sem a primária "Apontar colheita" e sem formulário de apontar; o motivo e "Programar colheita ›" para a O.S. nova do cultivo · [[], '', 'T1-A · Soja 58 W Prevista Santa Rita · Safra 2026/27 · 160 ha · meta 64 sc/ha × PRÓXIMO PASSO colheita a partir de 12/02/27 · nada a fazer agora. PREVISÃO VIGENTE 10.240 sc · safra (v1) COLHIDO NA SAFRA — PRODUTIVIDADE — CARGAS A RECEBER 0 CUSTO R$/SC sem custo realizado · Controle UNIDADE DE PRODUTIVIDADE sc/ha · Padrão da cultura RASCUNHO (NÃO PUBLICADO) Safra 10.240 sc pela meta (64 sc/ha × 160 ha) VERSÕES PUBLICADAS v1 15/09 Ana (agrônoma) safra 10.240 sc pela meta ORDENS DE COLHEITA Nenhuma']
+FALHA L O.S. só Liberada: a primária "Apontar colheita" abre o painel com o próximo passo "Iniciar a OS-0505" (verde, leva à O.S.) e sem formulário de apontar · [['Publicar previsão do Pivô 19'], None, '']
+FALHA R "Registrar carga ›" leva ao Recebimento com a pesagem nova da OS-0505 e o dia 26/09 preenchidos (corrigíveis); o endereço é consumido · ['', '']
+FALHA M 390 px: apontar 5 ha pelo toque grava uma vez e a lista mostra 26/09 provisório no topo · [2, 2, '']
+FALHA M 390 × 844: painel do apontamento sem rolagem lateral; "Apontar" visível e alcançável dentro da tela · {'lado': False, 'ok': False, 'dentro': False}
+OK    E sem erro de JS (COLH, MB-10, CARGA, 1440 e 390 px)
+RESULTADO: 16 ok · 13 falhas
