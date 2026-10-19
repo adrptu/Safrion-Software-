@@ -304,13 +304,13 @@ function EXTRAVALS(self,v){ const dz=!!self.state.dz;
     self.setState({dz:true,g2toast:'Conciliado · medição do tanque em 22/09 confere com os abastecimentos apontados (dif. 0,7%, dentro da tolerância de 1%) · lançamento vira definitivo.'}); }; }'''
     fech=(stepper([('Coleta e apontamentos','done'),('Conciliações','now'),('Rateios versionados','now'),('Revisão e fechamento','todo'),('Exportação ERP','todo')],'')
           + f'<div role="status" style="font-size: 13.5px; font-weight: 700; color: {INK};">{H("fech_hint")}</div>')
-    reab=imsg('Conferir reabertura de 08/2026', 'Prévia · nada foi alterado. A solicitação de reabertura de competência ainda não está disponível neste protótipo. O período permanece fechado; motivo e aprovação da Controladoria continuam necessários antes de estorno e relançamento.', 'clock', 'Ver disponibilidade da reabertura de competência')
+    # LEVE-1 (proprietário 19/10): sai o botão "Conferir reabertura de 08/2026" (prévia sem efeito: "nada foi alterado")
     corpo=(kpis([('COMPETÊNCIA','09/2026','fecha 05/10'),('LANÇAMENTOS','1.412','98% com doc.'),
                  ('PROVISÓRIOS',rs(prov),f'{sum(1 for x in L if x[9]!="green")} lançamentos'),('CONCILIAÇÃO ERP','OK até 21/09','14 na fila')])
         + bloco('Composição de custos · setembro/2026','Confira cada lançamento até o documento de origem; clique num lançamento provisório para corrigir dimensões ou rateio.',g_lan,
                 acao=imsg('Exportar para ERP','Exportação simulada · 1.402 lançamentos definitivos enviados ao ERP designado; provisórios ficam retidos até a conciliação.','doc','Exportar os lançamentos definitivos ao ERP'))
         + bloco('Fechamento da competência','Trate as pendências obrigatórias e feche; parâmetro futuro não recalcula período fechado sem revisão autorizada.',fech,
-                acao=ibtn('Conciliar diesel do tanque','conc_diesel','fuel','Conciliar a medição do tanque com os abastecimentos apontados')+reab,tone='red'))
+                acao=ibtn('Conciliar diesel do tanque','conc_diesel','fuel','Conciliar a medição do tanque com os abastecimentos apontados'),tone='red'))
     shell37('GE-03','Custos e fechamento',corpo,
       subtitle='Composição por natureza, centro, cultura, ciclo, talhão, operação e ativo — total, R$/ha e R$/unidade com denominador e conciliação explícitos.',
       status=('2 pendências bloqueiam o fechamento','red'),
