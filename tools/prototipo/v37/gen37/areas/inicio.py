@@ -857,7 +857,7 @@ function cls0(l,f,t){
   if(l==='Irrigação') return mcIrr(M.irr[t],f.ver);
   if(isIns(l,f)){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
     if(!its.length) return semPlanoOf(t)?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
-    const pend=its.some(x=>x.semData>0); const c=mc_worstC(its.map(x=>x.semData>0?'yellow':(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
+    const pend=its.some(x=>x.semData>0); const c=mc_worstC(its.map(x=>(st[x.p]||[])[1]==='red'?'red':(x.semData>0?'yellow':(st[x.p]||['','none'])[1]))); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
     return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(pend?'sem data · projeção parcial':(c==='yellow'?'aguardando pedido':'estoque cobre'))}; }
   if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }

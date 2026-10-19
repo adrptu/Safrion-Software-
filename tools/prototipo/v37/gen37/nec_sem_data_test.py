@@ -16,3 +16,10 @@ console.log('PASS necAgg real: null/vazio, ordem inversa, horizonte, somente pen
 '''
 subprocess.run([os.environ.get('NODE_BINARY','node'),'-e',f+t],check=True)
 compile(s,'inicio.py','exec')
+
+# O indicador agregado não pode esconder falta firme atrás de pendência amarela.
+start=s.index("if(isIns(l,f)){ const its=necAgg")
+end=s.index("  if(l==='Custos')",start)
+block=s[start:end]
+js="const assert=require('node:assert/strict');let state='red';const necAgg=()=>[{p:'X',semData:100}],insFaz=()=>({st:{P:{X:['Falta',state]}}}),isIns=()=>true,mc_worstC=cs=>cs.includes('red')?'red':cs[0];function check(l,f,t){"+block+"}assert.equal(check('I',{per:'P'},'T').c,'red');state='ok';assert.equal(check('I',{per:'P'},'T').c,'yellow');console.log('PASS falta firme mantém vermelho junto de data pendente');"
+subprocess.run([os.environ.get('NODE_BINARY','node'),'-e',js],check=True)
