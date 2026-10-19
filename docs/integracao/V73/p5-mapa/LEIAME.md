@@ -130,3 +130,33 @@ Depois da correção, no render (`logs/revisao_codex/`):
 | `mapa_colheita_unid_unit` | 6/6 |
 
 Brutos em `logs/revisao_codex_2/`.
+
+## Prova pedida pelo Codex na revisão 5569013634 (HEAD 8eef6ace): rótulo composto pela cadeia real, a 1440 e a 390 px
+**Pedido:** o R5 roda só a 1440 e injeta o texto no rótulo. Faltava provar os compostos pela cadeia real, nas duas larguras, com o nome acessível e sem sobreposição. Não há defeito novo.
+
+**`mapa_rotulo_real_test.py` (novo):**
+- **Cadeia real:** carga recebida → `prProdOS` (modo da participação) → `prResultado` → `colhNum` → `MUX.info` → marcador do MapLibre (rótulo e nome acessível).
+- **Estado sintético:** gravado no armazenamento local. A CD-04 grava a fonte pela tela, no calendário do Comercial, que não toca o Mapa. As 3 origens do Pivô 19 nas cargas recebidas passam a "estimada" (COLH R-06), como o formulário de carga grava. O Mamão fica em kg/ha (Ana).
+- **E1 e E2 (1440 e 390):** o Pivô 19 mostra "em colheita · 484,89 kg/ha · estimativa", inteiro, antes e depois de selecionar o pivô.
+- **E3:** o nome acessível traz o mesmo indicador: "P19, 75 ha, Mamão Formosa Tainung 1 · produção, em colheita · 484,89 kg/ha · estimativa, dado de 23/09 (hoje)".
+- **E4:** o rótulo, dentro da tela, não se sobrepõe a outro rótulo, antes e depois de selecionar.
+- **E5, sonda de texto e não cadeia real:**
+  - **Por que é sonda:** o cenário sintético não tem café em talhão do Mapa. O único café é o C1 da Santa Rita, sem geometria.
+  - **O que mede:** os compostos do café a apurar com a medida do campo e da estimativa, pela mesma quebra (`MUX.quebra`), cabem a 1440 e a 390.
+- **E6:** sem erro de JS.
+
+| Execução | Resultado |
+|---|---|
+| Render do PR (8eef6ace) | 6/6 |
+| Contraprova no render da v143 | 2/6 |
+
+**A contraprova reprova E1, E2, E3 e E5:**
+- O rótulo mostrava a produção, "em colheita · 36,42 t", e o nome acessível também.
+- Sem a quebra da MUX, o café composto é cortado.
+- **Ressalva:** na v143 ainda não existe a fonte de pessoas da CD-04, que veio com o PR #132. Por isso o estado da estimativa nem chega a ser gravado ali ("sem estado" no bruto). A reprovação vem do rótulo em t.
+
+**Observação fora do escopo do P5:** a 390 px o Pivô 19 abre fora da área do mapa, e selecioná-lo pelo teclado (Tab e Enter) abre o painel sem mover o mapa até ele. O teste centraliza o mapa no pivô, como a pessoa faria ao arrastar. Fica registrado para a frente do Mapa (MUX-F1), sem mudança neste PR.
+
+**Fotos:** `fotos/p19_estimativa_1440.png` e `fotos/p19_estimativa_390.png`, o rótulo real com "estimativa" em 3 linhas.
+
+**Brutos:** `logs/revisao_codex_3/`.
