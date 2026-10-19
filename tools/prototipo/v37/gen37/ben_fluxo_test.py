@@ -838,8 +838,9 @@ try:
             if J("location.pathname.endsWith('/MA.dc.html') && document.readyState==='complete' && document.body.innerText.length>50"): break
             time.sleep(.1)
         time.sleep(.6); lib(); loc = J("location.pathname.split('/').pop()+location.hash"); b = J("N(document.body.innerText)") or ''
+        cond = J("(()=>{ const s=document.querySelector('section[aria-label=\"Situação\"] button[aria-expanded]'); return s&&N(s.innerText); })()") or ''
         t.chk('M3 · "Ver na Manutenção" abre a Packing linha 1 na tela única da Manutenção (MA.dc.html#ativo=a13), com o bloqueio à vista',
-              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Bloqueado' in b, [hr, loc, b[:300]])
+              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Bloqueado' in cond, [hr, loc, cond, b[:300]])
         # TAB-12: o resumo mostra a condição; o motivo pertence à seção Situação, inicialmente recolhida.
         abriu = J("(()=>{ const s=document.querySelector('section[aria-label=\"Situação\"]'); const b=s&&s.querySelector('button[aria-expanded]'); if(!b||!VIS(b)) return false; if(b.getAttribute('aria-expanded')==='false') b.click(); return true; })()")
         time.sleep(.3)
