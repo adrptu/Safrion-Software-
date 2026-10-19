@@ -1,0 +1,5 @@
+a) a13 cond = Apto | "Bloqueado" no corpo: False | 
+c) 390 view=cartoes {'lado': False, 'cards': 3, 'prcard': 0} None
+c) 390 view=tabela {'lado': False, 'cards': 3, 'prcard': 0} None
+c) 1440 view=cartoes {'lado': False, 'cards': 3, 'prcard': 0} None
+c) 1440 view=tabela {'lado': False, 'cards': 0, 'prcard': 0} None

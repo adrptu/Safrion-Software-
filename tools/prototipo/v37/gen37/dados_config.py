@@ -96,7 +96,8 @@ def js_prefixo():
                         # CF04 × CONTROLE-02 F2: o adaptador da trilha do Codex (PlanoReferencia.trilha) em escopo próprio, para a CF-04 ler os
                         # recibos da referência técnica em qualquer tela sem redeclarar o PlanoReferencia do Planejar safra
                         + 'const CONF_PLANO_REF = (() => {\n' + open(os.path.join(HERE, 'plano_referencia.js'), encoding='utf-8').read() + '\nreturn PlanoReferencia; })();\n'
-                        + open(os.path.join(HERE, 'configuracoes.js'), encoding='utf-8').read() + '\n')
+                        + open(os.path.join(HERE, 'configuracoes.js'), encoding='utf-8').read() + '\n'
+                        + open(os.path.join(HERE, 'metas.js'), encoding='utf-8').read() + '\n')
     return _CACHE['js']
 
 

@@ -143,10 +143,11 @@ try:
         J("document.querySelector('a.volta37').click()"); h0 = espera(pronta('MOD-CFG.dc.html', "document.querySelectorAll('a.mod-cartao').length>0"))
         cs = J("[...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()])") or []; e0 = errs()
         r1 = clk('Usuários e alçadas', '.mod-grade'); h1 = espera(pronta('CF-01.dc.html', "document.querySelectorAll('[role=table] [role=row]').length>2")); time.sleep(.5)
-        ORD = [['CF-01.dc.html', 'Usuários e alçadas'], ['CF-04.dc.html', 'Auditoria'], ['CF-03.dc.html', 'Integrações'], ['CF-05.dc.html', 'Assinatura']]
-        chk('A15 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado no CF-01; a tela de entrada ("‹ Configurações") tem no máximo 4 cartões na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura, e o cartão abre o CF-01',
+        # EX-53 D11 (PR #129, 19/10/2026): "Metas e limites" (CF-06) entra em segundo, como no ui37.MENU2; a entrada passa de 4 para 5 cartões
+        ORD = [['CF-01.dc.html', 'Usuários e alçadas'], ['CF-06.dc.html', 'Metas e limites'], ['CF-04.dc.html', 'Auditoria'], ['CF-03.dc.html', 'Integrações'], ['CF-05.dc.html', 'Assinatura']]
+        chk('A15 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado no CF-01; a tela de entrada ("‹ Configurações") tem no máximo 5 cartões na ordem Usuários e alçadas · Metas e limites · Auditoria · Integrações · Assinatura, e o cartão abre o CF-01',
             nv.get('mods', [])[-2:] == ['Configurações', 'Outros acessos'] and nv.get('cur') == ['Configurações'] and nv.get('volta') == ['MOD-CFG.dc.html', '‹ Configurações']
-            and h0 and len(cs) <= 4 and cs[:1] == ORD[:1] and cs[-1:] == ORD[-1:] and cs == [x for x in ORD if x in cs] and not e0 and r1 == 'ok' and h1, [nv, h0, cs, e0, r1, h1])
+            and h0 and len(cs) <= 5 and cs[:1] == ORD[:1] and cs[-1:] == ORD[-1:] and cs == [x for x in ORD if x in cs] and not e0 and r1 == 'ok' and h1, [nv, h0, cs, e0, r1, h1])
         chk('CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS', '14 com acesso · 1 sem acesso' in hdr() and prims()['prims'] == ['Convidar pessoa'] and not errs(), [hdr(), prims(), errs()])
         tbl = J("[...document.querySelectorAll('[role=table]')].map(t=>t.querySelectorAll('[role=columnheader] button').length)")
         # um campo de busca por tela (proprietário, 13/10/2026): o da 1ª grade busca nas duas (a 2ª está no mesmo grupo, data-g2q)
