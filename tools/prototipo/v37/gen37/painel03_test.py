@@ -9,6 +9,7 @@
   P5 o painel lê e não grava (cenário e armazenamento iguais antes e depois de navegar pelas abas)
   P6 número da aba = itens a atacar e decidir do módulo; some com 0
   P7 1440 e 390: nada vaza na largura; abas com 44 px; setas, Home e End trocam a aba e levam o foco; dica ⓘ em cada cartão; sem erro de JS
+  P7g 1440: nas listas Atacar agora, Decidir e por funcionalidade, impacto, dono e verbo alinham entre as linhas (grade da lista)
   P8 Comercial: o Painel do módulo é a aba; a tela de oferta virou "Oferta e compromissos" (título = item do menu)
 Contraprova: RENDER_DIR=<render da v133> reprova P1 (PG ausente; PAGR/PMAN/PSUP no menu).
 Uso (de gen37/): env CHROME_BIN=… SAFRION_DADOS=sintetico [RENDER_DIR=…] python3 -B painel03_test.py"""
@@ -111,8 +112,11 @@ try:
               cards:document.querySelectorAll('[role=tabpanel] .pg-card').length, dicas:[...document.querySelectorAll('[role=tabpanel] .pg-card .pg-tip')].filter(b=>(b.getAttribute('data-dica')||'').length>20).length,
               tab44:[...document.querySelectorAll('[role=tab][data-pg]')].every(b=>b.getBoundingClientRect().height>=44),
               alvo44:[...document.querySelectorAll('[role=tabpanel] .pg-it, [role=tabpanel] .pg-cl, [role=tabpanel] .pg-bh a')].filter(e=>e.getBoundingClientRect().height>0).every(e=>e.getBoundingClientRect().height>=44),
+              alinh:[...document.querySelectorAll('[role=tabpanel] .pg-lista')].filter(u=>u.getClientRects().length).every(u=>['pg-imp','pg-dono','pg-verbo'].every(k=>{const xs=[...u.querySelectorAll('.'+k)].filter(e=>e.getClientRects().length).map(e=>Math.round(e.getBoundingClientRect().left)); return xs.length<2||Math.max(...xs)-Math.min(...xs)<=1;})),
               itens:document.querySelectorAll('[role=tabpanel] .pg-it').length, semdados:[...document.querySelectorAll('[role=tabpanel] .pg-v')].filter(e=>e.innerText.trim()==='Sem dados').length})""") or '{}')
             chk(f'P7c {tag} {m}: nada vaza na largura; abas e alvos com 44 px; cada cartão com a dica da conta', d.get('sw', 9e9) <= d.get('vw', 0) and d.get('vaza') == 0 and d.get('tab44') and d.get('alvo44') and d.get('dicas') == d.get('cards'), d)
+            if W == 1440:
+                chk(f'P7g {tag} {m}: impacto, dono e verbo começam no mesmo x em todas as linhas da lista (revisão do PR #122)', d.get('alinh') is True, d.get('alinh'))
             if m == 'pri':
                 chk(f'P7d {tag}: Prioridades com alavancas, "Atacar agora" e "Decidir"; nenhum indicador "Sem dados" na semente', d.get('itens', 0) >= 7 and d.get('semdados') == 0 and
                     J("[...document.querySelectorAll('[role=tabpanel] section h2')].map(h=>h.innerText.split(' · ')[0]).join('|')") == 'Alavancas do resultado|Atacar agora|Decidir', d)

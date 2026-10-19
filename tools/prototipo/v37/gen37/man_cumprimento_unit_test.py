@@ -17,8 +17,11 @@ def unit():
     p = os.path.join(HERE, '_probe', 'man_cumprimento_unit_all.js'); open(p, 'w', encoding='utf-8').write(src)
     r = subprocess.run(MOTOR + [p], capture_output=True, text=True, timeout=120)
     out = r.stdout.strip().splitlines()
-    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou sem erro', r.stderr[:600])
-    for x in (json.loads(out[-1]) if out else []): ok(x['ok'], x['n'], x['info'])
+    ok(r.returncode == 0 and out, 'motor JS (jsc/node) executou sem erro', (r.stderr or r.stdout)[:600])
+    if r.returncode != 0 or not out: return   # só lê o JSON quando o motor terminou e escreveu (Codex 6258137889)
+    try: casos = json.loads(out[-1])
+    except ValueError as e: return ok(False, 'saída do motor é a lista de casos em JSON', [str(e), out[-1][:300]])
+    for x in casos: ok(x['ok'], x['n'], x['info'])
 if __name__ == '__main__':
     os.chdir(HERE); unit()
     print(f'RESULTADO: {N[0] - len(FAIL)}/{N[0]} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))

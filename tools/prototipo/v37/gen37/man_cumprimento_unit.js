@@ -44,4 +44,4 @@ caso('regras', () => {
   ok('C10 · contraprova: a regra antiga ignora a aberta vencida (1 de 2 = 50%); a nova dá 1 de 3 = 33%', a && a.n === 2 && a.pct === 50 && r.pct === 33, [a, r]);
 });
 
-console.log(JSON.stringify(R));
+print(JSON.stringify(R));   // print: o jsc do Mac não tem console; no node o prelúdio do teste define print (Codex 6258137889)

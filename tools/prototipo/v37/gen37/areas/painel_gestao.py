@@ -42,7 +42,8 @@ function pgDias(a,b){ const x=Date.parse(a+'T00:00:00Z'), y=Date.parse(b+'T00:00
 /* Sem política de meta versionada (D11), desvio numérico não recebe avaliação de conformidade.
    Alertas de domínio continuam usando suas próprias regras (impedimento, déficit, receituário). */
 function pgCor(){ return 'gray'; }
-function pgSemMeta(texto,parcial){ return [texto,parcial?'Indicador parcial':'','Meta não configurada'].filter(Boolean).join(' · '); }
+function pgParcial(texto,parcial){ return [texto,parcial?'Indicador parcial':''].filter(Boolean).join(' · '); }
+function pgSemMeta(texto,parcial){ return [pgParcial(texto,parcial),'Meta não configurada'].filter(Boolean).join(' · '); }
 /* cartão de indicador: nível (Resultado | Plano | Hoje), nome, valor (número, texto ou null), referência e desvio (sub), cor, dica (fórmula,
    fonte e dono) e origem (href) */
 function pgK(niv,nome,v,sub,cor,dica,href){ return {niv,nome,v:v===null||v===undefined?'Sem dados':(typeof v==='number'?pgNf(v):String(v)),sub:sub||'',
@@ -92,7 +93,7 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
   let cu=null; try{ cu=agrCustoRef(c,{}); }catch(e){ cu=null; }
   const cc=(cu&&cu.cultivos)||[]; R.custos=cc;
   B.cus=cu===null?[pgK('Resultado','Custo das O.S.',null,'','','Custo das O.S. por cultura. Fonte: agrCustoRef (camada Custos do Mapa).','GE-03.dc.html')]:
-    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct;
+    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct;
       return pgK('Resultado',g.cultura+' · '+g.faz+' '+g.saf,d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',
         pgSemMeta('execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),g.parcial),pgCor(),
         'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.','GE-03.dc.html'); });
@@ -169,10 +170,11 @@ function pgDados(c){ const R={blocos:{agr:{},man:{},sup:{},com:{},cre:{}},itens:
   return R; }
 /* alavancas do resultado (estratégico): por cultivo do custo, o desvio da execução e o consumo do orçado; o preço médio da cultura (empresa) */
 function pgAlavancas(R){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) pc[x.cu]=x; });
-  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct, p=pc[g.cultura]||null;
+  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct, p=pc[g.cultura]||null;
     return {id:g.id,cult:g.cultura,ctx:g.faz+' · '+g.saf+' · '+pgNf(g.area_ha,1)+' ha',
-      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:pgCor(),cons:pgSemMeta(cons===null?'—':cons+'% do orçado',g.parcial),
-      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:pgSemMeta(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',p&&(p.amb||[]).length>0),prec:pgCor()}; }); }
+      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:pgCor(),cons:pgParcial(cons===null?'—':cons+'% do orçado',g.parcial),
+      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:pgParcial(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',p&&(p.amb||[]).length>0),prec:pgCor(),
+      semMeta:pgCor()==='gray'}; }); }
 /* leitura para os testes (como window.__com do Comercial): só funções que leem */
 try{ window.__pg={pgDados,pgOrdem,pgClasseAtivo,pgAlavancas,pgCor,pnValores,agrPainelRef,agrCustoRef,cenGet,cenClone,CEN0}; }catch(e){}
 const PG_COR={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],none:['#15201A','transparent']};
@@ -203,7 +205,7 @@ function EXTRAVALS(self,v){
   const VOLTA=PG_VOLTA[at]; v.pg_volta_tem=!!VOLTA; v.pg_volta_t=VOLTA?VOLTA[0]:''; v.pg_volta_href=VOLTA?VOLTA[1]:''; v.pg_volta_aria=VOLTA?'Voltar para '+VOLTA[0]:'';
   v.pg_mais_t=todos?'Mostrar só os 7 primeiros':'Ver todos'; v.pg_mais=()=>self.setState({pg_todos:!todos});
   v.pg_alav=pgAlavancas(R).map(a=>Object.assign(a,{cusbc:PG_COR[a.cusc][0],cusbg:PG_COR[a.cusc][1],prebc:PG_COR[a.prec][0],prebg:PG_COR[a.prec][1]}));
-  v.pg_alav_vazio=!v.pg_alav.length;
+  v.pg_alav_vazio=!v.pg_alav.length; v.pg_alav_semmeta=v.pg_alav.some(a=>a.semMeta);
 }
 '''
 
@@ -216,6 +218,8 @@ CSS = '''<style>
 .pg-bloco{border:1px solid #E4E9E5;border-radius:14px;background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
 .pg-bh{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .pg-bh h2{font-size:15px;font-weight:800;margin:0;color:#15201A;min-width:0}
+.pg-bt{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+.pg-semmeta{font-size:12px;font-weight:600;color:#5B6660;background:#EEF1EE;border-radius:999px;padding:1px 8px;white-space:nowrap}
 .pg-bh a{min-height:44px;display:inline-flex;align-items:center;padding:0 6px;color:#1E7A4C;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap}
 .pg-bh a:hover{text-decoration:underline}
 .pg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;min-width:0}
@@ -229,8 +233,10 @@ CSS = '''<style>
 .pg-v{font-size:24px;font-weight:800;letter-spacing:-.01em;line-height:1.2;overflow-wrap:anywhere}
 .pg-sub{font-size:12px;font-weight:600;align-self:flex-start;border-radius:999px;padding:1px 8px;overflow-wrap:anywhere;max-width:100%}
 .pg-sub:empty{display:none}
-.pg-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.pg-it{display:grid;grid-template-columns:130px minmax(0,1fr) minmax(90px,auto) minmax(90px,auto) auto;align-items:center;gap:4px 12px;padding:8px 12px;border:1px solid #E4E9E5;border-radius:10px;background:#fff;color:#15201A;text-decoration:none;min-height:44px;font-size:13px}
+.pg-lista{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:130px minmax(0,1fr) auto auto auto;gap:6px 12px}
+/* as colunas (impacto, dono, verbo) alinham entre as linhas: cada linha herda a grade da lista (revisão do PR #122, 6258085103) */
+.pg-lista>sc-for{display:contents}.pg-lista li{display:grid;grid-column:1 / -1;grid-template-columns:subgrid}
+.pg-it{display:grid;grid-column:1 / -1;grid-template-columns:subgrid;align-items:center;gap:4px 12px;padding:8px 12px;border:1px solid #E4E9E5;border-radius:10px;background:#fff;color:#15201A;text-decoration:none;min-height:44px;font-size:13px}
 .pg-it:hover{border-color:#1E7A4C;background:#F4FAF6}
 .pg-cls{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;justify-self:start;white-space:nowrap}
 .pg-tt{font-weight:700;min-width:0;overflow-wrap:anywhere}.pg-tt small{display:block;font-weight:600;color:#65736A;font-size:12px}
@@ -246,7 +252,7 @@ CSS = '''<style>
 .pg-det>summary::-webkit-details-marker{display:none}.pg-det>summary::before{content:'›';display:inline-block;transition:transform .15s;font-size:16px;color:#65736A}
 .pg-det[open]>summary::before{transform:rotate(90deg)}
 .pg :focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}
-@media(max-width:700px){.pg-it{grid-template-columns:minmax(0,1fr) auto}.pg-cls{grid-column:1 / -1}.pg-imp,.pg-dono{grid-column:1}.pg-verbo{grid-column:2;grid-row:2}
+@media(max-width:700px){.pg-lista{display:flex;flex-direction:column}.pg-lista li{display:block}.pg-it{grid-template-columns:minmax(0,1fr) auto}.pg-cls{grid-column:1 / -1}.pg-imp,.pg-dono{grid-column:1}.pg-verbo{grid-column:2;grid-row:2}
  .pg-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.pg-v{font-size:20px}}
 @media(max-width:420px){.pg-cards{grid-template-columns:1fr}}
 </style>'''
@@ -311,7 +317,9 @@ def build():
                    f'onClick="{H("pg_"+k+"_go")}" style="{H("pg_"+k+"_st")}">{E.esc(n)}<span class="pg-n" hidden="{H("!pg_"+k+"_tem")}" aria-label="itens a atacar ou decidir">{H("pg_"+k+"_n")}</span></button>' for k, n in MODS)
     tablist = f'<div role="tablist" aria-label="Painel por módulo" class="pg-abas" onKeyDown="{H("pg_tk")}">{abas}</div>'
     pane = lambda k, html: f'<sc-if value="{H("pg_"+k+"_on")}" hint-placeholder-val="{"true" if k == "pri" else "false"}"><div role="tabpanel" id="pg-pane-{k}" aria-labelledby="pg-tab-{k}" class="pg" tabindex="-1">{html}</div></sc-if>'
-    alav = (f'<section class="pg-bloco" aria-label="Alavancas do resultado"><div class="pg-bh"><h2>Alavancas do resultado</h2>'
+    # EX-53 F1a: sem meta configurada (D11), o aviso vem uma vez no título do bloco, não em cada célula (revisão do PR #122, 6258085103)
+    alav = (f'<section class="pg-bloco" aria-label="Alavancas do resultado"><div class="pg-bh"><div class="pg-bt"><h2>Alavancas do resultado</h2>'
+            f'<sc-if value="{H("pg_alav_semmeta")}" hint-placeholder-val="true"><span class="pg-semmeta">Meta não configurada</span></sc-if></div>'
             f'<button type="button" class="pg-tip g2dica-i" aria-label="Como ler as alavancas" data-dica="Por cultivo: o custo realizado da área executada contra o previsto da mesma área (acima = pior) e quanto do orçado já foi; o preço médio vendido da cultura contra a referência de mercado (abaixo = pior). A margem prevista entra na próxima fatia.">ⓘ</button></div>'
             # SEP-20261015 (b): a tabela abre o corpo do bloco (o cabeçalho dela separa sozinho); o aviso de vazio vem depois (ds_test A2c)
             f'<div><div class="pg-rola g2caixa"><table class="pg-tab"><thead><tr><th scope="col">Cultivo</th><th scope="col">Custo da execução</th><th scope="col">Preço médio vendido</th></tr></thead><tbody>'
