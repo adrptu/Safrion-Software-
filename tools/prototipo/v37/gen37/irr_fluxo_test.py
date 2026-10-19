@@ -7,6 +7,8 @@ TABELAS-FOCO (06/10/2026): no IR-01 a situação é chip e o rótulo composto ("
 "falta insumo · OS-0418") virou colunas: Ordem, Situação, Pendência e Próxima passada (a fonte do déficit fica no painel do setor).
 Revisão TABR (09/10/2026, A1): volta o critério de largura de antes das colunas novas: a 1440 px as grades IR cabem na caixa (sem rolar de
 lado); a 1280 px a página não rola e situação/etapa, pendência e próximo passo ficam à vista sem rolar a grade.
+LEVE-1 (leve, proprietário 19/10: "leve e fluido"): o botão "Aceitar com motivo" passa a "Aceitar divergência" (motivo opcional); o teste ainda
+informa o motivo e confere o mesmo resultado.
 Capturas em _probe/fluxo_*.png. Uso: python3 irr_fluxo_test.py"""
 import sys, os, time, subprocess, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -66,7 +68,7 @@ try:
     # 3 · OS-0394: conferir a medição (hidrômetro prevalece)
     goto('IR-03det.dc.html#OS-0394:conferir'); time.sleep(.5)
     chk('7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados', 'Conferir medição · OS-0394' in dlg() and '1.206' in dlg(), dlg()[:300])
-    setv('#cm_mot', 'Hidrômetro conferido em campo'); clk('Aceitar com motivo', 'aside[role=dialog]'); t = toast()
+    setv('#cm_mot', 'Hidrômetro conferido em campo'); clk('Aceitar divergência', 'aside[role=dialog]'); t = toast()   # LEVE-1: o botão perde "com motivo" (opcional)
     chk('8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm)', 'Encerradas' in head() and 'hidrômetro prevalece' in t and '11,2 mm' in t, [t, head()])
     # 4 · OS-0419: iniciar → término com a leitura da telemetria → conferência automática → crédito
     goto('IR-03det.dc.html#OS-0419'); clk('Iniciar irrigação'); t = toast()
@@ -155,7 +157,7 @@ try:
     clk('Iniciar irrigação'); goto('IR-03det.dc.html#OS-0419:termino'); time.sleep(.3)
     setv('#tm_cob', '40'); setv('#tm_vol', '3800'); setv('#tm_mot', 'Tempo do sensor a conferir'); clk('Registrar término antecipado', 'aside[role=dialog]')
     chk('31a área sem tempo compatível permanece Em conferência e não credita antes da validação', 'Em conferência' in head() and J("JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).setores.P2.bal.ap.some(a=>a.os==='OS-0419')") is False, head())
-    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); setv('#cm_mot', 'Área e leitura verificadas; horário do sensor incorreto'); clk('Aceitar com motivo', 'aside[role=dialog]'); tt = toast()
+    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); setv('#cm_mot', 'Área e leitura verificadas; horário do sensor incorreto'); clk('Aceitar divergência', 'aside[role=dialog]'); tt = toast()
     goto('IR-01.dc.html'); r2 = ROW('Pivô 2')
     chk('31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte', 'faixa de 40,0 ha' in tt and '11,2 mm' in r2, [tt, r2])
     # contexto: fazenda do Mapa ↔ Irrigação

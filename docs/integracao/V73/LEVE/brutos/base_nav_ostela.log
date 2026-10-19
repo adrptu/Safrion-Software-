@@ -1,0 +1,37 @@
+  ok  sem erro JS
+  ok  clicar abre a tela da ordem
+  ok  atividade: operação, atividade e gatilho · OS-0430 · Dessecação pré-plantio × A liberar T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses ab
+  ok  conjunto e horas previstas · OS-0430 · Dessecação pré-plantio × A liberar T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses ab
+  ok  insumos com dose e quantidade da ordem · OS-0430 · Dessecação pré-plantio × A liberar T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses ab
+  FALHOU dono e prazo da pendência na lista · OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) — antes de 25/09 0,00 ha 160,00 ha — 0,0 % Marcos
+  ok  próximo passo: Liberar para execução e Ajustar antes de liberar, sem revisar/aprovar/rejeitar versão
+  ok  ajustar: dose inválida fica junto ao campo e nada é liberado · DAP −20) RESPONSÁVEL Marcos CONJUNTO Trator 03 + Pulverizador PJ-3030 36 m · 21,6 ha/h HORAS PREVISTAS 7,4 h (7,4 h no saldo) PADRÃO · VERSÃO Soja alta tecnologia v6 · v1 SITUAÇÃO ATUAL Ana (agrônoma) confere, ajusta se 
+  ok  ajustar: Tirar marca o produto que sai e Desfazer devolve à ordem · (True, 'Área da ordem ha Glifosato 480 Agrofit › L/ha disponível 1.200 L Tirar Informe a dose maior que 0 L/ha. 2,4-D 806 Agrofit › L/ha na ordem 160 L · disponível 300 L Tirar Óleo mineral Agrofit › L/ha na ordem 80 L ·
+  ok  ajustar: incluir produto da lista do cadastro (#aj_inc + #aj_prods), recusando vazio e fora do cadastro · ('aj_prods', 32, 'Informe a dose maior que 0 L/ha. | Digite o nome do produto e escolha na lista.', 'Informe a dose maior que 0 L/ha. | Produto não encontrado no cadastro: escolha um da lista.', 'Área da ordem ha Glifosa
+  ok  liberar pede confirmação com reserva por lote (Voltar descartou o ajuste) e oferece ajustar antes · DAP −20) RESPONSÁVEL Marcos CONJUNTO Trator 03 + Pulverizador PJ-3030 36 m · 21,6 ha/h HORAS PREVISTAS 7,4 h (7,4 h no saldo) PADRÃO · VERSÃO Soja alta tecnologia v6 · v1 SITUAÇÃO ATUAL Ana (agrônoma) confere, ajusta se 
+  ok  Voltar não muda a fase
+  ok  liberada: fase, toast e reserva · ('OS-0430 liberada. REQ-041 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L. v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).', 'OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25
+  ok  sem insumo entregue, iniciar fica bloqueado e nomeia a entrega no Estoque · OS-0430 · Dessecação pré-plantio × Liberadas T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução n
+  ok  entregue sem confirmação: iniciar bloqueado até o app confirmar · OS-0430 · Dessecação pré-plantio × Liberadas T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução n
+  ok  próximo passo agora é Iniciar execução
+  ok  confirmação do início diz que os insumos estão com Marcos, confirmados no app · a 25/09 (DAP −20). ORIGEM Safra 2026/27 · Soja T1-A · plano SOJA-AT Dessecação pré-plantio · 160 ha v1 aprovada por Ana (agrônoma) às 19:45 · 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha (CMD-42
+  ok  em execução · OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução — — — — — 0,00 ha 160,00 ha — 0,0 % Marcos
+  ok  formulário de apontamento com saldo
+  ok  bloqueia área acima do saldo
+  ok  apontamento de 60 ha com insumos usados · Apontamento do dia 1: 60 ha (provisório) · usado: Glifosato 480 120 L, 2,4-D 806 60 L, Óleo mineral 30 L. Saldo 100 ha; a ordem continua em execução.
+  FALHOU ordem continua em execução, saldo 100 · OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução — — — — — 60,00 ha 100,00 ha — 37,5 % Marcos
+  ok  coluna Usado atualiza (120 L)
+  ok  saldo zero muda o botão para Enviar para conferência
+  ok  em conferência
+  FALHOU encerrada, sem botão de ação
+Traceback (most recent call last):
+  File "<base cbe4cd38>/gen37/ostela.py", line 102, in <module>
+    abrir('OS-0431'); t=pan()
+    ^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/ostela.py", line 23, in abrir
+    J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r.click();}})()"); time.sleep(.4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

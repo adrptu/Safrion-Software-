@@ -524,7 +524,7 @@ v.d_go=()=>cenMudar(self,c=>mbIniciar(c,o.id));
         + '</div>'
       + IF('t_zero',note(H('ha_hint'),RED))
       + IF('t_fe',ffield('Hectares feitos neste turno','ft_ha','ft_ha','set_ha','e_ha',hint=H('ha_hint'),big=True,ph='0')
-      + ffield('Horas trabalhadas','ft_h','ft_h','set_h','e_h',ph='ex.: 5,5')
+      + ffield('Horas trabalhadas','ft_h','ft_h','set_h','e_h',hint=H('h_hint'),ph='ex.: 5,5')
       + IF('has_cons',f'<div style="display: flex; flex-direction: column; gap: 10px;">'+h2('Consumo por insumo','Confira: vem calculado por dose × hectares.')
            + f'<sc-for list="{H("cons")}" as="k" hint-placeholder-count="1"><div style="display: flex; flex-direction: column; gap: 4px;">'
              f'<label for="{H("k.id")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("k.l")}</label>'
@@ -575,7 +575,10 @@ if(t){ const pz=mbPausado(t);
   const f=s.ft||{}; const er=s.ft_err||{}; const r=mbReq(c,o); const ha=mbNum(f.ha); const pv=mbProv(o); const mx=mbResta(o);
   v.t_fe=mx>0.001; v.t_zero=!v.t_fe; v.descartar=()=>cenMudar(self,c=>mbDescartar(c));
   v.t_falta=v.t_fe?'hectares, horas e consumo':'nada: a ordem não tem saldo'; v.t_prox=v.t_fe?'Fechar turno':'Descartar turno';
-  v.ft_ha=f.ha||''; v.ft_h=f.h||''; v.ft_obs=f.obs||'';
+  /* LEVE-1 (proprietário 19/10): horas = agora − início − pausas (cenHorasTurno), editáveis; campo apagado volta a pedir. Sem início: pede */
+  const hs=cenHorasTurno(t); const hsTxt=hs>0?mbIn(hs):'';
+  v.ft_ha=f.ha||''; v.ft_h=f.h!==undefined?f.h:hsTxt; v.ft_obs=f.obs||'';
+  v.h_hint=hsTxt?('Calculado: '+t.ini+' até agora'+(t.pausas.length?', menos '+t.pausas.length+(t.pausas.length>1?' pausas':' pausa'):'')+'. Corrija se precisar.'):'';
   v.ha_hint=!v.t_fe?'Saldo 0 ha: nada a apontar nesta ordem. Descarte o turno.':(pv?'Máximo '+cenNum(mx,1)+' ha: saldo '+cenNum(o.saldo,1)+' ha menos '+cenNum(pv,1)+' ha no aparelho':'Máximo '+cenNum(mx,1)+' ha (saldo da ordem)');
   v.cons=(o.ins||[]).map((x,i)=>{ const it=r&&r.itens.find(y=>y.prod===x.p); const ed=(f.ced||{})[x.p]; const e2=(er.cons||{})[x.p]||'';
     const qv=(ed!==undefined&&String(ed).trim()!=='')?mbNum(ed):(ha>0&&it&&ed===undefined?cenQtdTrecho(x.dose,(o.realizado||0)+pv,ha):NaN); const tem=it?it.custodia:0;
@@ -589,7 +592,7 @@ if(t){ const pz=mbPausado(t);
   v.set_ha=set('ha'); v.set_h=set('h'); v.set_obs=set('obs');
   v.e_ha=er.ha||''; v.e_ha_has=!!er.ha; v.e_h=er.h||''; v.e_h_has=!!er.h;
   v.ft_ok=()=>{ const c2=cenGet(); const t2=mbTurno(c2); if(!t2) return TOAST(self,'Nenhum turno aberto.'); const o2=c2.ordens[t2.os]; const st=self.state; const f2=st.ft||{};
-    const e={}; const h2=mbNum(f2.ha), hh=mbNum(f2.h); const pv2=mbProv(o2); const mx2=mbResta(o2);
+    const hs2=cenHorasTurno(t2); const e={}; const h2=mbNum(f2.ha), hh=mbNum(f2.h!==undefined?f2.h:(hs2>0?mbIn(hs2):'')); const pv2=mbProv(o2); const mx2=mbResta(o2);
     if(!(h2>0)) e.ha='Informe os hectares feitos (maior que zero).'; else if(h2>mx2+1e-9) e.ha='Máximo '+cenNum(mx2,1)+' ha: é o saldo da ordem'+(pv2?' menos '+cenNum(pv2,1)+' ha no aparelho':'')+'.';
     if(!(hh>0)) e.h='Informe as horas trabalhadas.'; else if(hh>24) e.h='Máximo 24 h por turno.';
     const r2=mbReq(c2,o2); const cons={}; const ec={}; const est=[];
@@ -1177,7 +1180,7 @@ const nf=manAppFila(c).filter(x=>x.om===o.id); v.dp_hasFila=nf.length>0; v.dp_fi
 const cf=manAppConfAbertos(c.man,o.id); v.dp_hasConf=cf.length>0; v.dp_confs=cf.map(x=>({t:'Conflito a resolver · Otávio',s:x.desc+' · por '+x.por+' às '+x.at+' · '+x.mot}));
 v.dp_why=o.etapa==='A liberar'?'A liberar: o Otávio (responsável de manutenção) libera a ordem.':((o.etapa==='Liberadas'||exe)&&pE?pE+' · você vê a ordem, sem alterar.':''); v.dp_hasWhy=!!v.dp_why;
 v.dp_rec=!!s.dp_rec; v.dp_rect=s.dp_rec?s.dp_rec.t:''; v.dp_recst=s.dp_rec&&s.dp_rec.fila?'background: '+MBTX.yels+'; color: '+MBTX.yel+';':'background: '+MBTX.accs+'; color: '+MBTX.acc+';';
-/* tarefas pelo tipo: OK grava num toque; fora de OK pede o motivo; Teste com tentativa e foto (D-36); nada vem marcado */
+/* tarefas pelo tipo: OK grava num toque; fora de OK abre o motivo, opcional (LEVE-1, proprietário 19/10); Teste com tentativa e foto (D-36); nada vem marcado */
 const nr=o.chk.filter(t=>t.tipo==='Teste'?((t.tent||[]).slice(-1)[0]||{}).r==='Aprovado':!!t.r).length; v.dp_tkn=nr+' de '+o.chk.length+' respondidas';
 const pst=(on,ok,dis)=>'font-family: inherit; font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: '+(dis?'not-allowed':'pointer')+'; white-space: nowrap;'+(dis?' opacity: .55;':'')
   +(on?(ok?' border: 1px solid '+MBTX.acc+'; background: '+MBTX.acc+'; color: #fff;':' border: 1px solid '+MBTX.yel+'; background: '+MBTX.yels+'; color: '+MBTX.yel+';'):' border: 1px solid '+MBTX.line+'; background: '+MBTX.surf+'; color: '+MBTX.ink+';');
@@ -1193,8 +1196,9 @@ v.dp_tks=o.chk.map((t,i)=>{ const tp=t.tipo||'Serviço'; const isT=tp==='Teste';
     r:rr||'Sem resposta',rst:mbChs(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),rdot:mbDot(MAN_OK.indexOf(rr)>=0?'green':(rr?(rr==='Reprovado'?'red':'yellow'):'gray')),
     por:t.por&&!isT?('por '+t.por+(t.em?' às '+t.em:'')):'',hasPor:!!t.por&&!isT,
     hasVal:ed&&isM,val:mval,un:t.un||'',vlab:'Valor · '+t.t+(t.un?' ('+t.un+')':''),setval:(e)=>setF('mv'+i,e.target.value),hasValTx:!ed&&isM&&t.val!==''&&t.val!==undefined,valTx:t.val!==''&&t.val!==undefined?manN(t.val,2)+' '+(t.un||''):'',
-    hasMot:ed&&!!cfr,mot:ff['mt'+i]!==undefined?ff['mt'+i]:(t.mot||''),motlab:'Motivo · '+t.t,setmot:(e)=>setF('mt'+i,e.target.value),motgot:'Registrar '+(ff['tr'+i]||'')+' com o motivo',
-    motgo:()=>{ const f2=self.state.dp||{}; const mt=String(f2['mt'+i]||'').trim(); if(!mt) return TOAST(self,'Informe o motivo de “'+t.t+'”.'); run('resp',isM?{i,r:f2['tr'+i],mot:mt,val:mval}:{i,r:f2['tr'+i],mot:mt},['tr'+i,'mt'+i]); },
+    hasMot:ed&&!!cfr,mot:ff['mt'+i]!==undefined?ff['mt'+i]:(t.mot||''),motlab:'Motivo (opcional) · '+t.t,setmot:(e)=>setF('mt'+i,e.target.value),motgot:'Registrar '+(ff['tr'+i]||''),
+    /* LEVE-1 (proprietário 19/10): fora de OK, o motivo é opcional; a resposta, quem e quando ficam gravados */
+    motgo:()=>{ const f2=self.state.dp||{}; const mt=String(f2['mt'+i]||'').trim(); run('resp',isM?{i,r:f2['tr'+i],mot:mt,val:mval}:{i,r:f2['tr'+i],mot:mt},['tr'+i,'mt'+i]); },
     hasMotTx:!!t.mot&&!cfr,motTx:t.mot||'',
     tents:(t.tent||[]).map((x,j)=>({t:(j+1)+'ª tentativa · '+x.r+' · '+x.evid+' · '+x.por+' · '+x.em,st:mbChs(x.r==='Aprovado'?'green':'red').replace('white-space: nowrap;','white-space: normal; line-height: 1.35; align-items: flex-start;'),dot:mbDot(x.r==='Aprovado'?'green':'red')})),hasTents:isT&&(t.tent||[]).length>0,
     treg:isT&&ed&&!!pend,tgot:'Anexar foto e registrar '+pend,tgo:()=>run('tentativa',{i,r:pend,evid:'foto (simulada)'},['tr'+i]),
@@ -1309,7 +1313,9 @@ const apF=F&&F.k==='desc'?prAPesar(c,F.os).filter(g=>g.via==='app'):[];
 v.f_cgs=apF.map(g=>({{t:g.id+(g.est_cx?' · ~'+g.est_cx+' cx':'')+' · '+cenDdMm(g.dcol),on:String(f.cg===g.id),st:mbPill(f.cg===g.id),tt:'Descartar a '+g.id,go:()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{cg:g.id}}),m10e:''}})}}));
 v.f_mot=f.mot||''; v.f_setmot=(e)=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{mot:e.target.value}}),m10e:''}});
 const fs=(k)=>(e)=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{[k]:e.target.value}}),m10e:''}});
-v.f_ha=f.ha||''; v.f_h=f.h||''; v.f_cx=f.cx||''; v.f_kg=f.kg||''; v.f_pct=f.pct||''; v.f_setha=fs('ha'); v.f_seth=fs('h'); v.f_setcx=fs('cx'); v.f_setkg=fs('kg'); v.f_setpct=fs('pct');
+/* LEVE-1 (proprietário 19/10): com turno aberto nesta O.S., horas = agora − início − pausas (cenHorasTurno), editáveis; sem turno, pede (nada inventado) */
+const tF=(F&&c.app&&c.app.turno&&!c.app.turno.fim&&c.app.turno.os===F.os)?c.app.turno:null; const hsF=tF?cenHorasTurno(tF):NaN; const hsFt=hsF>0?mbIn(hsF):'';
+v.f_ha=f.ha||''; v.f_h=f.h!==undefined?f.h:hsFt; v.f_cx=f.cx||''; v.f_kg=f.kg||''; v.f_pct=f.pct||''; v.f_setha=fs('ha'); v.f_seth=fs('h'); v.f_setcx=fs('cx'); v.f_setkg=fs('kg'); v.f_setpct=fs('pct');
 v.f_eha=''; v.f_eha_has=false; v.f_eh=''; v.f_eh_has=false;
 const oF=F&&c.ordens[F.os]; v.f_hha=oF?('Saldo da ordem: '+cenNum(Math.max(0,oF.saldo-mbProv(oF)),2)+' ha · data '+hoje):'';
 v.f_veics=['Carreta 01','Carreta 02','Caminhão 03'].map(x=>({{t:x,on:String(f.veic===x),st:mbPill(f.veic===x),tt:'Veículo da carga: '+x,go:()=>self.setState({{f10:Object.assign({{}},self.state.f10||{{}},{{veic:x}}),m10e:''}})}}));
@@ -1320,7 +1326,7 @@ v.grava=()=>{{ if(!F) return; let r;
   if(cbF&&!f.conf){{ self.setState({{m10e:'Carência: toque em "Colheita já feita" para registrar o que já foi colhido.'}}); return; }}
   if(F.k==='desc'){{ if(!f.cg){{ self.setState({{m10e:'Toque na carga a descartar.'}}); return; }} if(!String(f.mot||'').trim()){{ self.setState({{m10e:'Informe o motivo do descarte.'}}); return; }}
     r=cenMudar(null,cc=>prDescartarCarga(cc,f.cg,f.mot,cc.app.operador,'app')); }}
-  else if(F.k==='area'){{ const ha=mbNum(f.ha), h=mbNum(f.h); if(!(ha>0)){{ self.setState({{m10e:'Informe os hectares colhidos (maior que 0).'}}); return; }} if(!(h>0)){{ self.setState({{m10e:'Informe as horas trabalhadas.'}}); return; }}
+  else if(F.k==='area'){{ const ha=mbNum(f.ha), h=mbNum(f.h!==undefined?f.h:hsFt); if(!(ha>0)){{ self.setState({{m10e:'Informe os hectares colhidos (maior que 0).'}}); return; }} if(!(h>0)){{ self.setState({{m10e:'Informe as horas trabalhadas.'}}); return; }}
     r=cenMudar(null,cc=>{{ cc.app.nap=Math.max(cc.app.nap||0,F.n); const R=cenApontar(cc,{{os:F.os,d:hoje,ha,h,origem:'app',quem:cc.app.operador,chave:F.chave}});
       return {{msg:R.repetido?'Área já registrada ('+F.os+' · '+cenNum(ha,2)+' ha): nada somado de novo.':('Área apontada: '+cenNum(ha,2)+' ha em '+cenNum(h,1)+' h na '+F.os+(R.ap.sinc?'.':' · salva no aparelho, envia quando houver sinal.')+' A produção só muda com a carga pesada.')}}; }}); }}
   else {{ if(!f.veic){{ self.setState({{m10e:'Toque no veículo da carga.'}}); return; }} const mix=f.os2?[{{os:F.os,pct:mbNum(f.pct),modo:'estimada'}},{{os:f.os2,pct:100-mbNum(f.pct),modo:'estimada'}}]:null;

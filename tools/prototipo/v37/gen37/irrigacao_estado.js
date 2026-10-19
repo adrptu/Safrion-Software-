@@ -519,13 +519,15 @@ function irrTerminar(s, id, cob, vol, antecipado, motivo) {
   if (tempo.cedo && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
   cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
-  if (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0) throw new Error('Informe o volume medido no hidrômetro; a estimativa não é leitura.');
-  const mot = String(motivo || '').trim();
-  if (tempo.pendente && !mot) throw new Error('Área e tempo de bombeamento precisam de conferência: informe o motivo. O balanço só será creditado após conferir.');
+  /* LEVE-1 (proprietário 19/10: "leve e fluido"): termina sem a leitura do hidrômetro (vol null = "Sem leitura"; zero medido é outro fato). O balanço
+     continua creditando só o medido (irrCredito ignora vol null; irrConfAuto deixa a ordem em conferência "Sem leitura" até a leitura). */
+  if (vol === undefined || vol === '') vol = null;
+  if (vol !== null && (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0)) throw new Error('Volume medido inválido: informe m³ (zero ou mais) ou deixe em branco para terminar sem leitura.');
+  const mot = String(motivo || '').trim();   /* LEVE-1: motivo da área e tempo incompatíveis é opcional; o crédito continua pendente até conferir */
   const parc = cob < x.ha - 1e-9; p.temporalPendente = tempo.pendente; p.motivoTempo = tempo.pendente ? mot : ''; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
   p.fimReal = irrAgora(s, o); p.vol = vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (tempo.pendente ? 'área informada de ' + irrN(cob, 2, 0) + ' ha · tempo incompatível a conferir · motivo: ' + mot : parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (tempo.pendente ? 'área informada de ' + irrN(cob, 2, 0) + ' ha · tempo incompatível a conferir' + (mot ? ' · motivo: ' + mot : '') : parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
   if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução'+(tempo.pendente?' · área e tempo desta passada a conferir, crédito pendente':'')+' · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
@@ -563,7 +565,7 @@ function irrConferir(s, id, vol, motivo) {
   const med = informado ? vol : (ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q,p) => q+p.vol,0));
   if (med === null) throw new Error('Sem leitura do hidrômetro: informe o volume medido.');
   const m = irrMedicao(s, o, med); const dv = m.dv; const mot = String(motivo || '').trim();
-  if (m.exigeMotivo && !mot) throw new Error(m.temporal ? 'Confira área e tempo e informe o motivo da validação.' : 'Divergência acima da tolerância: informe o motivo para aceitar.');
+  /* LEVE-1 (proprietário 19/10): aceitar divergência ou validar área e tempo sem motivo passa; quem e quando ficam em o.conf e na trilha */
   // Validar tudo antes de alterar leituras/créditos; a última parcela conserva o total medido.
   ps.forEach(p => { if (p.temporalPendente) { p.temporalPendente = false; p.tempoConferido = { quem, motivo: mot, q: irrAgora(s, o) }; } });
   if (informado) { let saldo = med; ps.forEach((p,i) => { p.vol = i === ps.length-1 ? saldo : Math.min(saldo, Math.round(med*vals[i]/(est || 1))); saldo -= p.vol; }); }
@@ -608,7 +610,7 @@ function irrFonteNova(s, d) { if (!String(d.nome || '').trim()) throw new Error(
 function irrReclassificar(s, id, d) {
   const o = irrO(s, id); if (o.fert) throw new Error(id + ' já tem a v2 com o agrônomo.');
   if (['Em conferência', 'Encerradas', 'Canceladas'].indexOf(o.etapa) >= 0) throw new Error('A execução terminou: programe uma nova fertirrigação na O.S.');
-  if (!(d.dose > 0) || d.dose > 50) throw new Error('Dose entre 0 e 50 kg/ha.'); if (!String(d.mot || '').trim()) throw new Error('Informe o motivo agronômico.');
+  if (!(d.dose > 0) || d.dose > 50) throw new Error('Dose entre 0 e 50 kg/ha.');   /* LEVE-1 (proprietário 19/10): motivo agronômico opcional; o agrônomo libera a v2 na O.S. */
   const x = s.setores[o.setor]; const iniciou = o.etapa === 'Em execução'; const p = irrPassAtual(o);
   // antes de partir (ou entre passadas), a janela do saldo precisa estar pronta: bomba, parada do PCM e outorga valem também para a v2
   if (!p) { const ck = irrChecar(s, o); if (ck.bloq.length) throw new Error('Resolva antes de adicionar produtos: ' + ck.bloq.map(b => b.t + (b.h ? ' ' + b.h : '')).join(', ') + '.'); }
@@ -623,7 +625,7 @@ function irrReclassificar(s, id, d) {
   o.fert = { prod: d.prod, dose: d.dose, mot: d.mot, exec: iniciou, q, area, v1, vol: Math.round(vol), lamHa: area > 0 ? vol / (10 * area) : 0, tot: cenQtd(d.dose, area), sw };   // regra única de quantidade (cenario.js, sempre carregado antes)
   o.versao = 'v2';
   if (!iniciou) { if (o.lib) { o.libRes = o.lib; irrTr(o, q, o.lib, 'Liberação da água revogada: com produto, a liberação é do agrônomo', 'sistema'); } o.lib = null; o.etapa = 'A liberar'; }
-  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha · ' + d.mot + ' · ' + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
+  irrTr(o, q, 'RC-' + id.slice(3) + '-2', 'Versão v2 · ' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha · ' + (String(d.mot || '').trim() ? d.mot + ' · ' : '') + (iniciou ? (p ? 'passada ' + p.n + ' parada em ' + irrN(v1, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (fica na v1); saldo de ' + irrN(area, 2, 0) + ' ha' : 'passadas seguintes') + ' aguardam a liberação' : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação', s.faz[o.faz].gestor);
   return { msg: id + ' v2 criada (' + d.prod + ' ' + irrN(d.dose, 3, 1) + ' kg/ha) · para o agrônomo liberar na O.S. · ' + (iniciou ? 'segue Em execução com selo Revisão de saldo pendente' + (p ? ' · ' + irrN(v1, 2, 0) + ' ha já irrigados ficam na v1' : '') : 'voltou a A liberar') + ' · requisição de ' + irrN(o.fert.tot, 2) + ' kg na liberação.' };
 }
 // Adicionar produtos de uma vez: v2 na irrigação e no cenário da O.S.; se um lado falhar, nada é gravado
@@ -645,7 +647,7 @@ function irrReclassCen(c, s, id) {
     atv: { op: 'Fertirrigação', nome: 'Fertirrigação · ' + f.prod, gat: '', orig: 'Irrigação ' + id + ' v1 → v2', conj: x.bnome, rend: 0 },
     realizado: 0, saldo: f.area, resp: s.faz[x.faz].irrig, versao: 'v2', janela: irrJanO(o), ap: [], nota: '',
     cond: 'Produto na água: o agrônomo confere, ajusta se precisar e libera; a liberação reserva o estoque. Próximo passo: liberar para execução.',
-    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos · ' + f.mot, f.exec ? irrN(f.v1, 2, 0) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
+    orig: ['Irrigação ' + id + ' (água) · ' + x.nome, 'Adicionar produtos' + (String(f.mot || '').trim() ? ' · ' + f.mot : ''), f.exec ? irrN(f.v1, 2, 0) + ' ha já irrigados ficam na v1' : 'antes do início'], link: 'IR-03det.dc.html#' + id };
   c.ordens[id] = { id, tipo: no.tipo, talhao: no.talhao, area: f.area, etapa: 'A liberar', versao: 'v2', realizado: 0, saldo: f.area, resp: no.resp,
     ins: ins.map(z => ({ p: z.p, dose: z.dose, un: z.un, tot: z.tot, emb: '' })), req: null, selos: no.selos, ap: [], reservado: false, osc: { novo: no } };
   return { msg: '' };

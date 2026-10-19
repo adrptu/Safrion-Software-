@@ -198,8 +198,18 @@ def _nova_ordem_dados():
     safs=[s for s in D2.SAFRAS if not s['ro']]
     import cenario
     from areas.processo_planos import VER_APLICADA as _VA   # PA-OPER F1: o cultivo fica na versão dele (40.3); a O.S. lê a instrução dessa versão
+    # LEVE-1 (proprietário 19/10): a data do gatilho de cada atividade do plano no cultivo (núcleo único datas_atividade.js, variante canônica;
+    # sem âncora, nada) vira o início da janela sugerido na ordem nova
+    def _datas(c):
+        pl=D2.PLANO.get(c['plano']) if c.get('plano') else None
+        if not pl: return {}
+        out={}
+        for a in pl['atividades']:
+            d=D2.data_atividade(c,a)
+            if d: out[str(a['id'])]=d.isoformat()
+        return out
     cult={s['id']:[dict(id=c['id'],t=f"{c['local']} · {c['cultura']} {c['variedade']} · "+format(c['area'],'g').replace('.',',')+" ha",local=c['local'],area=c['area'],plano=c['plano'],var=c['variedade'],cultura=c['cultura'],
-                        ver=_VA.get(c['id'],(D2.PLANO.get(c['plano']) or {}).get('versao')))
+                        ver=_VA.get(c['id'],(D2.PLANO.get(c['plano']) or {}).get('versao')),datas=_datas(c))
                    for c in D2.CULTIVOS.get(s['id'],[])] for s in safs}
     # atividade do plano com seus insumos (grupo, produto, dose/ha): a ordem nova leva dose × área, como as ordens do registro
     planos={p['id']:dict(nome=p['nome'],versao=p['versao'],params=p.get('params') or {},atv=[dict(id=a['id'],nome=a['nome'],op=a['op'],gat=_gatilho(a.get('g') or {}),
@@ -620,9 +630,18 @@ function osIniErro(o,r){ const f=cenIniFalta(o,r); if(!f) return null;   // regr
   return {acao:'iniciar',t:'Iniciar bloqueado: '+f.t,q:f.q,h:L[0],hl:L[1]}; }
 function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw new Error(id+' não está liberada.');
   { const cb=carBloqColheita(c,o,'iniciar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
-  const e=osIniErro(o,o.req&&c.reqs[o.req]); if(e) throw new Error(e.t);
+  const r=o.req&&c.reqs[o.req]; const e=osIniErro(o,r); if(e) throw new Error(e.t);
   o.etapa='Em execução';
-  return {msg:id+' em execução. Registre o apontamento de cada turno.'}; }
+  /* LEVE-1 (proprietário 19/10): sem o bloco "Confirmar início", o recibo diz com quem estão os insumos (o que a confirmação mostrava) */
+  const com=r?r.itens.filter(i=>(o.ins||[]).some(x=>x.p===i.prod)&&i.custodia>1e-6).map(i=>i.quem||o.resp).filter((q,k,a)=>q&&a.indexOf(q)===k):[];
+  return {msg:id+' em execução'+(com.length?': insumos com '+com.join(', ')+', confirmados no app':'')+'. Registre o apontamento de cada turno.'}; }
+// LEVE-1 (proprietário 19/10: "Não quero um sistema travado e burocrático, quero leve e fluido"): Iniciar (CMD-07) e Enviar para conferência
+// (CMD-08) gravam no clique, sem o 2º bloco "Confirmar …"; o comando valida como antes (insumos com o operador, carência, saldo zero) e o aviso
+// é o recibo. Dano avaliado: nenhum (nada é reservado nem baixado; o envio grava quem e quando). Aprovar, Liberar e Encerrar mantêm a confirmação
+// (ato agronômico, reserva no Estoque e encerramento sem volta). Toque duplo: a 2ª chamada acha a ordem já em outra fase e não faz nada de novo.
+const OS_DIRETO=['iniciar','conferencia'];
+function osDireto(id,fn,etapa){ return c=>{ const o=c.ordens[id]; if(o&&o.etapa!==etapa) return {msg:id+' já está em '+o.etapa+': nada foi feito de novo.'};
+  return fn==='iniciar'?osc_iniciar(c,id):osc_conferencia(c,id,g2perfil()); }; }
 // apontamento pela web (O.S. e Mapa): o mesmo comando do app (cenApontar); cons/est vêm do formulário (osApIns), chave do formulário aberto
 function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha,cons,est,chave,origem:'web'}); const o=c.ordens[id]; const ap=R.ap;
   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
@@ -939,12 +958,15 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_pst='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:12px;'+(b?(bam?'background:#FFF3D6;border:1px solid #F0D9A0;':'background:#FDE8E6;border:1px solid #F4C7C1;'):(P.btn?'background:#E4F3E9;border:1px solid #BFE0CB;':'background:#F4F6F3;border:1px solid #E4E9E5;'));
   const pa=(st.pa&&st.pa.id===o.id)?st.pa:null;
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
-  v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
+  v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; }
+    if(OS_DIRETO.indexOf(P.fn)>=0){ osRun(self,osDireto(o.id,P.fn,o.etapa),{pa:null,pae:null},(e)=>self.setState({pae:{id:o.id,err:e}})); return; }   /* LEVE-1: grava no clique */
+    self.setState({pa:{id:o.id,fn:P.fn},pae:null}); };
+  v.pan_ierr=(st.pae&&st.pae.id===o.id)?st.pae.err:''; v.pan_hasIerr=!!v.pan_ierr;
   // confirmação e formulários de decisão só com o papel: aberto por outro perfil (troca no seletor ou em outra aba), não aparece (achado 1)
   const DSP=g2alc('AL-05').papeis, agr=g2papel(PF,DSP), gest=g2papel(PF,g2alc('AL-04').papeis), AGR=g2papel(PF,g2alc('AL-02').papeis);
   const LP=g2alc('AL-02').papeis.concat(OS_LIB().filter(x=>g2alc('AL-02').papeis.indexOf(x)<0));   /* dispensa (CMD-47; AL-05); cancelar (CMD-46; AL-04); ajustar (AL-02): da alçada vigente */
   const paOk=!!pa&&({ajustar:AGR,dispensar:agr,cancelar:gest,aprovar:AGR}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar');
-  v.pan_conf=paOk&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
+  v.pan_conf=paOk&&['liberar','aprovar','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
   v.pan_canf=paOk&&pa.fn==='cancelar'; v.pan_disf=paOk&&pa.fn==='dispensar';
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
@@ -1040,11 +1062,10 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,LIB,g2perfil()),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
   v.pan_ct={aprovar:'Aprovar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+g2ator(PF,g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera e reserva os insumos.'+osUsoAtencao(cenC,o.id),
-    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF,o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
-    conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
-  v.pan_cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
+    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF,o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
+  v.pan_cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});
-  v.pan_yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
+  v.pan_yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
     if(F) osRun(self,F,{pa:null}); };
   v.pan_ad=pa&&pa.d||''; v.pan_aha=pa&&pa.ha||''; v.pan_aerr=pa&&pa.err||''; v.pan_hasAerr=!!(pa&&pa.err);
   v.pan_asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'');
@@ -1590,10 +1611,19 @@ function EXTRAVALS(self,v){
     v.nv_safs=[{v:'',t:'Selecione a safra'}].concat(OSD.nova.safs.map(s=>({v:s.id,t:s.t}))); v.nv_saf=nv.saf;
     v.nv_cults=[{v:'',t:nv.saf?'Selecione o cultivo':'Escolha a safra primeiro'}].concat(cults.map(x=>({v:x.id,t:x.t}))); v.nv_cult=nv.cult; v.nv_cultdis=!nv.saf;
     v.nv_atvs=[{v:'',t:(!c?'Escolha o cultivo primeiro':(pl?'Selecione a atividade':'Cultivo sem plano aplicado'))}].concat(atvs.map(a=>({v:a.id,t:a.nome+' · '+a.op+(a.incl?' (incluída pela análise · '+a.laudo+')':'')}))); v.nv_atv=nv.atv; v.nv_atvdis=!pl;
-    v.nv_noplan=!!c&&!pl; v.nv_jan=nv.jan;
+    v.nv_noplan=!!c&&!pl;
+    /* LEVE-1 (proprietário 19/10): o início da janela vem preenchido com a data do gatilho do plano (datas do cultivo) ou hoje (dia operacional),
+       editável; gatilho que já passou vira hoje. Escolhido à mão ou vindo do atalho (#nova:…), vale o escolhido; campo apagado volta a pedir. */
+    const hojeOp=(typeof CEN_DIA_OP!=='undefined'?CEN_DIA_OP:'');
+    const janDe=(cur)=>{ const cc=cur.saf?(OSD.nova.cult[cur.saf]||[]).find(x=>x.id===cur.cult):null; const a=(cc&&pl&&cur.atv)?atvs.find(x=>x.id===cur.atv):null;
+      const g=a?(((cc.datas||{})[a.id])||((/^data (\d\d)\/(\d\d)\/(\d{4})$/.exec(a.gat||'')||[]).slice(1).reverse().join('-'))):'';
+      return {iso:g&&g>=hojeOp?g:hojeOp,g,gat:a?a.gat:''}; };
+    const janAuto=(cur)=>cur.janAuto!==false&&!cur.pre;
+    const janEf=(cur)=>janAuto(cur)?janDe(cur).iso:cur.jan;
+    v.nv_jan=janEf(nv); { const J=janDe(nv); v.nv_janh=!janAuto(nv)?'':(J.g?(J.g>=hojeOp?'Do gatilho do plano ('+J.gat+'). Edite se precisar.':'O gatilho do plano ('+J.gat+', '+brd(J.g)+') já passou: hoje. Edite se precisar.'):'Hoje. Edite se precisar.'); }
     v.nv_area=c?('Área da ordem: '+nf(c.area)+' ha · '+c.local+(pl?' · plano '+pl.nome+' v'+pl.versao:'')):''; v.nv_hasArea=!!c;
     v.nv_setsaf=(e)=>upd({saf:e.target.value,cult:'',atv:''}); v.nv_setcult=(e)=>upd({cult:e.target.value,atv:''});
-    v.nv_setatv=(e)=>upd({atv:e.target.value}); v.nv_setjan=(e)=>upd({jan:e.target.value});
+    v.nv_setatv=(e)=>upd({atv:e.target.value}); v.nv_setjan=(e)=>upd({jan:e.target.value,janAuto:false});
     const E=nv.errs||{}; ['saf','cult','atv','jan'].forEach(k=>{ v['nv_e_'+k]=E[k]||''; v['nv_he_'+k]=!!E[k];
       v['nv_st_'+k]='font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;background:#FFFFFF;color:#15201A;border:1px solid '+(E[k]?'#B42318':'#E4E9E5')+';'; });
     v.nv_hasErr=Object.keys(E).length>0; v.nv_warn=!!nv.warn;
@@ -1601,7 +1631,7 @@ function EXTRAVALS(self,v){
     v.nv_cancel=()=>{ if(dirty && !self.state.nv.warn){ self.setState({nv:Object.assign({},self.state.nv,{warn:true})}); return; } self.setState({nv:null}); };
     v.nv_discard=()=>self.setState({nv:null}); v.nv_keep=()=>self.setState({nv:Object.assign({},self.state.nv,{warn:false})});
     v.nv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.nv_cancel(); } };
-    v.nv_save=()=>{ const cur=self.state.nv; const errs={};
+    v.nv_save=()=>{ const cur0=self.state.nv; const cur=Object.assign({},cur0,{jan:janEf(cur0)}); const errs={};
       if(!cur.saf) errs.saf='Escolha a safra.';
       if(!cur.cult) errs.cult='Escolha o cultivo.';
       if(cur.cult && !pl) errs.atv='Sem atividade disponível para este cultivo.';
@@ -1617,7 +1647,7 @@ function EXTRAVALS(self,v){
         const tc=(/^solo:[^:]+:(cal|ges)$/.exec(cur.atv)||[])[1]||'';
         const dup=all.find(x=>x.etapa!=='Canceladas'&&((x.keys||[]).indexOf(k)>=0||(tc&&(x.keys||[]).some(q=>soloKCorr(q,cur.cult,tc)))||(semana&&x.talhao===c.local&&/^Colheita/.test(String(x.tipo||''))&&semDe(x)===sw)));
         if(dup){ const dk=tc&&(dup.keys||[]).indexOf(k)<0; errs.atv='Já existe '+dup.id+(semana?' para a colheita da semana '+sn+' neste talhão.':(dk?' para a '+(tc==='ges'?'gessagem':'calagem')+' deste cultivo (incluída pelo '+String((dup.keys||[]).find(q=>soloKCorr(q,cur.cult,tc))).split(':')[1]+'): ajuste a dose nela.':' para esta atividade neste cultivo.')); dupId=dup.id; } }
-      if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur,{errs,warn:false,dup:dupId})}); return; }
+      if(Object.keys(errs).length){ self.setState({nv:Object.assign({},cur0,{errs,warn:false,dup:dupId})}); return; }
       const a=atvs.find(x=>x.id===cur.atv); const s=OSD.nova.safs.find(x=>x.id===cur.saf);
       const num=440+all.filter(x=>x.novo&&!x.demoLote).length;   /* OS-LOTE: a semente de demonstração não desloca a numeração */ const id='OS-0'+num;
       // insumos da atividade do plano: dose × área do cultivo (a semente leva a variedade do cultivo); nada é reservado antes de liberar
@@ -1782,6 +1812,7 @@ def _painel():
       f'<sc-if value="{H("pan_hasBtnOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{BTN_ST(True,True)}">{H("pan_pbtnOff")}</button></sc-if>'
       f'<sc-if value="{H("pan_hasAjOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{_MINI}">{H("pan_ajbtnOff")}</button></sc-if>'
       f'<sc-if value="{H("pan_hasOffWhy")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED}; flex-basis: 100%;">{H("pan_offWhy")}</span></sc-if>'
+      f'<sc-if value="{H("pan_hasIerr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED}; flex-basis: 100%;">{H("pan_ierr")}</span></sc-if>'   # LEVE-1: recusa do comando direto
       f'<span style="flex-grow: 1;"></span>'
       f'<sc-if value="{H("pan_hasDisp")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_disgo")}" title="Dispensar parte do saldo sem executar (o realizado fica preservado)" style="{_LNK}">Dispensar saldo</button></sc-if>'
       f'<sc-if value="{H("pan_hasDispQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">{H("pan_dispQ")}</span></sc-if>'
@@ -1907,7 +1938,7 @@ def _form():
       + f'<sc-if value="{H("nv_hasDup")}" hint-placeholder-val="{F()}"><div style="margin-top: -4px;"><button type="button" onClick="{H("nv_opendup")}" title="Abrir a ordem que já existe para esta atividade (nada é emitido)" style="{_MINI}">{H("nv_dupt")}</button></div></sc-if>'
       + f'<sc-if value="{H("nv_noplan")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; color: {YEL}; background: {YELS}; padding: 8px 12px; border-radius: 10px; font-weight: 700;">Este cultivo não tem plano aplicado. <a href="SAF.dc.html" style="color: {ACC};">Aplicar plano em Planejar safra ›</a></div></sc-if>'
       + f'<sc-if value="{H("nv_hasArea")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; padding: 8px 12px; border-radius: 10px; background: {BG};">{H("nv_area")}</div></sc-if>'
-      + campo('jan','Início da janela',f'<input id="nv_jan" type="date" value="{H("nv_jan")}" onChange="{H("nv_setjan")}" style="{H("nv_st_jan")}">')
+      + campo('jan','Início da janela',f'<input id="nv_jan" type="date" value="{H("nv_jan")}" onChange="{H("nv_setjan")}" style="{H("nv_st_jan")}">',H('nv_janh'))
       + f'<div style="flex-grow: 1;"></div>'
       f'<sc-if value="{H("nv_warn")}" hint-placeholder-val="{F()}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("nv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("nv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
       f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("nv_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'

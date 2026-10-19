@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """CTL-2 · Frente A (AP-ÚNICO), parte de navegador do ap_unico_test.py: O.S. (1440 px), app MB-03 (390 px) e Estoque sobre o mesmo cenário.
-Uso: python3 ap_unico_test.py nav   (compile antes: build.py && montar_render.py)"""
+Uso: python3 ap_unico_test.py nav   (compile antes: build.py && montar_render.py)
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import json, re, time
 from app_lib import App
 
@@ -111,7 +112,7 @@ def rodar():
         guard()
         # 9 · retido até Em conferência: a pendência é de Paula (decidir a duplicidade), não de Rui
         restaurar(); a.mudar("return cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui');"); web_apontar('50'); app_turno('50'); web_apontar('110', data='2026-09-27')
-        web(); ordem(OS); btn('Enviar para conferência'); btn('Confirmar envio'); p = pan(); ln = linha(OS)
+        web(); ordem(OS); btn('Enviar para conferência'); p = pan(); ln = linha(OS)   # LEVE-1: grava no clique
         a.ok('Em conferência' in ln and 'Apontamento em conferência' in ln and 'Rui (almoxarife)' not in ln and 'Sobras a receber' not in ln and 'receber a devolução' not in p
              and 'Encerrar bloqueado: Apontamento em conferência de duplicidade: dia 6' in p and 'Quem resolve: Paula (conferência) decide na linha do apontamento' in p,
              'AP-08 Em conferência com retido: selo "Apontamento em conferência" na lista (não "Sobras a receber"/Rui) e o painel bloqueia o encerramento com Paula (dono Paula: unit C1): ' + ln[:200] + ' · ' + p[p.find('PRÓXIMO'):][:200])

@@ -1,0 +1,25 @@
+  ok  sem erro JS
+   insumos antes: INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Fungicida A Fungicidas 0,5 L/ha 64 L 0 L Reservado no Estoque · lote F26-02 · REQ-039 · previsto para o saldo 64 L · falta para terminar 64 L Reser
+   toast: OS-0424 cancelada sem execução. Reserva de 65 L do lote F26-02 liberada. Cancelada por Ana (gestora).
+   insumos depois: INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Fungicida A Fungicidas 0,5 L/ha 64 L 0 L Reserva de 65 L liberada · lote F26-02 · REQ-039 ATIVIDADE Pulverização · Fungicida · Trator 04 + Pulverizador PJ-3030 36 m SITUAÇÃO ATUAL Cancelada sem exe
+  ok  OS-0424 cancelada: seção Insumos deixa de mostrar a reserva de 65 L · INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Fungicida A Fungicidas 0,5 L/ha 64 L 0 L Reserva de 65 L liberada · lote F26-02 · REQ-039 ATIVIDADE Pulverização · Fungicida · Trator 04 + Pulverizador PJ-3030 36 m SITUAÇÃO ATUAL Cancelada sem exe
+  ok  OS-0424 cancelada: fase e situação · O Ordem cancelada sem execução: somente consulta. INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Fungicida A Fungicidas 0,5 L/ha 64 L 0 L Reserva de 65 L liberada · lote F26-02 · REQ-039 ATIVIDADE Pulverização · Fungicida · Trator 04 + Pulverizador PJ-3030 36 m SITUAÇÃO ATUAL Cancelada sem execução por Ana (gestora) às 19:21: Chuva. Reserva de 65 L do lote F26-02 liberada. ORIGEM 2 registros
+  ok  OS-0425 oferece Cancelar sem execução
+  ok  OS-0425 confirmação cita a REQ-040 · OS-0425 · Adubação 1ª parcela · café × Liberadas Entrega sem saldo suficiente C1 · 38 ha · janela 15/10 · Paula A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução na janela 15/10. Iniciar bloqueado: REQ-040 sem entrega · NPK 20-05-20 8.000 kg a entregar. Quem resolve: Rui (almoxarife) entrega no Estoque; Paula confirma o re
+  ok  OS-0425 toast · OS-0425 cancelada sem execução. Requisição REQ-040 cancelada; nada tinha sido entregue. Cancelada por Ana (gestora).
+  ok  OS-0425 cancelada: Insumos não mostra REQ-040 ativa · INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO NPK 20-05-20 Fertilizantes · padrão do plano v2 300 kg/ha 11.400 kg 0 kg REQ-040 cancelada · nada entregue ATIVIDADE Adubação a lanço · Adubação 1ª parcela · Trator 03 + Distribuidor 3 t SITUAÇÃO A
+  ok  OS-0430 confirmação: nenhum insumo reservado · OS-0430 · Dessecação pré-plantio × A liberar T1-A · 160 ha · janela 25/09 (DAP −20) · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses abaixo e libera; se precisar, ajusta antes de liberar. Os insumos são reservados no Estoque. Pendência com Ana (agrônoma) · antes de 25/09 Cancelar OS-0430 sem execução: a ordem sai 
+  ok  OS-0430 motivo obrigatório
+  ok  motivo só com espaços é recusado
+   toast: OS-0430 cancelada sem execução. Nenhum insumo estava reservado. Cancelada por Ana (gestora).
+Traceback (most recent call last):
+  File "gen37/verif_os.py", line 60, in <module>
+    nova('S2627','c1','a1','2026-09-28'); tt=toast(); e=alerts()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "gen37/verif_os.py", line 32, in nova
+    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Nova ordem'); b.click();})()"); time.sleep(.4)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

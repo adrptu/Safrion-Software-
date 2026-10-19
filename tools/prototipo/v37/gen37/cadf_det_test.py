@@ -2,7 +2,8 @@
 """Teste CDP do CD-01det (detalhe do talhão). É a parte CD-01det do cd0102test.py ajustada ao comportamento novo:
 parcelas em consulta com origem no Planejar safra (antes eram editadas aqui), resumo por safra pela área cultivável (312 ha, não o
 polígono de 312,4 ha), "Dividir em parcelas" leva ao SAF e a área cultivável não fica abaixo do alocado. Mais: "Definir polígono"
-(prévia, motivo acima de 1 %, nova versão preservando a anterior) e seletor de talhão no cabeçalho. ≤ 15 verificações."""
+(prévia, motivo acima de 1 %, nova versão preservando a anterior) e seletor de talhão no cabeçalho. ≤ 15 verificações.
+19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): a soma dos talhões acima da área da fazenda e a diferença cultivável × polígono sem motivo viram aviso, sem impedir salvar; parcelas da safra acima da área continuam barrando. O caso 8 troca "pede motivo" (erro ao salvar) por "mostra o motivo, opcional"; salvar sem motivo é conferido no leve1_test.py."""
 import re, sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -54,8 +55,7 @@ try:
     aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','header button')"); time.sleep(.3); J(f"({BTN})('Salvar polígono')"); time.sleep(.25)
     chk('7 painel abre e não salva sem prévia', 'Definir polígono da T1-B' in dlg() and 'Gere a prévia antes de salvar.' in alerts(), dlg())
     J(f"({BTN})('Desenhar no mapa')"); time.sleep(.2); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); d=dlg()
-    J(f"({BTN})('Salvar polígono')"); time.sleep(.25); al=alerts()
-    chk('8 desenho simulado: prévia com diferença −2,6 % pede motivo', 'Área do polígono 148,0 ha' in d and '−4,0 ha · 2,6 %' in d and 'Motivo da diferença' in d and 'Informe o motivo da diferença de 2,6 %.' in al, [d,al])
+    chk('8 desenho simulado: prévia com diferença −2,6 % mostra o motivo, opcional (LEVE-1: não barra)', 'Área do polígono 148,0 ha' in d and '−4,0 ha · 2,6 %' in d and 'Motivo da diferença' in d and 'opcional' in d and 'Informe o motivo' not in alerts(), d)
     J(f"({SETV})('#pg_mot','Carreador ou estrada')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     ts=toast(); vs=main()
     chk('9 nova versão v4 atual e v3 em consulta para as O.S. já emitidas', 'v4 do T1 é a atual; a v3 fica em consulta' in ts and 'Atual v4 · 312,4 ha' in vs and 'Consulta v3 · 312,4 ha' in vs and 'Carreador ou estrada' in vs, [ts,vs[-600:]])

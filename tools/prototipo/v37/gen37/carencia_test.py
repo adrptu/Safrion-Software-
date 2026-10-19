@@ -4,7 +4,8 @@ Parte 1 (unit): motor puro (dados_carencia.JS + núcleo da O.S.) no jsc, com os 
 Parte 2 (fluxo): Chrome headless com o mapa real da Lagoa Grande (CDP_GL=1): fluxo do mamão mapa → aplicação → colheita/lote →
 avaliação do destino, com resposta impeditiva (liberar colheita no Pivô 23) e recuperação (Rever programação), aviso preventivo da
 aplicação, colheita registrada em carência (fato não impedido, vai para conferência), lote por destino na CO-06 e telas de celular.
-Uso: python3 carencia_test.py [unit|fluxo]   (sem argumento: as duas partes). Capturas em _probe/carencia_*.png."""
+Uso: python3 carencia_test.py [unit|fluxo]   (sem argumento: as duas partes). Capturas em _probe/carencia_*.png.
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import os, sys, time, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 JSC = '/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc'
@@ -148,7 +149,7 @@ def fluxo():
         ok('Conflito com a colheita em Pivô 6' in p and 'impedida até 07/10' in p and 'Conflito com colheita até 07/10' in p and J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Iniciar execução')"),
            'OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início', p[:700])
         shot('carencia_os_conflito_aplicacao.png')
-        btn('Iniciar execução', 'aside[role=dialog]'); btn('Confirmar início', 'aside[role=dialog]'); time.sleep(.4)
+        btn('Iniciar execução', 'aside[role=dialog]'); time.sleep(.4)   # LEVE-1: grava no clique
         btn('Registrar apontamento', 'aside[role=dialog]'); time.sleep(.3)
         setv('aside[role=dialog] input[type=date]', '2026-09-24'); setv('aside[role=dialog] input[aria-label="Área feita em hectares"]', A06); time.sleep(.2)
         btn('Salvar apontamento', 'aside[role=dialog]'); time.sleep(.5)

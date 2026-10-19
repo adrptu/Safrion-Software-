@@ -250,9 +250,9 @@ function EXTRAVALS(self,v){
         mot='Dono: Sandra (fiscal) · prazo hoje 10:00. Não trava os aptos; volta à seleção ao resolver.',acao=[say('Reprocessar NF','nf')]),
     ]
     g_fi=grid(fi_cols,fila,edit=dict(m='form',title='Posição na fila',
-        sub='Reordenar exige motivo; autor, horário e versão da fila ficam registrados. Janela original e relógio de espera não mudam. O T2 está em doca e fica em 1º.',
+        sub='Autor, horário e versão da fila ficam registrados; o motivo é opcional. Janela original e relógio de espera não mudam. O T2 está em doca e fica em 1º.',   # LEVE-1 (proprietário 19/10)
         fields=[dict(k='pos',l='Nova posição',t='sel',req=True,opts=['2','3','4']),
-                dict(k='pmot',l='Motivo',t='sel',req=True,opts=['Encaixe com folga · não prejudica janelas cumpridas','Janela em risco','Carga perecível','Espera acumulada','Correção de prioridade'])]),
+                dict(k='pmot',l='Motivo (opcional)',t='sel',req=False,opts=['Encaixe com folga · não prejudica janelas cumpridas','Janela em risco','Carga perecível','Espera acumulada','Correção de prioridade'])]),
         so={'k':'pos','d':False},search=False,gid='g_fi',total=False)
     ex_cols=[C('ped','Pedido · destino',w=170),C('lote','Lote · quantidade',w=190),C('veic','Veículo · doca',w=120),C('doc','Documento',w=190),C('etapa','Etapa · checklist',w=210),C('acao','Ação')]
     VEICS=['T3 · doca 1','T4 · doca 3','T4 · doca 2']
@@ -355,13 +355,13 @@ function EXTRAVALS(self,v){ const s=self.state;
   self.g2after=(gid,rows,r)=>{ if(gid!=='g_fi'||!r) return;
     const alvo=Number(r.v.pos)||r.v.pos; const lst=rows.filter(x=>x.id!=='T2'&&x.id!=='C07'&&x!==r).sort((a,b)=>a.v.pos-b.v.pos);
     lst.splice(Math.max(0,alvo-2),0,r); lst.forEach((x,i)=>{ x.v.pos=i+2; delete x.s.pos; delete x.p.pos; });
-    r.p.mot=[{k:'txt',t:'Reordenado por Ana às 09:52: '+r.v.pmot+'.'}];
-    self.setState({fv:(self.state.fv||4)+1,g2toast:'Fila v'+((self.state.fv||4)+1)+' publicada · '+r.id+' na posição '+alvo+' · motivo, autor e horário registrados; janelas originais e esperas preservadas.'}); };
+    r.p.mot=[{k:'txt',t:'Reordenado por Ana às 09:52'+(r.v.pmot?': '+r.v.pmot:'')+'.'}];   /* LEVE-1: motivo opcional */
+    self.setState({fv:(self.state.fv||4)+1,g2toast:'Fila v'+((self.state.fv||4)+1)+' publicada · '+r.id+' na posição '+alvo+' · '+(r.v.pmot?'motivo, autor':'autor')+' e horário registrados; janelas originais e esperas preservadas.'}); };
 }
 '''
     # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      bloco('Fila ao vivo','Chame o próximo elegível; clique na linha para reordenar com motivo.',
+      bloco('Fila ao vivo','Chame o próximo elegível; clique na linha para reordenar.',
               g_fi + enc,
               ibtn('Chamar próximo elegível','chamar','truck','Chamar o próximo caminhão elegível para a doca livre'),state='yellow')
       + bloco('Expedições em preparação','Separe os lotes aptos e acompanhe cada carga até a saída.',

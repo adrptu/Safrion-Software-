@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Verificador independente (os-04..os-07): casos além do osacoes.py — só observa, não altera o protótipo."""
+"""Verificador independente (os-04..os-07): casos além do osacoes.py — só observa, não altera o protótipo.
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -86,7 +87,7 @@ try:
     chk('saldo 0: painel mostra Realizado · Dispensado · Saldo', 'Realizado 280 ha · Dispensado 70 ha · Saldo 0 ha (de 350 ha)' in t, t[t.find('APONTAMENTOS'):][:600])
     chk('saldo 0: sem turnos previstos', 'Previsto' not in t[t.find('APONTAMENTOS'):t.find('SITUAÇÃO')], t[t.find('APONTAMENTOS'):t.find('SITUAÇÃO')])
     kv=t[t.find('Saldo'):][:60]; print('   kv saldo:', kv)
-    btn('Enviar para conferência'); t=pan(); print('   conf:', t[t.find('Enviar OS-0421'):][:160]); btn('Confirmar envio'); print('   toast:', toast())
+    btn('Enviar para conferência'); print('   toast (recibo, sem Confirmar envio):', toast())
     fechar(); l=linha('OS-0421'); print('   linha:', l)
     kanban(); print('   cartao:', cartao('OS-0421')); lista()
     # 7) dispensa decimal

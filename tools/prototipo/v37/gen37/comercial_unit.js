@@ -1,6 +1,9 @@
 /* Testes puros do Comercial e logística (docs/comercial/ESPECIFICACAO.md §8; contas em docs/comercial/verificacao/contas.py) · node, sem navegador.
    Carregado depois de: perfis + CEN0 + cenario.js + PRDC + producao.js (+ núcleo da carência quando NUCLEO) + PR_UI_JS + PR_PED_JS + COMC + comercial.js.
-   Cada verificação vira uma linha do JSON final. Comentários só com barra-asterisco. */
+   Cada verificação vira uma linha do JSON final. Comentários só com barra-asterisco.
+   19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): encerrar saldo e cancelar carga sem motivo passam (quem e quando ficam
+   gravados); encerrar com carga programada, que ainda não saiu, cancela a carga no mesmo comando e diz qual. C09, RV-A5c e RV-A12c trocam o
+   oráculo "recusa" pelo efeito novo; a carga que já saiu continua intocada. */
 const R = []; function ok(n, c, info) { R.push({ n, ok: !!c, info: c ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 700) }); }
 function caso(nome, fn) { try { fn(); } catch (e) { ok(nome + ' (exceção)', false, String(e && e.stack || e).slice(0, 600)); } }
 function MUD(c, fn) { const x = cenClone(c); try { const r = fn(x) || {}; Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); return r; } catch (e) { return { erro: String(e.message || e) }; } }
@@ -213,12 +216,16 @@ caso('C08', () => { const c = NOVO60(); COLHEITA(c); MUD(c, x => comAprovarCredi
   const d4 = MUD(c, x => comDevolver(x, { rm: 'RM-0002', kg: 100, motivo: 'Avaria no transporte', ator: 'Dora', chave: 'T-D4' }));
   ok('C08c devolver mais que o entregue, sem motivo ou por quem vende é recusado', /acima do entregue: no máximo 9\.600 kg/.test(d2.erro || '') && /motivo/.test(d3.erro || '') && /decisão de/.test(d4.erro || ''), [d2.erro, d3.erro, d4.erro]); });
 caso('C09', () => { const c = NOVO60(); MUD(c, x => prReservar(x, { pedido: 'PV-030', lote: 'L10-031', kg: 7500, ator: 'Dora' })); PROG(c, 'PV-030', 'L10-031', 37000, 'Bitrem graneleiro 37 t', 'Dora', 'T-P');
-  const e0 = MUD(c, x => comEncerrar(x, { venda: 'PV-030', motivo: '', ator: 'Dora' })); const e1 = MUD(c, x => comEncerrar(x, { venda: 'PV-030', motivo: 'cliente reduziu o contrato', ator: 'Dora' }));
-  ok('C09 AC-10 encerrar sem motivo recusa; com carga programada recusa (cancele a carga antes)', /motivo/.test(e0.erro || '') && /RM-0002 programada/.test(e1.erro || ''), [e0.erro, e1.erro]);
-  const cc = MUD(c, x => comCancelarCarga(x, { rm: 'RM-0002', motivo: 'caminhão não veio', ator: 'Dora' })); const en = MUD(c, x => comEncerrar(x, { venda: 'PV-030', motivo: 'cliente reduziu o contrato', ator: 'Dora', chave: 'T-EN' }));
-  const v = c.producao.pedidos['PV-030']; const S = prSaldos(c, c.producao.lotes['L10-031']);
-  ok('C09b cancelada a carga (reservas intactas), encerrar cancela RS-0001 e RS-0002 na mesma transação; quantidade vigente 0 sc; disponível do L10-031 volta a 38.420 sc; falta 0',
-     !cc.erro && !en.erro && /RS-0001, RS-0002/.test(en.msg) && v.enc.qtd0 === 240000 && v.qtd === 0 && SC(S.disp) === '38.420 sc' && prFalta(c, v) === 0 && prSitPed(c, v).t === 'Encerrada', [cc.erro, en.erro || en.msg, SC(S.disp)]); });
+  /* LEVE-1: sem motivo e com a RM-0002 programada (não saiu), o encerramento cancela a carga e as reservas no mesmo comando */
+  const en = MUD(c, x => comEncerrar(x, { venda: 'PV-030', motivo: '', ator: 'Dora', chave: 'T-EN' }));
+  const v = c.producao.pedidos['PV-030']; const S = prSaldos(c, c.producao.lotes['L10-031']); const rm = c.producao.expedicoes['RM-0002'];
+  ok('C09 AC-10 (LEVE-1) encerrar sem motivo e com carga programada: grava quem e quando (sem motivo), cancela a RM-0002 no mesmo comando e diz qual',
+     !en.erro && /PV-030 encerrada por /.test(en.msg) && /carga programada cancelada: RM-0002 \(não tinha saído\)/.test(en.msg) && rm.st === 'Cancelada' && rm.canc.enc === 'PV-030' && !rm.saida
+     && v.enc.motivo === '' && /Dora/.test(v.enc.quem) && !!v.enc.d && v.enc.cargas.join() === 'RM-0002', [en.erro || en.msg, rm.st, v.enc]);
+  ok('C09b encerrar cancela RS-0001 e RS-0002 na mesma transação; quantidade vigente 0 sc; disponível do L10-031 volta a 38.420 sc; falta 0',
+     !en.erro && /RS-0001, RS-0002/.test(en.msg) && v.enc.qtd0 === 240000 && v.qtd === 0 && SC(S.disp) === '38.420 sc' && prFalta(c, v) === 0 && prSitPed(c, v).t === 'Encerrada', [en.erro || en.msg, SC(S.disp)]);
+  const en2 = MUD(c, x => comEncerrar(x, { venda: 'PV-030', motivo: '', ator: 'Dora', chave: 'T-EN' }));
+  ok('C09c repetir o mesmo encerramento (mesma chave) não cancela nada de novo', en2.repetido === true && /nada foi alterado/.test(en2.msg), en2); });
 caso('C10', () => { const c = NOVO60(); const rows = comPainel(c); const R_ = (p, per) => rows.find(r => r.prod === p && r.per === per) || {};
   const se = R_('Soja em grão', 'est:2025/26'), sf = R_('Soja em grão', '2026/27'), me = R_(MAM, 'est:'), m41 = R_(MAM, '2026-W41');
   ok('C10 AC-11 painel da semente: soja estoque 38.420 apto · 4.000 compromissos · 3.875 coberto · 34.420 sc livre; safra 26/27 68.180 · 19.900 · 48.280 sc',
@@ -370,7 +377,10 @@ caso('RV-A5', () => { const c = NOVO60(); COLHEITA(c); const PP = () => c.produc
   ok('RV-A5b 1ª carga pesa 10.000 kg (previsto 6.000): a saída avisa que a RM-0003 fica sem reserva; a RM-0003 passa a "descoberta" (cobre 0 de 4.000 kg)',
      d0.join() === '0,0' && !s.erro && /Aviso: líquido 4\.000 kg acima do previsto \(6\.000 kg\): RM-0003 fica sem reserva/.test(s.msg) && d1.length === 1 && d1[0].cobre === 0 && d1[0].prev === 4000, [d0, s.erro || s.msg, d1]);
   const sv = comSitVenda(c, PP().pedidos['PV-036']).t; const en = MUD(c, x => comEncerrar(x, { venda: 'PV-036', motivo: 'teste', ator: 'Dora', chave: 'C6' }));
-  ok('RV-A5c a venda fica "Em trânsito" (não "Entregue") com a carga que sobrou programada; encerrar o saldo sem reserva ativa e com a RM-0003 programada é recusado (M19)', sv === 'Em trânsito' && /RM-0003 programada/.test(en.erro || '') && !PP().pedidos['PV-036'].enc, [sv, en.erro || en.msg]); });
+  /* LEVE-1: a RM-0003 (programada, não saiu) é cancelada junto; a RM-0002, que já saiu, fica como estava e o expedido vira a quantidade vigente */
+  ok('RV-A5c a venda fica "Em trânsito" (não "Entregue") com a carga que sobrou programada; encerrar (LEVE-1) cancela a RM-0003, que não saiu, e não toca a RM-0002, que já saiu',
+     sv === 'Em trânsito' && !en.erro && !!PP().pedidos['PV-036'].enc && PP().expedicoes['RM-0003'].st === 'Cancelada' && PP().expedicoes['RM-0002'].st === 'Em trânsito' && !!PP().expedicoes['RM-0002'].saida
+     && /carga programada cancelada: RM-0003/.test(en.msg) && !/RM-0002/.test((en.msg || '').split('carga programada cancelada')[1] || ''), [sv, en.erro || en.msg, PP().expedicoes['RM-0003'].st, PP().expedicoes['RM-0002'].st]); });
 caso('RV-A7', () => { const c = NOVO();
   MUD(c, x => comConverterSaca(x, { venda: 'PV-030', fat: '50', fonte: 'Contrato CT-201 cl. 2', ator: 'Ana', chave: 'S50' })); MUD(c, x => prCancelarReserva(x, 'RS-0001', 'refazer com 50 kg', 'Ana'));
   let v = c.producao.pedidos['PV-030']; const f = prFormReserva({ state: {} }, c, null, v, 'ped', comLotesPara(c, v)); const q = f.fields[1];
@@ -417,10 +427,12 @@ caso('RV-A12', () => { const c = NOVO60(); EMTRANSITO(c); const P = () => c.prod
   const c2 = NOVO60(); MUD(c2, x => prReservar(x, { pedido: 'PV-030', lote: 'L10-031', kg: 7500, ator: 'Dora' }));
   const m8 = MUD(c2, x => comProgramar(x, { venda: 'PV-030', lotes: [{ lote: 'L10-031', prev: 37000 }], veic: 'Bitrem graneleiro 37 t', placa: 'ABC1D23', dprev: '2026-09-25', ator: 'Dora', chave: 'M8' }));
   PROG(c2, 'PV-030', 'L10-031', 37000, 'Bitrem graneleiro 37 t', 'Dora', 'M8b');
-  const m10 = MUD(c2, x => comCancelarCarga(x, { rm: 'RM-0002', motivo: '  ', ator: 'Dora', chave: 'M10' })); MUD(c2, x => comCancelarCarga(x, { rm: 'RM-0002', motivo: 'caminhão não veio', ator: 'Dora', chave: 'M10b' }));
-  const m3 = MUD(c2, x => comSair(x, { rm: 'RM-0002', bruto: '51200', tara: '14240', ator: 'Rui', chave: 'M3' }));
-  ok('RV-A12c M15 data prevista antes de hoje recusada; M10 cancelar carga sem motivo recusado; M02 carga cancelada não sai (nada baixado)',
-     /antes de hoje/.test(m8.erro || '') && /motivo do cancelamento da carga/.test(m10.erro || '') && /só carga programada sai/.test(m3.erro || '') && !c2.producao.expedicoes['RM-0002'].saida, [m8.erro, m10.erro, m3.erro]);
+  const m10 = MUD(c2, x => comCancelarCarga(x, { rm: 'RM-0002', motivo: '  ', ator: 'Dora', chave: 'M10' })); const m10b = MUD(c2, x => comCancelarCarga(x, { rm: 'RM-0002', motivo: '', ator: 'Dora', chave: 'M10' }));
+  const m3 = MUD(c2, x => comSair(x, { rm: 'RM-0002', bruto: '51200', tara: '14240', ator: 'Rui', chave: 'M3' })); const ck = c2.producao.expedicoes['RM-0002'].canc || {};
+  /* LEVE-1: cancelar carga sem motivo passa, gravando quem e quando; repetir a mesma chave não cancela de novo */
+  ok('RV-A12c M15 data prevista antes de hoje recusada; M10 (LEVE-1) cancelar carga sem motivo grava quem e quando, repetir não cancela de novo; M02 carga cancelada não sai (nada baixado)',
+     /antes de hoje/.test(m8.erro || '') && !m10.erro && /RM-0002 cancelada por /.test(m10.msg) && ck.motivo === '' && /Dora/.test(ck.quem) && !!ck.d && m10b.repetido === true
+     && /só carga programada sai/.test(m3.erro || '') && !c2.producao.expedicoes['RM-0002'].saida, [m8.erro, m10.erro || m10.msg, ck, m3.erro]);
   const c3 = NOVO60(); COLHEITA(c3);
   const m9 = MUD(c3, x => comProgramar(x, { venda: 'PV-036', lotes: [{ lote: 'L39-133', prev: 10000 }], veic: 'Baú refrigerado 12 t', placa: 'ABC1D23', dprev: '2026-09-26', ator: 'Dora', chave: 'M9' }));
   const lp = comLotesPara(c3, c3.producao.pedidos['PV-038']).map(L => L.id);

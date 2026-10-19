@@ -135,14 +135,15 @@ function confAlcMudar(c, id, mud, motivo, chave, ator, vEsp) { const K = confGar
   if (ve != null && cur.v !== ve) throw new Error(id + ' mudou para a v' + cur.v + ' enquanto o painel mostrava a v' + ve + ': reabra e confira. Nada foi alterado.');
   const novo = confAlcNova(b, cur, mud);
   if (!novo) throw new Error('Nada muda na ' + id + ': é o valor vigente (v' + cur.v + ').');
-  if (mot.length < 3) throw new Error('Informe o motivo da mudança da ' + id + '.');
+  /* LEVE-1 (proprietário 19/10: "leve e fluido"): o motivo é opcional; quem e quando ficam no evento. O 2º aprovador continua quando a mudança
+     amplia o poder de quem propõe (R10, abaixo): é segurança, não burocracia */
   const pd = K.pend[id]; if (pd) throw new Error(id + ' já tem mudança aguardando confirmação (v' + pd.v + ' por ' + pd.por + '): confirme ou desista antes de propor outra. Nada foi alterado.');
   const nv = Object.assign({}, cur, novo); confR9(K, b, nv); const P = confAtor(K, ator); const txt = confAlcMudT(b, cur, novo);
   if (confAmplia(b, P, cur, nv)) { K.pend[id] = { v: cur.v + 1, mud: novo, por: quem, k: P.k, motivo: mot, d: CONF0.hoje, at: confAgora() };
-    const ev = confEv(K, chave, imp, { tipo: 'alc-prop', quem, alvo: id, t: id + ' v' + cur.v + ' → v' + (cur.v + 1) + ' proposta: ' + txt + ' · motivo: ' + mot, ef: 'aguarda 2º aprovador (amplia o poder de quem propôs); vale a v' + cur.v });
+    const ev = confEv(K, chave, imp, { tipo: 'alc-prop', quem, alvo: id, t: id + ' v' + cur.v + ' → v' + (cur.v + 1) + ' proposta: ' + txt + (mot ? ' · motivo: ' + mot : ''), ef: 'aguarda 2º aprovador (amplia o poder de quem propôs); vale a v' + cur.v });
     return { msg: id + ' v' + (cur.v + 1) + ' aguarda confirmação (' + ev.id + '): ' + txt + ' amplia o seu poder; confirma ' + confQuemConf(K, K.pend[id]) + '. Até lá vale a v' + cur.v + '.', recibo: K.recibos[chave], pendente: true }; }
   confAlcAplica(K, b, cur, novo);
-  const ev = confEv(K, chave, imp, { tipo: 'alc', quem, alvo: id, t: id + ' v' + cur.v + ' → v' + (cur.v + 1) + ': ' + txt + ' · motivo: ' + mot, ef: 'vale para comandos novos; registros antigos guardam quem decidiu sob a v' + cur.v });
+  const ev = confEv(K, chave, imp, { tipo: 'alc', quem, alvo: id, t: id + ' v' + cur.v + ' → v' + (cur.v + 1) + ': ' + txt + (mot ? ' · motivo: ' + mot : ''), ef: 'vale para comandos novos; registros antigos guardam quem decidiu sob a v' + cur.v });
   return { msg: id + ' v' + (cur.v + 1) + ' vigente (' + ev.id + '): ' + txt + '. Vale para o próximo comando.', recibo: K.recibos[chave] }; }
 // quem confirma ou recusa a proposta (R10): gestor ou direção, nunca quem propôs (revisão F12: o texto não manda à própria proponente)
 function confQuemConf(K, pd) { const a = g2alcDe(K, 'AL-14').conf; const L = g2perfisDe(K).filter(P => confPodeA(P, a) && (!pd || P.k !== pd.k)).map(P => confAtorT(P, a));
@@ -157,7 +158,7 @@ function confAlcConfirmar(c, id, chave, ator, vEsp) { const K = confGarante(c); 
   if (!b) throw new Error('Nada aguarda confirmação na ' + id + '.'); const pd = confPendDe(K, id, ve, 'Confirmar');
   const quem = confExigeConf(K, ator, pd, id, 'Confirmar'); const cur = g2alcDe(K, id); const nv = Object.assign({}, cur, pd.mud); confR9(K, b, nv);
   confAlcAplica(K, b, cur, pd.mud); delete K.pend[id]; const txt = confAlcMudT(b, cur, pd.mud);
-  const ev = confEv(K, chave, imp, { tipo: 'alc-conf', quem, alvo: id, t: id + ' v' + (cur.v + 1) + ' confirmada: ' + txt + ' · proposta por ' + pd.por + ' · motivo: ' + pd.motivo, ef: 'vale para comandos novos' });
+  const ev = confEv(K, chave, imp, { tipo: 'alc-conf', quem, alvo: id, t: id + ' v' + (cur.v + 1) + ' confirmada: ' + txt + ' · proposta por ' + pd.por + (pd.motivo ? ' · motivo: ' + pd.motivo : ''), ef: 'vale para comandos novos' });
   return { msg: id + ' v' + (cur.v + 1) + ' confirmada por ' + quem + ' (' + ev.id + '): ' + txt + '. Vale para o próximo comando.', recibo: K.recibos[chave] }; }
 function confAlcDesistir(c, id, chave, ator, vEsp) { const K = confGarante(c); const ve = confVEsp(vEsp);
   const imp = JSON.stringify(['alc-des', id, ve]); const r0 = confRepete(K, chave, imp, 'Desistência da ' + id); if (r0) return r0;
@@ -170,7 +171,7 @@ function confAlcRecusar(c, id, chave, ator, vEsp) { const K = confGarante(c); co
   const imp = JSON.stringify(['alc-rec', id, ve]); const r0 = confRepete(K, chave, imp, 'Recusa da ' + id); if (r0) return r0;
   if (!b) throw new Error('Nada aguarda confirmação na ' + id + '.'); const pd = confPendDe(K, id, ve, 'Recusar');
   const quem = confExigeConf(K, ator, pd, id, 'Recusar'); const cur = g2alcDe(K, id); const txt = confAlcMudT(b, cur, pd.mud); delete K.pend[id];
-  const ev = confEv(K, chave, imp, { tipo: 'alc-rec', quem, alvo: id, t: id + ' v' + pd.v + ' recusada: ' + txt + ' · proposta por ' + pd.por + ' · motivo da proposta: ' + pd.motivo, ef: 'segue a vigente v' + cur.v });
+  const ev = confEv(K, chave, imp, { tipo: 'alc-rec', quem, alvo: id, t: id + ' v' + pd.v + ' recusada: ' + txt + ' · proposta por ' + pd.por + (pd.motivo ? ' · motivo da proposta: ' + pd.motivo : ''), ef: 'segue a vigente v' + cur.v });
   return { msg: 'Mudança da ' + id + ' recusada por ' + quem + ' (' + ev.id + '): segue a vigente v' + cur.v + '.', recibo: K.recibos[chave] }; }
 // ---------- integrações (R16, R17): só demonstração; a fila do ERP são os movimentos do cenário, enviados uma vez por conteúdo ----------
 function confErpImp(m) { return JSON.stringify([m.tipo, m.prod || '', m.lote || '', Number(m.qtd) || 0, m.det || '']); }

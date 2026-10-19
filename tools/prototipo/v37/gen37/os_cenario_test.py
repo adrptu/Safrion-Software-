@@ -5,7 +5,8 @@ mudança (como outro quadro do Canvas): entregas → confirmação no app → tu
 entregue/consumido/realizado sem recarregar; encerrar fica bloqueado pela sobra até a devolução no Estoque. Depois: bloqueio por sinal
 (OS-0417), liberar bloqueado por falta de lote (OS-0418) e por saldo (OS-0430), Restaurar demonstração e Ajustar antes de liberar
 (dose e área → v2 com histórico, liberada no mesmo comando).
-Uso: python3 os_cenario_test.py   (compile antes: areas.processo_os.build())"""
+Uso: python3 os_cenario_test.py   (compile antes: areas.processo_os.build())
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
@@ -58,7 +59,7 @@ try:
          and 'Insumo esgotado' not in T.linha(OS),
          'turno 2 (100 ha, 180 L de Glifosato): 160 / 160 ha, sobra 20 L em custódia, botão Enviar para conferência, sem "Insumo esgotado" (CTL-2 · B, P5)', (T.linha(OS), i[:300]))
     # 7 · em conferência, encerrar fica bloqueado pela sobra, com o atalho para receber a devolução no Estoque
-    T.btn('Enviar para conferência'); T.btn('Confirmar envio'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])
+    T.btn('Enviar para conferência'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])   # LEVE-1: grava no clique
     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p
          and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
          'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])

@@ -3,7 +3,8 @@
 cabeçalho recalculado (os-04), Nova ordem não duplica OS-0431 nem OS-0421 (os-05).
 01/10/2026 (decisão do proprietário): ordens só de água (OS-0419, OS-0422, OS-0423) saem da página O.S. e vivem na Irrigação.
 O cabeçalho não as conta e o início que muda a contagem de execução passa a ser o de uma ordem agrícola (OS-0424, depois da
-entrega no Estoque e da confirmação no app, pelo cenário compartilhado)."""
+entrega no Estoque e da confirmação no app, pelo cenário compartilhado).
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -63,7 +64,7 @@ try:
     # iniciar uma ordem muda a contagem de execução (01/10: a OS-0419, só água, saiu da O.S.; usa a OS-0424 num cenário limpo)
     reload(); ST="window.dispatchEvent(new StorageEvent('storage',{key:'talhao-os-cenario-v1'}))"
     J("(()=>{const X=window.__cen; X.cenMudar(null,c=>{ X.cenEntregar(c,'REQ-039','Fungicida A',65,'Marcos','Rui'); return X.cenConfirmarRecebimento(c,'REQ-039'); }); "+ST+";})()"); time.sleep(.4)
-    abrir('OS-0424'); btn('Iniciar execução'); btn('Confirmar início'); tt=toast(); fechar()
+    abrir('OS-0424'); btn('Iniciar execução'); tt=toast(); fechar()   # LEVE-1: grava no clique
     chk('cabeçalho acompanha o início (OS-0424): 3 em execução', 'OS-0424 em execução' in tt and hdr()=='3 em execução · 3 impedidas', (tt, hdr()))
     # ---------- os-05: Nova ordem não duplica ordens do plano ----------
     reload(); n0=len(ids())

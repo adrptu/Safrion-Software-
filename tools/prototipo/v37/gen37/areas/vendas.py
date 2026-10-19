@@ -85,7 +85,7 @@ const _g2rows0 = g2rows; g2rows = function (self, sp) { return PR_GRIDS[sp.id] ?
 function comProx(c, v, st) { const P = prP(c); const cu = comCultura(v); const U = x => comTxtV(v, x); const hoje = prHoje();
   const rms = comRmsVenda(c, v.id); const prog = rms.find(r => r.st === 'Programada'); const tran = rms.find(r => r.st === 'Em trânsito');
   const venc = (v.fim && v.fim < hoje) ? ' · janela vencida em ' + prBr(v.fim) : '';
-  if (st.t === 'Encerrada') return { t: 'saldo encerrado · ' + v.enc.motivo, p: 'Saldo encerrado em ' + prBr(v.enc.d) + ' por ' + v.enc.quem + ': ' + v.enc.motivo + '. Quantidade vigente ' + U(v.qtd) + ' (era ' + (v.enc.qtd0 === null || v.enc.qtd0 === undefined ? prFmtT(v.enc.qc0, 3) + ' ' + (v.un || '') : U(v.enc.qtd0)) + ').' };
+  if (st.t === 'Encerrada') return { t: 'saldo encerrado' + (v.enc.motivo ? ' · ' + v.enc.motivo : ' por ' + v.enc.quem), p: 'Saldo encerrado em ' + prBr(v.enc.d) + ' por ' + v.enc.quem + (v.enc.motivo ? ': ' + v.enc.motivo : '') + (v.enc.cargas && v.enc.cargas.length ? '; carga programada cancelada junto: ' + v.enc.cargas.join(', ') : '') + '. Quantidade vigente ' + U(v.qtd) + ' (era ' + (v.enc.qtd0 === null || v.enc.qtd0 === undefined ? prFmtT(v.enc.qc0, 3) + ' ' + (v.un || '') : U(v.enc.qtd0)) + ').' };
   /* A-17: sem a massa da saca, nada que dependa dela anda; o próximo passo é registrar a massa com a fonte */
   if (st.t === 'Saca a conferir') return { t: 'Registrar a saca · ' + COM_PAPT.vender, p: 'Saca do contrato a conferir (' + v.fatAmb.map(x => x + ' kg').join(' ou ') + '): até registrar a massa com a fonte, falta, oferta, saída e crédito ficam suspensos. Nada é convertido sem esse registro.', a: 'saca', at: 'Registrar a saca do ' + v.id, red: true };
   /* A5 da revisão: venda já entregue com carga ainda programada (o 1º caminhão levou tudo): o passo é cancelar a carga que sobrou */
@@ -196,7 +196,8 @@ function comPanVenda(self, c, v) { const FS = Object.assign({}, self.state.pr_fo
       { t: 'Movimentos', rows: mv, vazio: 'Nenhum movimento.' }], err: self.state.pr_err };
   if (cx) { PPx.form = { t: 'Cancelar ' + cx, h: 'O motivo fica no histórico; o disponível do lote volta.', fields: [prFld(self, 'mot', 'Motivo do cancelamento', { t: 'txt', im: 'text', ph: 'ex.: cliente adiou a retirada' })] };
     PPx.prim = { t: 'Cancelar ' + cx, go: () => prRun(self, x => prCancelarReserva(x, cx, fv('mot', ''), g2perfil()), { pr_cx: null, pr_form: null }) }; PPx.sec = [{ t: 'Manter reserva', go: () => self.setState({ pr_cx: null, pr_err: '' }) }]; return PPx; }
-  if (md === 'encerrar') { PPx.form = { t: 'Encerrar saldo do ' + v.id + ' · ' + COM_PAPT.vender, h: 'A quantidade vigente passa ao entregue; as reservas ativas são canceladas na mesma operação. Carga programada: cancele antes.', fields: [prFld(self, 'mot', 'Motivo', { t: 'txt', im: 'text', ph: 'ex.: cliente reduziu o contrato' })] };
+  if (md === 'encerrar') { const pgs = comRmsVenda(c, v.id).filter(r => r.st === 'Programada' && !r.saida).map(r => r.id);   /* LEVE-1: a carga programada é cancelada junto; motivo opcional */
+    PPx.form = { t: 'Encerrar saldo do ' + v.id + ' · ' + COM_PAPT.vender, h: 'A quantidade vigente passa ao entregue; as reservas ativas são canceladas na mesma operação' + (pgs.length ? '; a carga programada que ainda não saiu (' + pgs.join(', ') + ') também é cancelada.' : '.'), fields: [prFld(self, 'mot', 'Motivo (opcional)', { t: 'txt', im: 'text', ph: 'ex.: cliente reduziu o contrato' })] };
     PPx.prim = { t: 'Encerrar saldo', go: () => prRun(self, x => comEncerrar(x, { venda: v.id, motivo: fv('mot', ''), ator: g2perfil(), chave: ch0 }), { pr_modo: null, pr_form: null }) };
     PPx.sec = [{ t: 'Manter venda', go: () => self.setState({ pr_modo: null, pr_err: '' }) }]; return PPx; }
   if (nx.a === 'saca' && comPode('vender')) { const fk = fv('fat', ''); const fo0 = 'Contrato ' + (v.ref || v.id);
@@ -266,7 +267,7 @@ const _g2rows0 = g2rows; g2rows = function (self, sp) { return PR_GRIDS[sp.id] ?
 function comRmData(rm) { return (rm.entrega && rm.entrega.d) || (rm.saida && rm.saida.d) || rm.dprev || ''; }
 /* situação e próximo passo da carga: impedimento (comImpede, a mesma da venda e da saída) e crédito do previsto, com o dono */
 function comRmSit(c, rm) { const P = prP(c); const v = P.pedidos[rm.pedido] || {}; const cu = comCultura(v);
-  if (rm.st === 'Cancelada') return { t: 'Cancelada', c: 'gray', nx: 'motivo: ' + ((rm.canc || {}).motivo || '') };
+  if (rm.st === 'Cancelada') { const k = rm.canc || {}; return { t: 'Cancelada', c: 'gray', nx: k.motivo ? 'motivo: ' + k.motivo : 'cancelada por ' + (k.quem || '—') + (k.d ? ' em ' + prBr(k.d) : '') }; }   /* LEVE-1: motivo opcional */
   if (rm.st === 'Entregue' || rm.st === 'Entregue com devolução') { const tt = comTitulos(c, t => t.rm === rm.id)[0];
     return { t: rm.st, c: COM_SITCOR[rm.st], nx: comNat(v) !== 'Venda' ? 'liquidação em produto' : (tt ? comRS(tt.valor) + (comVencido(tt) ? ' vencido em ' + prBr(tt.venc) + ' · cobrar' : ' a receber até ' + prBr(tt.venc)) : ((comCond(v.cond) || {}).ant ? 'pagamento antecipado conferido' : 'nada a receber')) }; }
   if (rm.st === 'Em trânsito') return { t: 'Em trânsito', c: 'yellow', nx: 'Confirmar entrega · Expedição', a: 'entregar' };
@@ -348,7 +349,7 @@ function comPanRm(self, c, rm) { const FS = Object.assign({}, self.state.pr_form
     secs: [{ t: 'Lotes', rows: lotes }, { t: rm.st === 'Programada' ? 'Verificação da saída (ao vivo)' : 'Avaliação gravada na saída', rows: ver, vazio: '—' }, { t: 'Pesagem', rows: pes, vazio: 'Pesagem na saída.' },
       { t: 'Entrega', rows: ent, vazio: rm.modal === 'retira' ? 'Cliente retira: a saída é a entrega.' : 'Entrega a confirmar.' }, { t: 'Devoluções', rows: devs, vazio: 'Nenhuma devolução.' }, { t: 'Movimentos', rows: mv, vazio: 'Nenhum movimento.' }],
     err: self.state.pr_err };
-  if (md === 'cancelar') { PPx.form = { t: 'Cancelar ' + rm.id, h: 'As reservas do ' + rm.pedido + ' continuam; nada sai do estoque.', fields: [prFld(self, 'mot', 'Motivo', { t: 'txt', im: 'text', ph: 'ex.: caminhão não veio' })] };
+  if (md === 'cancelar') { PPx.form = { t: 'Cancelar ' + rm.id, h: 'As reservas do ' + rm.pedido + ' continuam; nada sai do estoque.', fields: [prFld(self, 'mot', 'Motivo (opcional)', { t: 'txt', im: 'text', ph: 'ex.: caminhão não veio' })] };
     PPx.prim = { t: 'Cancelar carga', go: () => prRun(self, x => comCancelarCarga(x, { rm: rm.id, motivo: fv('mot', ''), ator: g2perfil(), chave: ch }), { pr_modo: null, pr_form: null }) };
     PPx.sec = [{ t: 'Manter carga', go: () => self.setState({ pr_modo: null, pr_err: '' }) }]; return PPx; }
   if (md === 'devolver') { const fs = []; if (rm.lotes.length > 1) fs.push(prFld(self, 'dl', 'Lote', { t: 'opts', v: fv('dl', rm.lotes[0].lote), opts: rm.lotes.map(l => ({ v: l.lote, t: l.lote })) }));

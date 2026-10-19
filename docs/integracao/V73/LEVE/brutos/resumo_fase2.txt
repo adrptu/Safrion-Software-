@@ -1,0 +1,17 @@
+/dev/vda        252G   34G  5.1G  87% /
+leve1 rc=0 426s 19:12 :: RESULTADO: 32/32 ok
+contra_leve1 rc=1 425s 19:19 :: RESULTADO: 9/32 ok · FALHAS: I1a Iniciar execução grava no clique: OS-0424 Em execução, recibo "OS-0424 em execução: insumos com Marcos", sem bloco "Conf
+ap_unico_nav rc=1 110s 19:21 :: 6/13 ok · FALHAS: 7
+verif_os rc=1 28s 19:22 :: 
+os_cenario rc=0 125s 19:24 :: RESULTADO: 22/22 ok
+osfix rc=1 19s 19:24 :: 
+carencia_fluxo rc=0 143s 19:27 :: RESULTADO: 40/40 verificações
+ma_vinculo_AB rc=0 116s 19:28 :: RESULTADO: 59/59 ok
+ma_rastreio rc=0 113s 19:30 :: RESULTADO: 58/58 ok
+ma_unica rc=0 205s 19:34 :: RESULTADO: 23/23 ok
+base_ap_unico_nav rc=1 106s 19:36 :: 6/13 ok · FALHAS: 7
+base_verif_os rc=1 25s 19:36 :: 
+base_osfix rc=1 19s 19:36 :: 
+base_cadc_cd06 rc=1 5s 19:36 :: RESULTADO: OK 1/1
+/dev/vda        252G   34G  4.7G  88% /
+FIM

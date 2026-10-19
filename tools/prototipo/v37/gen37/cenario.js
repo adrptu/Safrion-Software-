@@ -562,6 +562,13 @@ function cenIniciarTurno(c, id) { cenAppAtivo(c);
   if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
   return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
 }
+// Horas do turno (LEVE-1, proprietário 19/10: "leve e fluido"): agora − início − pausas, em horas com 1 casa, a sugestão editável do Fechar turno.
+// Pausa ainda aberta conta até agora; virada de dia soma 24 h. Sem início registrado, NaN: o app continua pedindo (nunca inventa valor).
+function cenMinDia(hm) { const m = /^(\d\d?):(\d\d)$/.exec(String(hm || '').trim()); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; }
+function cenHorasTurno(t, agora) { if (!t || !t.ini) return NaN; const a = cenMinDia(agora || cenAgora()), i = cenMinDia(t.ini); if (isNaN(a) || isNaN(i)) return NaN;
+  const dif = (x, y) => { const d = y - x; return d < 0 ? d + 1440 : d; }; let min = dif(i, a);
+  (t.pausas || []).forEach(p => { const pi = cenMinDia(p.ini), pf = p.fim ? cenMinDia(p.fim) : a; if (!isNaN(pi) && !isNaN(pf)) min -= dif(pi, pf); });
+  return Math.max(0, Math.round(min / 6) / 10); }
 function cenPausar(c) { cenAppAtivo(c); const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
   const p = t.pausas[t.pausas.length - 1]; if (p && !p.fim) { p.fim = cenAgora(); return { msg: 'Turno retomado.' }; }
   t.pausas.push({ ini: cenAgora(), fim: null }); return { msg: 'Turno pausado.' }; }
@@ -804,6 +811,7 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
 function cenFecharTurno(c, ha, horas, consumo, obs, est) { cenAppAtivo(c);
   const t = c.app.turno; if (!t || t.fim) throw new Error('Nenhum turno aberto.');
   if (!(ha > 0)) throw new Error('Informe os hectares feitos.');
+  if (horas === undefined || horas === null) horas = cenHorasTurno(t);   // LEVE-1: sem horas informadas, as do turno (início, pausas e agora)
   if (!(horas > 0)) throw new Error('Informe as horas trabalhadas.');
   const R = cenApontar(c, { os: t.os, d: t.d || cenDdMm(CEN_DIA_OP), ha, h: horas, cons: consumo, est, obs, origem: 'app', quem: c.app.operador, chave: t.chave });
   t.fim = cenAgora(); c.app.turno = null; const ap = R.ap;

@@ -1,0 +1,24 @@
+--- parte os
+OK    U2a cenHorasTurno: 06:10 → 15:00 com pausa de 20 min = 8,5 h
+OK    U2b virada de dia: 22:00 → 01:30 = 3,5 h; pausa ainda aberta (14:00) conta até agora: 12:00 → 15:00 = 2 h
+OK    U2c sem início registrado (ou ilegível): NaN, nada inventado
+OK    U2d cenFecharTurno sem horas: o comando calcula as do turno (2,7 h) e grava o apontamento
+OK    U2e sem início, ou com horas 0 informadas, continua pedindo "Informe as horas trabalhadas."
+OK    U1a Iniciar (osDireto → osc_iniciar): OS-0424 Em execução e o recibo diz com quem estão os insumos
+OK    U1b toque duplo: a 2ª chamada do mesmo clique não faz nada de novo e não vira erro
+OK    U1c Enviar para conferência no clique grava CMD-08 com quem e quando uma vez; o toque duplo não grava de novo
+OK    U1d o comando continua validando: OS-0424 liberada sem o insumo entregue e confirmado não inicia ("Iniciar bloqueado") e nada muda
+OK    U9a AL-05 20 → 15 % sem motivo: vale na hora (v2), o evento grava quem e não tem "motivo:" vazio
+OK    U9b ampliar o próprio poder sem motivo continua aguardando o 2º aprovador (segurança mantida)
+TOTAL 11 · falhas 0
+--- parte man
+OK    U9c cancelar a OM-0234 sem motivo: Canceladas, quem e quando gravados, motivo vazio e o recibo sem "motivo:"
+OK    U5 vincular o Gotejo T7 (sem execução registrada) sem escolher a base: conta de agora, marco estimado (selo)
+OK    U4 (regressão) OM-0234 libera com a sugestão (Zé, única pessoa habilitada) e o tempo do serviço (5 h)
+OK    U9d manFaltaConcluir não pede "motivo de" para resposta fora de OK
+TOTAL 4 · falhas 0
+--- parte mapa
+OK    U10a desenho de 9.000 ha declarados (polígono de 61,20 ha) na Santa Rita: sem erro de área nem de motivo; os dois viram aviso
+OK    U10b contorno que cruza a si mesmo continua barrado (integridade da área)
+TOTAL 2 · falhas 0
+RESULTADO 17/17

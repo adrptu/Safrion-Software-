@@ -1,0 +1,45 @@
+== I1 O.S. · Iniciar e Enviar gravam no clique
+OK    I1a Iniciar execução grava no clique: OS-0424 Em execução, recibo "OS-0424 em execução: insumos com Marcos", sem bloco "Confirmar início" 
+FALHA I1b toque duplo (2ª chamada do mesmo clique): "já está em Em execução: nada foi feito de novo", sem erro sem osDireto
+OK    I1c Enviar para conferência grava no clique: Em conferência, recibo com quem enviou (CMD-08 gravado), sem "Confirmar envio" 
+FALHA I1d Encerrar continua pedindo confirmação ("Confirmar encerramento"; nada encerrado antes dela) [['×', 'INSUMOS E DOSES', 'APONTAMENTOS DIÁRIOS', 'RECURSOS ALOCADOS 4 recursos · 3 conflitos', 'ATIVIDADE Pulverização · Fungicida · Trator 04 + Pulverizador PJ-3030 36 m', 'SITUAÇÃO ATUAL Aguardando conferência de apontamentos, consumo e sobras.', 'ORIGEM 2 registros'], 'Em conferência']
+OK    I1e Liberar continua pedindo confirmação ("Confirmar liberação"; a ordem segue A liberar) 
+== I1 Mapa · Iniciar grava no clique
+OK    I1f Mapa (T1): "Iniciar execução" no painel do talhão grava no clique (OS-0424 Em execução), sem "Confirmar início" 
+== I2 App · Fechar turno com horas preenchidas
+OK    I2a Fechar turno: horas pré-preenchidas = agora − início − pausas = 2,7 h, com a dica do cálculo 
+OK    I2b campo apagado volta a pedir: "Informe as horas trabalhadas." (nada inventado) 
+OK    I2c sem digitar as horas, Fechar turno grava 20 ha em 2,7 h (o apontamento recebe as horas calculadas) 
+OK    I2d o comando (cenFecharTurno) sem horas calcula as do turno: "Turno fechado: 5 ha em 2,7 h" 
+OK    I2e sem início registrado: o comando recusa ("Informe as horas trabalhadas.") e o campo fica vazio (nada inventado) 
+== I2 App · colheita (MB-10)
+OK    I2f colheita: sem turno, horas vazias (pede); com turno aberto na OS-0505, horas = 2,7 (editáveis) 
+== I3 O.S. › Nova ordem: início da janela preenchido
+FALHA I3 O.S. › Nova ordem: início da janela preenchido · o roteiro não chegou ao fim do trecho RuntimeError('ReferenceError: CEN_DIA_OP is not defined\n    at <anonymous>:1:1')
+== I4 Manutenção › Liberar OM com executante e tempo preenchidos
+FALHA I4 (já na base) OM-0234: executante Zé (única pessoa habilitada) e tempo do serviço 5 h já preenchidos; "Liberar serviço" ligado ['Zé', '5', None]
+== I9 Manutenção · motivo opcional
+OK    I9a cancelar OM sem motivo: cancela, grava quem e quando (motivo vazio) e devolve a reserva 
+OK    I9b achado SM-0150: Fechar sem serviço sem motivo fecha, com quem e quando 
+== I9 App · checklist fora de OK sem motivo
+OK    I9c app (Zé, OM-0233): "Não feito" sem motivo grava a resposta com quem e quando 
+== I5 Vincular ativo: Contar de agora por padrão
+OK    I5 Gotejo T7 sem execução registrada: "Contar de agora" marcado e "Vincular ao PM-07" ligado (um toque a menos) 
+== I6 Cadastros › Produtos: data do preço = hoje
+OK    I6 digitar o preço preenche a data do preço com hoje (2026-09-23), editável 
+== I8 botões "Prévia · nada foi alterado" saem
+OK    I8a GE-03 sem "Conferir reabertura de 08/2026"; "Conciliar diesel do tanque" segue 
+OK    I8b CA-02 sem "Conferir reabertura do saldo"; o atalho "Abrir O.S." segue 
+== I9 Logística · reordenar a fila sem motivo
+OK    I9d LO-02: reordenar o T4 sem motivo publica a fila nova com autor e horário (sem "Informe motivo") 
+== I9 Configurações · AL-05 sem motivo
+OK    I9e AL-05 20 → 15 % (não amplia poder) sem motivo: "Salvar alçada" ligado e a v2 vale na hora 
+OK    I9f ampliar o próprio poder (15 → 25 %) continua pedindo 2º aprovador 
+== I9/I11 Irrigação · terminar sem leitura e sem motivo; aceitar divergência e fertirrigação sem motivo
+OK    I11 Terminar sem a leitura do hidrômetro (e sem motivo da área e tempo): Em conferência "Sem leitura", volume nulo (não zero), nada creditado no balanço 
+OK    I9g aceitar a divergência do hidrômetro sem motivo: encerra, hidrômetro prevalece, quem gravado 
+FALHA I9h fertirrigação (Adicionar produtos) sem motivo agronômico: o comando aceita (o agrônomo libera a v2 na O.S.) erro:irrClone is not defined
+== I10 Cadastros › Fazendas: área acima da fazenda vira aviso
+FALHA I10 talhão T4 com 2.000 ha (acima da Santa Rita): salva e o recibo traz o aviso da soma; nada barrado [False, False, '', '']
+OK    sem erro de JavaScript na última tela 
+RESULTADO: 23/29 ok · FALHAS: I1b toque duplo (2ª chamada do mesmo clique): "já está em Em execução: nada foi feito de novo", sem erro ; I1d Encerrar continua pedindo confirmação ("Confirmar encerramento"; nada encerrado antes dela) ; I3 O.S. › Nova ordem: início da janela preenchido · o roteiro não chegou ao fim do trecho ; I4 (já na base) OM-0234: executante Zé (única pessoa habilitada) e tempo do serviço 5 h já preenchidos; "Liberar serviço" ligado ; I9h fertirrigação (Adicionar produtos) sem motivo agronômico: o comando aceita (o agrônomo libera a v2 na O.S.) ; I10 talhão T4 com 2.000 ha (acima da Santa Rita): salva e o recibo traz o aviso da soma; nada barrado

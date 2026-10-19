@@ -551,13 +551,13 @@ def ir03det():
             f'<button type="button" onClick="{H("cf_ok")}" style="{BTN_ST(True,True)}">Aplicar janela</button>')
     tm_corpo=(campo('Área real coberta (ha)','tm_cob',f'<input id="tm_cob" inputMode="decimal" value="{H("tm_cob")}" onChange="{H("tm_setcob")}" style="{INP}">','tm_ecob')
               + campo('Volume medido no hidrômetro (m³)','tm_vol',f'<input id="tm_vol" inputMode="decimal" value="{H("tm_vol")}" onChange="{H("tm_setvol")}" style="{INP}">','tm_evol')
-              + f'<sc-if value="{H("tm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para conferir área e tempo','tm_mot',f'<input id="tm_mot" value="{H("tm_mot")}" onChange="{H("tm_setmot")}" style="{INP}">','tm_emot')+'</sc-if>'
+              + f'<sc-if value="{H("tm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para conferir área e tempo (opcional)','tm_mot',f'<input id="tm_mot" value="{H("tm_mot")}" onChange="{H("tm_setmot")}" style="{INP}">','tm_emot')+'</sc-if>'
               + f'<div style="font-size: 12.5px; color: {MUTED};">{H("tm_hint")}</div>')
     tm_rod=(f'<button type="button" onClick="{H("tm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("tm_ok")}" style="{BTN_ST(True,True)}">{H("tm_okT")}</button>')
     cm_corpo=(kvfor('cm_kv',2)
               + campo('Leitura do hidrômetro (m³)','cm_vol',f'<input id="cm_vol" inputMode="decimal" value="{H("cm_vol")}" onChange="{H("cm_setvol")}" style="{INP}">','cm_evol')
-              + f'<sc-if value="{H("cm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para aceitar a divergência','cm_mot',f'<input id="cm_mot" value="{H("cm_mot")}" onChange="{H("cm_setmot")}" style="{INP}">','cm_emot')+'</sc-if>')
+              + f'<sc-if value="{H("cm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para aceitar a divergência (opcional)','cm_mot',f'<input id="cm_mot" value="{H("cm_mot")}" onChange="{H("cm_setmot")}" style="{INP}">','cm_emot')+'</sc-if>')
     cm_rod=(f'<button type="button" onClick="{H("cm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("cm_devolver")}" style="{BTN_ST(False,True)} white-space: normal;">Devolver para conferir o hidrômetro</button>'
             f'<button type="button" onClick="{H("cm_ok")}" style="{BTN_ST(True,True)}">{H("cm_okT")}</button>')
@@ -566,7 +566,7 @@ def ir03det():
             f'<button type="button" onClick="{H("av_ok")}" style="{BTN_ST(True,True)}">Salvar avanço</button>')
     rc_corpo=(campo('Produto','rc_prod',f'<select id="rc_prod" value="{H("rc_prod")}" onChange="{H("rc_setprod")}" style="{INP}"><option value="Ureia 45%">Ureia 45%</option><option value="Nitrato de cálcio">Nitrato de cálcio</option><option value="Nitrato de potássio">Nitrato de potássio</option></select>','rc_eprod')
               + campo('Dose (kg/ha)','rc_dose',f'<input id="rc_dose" inputMode="decimal" value="{H("rc_dose")}" onChange="{H("rc_setdose")}" style="{INP}">','rc_edose')
-              + campo('Motivo agronômico','rc_mot',f'<textarea id="rc_mot" value="{H("rc_mot")}" onChange="{H("rc_setmot")}" placeholder="Ex.: deficiência de N no estádio V10" style="{INP} min-height: 64px; resize: vertical;"></textarea>','rc_emot')
+              + campo('Motivo agronômico (opcional)','rc_mot',f'<textarea id="rc_mot" value="{H("rc_mot")}" onChange="{H("rc_setmot")}" placeholder="Ex.: deficiência de N no estádio V10" style="{INP} min-height: 64px; resize: vertical;"></textarea>','rc_emot')
               + f'<div style="padding: 10px 12px; border-radius: 10px; background: {BG}; font-size: 12.8px; line-height: 1.5;"><b>Efeito</b> · {H("rc_prev")}</div>')
     rc_rod=(f'<button type="button" onClick="{H("rc_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("rc_ok")}" style="{BTN_ST(True,True)}">Criar versão v2</button>')
@@ -672,16 +672,16 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.tm_open=true; v.tm_okT=cedo?'Registrar término antecipado':'Confirmar término'; v.tm_titulo=v.tm_okT+' · '+id;
     v.tm_sub=x.nome+' · simulado · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
     v.tm_cob=tm.cob; v.tm_vol=tm.vol; const er=tm.err||{}; v.tm_ecob=er.cob||''; v.tm_ecob_has=!!er.cob; v.tm_evol=er.vol||''; v.tm_evol_has=!!er.vol;
-    v.tm_hint=(cedo?'Antes do fim previsto: informe o término antecipado e a área real. ':'')+'Simulado: informe o volume medido; estimativa não é leitura. O balanço usa somente o medido.';
+    v.tm_hint=(cedo?'Antes do fim previsto: informe o término antecipado e a área real. ':'')+'Simulado: informe o volume medido, se tiver a leitura; em branco, termina "Sem leitura" e o balanço espera a leitura (usa somente o medido; zero medido é diferente de ausência).';   /* LEVE-1 */
     const set=k=>e=>self.setState({tm:Object.assign({},self.state.tm,{[k]:e.target.value,err:{}})});
     v.tm_setcob=set('cob'); v.tm_setvol=set('vol'); v.tm_setmot=set('mot'); v.tm_mot=tm.mot||''; v.tm_mot_show=tempo.pendente; v.tm_emot=er.mot||''; v.tm_emot_has=!!er.mot;
-    if(tempo.pendente) v.tm_hint+=' Área e tempo precisam de conferência: informe o motivo; o balanço aguarda validação do irrigante ou gestor.';
+    if(tempo.pendente) v.tm_hint+=' Área e tempo precisam de conferência (motivo opcional); o balanço aguarda validação do irrigante ou gestor.';
     v.tm_warn=!!tm.warn; v.tm_cancel=()=>{ const t=self.state.tm; if(t&&(t.cob||t.vol||t.mot)) self.setState({tm:Object.assign({},t,{warn:true})}); else fechar(self,'tm'); };
     v.tm_keep=()=>self.setState({tm:Object.assign({},self.state.tm,{warn:false})});
     v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
       if(!(cob>0&&cob<=x.ha)) er.cob='Informe a área real entre 0 e '+irrN(x.ha,2,0)+' ha.';
-      if(!vs||!Number.isFinite(vol)||vol<0) er.vol='Informe o volume medido em m³; zero medido é diferente de ausência.';
-      if(tempo.pendente&&!String(cur.mot||'').trim()) er.mot='Informe o motivo; área e tempo serão conferidos antes do crédito.';
+      /* LEVE-1 (proprietário 19/10): volume em branco termina "Sem leitura" (o balanço só credita o medido); motivo da área e tempo opcional */
+      if(vs&&(!Number.isFinite(vol)||vol<0)) er.vol='Volume medido inválido: informe m³ (zero ou mais) ou deixe em branco para terminar sem leitura.';
       if(Object.keys(er).length){ self.setState({tm:Object.assign({},cur,{err:er})}); return; }
       run(s0=>irrTerminar(s0,id,cob,vol,cedo,cur.mot),()=>fechar(self,'tm')); }; }
   else { v.tm_mot=''; v.tm_mot_show=false; v.tm_emot=''; v.tm_emot_has=false; v.tm_setmot=()=>{}; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; v.tm_okT='Confirmar término'; }
@@ -692,7 +692,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,2,1)+' ha'},{l:'Medido',t:c.med!==null&&c.med!==undefined?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
              {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,2,1)+' de '+irrN(x.ha,2,0)+' ha'}];
     const num=g2num(cm.vol), medicao=irrMedicao(s,o,num);
-    v.cm_mot_show=medicao.exigeMotivo; v.cm_okT=v.cm_mot_show?'Aceitar com motivo':'Validar e encerrar';
+    v.cm_mot_show=medicao.exigeMotivo; v.cm_okT=v.cm_mot_show?'Aceitar divergência':'Validar e encerrar';   /* LEVE-1: o motivo é opcional */
     v.cm_vol=cm.vol; v.cm_mot=cm.mot||''; v.cm_evol=cm.err||''; v.cm_evol_has=!!cm.err;
     v.cm_emot=cm.emot||''; v.cm_emot_has=!!cm.emot;
     const set=k=>e=>self.setState({cm:Object.assign({},self.state.cm,{[k]:e.target.value,err:'',emot:''})});
@@ -702,7 +702,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.cm_devolver=()=>run(s0=>irrDevolver(s0,id),()=>fechar(self,'cm'));
     v.cm_ok=()=>{ const cur=self.state.cm, vs=String(cur.vol||'').trim(),vol=vs?g2num(vs):null;
       if(vol===null||!Number.isFinite(vol)||vol<0){ self.setState({cm:Object.assign({},cur,{err:'Informe o volume medido em m³.'})}); return; }
-      if(v.cm_mot_show&&!String(cur.mot||'').trim()){self.setState({cm:Object.assign({},cur,{emot:'Informe o motivo para aceitar a divergência.'})});return;}
+      /* LEVE-1 (proprietário 19/10): aceitar a divergência sem motivo passa; quem e quando ficam na conferência */
       run(s0=>irrConferir(s0,id,vol,cur.mot),()=>fechar(self,'cm')); }; }
   else { v.cm_kv=[]; v.cm_vol=''; v.cm_mot=''; v.cm_mot_show=false; v.cm_emot=''; v.cm_emot_has=false; v.cm_evol=''; v.cm_evol_has=false; v.cm_setvol=()=>{}; v.cm_setmot=()=>{}; v.cm_devolver=()=>{}; v.cm_ok=()=>{}; v.cm_titulo=''; v.cm_sub=''; v.cm_okT='Validar e encerrar'; }
   // ---- painel: registrar avanço (telemetria e manual do mesmo evento = um registro) ----
@@ -724,7 +724,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.rc_warn=!!rc.warn; v.rc_cancel=()=>{ if(dirty()) self.setState({rc:Object.assign({},self.state.rc,{warn:true})}); else self.setState({rc:null}); };
     v.rc_discard=()=>self.setState({rc:null}); v.rc_keep=()=>self.setState({rc:Object.assign({},self.state.rc,{warn:false})});
     v.rc_ok=()=>{ const cur=self.state.rc; const er={}; const dn=g2num(cur.d.dose); if(isNaN(dn)||dn<=0) er.dose='Use um número maior que zero (ex.: 12).'; else if(dn>50) er.dose='Máximo 50 kg/ha por evento.';
-      if(!String(cur.d.mot||'').trim()) er.mot='Informe o motivo agronômico.'; if(Object.keys(er).length){ self.setState({rc:Object.assign({},cur,{err:er})}); return; }
+      /* LEVE-1 (proprietário 19/10): motivo agronômico opcional */ if(Object.keys(er).length){ self.setState({rc:Object.assign({},cur,{err:er})}); return; }
       const r=irrReclassTudo(self,id,{prod:cur.d.prod,dose:dn,mot:cur.d.mot}); if(!r.erro) self.setState({rc:null}); }; }
   else { v.rc_prod=''; v.rc_dose=''; v.rc_mot=''; v.rc_prev=''; v.rc_setprod=()=>{}; v.rc_setdose=()=>{}; v.rc_setmot=()=>{}; ['prod','dose','mot'].forEach(k=>{ v['rc_e'+k]=''; v['rc_e'+k+'_has']=false; }); v.rc_ok=()=>{}; v.rc_titulo=''; v.rc_sub=''; }
 }

@@ -2,7 +2,10 @@
 """Teste do núcleo de estado da irrigação (irrigacao_estado.js + semente de dados_irrigacao.py) no Chrome headless, sem tela:
 semente (P2 11,2 · P1 ≈8,4 · T7 ≈10,0), tarefas automáticas da Lagoa Grande (tarefa única, OS-0601…), prontidão, conflito, execução,
 crédito parcial só na área coberta, conferência dentro e fora de 3 %, sem leitura não credita, limites só para as próximas e IDs sem colisão.
-Uso: python3 irr_estado_test.py  (≈ 15 s)"""
+Uso: python3 irr_estado_test.py  (≈ 15 s)
+19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): Terminar sem a leitura do hidrômetro deixa de ser recusado; a ordem vai para
+Em conferência "Sem leitura" com volume nulo (não zero) e nada creditado. O caso 18 troca o oráculo "recusa sem alterar" por esse estado; a
+leitura informada depois, na conferência (irrConferir), encerra e só então credita."""
 import sys, os, time, subprocess, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cdp import Chrome
@@ -71,9 +74,11 @@ try:
     antes = E("JSON.stringify(s.ordens['OS-0602'])")
     r = M("irrTerminar(s,'OS-0602',s.setores.PV08.ha,null)")
     vol = E("Math.round(s.ordens['OS-0602'].passadas[0].lam*s.setores.PV08.ha*10)")
-    chk('18 ausência de leitura recusa sem alterar ordem/crédito; volume explícito permite concluir', 'volume medido' in r
-        and E("JSON.stringify(s.ordens['OS-0602'])") == antes and E("irrN(irrDef(s,'PV08'),1)") == '6,4'
-        and isinstance(vol, int) and vol > 0 and 'encerrada' in M(f"irrTerminar(s,'OS-0602',s.setores.PV08.ha,{vol})") and E("irrDef(s,'PV08')<6.4"), [r, vol])
+    o18 = E("(o=>[o.etapa,o.conf&&o.conf.st,o.passadas[0].vol])(s.ordens['OS-0602'])"); d18 = E("irrN(irrDef(s,'PV08'),1)")
+    r2 = M(f"irrConferir(s,'OS-0602',{vol},'')") if isinstance(vol, int) else 'sem vol'
+    chk('18 ausência de leitura (LEVE-1): termina Em conferência "Sem leitura", volume nulo (não zero) e nada creditado; a leitura informada na conferência encerra e só então credita',
+        'sem leitura' in r.lower() and o18 == ['Em conferência', 'Sem leitura', None] and d18 == '6,4' and E("JSON.stringify(s.ordens['OS-0602'])") != antes
+        and isinstance(vol, int) and vol > 0 and E("s.ordens['OS-0602'].etapa") == 'Encerradas' and E("irrDef(s,'PV08')<6.4"), [r, o18, d18, vol, r2])
     r = M("irrLimites(s,'P2',{lmax:4.5,imin:18,efic:90})")
     chk('19 limites valem só para as próximas: OS-0422 liberada mantém 2 passadas', E("s.ordens['OS-0422'].passadas.length") == 2 and 'OS-0422 não muda' in r, r)
     r = M("irrSondaMarcar(s,'SO-P2','Suspeita','salto')")

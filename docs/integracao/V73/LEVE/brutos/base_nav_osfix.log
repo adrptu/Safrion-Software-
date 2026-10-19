@@ -1,0 +1,20 @@
+  ok  sem erro JS
+  FALHOU cabeçalho inicial: 2 em execução · 3 impedidas (OS-0418 sem lote de Ureia, OS-0420 e OS-0431) · i
+  ok  ordens só de água fora da página O.S. (01/10): sem OS-0419, OS-0422 e OS-0423 na lista, no cabeçalho e no texto · []
+  ok  OS-0424 cancelada: insumo mostra a reserva liberada · INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Fungicida A Fungicidas 0,5 L/ha 64 L 0 L Reserva de 65 L liberada · lote F26-02 · REQ-039 ATIVIDADE Pulverização · Fungicida · Trator 04 + Pulverizador PJ-3030 36 m SITUAÇÃO ATUAL Cancelada sem execução por 
+  ok  OS-0424 cancelada: aviso, situação e insumo dizem o mesmo · OS-0424 cancelada sem execução. Reserva de 65 L do lote F26-02 liberada. Cancelada por Ana (gestora).
+  ok  OS-0425 cancelada: insumo mostra a REQ-040 cancelada · INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO NPK 20-05-20 Fertilizantes · padrão do plano v2 300 kg/ha 11.400 kg 0 kg REQ-040 cancelada · nada entregue ATIVIDADE Adubação a lanço · Adubação 1ª parcela · Trator 03 + Distribuidor 3 t SITUAÇÃO ATUAL Cance
+Traceback (most recent call last):
+  File "<base cbe4cd38>/gen37/osfix.py", line 53, in <module>
+    cancelar('OS-0431','Sem máquina'); t=ins()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/osfix.py", line 33, in cancelar
+    abrir(id_); btn('Cancelar sem execução'); setv('aside[role=dialog] textarea[aria-label="Motivo do cancelamento"]',mot); btn('Confirmar cancelamento')
+    ^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/osfix.py", line 24, in abrir
+    def abrir(id_): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r.click();}})()"); time.sleep(.4)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

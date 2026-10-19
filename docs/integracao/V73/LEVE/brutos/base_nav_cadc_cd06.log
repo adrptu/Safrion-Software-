@@ -1,0 +1,10 @@
+OK  abre sem pendência de preço no cabeçalho e sem fatos do Estoque (quarentena, pedido) · Cadastros › Produtos, unidades e locais ‹ Cadastros Produtos, unidades e locais Cadastro completo Criar item
+RESULTADO: OK 1/1
+Traceback (most recent call last):
+  File "<base cbe4cd38>/gen37/cadc_cd06_test.py", line 17, in <module>
+    all(x in r for x in ['kg big bag de 1.000 kg','R$ 2,40/kg','15/09/2026']) and ck=='Só lote' and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,ck,dk[-200:]])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<base cbe4cd38>/gen37/cadc_cd06_test.py", line 17, in <genexpr>
+    all(x in r for x in ['kg big bag de 1.000 kg','R$ 2,40/kg','15/09/2026']) and ck=='Só lote' and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,ck,dk[-200:]])
+        ^^^^^^
+TypeError: argument of type 'NoneType' is not iterable

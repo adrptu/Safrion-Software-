@@ -1,0 +1,16 @@
+OK  1 CD-01 sem erro, subtotal por fazenda e nenhum total somando fazendas · ['', 'Santa Rita Santa Rita Agro Rio Verde/GO Em dia Própria 1.480 ha 1.165,0 ha 8', 'Boa Vista Boa Vista Ltda Sorriso/MT Em dia Arrendada até 31/08/2029 420 ha 120,0 ha 1']
+OK  2 fazenda vazia: erros junto aos campos · Corrija os campos destacados; o que você preencheu foi mantido. | Informe nome da fazenda. | Informe município. | Informe área total do imóvel.
+OK  3 o fuso não é campo (calculado da UF ao salvar, 16/10) · ['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse']
+OK  4 arrendada pede o fim do contrato (sem arrendador nem custo da terra) · [['Nome da fazenda', 'Empresa', 'Município', 'UF', 'Área total do imóvel', 'Posse', 'Fim do contrato'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe o fim do contrato.']
+OK  5 fazenda salva: linha-pai nova com "Incluir talhão" e o fuso calculado da UF (MT → Cuiabá) · ['Fazenda Nova Esperança cadastrada. Próximo passo: incluir os talhões dela.', 'Nova Esperança Santa Rita Agro Lucas do Rio Verde/MT Incluir talhão Em dia Arrendada até 30/06/2030 600 ha 0,0 ha 0', 'América/Cuiabá (UTC−4)']
+OK  6 talhão nasce na fazenda do grupo · Nova Esperança
+OK  7 regras do talhão: pivô já usado barra; área acima da fazenda não barra (LEVE-1: vira aviso no recibo) · Corrija os campos destacados; o que você preencheu foi mantido. | Bomba do Pivô 1 já irriga o P1 (Santa Rita).
+OK  8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda) · ['Nova Esperança Santa Rita Agro Lucas do Rio Verde/MT Em dia Arrendada até 30/06/2030 600 ha 250,0 ha 1', 'N1 cadastrado na Nova Esperança. Próximo passo: definir o polígono no detalhe do talhão.']
+OK  9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido · ['X9', '50', 'Serra Azul']
+OK  10 talhão X9 salvo na Serra Azul · Serra Azul Santa Rita Agro Jataí/GO Em dia Própria 100 ha 50,0 ha 1
+OK  11 T1 com parcelas na safra não inativa · Corrija os campos destacados; o que você preencheu foi mantido. | T1 tem parcelas na Safra 2026/27 e na Safrinha 2027. Tire-as no Planejar safra antes de inativar.
+OK  12 B1 inativo: continua na lista e sai do subtotal (0 talhão ativo na Boa Vista) · ['B1 Inativo 120,0 ha Sequeiro — — 0', 'Boa Vista Boa Vista Ltda Sorriso/MT Em dia Arrendada até 31/08/2029 420 ha 0,0 ha 0']
+OK  13 fazenda sem talhão ativo inativa sem excluir (chip "Inativa" na linha da fazenda) · Boa Vista Inativa Boa Vista Ltda Sorriso/MT Inativa Arrendada até 31/08/2029 420 ha 0,0 ha 0
+OK  14 "Abrir talhão ›" do painel do T2 abre o detalhe do T2 (seletor, crumb e primária do T2 na aba Parcelas) · ['CD-01det.dc.html#talhao=T2', 'Cadastros › Cadastros › T2 · 298 ha Talhão Polígono validado']
+OK  15 detalhe lê o cadastro salvo na lista: B1 inativo · ['Cadastros › Cadastros › B1 · 120 ha Talhão Inativo desde 23/09/2026', 'Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista · inativo PV01 · Lagoa Grande PV02 · Lagoa Grande ', ['Reativar B1']]
+RESULTADO: OK 15/15

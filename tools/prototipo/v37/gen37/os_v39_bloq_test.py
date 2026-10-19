@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """O.S. · bloqueios do cenário na lista e no Kanban (verificador v39, itens 2, 4 e 6): liberação sem lote (OS-0418) e encerramento com
-sobra em custódia (OS-0430) mostram selo e dono fora do painel; rótulo único "Rui (almoxarife)"; período da coluna Encerradas calculado."""
+sobra em custódia (OS-0430) mostram selo e dono fora do painel; rótulo único "Rui (almoxarife)"; período da coluna Encerradas calculado.
+LEVE-1 (leve, proprietário 19/10): Iniciar execução e Enviar para conferência gravam no clique, sem o bloco "Confirmar …"; o passo "Confirmar" sai e o oráculo é a fase e o recibo."""
 import sys, os, time, json, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
@@ -32,7 +33,7 @@ try:
     RQ = T.cen(f"c.ordens['{OS}'].req")
     for prod, q in (('Glifosato 480', 320), ('2,4-D 806', 160), ('Óleo mineral', 80)): T.mudar(f"return cenEntregar(c,'{RQ}','{prod}',{q},'Marcos','Rui');", avisar=False)
     T.mudar(f"cenConfirmarRecebimento(c,'{RQ}'); cenIniciarTurno(c,'{OS}'); return cenFecharTurno(c,160,12,{{'Glifosato 480':300}});")
-    T.ordem(OS); T.btn('Enviar para conferência'); T.btn('Confirmar envio'); T.fechar(); l = T.linha(OS)
+    T.ordem(OS); T.btn('Enviar para conferência'); T.ok(not T.temb('Confirmar envio') and T.cen(f"c.ordens['{OS}'].etapa") == 'Em conferência', 'Enviar para conferência grava no clique, sem "Confirmar envio" (LEVE-1)', T.cen(f"c.ordens['{OS}'].etapa")); T.fechar(); l = T.linha(OS)
     T.ok('Sobras a receber' in l and cor(OS, 'Sobras a receber') == AMAR and T.cel(OS, 'Quem resolve') == 'Rui (almoxarife)' and T.cel(OS, 'Próxima ação') == 'receber a devolução', 'lista da OS-0430: Sobras a receber + Rui (almoxarife)', l)
     tab('Kanban'); k = card(OS); tab('Lista')
     T.ok('Sobras a receber' in k and 'Rui (almoxarife) · receber a devolução' in k, 'Kanban da OS-0430 com o mesmo selo e dono', k)

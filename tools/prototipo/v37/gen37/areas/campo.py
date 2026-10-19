@@ -392,7 +392,7 @@ def _ca02():
          for i,(q,ev,ef,qm) in enumerate(proj)],
         edit=dict(m='ro',title='Passo do roteiro',fields=[dict(k='q',l='Quando',ro=True),dict(k='ev',l='Evento',ro=True),dict(k='ef',l='Efeito',ro=True),dict(k='quem',l='Quem',ro=True)]),
         search=False,gid='g_proj',total=False,headtools=False)
-    reabrir=imsg('Conferir reabertura do saldo', 'Prévia · nada foi alterado. A reabertura do saldo da OS-0417 ainda não está disponível neste protótipo. Confira os apontamentos e as condições na O.S.; a conferência e a aprovação continuam necessárias.', 'calendar', 'Ver disponibilidade da reabertura do saldo')+ilink('Abrir O.S.','OS.dc.html#OS-0417','arrow','Conferir a OS-0417')
+    reabrir=ilink('Abrir O.S.','OS.dc.html#OS-0417','arrow','Conferir a OS-0417')   # LEVE-1 (proprietário 19/10): sai o botão "Conferir reabertura do saldo" (prévia sem efeito)
     corpo=(
       # EX-50(a)-SUP (PR #109) + TAB-07: sem cartões de resumo fixos; o selo conta o que falta revisar. Divergência é decisão do formulário da linha
       bloco('Fila de conferência diária','Clique no apontamento para conferir o dia ou registrar divergência com motivo; nada altera área, horas ou consumo.',g_fila)

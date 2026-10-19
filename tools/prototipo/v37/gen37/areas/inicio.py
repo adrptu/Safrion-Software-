@@ -900,7 +900,6 @@ function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)
 function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
   return {aprovar:'Aprovar '+o.id+' (versão '+vn+'): ao confirmar, '+g2ator(g2perfil(),g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera.',
     liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+osLibTxt(g2perfil(),o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')+osUsoAtencao(cenGet(),o.id)),
-    iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+'.',conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',
     encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[fn]||''; }
 function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb.P, b=pb.b;   /* CTL-3: quem age (perfil) */ const pa=(self.state.mpa&&self.state.mpa.id===o.id)?self.state.mpa:null;
   const N={id:o.id,t:P.t,btn:'',isBtn:false,go:()=>{},bloq:!!b,bt:b?b.t:'',bq:b?'Quem resolve: '+b.q:'',hasBh:!!(b&&b.h),bh:(b&&b.h)||'#',bhl:(b&&b.hl)||'',
@@ -911,10 +910,12 @@ function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb
   const a=mo&&mo.act; if(a&&((a.k==='lib'&&g2papel(PF,g2alc('AL-02').papeis))||(a.k==='op'&&b&&b.h&&a.h!==b.h))){   /* ajustar antes de liberar: só o agrônomo */ N.hasLib=true; N.libt=a.t; N.libh=a.h==='OS.dc.html'?'OS.dc.html#'+o.id:a.h; if(a.k==='lib') N.libh='OS.dc.html#'+o.id+':ajustar'; }
   if(P.fn==='ajustar'){ N.hasLib=true; N.libt=P.btn; N.libh='OS.dc.html#'+o.id+':ajustar'; }   /* SOLO-01 · revisão A6: plano mudado pela análise, o ajuste abre na O.S. (o Mapa não tem o formulário) */
   else if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
-      self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
+      self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); }
+      else if(OS_DIRETO.indexOf(P.fn)>=0) osRun(self,osDireto(o.id,P.fn,o.etapa),{mpa:null},(e)=>self.setState({mpa:{id:o.id,fn:'',err:e}}));   /* LEVE-1: Iniciar e Enviar gravam no clique (núcleo da O.S.) */
+      else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
   if(!b&&o.dono){ N.dono='Pendência com '+o.dono+(o.prazo?' · '+o.prazo:''); N.hasDono=true; }
-  if(pa&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar')){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1) */ N.ct=mapCt(o,pa.fn); N.cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
-    N.yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
+  if(pa&&['liberar','aprovar','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar')){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1); Iniciar e Enviar sem confirmação (LEVE-1) */ N.ct=mapCt(o,pa.fn); N.cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',encerrar:'Confirmar encerramento'}[pa.fn];
+    N.yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
       osRun(self,F,{mpa:null},(e)=>self.setState({mpa:Object.assign({},pa,{err:e})})); }; }
   if(pa&&pa.fn==='apontar'){ N.ap=true; const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP); N.ad=pa.d||''; N.aha=pa.ha||'';
     N.asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'')+'. Os insumos usados saem pela dose.';
