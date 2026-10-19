@@ -134,7 +134,7 @@ class Reflectancia(unittest.TestCase):
         try: import numpy as np
         except ImportError: self.skipTest('numpy ausente')
         banda = {'raster:bands': [{'scale': 0.0001, 'offset': -0.1}]}
-        red, nir = np.array([296.0]), np.array([2500.0])                      # vegetação densa (vermelho bruto p5 dos pivôs em 19/10)
+        red, nir = np.array([400.0]), np.array([2500.0])                      # vegetação densa (números inventados: 0,04 e 0,25 de reflectância)
         nd = lambda r, n: float(((n - r) / (n + r))[0])
         certo = nd(S.refl(red, banda, True), S.refl(nir, banda, True))
         errado = nd(S.refl(red, banda, False), S.refl(nir, banda, False))
@@ -144,11 +144,15 @@ class Reflectancia(unittest.TestCase):
 
 
 class Formato(unittest.TestCase):
-    def test_quantizacao_e_fase(self):
+    def test_quantizacao_e_legenda_numerica(self):
         self.assertEqual((S.quant(-1.0), S.quant(1.0), S.quant(0.0)), (0, 250, 125))
         self.assertAlmostEqual(S.deq(S.quant(0.6)), 0.6, places=2)
-        self.assertEqual((S.fase_de(0.1), S.fase_de(0.5), S.fase_de(1.0), S.fase_de(None)), ('preparo · solo exposto', 'formação', 'produção', 'sem leitura (nuvem)'))
         self.assertEqual(S.cor_ndvi(1.0), (0x0B, 0x7A, 0x1E))
+        # sem estágio agronômico inferido do NDVI (Codex 6270730787): só faixas de valor contínuas, de −1 a 1, e a cor
+        L = S.legenda_ndvi()
+        self.assertFalse(hasattr(S, 'fase_de') or hasattr(S, 'FASES'))
+        self.assertEqual((L[0]['de'], L[-1]['ate']), (-1.0, 1.0))
+        self.assertTrue(all(a['ate'] == b['de'] for a, b in zip(L, L[1:])) and all(set(x) == {'de', 'ate', 'cor'} for x in L))
 
     def test_indice_invalido_sai_sem_corte(self):
         # contraprova: a regra anterior, max(-1, min(1, v)), levava 1,2 a 1,0 e o contava como vigor máximo
