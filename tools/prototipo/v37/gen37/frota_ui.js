@@ -51,8 +51,14 @@ function frModelo(self) {
     const comPos = !!(at && pos[0] && pf.pos), idade = at ? agora - at.obs : null;
     return {cj, geo, at, ava, pos, comPos, idade, selo, conflito: K[cj.os] || [], hora: at ? frHora(at.obs) : ''};
   }).sort((a, b) => a.cj.os < b.cj.os ? -1 : 1);
-  return {agora, it, pf, n: it.length};
+  // entradas (frEntradas, a mesma regra do frMarcadores): marcador, lista e contagens por conjunto físico; o mesmo conjunto do mesmo grupo, em
+  // sequência, é uma entrada com as O.S. dele (K4). x: a O.S. cuja leitura o marcador mostra (a posição é a do conjunto: a leitura mais nova)
+  const ent = frEntradas(cjs, K).map(e => { const its = e.oss.map(os => it.find(i => i.cj.os === os));
+    return Object.assign(e, {its, x: its.filter(i => i.comPos && i.geo).sort((a, b) => b.at.obs - a.at.obs)[0] || its[0]}); });
+  return {agora, it, ent, pf, n: ent.length};
 }
+// entrada que contém a O.S. (o "Ver no mapa" de qualquer O.S. do conjunto seleciona o marcador dele)
+function frEntDe(md, os) { return ((md && md.ent) || []).find(e => e.oss.indexOf(os) >= 0) || null; }
 function frTal(t) { try { return typeof rotT === 'function' ? rotT(t) : t; } catch (e) { return t; } }
 function frTals(cj) { return cj.tal.map(frTal).join(' + '); }
 function frNomeConj(cj) { return cj.componentes.length ? cj.componentes.map(x => x.nome).join(' + ') : (cj.fixo ? frTals(cj) + ' (ativo fixo)' : 'Sem conjunto alocado hoje'); }
@@ -72,9 +78,9 @@ function frEstTxt(x, pf) {
   if (!pf.pos && x.ava.estado !== 'Desconhecido') return 'Estado da máquina restrito ao seu perfil';
   return x.ava.estado === 'Desconhecido' ? 'estado desconhecido' : x.ava.estado;
 }
-function frAria(x, pf) {
-  const cj = x.cj, est = frEstTxt(x, pf);
-  return [frNomeConj(cj), cj.fam.curto, cj.os, est, pf.pos && x.at ? 'leitura ' + frIdadeTxt(x.idade) : '', pf.pos && x.at ? 'simulação' : '', x.conflito.length ? 'Conflito' : ''].filter(Boolean).join(' · ');
+function frAria(e, pf) {   // e: entrada (um conjunto, com uma ou mais O.S.)
+  const x = e.x, cj = x.cj, est = frEstTxt(x, pf);
+  return [frNomeConj(cj), cj.fam.curto, e.oss.join(' e '), est, pf.pos && x.at ? 'leitura ' + frIdadeTxt(x.idade) : '', pf.pos && x.at ? 'simulação' : '', x.conflito.length ? 'Conflito' : ''].filter(Boolean).join(' · ');
 }
 // ----- valores do template (chamado no fim do MAPVALS) -----
 function frVals(self, v) {
@@ -121,18 +127,19 @@ function frOrigem(o) { FRUI.origem = o; }
 function frAbre(os, origem) { const self = FRUI.self; if (!self) return; frOrigem({tipo: origem, os}); self.setState({frSel: os});   // não seleciona o talhão
   setTimeout(() => { const t = document.querySelector('[data-frota-painel] h2'); if (t) t.focus(); }, 60); }
 function frFecha() { const self = FRUI.self; if (!self) return; const o = FRUI.origem, s = self.state;
-  if (s.frSel && s.frLista) { self.setState({frSel: null}); setTimeout(() => { const b = document.querySelector('[data-frota-painel] [data-frota-linha="' + (o && o.os) + '"] button'); if (b) b.focus(); }, 60); return; }
+  const e = o && o.os ? frEntDe(FRUI.modelo, o.os) : null, k = e ? e.k : (o && o.os);   // o marcador e a linha são do conjunto (K4: a chave é a 1ª O.S.)
+  if (s.frSel && s.frLista) { self.setState({frSel: null}); setTimeout(() => { const b = document.querySelector('[data-frota-painel] [data-frota-linha="' + k + '"] button'); if (b) b.focus(); }, 60); return; }
   self.setState({frSel: null, frLista: false});
-  setTimeout(() => { const b = o && o.os && (FRUI.mk[o.os] || (FRUI.lg[o.os] && FRUI.lg[o.os].getElement())); if (b && b.getClientRects().length) b.focus();
+  setTimeout(() => { const b = k && (FRUI.mk[k] || (FRUI.lg[k] && FRUI.lg[k].getElement())); if (b && b.getClientRects().length) b.focus();
     else { const t = document.querySelector('[data-frota-tog]'); if (t) t.focus(); } }, 60);
 }
 // ----- desenho (marcadores, legenda, lista e painel) -----
-function frMarcadorHtml(x) {
-  const cj = x.cj, sel = FRUI.self && FRUI.self.state.frSel === cj.os, atual = frAtual(x), e = frEstadoCurto(x);
+function frMarcadorHtml(ent) {   // ent: entrada; com mais de uma O.S. (K4), o selo diz quantas
+  const x = ent.x, cj = x.cj, sel = !!FRUI.self && ent.oss.indexOf(FRUI.self.state.frSel) >= 0, atual = frAtual(x), e = frEstadoCurto(x);
   const ic = (FR_ICONES || {})[cj.fam.icone] || '', selo = atual || /envio suspenso/.test(x.pos[1]) ? (e || ['?', 'desconhecido']) : FR_SELO.semSinal;
   const seta = atual && x.at && x.at.rumo != null && x.at.vel > 0.5 ? '<span class="fr-seta" style="transform:rotate(' + Math.round(x.at.rumo) + 'deg)" aria-hidden="true"></span>' : '';
   return '<span class="fr-disco' + (atual ? '' : ' fr-vazado') + (sel ? ' fr-sel' : '') + '" aria-hidden="true">' + ic + seta + '</span>'
-    + '<span class="fr-rot" aria-hidden="true"><b>' + frEsc(frCurto(cj)) + ' · ' + frEsc(cj.fam.curto) + '</b><span class="fr-selo">' + selo[0] + ' ' + selo[1] + (x.conflito.length ? ' · Conflito' : '') + '</span></span>';
+    + '<span class="fr-rot" aria-hidden="true"><b>' + frEsc(frCurto(cj)) + ' · ' + frEsc(cj.fam.curto) + '</b><span class="fr-selo">' + selo[0] + ' ' + selo[1] + (ent.oss.length > 1 ? ' · ' + ent.oss.length + ' O.S.' : '') + (x.conflito.length ? ' · Conflito' : '') + '</span></span>';
 }
 function frTelaSvg(x) {   // posição da leitura no desenho da Santa Rita → pixels dentro da camada
   const svg = [...document.querySelectorAll('svg[data-mux-grupo]')].find(s => s.getClientRects().length); if (!svg || !x.geo || !x.at) return null;
@@ -143,34 +150,36 @@ function frDesenha() {
   const self = FRUI.self, md = FRUI.modelo; if (!self || !md) return; const st = self.state, on = !!st.frOn;
   const cam = [...document.querySelectorAll('[data-frota-camada]')].find(d => d.getClientRects().length) || null;
   const lgOn = typeof LGI !== 'undefined' && LGI.map && LGI.pronto && FAZ === 'Lagoa Grande';
-  const vis = on && md.pf.pos ? md.it.filter(x => x.comPos && x.geo) : [];
+  // um marcador por entrada (frEntradas: um por conjunto físico; K4 junta as O.S. do mesmo conjunto do grupo, em sequência), chave = a 1ª O.S.
+  const vis = on && md.pf.pos ? md.ent.filter(e => e.x.comPos && e.x.geo) : [];
   const vivos = new Set();
   // posições na tela (para o agrupamento: menos de 28 px vira "N máquinas"; o marcador com foco e o selecionado nunca entram num grupo)
   const R = cam ? cam.getBoundingClientRect() : null, pts = [];
-  vis.forEach(x => { let q = null;
+  vis.forEach(e => { const x = e.x; let q = null;
     if (x.geo.modo === 'svg' && R) { const s = frTelaSvg(x); if (s) q = [s[0] - R.left, s[1] - R.top]; }
     else if (x.geo.modo === 'lg' && lgOn) { const p = LGI.map.project([x.at.lon, x.at.lat]); q = [p.x, p.y]; }
-    if (q) pts.push([x.cj.os, q[0], q[1], x]); });
+    if (q) pts.push([e.k, q[0], q[1], e]); });
   const foco = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-frota-os');
-  const [grupos] = frAgrupar(pts.map(p => [p[0], p[1], p[2]]), foco, st.frSel);
+  const sE = frEntDe(md, st.frSel), selK = sE ? sE.k : st.frSel;   // "Ver no mapa" de qualquer O.S. do conjunto seleciona o marcador dele
+  const [grupos] = frAgrupar(pts.map(p => [p[0], p[1], p[2]]), foco, selK);
   const emGrupo = {}; grupos.filter(g => g.length > 1).forEach(g => g.forEach(id => { emGrupo[id] = g; }));
   const tb = document.querySelector('[data-frota-tog]'), tbB = tb && tb.getClientRects().length ? tb.getBoundingClientRect().bottom : -1;
   const topo = x => { const c = x.geo.modo === 'svg' ? R : (lgOn ? LGI.map.getContainer().getBoundingClientRect() : null); return c ? c.top : 0; };
-  pts.forEach(([os, px, py, x]) => {
+  pts.forEach(([os, px, py, e]) => { const x = e.x;
     if (emGrupo[os]) return; vivos.add(os);
     const baixo = topo(x) + py - 22 < tbB + 8;   // o rótulo ficaria sob a barra de ferramentas: vai para baixo do disco
-    const html = frMarcadorHtml(x), aria = frAria(x, md.pf);
+    const html = frMarcadorHtml(e), aria = frAria(e, md.pf);
     if (x.geo.modo === 'svg') {
       let b = FRUI.mk[os]; if (b && !b.isConnected) { delete FRUI.mk[os]; b = null; }
       if (!b && cam) { b = document.createElement('button'); b.type = 'button'; b.className = 'fr-m'; b.setAttribute('data-frota-os', os); b.onclick = () => frAbre(os, 'mapa'); cam.appendChild(b); FRUI.mk[os] = b; }
       if (!b) return; if (b.__h !== html) { b.innerHTML = html; b.__h = html; } if (b.getAttribute('aria-label') !== aria) b.setAttribute('aria-label', aria);
-      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); b.style.transform = 'translate(' + Math.round(px - 22) + 'px,' + Math.round(py - 22) + 'px)';
+      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', selK === os ? 'true' : 'false'); b.style.transform = 'translate(' + Math.round(px - 22) + 'px,' + Math.round(py - 22) + 'px)';
     } else if (lgOn && window.maplibregl) {
       let mk = FRUI.lg[os];
       if (!mk) { const b = document.createElement('button'); b.type = 'button'; b.className = 'fr-m fr-m-lg'; b.setAttribute('data-frota-os', os); b.onclick = (e) => { e.stopPropagation(); frAbre(os, 'mapa'); };
         mk = new maplibregl.Marker({element: b, anchor: 'center'}).setLngLat([x.at.lon, x.at.lat]).addTo(LGI.map); FRUI.lg[os] = mk; }
       const b = mk.getElement(); if (b.__h !== html) { b.innerHTML = html; b.__h = html; } if (b.getAttribute('aria-label') !== aria) b.setAttribute('aria-label', aria);
-      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', st.frSel === os ? 'true' : 'false'); mk.setLngLat([x.at.lon, x.at.lat]);
+      b.classList.toggle('fr-baixo', baixo); b.setAttribute('aria-pressed', selK === os ? 'true' : 'false'); mk.setLngLat([x.at.lon, x.at.lat]);
     }
   });
   // grupos: um botão "N máquinas" (44 px) que abre a lista
@@ -179,7 +188,8 @@ function frDesenha() {
     const cx = ps.reduce((s, p) => s + p[1], 0) / ps.length, cy = ps.reduce((s, p) => s + p[2], 0) / ps.length; let b = FRUI.grp[k];
     if (b && !b.isConnected) { delete FRUI.grp[k]; b = null; }
     if (!b && cam) { b = document.createElement('button'); b.type = 'button'; b.className = 'fr-m fr-grupo'; b.onclick = () => FRUI.self.setState({frLista: true, frSel: null, frGrupo: g.slice()}); cam.appendChild(b); FRUI.grp[k] = b; }
-    if (!b) return; b.textContent = g.length + ' máquinas'; b.setAttribute('aria-label', g.length + ' máquinas neste ponto: abrir a lista'); b.style.transform = 'translate(' + Math.round(cx - 22) + 'px,' + Math.round(cy - 22) + 'px)'; });
+    const conf = ps.some(p => p[3].its.some(i => i.conflito.length));   // o grupo nunca esconde o conflito de quem está nele
+    if (!b) return; b.textContent = g.length + ' máquinas' + (conf ? ' · Conflito' : ''); b.setAttribute('aria-label', g.length + ' máquinas neste ponto' + (conf ? ', com conflito' : '') + ': abrir a lista'); b.style.transform = 'translate(' + Math.round(cx - 22) + 'px,' + Math.round(cy - 22) + 'px)'; });
   Object.keys(FRUI.grp).forEach(k => { if (!gv.has(k)) { FRUI.grp[k].remove(); delete FRUI.grp[k]; } });
   Object.keys(FRUI.mk).forEach(os => { if (!vivos.has(os) || !FRUI.mk[os].isConnected) { FRUI.mk[os].remove(); delete FRUI.mk[os]; } });
   Object.keys(FRUI.lg).forEach(os => { if (!vivos.has(os) || !lgOn) { FRUI.lg[os].remove(); delete FRUI.lg[os]; } });
@@ -208,40 +218,48 @@ function frCarga(x) {
 }
 function frPainel(on, md) {
   const el = document.querySelector('[data-frota-painel]'); if (!el) return; const st = FRUI.self.state, pf = md.pf;
-  const x = st.frSel ? md.it.find(i => i.cj.os === st.frSel) : null;
+  // e: a entrada da O.S. selecionada; x: a leitura do conjunto (a do marcador); i: a O.S. selecionada (com uma O.S. só, i = x)
+  const e = st.frSel ? frEntDe(md, st.frSel) : null, x = e ? e.x : null, i = e ? e.its.find(y => y.cj.os === st.frSel) : null;
   let chave, cab, corpo, acoes;
   if (st.frSel) {
-    if (!x) { chave = 'saiu|' + st.frSel; const c = (typeof MAPC !== 'undefined' && MAPC) || cenGet(), et = ((c.ordens || {})[st.frSel] || {}).etapa || 'fora do mapa';
+    if (!e) { chave = 'saiu|' + st.frSel; const c = (typeof MAPC !== 'undefined' && MAPC) || cenGet(), et = ((c.ordens || {})[st.frSel] || {}).etapa || 'fora do mapa';
       cab = '<h2 tabindex="-1">' + frEsc(st.frSel) + '</h2><div class="fr-sub">Máquinas</div>';
       corpo = '<div role="status" class="fr-aviso">' + frEsc(st.frSel) + ' saiu de Em execução (agora ' + frEsc(et) + ') · dados desta máquina retirados</div>';
       acoes = '<a class="fr-prim" href="OS.dc.html#' + frEsc(st.frSel) + '">Abrir O.S.</a>';
     } else {
-      const cj = x.cj; chave = 'cj|' + cj.os + '|' + (st.frLista ? 'l' : '');
-      cab = '<h2 tabindex="-1">' + frEsc(frNomeConj(cj)).replace(/(\d) (m|ha)\b/g, '$1&nbsp;$2') + '</h2><div class="fr-sub">' + frEsc(cj.fam.curto + ' · ' + cj.os + (cj.versao ? ' · ' + (/^v/.test(cj.versao) ? '' : 'v') + cj.versao : '') + ' · ' + frTals(cj)) + '</div>';
-      const kv = [['O.S. e versão', cj.os + (cj.versao ? ' · versão ' + cj.versao : '')], ['Operação', cj.tipo], ['Talhão', frTals(cj)],
-        ['Conjunto', frNomeConj(cj) + (cj.vinculo === 'programacao' ? ' · pela programação' + (cj.condicional ? ' (condicional)' : '') : (cj.vinculo === 'fixture' ? ' · conjunto de demonstração' : ''))],
+      // K4 (mais de uma O.S. no conjunto): os campos da O.S. trazem cada uma, com o horário da programação; máquina, estado e posição são do conjunto
+      const cj = i.cj, mais = e.its.length > 1, por = f => mais ? e.its.map(y => y.cj.os + ': ' + f(y)) : f(i); chave = 'cj|' + e.k + '|' + (st.frLista ? 'l' : '');
+      const hh = h => String(Math.floor(h)).padStart(2, '0') + ':' + String(Math.round(h % 1 * 60)).padStart(2, '0');
+      const ver = y => y.cj.os + (y.cj.versao ? ' · versão ' + y.cj.versao : '') + (mais ? y.cj.blocos.map(b => ' · ' + hh(b[0]) + '–' + hh(b[1])).join('') : '');
+      cab = '<h2 tabindex="-1">' + frEsc(frNomeConj(cj)).replace(/(\d) (m|ha)\b/g, '$1&nbsp;$2') + '</h2><div class="fr-sub">' + frEsc(mais ? cj.fam.curto + ' · ' + e.oss.join(' e ') + ' · ' + [...new Set(e.its.map(y => frTals(y.cj)))].join(' · ')
+        : cj.fam.curto + ' · ' + cj.os + (cj.versao ? ' · ' + (/^v/.test(cj.versao) ? '' : 'v') + cj.versao : '') + ' · ' + frTals(cj)) + '</div>';
+      const kv = [['O.S. e versão', mais ? e.its.map(ver) : ver(i)], ['Operação', por(y => y.cj.tipo)], ['Talhão', por(y => frTals(y.cj))],
+        ['Conjunto', frNomeConj(cj) + (cj.vinculo === 'programacao' ? ' · pela programação' + (mais ? ' do grupo ' + cj.grupo + ', em sequência' : '') + (cj.condicional ? ' (condicional)' : '') : (cj.vinculo === 'fixture' ? ' · conjunto de demonstração' : ''))],
         ['Estado', frEstTxt(x, pf) + (pf.pos && x.at ? ' · ' + x.hora : '')], ['Posição', frPosTxt(x, pf) + (pf.pos && x.at ? ' · precisão não informada' : '')],
-        ['Quanto falta', frFalta(x)]];
+        ['Quanto falta', por(frFalta)]];
       if (pf.pos && x.at && frAtual(x)) kv.push(['Velocidade', frNum(x.at.vel, 0) + ' km/h (leitura)']);
-      const cg = frCarga(x); if (cg) kv.push(['Carga', cg]);
-      kv.push(['Operador', pf.nome ? (cj.pessoas.filter(p => /operador/.test(p.papel)).map(p => p.nome).join(', ') || cj.resp || '—') : 'operador da O.S.']);
-      if (x.selo) kv.push(['O.S.', x.selo]);
-      corpo = '<dl class="fr-kv">' + kv.map(([k, v]) => '<div><dt>' + frEsc(k) + '</dt><dd>' + frEsc(v) + '</dd></div>').join('') + '</dl>'
-        + x.conflito.map(k => '<div class="fr-conf">Conflito · ' + frEsc(k.nome) + ' também na ' + k.com.map(o => '<a href="OS.dc.html#' + o + '">' + o + '</a>').join(', ') + '</div>').join('')
+      const cg = mais ? e.its.filter(frCarga).map(y => y.cj.os + ': ' + frCarga(y)) : frCarga(i); if (cg.length) kv.push(['Carga', cg]);
+      kv.push(['Operador', pf.nome ? ([...new Set(e.its.flatMap(y => y.cj.pessoas.filter(p => /operador/.test(p.papel)).map(p => p.nome)))].join(', ') || cj.resp || '—') : 'operador da O.S.']);
+      const sl = mais ? e.its.filter(y => y.selo).map(y => y.cj.os + ': ' + y.selo) : i.selo; if (sl && sl.length) kv.push(['O.S.', sl]);
+      corpo = '<dl class="fr-kv">' + kv.map(([k, v]) => '<div><dt>' + frEsc(k) + '</dt><dd>' + (Array.isArray(v) ? v.map(frEsc).join('<br>') : frEsc(v)) + '</dd></div>').join('') + '</dl>'
+        + e.its.flatMap(y => y.conflito).map(k => '<div class="fr-conf">Conflito · ' + frEsc(k.nome) + ' também na ' + k.com.map(o => '<a href="OS.dc.html#' + o + '">' + o + '</a>').join(', ') + '</div>').join('')
         + (x.ava.aviso && pf.pos ? '<div role="note" class="fr-aviso">' + frEsc(x.ava.aviso) + '</div>' : '')
         + (pf.pos && x.at ? '<div class="fr-nota">Fonte: simulação · posições de demonstração, sem efeito na O.S.</div>' : '');
-      acoes = '<a class="fr-prim" href="OS.dc.html#' + frEsc(cj.os) + '">Abrir O.S.</a>' + (x.selo ? '<a class="fr-sec" href="OS.dc.html#' + frEsc(cj.os) + '">Ver impedimento</a>' : '')
+      acoes = '<a class="fr-prim" href="OS.dc.html#' + frEsc(cj.os) + '">' + (mais ? 'Abrir ' + frEsc(cj.os) : 'Abrir O.S.') + '</a>'   // as outras O.S. do conjunto, a 1 toque
+        + e.oss.filter(o => o !== cj.os).map(o => '<a class="fr-sec" href="OS.dc.html#' + frEsc(o) + '">Abrir ' + frEsc(o) + '</a>').join('') + (i.selo ? '<a class="fr-sec" href="OS.dc.html#' + frEsc(cj.os) + '">Ver impedimento</a>' : '')
         + (cj.fixo ? '<a class="fr-sec" href="IR-01.dc.html#faz=' + encodeURIComponent(FAZ) + '">Ver na Irrigação</a>' : '')
         + (cj.tal.length ? '<button type="button" class="fr-sec" data-frota-tal="' + frEsc(cj.tal.find(t => TIDS().indexOf(t) >= 0) || cj.tal[0]) + '">Ver talhão</button>' : '');
     }
   } else if (st.frLista) {
     chave = 'lista';
-    const g = st.frGrupo && st.frGrupo.length ? st.frGrupo : null, its = md.it.filter(i => !g || g.indexOf(i.cj.os) >= 0);
-    cab = '<h2 tabindex="-1">Máquinas em execução (' + its.length + ')</h2><div class="fr-sub">' + frEsc(FAZ + ' · ' + SAF) + (g ? ' · ' + g.length + ' no mesmo ponto' : '') + '</div>';
+    const g = st.frGrupo && st.frGrupo.length ? st.frGrupo : null, es = md.ent.filter(e => !g || g.indexOf(e.k) >= 0);   // uma linha por conjunto (K4: com as O.S. dele)
+    cab = '<h2 tabindex="-1">Máquinas em execução (' + es.length + ')</h2><div class="fr-sub">' + frEsc(FAZ + ' · ' + SAF) + (g ? ' · ' + g.length + ' no mesmo ponto' : '') + '</div>';
     corpo = '<table class="fr-tab"><thead><tr><th>Conjunto</th><th>Operação</th><th>O.S.</th><th>Talhão</th><th>Estado</th><th>Posição</th><th>Feito/saldo</th></tr></thead><tbody>'
-      + its.map(i => '<tr data-frota-linha="' + i.cj.os + '"><td><button type="button" data-frota-abre="' + i.cj.os + '">' + frEsc(frNomeConj(i.cj)) + '</button></td><td>' + frEsc(i.cj.fam.curto) + '</td><td>' + i.cj.os + '</td><td>'
-        + frEsc(frTals(i.cj)) + '</td><td>' + frEsc(i.cj.fixo ? (i.selo ? 'O.S. ' + i.selo.toLowerCase() : '—') : (i.selo ? 'O.S. ' + i.selo.toLowerCase() + ' · máquina: ' : '') + frEstTxt(i, pf)) + (i.conflito.length ? ' · Conflito · também na ' + i.conflito.map(k => k.com.join(', ')).join(', ') : '') + '</td><td>'
-        + frEsc(frPosTxt(i, pf)) + '</td><td>' + frEsc(frFeito(i.cj)) + '</td></tr>').join('') + '</tbody></table>'
+      + es.map(e => { const i = e.x, mais = e.its.length > 1, sl = e.its.filter(y => y.selo).map(y => 'O.S. ' + (mais ? y.cj.os + ' ' : '') + y.selo.toLowerCase()).join(' · ');
+        const cf = [...new Set(e.its.flatMap(y => y.conflito.flatMap(k => k.com)))];
+        return '<tr data-frota-linha="' + e.k + '"><td><button type="button" data-frota-abre="' + e.k + '">' + frEsc(frNomeConj(i.cj)) + '</button></td><td>' + frEsc(i.cj.fam.curto) + '</td><td>' + e.oss.join(' e ') + '</td><td>'
+        + frEsc([...new Set(e.its.map(y => frTals(y.cj)))].join(' · ')) + '</td><td>' + frEsc(i.cj.fixo ? (sl || '—') : (sl ? sl + ' · máquina: ' : '') + frEstTxt(i, pf)) + (cf.length ? ' · Conflito · também na ' + cf.join(', ') : '') + '</td><td>'
+        + frEsc(frPosTxt(i, pf)) + '</td><td>' + frEsc(e.its.map(y => (mais ? y.cj.os + ': ' : '') + frFeito(y.cj)).join(' · ')) + '</td></tr>'; }).join('') + '</tbody></table>'
       + (pf.pos ? '<div class="fr-nota">Fonte: simulação · posições de demonstração</div>' : '');
     acoes = '';
   } else { if (el.__k) { el.innerHTML = ''; el.__k = ''; } return; }
