@@ -801,7 +801,7 @@ function cls0(l,f,t){
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
     const R=cusReal(t); if(!R.ha) return {c:'none',l:R.shared.length?('só '+R.shared.map(x=>x.o.id).join(', ')+' compartilhada'):'sem execução'}; const dv=R.prevExec>0?(R.rs-R.prevExec)/R.prevExec*100:null;
     const a=metaAvaliar(cenGet(),'custo-desvio',dv,'%',!!((R.pend||[]).length||(R.shared||[]).length));
-    return {c:({green:'ok',yellow:'yellow',red:'red',gray:'gray'})[a.cor],l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1).replace('-', '−')+' %')+' · '+a.texto+(metaDe(cenGet(),'custo-desvio')?' · '+metaDica(cenGet(),'custo-desvio'):'')}; }
+    return {c:({green:'ok',yellow:'yellow',red:'red',gray:'gray'})[a.cor],l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1).replace('-', '−')+' %')}; }
   return {c:'none',l:''}; }
 // MUX-F2 (17/10/2026): cada classe da legenda leva a chave da cor (k) ou o hex (hx) para contar talhões e área, realçar e filtrar (legenda que trabalha);
 // "não se aplica" (none) ganha contorno tracejado no quadradinho, o mesmo do talhão no mapa (D14: a cor do fundo sozinha tinha contraste 1,0:1)
@@ -836,7 +836,7 @@ function fonte(l,f){
   if(l==='MIP/MID') return 'vistorias de Pragas e doenças · NC por alvo e fase · '+(FAZ==='Lagoa Grande'?'pivôs reais, vistorias demonstrativas':'talhões desenhados')+' · hoje '+M.hoje;
   if(l==='Irrigação') return FAZ==='Lagoa Grande'?('balanço hídrico demonstrativo sobre os pivôs reais · ETo 5,5 mm/dia × Kc do mamão por fase · tarefas do dia geradas pelo balanço · hoje '+M.hoje):'balanço hídrico 23/09 06:00 · Estação Santa Rita e sondas P1, P2 e T7 · ≈ = estimativa por ET · ordens do módulo Irrigação';
   if(isIns(l,f)){ const F=M.dem.faz[safK()]; if(!F) return 'safra '+SAF+' encerrada: sem necessidade a comprar'; return 'necessidade líquida da '+(F?F.nomes[F.saf]:'safra')+' (plano sem O.S. + O.S. abertas pelo que falta tirar do almoxarifado): a mesma do Planejar safra e da Compra · estoque apto e pedidos da fazenda, não divididos por talhão'; }
-  if(l==='Custos') return 'previsto = dose × preço + operação (rendimento da safra) · realizado provisório dos apontamentos aceitos · conferido à parte';
+  if(l==='Custos') return 'previsto = dose × preço + operação (rendimento da safra) · realizado provisório dos apontamentos aceitos · conferido à parte'+(f.most==='Previsto R$/ha'?'':' · '+metaDica(cenGet(),'custo-desvio'));
   return ''; }
 function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS().filter(inF); const ordF=M.ord.filter(o=>!mc_irrAgua(o)&&osSaf(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
   if(isCar(l,f)) return carStrip(f);   // MAPA-CARENCIA-LMR-20261003
