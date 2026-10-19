@@ -1,0 +1,26 @@
+OK   1440px Prioridades sem rolagem lateral (1440 ≤ 1440)
+OK   1440px Alavancas com 4 cultivo(s)
+OK   1440px Alavancas: todos os chips em cinza (sem meta, D11)
+OK   1440px Alavancas: "Meta não configurada" uma vez no título, nenhuma linha repete
+OK   1440px aba agr: 4 cartão(ões) "Meta não configurada", todos em cinza
+OK   1440px aba agr sem rolagem lateral (1440 ≤ 1440)
+OK   1440px aba man: 1 cartão(ões) "Meta não configurada", todos em cinza
+OK   1440px aba man sem rolagem lateral (1440 ≤ 1440)
+OK   1440px Ativos bloqueados com cor de domínio (rgb(253, 232, 230))
+OK   1440px aba com: 2 cartão(ões) "Meta não configurada", todos em cinza
+OK   1440px aba com sem rolagem lateral (1440 ≤ 1440)
+OK   390px Prioridades sem rolagem lateral (390 ≤ 390)
+OK   390px Alavancas com 4 cultivo(s)
+OK   390px Alavancas: todos os chips em cinza (sem meta, D11)
+OK   390px Alavancas: "Meta não configurada" uma vez no título, nenhuma linha repete
+OK   390px aba agr: 4 cartão(ões) "Meta não configurada", todos em cinza
+OK   390px aba agr sem rolagem lateral (390 ≤ 390)
+OK   390px aba man: 1 cartão(ões) "Meta não configurada", todos em cinza
+OK   390px aba man sem rolagem lateral (390 ≤ 390)
+OK   390px Ativos bloqueados com cor de domínio (rgb(253, 232, 230))
+OK   390px aba com: 2 cartão(ões) "Meta não configurada", todos em cinza
+OK   390px aba com sem rolagem lateral (390 ≤ 390)
+OK   teclado: seta → leva o foco à aba seguinte (agr)
+OK   teclado: a aba focada fica selecionada
+OK   teclado: Tab chega ao cartão com foco visível ({'t': 'A liberar 22', 'out': 'solid 2px rgb(30, 122, 76)', 'sh': 'none'})
+RESULTADO OK
