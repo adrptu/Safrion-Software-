@@ -5,7 +5,7 @@ Contrato: PR47, recibos6265546121 e6265682436. Um ajuste de apresentação no pa
 
 ## Problema e correção
 
-Quando a atividade não tinha âncora, a lista explicava “aguarda plantio/colheita”, mas o painel Por quê mostrava apenas “Data: —”. O painel agora usa o helper existente soloDataTexto. Nenhuma data é inventada, e dose, quantidade, custo e motivo de não aplicação permanecem iguais. Não há novo campo, etapa, comando ou menu.
+Quando a atividade não tinha âncora, a lista explicava “aguarda plantio/colheita”, mas o painel Por quê mostrava apenas “Data: —”. O painel agora recupera a atividade completa pelo ID no plano do cultivo e usa o helper existente soloDataTexto. Para uma inclusão sem atividade no plano, conserva a atividade incluída/sugestão como alternativa. Nenhuma data é inventada, e dose, quantidade, custo e motivo de não aplicação permanecem iguais. Não há novo campo, etapa, comando ou menu.
 
 Arquivos de produto/teste: areas/analise_solo.py e datas_consumidores_ocupacao_test.cjs em tools/prototipo/v37/gen37. Helpers solo.js/datas_atividade.js e regras de ocupação não foram alterados.
 
@@ -26,8 +26,16 @@ Saída final (exit 0):
 3/3 plano sem âncora não inventa fim nem liberação confirmada
 2/2 informar âncora restaura fim canônico do plano
 7/7 painel Por quê: âncora ausente/real, negação, dose/quantidade/custo e imutabilidade
+5/5 sugestão real → painel: ID numérico/texto, DAP/DAPC/DANC/DATA, data válida e valores preservados
 ```
 
-Total: 23 casos. As sete contraprovas novas cobrem DAP, DAPC, DANC, DATA, tipo ausente, data real e motivo de não aplicação. O teste chama as funções reais extraídas de SOLO_UI_JS e compara também valores/unidades e imutabilidade da sugestão. git diff --check passou.
+Total final: 28 casos. As sete primeiras contraprovas cobrem DAP, DAPC, DANC, DATA, tipo ausente, data real e motivo de não aplicação. O teste chama as funções reais extraídas de SOLO_UI_JS e compara também valores/unidades e imutabilidade da sugestão. git diff --check passou.
+
+## Correção devolvida na revisão do PR136
+
+O HEAD inicial 8d07d04d passou os 23 casos, mas esse resultado não cobria o construtor real: soloSugestoes reduz a atividade a id/nome/op. O achado 4313097025, também identificado pelo Claude real, foi reproduzido. A execução de soloSugestoes → soEfeito sem a correção falha em “aguarda data válida” versus “aguarda plantio”; bruto before-real-suggestion.txt. Isso corrige a limitação dos fixtures iniciais, sem apagar a prova anterior.
+
+Cinco casos adicionais agora passam pelo construtor real de calagem, verificam que a sugestão continua sem g e que o painel recupera DAP/DAPC/DANC/DATA pelo ID numérico/texto do plano. Conferem também data válida, dose, quantidade, custo e imutabilidade. Dados sintéticos mínimos de teste; não validam parâmetros agronômicos. solo.js continua intacto: a correção fica no consumidor compartilhado, sem ampliar o objeto persistido.
 
 Limite: prova de funções de apresentação, sem execução nova de navegador/teclado/celular; os controles, foco, layout e eventos não mudam. Reaproveita as verificações anteriores dos controles sem alegar nova prova visual. Não comprova homologação, parâmetros validados pelos RTs, integração real ou publicação.
+
