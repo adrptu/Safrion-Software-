@@ -37,5 +37,15 @@ c=setup();c.reqs.R.itens[0].lote='—';r=run('cenApontar',c,input).ap.reciboApli
 c=setup();c.ordens['OS-X'].etapa='Liberada';assert.throws(()=>run('cenApontar',c,input),/execução/);
 assert.equal(c.ordens['OS-X'].ap.length,0);
 assert.equal(JSON.stringify(JSON.parse(saved)),saved);
+c=setup();c.ordens['OS-X'].instrucao={versao:'v3',plano:'PA-DEMO',planoVer:5};
+a=run('cenApontar',c,input).ap;assert.equal(a.reciboAplicacao.planoReferencia.id,'PA-DEMO');
+assert.equal(a.reciboAplicacao.planoReferencia.versao,5);
+c.ordens['OS-X'].instrucao.planoVer=6;
+assert.equal(run('cenReciboAplicacao',c,c.ordens['OS-X'],a).planoReferencia.versao,5);
+for(const instrucao of [{versao:'v2',plano:'PA',planoVer:5},{versao:'v3',plano:'PA',planoVer:0},
+ {versao:'v3',plano:'',planoVer:5},{versao:'v3',plano:'PA',planoVer:'5'},null]){
+ c=setup();c.ordens['OS-X'].instrucao=instrucao;
+ assert.equal(run('cenApontar',c,input).ap.reciboAplicacao.planoReferencia,null);
+}
 assert.equal(run('cenReciboAplicacao',setup(),{id:'OS-X'},{d:'01/01'}),null);
 console.log('PASS recibo: relógio, legado/manual, offline, idempotência, cópia, lotes ambíguos e O.S. liberada');

@@ -1198,8 +1198,14 @@ function cenReciboAplicacao(c, o, ap, capturar = false) {
       lotesCandidatos: lotes, atribuicaoLote: lotes.length === 1 && itens.every(it => loteValido(it.lote))
         ? 'requisicao_univoca' : 'nao_demonstrada' };
   });
+  const instrucao = o.instrucao;
+  const planoReferencia = instrucao && instrucao.versao === o.versao
+    && typeof instrucao.plano === 'string' && instrucao.plano.trim()
+    && Number.isSafeInteger(instrucao.planoVer) && instrucao.planoVer > 0
+    ? { id: instrucao.plano, versao: instrucao.planoVer, fonte: 'instrucao_os' } : null;
+  // Referência capturada não afirma que a versão completa do plano é recuperável.
   return { versao: 1, tipo: 'relato_aplicacao', chave: ap.chave, os: o.id,
-    versaoOS: o.versao || null, talhao: o.talhao || null,
+    versaoOS: o.versao || null, planoReferencia, talhao: o.talhao || null,
     areaHa: ap.ha, ator: ap.quem || null, origem: ap.origem, capturadoEm,
     tempo: instante ? { precisao: 'instante', inicio: turno.inicioISO, fim: capturadoEm, fuso,
       fonte: 'relogio_app' } : { precisao: 'incompleta', dataInformada: ap.d, inicio: null, fim: null,
