@@ -86,18 +86,31 @@ def seed():
 
 _CACHE = {}
 
+def pessoas_seed():
+    """Fonte CD-04 independente do hash de acessos/metas já configurados."""
+    from areas import cad_ativos_pessoas as CAP
+    s = dict(pessoas=[dict(id=i, v=v) for i, v in CAP.pessoas()],
+             equipes=[dict(id=i, v=dict(nome=n, lider=l, cal=c)) for i,n,l,c in CAP.EQUIPES])
+    s['v'] = 'PESSOAS-' + hashlib.sha1(json.dumps(s, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:8]
+    return s
+
 
 def js_prefixo():
     """prefixo de TODA tela (engine), uma vez, depois do da assinatura: CONF0 + configuracoes.js (só nomes conf*/CONF*, RV-13)."""
     if 'js' not in _CACHE:
         import ui37   # v57: com o Beneficiamento fora da navegação (BEN_PUBLICADO=False), a trilha não liga para BEN.dc.html (decisão da v55)
+        import dados_manutencao as DM
         _CACHE['js'] = ('const CONF0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n'
                         + 'const CONF_BEN_H = ' + json.dumps('BEN.dc.html#' if ui37.BEN_PUBLICADO else '') + ';\n'
                         # CF04 × CONTROLE-02 F2: o adaptador da trilha do Codex (PlanoReferencia.trilha) em escopo próprio, para a CF-04 ler os
                         # recibos da referência técnica em qualquer tela sem redeclarar o PlanoReferencia do Planejar safra
                         + 'const CONF_PLANO_REF = (() => {\n' + open(os.path.join(HERE, 'plano_referencia.js'), encoding='utf-8').read() + '\nreturn PlanoReferencia; })();\n'
                         + open(os.path.join(HERE, 'configuracoes.js'), encoding='utf-8').read() + '\n'
-                        + open(os.path.join(HERE, 'metas.js'), encoding='utf-8').read() + '\n')
+                        + open(os.path.join(HERE, 'metas.js'), encoding='utf-8').read() + '\n'
+                        + 'const PESSOAS0 = ' + json.dumps(pessoas_seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n'
+                        + 'const CAP_ESPECIALIDADES = ' + json.dumps(DM.ESPECIALIDADES, ensure_ascii=False) + ';\n'
+                        + open(os.path.join(HERE, 'pessoas_estado.js'), encoding='utf-8').read() + '\n'
+                        + open(os.path.join(HERE, 'capacidade.js'), encoding='utf-8').read() + '\n')
     return _CACHE['js']
 
 
