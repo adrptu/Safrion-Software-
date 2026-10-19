@@ -45,3 +45,42 @@ Com ponteiro grosso, `button[aria-label^='Fechar']` com `width: 32px` e `height:
 - **Resultado:** 45/45 neste render e 45/45 também na `5bc0b340` (`logs/assinatura_corrigido*.log`), o que mostra que o produto já estava certo.
 
 **Fotos (`fotos/`):** `cf06_painel_390_antes` mostra o "×" com 32 px; `cf06_painel_390_depois` mostra o "×" com 44 px, alinhado ao título.
+
+## Achados do app do Codex no HEAD 43a83f73 (4311810128 e 4311851179)
+**4311810128 (P2): os "×" de 30 × 30 px do Mapa ficavam fora da regra.**
+- São dois "×", em `areas/inicio.py`: o painel do talhão (`_panel_html`) e o painel de término da irrigação (`_tm_painel`). Aparecem 4 vezes no IN-04.
+- **Correção na fonte comum (`engine.py`):** `ALVO_FECHAR = ('30px', '32px')` gera a regra para os dois tamanhos.
+- **Inventário do render:** todo "×" de fechar com menos de 44 px no estilo é de 30 ou 32 px e quadrado.
+
+**4311851179 (P2): o teste aceitava 3 de 4 telas, e a Manutenção nunca era medida.**
+- **Causa:** a linha clicada na Manutenção era um ativo, que não abre painel.
+- **Correção:** o teste abre as ordens (`MA.dc.html#vis=ordens`, tabela `g_om`) e passa a exigir a medida em todas as telas. Tela sem medida reprova.
+- **Telas novas no teste:** os dois painéis do Mapa (IN-04), ambos com "×" de 30 px:
+  - o do talhão, aberto por foco e Enter, como no teclado;
+  - o da importação de talhões, aberto pelo botão "Importar".
+- **A5 novo:** a 390 px com toque, nos dois painéis do Mapa, o "×" de 44 px fica inteiro na tela e não se sobrepõe a outro elemento do cabeçalho. A 390 px o painel fica abaixo do mapa (y ≈ 1005), igual na v143; o teste rola até ele, como a pessoa faria.
+- **A0 novo:** inventário estático. Todo "×" com menos de 44 px no estilo precisa estar coberto pela regra da própria página. Um tamanho novo reprova o teste até entrar em `ALVO_FECHAR`.
+
+### Testes executados
+| Teste | Resultado |
+|---|---|
+| `alvo_fechar`. A0 inventário; A1 390 px com toque nas 6 telas (CF-06, CF-01, O.S., ordens da Manutenção e os dois painéis do Mapa, de 30 px): 44 × 44; A2 1440 px com mouse: 32 ou 30 px, como no estilo; A3 fundo; A4 sem erro de JS; A5 "×" dos painéis do Mapa inteiro e sem sobreposição | 6/6 |
+| Contraprova: `engine.py` do HEAD 43a83f73 (só 32 px) | 4/6. Reprova A0 (4 "×" de 30 px no IN-04) e A1 (Mapa com 30 × 30) |
+| Contraprova: composição `5bc0b340` (sem a regra) | 4/6. Reprova A0 e A1 (todos com 32 ou 30 px) |
+
+**Impacto, no render com a regra de 30 e 32 px** (brutos em `logs/achados_app/`):
+
+| Teste | Resultado |
+|---|---|
+| `ds` | 72/72 |
+| `ds_padrao` | 17/17 |
+| `ds_1510` | 17/17 |
+| `ds_1610` | 16/16 |
+| `regras_toque` | 5/5 |
+| `popover_390` | 9/9 |
+| `mapa_mux_f1` | 43/43 |
+| `mapa_mux_f2` | 29/29 |
+| `talmapa` | 8/8 |
+| `paginas_scan` | 5/5 (147 páginas) |
+
+`areas/inicio.py`, de autoria do PR #133, não foi tocado: a correção está só na fonte comum (`engine.py`).

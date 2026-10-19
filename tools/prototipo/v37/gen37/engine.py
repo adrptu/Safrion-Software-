@@ -1311,13 +1311,15 @@ def recolhe_cabecalho(contexto,acoes):
 # DS-ALVO-20261015: liga o alvo de toque dos componentes (ALVO_ST) só com ponteiro grosso. Um link com cara de botão (inline-block) passa
 # a flex para o texto ficar no meio da altura maior; um link em bloco continua em bloco (flex). A escolha em pílula com estado (chip de
 # filtro rápido, segmento, aria-pressed) também ganha os 44 px, inclusive as cópias do estilo do chip feitas nas telas
+ALVO_FECHAR=('30px','32px')   # tamanhos do "×" de fechar desenhado à mão (F3)
 ALVO_CSS=("@media (pointer:coarse){:root{--g2-alvo:"+DS_ALVO['toque']+"}"
           "main :is(button,a)[aria-pressed][style*='border-radius: 999px']{min-height:"+DS_ALVO['toque']+";box-sizing:border-box}"
           "a[style*='--g2-alvo'][style*='display: inline-block']{display:inline-flex!important;align-items:center;justify-content:center}"
           "a[style*='--g2-alvo'][style*='display: block']{display:flex!important;align-items:center;justify-content:center}"
-          # F3 da base verde (19/10/2026): o "×" de fechar dos painéis laterais é desenhado à mão em ~20 telas com 32 × 32 px; com ponteiro grosso
-          # ganha os 44 px do alvo aqui, na fonte comum (o fundo escuro que também fecha não tem largura no estilo e fica de fora)
-          "button[aria-label^='Fechar'][style*='width: 32px'][style*='height: 32px']{min-width:"+DS_ALVO['toque']+";min-height:"+DS_ALVO['toque']+"}}")
+          # F3 da base verde (19/10/2026): o "×" de fechar dos painéis é desenhado à mão com 32 × 32 px (~20 telas) e 30 × 30 px (painéis do Mapa,
+          # achado do app no PR #135); com ponteiro grosso ganha os 44 px do alvo aqui, na fonte comum. O fundo escuro que também fecha não tem
+          # largura no estilo e fica de fora. alvo_fechar_test confere que todo "×" com largura menor que 44 px no render está em ALVO_FECHAR
+          +",".join("button[aria-label^='Fechar'][style*='width: %s'][style*='height: %s']"%(t,t) for t in ALVO_FECHAR)+"{min-width:"+DS_ALVO['toque']+";min-height:"+DS_ALVO['toque']+"}}")
 def area_acoes(pre='aa',rotulo='Ações da etapa'):
     """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
     Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
