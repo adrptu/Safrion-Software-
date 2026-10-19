@@ -17,8 +17,18 @@
   - **Cor natural:** do produto TCI.
   - **Pivôs:** círculo pelo ponto central do KML e pela área declarada (HECTARE). Para conferência, compara com o círculo desenhado na pasta POLIGONO.
   - **Pasta de saída:** recusa gravar dentro de um repositório git.
-- **`tools/geo/s2_l2a_test.py`:** 10 casos com um KML fictício (no mar, valores inventados), sem rede e sem dado real.
+- **`tools/geo/s2_l2a_test.py`:** 13 casos com um KML fictício (no mar, valores inventados), sem rede e sem dado real.
 - **`tools/prototipo/v37/gen37/.gitignore`:** segunda barreira contra `dados_lagoa/` e `dados_lagoa_kml.py`.
+
+## Escopo publicado (corrigido na v146, versão 164)
+A v145 publicou, além da imagem e da geometria, dados de cadastro do KML: números e processos de outorga, vazões, cursos d'água, recibo e módulos fiscais do CAR, e temas e áreas de APP e RL.
+- **Por que foi erro:** isso passa do escopo que eu mesmo registrei no PR #47 (6266706310): imagem, índices C4 e perímetros. O Codex apontou o problema (6266772947).
+- **Correção na v146:** saem do KML só a geometria e a área (pivôs e perímetros). No lugar do CAR, da APP/RL e das outorgas entram as constantes da demonstração sintética, que já trazem "(demonstração)" ou "SINTETICO" no texto. O `LG_FONTE` diz isso na tela de cadastro.
+- **Prova:**
+  - os 27 termos cadastrais do KML não aparecem em nenhum arquivo do novo render;
+  - na v145 publicada, apareciam em 9 arquivos (contraprova);
+  - novo caso `EscopoPublicavel` no teste: 13/13.
+- **Publicação:** mudaram 10 páginas (cadastro, irrigação, mapa e mais duas), lidas de volta 10/10 por sha256. As versões 161 a 163 continuam no histórico do artefato, que só o proprietário (ou quem ele autorizar) abre.
 
 ## Defeito achado e corrigido antes de publicar
 - **Sintoma:** a primeira saída deu NDVI 1,00 em quase todos os pivôs.
@@ -28,9 +38,9 @@
 
 ## Conferência (executada em 19/10)
 1. **Processamento real:**
-   - 23 pivôs, 2 cenas sem nuvem sobre os pivôs, 16 pontos de água e 18 temas do CAR;
+   - 23 pivôs e 2 cenas sem nuvem sobre os pivôs. O cadastro do KML é lido mas não é publicado (veja "Escopo publicado");
    - fica só no diretório temporário da sessão, fora de qualquer repositório.
-2. **Reprodutibilidade:** a versão do `s2_l2a.py` deste commit, rodada de novo sobre o mesmo KML, gerou os 11 arquivos byte a byte iguais aos publicados.
+2. **Reprodutibilidade:** a versão do `s2_l2a.py` do commit `4020a2a7`, rodada de novo sobre o mesmo KML, gerou os 11 arquivos byte a byte iguais aos publicados na v145. A v146 foi gerada pela versão deste commit.
 3. **Recusa:** o script recusa gravar com a saída dentro deste repositório.
 4. **Build com os dados reais** (árvore `1e927f62`, a do PR #138, mais os dados reais):
    - `paginas_scan` deu 5/5 nas 147 páginas, nos 2 tamanhos e sem erro de JavaScript;
@@ -38,7 +48,8 @@
 5. **Artefato:**
    - versões 161 a 163 (`1792413975-e91a`), com 147 páginas e 5 arquivos da Lagoa Grande, em 3 lotes;
    - leitura de volta de 7 arquivos (mapa, dados reais e uma página de cada lote): 7/7 iguais ao build por sha256.
-6. **Teste sintético:** `python3 -m unittest tools.geo.s2_l2a_test -v` deu 10/10.
+   - v146: versão 164 (`1792414809-c42a`), 10 páginas trocadas, leitura de volta 10/10 por sha256; `paginas_scan` 5/5 no build com os dados reais.
+6. **Teste sintético:** `python3 -m unittest tools.geo.s2_l2a_test -v` deu 13/13.
 
 ## Observações para o proprietário (sem valores aqui)
 - **Pivôs:** em 4 dos 23, a área declarada (HECTARE) diverge do círculo desenhado no KML ou falta o círculo. A lista vai ao proprietário no canal dele, não ao repositório.

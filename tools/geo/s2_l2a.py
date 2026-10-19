@@ -29,7 +29,8 @@ NUVEM_SCL = {3, 8, 9, 10}          # sombra de nuvem, nuvem média, nuvem alta, 
 FASES = [('preparo · solo exposto', -1.0, 0.25), ('plantio recente', 0.25, 0.40), ('formação', 0.40, 0.60),
          ('início da produção', 0.60, 0.72), ('produção', 0.72, 1.0)]
 PAL_NDVI = [(.30, (0xE4, 0x00, 0x2B)), (.45, (0xFF, 0x6A, 0x00)), (.60, (0xFF, 0xD5, 0x00)), (.72, (0xB5, 0xE6, 0x1D)), (.82, (0x3F, 0xBF, 0x2A)), (9, (0x0B, 0x7A, 0x1E))]
-LG_FONTE = 'KML do proprietário (pivôs, CAR e recursos hídricos) e imagem Sentinel-2 L2A da ESA (Copernicus), catálogo Earth Search'
+LG_FONTE = ('Pivôs e perímetro: KML do proprietário · imagem e índices: Sentinel-2 L2A da ESA (Copernicus), catálogo Earth Search · '
+            'CAR, APP/RL e outorgas: demonstração sintética (fora da exceção de 19/10)')
 LG_GEO = 'Círculo pelo ponto central do KML e pela área declarada (HECTARE)'
 
 
@@ -119,7 +120,7 @@ def ler_kml(caminho):
             circulos.append(cs[0])
         elif 'PERÍMETRO' in cam:
             perim.append(dict(nome=nome, tema=dd.get('tema', ''), area=float(dd['area']) if dd.get('area') else round(area_ha(cs[0]), 2),
-                              car=dd.get('recibo', ''), mf=float(dd['modfiscais']) if dd.get('modfiscais') else 0.0, mun=dd.get('municipio', '')))
+                              car=dd.get('recibo', ''), mf=float(dd['modfiscais']) if dd.get('modfiscais') else 0.0, mun=dd.get('municipio', ''), anel=cs[0]))
         elif topo in ('RESERVA LEGAL', 'APP') and dd.get('tema'):
             k = (topo, dd['tema'], dd['area'])
             if k in vistos: continue
@@ -210,11 +211,30 @@ def cantos(crs, x0, y0, x1, y1):
     return [[round(a, 7), round(b, 7)] for a, b in zip(xs, ys)]
 
 
+def publicavel(K, gen37):
+    """Escopo da exceção do proprietário (19/10/2026, "Exceção só no artefato privado"; PR #47 6266706310): imagem Sentinel-2,
+    índices C4 e geometria (pivôs e perímetros). Do KML só saem geometria e área. CAR (recibo, módulos fiscais), APP/RL e outorgas
+    (números, processos, vazões, descrições) não são publicados: no lugar entram as constantes da demonstração sintética, que já
+    trazem "(demonstração)" ou "SINTETICO" no texto, para as telas de cadastro e a regra de outorga (CTL-5) continuarem funcionando
+    sem apresentar sintético como real."""
+    sys.path.insert(0, gen37)
+    from dados_lagoa_sintetico import kml as SK
+    geo = [p for p in K['perim_kml'] if p.get('anel')]
+    imovel = next((p for p in geo if p['car'] and 'Líquida' not in p['tema']), None)
+    outros = [p for p in geo if not p['car']]
+    perim = [dict(nome='Imóvel (perímetro do KML)', area=round(area_ha(imovel['anel']), 2), car=SK.LG_PERIMETROS[0]['car'], mf=SK.LG_PERIMETROS[0]['mf'],
+                  mun='Lagoa Grande/MG', temas=['Perímetro'])] if imovel else []
+    perim += [dict(nome=(p['nome'] or 'Perímetro').capitalize(), area=round(area_ha(p['anel']), 2), car='', mf=0.0, mun='Lagoa Grande/MG', temas=['Perímetro'])
+              for p in outros]
+    cad_perim = [dict(nome=x['nome'], tema='Perímetro', area_ha=x['area'], municipio='Lagoa Grande', estado='MG', modulos_fiscais='', recibo_car='') for x in perim]
+    return dict(perimetros=perim, ambiental=list(SK.LG_AMBIENTAL), agua=list(SK.LG_AGUA), cad_perim=cad_perim)
+
+
 def processar(kml, gen37, datas):
     dest = os.path.join(gen37, 'dados_lagoa')
     if not fora_do_git(gen37): raise SystemExit('recusado: a saída é dado real e não pode ficar dentro de um repositório git')
     np, rasterio, rtransform, from_bounds, Resampling = _geo()
-    K = ler_kml(kml); pivos = K['pivos']
+    K = ler_kml(kml); pivos = K['pivos']; PUB = publicavel(K, gen37)
     conf = conferir_circulos(pivos, K['circulos'])
     lon = [p[3] for p in pivos]; lat = [p[4] for p in pivos]
     bbox = [min(lon) - 0.03, min(lat) - 0.03, max(lon) + 0.03, max(lat) + 0.03]
@@ -292,15 +312,13 @@ def processar(kml, gen37, datas):
     arq['lagoa_s2.json'] = _dump(dict(pivos=pv_json, cenas=cen_s2, idx=IDX, H=H, W=W, cantos=cant, pix=_b64(pix_b), dono=_b64(bytes(dono))))
     arq['lagoa_pivos.geojson'] = _dump(dict(type='FeatureCollection', features=[
         dict(type='Feature', properties=dict(id=p[0], nome=p[1], ha=p[2], r_m=p[5], rotulo=''), geometry=dict(type='Polygon', coordinates=[circulo(p[3], p[4], p[5])])) for p in pivos]))
-    P0 = K['perimetros'][0]
+    P0 = PUB['perimetros'][0]
     arq['lagoa_cadastro.json'] = _dump(dict(
         fazenda='Lagoa Grande', municipio='Lagoa Grande', uf='MG', fonte=LG_FONTE,
         pivos=[dict(id=p[0], nome=p[1], area_ha=p[2], centro=[p[3], p[4]], raio_m=p[5], geometria='círculo: centro do KML + área declarada') for p in pivos],
-        perimetros=[dict(nome=p['nome'] or 'Perímetro', tema=p['tema'] or 'Perímetro', area_ha=round(p['area'], 2), municipio='Lagoa Grande', estado='MG',
-                         modulos_fiscais=(f"{p['mf']:.1f}".replace('.', ',') if p['mf'] else ''), recibo_car=p['car']) for p in K['perim_kml']],
-        ambiental=[dict(grupo=g, tema=t, area_ha=a, recibo_car=P0['car']) for g, t, a, _ in K['ambiental']]
-                  + [dict(grupo='Imóvel', tema='Área do imóvel (CAR)', area_ha=P0['area'], recibo_car=P0['car'])],
-        agua=[dict(nome=a['nome'], descricao=a['desc'], lon=a['lon'], lat=a['lat']) for a in K['agua']]))
+        perimetros=PUB['cad_perim'],
+        ambiental=[dict(grupo=g, tema=t, area_ha=a, recibo_car=P0['car']) for g, t, a, _ in PUB['ambiental']],
+        agua=[dict(nome=a['nome'], descricao=a['desc'], lon=a['lon'], lat=a['lat']) for a in PUB['agua']]))
     arq['lagoa_rgb.json'] = _dump(rgbj)
     arq['lagoa_analise.json'] = _dump(dict(
         desc={'NDVI': dict(o='vigor geral', tec='(NIR − R) / (NIR + R)', uso='falhas e manchas'),
@@ -315,10 +333,10 @@ def processar(kml, gen37, datas):
         with open(os.path.join(dest, n), 'wb') as f: f.write(b_)
     with open(os.path.join(gen37, 'dados_lagoa_kml.py'), 'w', encoding='utf-8') as f:
         f.write('# -*- coding: utf-8 -*-\n"""Lagoa Grande real (gerado por lagoa_real.py a partir do KML do proprietário). Dado real: fora do git."""\n')
-        for n, v in (('LG_FONTE', LG_FONTE), ('LG_GEO', LG_GEO), ('LG_PIVOS', pivos), ('LG_PERIMETROS', K['perimetros']),
-                     ('LG_AMBIENTAL', K['ambiental']), ('LG_AGUA', K['agua'])):
+        for n, v in (('LG_FONTE', LG_FONTE), ('LG_GEO', LG_GEO), ('LG_PIVOS', pivos), ('LG_PERIMETROS', PUB['perimetros']),
+                     ('LG_AMBIENTAL', PUB['ambiental']), ('LG_AGUA', PUB['agua'])):
             f.write(f'{n} = {v!r}\n')
-    return dict(pivos=len(pivos), ha=round(sum(p[2] for p in pivos), 2), agua=len(K['agua']), ambiental=len(K['ambiental']), perimetros=len(K['perimetros']),
+    return dict(pivos=len(pivos), ha=round(sum(p[2] for p in pivos), 2), agua_kml=len(K['agua']), ambiental_kml=len(K['ambiental']), perimetros=len(PUB['perimetros']),
                 H=H, W=W, Hr=Hr, Wr=Wr, pixels=len(pix), cenas=[(c['id'], c['dt'], c['nuvem']) for c in cen_res],
                 conferencia_circulos=conf, arquivos={n: hashlib.sha256(b_).hexdigest()[:16] for n, b_ in sorted(arq.items())})
 

@@ -98,6 +98,37 @@ class LeituraDoKml(unittest.TestCase):
         self.assertEqual(F.agua_sit(c, '2026-10-19'), 'Sem descrição no KML')
 
 
+class EscopoPublicavel(unittest.TestCase):
+    """exceção de 19/10: só imagem, índices e geometria; CAR, APP/RL e outorgas do KML não saem (demonstração no lugar)"""
+    @classmethod
+    def setUpClass(cls):
+        cls.K = S.ler_kml(_kml()); cls.P = S.publicavel(cls.K, os.path.join(RAIZ, 'tools', 'prototipo', 'v37', 'gen37'))
+
+    def test_nada_do_cadastro_do_kml_sai(self):
+        txt = repr(self.P)
+        for a in self.K['agua']:
+            for c in ('num', 'proc', 'desc', 'curso', 'vazao'):
+                if a[c]: self.assertNotIn(a[c], txt, (c, a[c]))
+        for g, t, a, _ in self.K['ambiental']: self.assertNotIn(t, txt)
+        self.assertNotIn('SINTETICO-0001', txt)                                  # recibo do CAR do KML
+        self.assertNotIn('12.3', txt)                                            # módulos fiscais do KML
+
+    def test_no_lugar_a_demonstracao_rotulada(self):
+        from dados_lagoa_sintetico import kml as SK
+        self.assertEqual(self.P['agua'], SK.LG_AGUA)
+        self.assertEqual(self.P['ambiental'], SK.LG_AMBIENTAL)
+        self.assertTrue(all('demonstração' in (a['nome'] + a['curso']) or not a['curso'] for a in self.P['agua']))
+        self.assertIn('SINTETICO', self.P['perimetros'][0]['car'])
+        self.assertIn('demonstração sintética', S.LG_FONTE)
+
+    def test_perimetro_pela_geometria(self):
+        anel = next(p['anel'] for p in self.K['perim_kml'] if p['car'] and 'Líquida' not in p['tema'])
+        self.assertEqual(self.P['perimetros'][0]['area'], round(S.area_ha(anel), 2))   # área da geometria, não o atributo do CAR (500,126)
+        self.assertNotEqual(self.P['perimetros'][0]['area'], 500.13)
+        self.assertEqual([p['nome'] for p in self.P['perimetros']], ['Imóvel (perímetro do KML)', 'Perímetro arrendo'])
+        self.assertTrue(all(c['recibo_car'] == '' and c['modulos_fiscais'] == '' for c in self.P['cad_perim']))
+
+
 class Reflectancia(unittest.TestCase):
     def test_deslocamento_ja_aplicado_pelo_catalogo_nao_se_desconta_de_novo(self):
         try: import numpy as np
