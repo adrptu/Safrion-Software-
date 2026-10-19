@@ -524,7 +524,9 @@ function lgCss(){ if(LGI.css) return; LGI.css=true; const s=document.createEleme
    // (≥ 13,4:1 sobre qualquer fundo, NC11): número / valor / estado curto; por tamanho na tela: só o número (peq) ou número e valor (med).
    // O clique continua no polígono (pointer-events: none no botão): o teclado e o leitor de tela usam o botão. Selecionado: placa escura (número em destaque)
    +'.lg-rot{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-align:center;font-family:Manrope,system-ui,sans-serif;color:#15201A;background:rgba(255,255,255,.9);border:0;border-radius:8px;padding:2px 7px 3px;margin:0;box-shadow:0 1px 3px rgba(21,32,26,.28);max-width:140px;box-sizing:border-box;cursor:pointer}'
-   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+   // MUX-CORTE (19/10/2026): o valor ocupa até 3 linhas e quebra no "·" (muxQuebra); antes, uma linha com reticências cortava 34 rótulos a 1440 px
+   // (número, unidade ou estado: "Ácaro-rajado 18 % folhas com ác…", "em colheita · 484,89 k…"); reticências só depois da 3ª linha (o nome mais longo do MIP, 45 caracteres, ocupa 3)
+   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}'
    +'.lg-rot i{font-style:normal;font-size:10.5px;font-weight:600;color:#15201A;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
    +'.lg-rot.peq span,.lg-rot.peq i,.lg-rot.med i{display:none}.lg-rot.peq{padding:1px 6px}.lg-rot[aria-pressed=true]{background:#15201A;color:#FFFFFF;box-shadow:0 0 0 2px #FFFFFF}.lg-rot[aria-pressed=true] i{color:#FFFFFF}'
    +'.lg-rot.mux-fora span,.lg-rot.mux-fora i{display:none}.lg-rot:focus{outline:none}.lg-rot:focus-visible{outline:2px dashed #15201A;outline-offset:3px;box-shadow:0 0 0 3px #FFFFFF,0 1px 3px rgba(21,32,26,.28)}';
@@ -638,7 +640,7 @@ function lgSync(self){ const m=LGI.map; if(!m||!LGI.pronto) return; const st=sel
   M.lg.ids.forEach(t=>{ const c=cls(l,f,t); const hx=c.c==='sat'?c.hex:((M.lcop[c.c]||M.lcop.none)[0]); const fora=!!(FI&&FI.indexOf(t)<0);
     cor.push(t,hx); op.push(t,((c.c==='none')?0:(c.c==='sat'?(LGI.px?0:0.6):(c.c==='cloud'?0.35:0.55)))*(fora?0.3:1)); if(c.c==='cloud') hach.push(t);
     // MUX-F1/F2: botão do pivô com o nome único (P5), o valor e o estado curtos, o nome acessível completo, aria-pressed e o tabindex móvel
-    const mk=LGI.markers[t]; if(mk){ const el=mk.getElement(); const i=MUX.info[t]||{nome:rotT(t),valor:c.l,curto:''}; el.children[0].textContent=i.nome; el.children[1].textContent=i.valor;
+    const mk=LGI.markers[t]; if(mk){ const el=mk.getElement(); const i=MUX.info[t]||{nome:rotT(t),valor:c.l,curto:''}; el.children[0].textContent=i.nome; el.children[1].textContent=muxQuebra(i.valor);
       if(el.children[2]) el.children[2].textContent=i.curto||''; el.setAttribute('aria-label',i.acc||(i.nome+', '+c.l)); el.setAttribute('aria-pressed',sel.indexOf(t)>=0?'true':'false');
       el.tabIndex=(t===at)?0:-1; el.classList.toggle('mux-fora',fora); } });
   cor.push('#ffffff'); op.push(0); m.setPaintProperty('pv-fill','fill-color',cor); m.setPaintProperty('pv-fill','fill-opacity',op);
@@ -1393,7 +1395,9 @@ function colhCults(t){ const ft=M.soloTal[t]; if(!ft) return []; return Object.k
 function colhLeit(t){ const S=colhMap(); if(S.m[t]) return S.m[t];
   const xs=colhCults(t).map(id=>prTal(S.c,id)).sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
   return (S.m[t]={xs,x:xs[0]||null,c:S.c}); }
-function colhNum(L,x){ return x.R.comecou?prProdTxt(x.k.cultura,x.R):(x.sit==='Prevista'?prPrevTxt(L.c,x).t.split(' · ')[0]:''); }
+// UNID-PROD P5 (AC-h): o rótulo mostra a produtividade na unidade escolhida para a cultura, pela mesma função do painel do talhão (colhKv) e da
+// Previsão e colheita; antes mostrava a produção em t, outra grandeza, e a camada não comparava talhões de áreas diferentes
+function colhNum(L,x){ return x.R.comecou?prPrtvResTxt(x.k.cultura,x.R,g2unidPref(x.k.cultura)).split(' · ')[0]:(x.sit==='Prevista'?prPrevTxt(L.c,x).t.split(' · ')[0]:''); }
 function colhCls(t){ const L=colhLeit(t); const x=L.x; if(!x) return {c:'none',l:'sem colheita'}; const n=colhNum(L,x);
   return {c:COLHCOR[x.sit]||'gray',l:x.sit.toLowerCase()+(n?' · '+n:'')+(L.xs.length>1?' · +'+(L.xs.length-1):'')}; }
 function colhLegend(){ return Object.keys(COLHCOR).map(k=>Lc(COLH_L,COLHCOR[k],k.toLowerCase())).concat([Lc(COLH_L,'none','sem colheita')]); }
@@ -1468,6 +1472,8 @@ function muxPivoRot(s){ return String(s||'').replace(/^Pivô (\d+)\b/,'P$1'); } 
 function muxFazNome(t){ return isLG(t)?'Lagoa Grande':'Santa Rita'; }
 function muxOsTal(t){ return 'OS.dc.html#tal='+encodeURIComponent(muxFazNome(t)+'|'+t); }   // D8: a O.S. abre com a fazenda e o talhão escolhidos
 function muxDt(s){ return String(s||'').slice(0,5); }
+// MUX-CORTE: o "·" fica preso à palavra anterior, o número à unidade e o trecho curto (≤ 20 caracteres) inteiro, para a 2ª linha começar num trecho
+function muxQuebra(s){ return String(s||'').split(' · ').map(x=>x.length<=20?x.replace(/ /g,'\u00a0'):x.replace(/(\d) (?=[^\d\s])/g,'$1\u00a0')).join('\u00a0· '); }
 function muxCurto(s){ const x=String(s||'').split(/ · |: |, | ou | \(/)[0].trim(); return x.length>24?x.slice(0,23)+'…':x; }
 function muxLegKey(c){ return c.c==='sat'?'h:'+c.hex:'c:'+c.c; }
 function muxEditavel(el){ if(!el||!el.matches) return false; return el.isContentEditable||el.matches('input,textarea,select,[role=textbox],[role=searchbox],[role=combobox]'); }

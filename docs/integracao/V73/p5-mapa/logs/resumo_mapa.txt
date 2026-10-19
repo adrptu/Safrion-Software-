@@ -1,0 +1,24 @@
+map_decisoes rc=0 18 ok · 0 falhas []
+mapa_mux_f2 rc=0 RESULTADO: 29 ok · 0 falha(s)
+map_irrig_filtro rc=0 15 ok · 0 falhas []
+mapa_solo_texto rc=0 RESULTADO: 9 ok · 0 falhas
+carencia rc=0 RESULTADO: 90/90 verificações
+colheita_mapa rc=0 RESULTADO: 7 ok · 0 falhas
+mip_correcoes rc=0 RESULTADO 14/14
+mip_fluxo rc=0 RESULTADO 15/15
+mapa9 rc=0 RESULTADO: 13 ok · 0 falhas
+mapa_cancel rc=0 RESULTADO: 6/6
+solo_mapa_calor rc=0 RESULTADO: 9/9
+talmapa rc=0 RESULTADO: 8/8
+map_trilha_icones rc=0 RESULTADO: 9 ok · 0 falhas
+mapa_filtros rc=0 RESULTADO: 7/7
+mapa_mux_f0 rc=0 RESULTADO: 17 ok · 0 falha(s)
+mapa_faixa rc=0 RESULTADO: 25/25
+mapa_mux_f1 rc=0 RESULTADO: 43 ok · 0 falha(s)
+producao_fluxo rc=0 RESULTADO: OK 25/25
+demanda_estado_nav rc=0 RESULTADO: 14 ok · 0 falhas
+demanda_unica_nav rc=0 RESULTADO: 29 ok · 0 falhas
+est_laudo_lote_nav rc=0 RESULTADO: 7 ok · 0 falhas
+irr_fluxo rc=0 33 ok · 1 falhas ['19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor)']
+map_aprov rc=0 RESULTADO: 5 ok · 0 falhas []
+FIM

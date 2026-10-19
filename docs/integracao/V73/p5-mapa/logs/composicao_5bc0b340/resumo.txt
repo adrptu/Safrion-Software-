@@ -1,0 +1,6 @@
+mapa_rotulo_corte rc=0 RESULTADO: 4/4 ok
+irr_fluxo rc=0 34 ok · 0 falhas []
+mapa_mux_f2 rc=0 RESULTADO: 29 ok · 0 falha(s)
+producao_fluxo rc=0 RESULTADO: OK 25/25
+colheita_mapa rc=0 RESULTADO: 7 ok · 0 falhas
+config rc=0 RESULTADO: OK 90/90
