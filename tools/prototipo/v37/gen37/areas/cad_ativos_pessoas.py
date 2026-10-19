@@ -439,7 +439,22 @@ def cd04():
     acoes_form('g_eq')
     corpo=bloco_cad(abas('c4t',['Pessoas','Equipes'],'Cadastros de pessoas'),pane('c4t',0,gp)+pane('c4t',1,ge),'Pessoas e equipes')
     dados=dict(qf=QF,habil=[[a,k] for a,k,_ in HABIL],calda=CALDA,agro=AGRO)
-    js({},ALOC_JS+'const C4='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    import cenario
+    js({},cenario.js_prefixo()+ALOC_JS+'const C4='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+function c4fonte(self){ cenOuvir(self); const x=pessoasLer(cenGet());
+  if(self.__c4rev===x.rev&&self.__c4ver===x.v)return;
+  if(self.__c4ver&&(g2st(self,'g_pes').fm||g2st(self,'g_eq').fm))return;
+  const all=Object.assign({},self.state.g2||{});
+  [['g_pes',x.pessoas],['g_eq',x.equipes]].forEach(([id,rs])=>{all[id]=Object.assign({},all[id]||{},{rows:rs.map(r=>({id:r.id,v:pessoasClonar(r.v),s:{},p:{}}))});});
+  self.state.g2=all;self.__c4rev=x.rev;self.__c4ver=x.v;
+}
+function c4grava(self){
+  const lista=id=>RW(self,id).map(r=>{const v=Object.assign({},r.v);delete v.habv;delete v.membros;delete v.jorn;return {id:r.id,v};});
+  const p=lista('g_pes'),e=lista('g_eq'),chave=confChave('pessoas');
+  const r=cenMudar(null,c=>pessoasGravar(c,p,e,self.__c4rev,chave,g2perfil()),{estrito:true});
+  if(r.erro)return r.erro;
+  const x=pessoasLer(cenGet());self.__c4rev=x.rev;self.__c4ver=x.v;return '';
+}
 function c4hdia(c){ const m=/(\d{2})–(\d{2})h/.exec(c||''); if(m) return (Number(m[2])-Number(m[1]))+' h/dia'; const n=/(\d+)h$/.exec(c||''); return n?n[1]+' h/dia':''; }
 function c4qf(k,V,A){ const h=ml(V.hab);
   if(k==='ope') return h.some(x=>x.indexOf('Operar')===0); if(k==='cal') return h.indexOf(C4.calda)>=0; if(k==='irr') return h.indexOf('Irrigar')>=0;
@@ -464,7 +479,7 @@ function c4acesso(V){ const e=c4ac(V); return e.a==='ativo'?'':(e.a==='desativad
 function c4acOrig(V){ const e=c4ac(V); const t=e.a==='ativo'?'Ativo desde '+br(e.desde):(e.a==='desativado'?'Desativado em '+br(e.ate):'Sem acesso');
   return [{t:'Acesso ao app: '+t+' · gerenciar em Configurações › Usuários e alçadas',h:'CF-01.dc.html#pessoa='+encodeURIComponent(V.nome||'')}]; }
 CAD_ACTS.g_eq=(self,r)=>[cadExcluir(self,'g_eq',r,'equipe',r.nd?'tem pessoas ativas; mude-as de equipe antes':'')];
-function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc=c4eqcal(self); self._c4eq=self._c4eq||{}; self._c4pes=self._c4pes||{};
+function PREVALS(self,v){ c4fonte(self); cadActsIni(self); const ps=RW(self,'g_pes'); const eqc=c4eqcal(self); self._c4eq=self._c4eq||{}; self._c4pes=self._c4pes||{};
   ps.forEach(r=>{ const V=r.v; self._c4pes[r.id]=V.nome;
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.o=c4acOrig(V); r.p.equipe=[{k:'txt',t:V.equipe||'—'}]; r.s.equipe=V.equipe||'';
     const hs=ml(V.hab); r.m=Object.assign({},r.m||{},{habs:hs.map(h=>({id:h,l:h}))}); r.p.habs=[hs.length?{k:'txt',t:hs.join(', ')}:{k:'mut',t:'—'}]; r.s.habs=hs.join(', ');
@@ -498,7 +513,7 @@ function c4eqSit(ps,V){ const mem=ps.filter(p=>p.v.equipe===V.nome&&p.v.sit!=='I
   if(linat) return {t:'Líder inativa',p:sitX('Líder inativa','yellow','Escolher líder ativo'),res:true};
   if(nao) { const t=nao+(nao>1?' não alocáveis':' não alocável'); return {t:t,p:[chipc(t,'red')],res:true}; }
   return {t:'Em dia',p:sitOk('Em dia')}; }
-function EXTRAVALS(self,v){ const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
+function EXTRAVALS(self,v){ self.g2persist=gid=>['g_pes','g_eq'].includes(gid)?c4grava(self):''; const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
   const naoL=ps.filter(r=>c4sit(r.v).res==='nao'), venL=ps.filter(r=>c4sit(r.v).res==='ven'); const nao=naoL.length, ven=venL.length;
   cadEstado(v,'c4e',[nao?nao+(nao>1?' não alocáveis':' não alocável'):'',ven?ven+' a renovar em 30 dias':''].filter(Boolean).join(' · ')||'Todos alocáveis',nao?'red':(ven?'yellow':'green'));
   const eqs=RW(self,'g_eq'); const eqLid=eqs.filter(e=>{ const L=ps.find(p=>p.v.nome===e.v.lider); return !!e.v.lider&&(!L||L.v.sit==='Inativa'); }).length;
