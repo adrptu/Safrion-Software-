@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """CD-06 · produtos, unidades e locais (15 verificações no Chrome): grupo cadastrável com natureza de custo, preço de referência com
 data, embalagem estruturada, controle em um campo, situação Ativo/Inativo, unidade-base travada com motivo, locais com fazenda e
-capacidade só em tanque e silo; o cabeçalho mostra pendência do cadastro (não do Estoque)."""
+capacidade só em tanque e silo; o cabeçalho mostra pendência do cadastro (não do Estoque).
+19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): preço sem data deixa de ser barrado e grava com a data de hoje (23/09/2026 na
+demonstração); o oráculo "Informe a data do preço." vira "salvo com hoje", e a data informada continua valendo."""
 # TABELAS-FOCO (06/10/2026): natureza, unidade, embalagem e capacidade em colunas próprias (o ativo de origem do silo fica no painel do local)
 from cadc_lib import T
 import time, json
@@ -26,9 +28,9 @@ try:
     t.openrow(0,'Ureia 45%'); d=t.dlg()
     t.chk('Ureia sem saldo mas em plano: unidade travada pelo plano', t.fdis('un') and 'Travada: usado no plano Milho safrinha' in d, d[:300])
     t.cancel()
-    t.openrow(0,'Calcário dolomítico'); L=t.labels(); t.fset('preco','480'); t.fset('pdata',''); t.btn('Salvar'); a=t.alerts()   # SOLO-01: o calcário já tem data; limpa para testar a trava
-    t.chk('Calcário (granel): sem campo de conteúdo; preço sem data é barrado junto ao campo', 'Conteúdo da embalagem' not in L and 'Informe a data do preço.' in a, [L,a])
-    t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
+    t.openrow(0,'Calcário dolomítico'); L=t.labels(); t.fset('preco','480'); t.fset('pdata',''); t.btn('Salvar'); time.sleep(.2); a=t.alerts()   # SOLO-01: o calcário já tem data; limpa para testar o padrão
+    t.chk('Calcário (granel): sem campo de conteúdo; preço sem data grava com a data de hoje, sem barrar (LEVE-1)', 'Conteúdo da embalagem' not in L and 'Informe a data do preço.' not in a and not t.isopen() and '23/09/2026' in (t.rowtxt(0,'Calcário') or ''), [L,a,t.rowtxt(0,'Calcário')])
+    t.openrow(0,'Calcário dolomítico'); t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
     t.chk('preço salvo com data e a pendência some do cabeçalho', 'R$ 480,00/t' in (t.rowtxt(0,'Calcário') or '') and '20/09/2026' in (t.rowtxt(0,'Calcário') or '') and 'Cadastro completo' in t.header(), [t.rowtxt(0,'Calcário'),t.header()])
     t.openrow(0,'Calcário dolomítico'); t.fset('emb','Big bag'); L=t.labels(); d=t.dlg(); t.btn('Salvar'); a=t.alerts()
     t.chk('embalagem não granel pede o conteúdo na unidade-base (t)', 'Conteúdo da embalagem' in L and 'Informe quanto cabe em 1 big bag (em t).' in a, [L,a])

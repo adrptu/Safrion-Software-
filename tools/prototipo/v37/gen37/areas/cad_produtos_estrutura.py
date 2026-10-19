@@ -92,7 +92,7 @@ def cd06():
                     num('cont','Conteúdo da embalagem',req=False,min=0.001,help='Na unidade-base; retirada e compra usam embalagens inteiras.'),
                     sel('ctrl','Controle',DC.CONTROLES,**{'def':'Lote e validade'},help='Lote e validade: o recebimento pede a validade e a saída começa pela mais próxima.'),
                     num('preco','Preço de referência',req=False,min=0,help='Sem preço, o item fica pendente no custo do plano e na cotação.'),
-                    dat('pdata','Data do preço',req=False),
+                    dat('pdata','Data do preço',req=False,help='Sem data, o preço grava com a data de hoje.'),
                     txt('gar','Garantia ou densidade',req=False),
                     sel('local','Local padrão',[l[1] for l in DC.LOCAIS],**{'def':'Galpão 2'},help='O recebimento no Estoque sugere este local.'),
                     sel('sit','Situação',['Ativo','Inativo'],**{'def':'Ativo'},help='Inativo sai dos planos e das cotações; saldo e histórico continuam no Estoque.')]))
@@ -190,13 +190,15 @@ function EXTRAVALS(self,v){
   valida(self,v,'g_itm',(d,fm)=>{ const e={}; const dup=unico(self,'g_itm',fm,r=>String(r.v.item).toLowerCase(),d.item); if(dup) e.item='Já existe o item '+d.item+' em '+dup.v.grupo+'.';
     if(d.grupo===OUTRO_G){ const n=String(d.ngrupo||'').trim(); if(n&&RW(self,'g_grp').some(g=>g.v.nome.toLowerCase()===n.toLowerCase())) e.ngrupo=n+' já existe; escolha na lista Grupo.'; }
     if(d.emb!=='Granel'&&!(g2num(d.cont)>0)) e.cont='Informe quanto cabe em 1 '+String(d.emb||'embalagem').toLowerCase()+' (em '+(d.un||'unidade-base')+').';
-    if(String(d.preco||'').trim()&&!d.pdata) e.pdata='Informe a data do preço.';
+    if(String(d.preco||'').trim()&&!d.pdata) d.pdata=HOJE;   /* LEVE-1 (proprietário 19/10): preço sem data grava com a data de hoje (editável no campo) */
     if(d.grupo&&d.grupo!==OUTRO_G&&!RW(self,'g_grp').some(g=>g.v.nome===d.grupo)) e.grupo='Escolha o grupo.';
     if(d.local&&!RW(self,'g_loc').some(l=>l.v.nome===d.local)) e.local='Escolha um local cadastrado.';
     return e; });
   valida(self,v,'g_grp',(d,fm)=>{ const e={}; const n=String(d.nome||'').trim().toLowerCase(); if(RW(self,'g_grp').some(g=>g.id!==fm.rid&&g.v.nome.toLowerCase()===n)) e.nome='Já existe o grupo '+d.nome+'.'; return e; });
   valida(self,v,'g_loc',(d,fm)=>{ const e={}; const o=fm.rid?RW(self,'g_loc').find(l=>l.id===fm.rid):null; self.__c6old=o?{id:o.id,nome:o.v.nome}:null; const dup=unico(self,'g_loc',fm,r=>String(r.v.nome).toLowerCase(),d.nome); if(dup) e.nome='Já existe o local '+d.nome+'.'; return e; });
   ['g_itm','g_grp','g_loc'].forEach(g=>cadcEscolha(v,g));
+  /* LEVE-1 (proprietário 19/10): ao digitar o preço sem data, a data do preço vem preenchida com hoje (editável) */
+  self.g2draft=(gid,k,d)=>(gid==='g_itm'&&k==='preco'&&String(d.preco||'').trim()&&!d.pdata)?Object.assign({},d,{pdata:HOJE}):null;
   self.g2after=(gid,rows,r,isNew)=>{ if(!r) return;
     if(gid==='g_grp'){ self.setState({g2toast:'Salvo: grupo '+r.v.nome+' · '+(c6custo(r.v.nat)?'custo dos itens vai para '+r.v.nat:'receita, sem natureza de custo')+'.'}); return; }
     if(gid==='g_loc'){ const o=self.__c6old; let n=0;   // renomear o local leva junto os itens que o usam como padrão
