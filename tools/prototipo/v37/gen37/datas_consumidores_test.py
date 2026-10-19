@@ -25,7 +25,8 @@ c['colheita']='2026-11-01'
 assert D.data_atividade(c,a).isoformat()=='2026-11-03'
 c['colheita']='2026-12-01'
 assert D.data_atividade(c,a).isoformat()=='2026-12-03'
-assert D.classe_oc(None,-1,'2026-01-01','2026-12-31')=='fora'
+# 27b36334 (EX-57 F0c): data ausente é 'semdata', não 'fora' do calendário (o mesmo que safra_sem_data_test)
+assert D.classe_oc(None,-1,'2026-01-01','2026-12-31')=='semdata'
 assert D.falta_a_partir([(None,100),('2026-11-01',3)],5,[]) is None
 assert D.falta_a_partir([(None,100),('2026-11-01',6)],5,[])=='2026-11-01'
 print('OK ausência não vira plantio/data; edição invalida cache; falta datada exclui ausência')
