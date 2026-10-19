@@ -1,0 +1,69 @@
+OK    A16 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado nesta tela; o ícone abre a tela de entrada e o cartão "Assinatura" abre "Assinatura e cobrança"; Mapa segue link único 
+OK    A7a 23/09: selo Ativa; resumo Completo · 2.570,23 ha de 2.600 ha · R$ 5.140,46 (set/2026 fecha em 30/09) · próxima 01/10/2026 
+OK    A11a uma primária (verde cheio) em repouso: Alterar plano ou área 
+OK    A14a as 3 grades (uso, faturas, planos) têm ordenação e filtro por coluna; um campo de busca só, o da 1ª grade, para as 3 
+OK    A14b unidade na célula: "312 ha" no uso, "R$ 2.330,00" nas faturas, total 2.570,23 ha no rodapé 
+OK    A14c filtro rápido por fazenda e ordenação padrão por área decrescente (1ª linha T1 312 ha) 
+OK    A13a CF-05 sem cultura e sem safra (nenhum nome de cultura nem 2026/27) 
+OK    A18a nenhum campo de cartão, conta ou documento no CF-05 
+OK    A8a sem faixa de cobrança no próprio CF-05 
+OK    A4a prévia hoje → depois: R$ 5.140,46 → R$ 3.855,35, −R$ 1.285,11/mês, R$ 18,00/ha·ano, início 01/10/2026, sem fidelidade 
+OK    A5 recusa com o motivo: abaixo da medida (100 ha) e acima de 5.000 ha; nada agendado 
+OK    A4b aceite (clique duplo): um contrato v3 agendado; o 2º clique devolve o mesmo recibo ACE-0001; o botão some (form igual ao agendado) 
+OK    A4c desfazer antes de 01/10 volta ao contrato v2 (com recibo DES-0001: desfazer também registra quem agiu, revisão PLAT achado 4) 
+OK    A10a talhão de 50 ha no CD-01: CF-05 mede 2.620,23 ha, avisa 20,23 ha acima do contratado (sem cobrança-surpresa: prévia R$ 5.200,00) e a primária vira Ampliar área contratada 
+OK    A10b Ampliar abre a prévia com 2.700 ha: R$ 5.200,00 → R$ 5.240,46 
+OK    A10c BO-02 mede ao vivo: Grupo Santa Rita 2.620,23 ha e mensalidades vigentes R$ 6.338,00 
+FALHA A7b 01/10: set/2026 fecha com a medida da abertura (2.570,23 ha; 2.450,23 ha no fechamento, B1 inativo) e vence hoje; primária Pagar fatura; out/2026 já no Essencial · ['', 'Data simulada da cobrança: 01/10/2026 · set/2026 fechou com 2.570,23 ha → R$ 5.140,46, vence 01/10.', ['Pagar fatura'], 'set/2026 2.570,23 ha R$ 2,00/ha·mês · mínimo R$ 299,00 R$ 5.140,46 01/10/2026 A vencer']
+FALHA A4d a fatura de set/2026 fechou no Completo (mudança nunca retroage); memória com a medida do período (abertura × fechamento), mín(medida; contratada), quem aceitou o contrato e "pela área contratada seria" · Fatura de set/2026 × A vencer Cópia da fatura emitida em 01/10/2026 · vence 01/10/2026 · cobrança simulada, nenhum valor é cobrado. MEMÓRIA DA COBRANÇA Área medida 2.570,23 ha · 32 talhões · fechamento 30/09 Medida do período maior entre a abertura (01/09: 2.570,23 ha) e o fechamento (30/09: 2.570,23 ha) Área contratada 2.600 ha · contrato v2 · aceite por Ana · Gestora Área cobrada mín(medida; contratada) = 2.570,23 ha Conta máx(R$ 299,00; R$ 2,00/ha·mês × 2.570,23 ha = R$ 5.140,46) = R$ 5.140,46 Valor da fatura R$ 5.140,46 Pela área contratada seria R$ 5.200,00 (DEC-01, a decidir pelo proprietário) Plano Completo · R$ 2,00/ha·mês · mínimo R$ 299,00 EVENTOS 01/10/2026 Emitida · R$ 5.140,46 FORMA DE PAGAMENTO (SIMULADO) Pix · simulado Boleto · simulado Cartão final 4242 · simulado Nenhum dado de cartão, conta ou documento é pedido: o pagamento é simulado e o evento do provedor chega na ho
+OK    A7c 06/10: Em atraso · 5 dias 
+OK    A8b faixa amarela em OS, EST e CD-01 (sem cenario.js): "vencida há 5 dias (data simulada da cobrança: 06/10)", link de texto Pagar fatura → CF-05#pagar 
+OK    A8c nenhuma faixa no app (MB-01), na plataforma (BO-02), no onboarding (ON-01), no portal do parceiro (PT-01) nem no CF-05 
+OK    A7d 16/10: Inadimplente · 15 dias 
+OK    A8d faixa vermelha na O.S.: suspenso ampliar a área, nada apagado, trabalho de campo segue 
+OK    A9a inadimplente: liberar a OS-0430 (mesmo comando da tela, osc_liberar) segue 
+OK    A9b Incluir talhão recusa antes de abrir, com motivo e caminho 
+FALHA A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato) · ['Fatura de set/2026 vencida há 15 dias (data simulada da cobrança: 16/10): talhão novo ou reativado fica suspenso até o pagamento. Pague a fatura de set/2026 em Configurações › Assinatura e cobrança. Nada foi apagado; editar talhões, O.S., estoque e irrigação seguem.', '']
+FALHA A9d Reativar B1 recusado ao salvar (CD-01) · 
+FALHA A9e Reativar no detalhe (CD-01det) também recusado ao salvar · 
+OK    A9f Desenhar talhão novo recusa antes de abrir o desenho 
+OK    A9g importação: a linha "Talhão novo" é recusada com o motivo; com ela em "Não importar", o contorno novo do Pivô 1 é importado 
+OK    A7e o atalho da faixa (CF-05#pagar) abre a fatura aberta 
+OK    A18b nenhum campo de cartão, conta ou documento no painel de pagamento (forma escolhida numa lista) 
+OK    A6/A7f pagar sem forma é recusado; com Pix (clique duplo) paga uma vez: o 2º clique devolve o mesmo recibo PAG-0001; o evento diz quem pagou; volta a Ativa 
+FALHA A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada · "Organização";"Grupo Santa Rita"
+"Competência";"set/2026"
+"Estado";"Paga"
+"Plano";"Completo · contrato v2 · aceite por Ana · Gestora"
+"Área medida (ha)";"2.570,23"
+"Talhões medidos";"32"
+"Medida na abertura (ha)";"2.570,23"
+"Medida no fechamento (ha)";"2.570,23"
+"Área contratada (ha)";"2.600,00"
+"Área cobrada (ha)";"2.570,23"
+"Preço (R$/ha·mês)";"2,00"
+"Mínimo (R$/mês)";"299,00"
+"Crédito (R$)";"0,00"
+"Valor (R$)";"5.140,46"
+"Fechamento";"30/09/2026"
+"Vencimento";"01/10/2026"
+"Cob
+OK    A9h depois de pagar, Incluir talhão volta a abrir o formulário (Cadastrar talhão); faixa some 
+OK    A17a contestada: em 16/10 o selo segue Ativa, a fatura está Em contestação e a primária não é Pagar fatura 
+OK    A17b resolver com crédito: set/2026 volta a A vencer (vence 21/10, sem reescrever o valor) e out/2026 mostra o crédito de R$ 100,00 
+OK    A17c (revisão PLAT, achado 1) fatura já contestada e resolvida: sem "Contestar fatura" no painel; eventos dizem quem contestou e quem resolveu 
+OK    A20 medida 5.170,23 ha: primária Pedir proposta empresarial (não Ampliar, que seria sempre recusado); clique duplo registra um pedido (PRO-0001); a primária fica desabilitada e o BO-02 mostra o pedido 
+OK    A15a 390 px: sem rolagem lateral da página, título e primária alcançáveis, resumo 2 × 2 
+OK    A15b 390 px: painel do plano dentro da tela, com fechar e primária alcançáveis 
+OK    A15c 390 px: erro (100 ha) junto ao campo; aceite com clique duplo registra um contrato 
+OK    A15d 390 px: Pagar fatura → cartão simulado → clique duplo paga uma vez (mesmo recibo) 
+OK    A15e 390 px: faixa vermelha curta (≤ 60 px de altura): fatura vencida, o que está suspenso e o link Pagar fatura; sem rolagem lateral 
+OK    A0 sem erro de JavaScript nas telas visitadas 
+
+RESULTADO: 39 ok · 6 falhas
+  - A7b 01/10: set/2026 fecha com a medida da abertura (2.570,23 ha; 2.450,23 ha no fechamento, B1 inativo) e vence hoje; primária Pagar fatura; out/2026 já no Essencial
+  - A4d a fatura de set/2026 fechou no Completo (mudança nunca retroage); memória com a medida do período (abertura × fechamento), mín(medida; contratada), quem aceitou o contrato e "pela área contratada seria"
+  - A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato)
+  - A9d Reativar B1 recusado ao salvar (CD-01)
+  - A9e Reativar no detalhe (CD-01det) também recusado ao salvar
+  - A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada
