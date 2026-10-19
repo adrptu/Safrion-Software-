@@ -800,7 +800,7 @@ function cls0(l,f,t){
   if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
     const R=cusReal(t); if(!R.ha) return {c:'none',l:R.shared.length?('só '+R.shared.map(x=>x.o.id).join(', ')+' compartilhada'):'sem execução'}; const dv=R.prevExec>0?(R.rs-R.prevExec)/R.prevExec*100:null;
-    return {c:'gray',l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1)+' %')}; }
+    return {c:'gray',l:mil(R.rs)+' · '+(dv===null?'sem previsto':(dv>0?'+':'')+nfx(dv,1).replace('-', '−')+' %')}; }
   return {c:'none',l:''}; }
 // MUX-F2 (17/10/2026): cada classe da legenda leva a chave da cor (k) ou o hex (hx) para contar talhões e área, realçar e filtrar (legenda que trabalha);
 // "não se aplica" (none) ganha contorno tracejado no quadradinho, o mesmo do talhão no mapa (D14: a cor do fundo sozinha tinha contraste 1,0:1)

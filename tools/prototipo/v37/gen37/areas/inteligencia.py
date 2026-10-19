@@ -154,11 +154,12 @@ const _g2rows0 = g2rows; g2rows = function (self, sp) { return PR_GRIDS[sp.id] ?
 const IV_SIT = { 'Abaixo da referência': 'gray', 'Na referência': 'gray', 'Acima da referência': 'gray', 'Sem cotação': 'gray', 'Saca a conferir': 'gray', 'Sem venda': 'gray' };
 /* A-17: venda de saca sem a massa conferida fica fora da média; sem nenhuma venda conhecida, o preço fica suspenso (não vira zero) */
 function ivSit(p) { return p.medC === null ? (p.amb.length ? 'Saca a conferir' : 'Sem venda') : p.spread === null ? 'Sem cotação' : prCmp(p.spread, 0) > 0 ? 'Acima da referência' : prCmp(p.spread, 0) < 0 ? 'Abaixo da referência' : 'Na referência'; }
+function ivAbaixoRef(p) { return p.spread !== null && p.spread !== undefined && prCmp(p.spread, 0) < 0; }
 function ivN(x) { return x === null || x === undefined ? -1e12 : Number(x); }
 function ivPRow(p) { const R = y => y === null ? '—' : comPrecoTxt(p.cu, y); const sit = ivSit(p);
   return { id: 'p:' + p.prod, ro: true, v: { prod: p.prod, medc: ivN(p.medC), dif: ivN(p.spread), sit }, s: { prod: p.prod, medc: R(p.medC), ref: p.ref ? R(p.ref) : 'sem cotação', dif: intPct(p.spread), sit },
     p: { prod: [{ k: 'b', t: p.prod }], medc: [{ k: 'txt', t: R(p.medC) }].concat(p.amb.length ? [{ k: 'br' }, { k: 'mut', t: p.amb.length + ' venda(s) de saca a conferir fora da média' }] : []), ref: p.ref ? [{ k: 'txt', t: R(p.ref) }, { k: 'br' }, { k: 'mut', t: p.fonte }] : [{ k: 'mut', t: 'sem cotação (ausente ≠ zero)' }],
-      dif: p.spread === null ? [{ k: 'mut', t: '—' }] : [{ k: p.abaixo ? 'cn' : 'txt', c: 'red', t: intPct(p.spread) }], sit: [{ k: 'chip', t: sit, c: IV_SIT[sit] }] } }; }
+      dif: p.spread === null ? [{ k: 'mut', t: '—' }] : [{ k: 'txt', t: intPct(p.spread) }], sit: [{ k: 'chip', t: sit, c: IV_SIT[sit] }] } }; }
 const IV_EST = { 'Dentro da oferta': 'green', 'Vendido acima da oferta': 'red', 'Sem previsão': 'gray', 'Suspenso': 'gray' };
 function ivSRow(p) { const U = y => y === null ? '—' : comTxt(p.cu, y, 0); const sit = p.est;
   return { id: 's:' + p.prod, ro: true, v: { prod: p.prod, of: Number(p.oferta), comp: Number(p.comp), pos: ivN(p.pos), livre: ivN(p.livre), sit },
@@ -180,7 +181,7 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const c = cenGet();
   self.g2pick = (gid, rid) => self.setState({ pr_sel: { g: gid, id: rid }, pr_pan: { g: gid, id: rid } });
   GR('g_ivp').rows = I.prods.map(ivPRow); GR('g_ivs').rows = I.posicao.map(ivSRow);
   GR('g_ivc').rows = I.cli.slice().sort((a, b) => prCmp(b.liq, a.liq)).map(ivCRow);
-  const ab = I.prods.filter(p => p.spread !== null && prCmp(p.spread, 0) < 0); v.k_ab = String(ab.length); v.k_abn = ab.length ? ab.map(p => p.prod.split(' ')[0] + ' ' + intPct(p.spread)).join(' · ') : 'nenhuma venda abaixo da referência';
+  const ab = I.prods.filter(ivAbaixoRef); v.k_ab = String(ab.length); v.k_abn = ab.length ? ab.map(p => p.prod.split(' ')[0] + ' ' + intPct(p.spread)).join(' · ') : 'nenhuma venda abaixo da referência';
   const rk = I.posicao.filter(intRiscoOferta);
   v.k_rk = String(rk.length); v.k_rkn = rk.length ? rk.map(p => p.prod.split(' ')[0] + ': ' + (p.est === 'Sem previsão' ? 'vendido sem previsão' : 'acima da oferta')).join(' · ') : 'vendas cobertas pela oferta';
   const best = I.cli.slice().sort((a, b) => prCmp(b.liq, a.liq))[0]; v.k_liq = best ? comPrecoTxt(best.cu, best.liq) : '—'; v.k_liqn = best ? 'melhor líquido: ' + best.id + ' · ' + best.cliente : 'sem venda com preço'; }
@@ -221,9 +222,9 @@ function EXTRAVALS(self, v) { prRst(self, v); const c = self._c || cenGet(); con
   v.cards_ivs = prCards(self, v, 'g_ivs', id => { const p = I.posicao.find(x => 's:' + x.prod === id); return p ? prCard({ t1: p.prod, num: p.pos === null ? '—' : prFmt(prMul(p.pos, 100), 0) + '% vendido', t2: p.livre === null ? p.est : 'Livre ' + comTxt(p.cu, p.livre, 0), chip: [p.est, intRiscoOferta(p) ? 'red' : IV_EST[p.est]] }) : null; });
   v.cards_ivc = prCards(self, v, 'g_ivc', id => { const x = I.cli.find(y => 'c:' + y.id === id); return x ? prCard({ t1: x.id + ' · ' + x.cliente, num: comPrecoTxt(x.cu, x.liq) + ' líquido', t2: x.prod + ' · preço ' + comPrecoTxt(x.cu, x.preco) }) : null; });
   /* selo do cabeçalho: texto único (prStatus recebe texto e cor; a lista colava as frases sem separador, defeito S4 da v58) */
-  const ag = M.vendas.filter(x => x.rec === 'Vender agora'), ab = I.prods.filter(p => p.abaixo).length, rk = I.posicao.filter(intRiscoOferta).length;
+  const ag = M.vendas.filter(x => x.rec === 'Vender agora'), ab = I.prods.filter(ivAbaixoRef).length, rk = I.posicao.filter(intRiscoOferta).length;
   prStatus(v, [ag.length ? 'vender agora: ' + ag.map(x => x.prod.split(' ')[0]).join(', ') : 'nenhum produto no melhor momento de venda',
-    ab ? ab + ' produto(s) vendido(s) abaixo da referência' : 'nenhuma venda abaixo da referência', rk ? rk + ' produto(s) com venda sem oferta que cubra' : 'vendas cobertas pela oferta'].join(' · '), (ab || rk) ? 'yellow' : 'green');
+    ab ? ab + ' produto(s) vendido(s) abaixo da referência' : 'nenhuma venda abaixo da referência', rk ? rk + ' produto(s) com venda sem oferta que cubra' : 'vendas cobertas pela oferta'].join(' · '), rk ? 'yellow' : 'gray');
   int3Vals(self, v, 'venda');   /* INTEL-03: mercado e momento por período */
   const pan = st.pr_pan; const PP = pan ? ivPan(self, c, pan) : null; comPrimPainel(v, PP && PP.prim ? PP.prim : null, PP); prPainel(self, v, PP); }
 """
@@ -252,7 +253,7 @@ def iv():
     corpo = (AP.bloco('Mercado e momento', '', _int3_html())   # INTEL-03 F1 (18/10/2026)
              + AP.bloco('Preço e melhor mês para vender', 'Preço de agora, variação, tendência sem o efeito da época e o mês que historicamente paga mais. Esperar só aparece quando o ganho da época passa de 3% depois do custo do dinheiro (1,2% a.m.). Série sintética de 60 meses: histórico não é previsão.', g_ivm + AP.cartoes('cards_ivm'))
              + _ind(('Vendas abaixo da referência', 'k_ab', 'k_abn'), ('Venda sem oferta que cubra', 'k_rk', 'k_rkn'), ('Melhor recebimento líquido', 'k_liq', 'k_liqn'))
-             + AP.bloco('Preço × mercado', 'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) × referência de mercado com fonte. Meta não configurada; desvio sem classificação de desempenho. Sem cotação, fica em branco.', g_ivp + AP.cartoes('cards_ivp'))
+             + AP.bloco('Preço × mercado', 'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) × referência de mercado com fonte. Meta não configurada; desvio sem classificação de desempenho. Sem cotação, fica em branco.', '<p class="int-semmeta">Meta não configurada</p>' + g_ivp + AP.cartoes('cards_ivp'))
              + AP.bloco('Safra comercializada', 'Vendido ÷ oferta da safra (previsão publicada ou estoque apto, todas as fazendas). Acima de 100% é venda maior que a oferta.', g_ivs + AP.cartoes('cards_ivs'))
              + AP.bloco('Recebimento líquido por venda', 'Preço − frete (R$ 190/t; cliente que retira não paga) − custo de esperar o pagamento (1,2% a.m.). Compare clientes pelo que fica na fazenda.', g_ivc + AP.cartoes('cards_ivc')))
     V._shell('IV', 'Inteligência de vendas', 'Preço, tendência e o melhor mês para vender cada produto; abaixo, como estão as suas vendas contra o mercado.', corpo, fname, 1300,
@@ -300,7 +301,7 @@ function icIRow(i) { const P = y => y === null || y === undefined ? '—' : icRS
     s: { nome: i.nome, grupo: i.grupo, ult: i.ult ? P(i.ult.preco) : '—', ref: P(i.ref), mel: i.melhor ? P(i.melhor.preco) : (i.nVenc ? 'cotação vencida' : 'sem cotação'), vref: intPct(i.vRef), vult: intPct(i.vUlt), sit },
     p: { nome: [{ k: 'b', t: i.nome }], grupo: [{ k: 'txt', t: i.grupo }], ult: i.ult ? [{ k: 'txt', t: P(i.ult.preco) }, { k: 'br' }, { k: 'mut', t: prBr(i.ult.d) + ' · ' + i.ult.nome + (i.ult.orig === 'histórico sintético' ? ' · sintético' : '') }] : [{ k: 'mut', t: 'sem compra registrada' }],
       ref: [{ k: 'txt', t: P(i.ref) }], mel: i.melhor ? [{ k: 'b', t: P(i.melhor.preco) }, { k: 'br' }, { k: 'mut', t: i.melhor.nome + ' · ' + i.melhor.prazo + ' d · ' + i.melhor.frete }] : [{ k: 'mut', t: i.nVenc ? i.nVenc + ' cotação(ões) vencida(s): peça nova' : 'sem cotação (ausente ≠ zero)' }],
-      vref: [{ k: i.acima ? 'cn' : 'txt', c: 'red', t: intPct(i.vRef) }], vult: [{ k: 'txt', t: intPct(i.vUlt) }], sit: [{ k: 'chip', t: sit, c: IC_SITC[sit] }] } }; }
+      vref: [{ k: 'txt', t: intPct(i.vRef) }], vult: [{ k: 'txt', t: intPct(i.vUlt) }], sit: [{ k: 'chip', t: sit, c: IC_SITC[sit] }] } }; }
 function icFRow(f) { const pc = x => x === null ? '—' : prFmt(prMul(x, 100), 0) + '%';
   return { id: 'f:' + f.id, ro: true, v: { nome: f.nome, n: f.n, rel: icN(f.rel), prazo: icN(f.prazo), pont: icN(f.pont) },
     s: { nome: f.nome, n: String(f.n), rel: intPct(f.rel), prazo: f.prazo === null ? '—' : String(f.prazo).replace('.', ',') + ' d', pont: pc(f.pont) },
@@ -316,7 +317,7 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const I = intCompra
   v.k_ag = String(ag.length); v.k_agn = ag.length ? 'necessidade próxima: ' + ag.map(x => x.nome).join(' · ') : 'nada urgente';
   v.k_es = ipRS(M.economia); v.k_esn = es.length + ' insumo(s) mais baratos';   /* 14/10/2026: "esperando o mês certo, antes da necessidade" repetia o título do indicador */
   self.g2pick = (gid, rid) => self.setState({ pr_sel: { g: gid, id: rid }, pr_pan: { g: gid, id: rid } });
-  GR('g_ici').rows = I.itens.slice().sort((a, b) => (b.acima - a.acima) || prCmp(icN(b.vRef), icN(a.vRef))).map(icIRow);
+  GR('g_ici').rows = I.itens.slice().sort((a, b) => prCmp(icN(b.vRef), icN(a.vRef))).map(icIRow);
   GR('g_icf').rows = I.forn.slice().sort((a, b) => prCmp(icN(a.rel), icN(b.rel))).map(icFRow); GR('g_ich').rows = I.porHa.map(g => icHRow(g, I.area));
   const acimaRef = I.itens.filter(i => i.vRef !== null && prCmp(i.vRef, 0) > 0); v.k_ac = String(acimaRef.length); v.k_acn = acimaRef.length ? acimaRef.map(i => i.nome).join(' · ') : 'nenhuma cotação acima da referência';
   v.k_ec = icRS(I.economia, 0); v.k_ecn = 'contra a referência da safra';   /* 14/10/2026: "comprando pela melhor cotação" repetia o título do indicador */
@@ -355,7 +356,7 @@ function EXTRAVALS(self, v) { prRst(self, v); const I = self._ic || intCompras(I
   v.cards_ich = prCards(self, v, 'g_ich', id => { const g = I.porHa.find(x => 'h:' + x.grupo === id); return g ? prCard({ t1: g.grupo, num: icRS(g.rsha) + '/ha', t2: icRS(g.total, 0) }) : null; });
   const agc = M.compras.filter(x => x.rec === 'Comprar agora').length;
   prStatus(v, [agc ? agc + ' insumo(s) para comprar agora' : 'nada urgente para comprar', 'Meta não configurada para desvio de preço']
-    .concat(I.vencidas ? [I.vencidas + ' insumo(s) só com cotação vencida'] : []).join(' · '), (I.acima || I.vencidas) ? 'yellow' : 'green');
+    .concat(I.vencidas ? [I.vencidas + ' insumo(s) só com cotação vencida'] : []).join(' · '), I.vencidas ? 'yellow' : 'gray');
   int3Vals(self, v, 'compra');   /* INTEL-03: mercado e momento por período */
   const pan = st.pr_pan; const PP = pan ? icPan(self, pan) : null; comPrimPainel(v, PP && PP.prim ? PP.prim : null, PP); prPainel(self, v, PP); }
 """
@@ -382,7 +383,7 @@ def ic():
     corpo = (AP.bloco('Mercado e momento', '', _int3_html())   # INTEL-03 F1 (18/10/2026)
              + AP.bloco('Preço e melhor mês para comprar', 'Preço de agora, tendência sem o efeito da época, o mês mais barato no histórico e o que fazer até a próxima necessidade do Planejar safra, já descontado o prazo de entrega. Esperar só aparece quando a época barateia 3% ou mais. Série sintética de 60 meses: histórico não é previsão.', g_icm + AP.cartoes('cards_icm'))
              + _ind(('Economia esperando o mês certo', 'k_es', 'k_esn'), ('Cotações acima da referência', 'k_ac', 'k_acn'), ('Economia pela melhor cotação', 'k_ec', 'k_ecn'), ('Insumos por hectare', 'k_ha', 'k_han'))
-             + AP.bloco('Preço por insumo', 'Último preço pago × referência da safra × melhor cotação atual. Meta não configurada; desvio sem classificação de desempenho. O histórico de preço é sintético e vem marcado.', g_ici + AP.cartoes('cards_ici'))
+             + AP.bloco('Preço por insumo', 'Último preço pago × referência da safra × melhor cotação atual. Meta não configurada; desvio sem classificação de desempenho. O histórico de preço é sintético e vem marcado.', '<p class="int-semmeta">Meta não configurada</p>' + g_ici + AP.cartoes('cards_ici'))
              + AP.bloco('Fornecedores', 'Preço relativo (média das cotações contra a referência), prazo de entrega cotado e pontualidade (entregas no prazo ÷ entregas).', g_icf + AP.cartoes('cards_icf'))
              + AP.bloco('Custo de insumos por hectare', 'Σ (quantidade da safra × referência) ÷ área da safra, por grupo. Use para comparar com o orçamento.', g_ich + AP.cartoes('cards_ich')))
     V._shell('IC', 'Inteligência de compras', 'Preço, tendência e o melhor mês para comprar cada insumo antes da necessidade; abaixo, cotações, fornecedores e custo por hectare.', corpo, fname, 1300,
