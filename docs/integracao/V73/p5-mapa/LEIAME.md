@@ -107,3 +107,26 @@ Depois da correção, no render (`logs/revisao_codex/`):
 | `mapa_mux_f1` | 43/43 |
 | `mapa_mux_f2` | 29/29 |
 | `map_decisoes` | 18/18 |
+
+## Revisão do app do Codex no HEAD 4bc5a634 (4311564651): o rótulo composto do café cabe inteiro
+- **Achado:** "em colheita · kg/ha a apurar · 1.200,00 kg/ha de Café da roça" precisa de 4 linhas, e o limite de 3 cortava "Café da roça". O C2 só testava o texto, não o rótulo.
+- **Correção:**
+  - o limite passa a 4 linhas;
+  - `MUX.quebra` fica exposto para inspeção nos testes, como o `window.__MUX` que já existia.
+- **Regressão:** R5 no `mapa_rotulo_corte`. Com o Pivô 19 a 1440 px, passa pela mesma quebra os dois textos compostos mais longos e confere que não há corte:
+  - o café a apurar com a medida do campo, mais "+1";
+  - a estimativa, mais "+1".
+
+| Execução | Resultado |
+|---|---|
+| `mapa_rotulo_corte` com 4 linhas | 5/5 |
+| Contraprova com 3 linhas, no mesmo render | 4/5 (R5 reprova) |
+| `producao_fluxo unid` | 25/25 |
+| `colheita_mapa` | 7/7 |
+| `mapa_mux_f0` | 17/17 |
+| `mapa_mux_f1` | 43/43 |
+| `mapa_mux_f2` | 29/29 |
+| `map_decisoes` | 18/18 |
+| `mapa_colheita_unid_unit` | 6/6 |
+
+Brutos em `logs/revisao_codex_2/`.

@@ -6,7 +6,8 @@ da camada Colheita e produtividade em kg/ha (P5 da UNID-PROD).
   R2 390 × 844 com toque: o mesmo
   R3 Colheita e produtividade com o Mamão em kg/ha (Ana): o rótulo do Pivô 19 traz a situação e a produtividade com a unidade inteira
   R4 nenhum erro de JavaScript
-Contraprova: o render da v143 (sem a quebra) reprova R1 (34 cortes) e R3.
+  R5 os textos compostos mais longos do indicador (café a apurar com a produtividade medida do campo; estimativa; "+1") cabem no rótulo do pivô
+Contraprova: o render da v143 (sem a quebra) reprova R1 (34 cortes) e R3; o rótulo de 3 linhas (HEAD 4bc5a634) reprova R5.
 Uso (de gen37/): env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico [RENDER_DIR=…] python3 -B mapa_rotulo_corte_test.py"""
 import os, sys, json, time, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -45,7 +46,7 @@ def abre(w, h, toque):
       "localStorage.setItem('safrion.pref.unidprod:Ana:Mamão Formosa','kg'); sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Lagoa Grande\"}'); 1")
     c.goto(U('IN-04.dc.html'), 1.0); espera("!!(window.__LGI&&window.__LGI.pronto)")
 try:
-    p19 = ''
+    p19 = ''; r5 = '[]'
     for w, h, toque, rot in ((1440, 900, False, 'R1 1440 px'), (390, 844, True, 'R2 390 px com toque')):
         abre(w, h, toque); tabs = json.loads(J(TABS) or '[]'); ruins = {}
         for t in tabs:
@@ -53,11 +54,20 @@ try:
             if r: ruins[t] = r
             if w == 1440 and t == 'Colheita e produtividade':
                 p19 = J("(()=>{ const m=window.__LGI.markers['PV19']; return m?m.getElement().children[1].textContent.replace(/\\s+/g,' ').trim():''; })()") or ''
+                # R5 (achado do Codex no PR #133): os textos compostos mais longos do indicador (café a apurar com a produtividade medida do campo;
+                # estimativa) passam pela mesma quebra (MUX.quebra) e cabem no rótulo do pivô sem corte; o texto do P19 volta ao fim
+                r5 = J("""(()=>{ const s=window.__LGI.markers['PV19'].getElement().children[1], o=s.textContent, out=[];
+                  ['em colheita · kg/ha a apurar · 1.200,00 kg/ha de Café da roça · +1','em colheita · 1.484,89 kg/ha · estimativa · +1'].forEach(t=>{
+                    s.textContent=window.__MUX.quebra(t); out.push([t, s.scrollHeight>s.clientHeight+1||s.scrollWidth>s.clientWidth+1, Math.round(s.clientHeight)]); });
+                  s.textContent=o; return JSON.stringify(out); })()""")
         erros.extend(J("window.__e") or [])
         chk(f'{rot}: em {len(tabs)} camadas, nenhum valor de rótulo cortado nem "·" no começo de linha', len(tabs) >= 9 and not ruins,
             {k: (len(v), v[:3]) for k, v in ruins.items()} or tabs)
     chk('R3 Colheita e produtividade (Mamão em kg/ha): o Pivô 19 mostra a situação e a produtividade com a unidade inteira',
         bool(re.fullmatch(r'em colheita · [\d.]+,\d+ kg/ha', p19)), p19)
+    r5 = json.loads(r5 or '[]')
+    chk('R5 os textos compostos mais longos (café a apurar com a medida do campo; estimativa; "+1" de outro cultivo) cabem no rótulo sem corte',
+        len(r5) == 2 and not any(x[1] for x in r5), r5)
     chk('R4 nenhum erro de JavaScript', not erros, erros[:5])
 finally:
     c.close(); srv.terminate()

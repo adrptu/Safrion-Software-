@@ -1,0 +1,7 @@
+mapa_mux_f2 rc=0 RESULTADO: 29 ok · 0 falha(s)
+mapa_mux_f1 rc=0 RESULTADO: 43 ok · 0 falha(s)
+producao_fluxo rc=0 RESULTADO: OK 25/25
+colheita_mapa rc=0 RESULTADO: 7 ok · 0 falhas
+mapa_mux_f0 rc=0 RESULTADO: 17 ok · 0 falha(s)
+map_decisoes rc=0 18 ok · 0 falhas []
+mapa_colheita_unid_unit rc=0 RESULTADO: OK 6/6

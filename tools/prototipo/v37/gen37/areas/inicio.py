@@ -524,9 +524,9 @@ function lgCss(){ if(LGI.css) return; LGI.css=true; const s=document.createEleme
    // (≥ 13,4:1 sobre qualquer fundo, NC11): número / valor / estado curto; por tamanho na tela: só o número (peq) ou número e valor (med).
    // O clique continua no polígono (pointer-events: none no botão): o teclado e o leitor de tela usam o botão. Selecionado: placa escura (número em destaque)
    +'.lg-rot{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-align:center;font-family:Manrope,system-ui,sans-serif;color:#15201A;background:rgba(255,255,255,.9);border:0;border-radius:8px;padding:2px 7px 3px;margin:0;box-shadow:0 1px 3px rgba(21,32,26,.28);max-width:140px;box-sizing:border-box;cursor:pointer}'
-   // MUX-CORTE (19/10/2026): o valor ocupa até 3 linhas e quebra no "·" (muxQuebra); antes, uma linha com reticências cortava 34 rótulos a 1440 px
-   // (número, unidade ou estado: "Ácaro-rajado 18 % folhas com ác…", "em colheita · 484,89 k…"); reticências só depois da 3ª linha (o nome mais longo do MIP, 45 caracteres, ocupa 3)
-   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}'
+   // MUX-CORTE (19/10/2026): o valor ocupa até 4 linhas e quebra no "·" (muxQuebra); antes, uma linha com reticências cortava 34 rótulos a 1440 px
+   // (número, unidade ou estado: "Ácaro-rajado 18 % folhas com ác…", "em colheita · 484,89 k…"); reticências só depois da 4ª linha (o café a apurar com a produtividade medida do campo ocupa 4; achado do Codex no PR #133)
+   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4}'
    +'.lg-rot i{font-style:normal;font-size:10.5px;font-weight:600;color:#15201A;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
    +'.lg-rot.peq span,.lg-rot.peq i,.lg-rot.med i{display:none}.lg-rot.peq{padding:1px 6px}.lg-rot[aria-pressed=true]{background:#15201A;color:#FFFFFF;box-shadow:0 0 0 2px #FFFFFF}.lg-rot[aria-pressed=true] i{color:#FFFFFF}'
    +'.lg-rot.mux-fora span,.lg-rot.mux-fora i{display:none}.lg-rot:focus{outline:none}.lg-rot:focus-visible{outline:2px dashed #15201A;outline-offset:3px;box-shadow:0 0 0 3px #FFFFFF,0 1px 3px rgba(21,32,26,.28)}';
@@ -1475,6 +1475,7 @@ function muxOsTal(t){ return 'OS.dc.html#tal='+encodeURIComponent(muxFazNome(t)+
 function muxDt(s){ return String(s||'').slice(0,5); }
 // MUX-CORTE: o "·" fica preso à palavra anterior, o número à unidade e o trecho curto (≤ 20 caracteres) inteiro, para a 2ª linha começar num trecho
 function muxQuebra(s){ return String(s||'').split(' · ').map(x=>x.length<=20?x.replace(/ /g,'\u00a0'):x.replace(/(\d) (?=[^\d\s])/g,'$1\u00a0')).join('\u00a0· '); }
+MUX.quebra=muxQuebra;   // inspeção nos testes (mapa_rotulo_corte R5: o texto composto mais longo cabe no rótulo)
 function muxCurto(s){ const x=String(s||'').split(/ · |: |, | ou | \(/)[0].trim(); return x.length>24?x.slice(0,23)+'…':x; }
 function muxLegKey(c){ return c.c==='sat'?'h:'+c.hex:'c:'+c.c; }
 function muxEditavel(el){ if(!el||!el.matches) return false; return el.isContentEditable||el.matches('input,textarea,select,[role=textbox],[role=searchbox],[role=combobox]'); }
