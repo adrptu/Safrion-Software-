@@ -1,0 +1,15 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+const c={window:{},MIPD:{hoje:'2026-09-23',prot:{P:{un:'alvos/m',crit:'nc',nc:10}},tal:{T:{fase:'demo'}}}};
+vm.createContext(c);vm.runInContext(fs.readFileSync(process.argv[2]||__dirname+'/mip.js','utf8'),c);
+const s={vis:{V:{id:'V',tal:'T',prot:'P',data:'2026-09-23',est:'programada',npts:1,pts:[{n:1,v:null,ok:true,rec:false}],pend:[]}}};
+assert.equal(s.vis.V.revisoes,undefined);
+c.mipColetar(s,'V',0,true);const first=JSON.stringify(s.vis.V.revisoes[1]);assert.equal(s.vis.V.revisoes[1].pts[0].v,0);
+c.mipCorrigir(s,'V',1,2,true);c.mipConcluir(s,'V');assert.equal(JSON.stringify(s.vis.V.revisoes[1]),first);
+assert.equal(s.vis.V.revisoes[2].pts[0].v,2);assert.equal(s.vis.V.revisoes[3].est,'concluida');assert.equal(Object.keys(s.vis.V.revisoes).length,3);
+assert.equal(s.vis.V.revisoes[1].revisoes,undefined);assert.match(s.vis.V.disponivelEm,/Z$/);
+const before=JSON.stringify(s);assert.throws(()=>c.mipCorrigir(s,'V',1,'',true));assert.equal(JSON.stringify(s),before);
+const v={...s.vis.V,id:'W',versao:undefined,revisoes:undefined,pts:[{n:1,v:null,ok:true}],pend:[3]};s.vis.W=v;
+c.mipSinc(s,'W');assert.equal(v.versao,1);assert.equal(v.revisoes[1].pts[0].v,3);assert.equal(v.revisoes[1].pend.length,0);
+assert.throws(()=>c.mipSinc(s,'W'));assert.equal(v.versao,1);
+const restored=JSON.parse(JSON.stringify(s));restored.vis.V.pts[0].v=9;assert.equal(restored.vis.V.revisoes[1].pts[0].v,0);
+console.log('PASS revisões MIP: zero, correção, conclusão, sync, erro, ausência de backfill e isolamento após serialização');

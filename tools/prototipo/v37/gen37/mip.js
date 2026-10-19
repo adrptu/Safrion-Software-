@@ -267,7 +267,7 @@ function mipColetar(s, vid, valor, gpsOk) {
   if (reab) { v.est = 'coleta'; v.parcial = false; }
   const prox = mipAlvoPt(v); const vez = prox && prox.n !== pt.n ? prox : null;
   // RX1: disponibilidade desta revisão local; não é o instante da observação em campo.
-  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
+  mipRevisao(v);
   return { msg: (reab ? vid + ' reaberta · ' : '') + 'Ponto ' + pt.n + (eraRec && !pt.rec ? ' recoletado' : ' registrado') + (pt.rec ? ' para recoleta (GPS fora da tolerância)' : '')
     + (vez ? ' · ponto ' + vez.n + (vez.rec ? ' (recoleta)' : '') + ' aberto.' : (prox ? ' · ponto ' + prox.n + ' segue em recoleta.' : ' · todos os pontos coletados.')) };
 }
@@ -278,19 +278,28 @@ function mipCorrigir(s, vid, n, valor, gpsOk) {
   const pt = v.pts.find(x => x.n === Number(n)); if (!pt || pt.v === null || pt.v === undefined) throw new Error('Ponto ' + n + ' ainda não foi coletado.');
   const x = mipValor(mipP(v), valor, pt.n); const de = pt.v;
   pt.v = x; pt.ok = gpsOk !== false; pt.rec = gpsOk === false;
-  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
+  mipRevisao(v);
   return { msg: 'Ponto ' + pt.n + ' corrigido: ' + mipN(de) + ' → ' + mipN(x) + (pt.rec ? ' (recoleta)' : '') + '.' };
 }
 function mipConcluir(s, vid) {
   const v = s.vis[vid]; if (!v) throw new Error('Vistoria não encontrada.'); if (v.est === 'concluida') throw new Error(vid + ' já foi concluída.');
   const R0 = mipRes(v); if (!R0.col) throw new Error('Colete ao menos um ponto antes de concluir.');
   v.est = 'concluida'; v.parcial = false; const R = mipRes(v, s); const S = MIP_SIT[R.k];
-  v.versao = (Number.isSafeInteger(v.versao) && v.versao > 0 ? v.versao : 0) + 1; v.disponivelEm = new Date().toISOString();
+  mipRevisao(v);
   return { msg: vid + ' concluída com ' + R.col + ' de ' + R.tot + ' pontos · ' + (S ? S[0].toLowerCase() : '') + (R.kr && R.k === 'incompleta' ? ' (parcial: ' + MIP_SIT[R.kr][0].toLowerCase() + ')' : '') + '.' };
+}
+// Revisões futuras somente: não inventa a disponibilidade da semente ou de versões antigas.
+function mipRevisao(v) {
+ const historico=v.revisoes||{};
+ const ultima=Math.max(Number.isSafeInteger(v.versao)?v.versao:0,...Object.keys(historico).map(Number).filter(Number.isSafeInteger),0);
+ v.versao=ultima+1; v.disponivelEm=new Date().toISOString();
+ const {revisoes,...atual}=v;
+ v.revisoes={...historico,[v.versao]:JSON.parse(JSON.stringify(atual))};
 }
 function mipSinc(s, vid) {
   const v = s.vis[vid]; if (!v || !(v.pend || []).length) throw new Error('Nada a sincronizar.');
   const n = v.pend.length; v.pend.forEach(val => { const pt = v.pts.find(x => x.v === null || x.v === undefined); if (pt) pt.v = val; }); v.pend = [];
+  mipRevisao(v);
   const R = mipRes(v, s);
   return { msg: n + ' pontos de ' + v.resp + ' entraram na ' + vid + ' · ' + R.col + ' de ' + R.tot + ' pontos · sem conflito de versão.' };
 }
