@@ -4,6 +4,7 @@
 16/10/2026 (proprietário: "fazendas e talhoes na mesma tela, conectados e intuitivos"; padrão comum dos cadastros): uma árvore só, com a
 fazenda na linha-pai (abre o painel dela); "Criar fazenda" no cabeçalho (BOT-01/03); o talhão se inclui de dentro da fazenda ("Incluir
 talhão"); a fazenda só com o essencial (fuso calculado da UF; CAR, matrícula e arrendamento no Crédito). Oráculos ajustados a isso.
+19/10/2026 · LEVE-1 (leve, proprietário 19/10: "leve e fluido"): a soma dos talhões acima da área da fazenda e a diferença cultivável × polígono sem motivo viram aviso, sem impedir salvar; parcelas da safra acima da área continuam barrando. O caso 7 troca o oráculo "somariam 700 ha" (erro) por "não barra" (o aviso é conferido no leve1_test.py).
 Uso: python3 cadf_test.py  (serve _render/; ≤ 15 verificações; cada passo espera ≤ 0,5 s)."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
@@ -63,7 +64,7 @@ try:
     J(f"({CLK})('Incluir talhão','[role=row] button')"); time.sleep(.35)
     chk('6 talhão nasce na fazenda do grupo', fv('faz')=='Nova Esperança', fv('faz'))
     fset('t','N1'); fset('sis','Pivô central'); fset('setor','Bomba do Pivô 1'); fset('decl','700'); save(); al=alerts()
-    chk('7 regras do talhão: pivô já usado e área acima da fazenda', 'Bomba do Pivô 1 já irriga o P1' in al and 'somariam 700 ha; a fazenda tem 600 ha' in al, al)
+    chk('7 regras do talhão: pivô já usado barra; área acima da fazenda não barra (LEVE-1: vira aviso no recibo)', 'Bomba do Pivô 1 já irriga o P1' in al and 'somariam' not in al and 'somam 700' not in al, al)
     fset('sis','Sequeiro'); fset('decl','250'); save()
     ne=rowtxt(0,'Nova Esperança')
     chk('8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda)', not aberto() and '250,0 ha' in (ne or '') and '1.165,0 ha' in (rowtxt(0,'Santa Rita Santa Rita Agro') or ''), [ne,toast()])

@@ -44,11 +44,15 @@ function tmValida(d, faz){ const e = {}; const ring = d.ring; const ha = ring ? 
     else if (tal.some(t => t.v.faz === faz && (tgNome(t.v.t) === tgNome(n) || tgNome(tmNomeDe(t)) === tgNome(n)))) e.nome = 'Já existe ' + n + ' na ' + faz + '. Use outro nome.'; }
   const dec = tmNum(d.decl);
   if (!(dec > 0)) e.decl = 'Informe a área cultivável em ha (ex.: ' + nfx(ha, 1) + ').';
-  else { if (ha > 0 && Math.abs(ha - dec) / dec > 0.01 && !d.motivo) e.motivo = 'Diferença de ' + nfx(Math.abs(ha - dec) / dec * 100, 1) + ' % entre a área cultivável e o contorno: escolha o motivo.';
-    if (F && isFinite(Number(F.v.area)) && Number(F.v.area) > 0){ const soma = tal.filter(t => t.v.faz === faz && t.v.sit !== 'Inativo' && t.id !== d.alvo).reduce((s, t) => s + (Number(t.v.decl) || 0), 0) + dec;
-      if (soma > Number(F.v.area) + 0.005) e.decl = 'Os talhões ativos da ' + faz + ' somariam ' + nfx(soma, 2) + ' ha; a fazenda tem ' + nfx(Number(F.v.area), 2) + ' ha.'; } }
+  /* LEVE-1 (proprietário 19/10): diferença cultivável × contorno sem motivo e soma dos talhões acima da fazenda viram aviso (tmAvisos), como no cadastro */
   if (ring && !e.geo){ const sob = tmSobrepoe(ring, faz, d.alvo); if (sob.length) e.geo = 'O contorno sobrepõe ' + sob.join(', ') + ': ajuste o desenho para não contar a mesma área duas vezes.'; }
   return e; }
+function tmAvisos(d, faz){ const av = []; const ring = d.ring; const ha = ring ? tgAreaHa(ring) : 0; const dec = tmNum(d.decl); if (!(dec > 0)) return av;
+  const { faz: fz, tal } = tmBase(); const F = fz.find(f => f.v.nome === faz);
+  if (ha > 0 && Math.abs(ha - dec) / dec > 0.01 && !d.motivo) av.push('diferença de ' + nfx(Math.abs(ha - dec) / dec * 100, 1) + ' % entre a área cultivável e o contorno, sem motivo');
+  if (F && isFinite(Number(F.v.area)) && Number(F.v.area) > 0){ const soma = tal.filter(t => t.v.faz === faz && t.v.sit !== 'Inativo' && t.id !== d.alvo).reduce((s, t) => s + (Number(t.v.decl) || 0), 0) + dec;
+    if (soma > Number(F.v.area) + 0.005) av.push('os talhões ativos da ' + faz + ' somam ' + nfx(soma, 2) + ' ha e a fazenda tem ' + nfx(Number(F.v.area), 2) + ' ha'); }
+  return av; }
 // sobreposição com os outros talhões da fazenda (tolerância: 2 % da menor área ou 0,3 ha, o maior)
 function tmSobrepoe(ring, faz, exceto, extras){ const ha = tgAreaHa(ring); const out = [];
   tmAneis(faz).concat(extras || []).forEach(o => { if (o.id === exceto) return; const s = tgSobrepoeHa(ring, o.ring);
@@ -80,7 +84,8 @@ function tmConcluir(self, dw){ const ring = tmRing(dw);
 function tmSalvarDesenho(self){ const dw = self.state.dw; if (!dw || dw.etapa !== 'form') return;
   const d = { alvo: dw.alvo, nome: String(dw.nome || '').trim(), faz: FAZ, sis: dw.sis, decl: tmNum(dw.decl), motivo: dw.motivo, ring: dw.ring, origem: 'Desenho no mapa' };
   const e = tmValida(Object.assign({}, d, { decl: dw.decl }), FAZ); if (Object.keys(e).length){ self.setState({ dw: Object.assign({}, dw, { err: e }) }); return; }
-  try{ const r = tmSalvar(d); self.__dw = null; self.setState({ dw: null, tsel: [r.id], px: null, mpa: null, g2toast: r.nome + ' salvo no cadastro · contorno ' + r.ver + ' · ' + nfx(r.ha, 2) + ' ha' }); setTimeout(() => tmEnquadra(d.ring), 50); }
+  const av = tmAvisos(Object.assign({}, d, { decl: dw.decl }), FAZ);   /* LEVE-1: aviso no recibo, não impede salvar */
+  try{ const r = tmSalvar(d); self.__dw = null; self.setState({ dw: null, tsel: [r.id], px: null, mpa: null, g2toast: r.nome + ' salvo no cadastro · contorno ' + r.ver + ' · ' + nfx(r.ha, 2) + ' ha' + (av.length ? '. Aviso: ' + av.join('; ') + '.' : '') }); setTimeout(() => tmEnquadra(d.ring), 50); }
   catch(x){ self.setState({ dw: Object.assign({}, dw, { err: { geo: x.message } }) }); } }
 // ---------- importação (KML ou GeoJSON) ----------
 // nome todo em maiúsculas no arquivo ("PIVÔ 25") vira "Pivô 25"; nome escrito normalmente fica como está

@@ -96,7 +96,7 @@ def campos_tal(fazs):
             num('calc','Área do polígono','ha',req=False,ro=True,help='Da versão atual do polígono; em branco enquanto não houver polígono.'),
             dict(k='geo_t',l='Geometria',t='area',ro=True,req=False,cond=dict(k='geo',eq='circ'),help='Não é polígono validado; defina o polígono no detalhe do talhão.'),
             dict(k='geo',l='geo',t='txt',req=False,cond=dict(k='_nunca',eq='1')),
-            sel('motivo','Motivo da diferença',DC.MOTIVOS_DIF,req=False,help='Pedido quando a área cultivável difere mais de 1 % do polígono.'),
+            sel('motivo','Motivo da diferença',DC.MOTIVOS_DIF,req=False,help='Opcional: aparece quando a área cultivável difere mais de 1 % do polígono.'),
             sel('sit','Situação',['Ativo','Inativo'],**{'def':'Ativo'},help='Inativo sai do Planejar safra e do Mapa; safras e O.S. antigas seguem consultáveis.')]
 # só o essencial à gestão (16/10/2026; tabela campo a campo em docs/integracao/V71/cadastros-campos.md): saíram o fuso (calculado da UF),
 # CAR, módulos fiscais, matrícula, pendência nos documentos e arrendador (Crédito › Documentos para crédito), custo da terra (nenhuma tela lê)
@@ -161,12 +161,19 @@ function talErros(d,fm,ctx){ const e={}; const id=fm.rid; const nome=String(d.t|
     else if(d.sis==='Pivô central'&&d.sit!=='Inativo'){ const o=out.find(r=>r.v.sis==='Pivô central'&&r.v.setor===d.setor&&r.v.sit!=='Inativo'); if(o) e.setor=d.setor+' já irriga o '+o.v.t+' ('+o.v.faz+').'; } }
   const a=g2num(d.decl);
   if(!isNaN(a)){ const pior=Object.keys(al).filter(s=>al[s]>a+0.005)[0];
-    if(pior) e.decl='As parcelas da '+pior+' somam '+nfa(al[pior])+' ha; reduza-as no Planejar safra antes.';
-    else if(fz&&d.sit!=='Inativo'&&isnum(fz.v.area)){ const soma=r1(out.filter(r=>r.v.faz===d.faz&&r.v.sit!=='Inativo').reduce((s,r)=>s+(Number(r.v.decl)||0),0)+a);
-      if(soma>Number(fz.v.area)+0.005) e.decl='Os talhões ativos da '+d.faz+' somariam '+nfa(soma)+' ha; a fazenda tem '+nfa(fz.v.area)+' ha.'; }
-    if(precisaMotivo(d)&&!d.motivo){ const c=g2num(d.calc); e.motivo='Diferença de '+nf(Math.abs(c-a)/a*100,1)+' % entre área cultivável e polígono: informe o motivo.'; } }
+    if(pior) e.decl='As parcelas da '+pior+' somam '+nfa(al[pior])+' ha; reduza-as no Planejar safra antes.'; }
   if(d.sit==='Inativo'&&id&&comParc.length) e.sit=(nome||'O talhão')+' tem parcelas na '+comParc.join(' e na ')+'. Tire-as no Planejar safra antes de inativar.';
   return e; }
+// LEVE-1 (proprietário 19/10: "leve e fluido"): a soma dos talhões acima da área da fazenda e a diferença de área cultivável × polígono acima
+// de 1 % sem motivo viram aviso no recibo, sem impedir salvar (dano avaliado: nenhum; a área usada pela safra é a cultivável do talhão).
+// Talhão com parcelas na safra não inativa nem diminui abaixo das parcelas (as travas de cima continuam).
+function talAvisos(d,fm,ctx){ const av=[]; const id=fm.rid; const out=ctx.tals.filter(r=>r.id!==id); const fz=ctx.fazs.find(f=>f.v.nome===d.faz); const a=g2num(d.decl);
+  if(isNaN(a)||d.sit==='Inativo') return av;
+  if(fz&&isnum(fz.v.area)){ const soma=r1(out.filter(r=>r.v.faz===d.faz&&r.v.sit!=='Inativo').reduce((s,r)=>s+(Number(r.v.decl)||0),0)+a);
+    if(soma>Number(fz.v.area)+0.005) av.push('os talhões ativos da '+d.faz+' somam '+nfa(soma)+' ha e a fazenda tem '+nfa(fz.v.area)+' ha'); }
+  if(precisaMotivo(d)&&!d.motivo){ const c=g2num(d.calc); av.push('diferença de '+nf(Math.abs(c-a)/a*100,1)+' % entre área cultivável e polígono, sem motivo'); }
+  return av; }
+function avisoTxt(av){ return av&&av.length?' Aviso: '+av.join('; ')+'.':''; }
 function talToast(r,sit0){ return r.v.sit==='Inativo'?(r.v.t+' inativo: sai do Planejar safra e do Mapa; safras e O.S. antigas seguem consultáveis.')
   :(sit0==='Inativo'?(r.v.t+' reativado: volta ao Planejar safra e ao Mapa.'):('Salvo: '+r.v.t+' · '+r.v.faz+'.')); }
 function cadLer(){ try{ const s=localStorage.getItem(CKEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
@@ -415,7 +422,7 @@ function fazErros(self,d,fm){ const e={}; const fz=RW(self,'g_faz'); const antes
   if(nome===NOVA_FAZ) e.nome='Use outro nome.';
   else if(nome&&fz.some(r=>r.id!==fm.rid&&String(r.v.nome).trim().toLowerCase()===nome.toLowerCase())) e.nome='Já existe a fazenda '+nome+'.';
   const at=antes?tals(RW(self,'g_tal')).filter(t=>t.v.faz===antes&&t.v.sit!=='Inativo'):[]; const soma=r1(at.reduce((s,t)=>s+(Number(t.v.decl)||0),0)); const a=g2num(d.area);
-  if(!isNaN(a)&&a>=1&&at.length&&soma>a+0.005) e.area='Os talhões ativos somam '+nfa(soma)+' ha; a área total não pode ser menor.';
+  self._fAv=(!isNaN(a)&&a>=1&&at.length&&soma>a+0.005)?['os talhões ativos somam '+nfa(soma)+' ha, mais que a área total ('+nfa(a)+' ha)']:[];   /* LEVE-1: aviso, não impede salvar */
   if(d.sit==='Inativa'&&at.length) e.sit='Há '+at.length+(at.length>1?' talhões ativos':' talhão ativo')+' ('+at.map(t=>t.v.t).join(', ')+'). Inative-os antes da fazenda.';
   if(d.posse!=='Própria'&&d.fim&&d.fim<HOJE&&d.sit!=='Inativa') e.fim='Contrato vencido em '+br(d.fim)+': informe a renovação ou marque a fazenda como inativa.';
   return e; }
@@ -440,7 +447,7 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
     ff.opts=at.map(n=>({v:n,t:n})).concat([{v:NOVA_FAZ,t:NOVA_FAZ}]);
     ff.set=(e)=>{ const val=e.target.value; if(val!==NOVA_FAZ){ draftSet(self,'g_tal',{faz:val}); return; }
       self._stash=Object.assign({},g2st(self,'g_tal').fm); g2set(self,'g_tal',{fm:null}); g2new(self,GR('g_faz')); }; }
-  valida2(self,v,'g_tal',(d,fm)=>{ const o=fm.rid?ts.find(t=>t.id===fm.rid):null; self._sit0=o?o.v.sit:''; return talErros(d,fm,{tals:ts,fazs:fz,aloc:ALOC}); });
+  valida2(self,v,'g_tal',(d,fm)=>{ const o=fm.rid?ts.find(t=>t.id===fm.rid):null; self._sit0=o?o.v.sit:''; const ctx={tals:ts,fazs:fz,aloc:ALOC}; self._tAv=talAvisos(d,fm,ctx); return talErros(d,fm,ctx); });
   // PLAT-01 R12: incluir talhão recusa antes de abrir o formulário quando a assinatura está inadimplente
   const trava=(go)=>(...a)=>{ const tv=typeof assinTrava==='function'?assinTrava('ampliar_area'):''; if(tv){ self.setState({g2toast:tv}); return; } return go(...a); };
   if(v.g_tal_new) v.g_tal_new=trava(v.g_tal_new);
@@ -454,13 +461,13 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
       if(isNew){ tr.push({id:'F_'+r.id,ro:true,v:{t:r.v.nome,fid:r.id},s:{},p:{},kids:[]}); const x=Object.assign({},g2st(self,'g_tal').x||{}); x['F_'+r.id]=true; g2set(self,'g_tal',{rows:tr,x:x}); }
       else if(old&&old!==r.v.nome){ tals(tr).forEach(t=>{ if(t.v.faz===old){ t.v.faz=r.v.nome; t.s.faz=r.v.nome; } }); g2set(self,'g_tal',{rows:tr}); }
       if(isNew&&self._stash){ retoma(self,r.v.nome); self.setState({g2toast:'Fazenda '+r.v.nome+' cadastrada. Continue o talhão.'}); }
-      else self.setState({g2toast:isNew?('Fazenda '+r.v.nome+' cadastrada. Próximo passo: incluir os talhões dela.'):(r.v.sit==='Inativa'?(r.v.nome+' inativa: sai do Planejar safra; talhões e O.S. antigas seguem consultáveis.'):('Salvo: '+r.v.nome+'.'))}); }
+      else self.setState({g2toast:(isNew?('Fazenda '+r.v.nome+' cadastrada. Próximo passo: incluir os talhões dela.'):(r.v.sit==='Inativa'?(r.v.nome+' inativa: sai do Planejar safra; talhões e O.S. antigas seguem consultáveis.'):('Salvo: '+r.v.nome+'.')))+avisoTxt(self._fAv)}); }
     if(gid==='g_tal'){ cxLimpa('g_tal',r); if(r.v.sit==='Inativo'){ if(!r.v.inat) r.v.inat=HOJE; } else r.v.inat='';
       const f=RW(self,'g_faz').find(x=>x.v.nome===r.v.faz); const gk='F_'+(f?f.id:r.v.faz); const cur=rows.find(g=>g.kids&&g.kids.some(k=>k.id===r.id));
       if(!cur||cur.id!==gk){ const i=rows.indexOf(r); if(i>=0) rows.splice(i,1); if(cur) cur.kids.splice(cur.kids.indexOf(r),1);
         let g=rows.find(x=>x.id===gk); if(!g){ g={id:gk,ro:true,v:{t:r.v.faz,fid:f?f.id:''},s:{},p:{},kids:[]}; rows.push(g); } g.kids.push(r); }
       const x=Object.assign({},g2st(self,'g_tal').x||{}); x[gk]=true; g2set(self,'g_tal',{rows:rows,x:x,fl:r.id});
-      self.setState({g2toast:isNew?(r.v.t+' cadastrado na '+r.v.faz+'. Próximo passo: definir o polígono no detalhe do talhão.'):talToast(r,self._sit0)}); }
+      self.setState({g2toast:(isNew?(r.v.t+' cadastrado na '+r.v.faz+'. Próximo passo: definir o polígono no detalhe do talhão.'):talToast(r,self._sit0))+avisoTxt(self._tAv)}); }
     cadSalvar(self); }; }
 ''')
     # tela sem rolagem de página: só a área de dados da aba rola (a prancheta tem a altura da janela)
@@ -510,7 +517,7 @@ def _painel_poligono():
             f'<sc-for list="{H("pg_checks")}" as="x" hint-placeholder-count="2"><div style="font-size: 12.5px; color: {ACC}; font-weight: 700; padding-top: 4px;">✓ {H("x.t")}</div></sc-for></div></sc-if>'
             f'<sc-if value="{H("pg_needmot")}" hint-placeholder-val="{F_}"><div style="display: flex; flex-direction: column; gap: 4px;"><label for="pg_mot" style="{lab}">Motivo da diferença</label>'
             f'<select id="pg_mot" value="{H("pg_mot")}" onChange="{H("pg_setmot")}" style="{H("pg_motst")}"><sc-for list="{H("pg_mopts")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>'
-            f'<span style="font-size: 11.5px; color: {MUTED};">Diferença acima de 1 % pede o motivo.</span></div></sc-if>'
+            f'<span style="font-size: 11.5px; color: {MUTED};">Diferença acima de 1 %: informe o motivo se souber (opcional; sem ele, o selo "Diferença sem motivo" fica na lista).</span></div></sc-if>'
             f'<sc-if value="{H("pg_haserr")}" hint-placeholder-val="{F_}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: #FDE8E6; color: #B42318; font-size: 12.5px; font-weight: 700;">{H("pg_err")}</div></sc-if>'
             f'<div style="flex-grow: 1;"></div>'
             f'<sc-if value="{H("pg_warn")}" hint-placeholder-val="{F_}"><div role="alert" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FFF3D6; color: #8A5A00; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
@@ -664,16 +671,16 @@ function pgVals(self,v,T){ const pg=self.state.pg; v.pg_open=!!pg; const set=(p)
   v.pg_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pg_fechar(); } };
   v.pg_descartar=()=>self.setState({pg:null}); v.pg_continuar=()=>set({warn:false});
   v.pg_salvar=()=>{ const c=self.state.pg; if(!c.prev){ set({err:'Gere a prévia antes de salvar.'}); return; }
-    if(need&&!c.mot){ set({err:'Informe o motivo da diferença de '+nf(pct*100,1)+' %.'}); return; }
+    /* LEVE-1 (proprietário 19/10): diferença acima de 1 % sem motivo salva, com aviso; o selo "Diferença sem motivo" fica na lista */
     const vs2=versOf(self,c.t); const n=vs2.length?(parseInt(String(vs2[vs2.length-1][0]).slice(1),10)+1):1; const vn='v'+n;
     const rows=g2clone(RW(self,'g_idt')); const R2=g2find(rows,c.t);
-    const orig=(c.modo==='imp'?('Importado · '+c.arq):'Desenhado no mapa')+(c.cid?' · '+c.alvo:'')+(need?' · '+c.mot:'');
+    const orig=(c.modo==='imp'?('Importado · '+c.arq):'Desenhado no mapa')+(c.cid?' · '+c.alvo:'')+(need&&c.mot?' · '+c.mot:'');
     const area=c.cid&&isnum(R2.v.calc)?Number(R2.v.calc):c.prev.area;
     const vers=Object.assign({},self._vers0,self.state.vers||{}); vers[c.t]=vs2.concat([[vn,HOJE,orig,area]]);
     const pgeo=Object.assign({},self._pgeo0,self.state.pgeo||{}); R2.v.ver=vn;
     if(c.cid) pgeo[c.cid]='Validada'; else { R2.v.calc=c.prev.area; R2.v.motivo=need?c.mot:''; }
     g2set(self,'g_idt',{rows:rows});
-    self.setState({pg:null,vers:vers,pgeo:pgeo,g2toast:'Polígono '+c.art+' '+c.alvo+' salvo (simulado): '+vn+' do '+R2.v.t+' é a atual'+(vs2.length?('; a '+vs2[vs2.length-1][0]+' fica em consulta para as O.S. já emitidas.'):'; mapa de taxa variável liberado.')});
+    self.setState({pg:null,vers:vers,pgeo:pgeo,g2toast:'Polígono '+c.art+' '+c.alvo+' salvo (simulado): '+vn+' do '+R2.v.t+' é a atual'+(vs2.length?('; a '+vs2[vs2.length-1][0]+' fica em consulta para as O.S. já emitidas.'):'; mapa de taxa variável liberado.')+(need&&!c.mot?' Aviso: diferença de '+nf(pct*100,1)+' % sem motivo.':'')});
     detSalvar(self); }; }
 function EXTRAVALS(self,v){ const t=curT(self); const T=g2find(RW(self,'g_idt'),t); const ina=!!T&&T.v.sit==='Inativo';
   // seletor do cabeçalho: o talhão mostrado é sempre o escolhido (nunca um registro em silêncio)
@@ -708,9 +715,9 @@ function EXTRAVALS(self,v){ const t=curT(self); const T=g2find(RW(self,'g_idt'),
   // formulário do talhão no próprio detalhe
   cxForm(self,v,'g_idt'); const FI=v.g_idt_F; if(FI&&FI.open&&T) FI.title='Talhão · '+T.v.t;
   const ff=cxCampo(v,'g_idt','faz'); if(ff&&!ff.dis){ const at=FAZL.filter(f=>f.v.sit!=='Inativa').map(f=>f.v.nome); if(ff.v&&at.indexOf(ff.v)<0) at.push(ff.v); ff.opts=at.map(n=>({v:n,t:n})); }
-  valida2(self,v,'g_idt',(d,fm)=>{ const o=fm.rid?g2find(RW(self,'g_idt'),fm.rid):null; self._sit0=o?o.v.sit:''; return talErros(d,fm,{tals:RW(self,'g_idt'),fazs:FAZL,aloc:alocDe(self)}); });
+  valida2(self,v,'g_idt',(d,fm)=>{ const o=fm.rid?g2find(RW(self,'g_idt'),fm.rid):null; self._sit0=o?o.v.sit:''; const ctx={tals:RW(self,'g_idt'),fazs:FAZL,aloc:alocDe(self)}; self._tAv=talAvisos(d,fm,ctx); return talErros(d,fm,ctx); });
   self.g2after=(gid,rows,r)=>{ if(gid!=='g_idt'||!r) return; cxLimpa('g_idt',r); if(r.v.sit==='Inativo'){ if(!r.v.inat) r.v.inat=HOJE; } else r.v.inat='';
-    g2set(self,'g_idt',{rows:rows}); self.setState({g2toast:talToast(r,self._sit0)}); detSalvar(self); };
+    g2set(self,'g_idt',{rows:rows}); self.setState({g2toast:talToast(r,self._sit0)+avisoTxt(self._tAv)}); detSalvar(self); };
   if(T) geoVals(self,v,T); else { v.geo_parts=[]; v.geo_vers=[]; v.geo_novers=false; }
   pgVals(self,v,T||{id:'',v:{}}); }
 ''')
