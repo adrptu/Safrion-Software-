@@ -216,7 +216,7 @@ Propostas do texto ao proprietário; **não são decisões**. Até o acordo escr
 
 ### DEC-1810-01 — Aprovação agronômica em lote
 
-Adrianus confirmou: “pode aprovar em lote as O.S sim”. Fonte literal: [registro de 18/10](https://github.com/adrptu/Safrion-Software-/blob/408fb14e/docs/integracao/V73/pedidos-1810/decisoes-proprietario-1810.md), na sessão existente do Claude.
+Adrianus confirmou: “pode aprovar em lote as O.S sim”. Fonte literal: [registro de 18/10](integracao/V73/pedidos-1810/decisoes-proprietario-1810.md), na sessão existente do Claude.
 
 Substitui somente a restrição à confirmação individual da DEC-1610-03 e do AGENTS §4. Cada O.S. continua exigindo aprovação explícita por papel agronômico autorizado: prévia com produto, dose, alvo, talhão e alertas; revalidação de versão e travas legais por O.S.; registro CMD-42 e chave de idempotência próprios; resultado por linha com motivo para cada exclusão. O lote não contorna trava nem autoriza automaticamente novas versões. Aprovar não libera: CMD-06 permanece separado, com suas verificações.
 
