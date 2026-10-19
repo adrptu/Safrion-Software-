@@ -1,7 +1,7 @@
 # Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 18/10, noite (UTC)
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v139 (versão 151, `1792378621-2088`; recibo `artefato-v139/LEIAME.md`).
+**Fonte da situação:** a composição `claude/v44-v135-osagrupa` e o artefato publicado, com estado completo na v140 (versão 152, `1792379001-2aca`; recibos `artefato-v139/` e `artefato-v140/`).
 
 **Conferência do artefato (executada):**
 - v137: 10 páginas que mudaram (OS, AG-01, IR-01, SAF, IN-04 e as telas que carregam o código da Irrigação), enviadas num lote (versão 147);
