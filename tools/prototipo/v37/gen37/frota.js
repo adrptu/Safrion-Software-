@@ -94,11 +94,26 @@ function frConflitos(conjs, etapa, grupos) {
     if (!compat) out[r] = oss.slice().sort(); });
   return out;
 }
-// um marcador por conjunto físico distinto (máquina + implemento); dois conjuntos distintos nunca viram um (K7)
-function frMarcadores(conjs, etapa) {
-  const s = new Map(); Object.keys(conjs || {}).forEach(o => { if ((etapa || {})[o] !== 'Em execução') return; const c = conjs[o];
-    const k = (c.maquina || '') + '|' + (c.implemento || ''); if (!s.has(k)) s.set(k, [c.maquina, c.implemento]); });
-  return [...s.keys()].sort().map(k => s.get(k));
+// entradas da tela (marcador, lista, "Máquinas (N)" e "Lista (N)"): uma por conjunto físico (máquina + implemento). As O.S. do mesmo conjunto
+// só se juntam sem conflito nos componentes dele: o mesmo conjunto do mesmo grupo, com programação do grupo e em sequência (K4), um marcador
+// com as O.S. do grupo. Com conflito (K5, K6), cada O.S. fica com a sua entrada e o selo: juntar nunca esconde o conflito nem escolhe uma O.S.
+// em silêncio. Conjuntos distintos nunca se juntam (K2, K7); sem conjunto (sem vínculo ou ativo fixo), uma por O.S.
+// cjs: [{os, maquina, implemento, vinculo}]; K: conflitos por O.S. ({os: [...]}) → [{k: a 1ª O.S., oss: as O.S. em ordem}]
+function frEntradas(cjs, K) {
+  const out = [], por = {};
+  (cjs || []).slice().sort((a, b) => a.os < b.os ? -1 : a.os > b.os ? 1 : 0).forEach(c => {
+    const ch = c.vinculo && (c.maquina || c.implemento) && !((K || {})[c.os] || []).length ? (c.maquina || '') + '|' + (c.implemento || '') : null;
+    if (ch && por[ch]) { por[ch].oss.push(c.os); return; }
+    const e = {k: c.os, oss: [c.os]}; out.push(e); if (ch) por[ch] = e; });
+  return out;
+}
+// marcadores no formato do oráculo, pelas mesmas entradas da tela: um por conjunto físico (K4); dois conjuntos distintos nunca viram um (K2, K7);
+// o mesmo conjunto em conflito (K5, K6) fica com um marcador por O.S., cada um com o selo. grupos: como no frConflitos
+function frMarcadores(conjs, etapa, grupos) {
+  const cs = Object.keys(conjs || {}).filter(o => (etapa || {})[o] === 'Em execução').map(o => Object.assign({os: o, vinculo: true}, conjs[o]));
+  const C = frConflitos(conjs, etapa, grupos), K = {}; Object.keys(C).forEach(r => C[r].forEach(o => (K[o] = K[o] || []).push(r)));
+  const ch = m => m.join('|');
+  return frEntradas(cs, K).map(e => [conjs[e.k].maquina, conjs[e.k].implemento]).sort((a, b) => ch(a) < ch(b) ? -1 : ch(a) > ch(b) ? 1 : 0);
 }
 // Z · o que o mapa e a lista mostram. modo: ativo | pausado; congelada/corrente: {fonte, obs}. Pausa congela só a posição EXIBIDA no mapa.
 function frExibir(modo, congelada, corrente, agora, osEmExecucao, perfilVe) {
@@ -229,4 +244,4 @@ function frSimular(sim, agora, F0, n) {
   }
   return out;
 }
-if (typeof module !== 'undefined') module.exports = {frConjuntos, frGrupos, frConflitosDe, frRotaPoligono, frRotaCirculo, frNaRota, frMetrosParaGraus, frGrausParaMetros, frSimular, frDistM, frValida, frProcessar, frIdadeTxt, frSituacao, frAvaliar, frConflitos, frMarcadores, frExibir, frAgrupar, frFamilia, FR_TOL_FUT, FR_VMAX};
+if (typeof module !== 'undefined') module.exports = {frConjuntos, frGrupos, frConflitosDe, frRotaPoligono, frRotaCirculo, frNaRota, frMetrosParaGraus, frGrausParaMetros, frSimular, frDistM, frValida, frProcessar, frIdadeTxt, frSituacao, frAvaliar, frConflitos, frEntradas, frMarcadores, frExibir, frAgrupar, frFamilia, FR_TOL_FUT, FR_VMAX};

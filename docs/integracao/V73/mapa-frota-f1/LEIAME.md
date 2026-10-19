@@ -109,3 +109,41 @@ Depois das correções das fotos, rodaram de novo `mapa_frota` (20/20), `regras_
 - Santa Rita: com o painel a 1440 e 390 px e com a lista a 390 px;
 - Lagoa Grande: com o painel a 1440 px;
 - "Ver no mapa" com o recorte temporário.
+
+## Correção K4 (revisão do Codex 6270760702)
+**Achado (reproduzido):** duas O.S. Em execução do mesmo grupo, com o mesmo trator e implemento em blocos sequenciais (K4), eram 1 conjunto físico no modelo, mas a tela montava o marcador por O.S. No mesmo ponto aparecia a bolha "2 máquinas", com "Máquinas (2)" e "Lista (2)". O `frMarcadores` passava no K4, mas a tela não o usava. Reprodução no código de `1e927f62`, com `frota.js` e `frota_ui.js` num VM e cenário sintético: `brutos/correcao_k4/repro_antes_1e927f62.log` (`modelItems 2, physicalSets 1, visiblePositions 2, conflicts [0,0]`, bolha "2 máquinas").
+
+**O que mudou (uma regra só):**
+- **`frota.js`:**
+  - `frEntradas` faz uma entrada por conjunto físico. As O.S. do mesmo conjunto só se juntam quando nenhum componente dele está em conflito, o que equivale ao K4: mesmo grupo, mesmo conjunto, programação do grupo e blocos sem sobreposição.
+  - Com conflito (K2, K5, K6), cada O.S. fica com a sua entrada e o selo; conjuntos distintos nunca se juntam (K7).
+  - O `frMarcadores` passa a usar o `frEntradas` e recebe os grupos, como o `frConflitos`. Nos casos K2, K4 e K7 a saída é a mesma do oráculo; o oráculo não afirma a contagem de marcadores do K5 e do K6.
+- **`frota_ui.js`:**
+  - O `frModelo` devolve as entradas. O marcador, o `aria-label`, "Máquinas (N)", "Lista (N)", as linhas da lista e a bolha "N máquinas" passam a contar conjuntos.
+  - O marcador do K4 diz "· 2 O.S.". O painel mostra os campos de cada O.S., com o horário da programação; máquina, estado e posição vêm da leitura do marcador (M15). A primária é "Abrir OS-0421" e a secundária, "Abrir OS-0424".
+  - "Ver no mapa" de qualquer O.S. do conjunto seleciona o marcador dele, e o Esc devolve o foco a esse marcador.
+  - A bolha diz "N máquinas · Conflito" quando alguém nela tem conflito.
+  - A lista não repete mais a O.S. em "também na" (antes: "OS-0424, OS-0424", uma vez por componente).
+
+**Testes executados** (árvore de trabalho sobre `1e927f62`, render sintético). Brutos em `brutos/correcao_k4/`:
+
+| Comando (de `gen37/`) | Resultado |
+|---|---|
+| `node frota_unit.js` | 57/57 (53 + KT1–KT4: K4 na tela, "Ver no mapa" com foco e seleção, K2/K5/K6/K7 na tela e a bolha com conflito) |
+| `env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico python3 -B mapa_frota_test.py` | 23/23 (20 + K4, K4 "Ver no mapa" e o contraexemplo K6) |
+| `paginas_scan_test.py` (mesmo ambiente) | 5/5, nas 147 páginas |
+| `ds_1610_test.py` (mesmo ambiente) | 16/16 |
+
+**Contraprova no código de `1e927f62`:**
+- **`node frota_unit.js <cópias antigas>/frota.js`:** 54/57. KT1, KT2 e KT4 reprovam (`frota_unit_contraprova_1e927f62.log`). O KT3 passa nas duas versões: os casos incompatíveis já mostravam o conflito, e ele protege contra regressão.
+- **Navegador:** o bloco K4/K6 do `mapa_frota_test.py` rodou no render com o `frota.js` e o `frota_ui.js` antigos trocados no `IN-04.dc.html`, que os embute literalmente. Resultado 0/3 (`mapa_frota_k4_contraprova_1e927f62.log`):
+  - "Máquinas (3)" com a bolha "2 máquinas";
+  - "Ver no mapa" da OS-0424 deixa o marcador do conjunto sem seleção, o painel diz "Posição indisponível" e o foco se perde no Esc;
+  - a bolha do K6 não diz "Conflito".
+
+**Fotos** (1440 e 390 px, conferidas e não versionadas; texto em `fotos_texto.log`):
+- um marcador "T03 · Pulverização · ▶ trabalhando · 2 O.S.", com alvo de 44 × 44 px;
+- o painel com as 2 O.S. e as ações "Abrir OS-0421" e "Abrir OS-0424", que a 390 px ficam visíveis na folha inferior;
+- a lista com uma linha "OS-0421 e OS-0424";
+- o K6 com "2 máquinas · Conflito";
+- nenhuma rolagem lateral e nenhum erro de JS.

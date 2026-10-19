@@ -1,8 +1,9 @@
 // MAPA-FROTA F1 · regras puras de frota.js com os casos do oráculo docs/integracao/V71/mapa-frota/mapa_frota_chk.py (L1–L14, P1–P13, K1–K7, Z1–Z6)
-// e as famílias de ícone (decisão 5). Uso: node frota_unit.js [caminho do frota.js]   (sai 0 com tudo OK)
+// e as famílias de ícone (decisão 5); KT: K na tela (frota.js + frota_ui.js num VM). Uso: node frota_unit.js [caminho do frota.js]   (sai 0 com tudo OK)
+// O frota_ui.js é o da mesma pasta do frota.js (contraprova: node frota_unit.js <pasta com as cópias antigas>/frota.js)
 'use strict';
-const path = require('path');
-const F = require(process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'frota.js'));
+const path = require('path'), fs = require('fs'), vm = require('vm');
+const FJ = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'frota.js'), F = require(FJ);
 const R = []; const ok = (id, desc, c, info) => { R.push(!!c); console.log((c ? 'OK    ' : 'FALHA ') + id + ' · ' + desc + (c ? '' : ' · ' + JSON.stringify(info === undefined ? '' : info).slice(0, 400))); };
 const ids = xs => xs.map(x => x.id);
 const has = (recus, id, mot) => recus.some(r => r[0] === id && r[1] === mot);
@@ -74,15 +75,15 @@ const J = x => JSON.stringify(x);
 ok('K1', 'PJ em duas O.S. Em execução: conflito', J(F.frConflitos({'OS-0421': C('T03', 'PJ'), 'OS-0424': C('T04', 'PJ'), 'OS-0430': C('T03', 'PJ')}, EX2, {})) === J({PJ: ['OS-0421', 'OS-0424']}));
 const G1 = {G1: {ids: ['OS-0421', 'OS-0424'], maquina: 'T03', implemento: 'PJ'}};
 const cjg = {'OS-0421': C('T03', 'PJ', 'grupo', [[6, 9]]), 'OS-0424': C('T04', 'PJ', 'grupo', [[9, 11]])};
-ok('K2', 'mesmo PJ em dois tratores no mesmo grupo: conflito e dois marcadores', J(F.frConflitos(cjg, EX2, G1)) === J({PJ: ['OS-0421', 'OS-0424']}) && F.frMarcadores(cjg, EX2).length === 2);
+ok('K2', 'mesmo PJ em dois tratores no mesmo grupo: conflito e dois marcadores', J(F.frConflitos(cjg, EX2, G1)) === J({PJ: ['OS-0421', 'OS-0424']}) && F.frMarcadores(cjg, EX2, G1).length === 2);
 ok('K3', 'A liberar não ocupa', J(F.frConflitos({'OS-0421': C('T03', 'PJ'), 'OS-0430': C('T03', 'PJ')}, {'OS-0421': 'Em execução', 'OS-0430': 'A liberar'}, {})) === '{}');
 const cj4 = {'OS-0421': C('T03', 'PJ', 'grupo', [[6, 9]]), 'OS-0424': C('T03', 'PJ', 'grupo', [[9, 11]])};
-ok('K4', 'mesmo conjunto, grupo, em sequência: sem conflito, um marcador', J(F.frConflitos(cj4, EX2, G1)) === '{}' && J(F.frMarcadores(cj4, EX2)) === J([['T03', 'PJ']]));
+ok('K4', 'mesmo conjunto, grupo, em sequência: sem conflito, um marcador', J(F.frConflitos(cj4, EX2, G1)) === '{}' && J(F.frMarcadores(cj4, EX2, G1)) === J([['T03', 'PJ']]));
 const k5 = F.frConflitos({'OS-0421': C('T03', 'PJ', 'grupo', [[6, 9]]), 'OS-0424': C('T03', 'PJ', 'alocacao', [[9, 11]])}, EX2, G1);
 ok('K5', 'programação de outra fonte: conflito', J(k5) === J({T03: ['OS-0421', 'OS-0424'], PJ: ['OS-0421', 'OS-0424']}) || (J(k5.PJ) === J(['OS-0421', 'OS-0424']) && J(k5.T03) === J(['OS-0421', 'OS-0424']) && Object.keys(k5).length === 2), k5);
 const k6 = F.frConflitos({'OS-0421': C('T03', 'PJ', 'grupo', [[6, 10]]), 'OS-0424': C('T03', 'PJ', 'grupo', [[9, 11]])}, EX2, G1);
 ok('K6', 'blocos sobrepostos: conflito', J(k6.PJ) === J(['OS-0421', 'OS-0424']) && J(k6.T03) === J(['OS-0421', 'OS-0424']) && Object.keys(k6).length === 2, k6);
-ok('K7', 'dois conjuntos distintos no mesmo grupo: dois marcadores', J(F.frMarcadores({'OS-0421': C('T03', 'PJ', 'grupo', [[6, 9]]), 'OS-0424': C('T04', 'DI', 'grupo', [[9, 11]])}, EX2)) === J([['T03', 'PJ'], ['T04', 'DI']]));
+ok('K7', 'dois conjuntos distintos no mesmo grupo: dois marcadores', J(F.frMarcadores({'OS-0421': C('T03', 'PJ', 'grupo', [[6, 9]]), 'OS-0424': C('T04', 'DI', 'grupo', [[9, 11]])}, EX2, G1)) === J([['T03', 'PJ'], ['T04', 'DI']]));
 
 // ---- Z · pausa da animação e agrupamento
 const cong = {fonte: 'simulação', obs: 1000}, corr = {fonte: 'simulação', obs: 1060};
@@ -151,6 +152,72 @@ cjs = F.frConjuntos(ords2, {ordens: {}}, A, '2026-09-26', T, F0);
 const K = F.frConflitosDe(cjs, {}, T);
 ok('C3', 'iniciar a OS-0424 (programada em 24/09 com o PJ): o PJ fica nas duas e as duas mostram o conflito (M8)',
   (K['OS-0421'] || []).some(x => x.ativo === 'PJ' && x.com.join() === 'OS-0424') && (K['OS-0424'] || []).some(x => x.ativo === 'PJ' && x.com.join() === 'OS-0421'), K);
+
+// ---- KT · K na tela (revisão Codex 6270760702): o modelo (frModelo) e a montagem dos marcadores, da lista e do painel (frVals, frDesenha) num VM
+// com DOM mínimo; cenário sintético: OS-0421 e OS-0424 no grupo GRP-1 com Trator 03 + PJ, as duas simuladas no T2 (mesmo ponto na tela).
+// casos: K4 (em sequência), K2 (PJ em dois tratores), K5 (OS-0424 com troca: programação de outra fonte), K6 (blocos sobrepostos), K7 (conjuntos distintos)
+const ALV = (s => s.slice(s.indexOf('function alVigente(c){'), s.indexOf('\nfunction alHh(')))(fs.readFileSync(path.join(__dirname, 'alocacao.py'), 'utf8'));
+function tela(caso) {
+  const D = '2026-09-26', bl = (ini, fim, rs) => rs.map(r => ({r, dia: D, ini, fim, sit: 'firme'}));
+  const m2 = caso === 'K2' ? 'T04' : caso === 'K7' ? 'T04' : 'T03', i2 = caso === 'K7' ? 'DI' : 'PJ';
+  const c = {ordens: {'OS-0421': {id: 'OS-0421', etapa: 'Em execução', versao: 'v2', prog: {blocos: bl(6, caso === 'K6' ? 10 : 9, ['T03', 'PJ', 'MAR'])}},
+    'OS-0424': {id: 'OS-0424', etapa: 'Em execução', versao: 'v1', rec: caso === 'K5' ? {T99: 'T98'} : undefined, prog: {blocos: bl(9, 11, [m2, i2, 'MAR'])}}},
+    gruposExec: {'GRP-1': {id: 'GRP-1', versao: 1, ids: ['OS-0421', 'OS-0424'], programa: {maquina: 'T03', implemento: 'PJ', operador: 'MAR'}}}};
+  class El { constructor() { this.attrs = {}; this.children = []; this.style = {}; this.isConnected = false; this.innerHTML = this.textContent = ''; this.sub = {}; this.classList = {toggle() {}}; }
+    setAttribute(k, v) { this.attrs[k] = String(v); } getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; }
+    appendChild(x) { this.children.push(x); x.isConnected = true; x.pai = this; return x; } remove() { if (this.pai) this.pai.children = this.pai.children.filter(y => y !== this); this.isConnected = false; }
+    getClientRects() { return this.isConnected ? [1] : []; } getBoundingClientRect() { return {left: 0, top: 0, bottom: 0}; } contains() { return false; }
+    querySelector(s) { return this.sub[s] || null; } querySelectorAll() { return []; } focus() { doc.activeElement = this; } }
+  const cam = new El(), pn = new El(); cam.isConnected = pn.isConnected = true; ['[data-frota-cab]', '[data-frota-corpo]', '[data-frota-acoes]', '.fr-x'].forEach(s => { pn.sub[s] = new El(); });
+  const doc = {activeElement: null, addEventListener() {}, createElement: () => new El(), querySelectorAll: s => s === '[data-frota-camada]' ? [cam] : [], querySelector: s => s === '[data-frota-painel]' ? pn : null};
+  const filaT = [], cx = {document: doc, window: {addEventListener() {}, __frotaRelogio: 1790000000}, location: {hash: ''}, sessionStorage: {getItem: () => null},
+    setTimeout: f => filaT.push(f), clearTimeout() {}, setInterval: () => 1, clearInterval() {}, FR_ICONES: {}, CEN_DIA_OP: D, SAF: '2026/27', FAZ: 'Santa Rita',
+    FROTA0: {intervalo_s: 10, limite_s: 60, passada_m: 36, recuo_m: 18, base: [-34.629941, -47.122425], vel_kmh: {'Pulverização': 8, padrao: 6}, paradas: {},
+      simula: ['OS-0421', 'OS-0424'], rota_tal: {'OS-0421': 'T2', 'OS-0424': 'T2'}, demo: {}, rend: {}, tanque: {}},
+    AL0: {aloc: [], nome: {T03: 'Trator 03', T04: 'Trator 04', PJ: 'Pulverizador PJ-3030 36 m', DI: 'Distribuidor DI', MAR: 'Marcos · operador'},
+      tipo: {T03: 'Máquina', T04: 'Máquina', PJ: 'Implemento', DI: 'Implemento', MAR: 'Pessoa'}},
+    TIDS: () => ['T1', 'T2', 'T1-B'], g2perfil: () => ({k: 'Ana', todos: true}), cenGet: () => c,
+    M: {ord: [{id: 'OS-0421', tal: ['T1', 'T2'], tipo: 'Pulverização · Fungicida 1ª aplicação', fase: 'Em execução', selos: [], area: 350, rz: 190, saldo: 160, resp: 'Marcos', saf: '2026/27'},
+      {id: 'OS-0424', tal: ['T1-B'], tipo: 'Pulverização · Fungicida A', fase: 'Em execução', selos: [], area: 80, rz: 0, saldo: 80, resp: 'Marcos', saf: '2026/27'}],
+      geoc: {T2: ['poly', '100,100 300,100 300,250 100,250']}, tal: {T2: {ha: 100}}, lg: {pivos: [], ids: []}}};
+  vm.createContext(cx);
+  vm.runInContext(ALV + '\n' + fs.readFileSync(FJ, 'utf8') + '\n' + fs.readFileSync(path.join(path.dirname(FJ), 'frota_ui.js'), 'utf8')
+    + '\nfrTelaSvg = x => { const m = frGrausParaMetros(x.geo.lat0, x.geo.lon0, x.at.lat, x.at.lon); return [400 + m.x / 4, 300 - m.y / 4]; };', cx);   // o que o SVG faria: 4 m por px
+  let v = {}; const self = {state: {frOn: true, tsel: []}, setState(o) { Object.assign(this.state, o); v = {map_on: true}; cx.frVals(self, v); }};
+  const roda = () => { for (let n = 0; filaT.length && n < 200; n++) filaT.shift()(); };
+  const txt = h => h.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  const mk = () => cam.children.filter(b => b.getAttribute('data-frota-os')), bolhas = () => cam.children.filter(b => /fr-grupo/.test(b.className)).map(b => b.textContent);
+  const painel = () => ['[data-frota-cab]', '[data-frota-corpo]', '[data-frota-acoes]'].map(s => pn.sub[s].innerHTML).join(' ');
+  const out = {c, cx, self, v: () => v, roda, mk, bolhas, painel, txt, doc, it: () => vm.runInContext('FRUI.modelo', cx).it.length};
+  self.setState({}); roda(); return out;
+}
+const hrefs = h => (h.match(/href="OS\.dc\.html#(OS-\d+)"/g) || []).map(x => x.slice(17, -1)).filter((x, i, a) => a.indexOf(x) === i).sort();
+let t = tela('K4');
+const t4 = {n: t.it(), btn: t.v().fr_t, lis: t.v().fr_lt, mk: t.mk().map(b => [b.getAttribute('data-frota-os'), t.txt(b.innerHTML), b.getAttribute('aria-label')]), bol: t.bolhas()};
+t.self.setState({frLista: true}); t.roda(); const l4 = t.painel(), l4l = (l4.match(/data-frota-linha=/g) || []).length;
+t.self.setState({frLista: false}); t.roda(); if (t.mk()[0]) t.mk()[0].onclick(); t.roda(); const p4 = t.painel();
+ok('KT1', 'K4 na tela: 2 O.S. do mesmo conjunto em sequência = 1 marcador ("· 2 O.S."), "Máquinas (1)", "Lista (1)", sem bolha "2 máquinas"; lista com 1 linha e as 2 O.S.; painel abre as 2',
+  t4.n === 2 && t4.btn === 'Máquinas (1)' && t4.lis === 'Lista (1)' && t4.mk.length === 1 && t4.mk[0][0] === 'OS-0421' && /2 O\.S\./.test(t4.mk[0][1]) && /OS-0421 e OS-0424/.test(t4.mk[0][2]) && !t4.bol.length
+  && l4l === 1 && /OS-0421 e OS-0424/.test(t.txt(l4)) && J(hrefs(p4)) === J(['OS-0421', 'OS-0424']) && /Abrir OS-0424/.test(t.txt(p4)) && /em sequência/.test(t.txt(p4)), [t4, l4l, t.txt(l4).slice(0, 300), hrefs(p4)]);
+// "Ver no mapa" da OS-0424 (#frota=OS-0424 põe frSel = OS-0424): seleciona o marcador do conjunto; redesenhar com o foco nele não o troca nem o tira
+// do lugar; fechar o painel devolve o foco a ele (origem: link da OS-0424)
+t = tela('K4'); t.cx.frOrigem({tipo: 'link', os: 'OS-0424'}); t.self.setState({frSel: 'OS-0424'}); t.roda();
+const s0 = t.mk().map(b => [b.getAttribute('data-frota-os'), b.getAttribute('aria-pressed')]), b0 = t.mk()[0], p0 = t.painel();
+if (b0) b0.focus(); t.cx.window.__frotaRelogio += 10; vm.runInContext('FRUI.modelo = frModelo(FRUI.self); frDesenha();', t.cx); t.roda();
+const s1 = t.mk().map(b => [b.getAttribute('data-frota-os'), b.getAttribute('aria-pressed')]), mesmo = !!b0 && t.mk()[0] === b0 && b0.isConnected && t.doc.activeElement === b0;
+t.doc.activeElement = null; t.cx.frFecha(); t.roda();
+ok('KT2', 'K4 · "Ver no mapa" da OS-0424 seleciona o marcador do conjunto (OS-0421, aria-pressed), com as 2 O.S. no painel; seleção e foco ficam no redesenho; fechar devolve o foco a ele',
+  J(s0) === J([['OS-0421', 'true']]) && J(s1) === J(s0) && mesmo && J(hrefs(p0)) === J(['OS-0421', 'OS-0424']) && t.doc.activeElement === b0 && !t.self.state.frSel, [s0, s1, mesmo, hrefs(p0)]);
+// incompatíveis: nada se junta e o conflito aparece na contagem, na lista, na bolha "N máquinas" e em cada marcador; K7 (sem conflito) também não junta
+const inc = {};
+['K2', 'K5', 'K6', 'K7'].forEach(k => { const u = tela(k), r = {n: u.it(), btn: u.v().fr_t, bol: u.bolhas()};
+  u.self.setState({frLista: true}); u.roda(); r.linhas = u.painel().split('data-frota-linha=').slice(1).map(u.txt);
+  u.self.setState({frLista: false, frSel: 'OS-0424'}); u.roda(); r.mk = u.mk().map(b => [b.getAttribute('data-frota-os'), /Conflito/.test(b.innerHTML) && /Conflito/.test(b.getAttribute('aria-label'))]); inc[k] = r; });
+const confl = r => r.btn === 'Máquinas (2)' && r.linhas.length === 2 && r.linhas.every(l => /Conflito · também na OS-04\d\d/.test(l)) && J(r.mk) === J([['OS-0421', true], ['OS-0424', true]]);
+ok('KT3', 'K2, K5 e K6 na tela: duas entradas ("Máquinas (2)"), as duas linhas e os dois marcadores com "Conflito"; K7 (conjuntos distintos): duas entradas, sem conflito',
+  confl(inc.K2) && confl(inc.K5) && confl(inc.K6) && inc.K7.btn === 'Máquinas (2)' && inc.K7.linhas.length === 2 && J(inc.K7.mk) === J([['OS-0421', false], ['OS-0424', false]]), inc);
+ok('KT4', 'K2, K5 e K6 no mesmo ponto: a bolha diz "2 máquinas · Conflito" (o agrupamento não esconde o conflito); K7: "2 máquinas"',
+  ['K2', 'K5', 'K6'].every(k => J(inc[k].bol) === J(['2 máquinas · Conflito'])) && J(inc.K7.bol) === J(['2 máquinas']), ['K2', 'K5', 'K6', 'K7'].map(k => inc[k].bol));
 
 console.log('RESULTADO: ' + R.filter(Boolean).length + '/' + R.length + ' ok');
 process.exit(R.every(Boolean) ? 0 : 1);
