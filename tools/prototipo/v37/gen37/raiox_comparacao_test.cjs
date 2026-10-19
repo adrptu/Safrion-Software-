@@ -175,4 +175,16 @@ teste('método não declarado permanece pendente; nome desconhecido falha', () =
   assert.equal(executar(exemploPar()).comparacao.estado, 'agregacao_pendente');
   assert.equal(executar(exemploPar(), contexto, {...p, agregacao: 'automatico'}).motivo, 'contrato_invalido');
 });
+
+teste('A3 residual anterior no tratado bloqueia contraste; fora da janela permanece elegível', () => {
+  const instante = '2025-12-31T12:00:00.000Z';
+  const d = fixture();
+  d.aplicacoes.push(aplicacao('ANT', 'T', 1, {alvo: 'A2', evento: instante, disponivelEm: instante}));
+  const ps = {...p, agregacao: 'mediana_razoes_talhao_v1'};
+  const r = executar(d, contexto, ps);
+  assert.equal(r.comparacao.motivo, 'interferencia_no_tratado');
+  assert.equal(r.comparacao.estado, 'indisponivel');
+  d.aplicacoes[1].evento = d.aplicacoes[1].disponivelEm = '2025-12-29T12:00:00.000Z';
+  assert.equal(executar(d, contexto, ps).comparacao.estado, 'disponivel');
+});
 console.log(`${passou}/${passou} PASS — dados e parâmetros exclusivamente sintéticos.`);

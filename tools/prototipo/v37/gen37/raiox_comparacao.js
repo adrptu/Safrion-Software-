@@ -89,7 +89,7 @@ const RaioxComparacao = (() => {
     if (a.valor === 0) return indisponivel('tratado_zerado_antes');
     if (a.valor < p.pisoAntes) return indisponivel('tratado_abaixo_do_piso');
     if (!texto(a.estadio)) return indisponivel('estadio_ausente');
-    if (interferencia(s, a.talhao, ta, tb, chaveAplicacao(aplicacao))) return indisponivel('interferencia_no_tratado');
+    if (interferencia(s, a.talhao, ta - p.residualDias * DIA, tb, chaveAplicacao(aplicacao))) return indisponivel('interferencia_no_tratado');
     const candidatos = Array.isArray(pedido.controles) ? pedido.controles : [];
     const repetidos = new Map();
     for (const c of candidatos) repetidos.set(c?.talhao, (repetidos.get(c?.talhao) || 0) + 1);
