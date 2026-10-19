@@ -44,6 +44,16 @@ function pgDias(a,b){ const x=Date.parse(a+'T00:00:00Z'), y=Date.parse(b+'T00:00
 function pgCor(){ return 'gray'; }
 function pgParcial(texto,parcial){ return [texto,parcial?'Indicador parcial':''].filter(Boolean).join(' · '); }
 function pgSemMeta(texto,parcial){ return [pgParcial(texto,parcial),'Meta não configurada'].filter(Boolean).join(' · '); }
+/* EX-53 D11 no painel (Claude): a cor do desvio vem só da meta vigente da CF-06 (metas.js), avaliada pela mesma conta do consumidor
+   (custo-desvio: agrCustoRef; venda-referencia: intMeta da Inteligência de vendas). Sem meta: cinza e "Meta não configurada" */
+function pgMeta(c,id,aval){ const ok=!!c&&typeof metaDe==='function'&&!!metaDe(c,id);
+  const a=(ok&&aval&&aval())||{cor:'gray',texto:ok?'Sem base no período':'Meta não configurada'};
+  return {cor:a.cor,texto:a.texto,semMeta:!ok,dica:ok&&typeof metaDica==='function'?metaDica(c,id):''}; }
+// o resultado só aparece quando a meta avaliou (cor): sem base ou parcial, o "—" e o "Indicador parcial" já dizem; "·" preso à palavra anterior (corte a 390 px)
+function pgMetaSub(texto,parcial,a){ return a.semMeta?pgSemMeta(texto,parcial):[pgParcial(texto,parcial),a.cor!=='gray'?a.texto:''].filter(Boolean).join('\u00a0· '); }
+function pgMetaCus(c,g){ return pgMeta(c,'custo-desvio',()=>metaAvaliar(c,'custo-desvio',g.desvio_exec_pct,'%',!!g.parcial)); }
+function pgMetaVen(c,x){ return pgMeta(c,'venda-referencia',()=>typeof intMeta==='function'&&typeof intSpread==='function'&&x&&x.medC!==null&&x.ref
+  ?intMeta(c,'venda-referencia',intSpread(x.medC,x.ref.p),(x.amb||[]).length>0):null); }
 /* cartão de indicador: nível (Resultado | Plano | Hoje), nome, valor (número, texto ou null), referência e desvio (sub), cor, dica (fórmula,
    fonte e dono) e origem (href) */
 function pgK(niv,nome,v,sub,cor,dica,href){ return {niv,nome,v:v===null||v===undefined?'Sem dados':(typeof v==='number'?pgNf(v):String(v)),sub:sub||'',
@@ -93,10 +103,10 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
   let cu=null; try{ cu=agrCustoRef(c,{}); }catch(e){ cu=null; }
   const cc=(cu&&cu.cultivos)||[]; R.custos=cc;
   B.cus=cu===null?[pgK('Resultado','Custo das O.S.',null,'','','Custo das O.S. por cultura. Fonte: agrCustoRef (camada Custos do Mapa).','GE-03.dc.html')]:
-    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct;
+    cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct, a=pgMetaCus(c,g);
       return pgK('Resultado',g.cultura+' · '+g.faz+' '+g.saf,d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',
-        pgSemMeta('execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),g.parcial),pgCor(),
-        'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.','GE-03.dc.html'); });
+        pgMetaSub('execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),g.parcial,a),a.cor,
+        'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.'+(a.dica?' '+a.dica+'.':''),'GE-03.dc.html'); });
 }
 // EX-53 M5 · janela acordada em 6258424058; cálculo pertence à Manutenção.
 function pgPreventiva(m,c){
@@ -152,9 +162,9 @@ function pgCom(c,R){ const B=R.blocos.com, I=R.itens; let pz=null, ind=null, pa=
     try{ pz=comPrecos(c,hoje); }catch(e){ pz=null; } try{ ind=comIndicadores(c,hoje); }catch(e){ ind=null; } try{ pa=comPainel(c,hoje,'4'); }catch(e){ pa=null; } try{ tit=comTitulos(c); }catch(e){ tit=null; } }
   R.precos=pz||[];
   B.ven=pz===null?[pgK('Resultado','Preço médio vendido',null,'','','Média ponderada das vendas. Fonte: comPrecos.','VEN.dc.html')]:pz.filter(x=>x.medC!==null||x.ref).map(x=>{
-    const d=x.medC!==null&&x.ref&&x.ref.p>0?(x.ref.p-x.medC)/x.ref.p:null;
-    return pgK('Resultado','Preço médio · '+x.prod,x.medC===null?'—':comPrecoTxt(x.cu,x.medC),pgSemMeta(x.ref?'referência '+comPrecoTxt(x.cu,x.ref.p)+(d===null?'':' · '+(d>0?'−':'+')+pgNf(Math.abs(d)*100,1)+'%'):'sem cotação de referência',(x.amb||[]).length>0),
-      pgCor(),'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) contra a referência de mercado; abaixo = pior. '+((x.amb||[]).length?'Fora da média, saca a conferir: '+x.amb.join(', ')+'. ':'')+'Fonte: comPrecos. Dono: comercial.','VEN.dc.html'); });
+    const d=x.medC!==null&&x.ref&&x.ref.p>0?(x.ref.p-x.medC)/x.ref.p:null, a=pgMetaVen(c,x);
+    return pgK('Resultado','Preço médio · '+x.prod,x.medC===null?'—':comPrecoTxt(x.cu,x.medC),pgMetaSub(x.ref?'referência '+comPrecoTxt(x.cu,x.ref.p)+(d===null?'':' · '+(d>0?'−':'+')+pgNf(Math.abs(d)*100,1)+'%'):'sem cotação de referência',(x.amb||[]).length>0,a),
+      a.cor,'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) contra a referência de mercado; abaixo = pior. '+((x.amb||[]).length?'Fora da média, saca a conferir: '+x.amb.join(', ')+'. ':'')+'Fonte: comPrecos. Dono: comercial.'+(a.dica?' '+a.dica+'.':''),'VEN.dc.html'); });
   const def=pa?pa.filter(r=>r.sit==='Déficit'):null, sus=pa?pa.filter(r=>r.sit==='Suspenso'):null;
   B.ofe=[pgK('Plano','Períodos em déficit',def?def.length:null,'compromisso acima da oferta',def&&def.length?'red':'green','Produto e período em que as vendas passam da oferta (estoque apto ou previsão publicada), próximas 4 semanas. Fonte: comPainel.','PCOM.dc.html'),
     pgK('Plano','Períodos suspensos',sus?sus.length:null,'saca a conferir',sus&&sus.length?'yellow':'green','Período cuja conta está suspensa por venda em saca sem a massa conhecida. Fonte: comPainel.','PCOM.dc.html')];
@@ -180,12 +190,13 @@ function pgDados(c){ const R={blocos:{agr:{},man:{},sup:{},com:{},cre:{}},itens:
   R.itens.forEach(x=>{ x.impTxt=pgImpTxt(x.imp||{}); x.cls=PG_CLS[x.classe]; });
   return R; }
 /* alavancas do resultado (estratégico): por cultivo do custo, o desvio da execução e o consumo do orçado; o preço médio da cultura (empresa) */
-function pgAlavancas(R){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) pc[x.cu]=x; });
-  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct, p=pc[g.cultura]||null;
+// a meta é da organização: o aviso "não configurada" vem uma vez no título do bloco (semMeta*); com meta, o resultado vai na célula, junto da cor
+function pgAlavancas(R,c){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) pc[x.cu]=x; });
+  return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.consumo_orc_pct==null?null:g.consumo_orc_pct, p=pc[g.cultura]||null, ac=pgMetaCus(c,g), ap=pgMetaVen(c,p), pp=!!p&&(p.amb||[]).length>0;
     return {id:g.id,cult:g.cultura,ctx:g.faz+' · '+g.saf+' · '+pgNf(g.area_ha,1)+' ha',
-      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:pgCor(),cons:pgParcial(cons===null?'—':cons+'% do orçado',g.parcial),
-      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:pgParcial(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',p&&(p.amb||[]).length>0),prec:pgCor(),
-      semMeta:pgCor()==='gray'}; }); }
+      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:ac.cor,cons:[pgParcial(cons===null?'—':cons+'% do orçado',g.parcial),ac.cor!=='gray'?ac.texto:''].filter(Boolean).join('\u00a0· '),
+      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:[pgParcial(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',pp),ap.cor!=='gray'?ap.texto:''].filter(Boolean).join('\u00a0· '),prec:ap.cor,
+      semMeta:ac.semMeta||ap.semMeta,semMetaCus:ac.semMeta,semMetaVen:ap.semMeta}; }); }
 /* leitura para os testes (como window.__com do Comercial): só funções que leem */
 try{ window.__pg={pgDados,pgOrdem,pgClasseAtivo,pgAlavancas,pgCor,pnValores,agrPainelRef,agrCustoRef,cenGet,cenClone,CEN0}; }catch(e){}
 const PG_COR={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],none:['#15201A','transparent']};
@@ -215,8 +226,10 @@ function EXTRAVALS(self,v){
   Object.keys(R.blocos).forEach(m=>Object.keys(PG_BLOCOS[m]||{}).forEach(b=>{ const ys=R.itens.filter(x=>x.mod===m&&x.b===b).map(lin); v['pg_i_'+m+'_'+b]=ys; v['pg_i_'+m+'_'+b+'_tem']=ys.length>0; v['pg_i_'+m+'_'+b+'_n']=ys.length; }));
   const VOLTA=PG_VOLTA[at]; v.pg_volta_tem=!!VOLTA; v.pg_volta_t=VOLTA?VOLTA[0]:''; v.pg_volta_href=VOLTA?VOLTA[1]:''; v.pg_volta_aria=VOLTA?'Voltar para '+VOLTA[0]:'';
   v.pg_mais_t=todos?'Mostrar só os 7 primeiros':'Ver todos'; v.pg_mais=()=>self.setState({pg_todos:!todos});
-  v.pg_alav=pgAlavancas(R).map(a=>Object.assign(a,{cusbc:PG_COR[a.cusc][0],cusbg:PG_COR[a.cusc][1],prebc:PG_COR[a.prec][0],prebg:PG_COR[a.prec][1]}));
+  v.pg_alav=pgAlavancas(R,c).map(a=>Object.assign(a,{cusbc:PG_COR[a.cusc][0],cusbg:PG_COR[a.cusc][1],prebc:PG_COR[a.prec][0],prebg:PG_COR[a.prec][1]}));
   v.pg_alav_vazio=!v.pg_alav.length; v.pg_alav_semmeta=v.pg_alav.some(a=>a.semMeta);
+  const smC=v.pg_alav.some(a=>a.semMetaCus), smV=v.pg_alav.some(a=>a.semMetaVen);
+  v.pg_alav_semmeta_t=smC&&smV?'Meta não configurada':smC?'Meta de custo não configurada':'Meta de preço não configurada';
 }
 '''
 
@@ -316,6 +329,8 @@ def build():
     E.EXTRAJS[0] += _MIP.js_prefixo()
     import dados_comercial as _DCOM, os as _os
     E.EXTRAJS[0] += _DCOM.js_regras()   # o núcleo da carência (CARD) já vem com a O.S.
+    # EX-53 D11: a meta do preço vendido usa a conta da Inteligência de vendas (intSpread/intMeta), não uma cópia (ENG-011)
+    E.EXTRAJS[0] += open(_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), 'inteligencia.js'), encoding='utf-8').read() + '\n'
     E.EXTRAJS[0] += open(_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), 'credito_docs.js'), encoding='utf-8').read() + '\n'
     from ui37 import HUB37 as _HUB
     E.EXTRAJS[0] += ('const PG_VOLTA=' + json.dumps({k: [n, _HUB[n]] for k, n in MODS if n in _HUB}, ensure_ascii=False) + ';\n')
@@ -330,7 +345,7 @@ def build():
     pane = lambda k, html: f'<sc-if value="{H("pg_"+k+"_on")}" hint-placeholder-val="{"true" if k == "pri" else "false"}"><div role="tabpanel" id="pg-pane-{k}" aria-labelledby="pg-tab-{k}" class="pg" tabindex="-1">{html}</div></sc-if>'
     # EX-53 F1a: sem meta configurada (D11), o aviso vem uma vez no título do bloco, não em cada célula (revisão do PR #122, 6258085103)
     alav = (f'<section class="pg-bloco" aria-label="Alavancas do resultado"><div class="pg-bh"><div class="pg-bt"><h2>Alavancas do resultado</h2>'
-            f'<sc-if value="{H("pg_alav_semmeta")}" hint-placeholder-val="true"><span class="pg-semmeta">Meta não configurada</span></sc-if></div>'
+            f'<sc-if value="{H("pg_alav_semmeta")}" hint-placeholder-val="true"><span class="pg-semmeta">{H("pg_alav_semmeta_t")}</span></sc-if></div>'
             f'<button type="button" class="pg-tip g2dica-i" aria-label="Como ler as alavancas" data-dica="Por cultivo: o custo realizado da área executada contra o previsto da mesma área (acima = pior) e quanto do orçado já foi; o preço médio vendido da cultura contra a referência de mercado (abaixo = pior). A margem prevista entra na próxima fatia.">ⓘ</button></div>'
             # SEP-20261015 (b): a tabela abre o corpo do bloco (o cabeçalho dela separa sozinho); o aviso de vazio vem depois (ds_test A2c)
             f'<div><div class="pg-rola g2caixa"><table class="pg-tab"><thead><tr><th scope="col">Cultivo</th><th scope="col">Custo da execução</th><th scope="col">Preço médio vendido</th></tr></thead><tbody>'
