@@ -110,16 +110,28 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
 }
 // EX-53 M5 · janela acordada em 6258424058; cálculo pertence à Manutenção.
 /* KPI-PCM-08 · backlog por especialidade (EX-53 M7a, PRD 8662): HH previstas das ordens abertas ainda não executadas (manBacklog), por especialidade e
-   situação. Ordem sem tempo previsto não vira 0. Sem capacidade semanal configurada não há semanas equivalentes nem cor. */
-function pgBacklog(m){ const r=m&&m.oms?manBacklog(m):null, dica='Horas previstas das ordens abertas ainda não executadas, em três partes: pronto (A liberar sem impedimento, Liberadas e Em execução), falta de peça e pendência técnica (conflito, executante ou tempo previsto a definir). Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade, que ainda não é configurável. Fonte: manBacklog.';
-  if(!r) return pgK('Hoje','Backlog da oficina',null,'',null,dica,'MA.dc.html#vis=ordens');
-  const S={pronto:'pronto',peca:'falta de peça',tecnica:'pendência técnica'};
-  // dois grupos (travessão): especialidades, maior carga primeiro, e situação; "HH" só no total; a capacidade vai na dica (TEXTO-2; fotos de 19/10)
-  const esp=Object.keys(r.porEsp).sort((a,b)=>r.porEsp[b]-r.porEsp[a]||(a<b?-1:1)).map(k=>k+' '+manN(r.porEsp[k],1)).concat(r.semTempo?[r.semTempo+' sem estimativa']:[]).join(' · ');
-  const sit=Object.keys(S).filter(k=>r.sit[k].n).map(k=>{ const g=r.sit[k]; return S[k]+' '+(g.n>g.semTempo?manN(g.hh,1):'sem estimativa'); }).join(' · ');
+   situação. Ordem sem tempo previsto não vira 0. Semanas equivalentes (D11b) = HH ÷ capacidade semanal da CF-06 (capacidadeDe), calculadas em
+   manSemanas; sem capacidade válida não há número, e a dica diz o motivo. Sem meta inicial (ESPECIFICACAO §7): sem cor. */
+// motivo de não haver capacidade, pelos leitores públicos da D11b: dedicação ativa de quem saiu da CD-04 (capacidadeOrfas; achado do Codex
+// no PR #134), dedicação ativa que deixou de valer (a revisar) ou nenhuma
+function pgCapMotivo(c,esp){ try{ const tem=r=>!!(r&&r.ativa!==false&&r.alocacoes&&Object.prototype.hasOwnProperty.call(r.alocacoes,esp));
+  if(Object.values(capacidadeOrfas(c)).some(tem)) return 'capacidade a revisar (pessoa saiu do cadastro; retire a dedicação na CF-06)';
+  return Object.keys(pessoasCapacidade(c)).some(id=>tem(capacidadeRegistro(c,id)))?'capacidade a revisar (calendário, situação ou contrato mudou)':'capacidade semanal não configurada'; }catch(e){ return 'capacidade semanal não configurada'; } }
+function pgSemTxt(s){ return s.semanas===null?'':' ('+(s.parcial?'≥\u00a0':'')+manN(s.semanas,1)+'\u00a0'+(s.semanas<2?'semana':'semanas')+')'; }
+function pgBacklog(m,c){ const cap=(typeof capacidadeDe==='function'&&c)?(e=>capacidadeDe(c,e)):null, r=m&&m.oms?manBacklog(m,null,cap):null,
+    dica='Horas previstas das ordens abertas ainda não executadas, em três partes: pronto (A liberar sem impedimento, Liberadas e Em execução), falta de peça e pendência técnica (conflito, executante ou tempo previsto a definir). Em conferência sai do backlog. Semanas equivalentes = HH ÷ capacidade semanal da especialidade (Configurações › Metas e limites)';
+  if(!r) return pgK('Hoje','Backlog da oficina',null,'',null,dica+'. Fonte: manBacklog.','MA.dc.html#vis=ordens');
+  const S={pronto:'pronto',peca:'falta de peça',tecnica:'pendência técnica'}, W=r.semanas||{};
+  // dois grupos (travessão): especialidades, maior carga primeiro, com as semanas quando há capacidade, e situação; "HH" só no total (TEXTO-2)
+  const esp=Object.keys(r.porEsp).sort((a,b)=>r.porEsp[b]-r.porEsp[a]||(a<b?-1:1)).map(k=>k+'\u00a0'+manN(r.porEsp[k],1)+(W[k]?pgSemTxt(W[k]):'')).concat(r.semTempo?[r.semTempo+' sem estimativa']:[]).join('\u00a0· ');   // o "·" preso à palavra anterior: nenhuma linha começa com "·"
+  const sit=Object.keys(S).filter(k=>r.sit[k].n).map(k=>{ const g=r.sit[k]; return S[k]+'\u00a0'+(g.n>g.semTempo?manN(g.hh,1):'sem estimativa'); }).join('\u00a0· ');   // número preso ao que mede
   const v=!r.n?'0 HH':(r.n>r.semTempo?manN(r.hh,1)+' HH':'Sem estimativa');
   const sub=!r.n?'nenhuma ordem pendente':[esp,sit].filter(Boolean).join('\u00a0— ');
-  return pgK('Hoje','Backlog da oficina',v,sub,null,dica+' Semanas equivalentes: capacidade semanal não configurada.','MA.dc.html#vis=ordens'); }
+  // dica: a capacidade de cada especialidade com número e, agrupado, o motivo das que não têm
+  const com=[], sem={}; Object.keys(W).sort().forEach(k=>{ const s=W[k]; if(s.semanas!==null){ com.push(k+' '+manN(s.cap,1)+' HH/semana ('+s.pessoas+(s.pessoas>1?' pessoas':' pessoa')+')'+(s.parcial?', mínimo: há ordem sem tempo previsto':'')); return; }
+    const mot=s.motivo==='capacidade'?pgCapMotivo(c,k):s.motivo; (sem[mot]=sem[mot]||[]).push(k); });
+  const est=com.concat(Object.keys(sem).map(m=>m==='ordem sem especialidade'?'há ordem sem especialidade, fora da conta':m+': '+sem[m].join(', '))).join('; ');
+  return pgK('Hoje','Backlog da oficina',v,sub,null,dica+(est?': '+est:'')+'. Fonte: manBacklog.','MA.dc.html#vis=ordens'); }
 function pgPreventiva(m,c){
   const temBase=!!(m&&m.oms&&m.hoje), r=temBase?manCumprimento(m,'12m'):null, p=r||(temBase?manPeriodo(m,'12m'):null);
   const periodo=p?'12 m · '+p.de.split('-').reverse().join('/')+' a '+p.ate.split('-').reverse().join('/'):'12 m';
@@ -135,7 +147,7 @@ function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=
     pgK('Hoje','Em execução',pm.vals[2],'',null,'Ordens na etapa Em execução. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')]
     .concat(pm.labels.slice(0,2).map((l,i)=>pgK('Hoje',l,pm.bars[i],'',null,'Ordens de manutenção na fase '+l+'. Fonte: cenário da Manutenção.','MA.dc.html#vis=ordens')));
   B.oms.push(pgPreventiva(m,c));
-  B.oms.push(pgBacklog(m));
+  B.oms.push(pgBacklog(m,c));
   const at=m&&m.ativos&&typeof m.ativos==='object'?Object.values(m.ativos).filter(a=>a&&typeof a.cond==='string'):null;
   const disp=at&&at.length?Math.round(at.filter(a=>a.cond!=='Bloqueado').length/at.length*100):null;
   B.atv=[pgK('Hoje','Ativos bloqueados',pm.vals[3],'',pm.vals[3]>0?'red':'green','Ativos com condição Bloqueado. Fonte: cenário da Manutenção. Dono: PCM.','MA.dc.html#vis=ativos'),

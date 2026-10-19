@@ -1192,10 +1192,17 @@ function manCumprimento(c,k,aid){ const P=manPeriodo(c,k), corte=P.ate<c.hoje?P.
   return {ok,n,pct:Math.round(ok*100/n),atrasadas,abertas,semOrdem,de:P.de,ate:corte}; }
 /* KPI-PCM-08 · backlog por especialidade (EX-53 M7a; PRD 8662): HH estimadas das ordens abertas ainda não executadas, por especialidade e situação
    (pronto = Liberadas; falta de peça e a liberar = A liberar; em execução). Em conferência a execução terminou e sai do backlog. Ordem sem tempo
-   previsto não vira 0: conta em semTempo. Semanas equivalentes pedem a capacidade semanal da especialidade, ainda não configurável (semanas: null).
+   previsto não vira 0: conta em semTempo (e em semEsp, por especialidade). Semanas equivalentes: manSemanas, com a capacidade semanal da CF-06 (D11b).
    manHH é a soma única de horas previstas (carga "Esta semana" e Kanban da MA leem daqui). */
-function manHH(os){ const r={hh:0,n:0,semTempo:0,porEsp:{}}; os.forEach(o=>{ const t=Number(o.tempo), e=o.esp||'sem especialidade'; r.n++;
-  if(!(t>0)){ r.semTempo++; return; } r.hh+=t; r.porEsp[e]=(r.porEsp[e]||0)+t; }); return r; }
+function manHH(os){ const r={hh:0,n:0,semTempo:0,porEsp:{},semEsp:{}}; os.forEach(o=>{ const t=Number(o.tempo), e=o.esp||'sem especialidade'; r.n++;
+  if(!(t>0)){ r.semTempo++; r.semEsp[e]=(r.semEsp[e]||0)+1; return; } r.hh+=t; r.porEsp[e]=(r.porEsp[e]||0)+t; }); return r; }
+/* KPI-PCM-08 · semanas equivalentes (EX-53 D11b; ESPECIFICACAO §7, l.432): HH ÷ capacidade semanal da especialidade (P10). cap(esp) devolve
+   {hhSemana,pessoas} ou null (capacidadeDe da CF-06). Sem capacidade válida, ou sem hora prevista, semanas = null com o motivo: nunca 0.
+   Ordem da especialidade sem tempo previsto: as semanas são um mínimo (parcial). */
+function manSemanas(r,cap){ const out={}; Object.keys(r.porEsp).concat(Object.keys(r.semEsp||{})).forEach(e=>{ if(out[e]) return;
+  const hh=r.porEsp[e]||0, sem=(r.semEsp||{})[e]||0, k=(e!=='sem especialidade'&&typeof cap==='function')?cap(e):null, ok=!!(k&&k.hhSemana>0);
+  out[e]={hh,semTempo:sem,cap:ok?k.hhSemana:null,pessoas:ok?k.pessoas:null,semanas:ok&&hh>0?hh/k.hhSemana:null,parcial:sem>0,
+    motivo:e==='sem especialidade'?'ordem sem especialidade':(!ok?'capacidade':(hh>0?'':'sem estimativa'))}; }); return out; }
 function manHHTxt(r,porEsp){ const sem=r.semTempo?r.semTempo+' sem estimativa':'';
   const hh=porEsp?Object.keys(r.porEsp).sort().map(k=>k+' '+manN(r.porEsp[k],1)+' HH').join(' · '):(r.n>r.semTempo?manN(r.hh,1)+' HH':'');
   return [hh,sem].filter(Boolean).join(' · '); }
@@ -1206,8 +1213,8 @@ function manHHTxt(r,porEsp){ const sem=r.semTempo?r.semTempo+' sem estimativa':'
 function manBacklogSit(c,o){ if(!manAberta(o)) return null; if(o.etapa==='Liberadas'||o.etapa==='Em execução') return 'pronto'; if(o.etapa!=='A liberar') return null;
   const cf=manConflito(c,o); if((cf&&!o.conflitoAceito)||!manExecSug(o)||!(Number(o.tempo)>0)) return 'tecnica';
   return manFalta(c,o).length?'peca':'pronto'; }
-function manBacklog(c,aid){ const os=Object.values(c.oms).filter(o=>(!aid||o.aid===aid)&&manBacklogSit(c,o)); const r=manHH(os); r.sit={};
-  ['pronto','peca','tecnica'].forEach(k=>{ r.sit[k]=manHH(os.filter(o=>manBacklogSit(c,o)===k)); }); r.semanas=null; return r; }
+function manBacklog(c,aid,cap){ const os=Object.values(c.oms).filter(o=>(!aid||o.aid===aid)&&manBacklogSit(c,o)); const r=manHH(os); r.sit={};
+  ['pronto','peca','tecnica'].forEach(k=>{ r.sit[k]=manHH(os.filter(o=>manBacklogSit(c,o)===k)); }); r.semanas=manSemanas(r,cap); return r; }
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
