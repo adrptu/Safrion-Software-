@@ -39,8 +39,10 @@ function pgNf(x,d){ return Number(x).toLocaleString('pt-BR',{minimumFractionDigi
 function pgRs(x){ return 'R$ '+pgNf(x,2); }
 function pgDdmm(s){ return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s.slice(8,10)+'/'+s.slice(5,7):(s||''); }
 function pgDias(a,b){ const x=Date.parse(a+'T00:00:00Z'), y=Date.parse(b+'T00:00:00Z'); return isNaN(x)||isNaN(y)?null:Math.round((y-x)/864e5); }
-/* régua única de cor (§4): desvio = fração pior que a referência (positivo = pior); null = cinza */
-function pgCor(desv){ if(desv===null||desv===undefined||!Number.isFinite(desv)) return 'gray'; if(desv<=0) return 'green'; return desv<=0.10?'yellow':'red'; }
+/* Sem política de meta versionada (D11), desvio numérico não recebe avaliação de conformidade.
+   Alertas de domínio continuam usando suas próprias regras (impedimento, déficit, receituário). */
+function pgCor(){ return 'gray'; }
+function pgSemMeta(texto,parcial){ return [texto,parcial?'Indicador parcial':'','Meta não configurada'].filter(Boolean).join(' · '); }
 /* cartão de indicador: nível (Resultado | Plano | Hoje), nome, valor (número, texto ou null), referência e desvio (sub), cor, dica (fórmula,
    fonte e dono) e origem (href) */
 function pgK(niv,nome,v,sub,cor,dica,href){ return {niv,nome,v:v===null||v===undefined?'Sem dados':(typeof v==='number'?pgNf(v):String(v)),sub:sub||'',
@@ -92,7 +94,7 @@ function pgAgr(c,R){ const B=R.blocos.agr, I=R.itens;
   B.cus=cu===null?[pgK('Resultado','Custo das O.S.',null,'','','Custo das O.S. por cultura. Fonte: agrCustoRef (camada Custos do Mapa).','GE-03.dc.html')]:
     cc.map(g=>{ const d=g.desvio_exec_pct, cons=g.orcado_rs>0?Math.round(g.real_total_rs/g.orcado_rs*100):null;
       return pgK('Resultado',g.cultura+' · '+g.faz+' '+g.saf,d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',
-        'execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),d===null?'gray':pgCor(d/100),
+        pgSemMeta('execução × previsto de '+pgNf(g.ha_exec,1)+' ha'+(cons===null?'':' · '+cons+'% do orçado'),g.parcial),pgCor(),
         'Custo realizado da área executada contra o previsto da mesma área (acima = pior). Parcial: preço ausente, ordem sem rateio ou fora da cobertura ('+((g.pend||[]).slice(0,2).join('; ')||'sem pendência')+'). Fonte: agrCustoRef. Dono: gestor.','GE-03.dc.html'); });
 }
 function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=c&&c.man;
@@ -103,8 +105,8 @@ function pgMan(c,R){ const B=R.blocos.man, I=R.itens, pm=pnValores(c,'PMAN'), m=
   const at=m&&m.ativos&&typeof m.ativos==='object'?Object.values(m.ativos).filter(a=>a&&typeof a.cond==='string'):null;
   const disp=at&&at.length?Math.round(at.filter(a=>a.cond!=='Bloqueado').length/at.length*100):null;
   B.atv=[pgK('Hoje','Ativos bloqueados',pm.vals[3],'',pm.vals[3]>0?'red':'green','Ativos com condição Bloqueado. Fonte: cenário da Manutenção. Dono: PCM.','MA.dc.html#vis=ativos'),
-    pgK('Plano','Ativos liberados',disp===null?null:disp+'%',at?at.filter(a=>a.cond!=='Bloqueado').length+' de '+at.length+' ativos':'',disp===null?'gray':pgCor((95-disp)/100),
-      'Ativos sem condição Bloqueado ÷ ativos do cadastro da Manutenção (referência: 95%). Não é a disponibilidade em horas (F2). Fonte: cenário da Manutenção.','MA.dc.html#vis=ativos')];
+    pgK('Plano','Ativos liberados',disp===null?null:disp+'%',pgSemMeta(at?at.filter(a=>a.cond!=='Bloqueado').length+' de '+at.length+' ativos':''),pgCor(),
+      'Ativos sem condição Bloqueado ÷ ativos do cadastro da Manutenção (sem meta configurada). Não é a disponibilidade em horas (F2). Fonte: cenário da Manutenção.','MA.dc.html#vis=ativos')];
   let so=null; if(pm.vals[0]!==null){ try{ so=manSemOrdem(m); }catch(e){ so=null; } }
   if(so){ so.venc.forEach(l=>{ const venc=l.x.sit==='Vencida', d=l.x.prev&&venc?pgDias(l.x.prev,m.hoje):null;
       I.push({k:'man:'+l.vk+'|'+(l.sid||''),mod:'man',b:'sem',func:'Pendências sem ordem',tipo:'atacar',classe:4,titulo:(l.s?l.s.nome:'Plano')+' · '+(l.a.nome||l.aid),onde:l.p.nome||l.pid,
@@ -139,8 +141,8 @@ function pgCom(c,R){ const B=R.blocos.com, I=R.itens; let pz=null, ind=null, pa=
   R.precos=pz||[];
   B.ven=pz===null?[pgK('Resultado','Preço médio vendido',null,'','','Média ponderada das vendas. Fonte: comPrecos.','VEN.dc.html')]:pz.filter(x=>x.medC!==null||x.ref).map(x=>{
     const d=x.medC!==null&&x.ref&&x.ref.p>0?(x.ref.p-x.medC)/x.ref.p:null;
-    return pgK('Resultado','Preço médio · '+x.prod,x.medC===null?'—':comPrecoTxt(x.cu,x.medC),x.ref?'referência '+comPrecoTxt(x.cu,x.ref.p)+(d===null?'':' · '+(d>0?'−':'+')+pgNf(Math.abs(d)*100,1)+'%'):'sem cotação de referência',
-      d===null?'gray':pgCor(d),'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) contra a referência de mercado; abaixo = pior. '+((x.amb||[]).length?'Fora da média, saca a conferir: '+x.amb.join(', ')+'. ':'')+'Fonte: comPrecos. Dono: comercial.','VEN.dc.html'); });
+    return pgK('Resultado','Preço médio · '+x.prod,x.medC===null?'—':comPrecoTxt(x.cu,x.medC),pgSemMeta(x.ref?'referência '+comPrecoTxt(x.cu,x.ref.p)+(d===null?'':' · '+(d>0?'−':'+')+pgNf(Math.abs(d)*100,1)+'%'):'sem cotação de referência',(x.amb||[]).length>0),
+      pgCor(),'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) contra a referência de mercado; abaixo = pior. '+((x.amb||[]).length?'Fora da média, saca a conferir: '+x.amb.join(', ')+'. ':'')+'Fonte: comPrecos. Dono: comercial.','VEN.dc.html'); });
   const def=pa?pa.filter(r=>r.sit==='Déficit'):null, sus=pa?pa.filter(r=>r.sit==='Suspenso'):null;
   B.ofe=[pgK('Plano','Períodos em déficit',def?def.length:null,'compromisso acima da oferta',def&&def.length?'red':'green','Produto e período em que as vendas passam da oferta (estoque apto ou previsão publicada), próximas 4 semanas. Fonte: comPainel.','PCOM.dc.html'),
     pgK('Plano','Períodos suspensos',sus?sus.length:null,'saca a conferir',sus&&sus.length?'yellow':'green','Período cuja conta está suspensa por venda em saca sem a massa conhecida. Fonte: comPainel.','PCOM.dc.html')];
@@ -168,10 +170,9 @@ function pgDados(c){ const R={blocos:{agr:{},man:{},sup:{},com:{},cre:{}},itens:
 /* alavancas do resultado (estratégico): por cultivo do custo, o desvio da execução e o consumo do orçado; o preço médio da cultura (empresa) */
 function pgAlavancas(R){ const pc={}; (R.precos||[]).forEach(x=>{ if(!pc[x.cu]) pc[x.cu]=x; });
   return (R.custos||[]).map(g=>{ const d=g.desvio_exec_pct, cons=g.orcado_rs>0?Math.round(g.real_total_rs/g.orcado_rs*100):null, p=pc[g.cultura]||null;
-    const dp=p&&p.medC!==null&&p.ref&&p.ref.p>0?(p.ref.p-p.medC)/p.ref.p:null;
     return {id:g.id,cult:g.cultura,ctx:g.faz+' · '+g.saf+' · '+pgNf(g.area_ha,1)+' ha',
-      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:d===null?'gray':pgCor(d/100),cons:cons===null?'—':cons+'% do orçado',
-      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',prec:dp===null?'gray':pgCor(dp)}; }); }
+      cus:d===null?(g.parcial?'Parcial':'—'):(d>0?'+':'')+pgNf(d,1)+'%',cusc:pgCor(),cons:pgSemMeta(cons===null?'—':cons+'% do orçado',g.parcial),
+      pre:p&&p.medC!==null?comPrecoTxt(p.cu,p.medC):'—',prer:pgSemMeta(p&&p.ref?'ref. '+comPrecoTxt(p.cu,p.ref.p):'sem referência',p&&(p.amb||[]).length>0),prec:pgCor()}; }); }
 /* leitura para os testes (como window.__com do Comercial): só funções que leem */
 try{ window.__pg={pgDados,pgOrdem,pgClasseAtivo,pgAlavancas,pgCor,pnValores,agrPainelRef,agrCustoRef,cenGet,cenClone,CEN0}; }catch(e){}
 const PG_COR={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],none:['#15201A','transparent']};
