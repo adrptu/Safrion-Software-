@@ -1,0 +1,22 @@
+config_unit rc=0 RESULTADO 226/226
+man_backlog_unit rc=0 RESULTADO: 16/16 ok
+alocacao_unit rc=0 
+ben_unit rc=0 RESULTADO: OK 206/206
+config_app_unit rc=0 RESULTADO 4/4
+metas_unit_test.js rc=0 PASS: ausência, zero, fronteiras, retirada, unidade, parcial, inválidos e leitura imutável.
+popover_390 rc=0 RESULTADO: 9/9
+visoes_v23_codex rc=0 RESULTADO: 23/23
+ex53_alav_meta rc=0 RESULTADO: 5/5 ok
+ex53_metas rc=0 PASS EX53: sem meta, parcial, valor/link, alavancas e impedimento real
+ex53_m5_cartao rc=0 PASS M5: base vazia, domínio real 1/3, período, cor, destino e mutante 1/2
+painel03 rc=0 RESULTADO: 54 ok · 0 falhas
+paginas_scan rc=0 RESULTADO: 5 ok · 0 falhas (147 páginas)
+textos_soltos rc=0 
+config rc=0 RESULTADO: OK 90/90
+config_regressao rc=0 RESULTADO 6/6
+cada_cd04 rc=0 RESULTADO: OK 15/15
+cada_fix04 rc=0 RESULTADO: OK 12/12
+cad_inicio rc=0 RESULTADO: 16 ok · 0 falhas
+cadastros_padrao rc=0 RESULTADO: 44/44
+tabelas_cad rc=0 RESULTADO: 206/206 ok
+FIM
