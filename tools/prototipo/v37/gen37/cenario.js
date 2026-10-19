@@ -89,6 +89,14 @@ function cenInsumosOrdem(c, ordem, rVis) {
       pendente:itens.some(i => i.semSinal) || pend>0};
   });
 }
+// PA-OPER F1 (P4, P19): tanque útil do pulverizador como está no cadastro agora (CD-03 grava os ativos na chave dos cadastros; sem edição,
+// vale a semente CEN_PREP_ATIVOS). A O.S. guarda este valor no retrato da instrução ao ser emitida ou ao trocar o conjunto.
+function cenCadTanque(aid) { let n = null;
+  try { const o = JSON.parse(localStorage.getItem(CEN_KEY.replace('cenario', 'cadastros')) || '{}'); const L = o && o.ativos; const a = Array.isArray(L) && L.find(x => x && x.id === aid); n = a ? Number(a.tanque) : null; } catch (e) { n = null; }
+  if (n > 0) return n; const s = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid]; return s && s.tanque > 0 ? s.tanque : null; }
+// pulverizador de um conjunto pelo nome ("Trator 03 + Pulverizador PJ-3030 36 m"): o ativo cujo nome aparece no conjunto
+function cenPulvDoConj(conj) { if (typeof CEN_PREP_ATIVOS === 'undefined') return null; const t = String(conj || '');
+  return Object.keys(CEN_PREP_ATIVOS).find(k => t.indexOf(CEN_PREP_ATIVOS[k].nome) >= 0) || null; }
 // Uma projeção por ordem para painel, app e impressão. Não grava preparo nem aplica produtos.
 function cenPreparoOrdem(c, ordem) {
   const o = c && c.ordens && ordem && c.ordens[ordem.id] || ordem;
@@ -103,7 +111,7 @@ function cenPreparoOrdem(c, ordem) {
   const aid = typeof AL0 !== 'undefined' && AL0.ativo[rec[0].r];
   const ativo = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid];
   const retrato = instr && instr.versao === o.versao && typeof instr.tanque === 'number' && Number.isFinite(instr.tanque) && instr.tanque > 0;
-  const tanque = retrato ? instr.tanque : (ativo && ativo.tanque);
+  const tanque = retrato ? instr.tanque : (cenCadTanque(aid) || (ativo && ativo.tanque));
   if (!(typeof tanque==='number' && Number.isFinite(tanque) && tanque>0)) return fail('Tanque não informado · conferir implemento');
   if (!instr || instr.versao !== o.versao || !(typeof instr.vazao==='number' && Number.isFinite(instr.vazao) && instr.vazao>0))
     return fail('Vazão não informada · conferir instrução da versão vigente');

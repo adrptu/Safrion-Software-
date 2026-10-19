@@ -99,4 +99,13 @@ const r2 = O.opPublicar(r.plano, {tipo: 'publicar', podePublicar: true, por: 'An
 ok('P12e', 'Ana publica a v7 em revisão (não pula para v8)', r2.v === 7 && r2.plano.versoes.filter(x => x.v === 7).length === 1 && r2.plano.versoes.find(x => x.v === 7).estado === 'publicada');
 ok('P12f', 'impedimento recusa publicar', !!O.opPublicar(pl, {tipo: 'publicar', podePublicar: true, impedimentos: [{motivo: 'x'}], chave: 'k5'}).erro);
 
+// ---- K7 · deslocar os gatilhos de uma operação
+const G = (tipo, x) => tipo === 'DATA' ? {tipo, data: x} : {tipo, dias: x};
+ok('K7a', 'DAP −20 adiado 5 dias → DAP −15; DAP 25 → 30', O.opDeslocar(G('DAP', -20), 5).dias === -15 && O.opDeslocar(G('DAP', 25), 5).dias === 30);
+ok('K7b', 'data fixa 30/10/2026 + 5 → 04/11/2026 (vira o mês); − 31 → 29/09/2026', O.opDeslocar(G('DATA', '2026-10-30'), 5).data === '2026-11-04' && O.opDeslocar(G('DATA', '2026-10-30'), -31).data === '2026-09-29');
+ok('K7c', '3 dias antes da colheita + 5 → 2 dias após a colheita; 2 após − 5 → 3 antes', JSON.stringify(O.opDeslocar(G('DANC', 3), 5)) === JSON.stringify(G('DAPC', 2)) && JSON.stringify(O.opDeslocar(G('DAPC', 2), -5)) === JSON.stringify(G('DANC', 3)));
+ok('K7d', '10 dias antes da colheita + 5 → 5 dias antes (adiar aproxima da colheita)', JSON.stringify(O.opDeslocar(G('DANC', 10), 5)) === JSON.stringify(G('DANC', 5)));
+const g0 = G('DAP', 25);
+ok('K7e', 'n não inteiro, zero ou vazio: o gatilho não muda; nada é alterado no original', O.opDeslocar(g0, 2.5) === g0 && O.opDeslocar(g0, 0) === g0 && O.opDeslocar(g0, '') === g0 && O.opDeslocar(g0, 5) !== g0 && g0.dias === 25);
+
 const n = R.filter(Boolean).length; console.log(`\n${n}/${R.length} OK`); process.exit(n === R.length ? 0 : 1);

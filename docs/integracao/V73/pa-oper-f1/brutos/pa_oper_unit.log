@@ -22,6 +22,9 @@ OK    P7i · sem alvo, 0,45 L/ha cabe em algum uso (o mais permissivo, 0,5) → 
 OK    P7j · com alvo mancha-alvo, 0,45 > 0,4 → ⛔
 OK    P7k · dose por 100 L vira dose/ha pela calda (0,06 × 100/100 = 0,06 L/ha < 0,07) → ⛔
 OK    P7l · adjuvante sem modo de ação não é conferido
+OK    P7m · várias colheitas: vale a próxima depois da aplicação (DAP 100 + 30 = 130 ≤ 140)
+OK    P7n · DAP 120 + 30 = 150 passa da colheita da DAP 140 em 10 dias → ⛔
+OK    P7o · unidade da bula (kg/ha) diferente da do plano (L): ⚠ "dose não conferida", sem ⛔ inventado
 OK    E1 · pendência sem impedimento → Pendente
 OK    E2 · impedimento vence pendência → Impedida
 OK    E3 · só aviso → Com aviso; nada → Pronta
@@ -32,5 +35,10 @@ OK    P12c · Caio sem o papel não publica
 OK    P12d · Caio submete: v7 em revisão, v6 segue vigente
 OK    P12e · Ana publica a v7 em revisão (não pula para v8)
 OK    P12f · impedimento recusa publicar
+OK    K7a · DAP −20 adiado 5 dias → DAP −15; DAP 25 → 30
+OK    K7b · data fixa 30/10/2026 + 5 → 04/11/2026 (vira o mês); − 31 → 29/09/2026
+OK    K7c · 3 dias antes da colheita + 5 → 2 dias após a colheita; 2 após − 5 → 3 antes
+OK    K7d · 10 dias antes da colheita + 5 → 5 dias antes (adiar aproxima da colheita)
+OK    K7e · n não inteiro, zero ou vazio: o gatilho não muda; nada é alterado no original
 
-34/34 OK
+42/42 OK

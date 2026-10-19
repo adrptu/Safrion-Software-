@@ -1,0 +1,85 @@
+# PA-OPER F1 · Plano agronômico por operação, uma operação por vez, 19/10/2026
+
+**Pedido do proprietário (16/10, 14:27; 18/10):** planos agronômicos seccionados por operação, com as especificidades de cada uma e foco total, uma coisa bem feita por vez.
+**Especificação:** `docs/integracao/V71/PA-OPER.md` R3 (`10f37c52`, parecer favorável do Codex). Acordo da implantação: PR #47, comentário 6268255695.
+**Autoria:** Claude. **Revisão e integração:** Codex. **Base:** `e32ada5e` (MAPA-REAL F2, sobre MAPA-FROTA F1). **Branch:** `claude/v44-pa-oper-f1`.
+
+## Resultado útil
+Em **Agrícola › Planos agronômicos**, o plano abre com uma faixa: **Visão geral** e as operações na ordem do ciclo, cada uma com o número de atividades e o estado em texto (✓ Pronta, • Pendente, ⚠ Com aviso, ⛔ Impedida). Um toque põe a operação em foco:
+- só as atividades dela e o bloco **Parâmetros de <operação>** com as conferências;
+- na Pulverização, o **volume de calda da operação** (vale para as atividades sem valor próprio) e a **calda própria** de cada atividade, editável na linha;
+- o **alvo** de cada pulverização (no painel da atividade), que liga a dose à bula;
+- **Deslocar gatilhos**: adia ou antecipa de uma vez todas as atividades da operação (K7);
+- endereço próprio (`#plano=SOJA-AT&op=pulverizacao`): F5 reabre a mesma operação; Esc fecha primeiro o editor, depois o foco, depois o plano.
+
+**Bula na versão** (base de demonstração da AG-07, por cultura × alvo): dose acima da bula, carência que termina depois da próxima colheita prevista e número de aplicações acima do máximo impedem publicar, com o motivo; unidade da bula diferente da do plano e mesmo grupo de modo de ação em sequência são só aviso.
+
+**Rascunho e publicação** (decisão 9): toda mudança vai para o rascunho vN+1, que se guarda sozinho no cenário compartilhado, mesmo incompleto ou inválido, e reabre depois de sair ou recarregar. Publicar é ato explícito:
+- com o papel de agrônomo: **Salvar e publicar vN** (o pedido de 14/10, "deixe o botão salvar", com o achado 1 do Codex: publicação explícita);
+- sem o papel (PCP): **Submeter à revisão**; o agrônomo publica ou **Devolve** (menu ⋯); a versão vigente segue até lá;
+- o segundo clique não cria vN+2; publicar o plano não aprova nem libera O.S.
+
+**Do plano à O.S.** (transporte mínimo, decisão 10): a O.S. nova lê a calda da versão do plano em que o cultivo está e grava o **retrato** da instrução (versão do plano, calda e origem, tanque do pulverizador do conjunto no cadastro de agora). Editar o cadastro depois não muda a O.S. emitida; "Trocar conjunto" antes da execução refaz o retrato. Publicada uma versão com outra calda, a O.S. em A liberar emitida da anterior mostra "Plano vN difere: volume de calda …" e não muda sozinha.
+
+**Ficha e app de campo** (EX-38 R10): **Vazão por bico** alvo (volume × velocidade do REND × espaçamento ÷ 600) ao lado da disponível (curva ponta × pressão, outra fonte), com a diferença em %; sem velocidade, espaçamento ou curva, "desconhecido", nunca um padrão.
+
+**Dano evitado:** dose, carência e número de aplicações fora da bula publicados sem ver; calda digitada em quatro lugares; O.S. emitida que muda quando alguém edita o cadastro; plano que muda a O.S. sem aviso; número inventado onde falta dado.
+
+## Serviço único (ENG-011)
+`tools/prototipo/v37/gen37/operacoes.js` (no `cenario.js_prefixo()`, igual para PA, O.S., ficha e app): seções e família, herança operação → atividade, alteração de parâmetro, vazão alvo × disponível, dose por hectare, bula, pendências, estado, publicação e deslocamento de gatilhos. As cargas continuam só em `cenPreparoOrdem` (EX-38 R1, decimal); a fórmula duplicada `opCargas` foi removida.
+
+## Comandos e resultados (executados em 19/10, árvore desta branch, dados sintéticos)
+Todos em `tools/prototipo/v37/gen37`. Testes de navegador com `CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico` sobre o `_render` do build sintético desta árvore.
+
+| Comando | Resultado | Bruto |
+|---|---|---|
+| `node pa_oper_unit.js` (serviço: seções, herança, vazão, dose, bula, estado, publicação, K7; mutantes m1–m3) | **42/42** | `pa_oper_unit.log` |
+| `python3 -B pa_oper_cen_test.py` (P4 cargas na fonte única, P19 retrato) | **7/7** | `pa_oper_cen.log` |
+| `python3 -B pa_oper_p15_test.py` (P15: demanda das 4 safras, impressão digital dos 8 planos, c2, campos novos; mutante M1) | **5/5** | `pa_oper_p15.log` |
+| `python3 -B pa_oper_test.py` (P1–P3, P7, P12, P13, P15e/f, P16, P17, P18, P19, P19b, K2, K3, K5, K7) | **24/24**; cliques medidos: K2 4 · K3 3 · K5 5 · K7 5 (tetos 4, 4, 6, 6) | `pa_oper_test.log` |
+| `pa_lista_test.py` (K1: 4 cliques e 5 teclas, igual ao antes) | 24/24 | `reg_pa_lista_test.log` |
+| `pa_regras_test.py` | 18/18 | `reg_pa_regras_test.log` |
+| `ds_1610_test.py` | 16/16 | `reg_ds_1610_test.log` |
+| `paginas_scan_test.py` | 5/5 (147 páginas) | `reg_paginas_scan_test.log` |
+| `os_cenario_test.py` · `carencia_test.py` · `demanda_unica_test.py` · `demanda_unica_nav_test.py` | 22/22 · 90/90 · 71/71 · 29/29 | `reg_*.log` |
+| `alocacao_unit_test.py` · `cen_grava_test.py` · `ficha_pivo_unit_test.py` · `ficha_pivo_test.py` · `mapa_frota_test.py` | 21/21 · 10/10 · 23/23 · 21/21 · 20/20 | `reg_*.log` |
+| `ex38_test.py` | 16/17, **igual à base** (P3, ver desvio 6) | `reg_ex38_test.log`, `reg_ex38_test_BASE.log` |
+| `saf_operacoes_test.py` | 85/87, **igual à base** (N6 e P4 do Planejar safra, não tocados aqui) | `reg_saf_operacoes_test.log`, `…_BASE.log` |
+| `mbtest.py` | MB-02 "excesso 220 px", **igual à base** (já registrado na Base verde 2) | `reg_mbtest.log`, `reg_mbtest_BASE.log` |
+
+Os testes que abrem a tela de planos (`pa_oper_test`, `pa_lista`, `ds_1610`, `paginas_scan`) rodaram no build final, já com o K7 e os alvos de 44 px. Os demais rodaram no build anterior ao K7. A diferença entre os dois builds está só em `processo_planos.py` e numa função nova, `opDeslocar`, que só a tela de planos chama.
+
+**Fotos** em 1440 e 390 px (visão geral, Pulverização em foco, MILHO-SF com calda "Pendente", ficha da OS-0424, editor do K7) foram conferidas. Elas ficam fora do repositório. Na foto de 390 px, o campo de dias do K7 tinha 28 px de altura. Foi corrigido para 44 px, e o P16 agora mede também o campo, o Aplicar e o Cancelar.
+
+## Contraprova
+Rodada na ponta antes da F1, `e32ada5e` (`ANTES=<_render dessa ponta>`, árvore limpa, dados sintéticos):
+- `pa_oper_test.py`: **1 ok · 18 falhas** (`contraprova_base_pa_oper_test.log`).
+  - Não há na base: faixa com estado, foco, calda, bula na versão, publicação explícita, rascunho guardado, transporte da versão para a O.S., retrato, vazão por bico, migração "Pendente", deslocar.
+  - O roteiro K para no K7, porque "Deslocar gatilhos" não existe na base. Numa rodada anterior, o K5 (percorrer as operações pelos chips) passou também na base: é comportamento que já existia, e só não pode piorar.
+  - O único ok é "sem erro de JavaScript".
+- `pa_oper_cen_test.py` na base: `contraprova_base_pa_oper_cen.log`.
+- P15 (migração) passa nas duas versões quanto à demanda, como a especificação pede. O mutante obrigatório M1, que preenche a calda por código em todos os planos, reprova o P15d.
+- Mutantes de cálculo da especificação que valem para a F1 têm um caso que os reprova:
+  - última carga cheia: `pa_oper_cen` P4d (41.5: 500 + 500 + 200 L, 24 L de produto);
+  - velocidade padrão quando falta: `pa_oper_unit` P18b;
+  - calda pendente que vira padrão: `pa_oper_unit` P3c.
+  - Os mutantes não foram rodados de novo como código separado nesta entrega.
+
+## Desvios do aceite e decisões de implementação
+1. **Colunas da família.** O P2 pede "as colunas da família" na operação em foco. Implementado como uma linha de informação na atividade (alvo, calda e origem, carência), nos Cartões e na Tabela, e não como colunas novas da Tabela. Motivo: a Tabela é do motor comum (TAB-11/DS); coluna por família pede mudança no motor, que fica para a F2 com o Codex.
+2. **Oráculos antigos atualizados, com o motivo na docstring:** `pa_regras_test.py` e `pa_lista_test.py` editavam doses que agora passam da bula (0,6 → 0,45 L/ha no Fungicida A; Glifosato 6 → 2,5 L/ha, máximo 3) e liam "Salvar alterações" / "Publicado · vN" (agora "Salvar e publicar vN" / "Publicada vN"). L18: o plano novo persiste no F5 (decisão 9). L1: a palavra "impedida" do estado da operação deixa de reprovar. K1 medido: 4 cliques e 5 teclas, igual ao antes.
+3. **Semente de demonstração:** só SOJA-AT v6 · Pulverização · 100 L/ha, marcada "demonstração", para a OS-0421 manter os números de hoje (PA-OPER §Migração). Os outros 7 planos ficam "Pendente" (P15d, P15f).
+4. **Curva da ponta:** a05 ganhou espaçamento 0,5 m, ponta leque 110-015 a 3 bar e uma curva de catálogo (0,59 L/min), marcada "catálogo de ponta (demonstração)". Não é medição da fazenda.
+5. **Achados de dados da semente (para o Codex e o RT):**
+   - CAFE-AR · Fungicida C 0,8 L/ha > máximo de 0,75 → ⛔ (o plano café abre "Impedida" na Pulverização);
+   - MAMAO-PROD · Abamectina: carência termina 6 dias depois da colheita prevista → ⛔;
+   - SOJA-AT · Fungicida 2ª: mesmo grupo de modo de ação da aplicação anterior → ⚠;
+   - SOJA-AT e MILHO-SF · Inseticida B: bula em kg/ha × plano em L/ha → ⚠ "dose não conferida".
+6. **ex38_test P3** está vermelho já na base (16/17, mesmo motivo, log em `brutos/`): o teste exige 1e-12 contra a quantidade arredondada aos centésimos por `cenQtdTrecho`. Não vem desta frente. O retrato também anula a variação de `CEN_PREP_ATIVOS` que o P3 faz na OS-0421; proposta ao Codex: o P3 variar `instrucao.tanque`.
+7. **390 px:** a faixa quebra em uma operação por linha (6 linhas no SOJA-AT). A base já quebrava assim (foto conferida); fica como melhoria possível de padrão (faixa com rolagem horizontal), fora desta fatia.
+
+## Fora desta fatia (PA-OPER decisão 10)
+F2: Plantio e Tratamento de sementes (população, PMS, germinação), etapa 2 do Planejar safra com o resumo por operação e o ajuste por talhão, aplicar a vN nova ao cultivo. F3: Adubação e correção, fertirrigação. F4: Colheita, tratos, poda e preparo.
+
+## Brutos
+`brutos/`: saídas completas dos comandos acima e da contraprova.

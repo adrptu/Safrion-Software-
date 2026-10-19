@@ -178,10 +178,27 @@ function opPublicar(plano, ato) {
   return {plano: Object.assign({}, plano, {versoes: resto}), v: novo};
 }
 
+// K7 · desloca o gatilho de uma atividade n dias no calendário (n > 0 adia; n < 0 antecipa). Puro. A âncora fica a mesma; só antes ↔ depois
+// da colheita troca quando o deslocamento cruza a colheita (é o mesmo instante, contado do outro lado). n não inteiro ou zero: nada muda.
+function opDeslocar(g, n) {
+  n = Number(n);
+  if (!g || !Number.isInteger(n) || n === 0) return g;
+  if (g.tipo === 'DATA') {
+    const d = new Date(String(g.data) + 'T12:00:00Z'); if (isNaN(d.getTime())) return g;
+    d.setUTCDate(d.getUTCDate() + n); return Object.assign({}, g, {data: d.toISOString().slice(0, 10)});
+  }
+  if (g.tipo === 'DAP') return Object.assign({}, g, {dias: Number(g.dias) + n});
+  if (g.tipo === 'DANC' || g.tipo === 'DAPC') {
+    const r = (g.tipo === 'DANC' ? -Number(g.dias) : Number(g.dias)) + n;   // dias contados da colheita: antes < 0 ≤ depois
+    return Object.assign({}, g, r < 0 ? {tipo: 'DANC', dias: -r} : {tipo: 'DAPC', dias: r});
+  }
+  return g;
+}
+
 function opNum(v, casas) {
   if (v === null || v === undefined || v === '' || !isFinite(Number(v))) return '—';
   const c = casas === undefined ? (Number.isInteger(Number(v)) ? 0 : 2) : casas;
   return Number(v).toLocaleString('pt-BR', {minimumFractionDigits: 0, maximumFractionDigits: c});
 }
 
-if (typeof module !== 'undefined') module.exports = {OP_FAMILIAS, opFamilia, opChave, opSecoes, opParam, opAlteracaoParam, opVazaoAlvo, opVazaoDisp, opVazao, opDoseHa, opBula, opPendencias, opEstado, opPublicar, opNum};
+if (typeof module !== 'undefined') module.exports = {OP_FAMILIAS, opFamilia, opChave, opSecoes, opParam, opAlteracaoParam, opVazaoAlvo, opVazaoDisp, opVazao, opDoseHa, opBula, opPendencias, opEstado, opPublicar, opDeslocar, opNum};
