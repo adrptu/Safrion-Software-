@@ -235,8 +235,9 @@ try:
     agrupar_por(J, 'Talhão', 'g_os'); c8 = ids_car('g_os'); troca_visao(J, 'lista', '[aria-label="Visão das ordens"]'); t8 = ids_tab('g_os'); agrupar_por(J, 'Sem agrupar', 'g_os')
     chk('M7a O.S.: "Ver em cartões" no seletor de visões (?view=cartoes) mostra as mesmas ordens da Tabela, também agrupadas por Talhão; sem 2º seletor na barra da grade',
         r7 == 'ok' and t7 and c7 == t7 and 'view=cartoes' in u7 and t8 and c8 == t8 and any(x.startswith('grp@') for x in t8) and not J("!!document.querySelector('[data-g2md=\"g_os\"]')"), [r7, t7, c7, u7, t8, c8])
-    for nome, pg2, g2, alvo in [('MA › Ordens', 'MA.dc.html#vis=ordens', 'g_om', "[...document.querySelectorAll('[aria-label=\"Visão das ordens\"] button')].find(b=>b.getAttribute('aria-label')==='Cartões')"),
-                                ('BEN', 'BEN.dc.html', 'g_ob', "[...document.querySelectorAll('[aria-label=\"Visão das ordens\"] button')].find(b=>b.innerText.trim()==='Cartões')")]:
+    # VIS-08 (18/10): MA › Ordens e BEN com o seletor comum (engine.visoes_locais), só ícone; o botão é o data-visao=cartoes ("Ver em cartões")
+    for nome, pg2, g2, alvo in [('MA › Ordens', 'MA.dc.html#vis=ordens', 'g_om', "document.querySelector('[data-visoes-local=om] [data-visao=cartoes]')"),
+                                ('BEN', 'BEN.dc.html', 'g_ob', "document.querySelector('[data-visoes-local=bn] [data-visao=cartoes]')")]:
         abrir(pg2, perfil='Ana', limpa=True); espera(f"!!document.querySelector('[data-g2g=\"{g2}\"]')")
         ta = ids_tab(g2); clique_el(alvo); time.sleep(.4); ca = ids_car(g2); pr = J(f"(()=>{{const b={alvo}; return b?b.getAttribute('aria-pressed'):null}})()")
         chk(f'M7b {nome}: "Cartões" no seletor da tela (Lista | Cartões | Kanban) mostra as mesmas ordens da Lista; sem 2º seletor na barra da grade',

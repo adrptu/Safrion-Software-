@@ -18,7 +18,12 @@ CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...d
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
 # revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T1 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
-def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
+# DRILL-RECOLHIDO (v129): a árvore abre recolhida; o talhão que não aparece é achado depois do "Expandir tudo" da tabela
+def openrow1(ti,cod):
+    ACHA=f"""[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}})"""
+    if not J(f"(()=>!!({ACHA}))()"):
+        J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.35)
+    J("(()=>{const r=" + ACHA + "; (r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.35)
 # linha da fazenda (linha-pai da árvore, 16/10/2026): o 1º span da célula é o ▾ da seta; o clique vai no texto (.g2pw) e abre o painel da fazenda
 def openpai(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('.g2pw')||r).click();}})()"); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")

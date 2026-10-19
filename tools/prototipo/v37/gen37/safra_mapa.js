@@ -31,8 +31,8 @@ function smSet(self,patch){ const cur=self.state.sl; if(!cur) return; self.setSt
 function smMarcar(self,ks,on){ const cur=self.state.sl; if(!cur) return; const s=Object.assign({},cur.sel); ks.forEach(k=>{ if(on) s[k]=true; else delete s[k]; }); self.setState({sl:Object.assign({},cur,{sel:s,info:''})}); }
 function smVals(self,v){ const sl=self.state.sl; const lins=self.__slLin||[];
   const vista=sl.vista==='mapa'?'mapa':'tabela'; v.sl_vTab=vista==='tabela'; v.sl_vMapa=vista==='mapa';
-  v.sl_vistas=[['tabela','Tabela'],['mapa','Mapa']].map(([k,t])=>({t,on:String(vista===k),al:'Ver em '+t.toLowerCase(),go:()=>smSet(self,{vista:k,info:''}),
-    st:'padding:0 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid '+(vista===k?'#1E7A4C;background:#E4F3E9;color:#1E7A4C;':'#E4E9E5;background:#FFFFFF;color:#15201A;')}));
+  // VIS-08: seletor pelo ícone (engine.visoes_locais 'sl', visões lista e mapa); a Tabela do painel é a visão 'lista' do registro
+  [['lista','tabela'],['mapa','mapa']].forEach(([k,x])=>{ v['sl_lv_'+k+'_p']=String(vista===x); v['sl_lv_'+k+'_go']=()=>smSet(self,{vista:x,info:''}); });
   const G=SM_GEO[sl.faz]||null; v.sm_temGeo=!!G;
   Object.keys(SM_GEO).forEach(f=>{ v['sm_f_'+SM_FK[f]]=v.sl_vMapa&&f===sl.faz; });
   if(!v.sl_vMapa){ return; }

@@ -178,10 +178,18 @@ if os.path.isdir(P):
     s = pags.get('OS.dc.html', '')
     # EX-55 F1 (proprietário, 18/10/2026: mapa dentro das telas): Pragas e doenças (AG-01) e Irrigação (IR-01) ganham Tabela | Cartões | Mapa
     chk('B1 o seletor está na O.S. (7 visões: Tabela, Cartões pela DS VIS-05, Kanban, Calendário, Mapa pelo EX-55, Carga, Frentes pelo EX-54; VISOES-2 fundiu a agrupada), '
-        'em Pragas e doenças e na Irrigação (Tabela, Cartões e Mapa, EX-55); G2_VISOES vai em cada página',
-        com == ['AG-01.dc.html', 'IR-01.dc.html', 'OS.dc.html'] and 'data-visoes="lista cartoes kanban calendario mapa carga frentes"' in s and 'const G2_VISOES = {"g_os"' in s
+        'em Pragas e doenças e na Irrigação (Tabela, Cartões e Mapa, EX-55) e em Fazendas e talhões (Tabela, Cartões e Mapa, VIS-08); G2_VISOES vai em cada página',
+        com == ['AG-01.dc.html', 'CD-01.dc.html', 'IR-01.dc.html', 'OS.dc.html']
+        and 'data-visoes="lista cartoes mapa"' in pags.get('CD-01.dc.html', '') and 'const G2_VISOES = {"g_tal"' in pags.get('CD-01.dc.html', '') and 'data-visoes="lista cartoes kanban calendario mapa carga frentes"' in s and 'const G2_VISOES = {"g_os"' in s
         and 'data-visoes="lista cartoes mapa"' in pags.get('AG-01.dc.html', '') and 'const G2_VISOES = {"g_vis"' in pags.get('AG-01.dc.html', '')
         and 'data-visoes="lista cartoes mapa"' in pags.get('IR-01.dc.html', '') and 'const G2_VISOES = {"g_set"' in pags.get('IR-01.dc.html', ''), com)
+    # VIS-08 (proprietário, 18/10/2026): Planejar safra › Editar talhões… escolhe Tabela ou Mapa pelo ícone (visoes_locais, sem ?view), sem texto
+    sf = pags.get('SAF.dc.html', '')
+    m = re.search(r'<div class="g2visoes g2modos" role="group" aria-label="Visão dos talhões" data-visoes-local="sl">(.*?)</div>', sf)
+    bts = re.findall(r'<button type="button" data-visao="([a-z]+)" aria-label="([^"]+)"[^>]*>(.*?)</button>', m.group(1)) if m else []
+    chk('B1c VIS-08: Planejar safra › Editar talhões… com o seletor pelo ícone (Ver em tabela · Ver em mapa, só svg, sem texto) e sem o grupo de texto antigo',
+        [(k, l) for k, l, _ in bts] == [('lista', 'Ver em tabela'), ('mapa', 'Ver em mapa')] and all(c.startswith('<svg') and re.sub(r'<[^>]+>', '', c).strip() == '' for _, _, c in bts)
+        and 'sl_vistas' not in sf and 'G2_VISOES = {"sl"' not in sf, bts)
     chk('B1b o nível Talhão do "Agrupar por" da O.S. declara a coluna de filtro (fc = tal): o filtro de Talhão limita os grupos', '"niv": ["Fazenda", "Talhão"], "fc": ["", "tal"]' in s)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)

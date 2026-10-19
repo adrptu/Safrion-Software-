@@ -7,6 +7,7 @@ Protege o que a frente CADASTROS-PADRAO mudou, nas telas CD-01 a CD-08 (e CD-01d
   P3  BOT-01/03/05: a única primária verde fica no cabeçalho da tela, à direita do título, com o verbo Criar e o "+"; nada verde no bloco;
       com abas, o rótulo segue a aba e a aba que não cria fica sem verde
   P4  TAB-01: barra da grade numa linha; busca e filtro rápido (no lugar do motor) à esquerda; Colunas e Tabela | Cartões na ponta direita;
+      na tela com o seletor de visões (VIS-08, CD-01), o Tabela | Cartões fica nele, acima da lista, e sai da barra;
       TAB-02: sem "x de y" com filtro rápido
   P5  CD-01 (16/10: "fazendas e talhoes na mesma tela, conectados e intuitivos"): uma árvore só; a fazenda é a linha-pai e abre o painel
       dela; a seta abre e fecha; a área cultivável da fazenda é a soma dos talhões ativos; Criar fazenda e Incluir talhão funcionam
@@ -64,7 +65,7 @@ BARRA = r"""(()=>{ const cx=[...document.querySelectorAll('.g2caixa')].find(x=>x
     if(/^Colunas/.test(tx(e))) return 'colunas'; if(/Agrupar por/.test(tx(e))) return 'agrupar'; if(/^(Expandir|Recolher) tudo/.test(tx(e))) return 'expandir';
     if(/^\d+ de \d+$/.test(tx(e))) return 'conta'; return 'ferramenta'; };
   const tops=kids.map(e=>Math.round(e.getBoundingClientRect().top+e.getBoundingClientRect().height/2));
-  const hb=cx.querySelector('.g2hb'); return {ordem:kids.map(tipo), linhas:new Set(tops.map(t=>Math.round(t/8))).size, umaLinha:Math.max(...tops)-Math.min(...tops)<=6,
+  const hb=cx.querySelector('.g2hb'); return {visoes:!!document.querySelector('[data-visoes-gid] [data-visao=cartoes]'), ordem:kids.map(tipo), linhas:new Set(tops.map(t=>Math.round(t/8))).size, umaLinha:Math.max(...tops)-Math.min(...tops)<=6,
     caixa:getComputedStyle(hb||b).textTransform, hbCor:hb?getComputedStyle(hb).color:'', blocoCaixa:!!cx.closest('section')}; })()"""
 try:
     c.aparelho(1440, 900, 1, False)
@@ -81,7 +82,10 @@ try:
         nf = next((i for i, x in enumerate(o[1:], 1) if x != 'filtro'), len(o)); dire = o[nf:]
         ORD = ['ferramenta', 'expandir', 'agrupar', 'colunas', 'modos']
         esq_ok = o[:1] == ['busca'] and nf >= 2 and 'conta' not in o
-        dir_ok = bool(dire) and dire[-1] == 'modos' and all(x in ORD for x in dire) and [ORD.index(x) for x in dire] == sorted(ORD.index(x) for x in dire)
+        # VIS-08 (18/10/2026): na tela com o seletor de visões da VISOES-1 (CD-01: Tabela · Cartões · Mapa, acima da lista, como na IR-01),
+        # o Tabela | Cartões sai da barra da tabela; a barra termina no Colunas e não repete os modos
+        fim_ok = bool(dire) and (dire[-1] == 'modos' if not b.get('visoes') else 'modos' not in dire)
+        dir_ok = bool(dire) and fim_ok and all(x in ORD for x in dire) and [ORD.index(x) for x in dire] == sorted(ORD.index(x) for x in dire)
         chk(f'P4 {t}: barra numa linha, busca e filtro rápido à esquerda, Colunas e Tabela | Cartões na ponta (TAB-01/02)', b.get('umaLinha') and esq_ok and dir_ok, b)
         chk(f'P2 {t}: cabeçalho da tabela em maiúsculas pequenas e apagadas e tabela na caixa do motor dentro do bloco', b.get('caixa') == 'uppercase' and b.get('hbCor') == 'rgb(101, 115, 106)' and b.get('blocoCaixa'), b)
     # com abas, o rótulo segue a aba; a aba que não cria fica sem verde

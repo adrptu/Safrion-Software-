@@ -17,7 +17,12 @@ CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...d
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
 # revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T3 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
-def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
+# DRILL-RECOLHIDO (v129): a árvore abre recolhida; o talhão que não aparece é achado depois do "Expandir tudo" da tabela
+def openrow1(ti,cod):
+    ACHA=f"""[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}})"""
+    if not J(f"(()=>!!({ACHA}))()"):
+        J("[...document.querySelectorAll('button.g2xtog')].filter(b=>b.getClientRects().length&&/Expandir/.test(b.innerText)).forEach(b=>b.click())"); time.sleep(.35)
+    J("(()=>{const r=" + ACHA + "; (r.querySelector('[role=cell] span')||r).click();})()"); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
 def dlg(): return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
@@ -30,7 +35,8 @@ def save(): J(f"({BTN})('Salvar')"); time.sleep(.4)
 def fechar(): J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
 def fill(i): return J(f"(()=>{{const e=document.querySelectorAll('main svg polygon, main svg circle')[{i}]; return e?e.getAttribute('fill'):null;}})()")
 def aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
-def vis(t): J(f"({CLK})({json.dumps(t)},'main [role=group] button')"); time.sleep(.35)
+# VIS-08 (18/10): Lista e Mapa saem do controle de texto para o seletor de visões da VISOES-1 (só ícone; "Lista" é a Tabela)
+def vis(t): J(f"document.querySelector('[data-visoes-gid=g_tal] [data-visao={ {'Lista': 'lista', 'Tabela': 'lista', 'Mapa': 'mapa'}[t] }]').click()"); time.sleep(.35)
 # 16/10/2026 (padrão comum; fazendas e talhões numa árvore só): "Criar fazenda" no cabeçalho (BOT-01/03); o talhão se inclui de dentro da
 # fazenda ("Incluir talhão" no painel dela); a linha da fazenda mostra empresa e município na 2ª linha
 def novafaz(): J(f"({CLK})('Criar fazenda','header button')"); time.sleep(.35)

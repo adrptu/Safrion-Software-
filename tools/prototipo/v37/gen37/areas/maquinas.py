@@ -355,7 +355,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   v.om_semana_go=()=>self.setState({rot:'semana'}); v.om_peca_go=()=>self.setState({rot:'peca'});
   /* DS VIS-05 (15/10/2026: "toda lista tem Tabela e Cartões"): Lista | Cartões | Kanban; Cartões é a mesma grade g_om em cartões (g2lib.g2modosFim) */
   v.om_lista=['lista','cartoes'].indexOf(st.omodo||'lista')>=0; v.om_kanban=st.omodo==='kanban'; self.g2modoExterno=(gid)=>(gid==='g_om'&&self.state.omodo==='cartoes')?'cartoes':'tabela';
-  v.om_modos=[['lista','Lista','v_lista'],['cartoes','Cartões','v_cartoes'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ca:k==='cartoes',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
+  ['lista','cartoes','kanban'].forEach(k=>{ v['om_lv_'+k+'_p']=String((st.omodo||'lista')===k); v['om_lv_'+k+'_go']=()=>self.setState({omodo:k}); });
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
   v.sem_dias=Object.keys(dias).sort().map(d=>{ const esp={}; dias[d].forEach(o=>{ esp[o.esp]=(esp[o.esp]||0)+(Number(o.tempo)||0); });
     return {t:d==='vencidas'?'Atrasadas':(manSem(d)+' '+manBr(d)),oms:dias[d].map(o=>o.id).join(', '),hh:Object.keys(esp).map(k=>k+' '+manN(esp[k],1)+' HH').join(' · ')}; });
@@ -1151,9 +1151,8 @@ def _visoes():
     semana=IF('semana',f'<div role="note" aria-label="Esta semana" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: {BG};">'
               f'<div style="{SECT}">Esta semana · por dia · capacidade da oficina não calculável (sem P10)</div>'
               + FOR('sem_dias','d',f'<div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.8px;"><b style="min-width: 90px;">{H("d.t")}</b><span>{H("d.oms")}</span><span style="color: {MUTED};">{H("d.hh")}</span></div>',3) + '</div>')
-    modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
-           + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
-                 + IF('x.li',icon('v_lista',16),True) + IF('x.ca',icon('v_cartoes',16)) + IF('x.ka',icon('v_kanban',16)) + '</button>',3) + '</div></div>')
+    # VIS-08 (proprietário, 18/10/2026): o seletor comum da VISOES-1 (engine.visoes_locais; visoes.REGISTRO['ma_om']), com o mesmo ícone de Tabela das outras telas
+    modos=E.visoes_locais('om','ma_om','Visão das ordens')
     mais_om=E.mais('Ordens por fase',[('Ver carga desta semana',H('om_semana_go')),('Ver ordens que esperam peça',H('om_peca_go'))])
     ordens=_blo(bloco('Ordens por fase','',
                       linha(chipsN('fchips','Filtrar por fase',6,'fc'),chipsN('rotinas','Rotina',2),'<span style="flex-grow: 1;"></span>',mais_om,modos)

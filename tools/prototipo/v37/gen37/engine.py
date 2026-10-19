@@ -1938,9 +1938,23 @@ def modos_html(pre,rotulo='Visão da lista: tabela ou cartões'):
     ícone, ativo tonal com aria-pressed, 32 px no mouse e 44 px no toque), um botão por modo, só ícone, com o nome no aria-label (a dica vem dele).
     Buracos: {pre}_md_<modo>_p (aria-pressed) e {pre}_md_<modo>_go (g2lib.g2mdVals). O rótulo começa com "Visão" (padrão dos seletores de visão)."""
     import visoes as V
-    bts=''.join(f'<button type="button" data-modo="{k}" aria-label="{V.MODO_NOME[k]}" aria-pressed="{_h(pre+"_md_"+k+"_p")}" onClick="{_h(pre+"_md_"+k+"_go")}">'
-                f'{icon(V.MODO_ICONE[k],16)}</button>' for k in V.MODOS)
-    return f'<div class="g2visoes g2modos" role="group" aria-label="{esc(rotulo)}" data-g2md="{pre}">{bts}</div>'
+    return _seletor_icones(pre, [(k, V.MODO_NOME[k], V.MODO_ICONE[k]) for k in V.MODOS], rotulo, '_md_', 'data-modo', 'data-g2md')
+def _seletor_icones(pre, itens, rotulo, infixo, attr_bt, attr_grupo):
+    """Desenho único dos seletores de visão com estado da tela (modos_html e visoes_locais): o trilho .g2visoes da VISOES-1, um botão por
+    item, só ícone, com o nome no aria-label (a dica vem dele) e o ativo em aria-pressed. itens: [(chave, nome, ícone)]."""
+    bts=''.join(f'<button type="button" {attr_bt}="{k}" aria-label="{esc(nome)}" aria-pressed="{_h(pre+infixo+k+"_p")}" onClick="{_h(pre+infixo+k+"_go")}">'
+                f'{icon(ic,16)}</button>' for k, nome, ic in itens)
+    return f'<div class="g2visoes g2modos" role="group" aria-label="{esc(rotulo)}" {attr_grupo}="{pre}">{bts}</div>'
+def visoes_locais(pre, ent, rotulo):
+    """VIS-08 · Visão pelo ícone em painel (proprietário, 18/10/2026: "O modo de visão em mapa em planejar safra tem que ser pelo ícone igual
+    os demais"). Seletor de visões de um painel que não é a listagem da tela (ex.: Planejar safra › Editar talhões…): as visões válidas da
+    entidade (visoes.validas, fonte única), com o mesmo desenho, ícone e nome ("Ver em <visão>") do seletor da VISOES-1, sem ?view nem
+    preferência, porque a visão é do painel aberto. Buracos: {pre}_lv_<visão>_p (aria-pressed) e {pre}_lv_<visão>_go."""
+    import visoes as V
+    val = V.validas(ent)
+    for k in val:
+        if k not in V.ICONE: raise ValueError(f'visoes_locais({pre}): visão {k} sem ícone (visoes.ICONE)')
+    return _seletor_icones(pre, [(k, V.rotulo(k), V.ICONE[k]) for k in val], rotulo, '_lv_', 'data-visao', 'data-visoes-local')
 def filtro_coluna_html(gid):
     """Menu do filtro da coluna (padrão Excel/Google Sheets): ordenar, pesquisar, marcar valores e aplicar no OK. Buracos {gid}_fm.* de
     g2lib.g2cabVals; o mesmo no E.grid e nas tabelas próprias (TAB-08)."""

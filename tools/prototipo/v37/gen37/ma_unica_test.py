@@ -61,7 +61,8 @@ try:
         if re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', s): viv.append(b)
     m.ok(not viv, 'AC-PCM-03 · nenhum project/*.dc.html (fora dos redirecionamentos) aponta para MA-01..05, MA-04det ou PM', viv)
     # ---------- AC-PCM-04 · Kanban com 5 colunas nesta ordem ----------
-    m.ir('vis=ordens'); m.clk('Kanban')
+    # VIS-08 (18/10/2026): o seletor comum só tem ícone; o nome do botão é "Ver em kanban" (aria-label e dica)
+    m.ir('vis=ordens'); m.clk('Ver em kanban')
     cols = J("(()=>{const k=document.querySelector('[aria-label=\"Kanban das ordens\"]'); if(!k) return null; return [...k.children].filter(e=>e.getClientRects().length).map(e=>((e.querySelector('h3,h4,[role=heading]')||e).innerText.split('\\n')[0]).trim());})()")
     kb = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].map(b=>b.getAttribute('aria-label')||b.innerText)") or []
     m.ok(cols is not None and [re.sub(r'\s*\d+$', '', x).upper() for x in cols][:5] == ['A LIBERAR', 'LIBERADAS', 'EM EXECUÇÃO', 'EM CONFERÊNCIA', 'ENCERRADAS'] and len(cols) == 5
