@@ -62,7 +62,7 @@ for(const [dt,atv,nega,esperado] of casos){
 console.log('7/7 painel Por quê: âncora ausente/real, negação, dose/quantidade/custo e imutabilidade');
 
 // Regressão PR136/4313097025: a sugestão real guarda só id/nome/op, sem g.
-// O painel deve recuperar a atividade no plano do cultivo que originou a sugestão.
+// Todos os consumidores precisam receber o gatilho da atividade que originou a sugestão.
 c.PRDC={un:{Teste:{}}};
 vm.runInContext(`var contextoReal={S0:{hoje:'2026-10-19',regra:{v2:{Teste:60},k:{culturas:[]}},gar:{Calcario:{prnt:80}}},
   ls:[{id:'L',tipo:'solo',sit:'Validado',faz:'F',tal:'T',prof:'0–20',idx:{T:{v:5},V:{v:40}}}]};`,c);
@@ -77,7 +77,8 @@ for(const [tipo,dt,esperado] of [
   const antes=JSON.stringify(c.cultivoReal);
   const got=run("soloSugestoes(contextoReal,cultivoReal).sug");
   assert.equal(got.length,1,'O caso precisa passar pelo construtor real da calagem');
-  assert.equal(got[0].atv.g,undefined,'O teste preserva o contrato reduzido da sugestão');
+  c.sugReal=got[0];
+  assert.equal(run('soloDataTexto(sugReal.dt,sugReal.atv)'),esperado.slice(6),'O consumidor SAF também recebe a âncora');
   c.sugReal=got[0];const antesSug=JSON.stringify(c.sugReal);
   assert.deepStrictEqual(run('soEfeito(sugReal,cultivoReal)'),[
     'Dose: 1,00 t/ha → 1,25 t/ha (padrão 1,00 t/ha)',
