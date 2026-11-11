@@ -548,7 +548,7 @@ function cenIniciarTurno(c, id) { cenAppAtivo(c);
   if (c.app.turno && !c.app.turno.fim) throw new Error('Feche o turno aberto antes de iniciar outro.');
   { const f = cenIniFalta(o, o.req && c.reqs[o.req]); if (f) throw new Error('Iniciar bloqueado: ' + f.t + ' ' + f.q); }   // mesma regra da web
   c.app.nt = (c.app.nt || 0) + 1;   // chave do turno, gerada por quem inicia (o aparelho)
-  c.app.turno = { os: id, ini: cenAgora(), d: cenDdMm(CEN_DIA_OP), chave: 'TU-' + id + '-' + c.app.nt, pausas: [], fim: null };
+  c.app.turno = { os: id, ini: cenAgora(), inicioISO: new Date().toISOString(), fuso: 'America/Sao_Paulo', d: cenDdMm(CEN_DIA_OP), chave: 'TU-' + id + '-' + c.app.nt, pausas: [], fim: null };
   if (o.etapa === 'Liberadas') { o.etapa = 'Em execução'; }
   return { msg: 'Turno iniciado em ' + id + ' às ' + c.app.turno.ini + '.' };
 }
